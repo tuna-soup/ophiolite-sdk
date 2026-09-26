@@ -7,7 +7,7 @@ ROOT=Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('public_inputs',ROOT/'tools/check_public_inputs.py')
 audit=importlib.util.module_from_spec(spec);spec.loader.exec_module(audit)
 
-def test_current_inputs():assert audit.verify()==66
+def test_current_inputs():assert audit.verify()==74
 
 @pytest.mark.parametrize('case',['missing','duplicate','hash','rights','evidence','source','canary','notice'])
 def test_unqualified_input_refusal(tmp_path,case):
@@ -15,6 +15,9 @@ def test_unqualified_input_refusal(tmp_path,case):
     shutil.copytree(ROOT/'ophiolite/contracts',tmp_path/'ophiolite/contracts')
     shutil.copytree(ROOT/'tests/recordings',tmp_path/'tests/recordings')
     shutil.copytree(ROOT/'tests/fixtures',tmp_path/'tests/fixtures')
+    for source in (ROOT/'templates').glob('*/data/*'):
+        if source.is_file():
+            target=tmp_path/source.relative_to(ROOT);target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(source,target)
     path=tmp_path/'tests/fixtures/PROVENANCE.json';path.parent.mkdir(parents=True,exist_ok=True)
     manifest=json.loads((ROOT/'tests/fixtures/PROVENANCE.json').read_text())
     if case=='missing':manifest['inputs'].pop()
@@ -40,6 +43,9 @@ def public_copy(tmp_path):
     shutil.copytree(ROOT/'ophiolite/contracts',tmp_path/'ophiolite/contracts')
     shutil.copytree(ROOT/'tests/recordings',tmp_path/'tests/recordings')
     shutil.copytree(ROOT/'tests/fixtures',tmp_path/'tests/fixtures')
+    for source in (ROOT/'templates').glob('*/data/*'):
+        if source.is_file():
+            target=tmp_path/source.relative_to(ROOT);target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(source,target)
     target=tmp_path/'tests/fixtures/PROVENANCE.json';target.parent.mkdir(parents=True,exist_ok=True)
     shutil.copyfile(ROOT/'tests/fixtures/PROVENANCE.json',target)
     return target
@@ -76,3 +82,16 @@ def test_archive_guards(tmp_path,case):
     with zipfile.ZipFile(archive,'w') as package:
         for name,raw in members.items():package.writestr(name,raw)
     with pytest.raises(ValueError):audit.archive(archive,root)
+
+
+def test_template_source_archive_matches_audited_source(tmp_path):
+    import io,tarfile
+    root=tmp_path/'root';(root/'ophiolite/contracts').mkdir(parents=True)
+    (root/'ophiolite/contracts/a.json').write_text('{}')
+    (root/'templates/example').mkdir(parents=True);(root/'templates/example/app.py').write_text('print("reviewed")\n')
+    archive=tmp_path/'source.tar.gz'
+    with tarfile.open(archive,'w:gz') as output:
+        for name,raw in {'ophiolite/contracts/a.json':b'{}','templates/example/app.py':b'print("changed")\n'}.items():
+            member=tarfile.TarInfo('source/'+name);member.size=len(raw);output.addfile(member,io.BytesIO(raw))
+    with pytest.raises(ValueError,match='Archive differs from audited source: templates/'):
+        audit.archive(archive,root)

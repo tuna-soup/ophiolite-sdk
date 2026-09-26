@@ -36,3 +36,22 @@ jobs:
       - run: npm test --prefix packages/typescript
       - run: npm pack --dry-run
         working-directory: packages/typescript
+  templates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: templates/react-application/package-lock.json
+      - run: python -m pip install -r templates/notebook/requirements.lock
+      - run: python -m pip install --no-deps .
+      - run: npm ci --ignore-scripts
+        working-directory: templates/react-application
+      - run: npx playwright install --with-deps chromium
+        working-directory: templates/react-application
+      - run: OPHIOLITE_RUN_TEMPLATES=1 python -m pytest -q tests/test_templates.py

@@ -1,0 +1,5 @@
+{
+  "schema": "ophiolite.read-configuration/1",
+  "url": "http://127.0.0.1:56010",
+  "project": "p"
+}

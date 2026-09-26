@@ -1,0 +1,7 @@
+[project]
+name = "ophiolite-python-application-template"
+version = "0.1.0"
+requires-python = ">=3.10"
+description = "Source template for a bounded scientific application"
+# Run python -m app from this source directory. Dependencies are installed from
+# requirements.lock; this template does not publish an independent wheel.

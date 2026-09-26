@@ -10,3 +10,16 @@ include tools/ts-operation-overrides.json
 include packages/typescript/package.json packages/typescript/package-lock.json packages/typescript/tsconfig.json packages/typescript/operation-coverage.json packages/typescript/README.md packages/typescript/LICENSE packages/typescript/NOTICE
 recursive-include packages/typescript/src *.ts
 recursive-include packages/typescript/tests *.ts
+
+recursive-include templates *.py *.md *.json *.in *.lock *.las *.ipynb *.ts *.tsx *.mjs *.css *.html *.toml Makefile
+prune templates/react-application/node_modules
+prune templates/react-application/dist
+global-exclude *.png
+prune templates/agent-workflow/.venv
+prune templates/notebook/.venv
+prune templates/python-application/.venv
+prune templates/react-application/.venv
+prune templates/notebook/.ipynb_checkpoints
+prune templates/agent-workflow/.work
+prune templates/python-application/.work
+prune templates/react-application/.work

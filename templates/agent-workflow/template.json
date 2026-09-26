@@ -1,0 +1,13 @@
+{
+  "name": "agent-workflow",
+  "template_version": "0.1.0",
+  "sdk_version": "0.1.0",
+  "status": "preview",
+  "test_command": [
+    "python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests"
+  ]
+}

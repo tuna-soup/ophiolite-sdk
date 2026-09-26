@@ -1,0 +1,2 @@
+ophiolite[numpy,validation] @ git+https://github.com/tuna-soup/ophiolite-sdk@2a738431e0d61ef3445af0f8a67c93fc887f5095
+pytest>=8

@@ -13,3 +13,12 @@ maintainer generator literal; frozen fixtures retain their historical bytes.
 No external data acquisition is included. A changed or uncovered input must be
 reviewed before public push; the checker never supplies its own rights grant.
 The Platform repository as a whole has not been relicensed by this SDK notice.
+
+## Preview template dependencies
+
+The templates lock additional plotting/notebook tools (Matplotlib, Jupyter,
+nbclient, ipykernel), test tools and the React/Vite browser toolchain. Their source
+and browser binaries are not vendored in the SDK. Installations use the original
+distributions and their included notices. See each requirements.lock and the React
+package-lock.json for exact resolved packages. This bounded SDK/template input
+audit does not qualify the complete E17 open-source distribution.

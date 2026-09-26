@@ -10,3 +10,7 @@ dist/
 
 node_modules/
 *.tgz
+
+.ipynb_checkpoints/
+.work/
+curve.png
