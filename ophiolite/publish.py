@@ -253,9 +253,9 @@ def _atomic(path,raw,*,replace=False):
         if os.path.exists(temporary):os.unlink(temporary)
 
 
-def _checkpoint(path,value,*,replace=False):
+def _checkpoint(path,value,*,replace=False,sort_keys=False):
     # Match the frozen handoff's bytes: indent=2, no appended newline.
-    raw=json.dumps(value,indent=2,allow_nan=False).encode()
+    raw=json.dumps(value,indent=2,allow_nan=False,sort_keys=sort_keys).encode()
     if not replace and path.exists():
         if _stored(path)!=value:raise Refused(path.name+' belongs to different work; use a new run folder.')
         return
@@ -475,6 +475,37 @@ class WorkFolder:
     def download(self,receipt):
         with self._locked():
             raw=self.client.download(receipt);_atomic(self.path/'result.las',raw);return raw
+
+    def correct(self,binding,*,start,stop,offset):
+        """Explicit local interval-offset example, preserving the pilot files."""
+        if not all(isinstance(x,(int,float)) and not isinstance(x,bool) and math.isfinite(x) for x in (start,stop,offset)) or start>stop:
+            raise ValidationFailed(['Finite ordered interval and offset required'])
+        run=self.start(binding,application_version='interval-offset/1',parameters={'start':start,'stop':stop,'offset':offset})
+        recovered=(self.path/'receipt.json').exists()
+        if (self.path/'input.json').exists():
+            original=_private_bytes(self.path/'original.las')
+            wire=_stored(self.path/'input.json');view=parse(ApplicationCurve,wire)
+        else:
+            original,view=self.input(run);wire=run._view_wire
+        changes=[{'index':i,'value':value+offset} for i,(depth,value) in enumerate(zip(view.axis,view.values)) if start<=depth<=stop and value is not None and offset!=0]
+        validate_changes(changes,values=view.values,null_marker=source_null_marker(original))
+        with self._locked():
+            _atomic(self.path/'original.las',original)
+            _checkpoint(self.path/'input.json',wire)
+            _checkpoint(self.path/'changes.json',changes)
+        body=publication_body(run,original,view,changes=changes)
+        body.pop('publication_profile')  # Frozen offset CLI uses the server's curve-edit default.
+        with self._locked(),self._identity() as headers:
+            _checkpoint(self.path/'publication.json',body)
+            receipt=self._step('publish',body,headers)
+        self.download(receipt)
+        with self._locked():
+            for name in ('run.json','changes.json','receipt.json'):
+                _checkpoint(self.path/name,_stored(self.path/name),replace=True,sort_keys=True)
+        print('Recovered existing publication; source unchanged. Run:' if recovered else 'Published portable LAS; source unchanged. Run:',run.id)
+        print('Output:',self.path/'result.las')
+        print('Provenance is script-declared. This is not scientific approval.')
+        return receipt
 
     def recover(self,through=None):
         if through not in (None,'configure','start','publish','upload'):raise RecoveryUnavailable('Choose a saved operation to recover through.')

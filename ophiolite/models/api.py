@@ -80,6 +80,7 @@ class Run(Contract):
     state: str
     receipt: Receipt | None = None
     _client: object = PrivateAttr(default=None)
+    _view_wire: dict | None = PrivateAttr(default=None)
     _original: bytes | None = PrivateAttr(default=None)
     _view: object = PrivateAttr(default=None)
     _work: object = PrivateAttr(default=None)

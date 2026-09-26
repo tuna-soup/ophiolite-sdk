@@ -109,10 +109,11 @@ class AsyncClient(Client):
     async def read(self,asset,revision,curves,*,strict_interpretation=False):
         if not isinstance(curves,(list,tuple)) or not curves or len(set(curves))!=len(curves):
             raise Refused('Choose distinct value curves explicitly.')
-        descriptors=[];views=[];artifact=None
+        descriptors=[];views=[];artifact=None;wire_descriptors=[];wire_curves=[]
         for curve in curves:
-            descriptor=await self.describe(asset,revision,curve);data=descriptor.model_dump(by_alias=True,exclude_unset=True)
             path,query=self._path(asset,revision,curve)
+            data=await self._json(path+query,256*1024)
+            _core.verify_descriptor(data,self.project,asset,revision,curve)
             raw=next(r for r in data['representations'] if r['kind']!='normalized')
             normalized=next(r for r in data['representations'] if r['kind']=='normalized')
             if artifact is None:artifact=await self._get(path+'/representations/'+quote(raw['id'],safe='')+query,raw['bytes'])
@@ -120,7 +121,8 @@ class AsyncClient(Client):
             body=await self._get(path+'/representations/'+quote(normalized['id'],safe='')+query,normalized['bytes'])
             model,view=_core.verify_pair(data,body,artifact,curve,strict_interpretation=strict_interpretation)
             descriptors.append(model);views.append(view)
-        return CurveSet(descriptors,views,artifact,url=self.url,project=self.project)
+            wire_descriptors.append(data);wire_curves.append(json.loads(body))
+        return CurveSet(descriptors,views,artifact,url=self.url,project=self.project,wire_descriptors=wire_descriptors,wire_curves=wire_curves)
 
     async def read_many(self,selections,**options):
         results=[None]*len(selections)

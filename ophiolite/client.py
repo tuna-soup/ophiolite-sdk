@@ -20,9 +20,10 @@ from .auth import Credential
 
 
 class CurveSet:
-    def __init__(self,descriptors,curves,artifact,*,url='',project=''):
+    def __init__(self,descriptors,curves,artifact,*,url='',project='',wire_descriptors=None,wire_curves=None):
         self.descriptors,self.curves,self.artifact=descriptors,curves,artifact
         self.url,self.project=url,project
+        self._wire_descriptors,self._wire_curves=wire_descriptors,wire_curves
 
     @property
     def evidence(self):
@@ -45,7 +46,7 @@ class CurveSet:
         from .repr import curve_set_html
         return curve_set_html(self)
 
-    def save(self,path):
+    def save(self,path,*,legacy_order=False):
         path=Path(path)
         try:path.mkdir(mode=0o700,parents=True,exist_ok=False)
         except FileExistsError:raise Refused('Output already exists. Choose a new folder.') from None
@@ -56,10 +57,10 @@ class CurveSet:
         write('artifact.las',self.artifact)
         for index,(descriptor,view) in enumerate(zip(self.descriptors,self.curves)):
             suffix='' if len(self.curves)==1 else '-'+quote(view.curve,safe='')
-            write('curve'+suffix+'.json',encode(view.model_dump(by_alias=True,exclude_unset=True)))
+            write('curve'+suffix+'.json',encode(self._wire_curves[index] if legacy_order and self._wire_curves is not None else view.model_dump(by_alias=True,exclude_unset=True)))
             # Single-curve output matches the old kit; every multi-curve descriptor
             # is retained, rather than silently keeping only the last one.
-            write('descriptor'+suffix+'.json',encode(descriptor.model_dump(by_alias=True,exclude_unset=True)))
+            write('descriptor'+suffix+'.json',encode(self._wire_descriptors[index] if legacy_order and self._wire_descriptors is not None else descriptor.model_dump(by_alias=True,exclude_unset=True)))
 
 
 class Client:
@@ -146,10 +147,11 @@ class Client:
     def read(self,asset,revision,curves,*,strict_interpretation=False):
         if not isinstance(curves,(list,tuple)) or not curves or len(set(curves))!=len(curves):
             raise Refused('Choose distinct value curves explicitly.')
-        descriptors=[];views=[];artifact=None
+        descriptors=[];views=[];artifact=None;wire_descriptors=[];wire_curves=[]
         for curve in curves:
-            descriptor=self.describe(asset,revision,curve);data=descriptor.model_dump(by_alias=True,exclude_unset=True)
             path,query=self._path(asset,revision,curve)
+            data=self._json(path+query,256*1024)
+            _core.verify_descriptor(data,self.project,asset,revision,curve)
             raw=next(r for r in data['representations'] if r['kind']!='normalized')
             normalized=next(r for r in data['representations'] if r['kind']=='normalized')
             if artifact is None:artifact=self._get(path+'/representations/'+quote(raw['id'],safe='')+query,raw['bytes'])
@@ -157,7 +159,8 @@ class Client:
             body=self._get(path+'/representations/'+quote(normalized['id'],safe='')+query,normalized['bytes'])
             model,view=_core.verify_pair(data,body,artifact,curve,strict_interpretation=strict_interpretation)
             descriptors.append(model);views.append(view)
-        return CurveSet(descriptors,views,artifact,url=self.url,project=self.project)
+            wire_descriptors.append(data);wire_curves.append(json.loads(body))
+        return CurveSet(descriptors,views,artifact,url=self.url,project=self.project,wire_descriptors=wire_descriptors,wire_curves=wire_curves)
 
     def read_many(self,selections,**options):
         return [self.read(asset,revision,curves,**options) for asset,revision,curves in selections]
@@ -221,6 +224,7 @@ class Client:
         view=planning.parse(ApplicationCurve,value);_core.rules.curve(value)
         if view.source_sha256!=run.input_sha256 or view.source.model_dump()!=run.input_reference.model_dump() or view.curve!=run.binding.curve:
             raise VerificationFailed('The run input refers to another source or selected curve.')
+        run._view_wire=value
         run._original,run._view=original,view
         run._original_reference={k:v for k,v in result.items() if k!='payload_base64'}
         return original,view
@@ -264,6 +268,13 @@ class Client:
         parsed=planning.parse(UploadResult,result) if uploaded else planning.parse_result(result)
         if parsed.asset_id!=asset['asset_id'] or parsed.revision!=asset['revision']:raise VerificationFailed('Sharing returned a different exact asset.')
         return parsed
+
+    def bindings(self):
+        from . import publish as planning
+        from .models.api import Binding
+        data=self._post('applications','list',{})
+        if not isinstance(data.get('bindings'),list):raise VerificationFailed('Invalid application binding list.')
+        return [planning.parse(Binding,item) for item in data['bindings']]
 
     def options(self):return self._post('applications','options',{})
 

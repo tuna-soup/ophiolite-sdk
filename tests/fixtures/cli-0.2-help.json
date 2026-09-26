@@ -1,0 +1,599 @@
+{
+  "description": "Ophiolite pilot CLI: sign in, prepare exact data, run locally, publish explicitly.",
+  "commands": {
+    "list": {
+      "help": "List permitted scientific assets without a run",
+      "arguments": {
+        "help": {
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "help": "show this help message and exit",
+          "required": false,
+          "default": "==SUPPRESS=="
+        },
+        "configuration": {
+          "options": [
+            "--configuration"
+          ],
+          "help": null,
+          "required": false,
+          "default": "configuration.json"
+        },
+        "credentials": {
+          "options": [
+            "--credentials"
+          ],
+          "help": "Optional separate private credential file",
+          "required": false,
+          "default": "None"
+        }
+      }
+    },
+    "fetch": {
+      "help": "Read an exact revision into a new local folder",
+      "arguments": {
+        "help": {
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "help": "show this help message and exit",
+          "required": false,
+          "default": "==SUPPRESS=="
+        },
+        "configuration": {
+          "options": [
+            "--configuration"
+          ],
+          "help": null,
+          "required": false,
+          "default": "configuration.json"
+        },
+        "credentials": {
+          "options": [
+            "--credentials"
+          ],
+          "help": "Optional separate private credential file",
+          "required": false,
+          "default": "None"
+        },
+        "asset": {
+          "options": [
+            "--asset"
+          ],
+          "help": null,
+          "required": false,
+          "default": "None"
+        },
+        "revision": {
+          "options": [
+            "--revision"
+          ],
+          "help": null,
+          "required": false,
+          "default": "None"
+        },
+        "curve": {
+          "options": [
+            "--curve"
+          ],
+          "help": null,
+          "required": false,
+          "default": "None"
+        },
+        "output": {
+          "options": [
+            "--output"
+          ],
+          "help": null,
+          "required": true,
+          "default": "None"
+        }
+      }
+    },
+    "doctor": {
+      "help": "Check local setup without running code or contacting the server",
+      "arguments": {
+        "help": {
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "help": "show this help message and exit",
+          "required": false,
+          "default": "==SUPPRESS=="
+        },
+        "configuration": {
+          "options": [
+            "--configuration"
+          ],
+          "help": null,
+          "required": false,
+          "default": "configuration.json"
+        },
+        "credentials": {
+          "options": [
+            "--credentials"
+          ],
+          "help": "Optional separate private credential file",
+          "required": false,
+          "default": "None"
+        }
+      }
+    },
+    "login": {
+      "help": "Approve this project in your browser",
+      "arguments": {
+        "help": {
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "help": "show this help message and exit",
+          "required": false,
+          "default": "==SUPPRESS=="
+        },
+        "configuration": {
+          "options": [
+            "--configuration"
+          ],
+          "help": null,
+          "required": false,
+          "default": "configuration.json"
+        },
+        "credentials": {
+          "options": [
+            "--credentials"
+          ],
+          "help": "Optional separate private credential file",
+          "required": false,
+          "default": "None"
+        },
+        "write": {
+          "options": [
+            "--write"
+          ],
+          "help": "Request permission to publish results",
+          "required": false,
+          "default": "False"
+        },
+        "no_browser": {
+          "options": [
+            "--no-browser"
+          ],
+          "help": null,
+          "required": false,
+          "default": "False"
+        }
+      }
+    },
+    "status": {
+      "help": "Check application access",
+      "arguments": {
+        "help": {
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "help": "show this help message and exit",
+          "required": false,
+          "default": "==SUPPRESS=="
+        },
+        "configuration": {
+          "options": [
+            "--configuration"
+          ],
+          "help": null,
+          "required": false,
+          "default": "configuration.json"
+        },
+        "credentials": {
+          "options": [
+            "--credentials"
+          ],
+          "help": "Optional separate private credential file",
+          "required": false,
+          "default": "None"
+        }
+      }
+    },
+    "logout": {
+      "help": "Revoke application access",
+      "arguments": {
+        "help": {
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "help": "show this help message and exit",
+          "required": false,
+          "default": "==SUPPRESS=="
+        },
+        "configuration": {
+          "options": [
+            "--configuration"
+          ],
+          "help": null,
+          "required": false,
+          "default": "configuration.json"
+        },
+        "credentials": {
+          "options": [
+            "--credentials"
+          ],
+          "help": "Optional separate private credential file",
+          "required": false,
+          "default": "None"
+        }
+      }
+    },
+    "prepare": {
+      "help": "Fetch exact input; no computation or publication",
+      "arguments": {
+        "help": {
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "help": "show this help message and exit",
+          "required": false,
+          "default": "==SUPPRESS=="
+        },
+        "configuration": {
+          "options": [
+            "--configuration"
+          ],
+          "help": null,
+          "required": false,
+          "default": "configuration.json"
+        },
+        "credentials": {
+          "options": [
+            "--credentials"
+          ],
+          "help": "Optional separate private credential file",
+          "required": false,
+          "default": "None"
+        },
+        "work": {
+          "options": [
+            "--work"
+          ],
+          "help": null,
+          "required": false,
+          "default": "run"
+        },
+        "script": {
+          "options": [
+            "--script"
+          ],
+          "help": null,
+          "required": true,
+          "default": "None"
+        },
+        "parameters": {
+          "options": [
+            "--parameters"
+          ],
+          "help": null,
+          "required": true,
+          "default": "None"
+        },
+        "asset": {
+          "options": [
+            "--asset"
+          ],
+          "help": null,
+          "required": false,
+          "default": "None"
+        },
+        "revision": {
+          "options": [
+            "--revision"
+          ],
+          "help": null,
+          "required": false,
+          "default": "None"
+        },
+        "curve": {
+          "options": [
+            "--curve"
+          ],
+          "help": null,
+          "required": false,
+          "default": "None"
+        },
+        "name": {
+          "options": [
+            "--name"
+          ],
+          "help": null,
+          "required": false,
+          "default": "None"
+        },
+        "release": {
+          "options": [
+            "--release"
+          ],
+          "help": null,
+          "required": false,
+          "default": "None"
+        },
+        "asset_index": {
+          "options": [
+            "--asset-index"
+          ],
+          "help": null,
+          "required": false,
+          "default": "None"
+        },
+        "runner": {
+          "options": [
+            "--runner"
+          ],
+          "help": null,
+          "required": false,
+          "default": "None"
+        }
+      }
+    },
+    "run": {
+      "help": "Execute your prepared Python script on this computer",
+      "arguments": {
+        "help": {
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "help": "show this help message and exit",
+          "required": false,
+          "default": "==SUPPRESS=="
+        },
+        "configuration": {
+          "options": [
+            "--configuration"
+          ],
+          "help": null,
+          "required": false,
+          "default": "configuration.json"
+        },
+        "credentials": {
+          "options": [
+            "--credentials"
+          ],
+          "help": "Optional separate private credential file",
+          "required": false,
+          "default": "None"
+        },
+        "work": {
+          "options": [
+            "--work"
+          ],
+          "help": null,
+          "required": false,
+          "default": "run"
+        }
+      }
+    },
+    "publish": {
+      "help": "Publish the prepared result; does not share it",
+      "arguments": {
+        "help": {
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "help": "show this help message and exit",
+          "required": false,
+          "default": "==SUPPRESS=="
+        },
+        "configuration": {
+          "options": [
+            "--configuration"
+          ],
+          "help": null,
+          "required": false,
+          "default": "configuration.json"
+        },
+        "credentials": {
+          "options": [
+            "--credentials"
+          ],
+          "help": "Optional separate private credential file",
+          "required": false,
+          "default": "None"
+        },
+        "work": {
+          "options": [
+            "--work"
+          ],
+          "help": null,
+          "required": false,
+          "default": "run"
+        }
+      }
+    },
+    "correct": {
+      "help": "Run and explicitly publish the bounded offset example",
+      "arguments": {
+        "help": {
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "help": "show this help message and exit",
+          "required": false,
+          "default": "==SUPPRESS=="
+        },
+        "configuration": {
+          "options": [
+            "--configuration"
+          ],
+          "help": null,
+          "required": false,
+          "default": "configuration.json"
+        },
+        "credentials": {
+          "options": [
+            "--credentials"
+          ],
+          "help": "Optional separate private credential file",
+          "required": false,
+          "default": "None"
+        },
+        "start": {
+          "options": [
+            "--start"
+          ],
+          "help": null,
+          "required": true,
+          "default": "None"
+        },
+        "stop": {
+          "options": [
+            "--stop"
+          ],
+          "help": null,
+          "required": true,
+          "default": "None"
+        },
+        "offset": {
+          "options": [
+            "--offset"
+          ],
+          "help": null,
+          "required": true,
+          "default": "None"
+        },
+        "output": {
+          "options": [
+            "--output"
+          ],
+          "help": null,
+          "required": false,
+          "default": "curve-result"
+        },
+        "publish": {
+          "options": [
+            "--publish"
+          ],
+          "help": "Explicitly authorize example publication",
+          "required": true,
+          "default": "False"
+        },
+        "asset": {
+          "options": [
+            "--asset"
+          ],
+          "help": null,
+          "required": false,
+          "default": "None"
+        },
+        "revision": {
+          "options": [
+            "--revision"
+          ],
+          "help": null,
+          "required": false,
+          "default": "None"
+        },
+        "curve": {
+          "options": [
+            "--curve"
+          ],
+          "help": null,
+          "required": false,
+          "default": "None"
+        },
+        "name": {
+          "options": [
+            "--name"
+          ],
+          "help": null,
+          "required": false,
+          "default": "None"
+        },
+        "release": {
+          "options": [
+            "--release"
+          ],
+          "help": null,
+          "required": false,
+          "default": "None"
+        },
+        "asset_index": {
+          "options": [
+            "--asset-index"
+          ],
+          "help": null,
+          "required": false,
+          "default": "None"
+        },
+        "runner": {
+          "options": [
+            "--runner"
+          ],
+          "help": null,
+          "required": false,
+          "default": "None"
+        }
+      }
+    },
+    "share": {
+      "help": "Give colleagues read or reuse access to a result or original you own",
+      "arguments": {
+        "help": {
+          "options": [
+            "-h",
+            "--help"
+          ],
+          "help": "show this help message and exit",
+          "required": false,
+          "default": "==SUPPRESS=="
+        },
+        "configuration": {
+          "options": [
+            "--configuration"
+          ],
+          "help": null,
+          "required": false,
+          "default": "configuration.json"
+        },
+        "credentials": {
+          "options": [
+            "--credentials"
+          ],
+          "help": "Optional separate private credential file",
+          "required": false,
+          "default": "None"
+        },
+        "asset": {
+          "options": [
+            "--asset"
+          ],
+          "help": null,
+          "required": true,
+          "default": "None"
+        },
+        "read": {
+          "options": [
+            "--read"
+          ],
+          "help": null,
+          "required": false,
+          "default": "None"
+        },
+        "reuse": {
+          "options": [
+            "--reuse"
+          ],
+          "help": null,
+          "required": false,
+          "default": "None"
+        }
+      }
+    }
+  }
+}

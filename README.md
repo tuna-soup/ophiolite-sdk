@@ -267,3 +267,37 @@ reply after commit. It accepts its packaged original synthetic LAS only. It is a
 test aid, not an authorization oracle, general LAS service or deployed gateway.
 Native gateway and deployment qualification are separate tests. No stable SDK,
 production service or complete E17/E18 release is implied by this preview.
+
+## Command line (preview)
+
+Installing the SDK provides `ophiolite`. Use the configuration downloaded from
+Workspace: `ophiolite doctor --configuration configuration.json` checks local
+configuration and the packaged contract version without reading credentials or
+contacting a server. Add `--online` explicitly to compare the service contract.
+
+`login --no-browser` prints the sign-in and approval links. Add `--write` only for
+publication consent. Credentials use the SDK namespace described above; old flat
+kit caches are refused unchanged. Run fresh login rather than copying tokens.
+`status` checks the approved grant, and `logout` revokes/removes the SDK session.
+
+`list` discovers permitted assets. `fetch --asset ... --revision ... --curve GR
+--output new-folder` reads exact data and preserves the pilot's file formatting.
+For a calculation configuration, use `prepare --asset ... --revision ... --curve GR
+--name Example --script calculation.py --parameters parameters.json --work run`.
+An existing configured binding or `--release ... --curve ... --name ...` is also
+supported. Prepare only fetches input; it never executes Python or publishes.
+
+`run --work run` executes the unchanged prepared script locally with your operating
+system permissions. Inspect its `curves.json`, then explicitly `publish --work run`.
+Use `recover --work run` after a lost response. `share --asset ... --read colleague
+--reuse colleague` replaces the audience; read/reuse rights are checked separately.
+The offset example remains explicit: `correct --start 100 --stop 104 --offset 1
+--publish` plus the input selection and `--output new-folder`. Values outside the
+interval and missing samples remain unchanged. This example is not scientific
+approval. All commands accept `--configuration` and optional `--credentials`.
+
+The old six correction output files and three read output files remain compatible.
+Private SDK identity, locks, exact requests/responses and input checkpoints are
+additional files; retain the entire folder for recovery. The deprecated pilot kit
+uses the same SDK credential transactions when upgraded. Frozen old installations
+remain separate and cannot safely share the new credential cache.
