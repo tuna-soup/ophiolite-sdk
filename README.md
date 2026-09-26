@@ -1,7 +1,7 @@
-# Ophiolite SDK — scientific workflow preview
+# Ophiolite SDK — preview contracts, supported client
 
-This E4 implementation reads and publishes exact scientific revisions through Ophiolite's
-public service API. Contracts are preview contracts. No production-support or
+The supported 0.x client reads and publishes exact scientific revisions through Ophiolite's
+public service API. Contracts remain preview contracts. No production-support or
 complete open-source release qualification is claimed.
 
 ## Install and read
@@ -301,3 +301,36 @@ Private SDK identity, locks, exact requests/responses and input checkpoints are
 additional files; retain the entire folder for recovery. The deprecated pilot kit
 uses the same SDK credential transactions when upgraded. Frozen old installations
 remain separate and cannot safely share the new credential cache.
+
+
+## Packaged workflow guides
+
+Run `ophiolite skills path` to locate six installed guides: authenticate, read exact
+data, validate locally, publish derived curves, share a result and recover a
+publication. They describe public SDK calls and refusal recovery. Keep the original
+private work folder after an uncertain publication; read grants before deciding what
+to do after an uncertain sharing response. Never retry sharing automatically.
+The repository's AGENTS.md records the same scientific and credential boundaries.
+
+## Version and compatibility policy
+
+Python `ophiolite` and TypeScript `@ophiolite/client` share `0.MINOR.PATCH` and one
+release tag. PATCH changes fix defects or add APIs. MINOR changes may break APIs,
+with a **Breaking** entry in CHANGELOG.md and a one-minor deprecation shim where
+feasible. A stable 1.0 promise requires every registry entry the SDK reads to be
+supported and the OpenAPI document to be versioned as stable. Source installation
+is available; PyPI/npm publication and managed-service release qualification are
+separate delivery gates.
+
+Additive contract fields are tolerated while declared constraints remain enforced.
+A new schema suffix such as `/2` requires a new model and SDK MINOR. For an unknown
+schema, upgrade the SDK or read the exact artifact; do not reinterpret its meaning.
+Templates record their own version and SDK version, and CI tests them against the
+current SDK. Supported scientific reads currently cover the documented curve
+profiles, not arbitrary geoscience types or universal conversion.
+
+The pilot `ophiolite-cli` 0.3.0 compatibility modules remain for one announced
+transition release. They are removed in the first versioned E10 release afterward.
+Use fresh SDK login; do not import old credential caches. The SDK, TypeScript client,
+templates, packaged guides and extracted contracts are Apache-2.0. Server licensing
+and the complete open-source release have separate qualification requirements.

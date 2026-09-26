@@ -23,4 +23,4 @@ dev = ["pytest>=8", "build>=1", "jsonschema>=4.26"]
 include = ["ophiolite*"]
 
 [tool.setuptools.package-data]
-ophiolite = ["contracts/**/*", "contracts/*"]
+ophiolite = ["contracts/**/*", "contracts/*", "skills/*/SKILL.md"]

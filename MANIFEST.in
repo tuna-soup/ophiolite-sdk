@@ -27,3 +27,6 @@ prune templates/agent-workflow/.pytest_cache
 prune templates/notebook/.pytest_cache
 prune templates/python-application/.pytest_cache
 prune templates/react-application/.pytest_cache
+
+recursive-include ophiolite/skills *.md
+include AGENTS.md
