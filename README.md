@@ -13,8 +13,8 @@ python -m pip install 'git+https://github.com/tuna-soup/ophiolite-sdk@<reviewed-
 ```
 
 The read-only foundation accepts an explicit existing scoped bearer credential.
-Browser login and credential storage arrive in E4 C3. Configure credentials through
-your approved environment mechanism; do not put them in source files or logs.
+Browser login can also obtain and privately store an approved application credential.
+Do not put credentials in source files or logs.
 Provider application credentials also need their approved application grant ID.
 
 ```python
@@ -46,6 +46,47 @@ read writes `artifact.las`, `curve.json` and `descriptor.json`. Multiple curves 
 separate curve and descriptor JSON files. JSON is re-serialized for readability;
 its saved bytes are not claimed to match the downloaded representation hash.
 The source artifact is exact. This directory is not an E18 portable export bundle.
+
+## Browser login and credential renewal
+
+```python
+from ophiolite.auth import device_login
+
+credential = device_login(
+    gateway_url, project_id,
+    notify=lambda url, message: print(message, url),
+)
+with Client(gateway_url, project_id, credential) as client:
+    data = client.read(asset_id, exact_revision, curves=['GR'])
+```
+
+Follow the provider sign-in link, then confirm the application code in Workspace.
+Login saves only after approval. The default request grants read access; `write=True`
+requests additional write consent but does not establish permission by itself.
+`notify` receives the two public browser URLs/codes; it never receives bearer tokens.
+No browser opens automatically. Do not forward approval codes to an unknown party.
+
+`Credential.from_file(path)` explicitly opens a saved SDK credential. The default
+path is returned by `ophiolite.auth.default_path(gateway_url, project_id)` under
+`~/.config/ophiolite/sdk/v1/projects/`. An explicit destination requires a private
+0700 directory and 0600 file. Stored credentials are bound to the gateway/project.
+The SDK renews an expiring provider session under a cross-process lock and rereads
+before renewal, so overlapping callers use the newly saved credentials.
+
+The SDK refuses old kit credential files and never migrates refresh tokens. Run
+fresh browser login for the SDK; frozen kit installations retain their separate
+cache and authorization. `credential.revoke()` attempts both Workspace and provider
+revocation and removes the local cache, reporting any unconfirmed remote revocation.
+`credential.delete()` removes only the local cache. Neither cancels a request that
+already obtained a credential; server authorization remains decisive. A delayed
+renewal cannot recreate a deleted cache. Explicit fresh login creates a new session.
+
+Login/consent polling is bounded to ten minutes per phase. Renewal is never retried
+automatically after an uncertain provider response; sign in again when instructed.
+A `threading.Event` passed as `cancel` can stop login polling or lock waits. It does
+not interrupt an HTTP request already in progress. HTTP timeout is 30 seconds.
+POSIX lock behavior is tested on Linux; the Windows locking branch is unqualified.
+C3 qualification uses a synthetic rotating provider, not a production identity provider.
 
 ## Scientific arrays and notebook display
 

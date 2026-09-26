@@ -3,7 +3,6 @@ import json
 import math
 import os
 import time
-from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import quote
 import httpx
@@ -17,26 +16,7 @@ MAX_BYTES=32*1024*1024
 from ._core import origin
 
 
-@dataclass(frozen=True,repr=False)
-class Credential:
-    """Explicit bearer only in C1. No credential-store writer exists in this stage."""
-    token: str
-    grant: str | None = None
-
-    @classmethod
-    def bearer(cls, token, *, grant=None):
-        if not isinstance(token,str) or not token or any(c.isspace() for c in token):
-            raise Refused('Supply a bearer credential without whitespace.')
-        if grant is not None and (not isinstance(grant,str) or not grant or any(c.isspace() for c in grant)):
-            raise Refused('Supply a valid application grant.')
-        return cls(token,grant)
-
-    def headers(self):
-        value={'Authorization':'Bearer '+self.token}
-        if self.grant is not None:value['X-Ophiolite-Application-Grant']=self.grant
-        return value
-
-    def __repr__(self): return 'Credential(<private>)'
+from .auth import Credential
 
 
 class CurveSet:
@@ -108,7 +88,7 @@ class Client:
     def __exit__(self,*args):self.close()
 
     def _get(self,path,limit):
-        headers=self.credential.headers() if self.credential else {}
+        headers=self.credential.headers(self.url,self.project) if self.credential else {}
         categories={401:(AuthenticationRequired,'Sign in again.'),403:(PermissionRefused,'Check project access and the approved grant.'),
                     404:(Unavailable,'This exact revision is unavailable or not permitted.'),409:(IntegrityConflict,'Stored data failed an integrity check. Ask the deployment administrator.'),
                     413:(CapacityExceeded,'Representation exceeds the bounded size; partial reads are not supported.'),400:(Refused,'The request was refused. Check the selected input.'),

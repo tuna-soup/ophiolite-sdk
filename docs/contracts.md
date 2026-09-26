@@ -59,3 +59,20 @@ status. Older responses lacking both evidence and recorded-reader fields report
 The separate view Descriptor and notebook use this derived status. Saved wire
 fields retain their original presence. This compatibility status adds no server
 enum and claims no comparison when the earlier reader record is unavailable.
+
+
+Credential files use `ophiolite.sdk-credential/1`, an envelope containing
+`credential`, an integer `generation`, and a per-login `family`. No flat legacy
+fields are accepted. `Credential.open` aliases `from_file`; `headers(url, project)`
+checks scope and performs serialized renewal. `update(tokens)` atomically persists
+only against the generation this instance observed; stale explicit updates refuse.
+`save()` rereads under the lock and cannot overwrite a newer token snapshot.
+`delete()` and `revoke()` share that lock. Instances from a replaced login family
+cannot read, overwrite or delete the new session. The adjacent lock file persists
+after deletion to preserve one lock identity across waiting processes.
+
+Authentication requests refuse redirects, foreign provider endpoints and oversized
+responses. Only approved error categories are returned; arbitrary provider bodies
+are excluded from exceptions. Provider token rotation must return both an access
+and refresh token with a finite positive lifetime. No automatic request replay is
+performed. Local scientific validation still performs no login or cache discovery.
