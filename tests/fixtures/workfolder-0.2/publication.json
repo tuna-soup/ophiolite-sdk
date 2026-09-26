@@ -1,0 +1,18 @@
+{
+  "id": "1916ac1df4643e359c080dfab6e89a5a86e5b43417f3ad5022eac263251cf7c9",
+  "publication_profile": "las-derived-curves/1",
+  "derived_curves": [
+    {
+      "mnemonic": "NEW",
+      "unit": "gAPI",
+      "description": "Original synthetic result",
+      "values": [
+        0,
+        null,
+        10,
+        20,
+        30
+      ]
+    }
+  ]
+}

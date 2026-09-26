@@ -1,0 +1,10 @@
+{
+  "representation": "retained-original",
+  "source": {
+    "authority": "synthetic-file",
+    "key": "curve-a",
+    "revision": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
+    "profile": "las2/1"
+  },
+  "sha256": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b"
+}

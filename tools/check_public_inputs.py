@@ -28,7 +28,7 @@ def verify(root=ROOT):
     if len(by_path)!=len(entries):raise ValueError('Duplicate provenance path')
     source=json.loads((root/'ophiolite/contracts/SOURCE.json').read_text())
     expected={'ophiolite/contracts/'+name for name in source['files']}
-    expected.update(p.relative_to(root).as_posix() for p in (root/'tests/fixtures').rglob('*.json') if p.name!='PROVENANCE.json')
+    expected.update(p.relative_to(root).as_posix() for p in (root/'tests/fixtures').rglob('*') if p.is_file() and p.name!='PROVENANCE.json')
     recordings=root/'tests/recordings'
     expected.update(p.relative_to(root).as_posix() for p in recordings.rglob('*') if p.is_file())
     if set(by_path)!=expected:raise ValueError('Copied input provenance coverage differs')

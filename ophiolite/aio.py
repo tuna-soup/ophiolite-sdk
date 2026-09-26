@@ -12,6 +12,22 @@ from .errors import (AuthenticationRequired,PermissionRefused,Unavailable,Integr
                      CapacityExceeded,Refused,Incompatible,Busy,VerificationFailed,OphioliteError)
 
 
+async def _complete(awaitable):
+    task=asyncio.create_task(awaitable)
+    try:
+        return await asyncio.shield(task)
+    except asyncio.CancelledError:
+        with anyio.CancelScope(shield=True):
+            while not task.done():
+                try:await asyncio.shield(task)
+                except asyncio.CancelledError:continue
+                except Exception:break
+            try:task.result()
+            except Exception:pass
+        raise
+
+
+
 class AsyncClient(Client):
     def __init__(self,url,project,credential=None,http=None):
         # Validate before allocating a transport; the inherited configuration and
@@ -38,21 +54,7 @@ class AsyncClient(Client):
 
     async def _headers(self):
         if self.credential is None:return {}
-        # A raw asyncio Task.cancel is stronger than an AnyIO cancellation scope.
-        # Own the mutex in the worker task and drain it even in that case. Token
-        # rotation finishes before cancellation returns or another worker enters.
-        task=asyncio.create_task(self._credential_transaction())
-        try:
-            return await asyncio.shield(task)
-        except asyncio.CancelledError:
-            with anyio.CancelScope(shield=True):
-                while not task.done():
-                    try:await asyncio.shield(task)
-                    except asyncio.CancelledError:continue
-                    except Exception:break
-                try:task.result()
-                except Exception:pass
-            raise
+        return await _complete(self._credential_transaction())
 
     async def _get(self,path,limit):
         headers=await self._headers()
@@ -133,3 +135,106 @@ class AsyncClient(Client):
             await asyncio.gather(*tasks,return_exceptions=True)
             raise
         return results
+
+    async def _post_bytes(self,area,operation,raw,*,extra_headers=None,headers=None,retry=False,expected_context=None):
+        from . import publish as planning,application_transport as policy
+        from .errors import RecoveryUnavailable
+        url,project=self.url,self.project
+        if expected_context is not None and (url,project)!=expected_context:raise RecoveryUnavailable('The gateway or project changed during this operation.')
+        path=planning.operation_path(project,area,operation)
+        if extra_headers and any(key.lower() not in ('content-type','x-ophiolite-upload') for key in extra_headers):raise Refused('Saved request headers cannot replace authorization.')
+        captured=dict(await self._headers() if headers is None else headers)
+        captured.update(extra_headers or {'Content-Type':'application/json'})
+        attempts=3 if operation!='share' and (retry or operation in planning.READ_OPERATIONS) else 1
+        for attempt in range(attempts):
+            if (self.url,self.project)!=(url,project):raise RecoveryUnavailable('The gateway or project changed during this operation.')
+            try:
+                async with self.http.stream('POST',url+path,content=raw,headers=captured,follow_redirects=False) as response:
+                    if response.status_code in (429,503) and attempt+1<attempts:
+                        await anyio.sleep(policy.delay(response));continue
+                    policy.status(response,operation)
+                    content=bytearray()
+                    async for chunk in response.aiter_bytes():
+                        content.extend(chunk)
+                        if len(content)>policy.MAX_RESPONSE:raise CapacityExceeded('Application response exceeds its supported size.')
+                    return policy.decode(bytes(content))
+            except httpx.HTTPError:
+                if attempt+1<attempts:continue
+                policy.disconnected(operation)
+
+    async def _post(self,area,operation,body,**options):
+        from .publish import json_bytes
+        if 'project_id' in body and body['project_id']!=self.project:raise Refused('The request belongs to another project.')
+        return await self._post_bytes(area,operation,json_bytes({'project_id':self.project,**body}),**options)
+
+    async def _grant_status(self,headers):
+        from . import application_transport as policy
+        from .publish import json_bytes
+        try:
+            async with self.http.stream('POST',self.url+'/api/v1/application-access/status',
+                 content=json_bytes({'id':headers['X-Ophiolite-Application-Grant']}),
+                 headers={**headers,'Content-Type':'application/json'},follow_redirects=False) as response:
+                policy.status(response,'status');raw=bytearray()
+                async for chunk in response.aiter_bytes():
+                    raw.extend(chunk)
+                    if len(raw)>2_100_000:raise CapacityExceeded('Authorization response exceeds its supported size.')
+                return policy.decode(bytes(raw))
+        except httpx.HTTPError:raise AuthenticationRequired('Authorization could not be confirmed. No mutation was sent.') from None
+
+    async def _application(self,name,/,*args,**kwargs):
+        from .models.api import Run
+        result=await _complete(anyio.to_thread.run_sync(partial(getattr(_ApplicationDriver(self),name),*args,**kwargs),abandon_on_cancel=False))
+        if isinstance(result,Run):
+            result._client=self
+            if result._work is not None:result._work=AsyncWorkFolder(self,result._work.path,lock_timeout=result._work.lock_timeout)
+        return result
+
+    def work_folder(self,path,**options):return AsyncWorkFolder(self,path,**options)
+
+
+class _ApplicationDriver(Client):
+    """Run shared application planning/files in a worker; HTTP stays on its loop."""
+    def __init__(self,client):
+        self.owner=client
+        self.url,self.project,self.prefix=client.url,client.project,client.prefix
+        self.credential,self.http,self._owns_http=client.credential,client.http,False
+
+    def _post_bytes(self,area,operation,raw,**options):
+        # Acquire the credential in this worker, not a nested worker. A work-folder
+        # transaction already supplies its locked immutable identity snapshot.
+        if options.get('headers') is None:options['headers']=self._headers()
+        return anyio.from_thread.run(partial(self.owner._post_bytes,area,operation,raw,**options))
+
+    def _grant_status(self,headers):return anyio.from_thread.run(self.owner._grant_status,headers)
+
+
+class AsyncWorkFolder:
+    def __init__(self,client,path,**options):self.client,self.path,self.options=client,path,options
+
+    async def _call(self,name,/,*args,**kwargs):
+        from .publish import WorkFolder
+        from .models.api import Run
+        def operation():return getattr(WorkFolder(_ApplicationDriver(self.client),self.path,**self.options),name)(*args,**kwargs)
+        result=await _complete(anyio.to_thread.run_sync(operation,abandon_on_cancel=False))
+        if isinstance(result,Run):result._client,result._work=self.client,self
+        return result
+
+
+def _async_application(name):
+    from functools import wraps
+    @wraps(getattr(Client,name))
+    async def method(self,*args,**kwargs):return await self._application(name,*args,**kwargs)
+    return method
+
+
+def _async_work(name):
+    async def method(self,*args,**kwargs):return await self._call(name,*args,**kwargs)
+    method.__name__=name
+    return method
+
+
+for _name in ('configure','start','run_input','publish','download','results','grants','share','options','inspect',
+              'upload_las','inspect_las','upload_info','members','result_preview','result_download','recover'):
+    setattr(AsyncClient,_name,_async_application(_name))
+for _name in ('configure','start','input','publish','download','upload_las','recover'):
+    setattr(AsyncWorkFolder,_name,_async_work(_name))

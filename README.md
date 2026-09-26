@@ -1,6 +1,6 @@
-# Ophiolite SDK — read-only preview
+# Ophiolite SDK — scientific workflow preview
 
-This E4 implementation reads exact scientific revisions through Ophiolite's
+This E4 implementation reads and publishes exact scientific revisions through Ophiolite's
 public service API. Contracts are preview contracts. No production-support or
 complete open-source release qualification is claimed.
 
@@ -12,7 +12,7 @@ Python 3.10 or later is required. Install from a reviewed commit of this reposit
 python -m pip install 'git+https://github.com/tuna-soup/ophiolite-sdk@<reviewed-commit>'
 ```
 
-The read-only foundation accepts an explicit existing scoped bearer credential.
+The SDK accepts an explicit existing scoped bearer credential.
 Browser login can also obtain and privately store an approved application credential.
 Do not put credentials in source files or logs.
 Provider application credentials also need their approved application grant ID.
@@ -182,3 +182,88 @@ PostgreSQL test schema. `OPHIOLITE_REQUIRE_GATEWAY=1` turns missing required cas
 into failures. Its current delegate is stubbed; it does not qualify browser consent
 or a live deployment. Mutation and independent verification results are recorded in
 the Integration E04 strategy, with the exact commands and source revisions.
+
+## Local calculation, publication and recovery
+
+Use an approved write credential and a private work folder for recoverable work:
+
+```python
+work = client.work_folder('my-calculation')
+binding = work.configure(asset_id, exact_revision, curve='GR', name='My calculation')
+run = work.start(binding, application_version='my-script/1', parameters={'factor': 2})
+original, view = run.input()
+receipt = work.publish(run, derived_curves=[{
+    'mnemonic': 'GR_CALC', 'unit': 'gAPI', 'description': 'GR multiplied by two',
+    'values': [None if value is None else value * 2 for value in view.values],
+}])
+work.download(receipt)
+```
+
+Run Python locally; `start` records and resolves a run, it does not execute your
+script. Supply a `script=bytes` to record its digest. Declared method/version and
+parameters establish traceability, not verified execution or rerun equivalence.
+Only use the example's gAPI label when that is the selected curve's actual unit.
+The runnable [public example](examples/public_curve_handoff.py) preserves that unit.
+
+Publication creates a separate derived asset; it does not edit the input, grant
+access or silently append a revision. Validate all source curve names, explicit
+LAS NULL, sample counts and derived names/units before sending. Missing values
+stay `None`; zero stays zero. The SDK header parser currently requires UTF-8 and
+refuses duplicate source mnemonics, even when a server reader can rename them.
+It performs no resampling, unit conversion or scientific inference. Unsupported
+headers/values raise `ValidationFailed` or `Refused` before publication.
+
+After a lost response or process restart, reopen the same folder:
+
+```python
+result = client.recover('my-calculation')
+```
+
+Recovery replays a saved exact request and checks the response. A completed folder
+returns `None`. Preserve the folder, including requests, metadata and responses;
+do not edit it to change a calculation. Changed work needs a new folder. Direct
+`client.configure/start/publish` calls are available but are **not recoverable after
+a process restart**. A command ID alone is not a recovery handle.
+
+Work folders bind gateway, project and authenticated identity. A fresh approved
+grant for the same server-confirmed user can recover. A replacement opaque delegate
+cannot: recovery requires the original delegate fingerprint. Credentials are never
+written into the work folder. Saved payload and metadata are flushed and fsynced
+before a mutation; a folder lock spans checkpoint, request and response. This is
+Linux process-restart/durability-order qualification, not a power-loss guarantee.
+
+| Operation | Automatic retries |
+|---|---|
+| Reads, inspect, options, info, members, results and downloads | Up to three attempts for transient transport/busy responses. |
+| Configure, start, upload and publish | Up to three attempts with the same command/body; folders persist them for later recovery. |
+| Share | Never; an uncertain response raises `ShareOutcomeUnknown`. |
+| Login, refresh and revoke | Never after an ambiguous request outcome. |
+
+Before retrying an uncertain share, read `client.grants(receipt.asset)` and decide
+the complete intended audience. Then call `client.share(receipt.asset, read=[...],
+reuse=[...])`. This replaces the audience; it is not an additive invitation.
+Unavailable grants (non-owner, absent or mismatching exact revision) are refused,
+never represented as an empty audience. Publication and sharing are separate.
+Restricted result models retain permitted scientific data without fabricating or
+exposing inaccessible parent identifiers. Revocation cannot recall earlier exports.
+
+`work.upload_las(path, name=..., attribution=..., audience=[...],
+rights_confirmed=True)` persists an owned original copy before sending (8 MiB cap).
+Changing/deleting the source file cannot change recovery. Upload permission is
+separate from application-grant consent; use an explicitly authorised delegate
+client/folder when required. The SDK never falls back to a different credential.
+Attribution and rights confirmation are user declarations, not verified licences.
+
+`AsyncClient` exposes the same methods with `await`; its work-folder methods are
+also awaited. Credential and folder transactions run off the event loop. Cancellation
+drains the active transaction before releasing its lock; it does not undo a server
+mutation. Recover from the saved folder after an uncertain interruption.
+
+## Synthetic workflow fixture server
+
+`from ophiolite.testing import fixture_server` provides an in-memory loopback
+workflow fixture, including `drop_response_after='publish'` to simulate a lost
+reply after commit. It accepts its packaged original synthetic LAS only. It is a
+test aid, not an authorization oracle, general LAS service or deployed gateway.
+Native gateway and deployment qualification are separate tests. No stable SDK,
+production service or complete E17/E18 release is implied by this preview.

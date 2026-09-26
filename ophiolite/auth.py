@@ -252,10 +252,16 @@ class Credential:
         return value
 
     def headers(self, url=None, project=None, *, cancel=None):
+        with self.snapshot(url,project,cancel=cancel) as headers:
+            return dict(headers)
+
+    @contextmanager
+    def snapshot(self, url=None, project=None, *, cancel=None):
         if self.path is None:
             result = {'Authorization':'Bearer '+self.token}
             if self.grant is not None: result['X-Ophiolite-Application-Grant'] = self.grant
-            return result
+            yield result
+            return
         with _lock(self.path,cancel=cancel):
             value = self._current()
             data = value['credential']
@@ -268,7 +274,7 @@ class Credential:
                 value['generation'] += 1
                 _write(self.path,value)
             self._envelope = value
-            return {'Authorization':'Bearer '+data['access_token'],'X-Ophiolite-Application-Grant':data['grant_id']}
+            yield {'Authorization':'Bearer '+data['access_token'],'X-Ophiolite-Application-Grant':data['grant_id']}
 
     def update(self, tokens):
         if self.path is None: _fail('Open an SDK credential store before updating it.')

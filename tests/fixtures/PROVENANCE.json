@@ -483,6 +483,105 @@
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
       "evidence": "Original eight required rule-to-case mappings authored explicitly for E4 R6 deletion coverage. No observed data, external text or private identifiers; SDK licence grant. Kept independent of executable case discovery."
+    },
+    {
+      "path": "tests/fixtures/workfolder-0.2/calculation.py",
+      "sha256": "80e023752001e751805288855065712f41f2ca5f6af36cd267a2450ddd37a056",
+      "source_commit": "16c1bb13d7cabe7b7d0d97af311ef054e1f7eb16",
+      "origin": "Original synthetic SDK fixture; frozen scientific_handoff.py file-protocol oracle",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Owner SDK/template/contract Apache-2.0 scope. Nine generated workfolder files matched complete frozen Platform handoff byte-for-byte on synthetic fixture_server data; fixed origin substituted in run.json after comparison. calculation.py is original two-line synthetic example. No private CLI implementation or customer data copied; no broader Platform licence grant claimed."
+    },
+    {
+      "path": "tests/fixtures/workfolder-0.2/curves.json",
+      "sha256": "d3d2b33b8ad90ed7d8bcffc451d273105daa58f0cc2b9fadfff17b100a1add7a",
+      "source_commit": "16c1bb13d7cabe7b7d0d97af311ef054e1f7eb16",
+      "origin": "Original synthetic SDK fixture; frozen scientific_handoff.py file-protocol oracle",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Owner SDK/template/contract Apache-2.0 scope. Nine generated workfolder files matched complete frozen Platform handoff byte-for-byte on synthetic fixture_server data; fixed origin substituted in run.json after comparison. calculation.py is original two-line synthetic example. No private CLI implementation or customer data copied; no broader Platform licence grant claimed."
+    },
+    {
+      "path": "tests/fixtures/workfolder-0.2/input-reference.json",
+      "sha256": "8be04252f0691a50cdf6cc053d281a59cb29772cd347bace0667d71b7a0ac14e",
+      "source_commit": "16c1bb13d7cabe7b7d0d97af311ef054e1f7eb16",
+      "origin": "Original synthetic SDK fixture; frozen scientific_handoff.py file-protocol oracle",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Owner SDK/template/contract Apache-2.0 scope. Nine generated workfolder files matched complete frozen Platform handoff byte-for-byte on synthetic fixture_server data; fixed origin substituted in run.json after comparison. calculation.py is original two-line synthetic example. No private CLI implementation or customer data copied; no broader Platform licence grant claimed."
+    },
+    {
+      "path": "tests/fixtures/workfolder-0.2/input.las",
+      "sha256": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
+      "source_commit": "16c1bb13d7cabe7b7d0d97af311ef054e1f7eb16",
+      "origin": "Original synthetic SDK fixture; frozen scientific_handoff.py file-protocol oracle",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Owner SDK/template/contract Apache-2.0 scope. Nine generated workfolder files matched complete frozen Platform handoff byte-for-byte on synthetic fixture_server data; fixed origin substituted in run.json after comparison. calculation.py is original two-line synthetic example. No private CLI implementation or customer data copied; no broader Platform licence grant claimed."
+    },
+    {
+      "path": "tests/fixtures/workfolder-0.2/publication.json",
+      "sha256": "548e2a70cfdfeef4c1b4a9deddcbddf338a7da887746c167bafe51548631134f",
+      "source_commit": "16c1bb13d7cabe7b7d0d97af311ef054e1f7eb16",
+      "origin": "Original synthetic SDK fixture; frozen scientific_handoff.py file-protocol oracle",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Owner SDK/template/contract Apache-2.0 scope. Nine generated workfolder files matched complete frozen Platform handoff byte-for-byte on synthetic fixture_server data; fixed origin substituted in run.json after comparison. calculation.py is original two-line synthetic example. No private CLI implementation or customer data copied; no broader Platform licence grant claimed."
+    },
+    {
+      "path": "tests/fixtures/workfolder-0.2/receipt.json",
+      "sha256": "df10b5ae0802021057ddbef8fa8208ba4326518670eb77de2e494f9305a6f922",
+      "source_commit": "16c1bb13d7cabe7b7d0d97af311ef054e1f7eb16",
+      "origin": "Original synthetic SDK fixture; frozen scientific_handoff.py file-protocol oracle",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Owner SDK/template/contract Apache-2.0 scope. Nine generated workfolder files matched complete frozen Platform handoff byte-for-byte on synthetic fixture_server data; fixed origin substituted in run.json after comparison. calculation.py is original two-line synthetic example. No private CLI implementation or customer data copied; no broader Platform licence grant claimed."
+    },
+    {
+      "path": "tests/fixtures/workfolder-0.2/resolved.json",
+      "sha256": "ba18fbc6625f2832740984fcbea901ad99b1a9125620906c5ccf401e434cc4c7",
+      "source_commit": "16c1bb13d7cabe7b7d0d97af311ef054e1f7eb16",
+      "origin": "Original synthetic SDK fixture; frozen scientific_handoff.py file-protocol oracle",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Owner SDK/template/contract Apache-2.0 scope. Nine generated workfolder files matched complete frozen Platform handoff byte-for-byte on synthetic fixture_server data; fixed origin substituted in run.json after comparison. calculation.py is original two-line synthetic example. No private CLI implementation or customer data copied; no broader Platform licence grant claimed."
+    },
+    {
+      "path": "tests/fixtures/workfolder-0.2/result.las",
+      "sha256": "4b04c3f947619b6972319cdb9dab5e1407bc5c95f61056239f277cf2dacf5e37",
+      "source_commit": "16c1bb13d7cabe7b7d0d97af311ef054e1f7eb16",
+      "origin": "Original synthetic SDK fixture; frozen scientific_handoff.py file-protocol oracle",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Owner SDK/template/contract Apache-2.0 scope. Nine generated workfolder files matched complete frozen Platform handoff byte-for-byte on synthetic fixture_server data; fixed origin substituted in run.json after comparison. calculation.py is original two-line synthetic example. No private CLI implementation or customer data copied; no broader Platform licence grant claimed."
+    },
+    {
+      "path": "tests/fixtures/workfolder-0.2/run.json",
+      "sha256": "b5b0ee395207391efdc41d56b5f36e828c8d509b9708a265928644be5122da11",
+      "source_commit": "16c1bb13d7cabe7b7d0d97af311ef054e1f7eb16",
+      "origin": "Original synthetic SDK fixture; frozen scientific_handoff.py file-protocol oracle",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Owner SDK/template/contract Apache-2.0 scope. Nine generated workfolder files matched complete frozen Platform handoff byte-for-byte on synthetic fixture_server data; fixed origin substituted in run.json after comparison. calculation.py is original two-line synthetic example. No private CLI implementation or customer data copied; no broader Platform licence grant claimed."
+    },
+    {
+      "path": "tests/recordings/applications-workflow.json",
+      "sha256": "8742e3bb7ddf52f8d5d5790f16b644a2edb00a6ff48b6e8720f25c972a1f2a21",
+      "source_commit": "16c1bb13d7cabe7b7d0d97af311ef054e1f7eb16",
+      "origin": "Actual in-process Platform public HTTP routes, test_one_api_matrix synthetic principals and original synthetic LAS",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Original Ophiolite synthetic fixture outputs within owner SDK/contract/template licence scope; generated by tests/gateway/test_record_applications.py. Header values omitted; no customer data, provider tokens or private code copied. Includes generated synthetic asset IDs, checksums and times. This is route-contract evidence, not live OIDC or broader E17 qualification."
+    },
+    {
+      "path": "tests/recordings/las-uploads-workflow.json",
+      "sha256": "322c65715dd4b38f0f5996ca4ac2443bd93b334a67217eea4c86966c2443a1fc",
+      "source_commit": "16c1bb13d7cabe7b7d0d97af311ef054e1f7eb16",
+      "origin": "Actual in-process Platform public HTTP routes, test_one_api_matrix synthetic principals and original synthetic LAS",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Original Ophiolite synthetic fixture outputs within owner SDK/contract/template licence scope; generated by tests/gateway/test_record_applications.py. Header values omitted; no customer data, provider tokens or private code copied. Includes generated synthetic asset IDs, checksums and times. This is route-contract evidence, not live OIDC or broader E17 qualification."
     }
   ]
 }

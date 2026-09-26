@@ -1,0 +1,74 @@
+{
+  "schema": "ophiolite.sdk-recording/1",
+  "source": "Platform 16c1bb1 test_one_api_matrix, original synthetic LAS; HTTP header values deliberately omitted",
+  "exchanges": [
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/p/las-uploads/upload",
+      "request_base64": "flZlcnNpb24KVkVSUy4gMi4wIDogTEFTCldSQVAuIE5PIDogcm93cwp+V2VsbApTVFJULk0gMTAwIDogc3RhcnQKU1RPUC5NIDEwMiA6IHN0b3AKU1RFUC5NIDEgOiBzdGVwCk5VTEwuIC05OTkuMjUgOiBtaXNzaW5nCldFTEwuIFNZTlRIRVRJQyA6IGZpeHR1cmUKfkN1cnZlCkRFUFQuTSA6IGRlcHRoCkdSLmdBUEkgOiBnYW1tYQp+QVNDSUkKMTAwIDAKMTAxIC05OTkuMjUKMTAyIDMwCg==",
+      "status": 200,
+      "response": {
+        "asset_id": "8f38a81bffc1e84e61ee01f66833e0386cafe199199fc67965358d2a11a45e72",
+        "revision": "5c32a42444abee42f5e16b7ac275acb0fb7638f7096a7d687fc5def0ca18dc86",
+        "name": "Recording input",
+        "can_share": true,
+        "acquisition": {
+          "attribution": "Original synthetic fixture",
+          "filename": "input.las",
+          "identity": "alice",
+          "kind": "user-upload",
+          "rights": "User declares retention, derivation and sharing within the selected audience are permitted",
+          "uploaded_at": 1790439949.3639798,
+          "well_notes": ""
+        },
+        "permitted_audience": [
+          "alice",
+          "bob"
+        ],
+        "recipients": [
+          "alice"
+        ],
+        "reuse_recipients": [
+          "alice"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/p/las-uploads/info",
+      "request_base64": "eyJwcm9qZWN0X2lkIjoicCIsImFzc2V0X2lkIjoiOGYzOGE4MWJmZmMxZTg0ZTYxZWUwMWY2NjgzM2UwMzg2Y2FmZTE5OTE5OWZjNjc5NjUzNThkMmExMWE0NWU3MiJ9",
+      "status": 200,
+      "response": {
+        "asset_id": "8f38a81bffc1e84e61ee01f66833e0386cafe199199fc67965358d2a11a45e72",
+        "revision": "5c32a42444abee42f5e16b7ac275acb0fb7638f7096a7d687fc5def0ca18dc86",
+        "name": "Recording input",
+        "can_share": true,
+        "acquisition": {
+          "attribution": "Original synthetic fixture",
+          "filename": "input.las",
+          "identity": "alice",
+          "kind": "user-upload",
+          "rights": "User declares retention, derivation and sharing within the selected audience are permitted",
+          "uploaded_at": 1790439949.3639798,
+          "well_notes": ""
+        },
+        "permitted_audience": [
+          "alice",
+          "bob"
+        ],
+        "recipients": [
+          "alice"
+        ],
+        "reuse_recipients": [
+          "alice"
+        ],
+        "display": {
+          "member_names": {
+            "alice": "Alice",
+            "bob": "Bob"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "mnemonic": "NEW",
+    "unit": "gAPI",
+    "description": "Original synthetic result",
+    "values": [
+      0,
+      null,
+      10,
+      20,
+      30
+    ]
+  }
+]

@@ -1,0 +1,21 @@
+{
+  "config": {
+    "url": "http://localhost:8765",
+    "project": "p",
+    "binding": null,
+    "parameters": {
+      "method": "synthetic",
+      "code_sha256": "80e023752001e751805288855065712f41f2ca5f6af36cd267a2450ddd37a056"
+    },
+    "input": {
+      "asset_id": "synthetic",
+      "asset_revision": "revision",
+      "curve": "GR",
+      "name": "Example"
+    }
+  },
+  "command_id": "cccccccccccccccccccccccccccccccc",
+  "configure_command": "dddddddddddddddddddddddddddddddd",
+  "binding": "64b586352df844defde919f8f7fe3238e0a6bf286797fff893ca658a2fd61e06",
+  "generation": 1
+}

@@ -1,0 +1,567 @@
+{
+  "schema": "ophiolite.sdk-recording/1",
+  "source": "Platform 16c1bb1 test_one_api_matrix, original synthetic LAS; HTTP header values deliberately omitted",
+  "exchanges": [
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/p/applications/configure",
+      "request_base64": "eyJwcm9qZWN0X2lkIjoicCIsImN1cnZlIjoiR1IiLCJuYW1lIjoiUmVjb3JkZWQgY2FsY3VsYXRpb24iLCJjb21tYW5kX2lkIjoiODkxMmIzMzY1MzFhNDk4Yzg0Y2U3ZmJlOTU2YjYzYjAiLCJwdWJsaWNhdGlvbl9wcm9maWxlIjoibGFzLWRlcml2ZWQtY3VydmVzLzEiLCJhc3NldF9pZCI6IjhmMzhhODFiZmZjMWU4NGU2MWVlMDFmNjY4MzNlMDM4NmNhZmUxOTkxOTlmYzY3OTY1MzU4ZDJhMTFhNDVlNzIiLCJhc3NldF9yZXZpc2lvbiI6IjVjMzJhNDI0NDRhYmVlNDJmNWUxNmI3YWMyNzVhY2IwZmI3NjM4ZjcwOTZhN2Q2ODdmYzVkZWYwY2ExOGRjODYifQ==",
+      "status": 200,
+      "response": {
+        "id": "378fb17e86df340e096915bce62617b87e1b2a55cd7d36c9d98328b44c35327f",
+        "owner": "alice",
+        "project_id": "p",
+        "kind": "binding",
+        "name": "Recorded calculation",
+        "generation": 1,
+        "managed_input": {
+          "asset_id": "8f38a81bffc1e84e61ee01f66833e0386cafe199199fc67965358d2a11a45e72",
+          "revision": "5c32a42444abee42f5e16b7ac275acb0fb7638f7096a7d687fc5def0ca18dc86"
+        },
+        "curve": "GR",
+        "expected_revision": "5c32a42444abee42f5e16b7ac275acb0fb7638f7096a7d687fc5def0ca18dc86",
+        "destination": "portable",
+        "runners": [
+          "alice"
+        ],
+        "definition": "curve-correction/1",
+        "publication_profile": "las-derived-curves/1",
+        "create_digest": "dccc77cacb0df92c95637cbf722e406ff55afa350d0eb0157eb07be281316843"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/p/applications/start",
+      "request_base64": "eyJwcm9qZWN0X2lkIjoicCIsImlkIjoiMzc4ZmIxN2U4NmRmMzQwZTA5NjkxNWJjZTYyNjE3Yjg3ZTFiMmE1NWNkN2QzNmM5ZDk4MzI4YjQ0YzM1MzI3ZiIsImdlbmVyYXRpb24iOjEsImNvbW1hbmRfaWQiOiIxYmEwYjI1ODMzZmU0M2IzYmIwOWU5YmE5NWRjMWRiOSIsImFwcGxpY2F0aW9uX3ZlcnNpb24iOiJyZWNvcmRpbmcvMSIsInBhcmFtZXRlcnMiOnt9fQ==",
+      "status": 200,
+      "response": {
+        "id": "1a84ce1a90231ab97b7b64a7815be0e7553070ca93808c87584b4a3c3c69c2bd",
+        "owner": "alice",
+        "project_id": "p",
+        "kind": "run",
+        "binding": {
+          "create_digest": "dccc77cacb0df92c95637cbf722e406ff55afa350d0eb0157eb07be281316843",
+          "curve": "GR",
+          "definition": "curve-correction/1",
+          "destination": "portable",
+          "expected_revision": "5c32a42444abee42f5e16b7ac275acb0fb7638f7096a7d687fc5def0ca18dc86",
+          "generation": 1,
+          "id": "378fb17e86df340e096915bce62617b87e1b2a55cd7d36c9d98328b44c35327f",
+          "kind": "binding",
+          "managed_input": {
+            "asset_id": "8f38a81bffc1e84e61ee01f66833e0386cafe199199fc67965358d2a11a45e72",
+            "revision": "5c32a42444abee42f5e16b7ac275acb0fb7638f7096a7d687fc5def0ca18dc86"
+          },
+          "name": "Recorded calculation",
+          "owner": "alice",
+          "project_id": "p",
+          "publication_profile": "las-derived-curves/1",
+          "runners": [
+            "alice"
+          ]
+        },
+        "input": {
+          "authority": "ophiolite:uploaded",
+          "key": "8f38a81bffc1e84e61ee01f66833e0386cafe199199fc67965358d2a11a45e72",
+          "profile": "las2/1",
+          "revision": "5c32a42444abee42f5e16b7ac275acb0fb7638f7096a7d687fc5def0ca18dc86"
+        },
+        "input_sha256": "5c32a42444abee42f5e16b7ac275acb0fb7638f7096a7d687fc5def0ca18dc86",
+        "interpretation": {
+          "reader": "asset_connectors.las_reader/1",
+          "lasio_version": "0.32",
+          "mapping": "application-curve/1",
+          "null_policy": "strict declared NULL; nonfinite samples mapped to null; wrapped rows use declared curve count",
+          "parsing_policy": "las2-strict-null/1"
+        },
+        "application_version": "recording/1",
+        "parameters": {},
+        "request_digest": "bc5551607a12a503de279989bd969fa805c089edb96785fc3a9d65b83c7a6af1",
+        "state": "resolved",
+        "evidence": "script-declared",
+        "created": 1790439949.4155064
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/p/applications/original",
+      "request_base64": "eyJwcm9qZWN0X2lkIjoicCIsImlkIjoiMWE4NGNlMWE5MDIzMWFiOTdiN2I2NGE3ODE1YmUwZTc1NTMwNzBjYTkzODA4Yzg3NTg0YjRhM2MzYzY5YzJiZCJ9",
+      "status": 200,
+      "response": {
+        "representation": "retained-original",
+        "source": {
+          "authority": "ophiolite:uploaded",
+          "key": "8f38a81bffc1e84e61ee01f66833e0386cafe199199fc67965358d2a11a45e72",
+          "profile": "las2/1",
+          "revision": "5c32a42444abee42f5e16b7ac275acb0fb7638f7096a7d687fc5def0ca18dc86"
+        },
+        "sha256": "5c32a42444abee42f5e16b7ac275acb0fb7638f7096a7d687fc5def0ca18dc86",
+        "payload_base64": "flZlcnNpb24KVkVSUy4gMi4wIDogTEFTCldSQVAuIE5PIDogcm93cwp+V2VsbApTVFJULk0gMTAwIDogc3RhcnQKU1RPUC5NIDEwMiA6IHN0b3AKU1RFUC5NIDEgOiBzdGVwCk5VTEwuIC05OTkuMjUgOiBtaXNzaW5nCldFTEwuIFNZTlRIRVRJQyA6IGZpeHR1cmUKfkN1cnZlCkRFUFQuTSA6IGRlcHRoCkdSLmdBUEkgOiBnYW1tYQp+QVNDSUkKMTAwIDAKMTAxIC05OTkuMjUKMTAyIDMwCg=="
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/p/applications/read",
+      "request_base64": "eyJwcm9qZWN0X2lkIjoicCIsImlkIjoiMWE4NGNlMWE5MDIzMWFiOTdiN2I2NGE3ODE1YmUwZTc1NTMwNzBjYTkzODA4Yzg3NTg0YjRhM2MzYzY5YzJiZCJ9",
+      "status": 200,
+      "response": {
+        "schema": "ophiolite.application-curve/1",
+        "representation": "normalized",
+        "axis": [
+          100.0,
+          101.0,
+          102.0
+        ],
+        "values": [
+          0.0,
+          null,
+          30.0
+        ],
+        "curve": "GR",
+        "unit": "gAPI",
+        "context": {
+          "depth_index": "DEPT",
+          "depth_unit": "M",
+          "depth_reference": "source declared; not inferred",
+          "missing_value_marker": "-999.25",
+          "missing_value_policy": "Declared LAS NULL marker; missing samples are not zero"
+        },
+        "source": {
+          "authority": "ophiolite:uploaded",
+          "key": "8f38a81bffc1e84e61ee01f66833e0386cafe199199fc67965358d2a11a45e72",
+          "profile": "las2/1",
+          "revision": "5c32a42444abee42f5e16b7ac275acb0fb7638f7096a7d687fc5def0ca18dc86"
+        },
+        "source_sha256": "5c32a42444abee42f5e16b7ac275acb0fb7638f7096a7d687fc5def0ca18dc86",
+        "interpretation": {
+          "reader": "asset_connectors.las_reader/1",
+          "lasio_version": "0.32",
+          "mapping": "application-curve/1",
+          "null_policy": "strict declared NULL; nonfinite samples mapped to null; wrapped rows use declared curve count",
+          "parsing_policy": "las2-strict-null/1"
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/p/applications/publish",
+      "request_base64": "eyJwcm9qZWN0X2lkIjoicCIsImlkIjoiMWE4NGNlMWE5MDIzMWFiOTdiN2I2NGE3ODE1YmUwZTc1NTMwNzBjYTkzODA4Yzg3NTg0YjRhM2MzYzY5YzJiZCIsInB1YmxpY2F0aW9uX3Byb2ZpbGUiOiJsYXMtZGVyaXZlZC1jdXJ2ZXMvMSIsImRlcml2ZWRfY3VydmVzIjpbeyJtbmVtb25pYyI6Ik5FVyIsInVuaXQiOiJnQVBJIiwiZGVzY3JpcHRpb24iOiJPcmlnaW5hbCBzeW50aGV0aWMgcmVzdWx0IiwidmFsdWVzIjpbMCxudWxsLDYwXX1dfQ==",
+      "status": 200,
+      "response": {
+        "application_version": "recording/1",
+        "binding": {
+          "create_digest": "dccc77cacb0df92c95637cbf722e406ff55afa350d0eb0157eb07be281316843",
+          "curve": "GR",
+          "definition": "curve-correction/1",
+          "destination": "portable",
+          "expected_revision": "5c32a42444abee42f5e16b7ac275acb0fb7638f7096a7d687fc5def0ca18dc86",
+          "generation": 1,
+          "id": "378fb17e86df340e096915bce62617b87e1b2a55cd7d36c9d98328b44c35327f",
+          "kind": "binding",
+          "managed_input": {
+            "asset_id": "8f38a81bffc1e84e61ee01f66833e0386cafe199199fc67965358d2a11a45e72",
+            "revision": "5c32a42444abee42f5e16b7ac275acb0fb7638f7096a7d687fc5def0ca18dc86"
+          },
+          "name": "Recorded calculation",
+          "owner": "alice",
+          "project_id": "p",
+          "publication_profile": "las-derived-curves/1",
+          "runners": [
+            "alice"
+          ]
+        },
+        "created": 1790439949.4155064,
+        "evidence": "script-declared",
+        "id": "1a84ce1a90231ab97b7b64a7815be0e7553070ca93808c87584b4a3c3c69c2bd",
+        "input": {
+          "authority": "ophiolite:uploaded",
+          "key": "8f38a81bffc1e84e61ee01f66833e0386cafe199199fc67965358d2a11a45e72",
+          "profile": "las2/1",
+          "revision": "5c32a42444abee42f5e16b7ac275acb0fb7638f7096a7d687fc5def0ca18dc86"
+        },
+        "input_sha256": "5c32a42444abee42f5e16b7ac275acb0fb7638f7096a7d687fc5def0ca18dc86",
+        "interpretation": {
+          "lasio_version": "0.32",
+          "mapping": "application-curve/1",
+          "null_policy": "strict declared NULL; nonfinite samples mapped to null; wrapped rows use declared curve count",
+          "parsing_policy": "las2-strict-null/1",
+          "reader": "asset_connectors.las_reader/1"
+        },
+        "kind": "run",
+        "owner": "alice",
+        "parameters": {},
+        "project_id": "p",
+        "request_digest": "bc5551607a12a503de279989bd969fa805c089edb96785fc3a9d65b83c7a6af1",
+        "state": "published",
+        "receipt": {
+          "destination": "portable",
+          "upstream_write": false,
+          "publication_id": "1a84ce1a90231ab97b7b64a7815be0e7553070ca93808c87584b4a3c3c69c2bd",
+          "identity": "alice",
+          "output_reference": {
+            "authority": "ophiolite:derived",
+            "key": "1a84ce1a90231ab97b7b64a7815be0e7553070ca93808c87584b4a3c3c69c2bd",
+            "revision": "e9c6747d4b867da2b75d0ff5e2067ca69914399e18792320ee4f347918cf61ad"
+          },
+          "manifest": {
+            "schema": "ophiolite.derived-curves-result/1",
+            "parent": {
+              "authority": "ophiolite:uploaded",
+              "key": "8f38a81bffc1e84e61ee01f66833e0386cafe199199fc67965358d2a11a45e72",
+              "profile": "las2/1",
+              "revision": "5c32a42444abee42f5e16b7ac275acb0fb7638f7096a7d687fc5def0ca18dc86"
+            },
+            "appended": [
+              {
+                "mnemonic": "NEW",
+                "unit": "gAPI",
+                "description": "Original synthetic result",
+                "samples": 3,
+                "missing": 1
+              }
+            ],
+            "media_type": "application/x-las",
+            "bytes": 833,
+            "sha256": "e9c6747d4b867da2b75d0ff5e2067ca69914399e18792320ee4f347918cf61ad",
+            "report": {
+              "appended": [
+                {
+                  "mnemonic": "NEW",
+                  "unit": "gAPI",
+                  "description": "Original synthetic result",
+                  "samples": 3,
+                  "missing": 1
+                }
+              ],
+              "verified": "Server readback preserves original channels, depth and units; new values match request",
+              "losses": [
+                "LAS text formatting regenerated; original bytes remain in the input asset"
+              ],
+              "fidelity": {
+                "schema": "ophiolite.fidelity/1",
+                "state": "assessed-with-loss",
+                "scope": "edited-representation",
+                "assessor": "ophiolite-connectors",
+                "method": "Append-only parse/write/readback",
+                "version": "1",
+                "losses": [
+                  "LAS formatting regenerated"
+                ],
+                "limitations": [
+                  "Scientific calculation and external execution are not verified"
+                ]
+              }
+            }
+          }
+        },
+        "output_digest": "c3472eaaff2f7505438a8a0a25af2b46ee153b1095234d84e6625bdeddeca5de",
+        "published": 1790439949.4614756,
+        "review_state": "unreviewed"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/p/applications/download",
+      "request_base64": "eyJwcm9qZWN0X2lkIjoicCIsImlkIjoiMWE4NGNlMWE5MDIzMWFiOTdiN2I2NGE3ODE1YmUwZTc1NTMwNzBjYTkzODA4Yzg3NTg0YjRhM2MzYzY5YzJiZCJ9",
+      "status": 200,
+      "response": {
+        "destination": "portable",
+        "identity": "alice",
+        "manifest": {
+          "appended": [
+            {
+              "description": "Original synthetic result",
+              "missing": 1,
+              "mnemonic": "NEW",
+              "samples": 3,
+              "unit": "gAPI"
+            }
+          ],
+          "bytes": 833,
+          "media_type": "application/x-las",
+          "parent": {
+            "authority": "ophiolite:uploaded",
+            "key": "8f38a81bffc1e84e61ee01f66833e0386cafe199199fc67965358d2a11a45e72",
+            "profile": "las2/1",
+            "revision": "5c32a42444abee42f5e16b7ac275acb0fb7638f7096a7d687fc5def0ca18dc86"
+          },
+          "report": {
+            "appended": [
+              {
+                "description": "Original synthetic result",
+                "missing": 1,
+                "mnemonic": "NEW",
+                "samples": 3,
+                "unit": "gAPI"
+              }
+            ],
+            "fidelity": {
+              "assessor": "ophiolite-connectors",
+              "limitations": [
+                "Scientific calculation and external execution are not verified"
+              ],
+              "losses": [
+                "LAS formatting regenerated"
+              ],
+              "method": "Append-only parse/write/readback",
+              "schema": "ophiolite.fidelity/1",
+              "scope": "edited-representation",
+              "state": "assessed-with-loss",
+              "version": "1"
+            },
+            "losses": [
+              "LAS text formatting regenerated; original bytes remain in the input asset"
+            ],
+            "verified": "Server readback preserves original channels, depth and units; new values match request"
+          },
+          "schema": "ophiolite.derived-curves-result/1",
+          "sha256": "e9c6747d4b867da2b75d0ff5e2067ca69914399e18792320ee4f347918cf61ad"
+        },
+        "output_reference": {
+          "authority": "ophiolite:derived",
+          "key": "1a84ce1a90231ab97b7b64a7815be0e7553070ca93808c87584b4a3c3c69c2bd",
+          "revision": "e9c6747d4b867da2b75d0ff5e2067ca69914399e18792320ee4f347918cf61ad"
+        },
+        "publication_id": "1a84ce1a90231ab97b7b64a7815be0e7553070ca93808c87584b4a3c3c69c2bd",
+        "upstream_write": false,
+        "payload_base64": "flZlcnNpb24gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tClZFUlMuIDIuMCA6IENXTFMgbG9nIEFTQ0lJIFN0YW5kYXJkIC1WRVJTSU9OIDIuMApXUkFQLiAgTk8gOiBPbmUgbGluZSBwZXIgZGVwdGggc3RlcAp+V2VsbCAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KU1RSVC5NICAgICAgMTAwIDogc3RhcnQKU1RPUC5NICAgICAgMTAyIDogc3RvcApTVEVQLk0gICAgICAgIDEgOiBzdGVwCk5VTEwuICAgLTk5OS4yNSA6IG1pc3NpbmcKV0VMTC4gU1lOVEhFVElDIDogZml4dHVyZQp+Q3VydmUgSW5mb3JtYXRpb24gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KREVQVC5NICAgICA6IGRlcHRoCkdSICAuZ0FQSSAgOiBnYW1tYQpORVcgLmdBUEkgIDogT3JpZ2luYWwgc3ludGhldGljIHJlc3VsdAp+UGFyYW1zIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0Kfk90aGVyIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCn5BU0NJSSAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQogICAgICAgICAgICAgICAgIDEwMCAgICAgICAgICAgICAgICAgICAwICAgICAgICAgICAgICAgICAgIDAKICAgICAgICAgICAgICAgICAxMDEgICAgICAgICAgICAgLTk5OS4yNSAgICAgICAgICAgICAtOTk5LjI1CiAgICAgICAgICAgICAgICAgMTAyICAgICAgICAgICAgICAgICAgMzAgICAgICAgICAgICAgICAgICA2MAo="
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/p/applications/share",
+      "request_base64": "eyJwcm9qZWN0X2lkIjoicCIsImlkIjoiMWE4NGNlMWE5MDIzMWFiOTdiN2I2NGE3ODE1YmUwZTc1NTMwNzBjYTkzODA4Yzg3NTg0YjRhM2MzYzY5YzJiZCIsImF1ZGllbmNlIjpbImJvYiJdLCJyZXVzZV9hdWRpZW5jZSI6W119",
+      "status": 200,
+      "response": {
+        "asset_id": "1a84ce1a90231ab97b7b64a7815be0e7553070ca93808c87584b4a3c3c69c2bd",
+        "revision": "e9c6747d4b867da2b75d0ff5e2067ca69914399e18792320ee4f347918cf61ad",
+        "can_reuse": true,
+        "reuse_recipients": [
+          "alice"
+        ],
+        "permitted_audience": [
+          "alice",
+          "bob"
+        ],
+        "id": "1a84ce1a90231ab97b7b64a7815be0e7553070ca93808c87584b4a3c3c69c2bd",
+        "name": "Recorded calculation",
+        "owner": "alice",
+        "input": {
+          "authority": "ophiolite:uploaded",
+          "key": "8f38a81bffc1e84e61ee01f66833e0386cafe199199fc67965358d2a11a45e72",
+          "profile": "las2/1",
+          "revision": "5c32a42444abee42f5e16b7ac275acb0fb7638f7096a7d687fc5def0ca18dc86"
+        },
+        "curve": "GR",
+        "application_version": "recording/1",
+        "parameters": {},
+        "evidence": "script-declared",
+        "receipt": {
+          "destination": "portable",
+          "identity": "alice",
+          "manifest": {
+            "appended": [
+              {
+                "description": "Original synthetic result",
+                "missing": 1,
+                "mnemonic": "NEW",
+                "samples": 3,
+                "unit": "gAPI"
+              }
+            ],
+            "bytes": 833,
+            "media_type": "application/x-las",
+            "parent": {
+              "authority": "ophiolite:uploaded",
+              "key": "8f38a81bffc1e84e61ee01f66833e0386cafe199199fc67965358d2a11a45e72",
+              "profile": "las2/1",
+              "revision": "5c32a42444abee42f5e16b7ac275acb0fb7638f7096a7d687fc5def0ca18dc86"
+            },
+            "report": {
+              "appended": [
+                {
+                  "description": "Original synthetic result",
+                  "missing": 1,
+                  "mnemonic": "NEW",
+                  "samples": 3,
+                  "unit": "gAPI"
+                }
+              ],
+              "fidelity": {
+                "assessor": "ophiolite-connectors",
+                "limitations": [
+                  "Scientific calculation and external execution are not verified"
+                ],
+                "losses": [
+                  "LAS formatting regenerated"
+                ],
+                "method": "Append-only parse/write/readback",
+                "schema": "ophiolite.fidelity/1",
+                "scope": "edited-representation",
+                "state": "assessed-with-loss",
+                "version": "1"
+              },
+              "losses": [
+                "LAS text formatting regenerated; original bytes remain in the input asset"
+              ],
+              "verified": "Server readback preserves original channels, depth and units; new values match request"
+            },
+            "schema": "ophiolite.derived-curves-result/1",
+            "sha256": "e9c6747d4b867da2b75d0ff5e2067ca69914399e18792320ee4f347918cf61ad"
+          },
+          "output_reference": {
+            "authority": "ophiolite:derived",
+            "key": "1a84ce1a90231ab97b7b64a7815be0e7553070ca93808c87584b4a3c3c69c2bd",
+            "revision": "e9c6747d4b867da2b75d0ff5e2067ca69914399e18792320ee4f347918cf61ad"
+          },
+          "publication_id": "1a84ce1a90231ab97b7b64a7815be0e7553070ca93808c87584b4a3c3c69c2bd",
+          "upstream_write": false
+        },
+        "review_state": "unreviewed",
+        "published": 1790439949.4614756,
+        "can_share": true,
+        "recipients": [
+          "alice",
+          "bob"
+        ],
+        "display": {
+          "method": "Method not described",
+          "settings": null,
+          "built_on": "an uploaded file",
+          "version": {
+            "at": "2026-09-26T16:25:49Z",
+            "by": {
+              "id": "alice",
+              "label": null
+            },
+            "ordinal": null,
+            "of": null,
+            "source_version": null
+          },
+          "held_as": "Result",
+          "updates": "Locked to this version"
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/projects/p/applications/result-list",
+      "request_base64": "eyJwcm9qZWN0X2lkIjoicCJ9",
+      "status": 200,
+      "response": {
+        "results": [
+          {
+            "asset_id": "1a84ce1a90231ab97b7b64a7815be0e7553070ca93808c87584b4a3c3c69c2bd",
+            "revision": "e9c6747d4b867da2b75d0ff5e2067ca69914399e18792320ee4f347918cf61ad",
+            "can_reuse": true,
+            "reuse_recipients": [
+              "alice"
+            ],
+            "permitted_audience": [
+              "alice",
+              "bob"
+            ],
+            "id": "1a84ce1a90231ab97b7b64a7815be0e7553070ca93808c87584b4a3c3c69c2bd",
+            "name": "Recorded calculation",
+            "owner": "alice",
+            "input": {
+              "authority": "ophiolite:uploaded",
+              "key": "8f38a81bffc1e84e61ee01f66833e0386cafe199199fc67965358d2a11a45e72",
+              "profile": "las2/1",
+              "revision": "5c32a42444abee42f5e16b7ac275acb0fb7638f7096a7d687fc5def0ca18dc86"
+            },
+            "curve": "GR",
+            "application_version": "recording/1",
+            "parameters": {},
+            "evidence": "script-declared",
+            "receipt": {
+              "destination": "portable",
+              "identity": "alice",
+              "manifest": {
+                "appended": [
+                  {
+                    "description": "Original synthetic result",
+                    "missing": 1,
+                    "mnemonic": "NEW",
+                    "samples": 3,
+                    "unit": "gAPI"
+                  }
+                ],
+                "bytes": 833,
+                "media_type": "application/x-las",
+                "parent": {
+                  "authority": "ophiolite:uploaded",
+                  "key": "8f38a81bffc1e84e61ee01f66833e0386cafe199199fc67965358d2a11a45e72",
+                  "profile": "las2/1",
+                  "revision": "5c32a42444abee42f5e16b7ac275acb0fb7638f7096a7d687fc5def0ca18dc86"
+                },
+                "report": {
+                  "appended": [
+                    {
+                      "description": "Original synthetic result",
+                      "missing": 1,
+                      "mnemonic": "NEW",
+                      "samples": 3,
+                      "unit": "gAPI"
+                    }
+                  ],
+                  "fidelity": {
+                    "assessor": "ophiolite-connectors",
+                    "limitations": [
+                      "Scientific calculation and external execution are not verified"
+                    ],
+                    "losses": [
+                      "LAS formatting regenerated"
+                    ],
+                    "method": "Append-only parse/write/readback",
+                    "schema": "ophiolite.fidelity/1",
+                    "scope": "edited-representation",
+                    "state": "assessed-with-loss",
+                    "version": "1"
+                  },
+                  "losses": [
+                    "LAS text formatting regenerated; original bytes remain in the input asset"
+                  ],
+                  "verified": "Server readback preserves original channels, depth and units; new values match request"
+                },
+                "schema": "ophiolite.derived-curves-result/1",
+                "sha256": "e9c6747d4b867da2b75d0ff5e2067ca69914399e18792320ee4f347918cf61ad"
+              },
+              "output_reference": {
+                "authority": "ophiolite:derived",
+                "key": "1a84ce1a90231ab97b7b64a7815be0e7553070ca93808c87584b4a3c3c69c2bd",
+                "revision": "e9c6747d4b867da2b75d0ff5e2067ca69914399e18792320ee4f347918cf61ad"
+              },
+              "publication_id": "1a84ce1a90231ab97b7b64a7815be0e7553070ca93808c87584b4a3c3c69c2bd",
+              "upstream_write": false
+            },
+            "review_state": "unreviewed",
+            "published": 1790439949.4614756,
+            "can_share": true,
+            "recipients": [
+              "alice",
+              "bob"
+            ],
+            "display": {
+              "method": "Method not described",
+              "settings": null,
+              "built_on": "an uploaded file",
+              "version": {
+                "at": "2026-09-26T16:25:49Z",
+                "by": {
+                  "id": "alice",
+                  "label": null
+                },
+                "ordinal": null,
+                "of": null,
+                "source_version": null
+              },
+              "held_as": "Result",
+              "updates": "Locked to this version"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

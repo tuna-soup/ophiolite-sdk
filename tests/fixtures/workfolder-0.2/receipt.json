@@ -1,0 +1,74 @@
+{
+  "id": "1916ac1df4643e359c080dfab6e89a5a86e5b43417f3ad5022eac263251cf7c9",
+  "owner": "alice",
+  "project_id": "p",
+  "kind": "run",
+  "binding": {
+    "id": "64b586352df844defde919f8f7fe3238e0a6bf286797fff893ca658a2fd61e06",
+    "owner": "alice",
+    "project_id": "p",
+    "kind": "binding",
+    "name": "Example",
+    "generation": 1,
+    "curve": "GR",
+    "publication_profile": "las-derived-curves/1",
+    "managed_input": {
+      "asset_id": "synthetic",
+      "revision": "revision"
+    }
+  },
+  "input": {
+    "authority": "synthetic-file",
+    "key": "curve-a",
+    "revision": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
+    "profile": "las2/1"
+  },
+  "input_sha256": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
+  "application_version": "manual-rock-physics/1",
+  "parameters": {
+    "method": "synthetic",
+    "code_sha256": "80e023752001e751805288855065712f41f2ca5f6af36cd267a2450ddd37a056"
+  },
+  "state": "published",
+  "created": 1700000000.0,
+  "receipt": {
+    "destination": "portable",
+    "upstream_write": false,
+    "publication_id": "1916ac1df4643e359c080dfab6e89a5a86e5b43417f3ad5022eac263251cf7c9",
+    "identity": "alice",
+    "output_reference": {
+      "authority": "ophiolite:derived",
+      "key": "1916ac1df4643e359c080dfab6e89a5a86e5b43417f3ad5022eac263251cf7c9",
+      "revision": "4b04c3f947619b6972319cdb9dab5e1407bc5c95f61056239f277cf2dacf5e37"
+    },
+    "manifest": {
+      "schema": "ophiolite.derived-curves-result/1",
+      "parent": {
+        "authority": "synthetic-file",
+        "key": "curve-a",
+        "revision": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
+        "profile": "las2/1"
+      },
+      "media_type": "application/x-las",
+      "bytes": 210,
+      "sha256": "4b04c3f947619b6972319cdb9dab5e1407bc5c95f61056239f277cf2dacf5e37",
+      "report": {},
+      "appended": [
+        {
+          "mnemonic": "NEW",
+          "unit": "gAPI",
+          "description": "Original synthetic result",
+          "values": [
+            0,
+            null,
+            10,
+            20,
+            30
+          ]
+        }
+      ]
+    }
+  },
+  "output_digest": "ede7e8547a839f9e58f4bf2820796c78a6c15638edffe167bf2844f233b6725f",
+  "published": 1700000000.0
+}

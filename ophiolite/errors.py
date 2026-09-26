@@ -41,3 +41,12 @@ class Busy(Unavailable):
     def __init__(self,message,recovery='',*,retry_after=0,**kwargs):
         self.retry_after=retry_after
         super().__init__(message,recovery,**kwargs)
+
+class ValidationFailed(Refused):
+    code='validation-failed'
+    def __init__(self,violations):
+        self.violations=tuple(violations)
+        super().__init__('Publication inputs need correction. '+' '.join(violations),details={'violations':list(violations)})
+
+class RecoveryUnavailable(Refused):code='recovery-unavailable'
+class ShareOutcomeUnknown(Unavailable):code='share-outcome-unknown'
