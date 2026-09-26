@@ -3,6 +3,9 @@ from ._version import __version__
 
 
 def __getattr__(name):
+    if name == 'AsyncClient':
+        from .aio import AsyncClient
+        return AsyncClient
     if name == 'Descriptor':
         from .scientific import Descriptor
         return Descriptor

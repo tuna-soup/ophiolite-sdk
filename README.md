@@ -120,6 +120,31 @@ with permitted read access. An unavailable version is refused instead of replace
 with a newer one. The qualification evidence covers an isolated candidate gateway;
 it does not establish support for every deployment.
 
+## Async applications
+
+```python
+from ophiolite.aio import AsyncClient
+
+async with AsyncClient(gateway_url, project_id, credential) as client:
+    data = await client.read(asset_id, exact_revision, curves=['GR'])
+    selections = await client.read_many([
+        (asset_id, exact_revision, ['GR']),
+        (other_asset, other_revision, ['RHOB']),
+    ])
+```
+
+`describe` and `read` are awaited; `assets()` is an async iterator. `read_many`
+returns results in input order and cancels/drains peers on failure. Every read uses
+the same scientific verification as the synchronous client. Arrays, DataFrames and
+notebook display use the returned `CurveSet` normally. Reads do not write files.
+
+Credential lock waits, file operations and provider HTTP run in a worker thread.
+Cancellation waits for an in-progress credential transaction to finish/save, then
+propagates; this can take the bounded lock/provider timeout. It never abandons a
+rotating refresh token. Cancellation during a scientific response closes that
+response and returns no partial `CurveSet`. An injected HTTP client remains owned
+by its caller. Async behavior is qualified with the asyncio backend only.
+
 ## Recovery and limits
 
 - Authentication failure: obtain a current approved credential and retry.

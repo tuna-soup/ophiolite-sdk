@@ -9,6 +9,25 @@ from ophiolite.errors import *
 from test_validate import encoded
 
 
+@pytest.fixture(autouse=True,params=['sync','async'])
+def read_transport(request,monkeypatch):
+    """One scenario table, including all refusal cases, for both transports."""
+    if request.param=='sync':yield;return
+    import asyncio,importlib.util,time
+    from pathlib import Path
+    import ophiolite.aio as aio
+    spec=importlib.util.spec_from_file_location('async_read_adapter',Path(__file__).parent/'helpers/async_read_adapter.py')
+    module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+    loop=asyncio.new_event_loop();instances=[]
+    monkeypatch.setattr(__import__(__name__), 'Client',module.adapter(loop,instances))
+    async def recorded_sleep(seconds):time.sleep(seconds)
+    monkeypatch.setattr(aio.anyio,'sleep',recorded_sleep)
+    try:yield
+    finally:
+        for client in instances:loop.run_until_complete(client.http.aclose())
+        loop.close()
+
+
 def response_transport(fixture,*,other=False,corrupt_artifact=False):
     d,raw,artifact=fixture();calls=[]
     def handler(request):
