@@ -23,3 +23,7 @@ prune templates/notebook/.ipynb_checkpoints
 prune templates/agent-workflow/.work
 prune templates/python-application/.work
 prune templates/react-application/.work
+prune templates/agent-workflow/.pytest_cache
+prune templates/notebook/.pytest_cache
+prune templates/python-application/.pytest_cache
+prune templates/react-application/.pytest_cache
