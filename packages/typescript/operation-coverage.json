@@ -426,6 +426,18 @@
     "response": "explicitly-untyped"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/inbox/list",
+    "function": "postProjectsProjectInboxList",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/inbox/mark-read",
+    "function": "postProjectsProjectInboxMarkRead",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/las-uploads/info",
     "function": "postProjectsProjectLasUploadsInfo",
     "request": "explicitly-untyped",
@@ -446,6 +458,12 @@
   {
     "operation": "POST /api/v1/projects/{project}/las-uploads/members",
     "function": "postProjectsProjectLasUploadsMembers",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/las-uploads/policy",
+    "function": "postProjectsProjectLasUploadsPolicy",
     "request": "explicitly-untyped",
     "response": "explicitly-untyped"
   },
