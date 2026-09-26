@@ -32,3 +32,8 @@ from that folder; never invent a replacement command ID to bypass uncertainty.
 Do not claim atomicity across unrelated sources, managed execution, universal LAS
 conversion or publication beyond the documented sample/upload limits. Unrelated
 project members do not gain access merely because a result was published.
+
+The CLI runs local calculations with a private POSIX file-creation mask (0700
+directories, 0600 files for ordinary Python writes). Existing outputs and scripts
+that explicitly change permissions are not repaired automatically. If publication
+refuses a private checkpoint, inspect its ownership and permissions before retrying.

@@ -12,6 +12,9 @@ No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
 - SDK CLI with transitional pilot compatibility modules, generated TypeScript
   transport, four tested starter templates and six packaged workflow guides.
 
+- POSIX CLI calculations create private output files by default, including on macOS.
+  Checkpoint permission errors retain their actionable diagnostic.
+
 ### Breaking and migration
 
 Fresh SDK login replaces use of the old pilot credential cache. Never copy the old

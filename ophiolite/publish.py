@@ -232,7 +232,8 @@ def _private_bytes(path):
 
 
 def _stored(path):
-    try:return json.loads(_private_bytes(path))
+    raw=_private_bytes(path)
+    try:return json.loads(raw)
     except (ValueError,UnicodeError):raise RecoveryUnavailable('The work checkpoint is not valid JSON.') from None
 
 

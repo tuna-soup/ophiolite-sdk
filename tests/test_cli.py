@@ -1,5 +1,6 @@
 import hashlib
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -111,7 +112,7 @@ def test_local_run_calls_current_python_with_selected_folder(tmp_path,monkeypatc
     state=work/'run.json';state.write_text(json.dumps({'config':{'url':'http://localhost','project':'p','parameters':{'code_sha256':hashlib.sha256(script.read_bytes()).hexdigest()}}}));state.chmod(0o600)
     calls=[];monkeypatch.setattr(subprocess,'run',lambda args,**kwargs:calls.append((args,kwargs)))
     cli.main(['run','--configuration',str(config),'--work',str(work)])
-    assert calls==[([sys.executable,str(script),str(work)],{'check':True})]
+    assert calls==[([sys.executable,str(script),str(work)],{'check':True,**({'umask':0o077} if os.name=='posix' else {})})]
     assert 'operating-system permissions' in capsys.readouterr().out
 
 
@@ -149,3 +150,29 @@ def test_binding_list_shape_is_not_silently_empty():
     from ophiolite.errors import VerificationFailed
     with httpx.Client(transport=httpx.MockTransport(lambda r:httpx.Response(200,json={'bindings':{}}))) as http:
         with pytest.raises(VerificationFailed):Client('http://localhost','p',http=http).bindings()
+
+
+@pytest.mark.skipif(os.name!='posix',reason='POSIX file permission contract')
+def test_local_calculation_outputs_are_private_and_publishable(tmp_path,monkeypatch):
+    with fixture_server() as server:
+        config=configuration(tmp_path,server.url);work=tmp_path/'work'
+        script=tmp_path/'calculation.py'
+        curves=[{'mnemonic':'NEW','unit':'gAPI','description':'Original synthetic','values':[0,None,10,20,30]}]
+        script.write_text('import pathlib,sys\n(pathlib.Path(sys.argv[1])/"curves.json").write_text('+repr(json.dumps(curves))+')\n')
+        parameters=tmp_path/'parameters.json';parameters.write_text('{}')
+        monkeypatch.setattr(Credential,'from_file',lambda path:Credential.bearer('oph_api_alice'))
+        cli.main(['prepare','--configuration',str(config),'--work',str(work),'--asset','synthetic','--revision','revision','--curve','GR','--name','Private output','--script',str(script),'--parameters',str(parameters)])
+        prior=os.umask(0o022)
+        try:cli.main(['run','--configuration',str(config),'--work',str(work)])
+        finally:os.umask(prior)
+        assert (work/'curves.json').stat().st_mode & 0o777 == 0o600
+        result=cli.main(['publish','--configuration',str(config),'--work',str(work)])
+        assert result.publication_id and (work/'result.las').read_bytes()
+
+
+def test_checkpoint_permission_error_is_not_reported_as_invalid_json(tmp_path):
+    from ophiolite import publish
+    from ophiolite.errors import RecoveryUnavailable
+    path=tmp_path/'checkpoint.json';path.write_text('{}');path.chmod(0o644)
+    with pytest.raises(RecoveryUnavailable,match='Cannot read the private work checkpoint'):
+        publish._stored(path)

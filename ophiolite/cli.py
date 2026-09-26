@@ -3,6 +3,7 @@ import argparse
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -86,7 +87,8 @@ def _local_run(config,work):
     if hashlib.sha256(publish._private_bytes(script)).hexdigest()!=saved['parameters']['code_sha256']:
         raise Refused('Script changed. Prepare a new run folder.')
     print('Running your Python script locally. It has your operating-system permissions; review code before running.',flush=True)
-    subprocess.run([sys.executable,str(script),str(work)],check=True)
+    subprocess.run([sys.executable,str(script),str(work)],check=True,
+                   **({"umask":0o077} if os.name=="posix" else {}))
     print('Calculation finished. Inspect the outputs before ophiolite publish.')
 
 
