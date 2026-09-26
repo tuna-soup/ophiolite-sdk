@@ -47,6 +47,38 @@ separate curve and descriptor JSON files. JSON is re-serialized for readability;
 its saved bytes are not claimed to match the downloaded representation hash.
 The source artifact is exact. This directory is not an E18 portable export bundle.
 
+## Scientific arrays and notebook display
+
+Install `ophiolite[numpy]` or `ophiolite[pandas]` from the same reviewed source
+revision to enable the optional views. They load only when called.
+
+```python
+array, description = data.to_numpy()
+frame, description = data.to_frame()
+description.attach(frame)  # optional, explicit frame.attrs['ophiolite'] copy
+```
+
+The NumPy array has shape `(samples, selected curves)`, with float64 columns in
+requested order. Missing samples become NaN; real zero stays zero. The DataFrame
+uses the exact depth axis as its index, including decreasing or duplicate values.
+Neither method sorts, aligns, interpolates, fills gaps or converts units.
+
+Each method returns a separate `Descriptor` carrying the full axis and its unit,
+reference and order, per-curve units/counts, source identity, hashes and reader
+interpretation. The frame starts with empty `attrs`. Use the companion descriptor
+when passing an array to other code; array values alone do not preserve meaning.
+Both methods refuse differing axes, units, depth references, interpretation or
+source identity. Read incompatible curves separately or explicitly transform them
+in your own scientific workflow with a recorded method.
+
+Notebook HTML presents scientific labels, units and counts; identifiers and hashes
+are in **Technical details**. The exact-version link opens the first selected curve and requires a Workspace
+build with E4 scientific-link support. Older Workspace builds need an upgrade.
+The link contains no credential and grants no permission; sign in to Workspace
+with permitted read access. An unavailable version is refused instead of replaced
+with a newer one. The qualification evidence covers an isolated candidate gateway;
+it does not establish support for every deployment.
+
 ## Recovery and limits
 
 - Authentication failure: obtain a current approved credential and retry.
@@ -63,14 +95,14 @@ Local models/validation import without credentials or a running service. Models
 retain additive fields while enforcing declared constraints. The `validation`
 extra enables strict JSON Schema checks; see [contracts](docs/contracts.md).
 
-NumPy/pandas views, asynchronous I/O, browser login, publication, the CLI and
-application templates remain later E4 commits. Portable export and the independent
+Asynchronous I/O, browser login, publication, the CLI and application templates
+remain later E4 commits. Portable export and the independent
 bundle reader belong to E18; see [the reader boundary](docs/offline-reader-boundary.md).
 
 ## Developer checks
 
 ```sh
-python -m pip install '.[dev]'
+python -m pip install '.[dev,numpy,pandas,validation]'
 python -m build
 python -m venv .wheel
 .wheel/bin/python -m pip install dist/ophiolite-0.1.0-py3-none-any.whl

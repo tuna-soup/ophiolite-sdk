@@ -5,7 +5,7 @@ import os
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote
 import httpx
 from . import _core
 from .errors import (AuthenticationRequired, PermissionRefused, IntegrityConflict, CapacityExceeded, Refused, Busy,
@@ -14,13 +14,7 @@ from .errors import (AuthenticationRequired, PermissionRefused, IntegrityConflic
 MAX_BYTES=32*1024*1024
 
 
-def origin(value):
-    if not isinstance(value,str): raise Refused('Use a service origin.')
-    parsed=urlsplit(value)
-    if (parsed.scheme not in ('http','https') or not parsed.hostname or parsed.username or parsed.password or parsed.query or parsed.fragment or parsed.path not in ('','/')
-        or parsed.scheme=='http' and parsed.hostname not in ('localhost','127.0.0.1','::1')):
-        raise Refused('Use HTTPS or a loopback origin without credentials or a path.')
-    return value.rstrip('/')
+from ._core import origin
 
 
 @dataclass(frozen=True,repr=False)
@@ -49,6 +43,27 @@ class CurveSet:
     def __init__(self,descriptors,curves,artifact,*,url='',project=''):
         self.descriptors,self.curves,self.artifact=descriptors,curves,artifact
         self.url,self.project=url,project
+
+    @property
+    def evidence(self):
+        """SDK compatibility status, preserving absent older wire evidence."""
+        return {asset.scientific.curve:_core.rules.interpretation(asset.model_dump(by_alias=True,exclude_unset=True)) for asset in self.descriptors}
+
+    def to_numpy(self):
+        from .scientific import to_numpy
+        return to_numpy(self)
+
+    def to_frame(self):
+        from .scientific import to_frame
+        return to_frame(self)
+
+    def workspace_url(self):
+        from .scientific import workspace_url
+        return workspace_url(self)
+
+    def _repr_html_(self):
+        from .repr import curve_set_html
+        return curve_set_html(self)
 
     def save(self,path):
         path=Path(path)

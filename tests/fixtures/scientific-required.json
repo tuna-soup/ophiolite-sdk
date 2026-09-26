@@ -1,0 +1,14 @@
+{
+  "schema": "ophiolite.sdk-required-scientific-cases/1",
+  "maintenance": "Independent invariant inventory; update deliberately when adding a protected scientific rule. Never generate from the executable corpus.",
+  "required": {
+    "sample values exclude booleans": "boolean-sample",
+    "sample values exclude strings": "string-sample",
+    "sample values exclude nonfinite numbers": "overflow-sample",
+    "authorization calendar time is real": "invalid-calendar",
+    "source profile is registered": "unregistered-reference",
+    "live descriptor and curve interpretation agree": "wrong-live-interpretation",
+    "declared missing marker is represented by null": "marker-in-samples",
+    "reader evidence agrees with recorded history": "inconsistent-evidence"
+  }
+}

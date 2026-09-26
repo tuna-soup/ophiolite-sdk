@@ -451,6 +451,38 @@
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
       "evidence": "Eight deliberately invalid scientific records, with correct normalized byte hashes/lengths. Derived only from the reviewed Ophiolite synthetic source/curve fixture; no acquired data or credentials. E4 SDK/extracted-contract licence decision."
+    },
+    {
+      "path": "tests/fixtures/views/decreasing.json",
+      "sha256": "5b32dc398e6da4169790a98feadf865698e964bfd7a974f9f66c9fc0aea3d5ba",
+      "origin": "E4 original synthetic two-curve LAS and independently declared expected arrays/metadata",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Original first-party artificial SDK view fixture; increasing/decreasing/duplicate axes, zero/null, gAPI and g/cm3 values. No observed well or external data; E4 SDK licence grant. Input envelope shape derives from the already-reviewed synthetic contract fixture."
+    },
+    {
+      "path": "tests/fixtures/views/duplicates.json",
+      "sha256": "c6e30f837025af867619c3ab38c3405e9507a6b2095355416ecd4220fece4322",
+      "origin": "E4 original synthetic two-curve LAS and independently declared expected arrays/metadata",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Original first-party artificial SDK view fixture; increasing/decreasing/duplicate axes, zero/null, gAPI and g/cm3 values. No observed well or external data; E4 SDK licence grant. Input envelope shape derives from the already-reviewed synthetic contract fixture."
+    },
+    {
+      "path": "tests/fixtures/views/increasing.json",
+      "sha256": "01a97ce4cbdc8583ab549681f91eae805e9b78f92055ee2dca7f14106eeb18dc",
+      "origin": "E4 original synthetic two-curve LAS and independently declared expected arrays/metadata",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Original first-party artificial SDK view fixture; increasing/decreasing/duplicate axes, zero/null, gAPI and g/cm3 values. No observed well or external data; E4 SDK licence grant. Input envelope shape derives from the already-reviewed synthetic contract fixture."
+    },
+    {
+      "path": "tests/fixtures/scientific-required.json",
+      "sha256": "819301725ac9b0cb3c6610edbfcd5c238942c46bacb29aac539920d8bf767a11",
+      "origin": "Independent first-party SDK scientific invariant acceptance inventory",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Original eight required rule-to-case mappings authored explicitly for E4 R6 deletion coverage. No observed data, external text or private identifiers; SDK licence grant. Kept independent of executable case discovery."
     }
   ]
 }

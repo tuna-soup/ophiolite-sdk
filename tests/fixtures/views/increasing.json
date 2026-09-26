@@ -1,0 +1,267 @@
+{
+  "origin": "Hand-authored E4 synthetic SDK view oracle; no observed well",
+  "artifact_utf8": "~Version\nVERS. 2.0\nWRAP. NO\n~Well\nNULL. -999.25\nWELL. SYNTHETIC-SDK-VIEW\n~Curve\nDEPT.M : Depth\nGR.gAPI : Gamma ray\nRHOB.g/cm3 : Density\n~ASCII\n100 0 2\n101 10 2.1\n102 -999.25 -999.25\n103 30 2.3\n104 40 2.4\n",
+  "descriptors": [
+    {
+      "schema": "ophiolite.scientific-asset/1",
+      "asset_id": "sdk-view-fixture",
+      "revision": "7730299fc435d7922e4e164d78f240848e9e758c847b2a3b0314a8c36a0f1e20",
+      "project_id": "synthetic-project",
+      "authority": "synthetic-file",
+      "origin": "source-reference",
+      "custodian": null,
+      "source_reference": {
+        "authority": "synthetic-file",
+        "key": "sdk-view-fixture",
+        "revision": "7730299fc435d7922e4e164d78f240848e9e758c847b2a3b0314a8c36a0f1e20",
+        "profile": "las2/1"
+      },
+      "profile": "las2/1",
+      "scientific": {
+        "curve": "GR",
+        "unit": "gAPI",
+        "unit_status": "declared",
+        "axis_unit": "M",
+        "axis_unit_status": "declared",
+        "depth_reference": "source declared; not inferred",
+        "sample_count": 5,
+        "axis_order": "increasing",
+        "axis_duplicates": false,
+        "missing_count": 1,
+        "missing_value_marker": "-999.25"
+      },
+      "interpretation": {
+        "reader": "asset_connectors.las_reader/1",
+        "lasio_version": "0.32",
+        "mapping": "application-curve/1",
+        "null_policy": "strict declared NULL; nonfinite samples mapped to null; wrapped rows use declared curve count",
+        "parsing_policy": "las2-strict-null/1"
+      },
+      "interpretation_evidence": "live",
+      "recorded_interpretation": null,
+      "representations": [
+        {
+          "id": "las",
+          "kind": "original",
+          "media_type": "application/x-las",
+          "profile": "las2/1",
+          "bytes": 204,
+          "sha256": "7730299fc435d7922e4e164d78f240848e9e758c847b2a3b0314a8c36a0f1e20",
+          "available": true,
+          "losses": []
+        },
+        {
+          "id": "curve",
+          "kind": "normalized",
+          "media_type": "application/json",
+          "profile": "ophiolite.application-curve/1",
+          "bytes": 1067,
+          "sha256": "9a04f61dce722a002ed4775e90fb7013049ca18658725ffb5d67bc81fc9fe66e",
+          "available": true,
+          "losses": [
+            "Selected curve only; other LAS headers and curves remain in artifact"
+          ]
+        }
+      ],
+      "retention": {
+        "mode": "upstream-only",
+        "policy": "upstream current bytes only",
+        "historical_reads": "not-guaranteed"
+      },
+      "parents": [],
+      "provenance": {
+        "evidence": "source-declared",
+        "method": null,
+        "code_reference": null,
+        "environment_reference": null,
+        "omissions": [
+          "Synthetic offline fixture, not a server publication",
+          "No independently verified execution environment"
+        ]
+      },
+      "supported_operations": [
+        "read",
+        "export",
+        "use-as-input"
+      ],
+      "authorization": {
+        "status": "not-evaluated"
+      }
+    },
+    {
+      "schema": "ophiolite.scientific-asset/1",
+      "asset_id": "sdk-view-fixture",
+      "revision": "7730299fc435d7922e4e164d78f240848e9e758c847b2a3b0314a8c36a0f1e20",
+      "project_id": "synthetic-project",
+      "authority": "synthetic-file",
+      "origin": "source-reference",
+      "custodian": null,
+      "source_reference": {
+        "authority": "synthetic-file",
+        "key": "sdk-view-fixture",
+        "revision": "7730299fc435d7922e4e164d78f240848e9e758c847b2a3b0314a8c36a0f1e20",
+        "profile": "las2/1"
+      },
+      "profile": "las2/1",
+      "scientific": {
+        "curve": "RHOB",
+        "unit": "g/cm3",
+        "unit_status": "declared",
+        "axis_unit": "M",
+        "axis_unit_status": "declared",
+        "depth_reference": "source declared; not inferred",
+        "sample_count": 5,
+        "axis_order": "increasing",
+        "axis_duplicates": false,
+        "missing_count": 1,
+        "missing_value_marker": "-999.25"
+      },
+      "interpretation": {
+        "reader": "asset_connectors.las_reader/1",
+        "lasio_version": "0.32",
+        "mapping": "application-curve/1",
+        "null_policy": "strict declared NULL; nonfinite samples mapped to null; wrapped rows use declared curve count",
+        "parsing_policy": "las2-strict-null/1"
+      },
+      "interpretation_evidence": "live",
+      "recorded_interpretation": null,
+      "representations": [
+        {
+          "id": "las",
+          "kind": "original",
+          "media_type": "application/x-las",
+          "profile": "las2/1",
+          "bytes": 204,
+          "sha256": "7730299fc435d7922e4e164d78f240848e9e758c847b2a3b0314a8c36a0f1e20",
+          "available": true,
+          "losses": []
+        },
+        {
+          "id": "curve",
+          "kind": "normalized",
+          "media_type": "application/json",
+          "profile": "ophiolite.application-curve/1",
+          "bytes": 1073,
+          "sha256": "62070a688d89d248032e3cb89fac4acf9a448991dff7bddd633d6b7916e4461d",
+          "available": true,
+          "losses": [
+            "Selected curve only; other LAS headers and curves remain in artifact"
+          ]
+        }
+      ],
+      "retention": {
+        "mode": "upstream-only",
+        "policy": "upstream current bytes only",
+        "historical_reads": "not-guaranteed"
+      },
+      "parents": [],
+      "provenance": {
+        "evidence": "source-declared",
+        "method": null,
+        "code_reference": null,
+        "environment_reference": null,
+        "omissions": [
+          "Synthetic offline fixture, not a server publication",
+          "No independently verified execution environment"
+        ]
+      },
+      "supported_operations": [
+        "read",
+        "export",
+        "use-as-input"
+      ],
+      "authorization": {
+        "status": "not-evaluated"
+      }
+    }
+  ],
+  "normalized_utf8": [
+    "{\n  \"schema\": \"ophiolite.application-curve/1\",\n  \"representation\": \"normalized\",\n  \"axis\": [\n    100,\n    101,\n    102,\n    103,\n    104\n  ],\n  \"values\": [\n    0,\n    10,\n    null,\n    30,\n    40\n  ],\n  \"curve\": \"GR\",\n  \"unit\": \"gAPI\",\n  \"context\": {\n    \"depth_index\": \"DEPT\",\n    \"depth_unit\": \"M\",\n    \"depth_reference\": \"source declared; not inferred\",\n    \"missing_value_marker\": \"-999.25\",\n    \"missing_value_policy\": \"Declared LAS NULL marker; missing samples are not zero\"\n  },\n  \"source\": {\n    \"authority\": \"synthetic-file\",\n    \"key\": \"sdk-view-fixture\",\n    \"revision\": \"7730299fc435d7922e4e164d78f240848e9e758c847b2a3b0314a8c36a0f1e20\",\n    \"profile\": \"las2/1\"\n  },\n  \"source_sha256\": \"7730299fc435d7922e4e164d78f240848e9e758c847b2a3b0314a8c36a0f1e20\",\n  \"interpretation\": {\n    \"reader\": \"asset_connectors.las_reader/1\",\n    \"lasio_version\": \"0.32\",\n    \"mapping\": \"application-curve/1\",\n    \"null_policy\": \"strict declared NULL; nonfinite samples mapped to null; wrapped rows use declared curve count\",\n    \"parsing_policy\": \"las2-strict-null/1\"\n  }\n}\n",
+    "{\n  \"schema\": \"ophiolite.application-curve/1\",\n  \"representation\": \"normalized\",\n  \"axis\": [\n    100,\n    101,\n    102,\n    103,\n    104\n  ],\n  \"values\": [\n    2,\n    2.1,\n    null,\n    2.3,\n    2.4\n  ],\n  \"curve\": \"RHOB\",\n  \"unit\": \"g/cm3\",\n  \"context\": {\n    \"depth_index\": \"DEPT\",\n    \"depth_unit\": \"M\",\n    \"depth_reference\": \"source declared; not inferred\",\n    \"missing_value_marker\": \"-999.25\",\n    \"missing_value_policy\": \"Declared LAS NULL marker; missing samples are not zero\"\n  },\n  \"source\": {\n    \"authority\": \"synthetic-file\",\n    \"key\": \"sdk-view-fixture\",\n    \"revision\": \"7730299fc435d7922e4e164d78f240848e9e758c847b2a3b0314a8c36a0f1e20\",\n    \"profile\": \"las2/1\"\n  },\n  \"source_sha256\": \"7730299fc435d7922e4e164d78f240848e9e758c847b2a3b0314a8c36a0f1e20\",\n  \"interpretation\": {\n    \"reader\": \"asset_connectors.las_reader/1\",\n    \"lasio_version\": \"0.32\",\n    \"mapping\": \"application-curve/1\",\n    \"null_policy\": \"strict declared NULL; nonfinite samples mapped to null; wrapped rows use declared curve count\",\n    \"parsing_policy\": \"las2-strict-null/1\"\n  }\n}\n"
+  ],
+  "expected_array": [
+    [
+      0,
+      2
+    ],
+    [
+      10,
+      2.1
+    ],
+    [
+      null,
+      null
+    ],
+    [
+      30,
+      2.3
+    ],
+    [
+      40,
+      2.4
+    ]
+  ],
+  "expected_descriptor": {
+    "asset_id": "sdk-view-fixture",
+    "revision": "7730299fc435d7922e4e164d78f240848e9e758c847b2a3b0314a8c36a0f1e20",
+    "project": "synthetic-project",
+    "authority": "synthetic-file",
+    "origin": "source-reference",
+    "profile": "las2/1",
+    "display_name": "LAS 2.0 well log file",
+    "axis": {
+      "values": [
+        100,
+        101,
+        102,
+        103,
+        104
+      ],
+      "unit": "M",
+      "unit_status": "declared",
+      "depth_index": "DEPT",
+      "depth_reference": "source declared; not inferred",
+      "order": "increasing",
+      "duplicates": false
+    },
+    "curves": {
+      "GR": {
+        "unit": "gAPI",
+        "unit_status": "declared",
+        "missing_count": 1,
+        "sample_count": 5,
+        "marker": "-999.25"
+      },
+      "RHOB": {
+        "unit": "g/cm3",
+        "unit_status": "declared",
+        "missing_count": 1,
+        "sample_count": 5,
+        "marker": "-999.25"
+      }
+    },
+    "interpretation": {
+      "reader": "asset_connectors.las_reader/1",
+      "lasio_version": "0.32",
+      "mapping": "application-curve/1",
+      "null_policy": "strict declared NULL; nonfinite samples mapped to null; wrapped rows use declared curve count",
+      "parsing_policy": "las2-strict-null/1"
+    },
+    "recorded_interpretation": null,
+    "evidence": "live",
+    "artifact_sha256": "7730299fc435d7922e4e164d78f240848e9e758c847b2a3b0314a8c36a0f1e20",
+    "curve_sha256": {
+      "GR": "9a04f61dce722a002ed4775e90fb7013049ca18658725ffb5d67bc81fc9fe66e",
+      "RHOB": "62070a688d89d248032e3cb89fac4acf9a448991dff7bddd633d6b7916e4461d"
+    },
+    "workspace_url": "https://workspace.example/project/synthetic-project/asset/sdk-view-fixture?revision=7730299fc435d7922e4e164d78f240848e9e758c847b2a3b0314a8c36a0f1e20&kind=scientific&curve=GR",
+    "contracts": {
+      "registry_version": "1.6.0",
+      "schema_ids": [
+        "ophiolite.scientific-asset/1",
+        "ophiolite.application-curve/1"
+      ]
+    },
+    "display": {}
+  }
+}

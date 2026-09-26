@@ -112,6 +112,7 @@ def asset(value):
 
 
 def interpretation(value):
+    if 'interpretation_evidence' not in value and 'recorded_interpretation' not in value: return 'not-available'
     recorded=value.get('recorded_interpretation'); live=value.get('interpretation'); label=value.get('interpretation_evidence')
     if live is None and recorded is None: return 'not-available'
     if recorded is None:

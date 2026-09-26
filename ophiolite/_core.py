@@ -1,6 +1,8 @@
 """Transport-free exact-read verification shared by synchronous and future async drivers."""
 import hashlib
 import warnings
+from urllib.parse import urlsplit
+from .errors import Refused
 from . import validate
 from .errors import InterpretationDiffers, InterpretationChanged, VerificationFailed
 from .models.generated import ScientificAsset
@@ -25,8 +27,16 @@ def verify_pair(descriptor, normalized, artifact, requested_curve, *, strict_int
     rules.require(values['curve']==requested_curve, 'Requested curve differs from returned data')
     raw=next(r for r in data['representations'] if r['kind']!='normalized')
     verify_bytes(raw,artifact)
-    evidence=rules.interpretation(data)
+    evidence=rules.interpretation(asset.model_dump(by_alias=True,exclude_unset=True))
     if evidence=='recorded-differs':
         if strict_interpretation: raise InterpretationChanged('The saved and current reader interpretations differ.', 'Read the exact artifact or explicitly accept this difference.', details={'recorded':data['recorded_interpretation'],'live':data['interpretation']})
         warnings.warn('The saved and current reader interpretations differ; both records are available in the descriptor.',InterpretationDiffers,stacklevel=2)
     return asset, view
+
+def origin(value):
+    if not isinstance(value,str): raise Refused('Use a service origin.')
+    parsed=urlsplit(value)
+    if (parsed.scheme not in ('http','https') or not parsed.hostname or parsed.username or parsed.password or parsed.query or parsed.fragment or parsed.path not in ('','/')
+        or parsed.scheme=='http' and parsed.hostname not in ('localhost','127.0.0.1','::1')):
+        raise Refused('Use HTTPS or a loopback origin without credentials or a path.')
+    return value.rstrip('/')

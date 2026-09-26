@@ -38,3 +38,24 @@ The scientific-negative corpus uses correctly hashed malformed payloads so seman
 failures cannot be hidden by checksum failure. The synthetic public-route recording
 retains exact bodies and excludes request credentials. Rights/provenance records are
 in `tests/fixtures/PROVENANCE.json`; unreviewed inputs block public publication.
+
+
+`CurveSet.to_numpy()` and `to_frame()` return `(values, Descriptor)`. NumPy values
+are a two-dimensional float64 array; DataFrame columns preserve requested curve
+order and its index preserves every depth. None maps to NaN with no filling.
+Both share the same compatibility checks: complete coordinate equality, depth
+unit and status, depth index/reference, declared interpretation fields and exact
+project/asset/revision/source reference. Additive metadata does not create false
+identity differences. Mismatches raise `AxisMismatch` with curve names, reason and,
+for coordinate mismatch, the first differing index. No implicit unit conversion
+or CRS interpretation is provided. `Descriptor.attach(frame)` explicitly writes a
+serialized metadata copy to `frame.attrs['ophiolite']`; it does not bind later edits
+or make a transformed frame scientifically equivalent to the original.
+
+
+`CurveSet.evidence` maps selected curve mnemonics to the SDK's reader-history
+status. Older responses lacking both evidence and recorded-reader fields report
+`not-available`; generated wire-model defaults do not establish that evidence.
+The separate view Descriptor and notebook use this derived status. Saved wire
+fields retain their original presence. This compatibility status adds no server
+enum and claims no comparison when the earlier reader record is unavailable.

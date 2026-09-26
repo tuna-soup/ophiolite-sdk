@@ -72,6 +72,26 @@ def test_second_descriptor_artifact_mismatch(fixture):
     raw=encoded(d,v)
     with pytest.raises(VerificationFailed,match='checksum'):_core.verify_pair(d,raw,artifact,'GR')
 
+
+def test_second_curve_disagrees_with_downloaded_artifact(fixture):
+    first,raw,artifact=fixture();requests=[]
+    def handler(request):
+        selected=request.url.params['curve'];requests.append((request.url.path,selected))
+        d=json.loads(json.dumps(first));v=json.loads(raw)
+        d['scientific']['curve']=selected;v['curve']=selected
+        if selected=='RHOB':
+            d['representations'][0]['sha256']='0'*64
+            v['source_sha256']='0'*64
+        body=encoded(d,v)
+        if '/representations/' in request.url.path:
+            return httpx.Response(200,content=body if request.url.path.endswith('/curve') else artifact)
+        return httpx.Response(200,json=d)
+    with httpx.Client(transport=httpx.MockTransport(handler)) as http:
+        with pytest.raises(VerificationFailed,match='checksum'):
+            Client('http://localhost',first['project_id'],http=http).read(first['asset_id'],first['revision'],['GR','RHOB'])
+    assert sum(path.endswith('/las') for path,curve in requests)==1
+    assert any(curve=='RHOB' and '/representations/' not in path for path,curve in requests)
+
 @pytest.mark.parametrize('status,kind',[(401,AuthenticationRequired),(403,PermissionRefused),(404,Unavailable),(409,IntegrityConflict),(413,CapacityExceeded),(400,Refused),(422,Incompatible),(503,Busy),(302,Unavailable)])
 def test_status_categories(fixture,status,kind):
     d,_,_=fixture();calls=[]
@@ -181,3 +201,31 @@ def test_evidence_error_has_human_message_and_technical_code():
     assert error.code=='evidence-inconsistent'
     assert 'evidence-inconsistent' not in str(error)
     assert 'reader history' in error.message
+
+
+@pytest.mark.parametrize('origin',['source','capture','derived'])
+def test_frozen_public_read_preserves_unavailable_evidence(fixture,origin):
+    d,raw,artifact=fixture(origin,True)
+    def handler(request):
+        if '/representations/' in request.url.path:
+            return httpx.Response(200,content=raw if '/representations/curve' in request.url.path else artifact)
+        return httpx.Response(200,json=d)
+    with httpx.Client(transport=httpx.MockTransport(handler)) as http:
+        data=Client('http://localhost',d['project_id'],http=http).read(d['asset_id'],d['revision'],[d['scientific']['curve']])
+    assert data.evidence=={d['scientific']['curve']:'not-available'}
+    assert 'interpretation_evidence' not in data.descriptors[0].model_fields_set
+    assert data.to_numpy()[1].evidence=='not-available'
+    assert 'Reader history is unavailable' in data._repr_html_()
+    assert 'Read with the current reader' not in data._repr_html_()
+
+@pytest.mark.parametrize('field,bad',[('authority','other-source'),('key','other-key'),('revision','other-revision'),('profile','geotiff/1')])
+def test_public_read_rejects_each_source_identity_field(fixture,field,bad):
+    d,raw,artifact=fixture();v=json.loads(raw);v['source'][field]=bad
+    body=encoded(d,v)
+    def handler(request):
+        if '/representations/' in request.url.path:
+            return httpx.Response(200,content=body if request.url.path.endswith('/curve') else artifact)
+        return httpx.Response(200,json=d)
+    with httpx.Client(transport=httpx.MockTransport(handler)) as http:
+        with pytest.raises(VerificationFailed,match='source identities disagree'):
+            Client('http://localhost',d['project_id'],http=http).read(d['asset_id'],d['revision'],['GR'])

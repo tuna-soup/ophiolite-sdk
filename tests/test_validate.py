@@ -184,3 +184,12 @@ def test_shared_scientific_corpus(case):
     rep=next(r for r in descriptor['representations'] if r['kind']=='normalized')
     assert len(raw)==rep['bytes'] and hashlib.sha256(raw).hexdigest()==rep['sha256']
     with pytest.raises(VerificationFailed):validate.pair(descriptor,raw)
+
+
+def test_scientific_corpus_has_each_required_invariant():
+    from pathlib import Path
+    required=json.loads((Path(__file__).parent/'fixtures/scientific-required.json').read_text())['required']
+    ids=[case['id'] for case in corpus()]
+    assert len(ids)==len(set(ids))
+    assert set(ids)==set(required.values())
+    assert len(required)==8

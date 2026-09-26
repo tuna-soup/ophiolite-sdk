@@ -30,7 +30,7 @@ def pair(descriptor, raw):
     rules.require(rules.known(value['source'],rules.REFERENCE)==rules.known(expected,rules.REFERENCE) and value['source_sha256']==artifact['sha256'], 'Curve and artifact source identities disagree')
     facts=rules.facts(value)
     rules.require(all(data['scientific'].get(k)==v for k,v in facts.items()) and rules.known(value['interpretation'],rules.INTERPRETATION)==rules.known(data['interpretation'],rules.INTERPRETATION), 'Descriptor scientific context or interpretation disagrees with curve')
-    rules.interpretation(data)
+    rules.interpretation(asset.model_dump(by_alias=True,exclude_unset=True))
     return asset, view
 
 

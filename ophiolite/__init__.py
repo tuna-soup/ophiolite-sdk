@@ -3,6 +3,9 @@ from ._version import __version__
 
 
 def __getattr__(name):
+    if name == 'Descriptor':
+        from .scientific import Descriptor
+        return Descriptor
     if name == '__contracts__':
         from .models.invariants import registry
         index, _ = registry()

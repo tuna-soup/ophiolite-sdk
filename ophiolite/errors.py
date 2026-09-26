@@ -20,7 +20,17 @@ class IntegrityConflict(OphioliteError): code='integrity-conflict'
 class CapacityExceeded(VerificationFailed): code='capacity-exceeded'
 class Incompatible(OphioliteError): code='incompatible-context'
 class Refused(OphioliteError): code='INVALID_ARGUMENT'
-class AxisMismatch(OphioliteError): code='axis-mismatch'
+class AxisMismatch(OphioliteError):
+    code='axis-mismatch'
+
+    def __init__(self,curves,reason,first_differing_index=None):
+        labels={'values':'depth coordinates','unit':'depth units','reference':'depth references','interpretation':'reader interpretations','source':'exact source versions'}
+        self.curves,self.reason,self.first_differing_index=tuple(curves),reason,first_differing_index
+        super().__init__('These curves have different '+labels.get(reason,'scientific context')+'.',
+                         'Read them separately or align them explicitly; no resampling or unit conversion was performed.',
+                         details={'curves':list(curves),'reason':reason,'first_differing_index':first_differing_index})
+
+class MissingExtra(OphioliteError): code='missing-extra'
 class InterpretationChanged(VerificationFailed): code='interpretation-changed'
 class InterpretationDiffers(UserWarning): pass
 

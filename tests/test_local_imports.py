@@ -20,7 +20,7 @@ def audit(event,args):
   if home==path or home in path.parents:raise AssertionError('Local import read/created a credential/cache')
 sys.addaudithook(audit)
 import ophiolite
-from ophiolite import validate
+from ophiolite import validate, Descriptor
 from ophiolite.models.generated import ScientificAsset, ApplicationCurve
 from importlib.resources import files
 root=files('ophiolite').joinpath('contracts/assets/v1/fixtures')
