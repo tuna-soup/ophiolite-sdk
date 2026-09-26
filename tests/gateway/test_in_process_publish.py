@@ -118,3 +118,19 @@ def test_sdk_restricted_result_models_do_not_restore_parent(web):
     public=json.dumps([obj.model_dump(by_alias=True,exclude_unset=True) for obj in (summaries[0],preview,result,visible)])
     assert original.asset_id not in public and original.revision not in public
     assert 'parent' not in result.manifest.model_dump(by_alias=True,exclude_unset=True)
+
+
+@pytest.mark.parametrize('kind',['delegate','grant'])
+def test_sdk_conditional_share_against_the_gateway(web,kind):
+    """E7: the snapshot generation guards the replace; a stale retry cannot undo a revocation."""
+    from ophiolite.errors import IntegrityConflict
+    alice=client(web,'alice',kind)
+    binding=alice.configure(release_id=web.r['id'],curve='GR',name='SDK conditional',runners=['alice'],command_id='sdk-cond',publication_profile='curve-edits/1')
+    run=alice.start(binding,application_version='sdk-example/1',parameters={},command_id='sdk-cond-run');run.input()
+    receipt=alice.publish(run,changes=[{'index':0,'value':2}])
+    snapshot=alice.grants(receipt);assert snapshot.generation==1
+    alice.share(receipt,read=['bob'],expected_generation=1,command_id='add-bob')
+    assert alice.share(receipt,read=['bob'],expected_generation=1,command_id='add-bob').recipients==['alice','bob']  # idempotent replay
+    alice.share(receipt,read=[],expected_generation=2,command_id='revoke-bob')
+    with pytest.raises(IntegrityConflict):alice.share(receipt,read=['bob'],expected_generation=1,command_id='add-bob')
+    assert alice.grants(receipt).recipients==['alice'] and alice.grants(receipt).generation==3

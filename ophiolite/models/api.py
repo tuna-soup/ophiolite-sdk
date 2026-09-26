@@ -144,6 +144,7 @@ class Grants(Contract):
     revision: str
     recipients: list[str]
     reuse_recipients: list[str]
+    generation: int | None = None  # None: the server does not support conditional sharing
 
 class UploadRequest(Contract):
     model_config=ConfigDict(extra='forbid',strict=True)

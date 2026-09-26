@@ -156,7 +156,9 @@ def grants(asset,result):
         raise PermissionRefused('Current recipients are unavailable for this exact asset.')
     if 'recipients' not in item or 'reuse_recipients' not in item:
         raise VerificationFailed('The recipient response is incomplete.')
-    result=parse(api.Grants,{key:item[key] for key in ('asset_id','revision','recipients','reuse_recipients')})
+    generation=item.get('grants_generation')
+    if generation is not None and (type(generation) is not int or generation<0):raise VerificationFailed('The recipient generation is invalid.')
+    result=parse(api.Grants,{**{key:item[key] for key in ('asset_id','revision','recipients','reuse_recipients')},'generation':generation})
     validate_recipients(result.recipients,result.reuse_recipients)
     return result
 

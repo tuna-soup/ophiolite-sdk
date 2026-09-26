@@ -76,6 +76,8 @@ class _MemoryApplications:
         self.original=root.joinpath('original.las').read_bytes()
         self.view=json.loads(root.joinpath('curve.json').read_bytes())
         self.bindings={};self.runs={};self.uploads={};self.commands={};self.results={};self.mutations={};self.audiences={}
+        # Conditional sharing (E7). conditional=False simulates a pre-E7 server that ignores the fields.
+        self.conditional=True;self.generations={};self.share_commands={}
     def __call__(self,method,path,raw,headers):
         with self._journal_lock:return self._call(method,path,raw,headers)
     def _call(self,method,path,raw,headers):
@@ -147,7 +149,16 @@ class _MemoryApplications:
                 if operation=='result-download':answer['run']=run
                 return 200,copy.deepcopy(answer)
             elif operation=='share':
-                ident=body.get('asset_id',body.get('id'));self.audiences[ident]=(body['audience'],body.get('reuse_audience',[]))
+                ident=body.get('asset_id',body.get('id'));generation=self.generations.get(ident,1)
+                if self.conditional and body.get('expected_generation') is not None:
+                    command,digest=body.get('command_id'),json.dumps([sorted(body['audience']),sorted(body.get('reuse_audience',[]))])
+                    last=self.share_commands.get(ident)
+                    if command and last and last[0]==command:
+                        if last[1]!=digest:return 409,{'error':'This sharing request was already used for different recipients','code':'recipients-changed'}
+                        return 200,self.summary(ident)
+                    if body['expected_generation']!=generation:return 409,{'error':'Recipients changed; reload before saving','code':'recipients-changed'}
+                    self.share_commands[ident]=(command,digest)
+                self.audiences[ident]=(body['audience'],body.get('reuse_audience',[]));self.generations[ident]=generation+1
                 self.mutations['share']=self.mutations.get('share',0)+1
                 return 200,self.summary(ident)
             elif operation=='result-list':return 200,{'results':[self.summary(ident) for ident in self.results]}
@@ -161,11 +172,14 @@ class _MemoryApplications:
     def summary(self,ident):
         if ident in self.uploads:
             answer=dict(self.uploads[ident]);read,reuse=self.audiences.get(ident,(answer['recipients'],answer['reuse_recipients']))
-            return {**answer,'recipients':read,'reuse_recipients':reuse}
+            return {**answer,'recipients':read,'reuse_recipients':reuse,**self.generation(ident)}
         run=self.runs[ident];read,reuse=self.audiences.get(ident,([run['owner']],[run['owner']]))
         return {'asset_id':ident,'revision':run['receipt']['output_reference']['revision'],'id':ident,'name':run['binding']['name'],
                 'owner':run['owner'],'input':run['input'],'curve':run['binding']['curve'],'receipt':run['receipt'],
-                'can_share':True,'recipients':read,'reuse_recipients':reuse,'published':run['published']}
+                'can_share':True,'recipients':read,'reuse_recipients':reuse,'published':run['published'],**self.generation(ident)}
+
+    def generation(self,ident):
+        return {'grants_generation':self.generations.get(ident,1)} if self.conditional else {}
 
 
 if __name__=='__main__':

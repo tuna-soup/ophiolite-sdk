@@ -5,7 +5,7 @@ from .errors import (AuthenticationRequired,PermissionRefused,Unavailable,Integr
                      CapacityExceeded,Refused,Busy,ShareOutcomeUnknown,VerificationFailed)
 
 MAX_RESPONSE=48*1024*1024  # bounded JSON envelope including a 32 MiB base64 artifact
-SHARE_RECOVERY='Read the current recipients first with client.grants(asset), then decide and call share again with the full intended audience.'
+SHARE_RECOVERY='Read the current recipients first with client.grants(asset), then decide and call share again with the full intended audience and expected_generation from that snapshot.'
 
 
 def delay(response):
@@ -19,6 +19,8 @@ def status(response,operation):
     if 200<=code<300:return
     if operation=='share' and code>=500:
         raise ShareOutcomeUnknown('The sharing outcome is unknown.',SHARE_RECOVERY,status=code)
+    if operation=='share' and code==409:
+        raise IntegrityConflict('The recipients changed since you read them.',SHARE_RECOVERY,status=code)
     kind,message={401:(AuthenticationRequired,'Sign in again.'),403:(PermissionRefused,'Check project access and the approved grant.'),
         404:(Unavailable,'The requested application data is unavailable or not permitted.'),
         409:(IntegrityConflict,'The request conflicts with the stored result.'),

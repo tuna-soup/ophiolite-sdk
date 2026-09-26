@@ -12,7 +12,7 @@ import tempfile
 from urllib.parse import parse_qs, unquote, urlsplit
 
 from ophiolite import Client, Credential
-from ophiolite.errors import ShareOutcomeUnknown, Refused
+from ophiolite.errors import ShareOutcomeUnknown, IntegrityConflict, Refused
 from ophiolite.publish import validate_derived_curves
 from ophiolite.testing import fixture_server
 from ophiolite import validate
@@ -109,8 +109,8 @@ def publish_stage(state):
 def share_after_read(client, receipt, audience):
     before = client.grants(receipt)
     try:
-        return {'state':'shared','grants':client.share(receipt,read=audience).model_dump(), 'previous':before.model_dump()}
-    except ShareOutcomeUnknown:
+        return {'state':'shared','grants':client.share(receipt,read=audience,expected_generation=before.generation).model_dump(), 'previous':before.model_dump()}
+    except (ShareOutcomeUnknown, IntegrityConflict):
         # Observe once; never replay an uncertain sharing write.
         observed = client.grants(receipt)
         return {'state':'inspect-recipients','message':'Read recipients first before deciding whether to share again.', 'grants':observed.model_dump()}

@@ -9,6 +9,9 @@ No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
   NumPy/DataFrame views, descriptors and exact Workspace links.
 - SDK-owned browser credentials, bounded local validation, publication work folders,
   recovery and explicit sharing. Local execution remains local.
+- Conditional sharing: `grants().generation` and `share(..., expected_generation=)`
+  with one idempotent replay after a lost response; a replay never undoes a later
+  revocation. Unconditional `share()` is deprecated for one transition release.
 - SDK CLI with transitional pilot compatibility modules, generated TypeScript
   transport, four tested starter templates and six packaged workflow guides.
 
