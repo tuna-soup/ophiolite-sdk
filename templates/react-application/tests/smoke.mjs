@@ -40,7 +40,9 @@ try{
  await page.getByLabel('New curve name').fill('CALC');await page.getByRole('button',{name:'Validate',exact:true}).click();await page.getByRole('status').filter({hasText:'satisfies'}).waitFor();
  await page.getByRole('button',{name:'Publish derived curve',exact:true}).click();await page.getByRole('heading',{name:'Derived result saved'}).waitFor();assert((await page.getByRole('link',{name:'Open this result in Workspace'}).getAttribute('href')).includes('revision='));
  await page.evaluate(async()=>{const {request}=await import('/src/helpers.mjs');await request('_test',{drop_share:true});});
- await page.getByLabel('Recipients (comma separated)').fill('alice,bob');await page.getByRole('button',{name:'Share result',exact:true}).click();await page.getByRole('status').filter({hasText:'Read recipients first'}).waitFor();
+ await page.getByLabel('Recipients (comma separated)').fill('alice,bob');await page.getByRole('button',{name:'Share result',exact:true}).click();await page.getByRole('status').filter({hasText:'can now read this result'}).waitFor();
+ await page.evaluate(async()=>{const {request}=await import('/src/helpers.mjs');await request('_test',{fault:'recipients_changed'});});
+ await page.getByLabel('Recipients (comma separated)').fill('alice');await page.getByRole('button',{name:'Share result',exact:true}).click();await page.getByRole('status').filter({hasText:'Read recipients first'}).waitFor();
  const after=await page.evaluate(async()=>{const {request}=await import('/src/helpers.mjs');return request('_test');});assert.equal(after.mutations.share,1);assert.equal(after.mutations.publish,1);
  for(const [fault,text] of [['expired','ophiolite login'],['busy','service is busy']]){
   await page.evaluate(async fault=>{const {request}=await import('/src/helpers.mjs');await request('_test',{fault});},fault);await page.getByRole('button',{name:'Retry',exact:true}).click();await page.getByRole('status').filter({hasText:text}).waitFor();
