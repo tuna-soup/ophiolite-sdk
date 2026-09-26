@@ -5,3 +5,8 @@ recursive-include tests *.py *.json
 recursive-include ophiolite/contracts *
 global-exclude *.py[cod]
 global-exclude __pycache__
+
+include tools/ts-operation-overrides.json
+include packages/typescript/package.json packages/typescript/package-lock.json packages/typescript/tsconfig.json packages/typescript/operation-coverage.json packages/typescript/README.md packages/typescript/LICENSE packages/typescript/NOTICE
+recursive-include packages/typescript/src *.ts
+recursive-include packages/typescript/tests *.ts

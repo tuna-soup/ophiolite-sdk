@@ -192,4 +192,4 @@ def test_scientific_corpus_has_each_required_invariant():
     ids=[case['id'] for case in corpus()]
     assert len(ids)==len(set(ids))
     assert set(ids)==set(required.values())
-    assert len(required)==8
+    assert len(required)==47

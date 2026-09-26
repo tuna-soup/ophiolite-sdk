@@ -19,3 +19,20 @@ jobs:
       - run: python tools/check_public_inputs.py --artifact dist/ophiolite-0.1.0-py3-none-any.whl --artifact dist/ophiolite-0.1.0.tar.gz
       - run: python -m venv .wheel && .wheel/bin/python -m pip install dist/ophiolite-0.1.0-py3-none-any.whl
       - run: OPHIOLITE_TEST_WHEEL_PYTHON="$PWD/.wheel/bin/python" python -m pytest -q tests --ignore=tests/gateway
+  typescript:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: packages/typescript/package-lock.json
+      - run: python tools/generate_ts_client.py --check
+      - run: npm ci --ignore-scripts --prefix packages/typescript
+      - run: npm test --prefix packages/typescript
+      - run: npm pack --dry-run
+        working-directory: packages/typescript

@@ -7,3 +7,6 @@ build/
 dist/
 
 .wheel/
+
+node_modules/
+*.tgz

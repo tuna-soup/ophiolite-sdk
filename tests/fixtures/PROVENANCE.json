@@ -445,12 +445,12 @@
     },
     {
       "path": "tests/fixtures/scientific-invalid.json",
-      "sha256": "0cf4a14f6e532b490773b1853f1699023827f326430dc5b0d011feaaa7db4079",
+      "sha256": "ec4fb3e510f72b091c69c7f50d85990f1b1a2e22823a0941c410c0c1cb0ad902",
       "source_commit": "16c1bb13d7cabe7b7d0d97af311ef054e1f7eb16",
       "origin": "E4 original negative corpus derived from reviewed synthetic contracts/assets/v1/fixtures",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
-      "evidence": "Eight deliberately invalid scientific records, with correct normalized byte hashes/lengths. Derived only from the reviewed Ophiolite synthetic source/curve fixture; no acquired data or credentials. E4 SDK/extracted-contract licence decision."
+      "evidence": "Eight deliberately invalid scientific records, with correct normalized byte hashes/lengths. Derived only from the reviewed Ophiolite synthetic source/curve fixture; no acquired data or credentials. E4 SDK/extracted-contract licence decision. C7 extends the original synthetic scientific corpus to 47 explicit cases and its independently maintained rule inventory; no customer input or third-party code. Same owner-authorized SDK/contract fixture scope."
     },
     {
       "path": "tests/fixtures/views/decreasing.json",
@@ -478,11 +478,11 @@
     },
     {
       "path": "tests/fixtures/scientific-required.json",
-      "sha256": "819301725ac9b0cb3c6610edbfcd5c238942c46bacb29aac539920d8bf767a11",
+      "sha256": "c2c455d819ccec9fdcee522296a085d44b232aa818716f3d1438264e8218e5fa",
       "origin": "Independent first-party SDK scientific invariant acceptance inventory",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
-      "evidence": "Original eight required rule-to-case mappings authored explicitly for E4 R6 deletion coverage. No observed data, external text or private identifiers; SDK licence grant. Kept independent of executable case discovery."
+      "evidence": "Original eight required rule-to-case mappings authored explicitly for E4 R6 deletion coverage. No observed data, external text or private identifiers; SDK licence grant. Kept independent of executable case discovery. C7 extends the original synthetic scientific corpus to 47 explicit cases and its independently maintained rule inventory; no customer input or third-party code. Same owner-authorized SDK/contract fixture scope."
     },
     {
       "path": "tests/fixtures/workfolder-0.2/calculation.py",

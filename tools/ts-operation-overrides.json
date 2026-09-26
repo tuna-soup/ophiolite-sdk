@@ -1,0 +1,62 @@
+{
+  "POST /api/v1/projects/{project}/applications/configure": {
+    "source": "ophiolite/models/api.py; Platform services/project_gateway/applications.py at 16c1bb13d7cabe7b7d0d97af311ef054e1f7eb16",
+    "recording": "tests/recordings/applications-workflow.json",
+    "response_type": "API.Binding",
+    "adapter": "binding"
+  },
+  "POST /api/v1/projects/{project}/applications/start": {
+    "source": "ophiolite/models/api.py; Platform services/project_gateway/applications.py at 16c1bb13d7cabe7b7d0d97af311ef054e1f7eb16",
+    "recording": "tests/recordings/applications-workflow.json",
+    "response_type": "API.Run",
+    "adapter": "run"
+  },
+  "POST /api/v1/projects/{project}/applications/original": {
+    "source": "ophiolite/models/api.py; Platform services/project_gateway/applications.py at 16c1bb13d7cabe7b7d0d97af311ef054e1f7eb16",
+    "recording": "tests/recordings/applications-workflow.json",
+    "response_type": "API.Original",
+    "adapter": "original"
+  },
+  "POST /api/v1/projects/{project}/applications/read": {
+    "source": "ophiolite/models/api.py; Platform services/project_gateway/applications.py at 16c1bb13d7cabe7b7d0d97af311ef054e1f7eb16",
+    "recording": "tests/recordings/applications-workflow.json",
+    "response_type": "API.ApplicationCurve",
+    "adapter": "curve"
+  },
+  "POST /api/v1/projects/{project}/applications/publish": {
+    "source": "ophiolite/models/api.py; Platform services/project_gateway/applications.py at 16c1bb13d7cabe7b7d0d97af311ef054e1f7eb16",
+    "recording": "tests/recordings/applications-workflow.json",
+    "response_type": "API.Run",
+    "adapter": "run"
+  },
+  "POST /api/v1/projects/{project}/applications/download": {
+    "source": "ophiolite/models/api.py; Platform services/project_gateway/applications.py at 16c1bb13d7cabe7b7d0d97af311ef054e1f7eb16",
+    "recording": "tests/recordings/applications-workflow.json",
+    "response_type": "API.Download",
+    "adapter": "download"
+  },
+  "POST /api/v1/projects/{project}/applications/share": {
+    "source": "ophiolite/models/api.py; Platform services/project_gateway/applications.py at 16c1bb13d7cabe7b7d0d97af311ef054e1f7eb16",
+    "recording": "tests/recordings/applications-workflow.json",
+    "response_type": "API.Result",
+    "adapter": "result"
+  },
+  "POST /api/v1/projects/{project}/applications/result-list": {
+    "source": "ophiolite/models/api.py; Platform services/project_gateway/applications.py at 16c1bb13d7cabe7b7d0d97af311ef054e1f7eb16",
+    "recording": "tests/recordings/applications-workflow.json",
+    "response_type": "{ results: API.Result[] }",
+    "adapter": "results"
+  },
+  "POST /api/v1/projects/{project}/las-uploads/upload": {
+    "source": "ophiolite/models/api.py; Platform services/project_gateway/las_uploads.py at 16c1bb13d7cabe7b7d0d97af311ef054e1f7eb16",
+    "recording": "tests/recordings/las-uploads-workflow.json",
+    "response_type": "API.UploadResult",
+    "adapter": "upload"
+  },
+  "POST /api/v1/projects/{project}/las-uploads/info": {
+    "source": "ophiolite/models/api.py; Platform services/project_gateway/las_uploads.py at 16c1bb13d7cabe7b7d0d97af311ef054e1f7eb16",
+    "recording": "tests/recordings/las-uploads-workflow.json",
+    "response_type": "API.UploadResult",
+    "adapter": "upload"
+  }
+}
