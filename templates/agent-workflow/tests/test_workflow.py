@@ -50,11 +50,15 @@ def test_failure_examples_refuse_without_publication(tmp_path):
         with pytest.raises(AxisMismatch):combined.to_numpy()
 
 
-def test_lost_share_reads_grants_without_retry(tmp_path):
+def test_lost_share_replays_once_and_changed_recipients_are_inspected(tmp_path):
     with synthetic_server() as server,client_for(server.url,fixture=True) as client:
         state=stage(client,tmp_path/'work');receipt=publish_stage(state);server.drop('share',1)
         answer=share_after_read(client,receipt,['alice','bob'])
-        assert answer['state']=='inspect-recipients' and 'Read recipients first' in answer['message']
-        assert set(answer['grants']['recipients'])=={'alice','bob'}
+        # The SDK repeats the identical conditional request once; the server applies it once.
+        assert answer['state']=='shared' and set(answer['grants']['recipients'])=={'alice','bob'}
         assert server.template_mutations['share']==1
-        assert [r['path'].rsplit('/',1)[-1] for r in server.requests[-3:]]==['result-list','share','result-list']
+        assert [r['path'].rsplit('/',1)[-1] for r in server.requests[-4:]]==['result-list','result-list','share','share']
+        server.template_faults['recipients_changed']=True
+        answer=share_after_read(client,receipt,['alice'])
+        assert answer['state']=='inspect-recipients' and 'Read recipients first' in answer['message']
+        assert set(answer['grants']['recipients'])=={'alice','bob'} and server.template_mutations['share']==1

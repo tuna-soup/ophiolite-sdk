@@ -78,7 +78,9 @@ def test_full_backend_workflow_and_no_credentials_in_responses(server):
     bad=post('validate',{'mnemonic':'bad'},status=422);assert bad['violations']
     post('publish',status=422);assert fixture.template_mutations.get('publish',0)==0
     post('validate',{'mnemonic':'CALC'});receipt=post('publish');assert 'kind=scientific' in receipt['workspace_url']
-    fixture.drop('share',1);answer=post('share',{'audience':['alice','bob']});assert answer['state']=='inspect-recipients'
+    fixture.drop('share',1);answer=post('share',{'audience':['alice','bob']});assert answer['state']=='shared'
+    assert fixture.template_mutations['share']==1
+    fixture.template_faults['recipients_changed']=True;answer=post('share',{'audience':['alice']});assert answer['state']=='inspect-recipients'
     assert fixture.template_mutations['share']==1
 
 

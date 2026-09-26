@@ -42,6 +42,10 @@ def synthetic_server():
         if faults.get('revoked'): return 403, {'error':'Access has been revoked.'}
         if faults.get('busy'): return 503, {'error':'Service is busy.'}
         if faults.get('capacity'): return 413, {'error':'Supported size exceeded.'}
+        if path.endswith('/share') and faults.pop('recipients_changed', None):
+            # Someone else changed the recipients after this client read them.
+            ident = json.loads(body).get('id') or json.loads(body).get('asset_id')
+            applications.generations[ident] = applications.generations.get(ident, 1) + 1
         parsed = urlsplit(path)
         route = unquote(parsed.path)
         if method == 'GET':
