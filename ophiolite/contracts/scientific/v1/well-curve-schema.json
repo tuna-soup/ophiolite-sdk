@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/scientific/v1/well-curve-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite/well-curve/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "title": "WellCurve",
+  "description": "Structural shape of an ophiolite/well-curve/1 exchange snapshot. Equal array lengths and strictly increasing depths cannot be expressed here; project_gateway.catalog.validate_snapshot checks them. Unknown fields are extensions and are kept.",
+  "type": "object",
+  "required": ["kind", "unit", "depth_unit", "well_id", "md_datum", "curve_type", "measured_depth", "values"],
+  "properties": {
+    "kind": {"const": "curve"},
+    "unit": {"type": "string", "minLength": 1, "maxLength": 128, "pattern": "\\S"},
+    "depth_unit": {"const": "m"},
+    "well_id": {"type": "string", "minLength": 1, "maxLength": 512, "pattern": "\\S"},
+    "md_datum": {"type": "string", "minLength": 1, "maxLength": 512, "pattern": "\\S"},
+    "curve_type": {"type": "string", "minLength": 1, "maxLength": 512, "pattern": "\\S"},
+    "measured_depth": {"type": "array", "minItems": 1, "maxItems": 100000, "items": {"type": "number"}},
+    "values": {"type": "array", "minItems": 1, "maxItems": 100000, "items": {"anyOf": [{"type": "number"}, {"const": "NaN"}]}},
+    "original_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "source_revision": {"type": "string"}
+  }
+}

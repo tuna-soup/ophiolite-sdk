@@ -1,0 +1,18 @@
+{
+  "kind": "curve",
+  "unit": "gAPI",
+  "depth_unit": "m",
+  "well_id": "synthetic",
+  "md_datum": "unknown",
+  "curve_type": "GR",
+  "measured_depth": [
+    1.0,
+    2.0,
+    3.0
+  ],
+  "values": [
+    10.0,
+    "NaN",
+    30.0
+  ]
+}

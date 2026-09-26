@@ -1,0 +1,7 @@
+include LICENSE NOTICE THIRD_PARTY.md CHANGELOG.md
+recursive-include docs *.md
+recursive-include tools *.py
+recursive-include tests *.py *.json
+recursive-include ophiolite/contracts *
+global-exclude *.py[cod]
+global-exclude __pycache__

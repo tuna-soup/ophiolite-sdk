@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ophiolite"
+version = "0.1.0"
+description = "Preview scientific client for Ophiolite"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+dependencies = ["httpx>=0.28,<1", "pydantic>=2.11,<3"]
+
+[project.optional-dependencies]
+numpy = ["numpy>=1.24"]
+pandas = ["pandas>=2"]
+validation = ["jsonschema>=4.26"]
+dev = ["pytest>=8", "build>=1", "jsonschema>=4.26"]
+
+[tool.setuptools.packages.find]
+include = ["ophiolite*"]
+
+[tool.setuptools.package-data]
+ophiolite = ["contracts/**/*", "contracts/*"]

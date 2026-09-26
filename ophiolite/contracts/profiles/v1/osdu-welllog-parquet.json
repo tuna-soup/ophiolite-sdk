@@ -1,0 +1,18 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "osdu-welllog-parquet/1",
+  "kind": "source",
+  "lifecycle": "preview",
+  "display_name": "OSDU well log (Parquet)",
+  "description": "A well log stored as Parquet behind an approved OSDU record, read exactly from upstream.",
+  "connector": {
+    "scientific_profile": "well-log-source/1",
+    "source_schema": "exact-approved-kind",
+    "mapping_version": "osdu-welllog-reader/1",
+    "history": "upstream-exact-read"
+  },
+  "role": "artifact",
+  "media_types": [
+    "application/vnd.apache.parquet"
+  ]
+}

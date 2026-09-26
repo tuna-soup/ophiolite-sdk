@@ -1,0 +1,1047 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/assets/v1/schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.scientific-asset/1",
+    "version": "1.3.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "Acquisition": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "user-upload",
+          "title": "Kind",
+          "type": "string"
+        },
+        "filename": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Filename",
+          "type": "string"
+        },
+        "attribution": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Attribution",
+          "type": "string"
+        },
+        "well_notes": {
+          "maxLength": 1000,
+          "title": "Well Notes",
+          "type": "string"
+        },
+        "identity": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Identity",
+          "type": "string"
+        },
+        "uploaded_at": {
+          "title": "Uploaded At",
+          "type": "number"
+        },
+        "rights": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Rights",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "filename",
+        "attribution",
+        "well_notes",
+        "identity",
+        "uploaded_at",
+        "rights"
+      ],
+      "title": "Acquisition",
+      "type": "object"
+    },
+    "Display": {
+      "additionalProperties": false,
+      "description": "Plain words for this item (display.py); identifiers stay in the fields beside it.",
+      "properties": {
+        "type": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Type"
+        },
+        "type_help": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Type Help"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source"
+        },
+        "held_as": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Held As"
+        },
+        "updates": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Updates"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Status"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Version"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "last_checked": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Last Checked"
+        },
+        "method": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Method"
+        },
+        "settings": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Settings"
+        },
+        "evidence": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence"
+        },
+        "checked": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checked"
+        },
+        "built_on": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Built On"
+        },
+        "available_as": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 512,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 8,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Available As"
+        }
+      },
+      "title": "Display",
+      "type": "object"
+    },
+    "Evaluated": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "const": "evaluated",
+          "title": "Status",
+          "type": "string"
+        },
+        "evaluated_for": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Evaluated For",
+          "type": "string"
+        },
+        "evaluated_at": {
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+          "title": "Evaluated At",
+          "type": "string"
+        },
+        "allowed_operations": {
+          "items": {
+            "enum": [
+              "read",
+              "export",
+              "use-as-input"
+            ],
+            "type": "string"
+          },
+          "maxItems": 3,
+          "title": "Allowed Operations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "status",
+        "evaluated_for",
+        "evaluated_at",
+        "allowed_operations"
+      ],
+      "title": "Evaluated",
+      "type": "object"
+    },
+    "Interpretation": {
+      "additionalProperties": false,
+      "description": "The executable identity of the deployed reader; literals name what runs now.",
+      "properties": {
+        "reader": {
+          "const": "asset_connectors.las_reader/1",
+          "title": "Reader",
+          "type": "string"
+        },
+        "lasio_version": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Lasio Version",
+          "type": "string"
+        },
+        "mapping": {
+          "const": "application-curve/1",
+          "title": "Mapping",
+          "type": "string"
+        },
+        "null_policy": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Null Policy",
+          "type": "string"
+        },
+        "parsing_policy": {
+          "const": "las2-strict-null/1",
+          "default": "las2-strict-null/1",
+          "title": "Parsing Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reader",
+        "lasio_version",
+        "mapping",
+        "null_policy"
+      ],
+      "title": "Interpretation",
+      "type": "object"
+    },
+    "NotEvaluated": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "const": "not-evaluated",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "title": "NotEvaluated",
+      "type": "object"
+    },
+    "Person": {
+      "additionalProperties": false,
+      "description": "Who did something: the user id and, when the server knows one, a human label.",
+      "properties": {
+        "id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "Person",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence": {
+          "enum": [
+            "source-declared",
+            "script-declared"
+          ],
+          "title": "Evidence",
+          "type": "string"
+        },
+        "method": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Method"
+        },
+        "code_reference": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Code Reference"
+        },
+        "environment_reference": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Environment Reference"
+        },
+        "omissions": {
+          "items": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 32,
+          "title": "Omissions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "evidence",
+        "method",
+        "code_reference",
+        "environment_reference",
+        "omissions"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "RecordedInterpretation": {
+      "additionalProperties": false,
+      "description": "What was recorded at retention; representable for any past reader version.\n\nThe identity is the triple (reader, parsing_policy, mapping); lasio_version is\nlibrary evidence that travels with the record. None means not recorded.",
+      "properties": {
+        "reader": {
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9._-]*(/[a-z0-9._-]+)*/[0-9]+$",
+          "title": "Reader",
+          "type": "string"
+        },
+        "parsing_policy": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^[a-z0-9][a-z0-9._-]*(/[a-z0-9._-]+)*/[0-9]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parsing Policy"
+        },
+        "mapping": {
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9._-]*(/[a-z0-9._-]+)*/[0-9]+$",
+          "title": "Mapping",
+          "type": "string"
+        },
+        "lasio_version": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lasio Version"
+        },
+        "null_policy": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Null Policy"
+        }
+      },
+      "required": [
+        "reader",
+        "mapping"
+      ],
+      "title": "RecordedInterpretation",
+      "type": "object"
+    },
+    "Reference": {
+      "additionalProperties": false,
+      "properties": {
+        "authority": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Authority",
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "profile": {
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+          "title": "Profile",
+          "type": "string"
+        }
+      },
+      "required": [
+        "authority",
+        "key",
+        "revision",
+        "profile"
+      ],
+      "title": "Reference",
+      "type": "object"
+    },
+    "Representation": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "original",
+            "captured-result",
+            "derived-artifact",
+            "normalized"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "media_type": {
+          "enum": [
+            "application/x-las",
+            "application/json"
+          ],
+          "title": "Media Type",
+          "type": "string"
+        },
+        "profile": {
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+          "title": "Profile",
+          "type": "string"
+        },
+        "bytes": {
+          "maximum": 33554432,
+          "minimum": 0,
+          "title": "Bytes",
+          "type": "integer"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "available": {
+          "title": "Available",
+          "type": "boolean"
+        },
+        "losses": {
+          "items": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 32,
+          "title": "Losses",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "media_type",
+        "profile",
+        "bytes",
+        "sha256",
+        "available",
+        "losses"
+      ],
+      "title": "Representation",
+      "type": "object"
+    },
+    "Retention": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "upstream-only",
+            "retained"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "policy": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Policy",
+          "type": "string"
+        },
+        "historical_reads": {
+          "enum": [
+            "not-guaranteed",
+            "while-retained-and-authorized"
+          ],
+          "title": "Historical Reads",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mode",
+        "policy",
+        "historical_reads"
+      ],
+      "title": "Retention",
+      "type": "object"
+    },
+    "ScientificContext": {
+      "additionalProperties": false,
+      "properties": {
+        "curve": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Curve",
+          "type": "string"
+        },
+        "unit": {
+          "maxLength": 128,
+          "title": "Unit",
+          "type": "string"
+        },
+        "unit_status": {
+          "enum": [
+            "declared",
+            "unknown"
+          ],
+          "title": "Unit Status",
+          "type": "string"
+        },
+        "axis_unit": {
+          "maxLength": 128,
+          "title": "Axis Unit",
+          "type": "string"
+        },
+        "axis_unit_status": {
+          "enum": [
+            "declared",
+            "unknown"
+          ],
+          "title": "Axis Unit Status",
+          "type": "string"
+        },
+        "depth_reference": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Depth Reference",
+          "type": "string"
+        },
+        "sample_count": {
+          "maximum": 100000,
+          "minimum": 0,
+          "title": "Sample Count",
+          "type": "integer"
+        },
+        "axis_order": {
+          "enum": [
+            "increasing",
+            "decreasing",
+            "unordered",
+            "insufficient"
+          ],
+          "title": "Axis Order",
+          "type": "string"
+        },
+        "axis_duplicates": {
+          "title": "Axis Duplicates",
+          "type": "boolean"
+        },
+        "missing_count": {
+          "maximum": 100000,
+          "minimum": 0,
+          "title": "Missing Count",
+          "type": "integer"
+        },
+        "missing_value_marker": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Missing Value Marker",
+          "type": "string"
+        }
+      },
+      "required": [
+        "curve",
+        "unit",
+        "unit_status",
+        "axis_unit",
+        "axis_unit_status",
+        "depth_reference",
+        "sample_count",
+        "axis_order",
+        "axis_duplicates",
+        "missing_count",
+        "missing_value_marker"
+      ],
+      "title": "ScientificContext",
+      "type": "object"
+    },
+    "Version": {
+      "additionalProperties": false,
+      "description": "How a version reads in words; never derived from polling time.",
+      "properties": {
+        "at": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "At"
+        },
+        "by": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Person"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "ordinal": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ordinal"
+        },
+        "of": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Of"
+        },
+        "source_version": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Version"
+        }
+      },
+      "title": "Version",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "acquisition": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Acquisition"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "display": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Display"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "schema": {
+      "const": "ophiolite.scientific-asset/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "asset_id": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "revision": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Revision",
+      "type": "string"
+    },
+    "project_id": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Project Id",
+      "type": "string"
+    },
+    "authority": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Authority",
+      "type": "string"
+    },
+    "origin": {
+      "enum": [
+        "source-reference",
+        "retained-capture",
+        "managed-derived"
+      ],
+      "title": "Origin",
+      "type": "string"
+    },
+    "custodian": {
+      "anyOf": [
+        {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Custodian"
+    },
+    "source_reference": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Reference"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "profile": {
+      "maxLength": 128,
+      "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+      "title": "Profile",
+      "type": "string"
+    },
+    "scientific": {
+      "$ref": "#/$defs/ScientificContext"
+    },
+    "interpretation": {
+      "$ref": "#/$defs/Interpretation"
+    },
+    "interpretation_evidence": {
+      "default": "live",
+      "enum": [
+        "live",
+        "recorded",
+        "recorded-differs",
+        "not-recorded"
+      ],
+      "title": "Interpretation Evidence",
+      "type": "string"
+    },
+    "recorded_interpretation": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RecordedInterpretation"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "representations": {
+      "items": {
+        "$ref": "#/$defs/Representation"
+      },
+      "maxItems": 8,
+      "minItems": 2,
+      "title": "Representations",
+      "type": "array"
+    },
+    "retention": {
+      "$ref": "#/$defs/Retention"
+    },
+    "parents": {
+      "items": {
+        "$ref": "#/$defs/Reference"
+      },
+      "maxItems": 8,
+      "title": "Parents",
+      "type": "array"
+    },
+    "parent_visibility": {
+      "default": "complete",
+      "enum": [
+        "complete",
+        "restricted"
+      ],
+      "title": "Parent Visibility",
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "supported_operations": {
+      "items": {
+        "enum": [
+          "read",
+          "export",
+          "use-as-input"
+        ],
+        "type": "string"
+      },
+      "maxItems": 3,
+      "title": "Supported Operations",
+      "type": "array"
+    },
+    "authorization": {
+      "discriminator": {
+        "mapping": {
+          "evaluated": "#/$defs/Evaluated",
+          "not-evaluated": "#/$defs/NotEvaluated"
+        },
+        "propertyName": "status"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/NotEvaluated"
+        },
+        {
+          "$ref": "#/$defs/Evaluated"
+        }
+      ],
+      "title": "Authorization"
+    }
+  },
+  "required": [
+    "schema",
+    "asset_id",
+    "revision",
+    "project_id",
+    "authority",
+    "origin",
+    "custodian",
+    "source_reference",
+    "profile",
+    "scientific",
+    "interpretation",
+    "representations",
+    "retention",
+    "parents",
+    "provenance",
+    "supported_operations",
+    "authorization"
+  ],
+  "title": "Asset",
+  "type": "object"
+}

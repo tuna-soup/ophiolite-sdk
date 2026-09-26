@@ -1,0 +1,311 @@
+{
+  "schema": "ophiolite.contracts-registry/1",
+  "version": "1.6.0",
+  "title": "Ophiolite contracts registry",
+  "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
+  "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+  "lifecycles": [
+    {
+      "id": "preview",
+      "meaning": "Served and tested; the deployment may replace it with a new id suffix inside the program without a transition release."
+    },
+    {
+      "id": "supported",
+      "meaning": "Qualification criteria are written in the entry (qualified_by); only additive 1.x changes; deprecation needs a transition release with an announced cutoff."
+    },
+    {
+      "id": "deprecated",
+      "meaning": "Still served until the cutoff date in the entry; consumers move to the entry named in replaced_by."
+    }
+  ],
+  "schemas": [
+    {
+      "id": "ophiolite.contracts-registry/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "registry-schema.json",
+      "title": "ContractsRegistry",
+      "description": "The registry index: every schema, profile and document with its id, version, lifecycle and path."
+    },
+    {
+      "id": "ophiolite.contract-profile/1",
+      "version": "1.3.0",
+      "lifecycle": "preview",
+      "path": "profile-schema.json",
+      "title": "ContractProfile",
+      "description": "A profile document: display name, description, role, media types, representation rules and interpretation identity."
+    },
+    {
+      "id": "ophiolite.scientific-asset/1",
+      "version": "1.3.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/schema.json",
+      "title": "ScientificAsset",
+      "description": "The scientific asset descriptor (envelope): exact identity, origin, representations, retention, provenance and authorization."
+    },
+    {
+      "id": "ophiolite.application-curve/1",
+      "version": "1.2.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/curve-schema.json",
+      "title": "ApplicationCurve",
+      "description": "A normalized LAS curve as the source stored it, with its source reference, digest and interpretation identity."
+    },
+    {
+      "id": "ophiolite.curve-context/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/curve-context-schema.json",
+      "title": "ScientificContext",
+      "description": "Observed facts about a normalized curve: units and their status, sample and missing counts, axis order."
+    },
+    {
+      "id": "ophiolite.asset-summary/1",
+      "version": "1.2.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/summary-schema.json",
+      "title": "AssetSummary",
+      "description": "A discovery summary: identity, origin, profile, curve names and the operations allowed to the caller."
+    },
+    {
+      "id": "ophiolite/well-curve/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "scientific/v1/well-curve-schema.json",
+      "title": "WellCurve",
+      "description": "Structural shape of an ordered well curve exchange snapshot; cross-field rules stay in catalog.validate_snapshot."
+    },
+    {
+      "id": "ophiolite/scalar-map/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "scientific/v1/scalar-map-schema.json",
+      "title": "ScalarMap",
+      "description": "Structural shape of a regular scalar map exchange snapshot; cross-field rules stay in catalog.validate_snapshot."
+    }
+  ],
+  "profiles": [
+    {
+      "id": "las2/1",
+      "kind": "source",
+      "display_name": "LAS 2.0 well log file",
+      "description": "A LAS 2.0 text file of depth-indexed well log curves, kept byte for byte as the source stored it.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/las2.json"
+    },
+    {
+      "id": "ophiolite.application-curve/1",
+      "kind": "normalized",
+      "display_name": "Normalized well log curve",
+      "description": "One curve from a LAS file exactly as the source stored it: original depth order and units, missing samples as null, with the reader identity that produced it.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/application-curve.json"
+    },
+    {
+      "id": "ophiolite/well-curve/1",
+      "kind": "normalized",
+      "display_name": "Ordered well curve (native exchange)",
+      "description": "A curve on strictly increasing measured depth in metres with an explicit well identity and depth datum; the native protobuf exchange form.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/well-curve.json"
+    },
+    {
+      "id": "ophiolite/scalar-map/1",
+      "kind": "normalized",
+      "display_name": "Regular scalar map (native exchange)",
+      "description": "A regular row-major grid of numeric samples with explicit units, coordinate unit and CRS status; the native protobuf exchange form.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/scalar-map.json"
+    },
+    {
+      "id": "geotiff/1",
+      "kind": "source",
+      "display_name": "GeoTIFF raster (single band)",
+      "description": "A single-band GeoTIFF kept as the source stored it; its nodata and CRS are source declarations.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/geotiff.json"
+    },
+    {
+      "id": "sql-wells/1",
+      "kind": "source",
+      "display_name": "Well locations from a SQL table",
+      "description": "Well records read through a reviewed customer mapping from a SQL table; current values only.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/sql-wells.json"
+    },
+    {
+      "id": "edited-wells/1",
+      "kind": "source",
+      "display_name": "Edited well locations (retained result)",
+      "description": "A retained, exactly readable result of editing well records in a saved draft.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/edited-wells.json"
+    },
+    {
+      "id": "osdu-record/1",
+      "kind": "source",
+      "display_name": "OSDU record",
+      "description": "An approved OSDU record kind read exactly from an upstream OSDU service.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/osdu-record.json"
+    },
+    {
+      "id": "osdu-welllog-parquet/1",
+      "kind": "source",
+      "display_name": "OSDU well log (Parquet)",
+      "description": "A well log stored as Parquet behind an approved OSDU record, read exactly from upstream.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/osdu-welllog-parquet.json"
+    },
+    {
+      "id": "native-external/1",
+      "kind": "source",
+      "display_name": "Native external snapshot",
+      "description": "An ExternalSnapshot supplied by a caller through the native protobuf API with caller-declared mapping.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/native-external.json"
+    }
+  ],
+  "documents": [
+    {
+      "id": "ophiolite.mapping/application-curve-to-well-curve/1",
+      "kind": "mapping",
+      "path": "mappings/v1/application-curve-to-well-curve.json",
+      "title": "Application curve to ordered well curve: pairs, caller-supplied evidence, refusals, losses"
+    },
+    {
+      "id": "ophiolite.vocabulary/1",
+      "kind": "vocabulary",
+      "path": "vocabulary/v1/vocabulary.json",
+      "title": "Shared terms: null samples, unknown units, axis order, measured-depth evidence, depth datum"
+    },
+    {
+      "id": "ophiolite.generated/typescript/1",
+      "kind": "generated",
+      "path": "generated/v1/ophiolite-contracts.ts",
+      "title": "TypeScript types emitted from every registry schema; explicit unions, optional marks, no any"
+    },
+    {
+      "id": "ophiolite.openapi/1",
+      "kind": "openapi",
+      "path": "openapi/v1/openapi.json",
+      "title": "Snapshot of the live /api/v1/openapi.json: automation routes, scientific asset routes and the registry routes in one document"
+    },
+    {
+      "id": "ophiolite.connector-semantics/1",
+      "kind": "vocabulary",
+      "path": "connectors/v1/contract.json",
+      "title": "Connector semantics vocabulary; copied byte for byte into Connectors and pinned there by digest"
+    },
+    {
+      "id": "ophiolite.fixture/scientific/well-curve.json/1",
+      "kind": "fixture",
+      "path": "scientific/v1/fixtures/well-curve.json",
+      "schema": "ophiolite/well-curve/1"
+    },
+    {
+      "id": "ophiolite.fixture/scientific/scalar-map.json/1",
+      "kind": "fixture",
+      "path": "scientific/v1/fixtures/scalar-map.json",
+      "schema": "ophiolite/scalar-map/1"
+    },
+    {
+      "id": "ophiolite.fixture/assets/source.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/source.json",
+      "schema": "ophiolite.scientific-asset/1"
+    },
+    {
+      "id": "ophiolite.fixture/assets/capture.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/capture.json",
+      "schema": "ophiolite.scientific-asset/1"
+    },
+    {
+      "id": "ophiolite.fixture/assets/derived.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/derived.json",
+      "schema": "ophiolite.scientific-asset/1"
+    },
+    {
+      "id": "ophiolite.fixture/assets/curve.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/curve.json",
+      "schema": "ophiolite.application-curve/1"
+    },
+    {
+      "id": "ophiolite.fixture/assets/derived-curve.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/derived-curve.json",
+      "schema": "ophiolite.application-curve/1"
+    },
+    {
+      "id": "ophiolite.fixture/assets/expected.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/expected.json"
+    },
+    {
+      "id": "ophiolite.fixture/assets/original.las/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/original.las"
+    },
+    {
+      "id": "ophiolite.fixture/assets/derived.las/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/derived.las"
+    },
+    {
+      "id": "ophiolite.fixture/pre-e1/source.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/frozen/pre-e1/source.json",
+      "title": "Pre-E1 fixture bytes, frozen; never regenerated",
+      "schema": "ophiolite.scientific-asset/1"
+    },
+    {
+      "id": "ophiolite.fixture/pre-e1/capture.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/frozen/pre-e1/capture.json",
+      "title": "Pre-E1 fixture bytes, frozen; never regenerated",
+      "schema": "ophiolite.scientific-asset/1"
+    },
+    {
+      "id": "ophiolite.fixture/pre-e1/derived.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/frozen/pre-e1/derived.json",
+      "title": "Pre-E1 fixture bytes, frozen; never regenerated",
+      "schema": "ophiolite.scientific-asset/1"
+    },
+    {
+      "id": "ophiolite.fixture/pre-e1/curve.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/frozen/pre-e1/curve.json",
+      "title": "Pre-E1 fixture bytes, frozen; never regenerated",
+      "schema": "ophiolite.application-curve/1"
+    },
+    {
+      "id": "ophiolite.fixture/pre-e1/derived-curve.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/frozen/pre-e1/derived-curve.json",
+      "title": "Pre-E1 fixture bytes, frozen; never regenerated",
+      "schema": "ophiolite.application-curve/1"
+    },
+    {
+      "id": "ophiolite.fixture/pre-e1/expected.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/frozen/pre-e1/expected.json",
+      "title": "Pre-E1 fixture bytes, frozen; never regenerated"
+    },
+    {
+      "id": "ophiolite.fixture/pre-e1/original.las/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/frozen/pre-e1/original.las",
+      "title": "Pre-E1 fixture bytes, frozen; never regenerated"
+    },
+    {
+      "id": "ophiolite.fixture/pre-e1/derived.las/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/frozen/pre-e1/derived.las",
+      "title": "Pre-E1 fixture bytes, frozen; never regenerated"
+    }
+  ]
+}

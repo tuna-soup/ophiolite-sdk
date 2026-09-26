@@ -1,0 +1,18 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "native-external/1",
+  "kind": "source",
+  "lifecycle": "preview",
+  "display_name": "Native external snapshot",
+  "description": "An ExternalSnapshot supplied by a caller through the native protobuf API with caller-declared mapping.",
+  "connector": {
+    "scientific_profile": "native-external-snapshot/1",
+    "source_schema": "arraybridge.v1.ExternalSnapshot",
+    "mapping_version": "caller-declared",
+    "history": "not-assessed"
+  },
+  "role": "artifact",
+  "media_types": [
+    "application/json"
+  ]
+}

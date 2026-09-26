@@ -1,0 +1,85 @@
+{
+  "schema": "ophiolite.scientific-asset/1",
+  "asset_id": "synthetic-run-b",
+  "revision": "2fdbfc25b866dc766f2c8a31b2c7dee178950f6a9e4f09cac623f67f51d9ba6d",
+  "project_id": "synthetic-project",
+  "authority": "ophiolite:derived",
+  "origin": "managed-derived",
+  "custodian": "ophiolite:managed",
+  "source_reference": null,
+  "profile": "las2/1",
+  "scientific": {
+    "curve": "GR",
+    "unit": "gAPI",
+    "unit_status": "declared",
+    "axis_unit": "M",
+    "axis_unit_status": "declared",
+    "depth_reference": "source declared; not inferred",
+    "sample_count": 5,
+    "axis_order": "increasing",
+    "axis_duplicates": false,
+    "missing_count": 1,
+    "missing_value_marker": "-999.25"
+  },
+  "interpretation": {
+    "reader": "asset_connectors.las_reader/1",
+    "lasio_version": "0.32",
+    "mapping": "application-curve/1",
+    "null_policy": "strict declared NULL; nonfinite samples mapped to null; wrapped rows use declared curve count"
+  },
+  "representations": [
+    {
+      "id": "las",
+      "kind": "derived-artifact",
+      "media_type": "application/x-las",
+      "profile": "las2/1",
+      "bytes": 311,
+      "sha256": "2fdbfc25b866dc766f2c8a31b2c7dee178950f6a9e4f09cac623f67f51d9ba6d",
+      "available": true,
+      "losses": []
+    },
+    {
+      "id": "curve",
+      "kind": "normalized",
+      "media_type": "application/json",
+      "profile": "ophiolite.application-curve/1",
+      "bytes": 1043,
+      "sha256": "507fc56a07d8aa1c7b9e467b17700c75b5e8ffbe7ea4c9817ae062aa65d5dbb1",
+      "available": true,
+      "losses": [
+        "Selected curve only; other LAS headers and curves remain in artifact"
+      ]
+    }
+  ],
+  "retention": {
+    "mode": "retained",
+    "policy": "until authorized lifecycle operation",
+    "historical_reads": "while-retained-and-authorized"
+  },
+  "parents": [
+    {
+      "authority": "synthetic-file",
+      "key": "curve-a",
+      "revision": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
+      "profile": "las2/1"
+    }
+  ],
+  "provenance": {
+    "evidence": "script-declared",
+    "method": "Add 2 over source depths 100\u2013103; skip missing samples",
+    "code_reference": null,
+    "environment_reference": null,
+    "omissions": [
+      "Synthetic offline fixture, not a server publication",
+      "No independently verified execution environment"
+    ]
+  },
+  "supported_operations": [
+    "read",
+    "export",
+    "use-as-input"
+  ],
+  "authorization": {
+    "status": "not-evaluated"
+  }
+}

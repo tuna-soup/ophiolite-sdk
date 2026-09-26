@@ -1,0 +1,21 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "ophiolite.application-curve/1",
+  "kind": "normalized",
+  "lifecycle": "preview",
+  "display_name": "Normalized well log curve",
+  "description": "One curve from a LAS file exactly as the source stored it: original depth order and units, missing samples as null, with the reader identity that produced it.",
+  "payload_schema": "ophiolite.application-curve/1",
+  "role": "normalized",
+  "media_types": [
+    "application/json"
+  ],
+  "interpretation": {
+    "reader": "asset_connectors.las_reader/1",
+    "parsing_policy": "las2-strict-null/1",
+    "mapping": "application-curve/1"
+  },
+  "mappings": [
+    "ophiolite.mapping/application-curve-to-well-curve/1"
+  ]
+}

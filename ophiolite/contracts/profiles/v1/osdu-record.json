@@ -1,0 +1,18 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "osdu-record/1",
+  "kind": "source",
+  "lifecycle": "preview",
+  "display_name": "OSDU record",
+  "description": "An approved OSDU record kind read exactly from an upstream OSDU service.",
+  "connector": {
+    "scientific_profile": "well-record-source/1",
+    "source_schema": "exact-approved-kind",
+    "mapping_version": "osdu-record-reader/1",
+    "history": "upstream-exact-read"
+  },
+  "role": "artifact",
+  "media_types": [
+    "application/json"
+  ]
+}

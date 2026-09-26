@@ -1,0 +1,208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/assets/v1/curve-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.application-curve/1",
+    "version": "1.2.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "CurveContext": {
+      "additionalProperties": false,
+      "properties": {
+        "depth_index": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Depth Index",
+          "type": "string"
+        },
+        "depth_unit": {
+          "maxLength": 128,
+          "title": "Depth Unit",
+          "type": "string"
+        },
+        "depth_reference": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Depth Reference",
+          "type": "string"
+        },
+        "missing_value_marker": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Missing Value Marker",
+          "type": "string"
+        },
+        "missing_value_policy": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Missing Value Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "depth_index",
+        "depth_unit",
+        "depth_reference",
+        "missing_value_marker",
+        "missing_value_policy"
+      ],
+      "title": "CurveContext",
+      "type": "object"
+    },
+    "Interpretation": {
+      "additionalProperties": false,
+      "description": "The executable identity of the deployed reader; literals name what runs now.",
+      "properties": {
+        "reader": {
+          "const": "asset_connectors.las_reader/1",
+          "title": "Reader",
+          "type": "string"
+        },
+        "lasio_version": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Lasio Version",
+          "type": "string"
+        },
+        "mapping": {
+          "const": "application-curve/1",
+          "title": "Mapping",
+          "type": "string"
+        },
+        "null_policy": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Null Policy",
+          "type": "string"
+        },
+        "parsing_policy": {
+          "const": "las2-strict-null/1",
+          "default": "las2-strict-null/1",
+          "title": "Parsing Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reader",
+        "lasio_version",
+        "mapping",
+        "null_policy"
+      ],
+      "title": "Interpretation",
+      "type": "object"
+    },
+    "Reference": {
+      "additionalProperties": false,
+      "properties": {
+        "authority": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Authority",
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "profile": {
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+          "title": "Profile",
+          "type": "string"
+        }
+      },
+      "required": [
+        "authority",
+        "key",
+        "revision",
+        "profile"
+      ],
+      "title": "Reference",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "ophiolite.application-curve/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "representation": {
+      "const": "normalized",
+      "title": "Representation",
+      "type": "string"
+    },
+    "axis": {
+      "items": {
+        "type": "number"
+      },
+      "maxItems": 100000,
+      "title": "Axis",
+      "type": "array"
+    },
+    "values": {
+      "items": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "maxItems": 100000,
+      "title": "Values",
+      "type": "array"
+    },
+    "curve": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Curve",
+      "type": "string"
+    },
+    "unit": {
+      "maxLength": 128,
+      "title": "Unit",
+      "type": "string"
+    },
+    "context": {
+      "$ref": "#/$defs/CurveContext"
+    },
+    "source": {
+      "$ref": "#/$defs/Reference"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "interpretation": {
+      "$ref": "#/$defs/Interpretation"
+    }
+  },
+  "required": [
+    "schema",
+    "representation",
+    "axis",
+    "values",
+    "curve",
+    "unit",
+    "context",
+    "source",
+    "source_sha256",
+    "interpretation"
+  ],
+  "title": "Curve",
+  "type": "object"
+}

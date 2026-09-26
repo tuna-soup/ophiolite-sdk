@@ -1,0 +1,18 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "sql-wells/1",
+  "kind": "source",
+  "lifecycle": "preview",
+  "display_name": "Well locations from a SQL table",
+  "description": "Well records read through a reviewed customer mapping from a SQL table; current values only.",
+  "connector": {
+    "scientific_profile": "well-location/1",
+    "source_schema": "schema-digest",
+    "mapping_version": "customer-mapping",
+    "history": "current-only"
+  },
+  "role": "artifact",
+  "media_types": [
+    "application/json"
+  ]
+}

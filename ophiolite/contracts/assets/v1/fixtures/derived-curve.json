@@ -1,0 +1,41 @@
+{
+  "schema": "ophiolite.application-curve/1",
+  "representation": "normalized",
+  "axis": [
+    100.0,
+    101.0,
+    102.0,
+    103.0,
+    104.0
+  ],
+  "values": [
+    2.0,
+    12.0,
+    null,
+    32.0,
+    40.0
+  ],
+  "curve": "GR",
+  "unit": "gAPI",
+  "context": {
+    "depth_index": "DEPT",
+    "depth_unit": "M",
+    "depth_reference": "source declared; not inferred",
+    "missing_value_marker": "-999.25",
+    "missing_value_policy": "Declared LAS NULL marker; missing samples are not zero"
+  },
+  "source": {
+    "authority": "ophiolite:derived",
+    "key": "synthetic-run-b",
+    "revision": "2fdbfc25b866dc766f2c8a31b2c7dee178950f6a9e4f09cac623f67f51d9ba6d",
+    "profile": "las2/1"
+  },
+  "source_sha256": "2fdbfc25b866dc766f2c8a31b2c7dee178950f6a9e4f09cac623f67f51d9ba6d",
+  "interpretation": {
+    "reader": "asset_connectors.las_reader/1",
+    "lasio_version": "0.32",
+    "mapping": "application-curve/1",
+    "null_policy": "strict declared NULL; nonfinite samples mapped to null; wrapped rows use declared curve count",
+    "parsing_policy": "las2-strict-null/1"
+  }
+}

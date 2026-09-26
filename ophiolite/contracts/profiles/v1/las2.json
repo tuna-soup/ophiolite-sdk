@@ -1,0 +1,32 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "las2/1",
+  "kind": "source",
+  "lifecycle": "preview",
+  "display_name": "LAS 2.0 well log file",
+  "description": "A LAS 2.0 text file of depth-indexed well log curves, kept byte for byte as the source stored it.",
+  "serves": [
+    "ophiolite.scientific-asset/1"
+  ],
+  "connector": {
+    "scientific_profile": "well-log-source/1",
+    "source_schema": "LAS/2.0",
+    "mapping_version": "las-source/1",
+    "history": "current-only"
+  },
+  "role": "artifact",
+  "media_types": [
+    "application/x-las"
+  ],
+  "normalized_profile": "ophiolite.application-curve/1",
+  "context_schema": "ophiolite.curve-context/1",
+  "representation_rules": {
+    "artifact_kind_by_origin": {
+      "source-reference": "original",
+      "retained-capture": "original",
+      "managed-derived": "derived-artifact"
+    },
+    "normalized": 1,
+    "total": 2
+  }
+}

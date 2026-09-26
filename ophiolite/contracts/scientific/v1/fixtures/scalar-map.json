@@ -1,0 +1,19 @@
+{
+  "kind": "scalar-map",
+  "unit": "m",
+  "scalar_map": {
+    "width": 2,
+    "height": 2,
+    "first_x": 0.0,
+    "first_y": 1.0,
+    "step_x": 1.0,
+    "step_y": 1.0,
+    "values": [
+      1.0,
+      2.0,
+      "NaN",
+      4.0
+    ],
+    "metadata_json": "{\"unit\": \"m\", \"crs_status\": \"unknown\", \"coordinate_unit\": \"m\", \"vertical_reference\": {\"status\": \"unknown\"}}"
+  }
+}

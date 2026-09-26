@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/assets/v1/curve-context-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.curve-context/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "additionalProperties": false,
+  "properties": {
+    "curve": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Curve",
+      "type": "string"
+    },
+    "unit": {
+      "maxLength": 128,
+      "title": "Unit",
+      "type": "string"
+    },
+    "unit_status": {
+      "enum": [
+        "declared",
+        "unknown"
+      ],
+      "title": "Unit Status",
+      "type": "string"
+    },
+    "axis_unit": {
+      "maxLength": 128,
+      "title": "Axis Unit",
+      "type": "string"
+    },
+    "axis_unit_status": {
+      "enum": [
+        "declared",
+        "unknown"
+      ],
+      "title": "Axis Unit Status",
+      "type": "string"
+    },
+    "depth_reference": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Depth Reference",
+      "type": "string"
+    },
+    "sample_count": {
+      "maximum": 100000,
+      "minimum": 0,
+      "title": "Sample Count",
+      "type": "integer"
+    },
+    "axis_order": {
+      "enum": [
+        "increasing",
+        "decreasing",
+        "unordered",
+        "insufficient"
+      ],
+      "title": "Axis Order",
+      "type": "string"
+    },
+    "axis_duplicates": {
+      "title": "Axis Duplicates",
+      "type": "boolean"
+    },
+    "missing_count": {
+      "maximum": 100000,
+      "minimum": 0,
+      "title": "Missing Count",
+      "type": "integer"
+    },
+    "missing_value_marker": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Missing Value Marker",
+      "type": "string"
+    }
+  },
+  "required": [
+    "curve",
+    "unit",
+    "unit_status",
+    "axis_unit",
+    "axis_unit_status",
+    "depth_reference",
+    "sample_count",
+    "axis_order",
+    "axis_duplicates",
+    "missing_count",
+    "missing_value_marker"
+  ],
+  "title": "ScientificContext",
+  "type": "object"
+}

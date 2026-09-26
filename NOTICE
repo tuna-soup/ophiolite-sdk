@@ -1,0 +1,7 @@
+Ophiolite SDK
+Copyright 2026 Ophiolite contributors.
+
+The SDK is developed under the Apache License, Version 2.0.
+Copied contract paths retain their exact source revisions in contracts/SOURCE.json.
+Release input qualification is recorded separately; a licence notice does not
+establish third-party rights or a production-support promise.

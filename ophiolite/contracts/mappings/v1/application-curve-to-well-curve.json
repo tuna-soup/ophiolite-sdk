@@ -1,0 +1,35 @@
+{
+  "schema": "ophiolite.contract-mapping/1",
+  "id": "ophiolite.mapping/application-curve-to-well-curve/1",
+  "from": "ophiolite.application-curve/1",
+  "to": "ophiolite/well-curve/1",
+  "direction": "one-way",
+  "invertible": false,
+  "executable": "project_gateway.curve_mapping.to_well_curve",
+  "vocabulary": "ophiolite.vocabulary/1",
+  "caller_supplied": ["well_id", "axis_kind", "md_datum"],
+  "pairs": [
+    {"from": "axis", "to": "measured_depth", "rule": "copied unchanged; the axis must already be strictly increasing"},
+    {"from": "values", "to": "values", "rule": "numbers copied unchanged; a null sample becomes the protobuf JSON \"NaN\" marker"},
+    {"from": "curve", "to": "curve_type", "rule": "copied unchanged"},
+    {"from": "unit", "to": "unit", "rule": "copied unchanged; must be non-blank because the target has no unknown-unit convention"},
+    {"from": "context.depth_unit", "to": "depth_unit", "rule": "must already be metres ('m' or 'M'); written as 'm'; no unit conversion"}
+  ],
+  "constants": {"kind": "curve"},
+  "preconditions": [
+    {"id": "measured-depth-evidence", "check": "axis_kind == 'MD'", "message": "Explicit measured-depth interpretation required"},
+    {"id": "datum-declared", "check": "md_datum is non-empty trimmed text; 'unknown' is allowed", "message": "Explicit depth datum declaration required; 'unknown' is allowed, inference is not"},
+    {"id": "well-declared", "check": "well_id is non-empty trimmed text", "message": "Explicit well identity required"},
+    {"id": "metres", "check": "context.depth_unit in ('m', 'M')", "message": "Depth unit must be metres; no unit conversion is applied"},
+    {"id": "samples", "check": "len(axis) >= 1", "message": "At least one sample required"},
+    {"id": "strictly-increasing", "check": "axis[i] < axis[i+1] for every i", "message": "Depth axis must be strictly increasing; no reordering or deduplication is applied"},
+    {"id": "unit-declared", "check": "unit.strip() != ''", "message": "Explicit value unit required; an unknown unit is not invented"}
+  ],
+  "losses": [
+    "source reference (source) is not carried",
+    "artifact digest (source_sha256) is not carried",
+    "interpretation identity is not carried",
+    "missing_value_marker is not carried; the target has no marker, NaN is its null",
+    "the reader's depth_reference sentence is not carried and is never used as md_datum"
+  ]
+}

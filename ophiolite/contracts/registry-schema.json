@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/registry-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.contracts-registry/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "title": "ContractsRegistry",
+  "description": "The registry index. Ids follow id_grammar; versions are semver of the document; paths are registry-relative and never leave contracts/.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "version", "title", "description", "id_grammar", "lifecycles", "schemas", "profiles", "documents"],
+  "properties": {
+    "schema": {"const": "ophiolite.contracts-registry/1"},
+    "version": {"type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"},
+    "title": {"type": "string", "minLength": 1},
+    "description": {"type": "string", "minLength": 1},
+    "id_grammar": {"type": "string", "minLength": 1},
+    "lifecycles": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"$ref": "#/$defs/Lifecycle"}},
+    "schemas": {"type": "array", "items": {"$ref": "#/$defs/SchemaEntry"}},
+    "profiles": {"type": "array", "items": {"$ref": "#/$defs/ProfileEntry"}},
+    "documents": {"type": "array", "items": {"$ref": "#/$defs/DocumentEntry"}}
+  },
+  "$defs": {
+    "Lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "meaning"],
+      "properties": {
+        "id": {"enum": ["preview", "supported", "deprecated"]},
+        "meaning": {"type": "string", "minLength": 1}
+      }
+    },
+    "SchemaEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "lifecycle", "path", "title", "description"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$", "maxLength": 128},
+        "version": {"type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"},
+        "lifecycle": {"enum": ["preview", "supported", "deprecated"]},
+        "path": {"type": "string", "minLength": 1},
+        "title": {"type": "string", "pattern": "^[A-Z][A-Za-z0-9]*$"},
+        "description": {"type": "string", "minLength": 1},
+        "qualified_by": {"type": "string", "minLength": 1},
+        "cutoff": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
+        "replaced_by": {"type": "string", "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$"}
+      }
+    },
+    "ProfileEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "display_name", "description", "lifecycle", "path"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$", "maxLength": 128},
+        "kind": {"enum": ["source", "normalized"]},
+        "display_name": {"type": "string", "minLength": 1, "maxLength": 80},
+        "description": {"type": "string", "minLength": 1, "maxLength": 400},
+        "lifecycle": {"enum": ["preview", "supported", "deprecated"]},
+        "path": {"type": "string", "minLength": 1},
+        "qualified_by": {"type": "string", "minLength": 1},
+        "cutoff": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
+        "replaced_by": {"type": "string", "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$"}
+      }
+    },
+    "DocumentEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "path"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$", "maxLength": 128},
+        "kind": {"enum": ["mapping", "vocabulary", "generated", "openapi", "fixture"]},
+        "path": {"type": "string", "minLength": 1},
+        "title": {"type": "string", "minLength": 1},
+        "schema": {"type": "string", "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$"}
+      }
+    }
+  }
+}

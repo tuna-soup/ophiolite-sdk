@@ -1,0 +1,40 @@
+# Scientific contracts and local validation
+
+`ophiolite/contracts/SOURCE.json` pins the immutable source commit, contract tree,
+registry version and every copied file's digest. The maintainer sync tool checks
+tracked path coverage and bytes against Platform. A later Platform CLI-only commit
+may share that contract tree; it need not change the captured contract-source SHA.
+
+Generated Pydantic models enforce declared types, patterns, bounds and finite
+numbers. Unknown additive fields are retained. Semantic validation checks custody,
+retention, exact source/parent identities, registry membership, real calendar times,
+representation roles/counts, sample meaning and descriptor/view agreement.
+
+```python
+from ophiolite import validate
+asset_model, curve_model = validate.pair(descriptor, downloaded_normalized_bytes)
+```
+
+This local operation performs no network or credential lookup. It checks normalized
+bytes against the descriptor. The network client's additional verification checks
+the downloaded source artifact and the originally requested asset/revision/curve.
+For strict schema validation install `ophiolite[validation]` and call
+`validate.schema(value, schema_id, strict=True)`. Strict mode rejects unknown fields;
+normal client reads retain additive fields.
+
+Scientific identity compares declared fields, not unrelated additive labels. Live
+interpretation equality includes the declared null policy. Recorded evidence follows
+the service policy: mapping differences refuse normalization; reader, parsing-policy
+or library-version differences produce `recorded-differs`; a null-policy-only change
+does not change that evidence label. Both records remain available.
+
+Units are labels supplied by the source. Empty units stay unknown. Depth axis values,
+order, duplicates, index name, reference, zero values and null positions are retained.
+No CRS/datum transformation, alignment, interpolation or native-edit capability is
+implied. Server authorization remains authoritative; descriptor operations are not
+an access grant.
+
+The scientific-negative corpus uses correctly hashed malformed payloads so semantic
+failures cannot be hidden by checksum failure. The synthetic public-route recording
+retains exact bodies and excludes request credentials. Rights/provenance records are
+in `tests/fixtures/PROVENANCE.json`; unreviewed inputs block public publication.

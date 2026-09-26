@@ -1,0 +1,18 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "geotiff/1",
+  "kind": "source",
+  "lifecycle": "preview",
+  "display_name": "GeoTIFF raster (single band)",
+  "description": "A single-band GeoTIFF kept as the source stored it; its nodata and CRS are source declarations.",
+  "connector": {
+    "scientific_profile": "raster-source/1",
+    "source_schema": "GeoTIFF/single-band",
+    "mapping_version": "geotiff-source/1",
+    "history": "current-only"
+  },
+  "role": "artifact",
+  "media_types": [
+    "image/tiff"
+  ]
+}

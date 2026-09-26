@@ -1,0 +1,12 @@
+{
+  "schema": "ophiolite.contract-vocabulary/1",
+  "id": "ophiolite.vocabulary/1",
+  "terms": [
+    {"term": "null sample", "meaning": "A sample whose value is missing. Zero is a measurement, never a null.", "application-curve": "JSON null; the LAS marker never appears in values", "well-curve": "the string \"NaN\" (protobuf JSON); a numeric value is never a null"},
+    {"term": "unknown unit", "meaning": "The source declared no unit. Unknown is not dimensionless.", "application-curve": "the empty string; unit_status reports 'unknown'", "well-curve": "not representable: a non-blank unit is required, so the mapping refuses"},
+    {"term": "axis order", "meaning": "The order of depth samples as stored.", "application-curve": "any order, duplicates allowed; axis_order and axis_duplicates are observed facts", "well-curve": "strictly increasing measured depth; the mapping refuses rather than reorders or deduplicates"},
+    {"term": "measured-depth evidence", "meaning": "A declaration that the depth axis is measured depth along the borehole. Metres plus increasing order do not establish it.", "application-curve": "not carried; the reader's depth_reference is a fixed sentence", "well-curve": "required from the caller as axis_kind == 'MD' (precedent: the OpendTect host adapter)"},
+    {"term": "depth datum", "meaning": "The reference the depths are measured from.", "application-curve": "not known; depth_reference says 'source declared; not inferred'", "well-curve": "md_datum from the caller; 'unknown' is an allowed declaration, inference is not"},
+    {"term": "exact artifact", "meaning": "The original bytes a normalized view was derived from.", "application-curve": "named by source and source_sha256", "well-curve": "optionally named by original_sha256; not carried by the mapping"}
+  ]
+}

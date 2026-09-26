@@ -1,0 +1,436 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/assets/v1/summary-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.asset-summary/1",
+    "version": "1.2.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "Display": {
+      "additionalProperties": false,
+      "description": "Plain words for this item (display.py); identifiers stay in the fields beside it.",
+      "properties": {
+        "type": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Type"
+        },
+        "type_help": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Type Help"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source"
+        },
+        "held_as": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Held As"
+        },
+        "updates": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Updates"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Status"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Version"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "last_checked": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Last Checked"
+        },
+        "method": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Method"
+        },
+        "settings": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Settings"
+        },
+        "evidence": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence"
+        },
+        "checked": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checked"
+        },
+        "built_on": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Built On"
+        },
+        "available_as": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 512,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 8,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Available As"
+        }
+      },
+      "title": "Display",
+      "type": "object"
+    },
+    "Person": {
+      "additionalProperties": false,
+      "description": "Who did something: the user id and, when the server knows one, a human label.",
+      "properties": {
+        "id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "Person",
+      "type": "object"
+    },
+    "Version": {
+      "additionalProperties": false,
+      "description": "How a version reads in words; never derived from polling time.",
+      "properties": {
+        "at": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "At"
+        },
+        "by": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Person"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "ordinal": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ordinal"
+        },
+        "of": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Of"
+        },
+        "source_version": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Version"
+        }
+      },
+      "title": "Version",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "asset_id": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "revision": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Revision",
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "origin": {
+      "enum": [
+        "source-reference",
+        "retained-capture",
+        "managed-derived"
+      ],
+      "title": "Origin",
+      "type": "string"
+    },
+    "authority": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Authority",
+      "type": "string"
+    },
+    "profile": {
+      "maxLength": 128,
+      "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+      "title": "Profile",
+      "type": "string"
+    },
+    "custodian": {
+      "anyOf": [
+        {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Custodian"
+    },
+    "curves": {
+      "items": {
+        "maxLength": 512,
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 64,
+      "title": "Curves",
+      "type": "array"
+    },
+    "sample_count": {
+      "anyOf": [
+        {
+          "maximum": 100000,
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Sample Count"
+    },
+    "allowed_operations": {
+      "items": {
+        "enum": [
+          "read",
+          "export",
+          "use-as-input"
+        ],
+        "type": "string"
+      },
+      "maxItems": 3,
+      "title": "Allowed Operations",
+      "type": "array"
+    },
+    "display": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Display"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "asset_id",
+    "revision",
+    "name",
+    "origin",
+    "authority",
+    "profile",
+    "custodian",
+    "curves",
+    "sample_count",
+    "allowed_operations"
+  ],
+  "title": "AssetSummary",
+  "type": "object"
+}

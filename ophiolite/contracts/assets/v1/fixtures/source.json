@@ -1,0 +1,86 @@
+{
+  "schema": "ophiolite.scientific-asset/1",
+  "asset_id": "curve-a",
+  "revision": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
+  "project_id": "synthetic-project",
+  "authority": "synthetic-file",
+  "origin": "source-reference",
+  "custodian": null,
+  "source_reference": {
+    "authority": "synthetic-file",
+    "key": "curve-a",
+    "revision": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
+    "profile": "las2/1"
+  },
+  "profile": "las2/1",
+  "scientific": {
+    "curve": "GR",
+    "unit": "gAPI",
+    "unit_status": "declared",
+    "axis_unit": "M",
+    "axis_unit_status": "declared",
+    "depth_reference": "source declared; not inferred",
+    "sample_count": 5,
+    "axis_order": "increasing",
+    "axis_duplicates": false,
+    "missing_count": 1,
+    "missing_value_marker": "-999.25"
+  },
+  "interpretation": {
+    "reader": "asset_connectors.las_reader/1",
+    "lasio_version": "0.32",
+    "mapping": "application-curve/1",
+    "null_policy": "strict declared NULL; nonfinite samples mapped to null; wrapped rows use declared curve count",
+    "parsing_policy": "las2-strict-null/1"
+  },
+  "interpretation_evidence": "live",
+  "recorded_interpretation": null,
+  "representations": [
+    {
+      "id": "las",
+      "kind": "original",
+      "media_type": "application/x-las",
+      "profile": "las2/1",
+      "bytes": 311,
+      "sha256": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
+      "available": true,
+      "losses": []
+    },
+    {
+      "id": "curve",
+      "kind": "normalized",
+      "media_type": "application/json",
+      "profile": "ophiolite.application-curve/1",
+      "bytes": 1076,
+      "sha256": "81992992a1a15daac792bebf5979c51e0f8c3c1869a75a125999e6466e38bfba",
+      "available": true,
+      "losses": [
+        "Selected curve only; other LAS headers and curves remain in artifact"
+      ]
+    }
+  ],
+  "retention": {
+    "mode": "upstream-only",
+    "policy": "upstream current bytes only",
+    "historical_reads": "not-guaranteed"
+  },
+  "parents": [],
+  "provenance": {
+    "evidence": "source-declared",
+    "method": null,
+    "code_reference": null,
+    "environment_reference": null,
+    "omissions": [
+      "Synthetic offline fixture, not a server publication",
+      "No independently verified execution environment"
+    ]
+  },
+  "supported_operations": [
+    "read",
+    "export",
+    "use-as-input"
+  ],
+  "authorization": {
+    "status": "not-evaluated"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "schema": "ophiolite.connector-semantics/1",
+  "assessment_states": ["not-assessed", "assessed-no-loss", "assessed-with-loss"],
+  "assessment_scopes": ["source-representation", "byte-preservation", "edited-representation", "scientific-meaning"],
+  "policy_actions": ["read", "export", "retain", "redistribute"],
+  "profiles": {
+    "las2/1": {"scientific_profile": "well-log-source/1", "source_schema": "LAS/2.0", "mapping_version": "las-source/1", "history": "current-only"},
+    "geotiff/1": {"scientific_profile": "raster-source/1", "source_schema": "GeoTIFF/single-band", "mapping_version": "geotiff-source/1", "history": "current-only"},
+    "edited-wells/1": {"scientific_profile": "well-location/1", "source_schema": "ophiolite.edited-wells/1", "mapping_version": "edited-wells/1", "history": "retained-exact-read"},
+    "sql-wells/1": {"scientific_profile": "well-location/1", "source_schema": "schema-digest", "mapping_version": "customer-mapping", "history": "current-only"},
+    "osdu-record/1": {"scientific_profile": "well-record-source/1", "source_schema": "exact-approved-kind", "mapping_version": "osdu-record-reader/1", "history": "upstream-exact-read"},
+    "osdu-welllog-parquet/1": {"scientific_profile": "well-log-source/1", "source_schema": "exact-approved-kind", "mapping_version": "osdu-welllog-reader/1", "history": "upstream-exact-read"},
+    "native-external/1": {"scientific_profile": "native-external-snapshot/1", "source_schema": "arraybridge.v1.ExternalSnapshot", "mapping_version": "caller-declared", "history": "not-assessed"}
+  },
+  "policy_defaults": {"retained": false, "retention_permitted": false, "redistribution_permitted": false, "audience": []},
+  "identity": {"entity": "source namespace plus explicit stable entity key; never name or coordinate inference", "revision": "exact source revision; opaque string", "representation": "profile plus payload SHA-256; does not create a new authority"},
+  "projection": {"required_context": ["source_identity", "exact_revision", "scientific_profile", "mapping_version", "units", "null_semantics", "provenance"], "writeback": "explicit separate publication only"}
+}

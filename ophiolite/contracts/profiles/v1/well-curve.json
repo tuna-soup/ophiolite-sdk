@@ -1,0 +1,16 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "ophiolite/well-curve/1",
+  "kind": "normalized",
+  "lifecycle": "preview",
+  "display_name": "Ordered well curve (native exchange)",
+  "description": "A curve on strictly increasing measured depth in metres with an explicit well identity and depth datum; the native protobuf exchange form.",
+  "payload_schema": "ophiolite/well-curve/1",
+  "role": "normalized",
+  "media_types": [
+    "application/json"
+  ],
+  "mapped_from": [
+    "ophiolite.mapping/application-curve-to-well-curve/1"
+  ]
+}
