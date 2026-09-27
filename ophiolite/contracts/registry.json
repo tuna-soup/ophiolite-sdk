@@ -141,7 +141,7 @@
     },
     {
       "id": "ophiolite.portable-bundle/2",
-      "version": "2.3.0",
+      "version": "2.4.0",
       "lifecycle": "preview",
       "path": "bundles/v2/manifest-schema.json",
       "title": "PortableBundleManifestV2",

@@ -547,6 +547,8 @@ class PortableBundleManifestV2(Contract):
     limits: PortableBundleManifestV2Limits = Field(...)
     notice: Annotated[str, Field(min_length=1)] = Field(...)
     observations: PortableBundleManifestV2Observations = Field(None)
+    entities: Annotated[list[PortableBundleManifestV2EntitiesItem], Field(max_length=256)] = Field(None)
+    relationships: Annotated[list[PortableBundleManifestV2RelationshipsItem], Field(max_length=2048)] = Field(None)
 
 class BundleSelectedV2(Contract):
     asset_id: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
@@ -839,6 +841,18 @@ class PortableBundleManifestV2Observations(Contract):
     groups: Annotated[list[BundleGroupV2], Field(max_length=128)] = Field(None)
     groups_omitted: Annotated[str, Field(min_length=1, max_length=200)] = Field(None)
 
+class PortableBundleManifestV2EntitiesItem(Contract):
+    entity_id: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
+    kind: Literal['well', 'wellbore'] = Field(...)
+    name: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
+    identity: PortableBundleManifestV2EntitiesItemIdentity = Field(...)
+
+class PortableBundleManifestV2RelationshipsItem(Contract):
+    predicate: str = Field(...)
+    subject: PortableBundleManifestV2RelationshipsItemSubject = Field(...)
+    object: PortableBundleManifestV2RelationshipsItemObject = Field(...)
+    evidence: None | PortableBundleManifestV2RelationshipsItemEvidence1 = Field(...)
+
 class BundleAssetV2Relationships(Contract):
     well_log: None | Literal['restricted'] | BundleAssetV2RelationshipsWell_Log2 = Field(None)
 
@@ -859,9 +873,34 @@ class RepresentationRulesArtifact_Kind_By_Origin(Contract):
     retained_capture: Literal['original', 'captured-result', 'derived-artifact'] = Field(..., alias='retained-capture')
     managed_derived: Literal['original', 'captured-result', 'derived-artifact'] = Field(..., alias='managed-derived')
 
+class PortableBundleManifestV2EntitiesItemIdentity(Contract):
+    authority: str | None = Field(...)
+    key: str | None = Field(...)
+    provisional: bool = Field(...)
+
+class PortableBundleManifestV2RelationshipsItemSubject(Contract):
+    kind: Literal['revision', 'well', 'wellbore'] = Field(...)
+    asset_id: str = Field(None)
+    revision: str = Field(None)
+    entity_id: str = Field(None)
+
+class PortableBundleManifestV2RelationshipsItemObject(Contract):
+    kind: Literal['revision', 'well', 'wellbore'] = Field(...)
+    asset_id: str = Field(None)
+    revision: str = Field(None)
+    entity_id: str = Field(None)
+
+class PortableBundleManifestV2RelationshipsItemEvidence1(Contract):
+    source: PortableBundleManifestV2RelationshipsItemEvidence1Source = Field(None)
+    statement: Annotated[str, Field(max_length=500)] = Field(None)
+
 class BundleAssetV2RelationshipsWell_Log2(Contract):
     asset_id: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
     revision: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
+
+class PortableBundleManifestV2RelationshipsItemEvidence1Source(Contract):
+    asset_id: str = Field(...)
+    revision: str = Field(...)
 
 ScientificContext.model_rebuild()
 ApplicationCurve.model_rebuild()
@@ -965,8 +1004,15 @@ BundleGroupRecommended1.model_rebuild()
 PortableBundleManifestV2Exporter.model_rebuild()
 PortableBundleManifestV2Limits.model_rebuild()
 PortableBundleManifestV2Observations.model_rebuild()
+PortableBundleManifestV2EntitiesItem.model_rebuild()
+PortableBundleManifestV2RelationshipsItem.model_rebuild()
 BundleAssetV2Relationships.model_rebuild()
 BundleAssetV2Original.model_rebuild()
 BundleGroupV2Recommended1.model_rebuild()
 RepresentationRulesArtifact_Kind_By_Origin.model_rebuild()
+PortableBundleManifestV2EntitiesItemIdentity.model_rebuild()
+PortableBundleManifestV2RelationshipsItemSubject.model_rebuild()
+PortableBundleManifestV2RelationshipsItemObject.model_rebuild()
+PortableBundleManifestV2RelationshipsItemEvidence1.model_rebuild()
 BundleAssetV2RelationshipsWell_Log2.model_rebuild()
+PortableBundleManifestV2RelationshipsItemEvidence1Source.model_rebuild()

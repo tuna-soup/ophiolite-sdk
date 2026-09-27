@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/bundles/v2/manifest-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.portable-bundle/2",
-    "version": "2.3.0",
+    "version": "2.4.0",
     "lifecycle": "preview"
   },
   "title": "PortableBundleManifestV2",
@@ -123,6 +123,168 @@
           "minLength": 1,
           "maxLength": 200,
           "description": "Why groups were not observed (for example, the exporting credential may not list them); never silently empty."
+        }
+      }
+    },
+    "entities": {
+      "type": "array",
+      "maxItems": 256,
+      "description": "2.4 (E20): the wells and wellbores exported revisions are associated with, as the exporter could read them. Present together with relationships.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "entity_id",
+          "kind",
+          "name",
+          "identity"
+        ],
+        "properties": {
+          "entity_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "kind": {
+            "enum": [
+              "well",
+              "wellbore"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "identity": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "authority",
+              "key",
+              "provisional"
+            ],
+            "properties": {
+              "authority": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "key": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "provisional": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    },
+    "relationships": {
+      "type": "array",
+      "maxItems": 2048,
+      "description": "2.4 (E20): registered associations (relationships/v1/registry.json) between exported exact revisions and listed entities; readers refuse any other.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "predicate",
+          "subject",
+          "object",
+          "evidence"
+        ],
+        "properties": {
+          "predicate": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "revision",
+                  "well",
+                  "wellbore"
+                ]
+              },
+              "asset_id": {
+                "type": "string"
+              },
+              "revision": {
+                "type": "string"
+              },
+              "entity_id": {
+                "type": "string"
+              }
+            }
+          },
+          "object": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "revision",
+                  "well",
+                  "wellbore"
+                ]
+              },
+              "asset_id": {
+                "type": "string"
+              },
+              "revision": {
+                "type": "string"
+              },
+              "entity_id": {
+                "type": "string"
+              }
+            }
+          },
+          "evidence": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "source": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "asset_id",
+                      "revision"
+                    ],
+                    "properties": {
+                      "asset_id": {
+                        "type": "string"
+                      },
+                      "revision": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "statement": {
+                    "type": "string",
+                    "maxLength": 500
+                  }
+                }
+              }
+            ]
+          }
         }
       }
     }

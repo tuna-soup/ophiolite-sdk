@@ -751,6 +751,38 @@ export type PortableBundleManifestV2 = {
     groups?: BundleGroupV2[];
     groups_omitted?: string;
   };
+  entities?: ({
+    entity_id: string;
+    kind: "well" | "wellbore";
+    name: string;
+    identity: {
+      authority: string | null;
+      key: string | null;
+      provisional: boolean;
+    };
+  })[];
+  relationships?: ({
+    predicate: string;
+    subject: {
+      kind: "revision" | "well" | "wellbore";
+      asset_id?: string;
+      revision?: string;
+      entity_id?: string;
+    };
+    object: {
+      kind: "revision" | "well" | "wellbore";
+      asset_id?: string;
+      revision?: string;
+      entity_id?: string;
+    };
+    evidence: null | {
+      source?: {
+        asset_id: string;
+        revision: string;
+      };
+      statement?: string;
+    };
+  })[];
 };
 
 export type Stick = {
