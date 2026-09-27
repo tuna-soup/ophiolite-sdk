@@ -313,7 +313,8 @@ class Client:
             try:result=self._post(area,'share',body)
             except ShareOutcomeUnknown:result=self._post(area,'share',body)  # identical replay: idempotent or refused
         parsed=planning.parse(UploadResult,result) if uploaded else planning.parse_result(result)
-        if parsed.asset_id!=asset['asset_id'] or parsed.revision!=asset['revision']:raise VerificationFailed('Sharing returned a different exact asset.')
+        # Recipients belong to a result as a whole (every version, E8); an upload has one revision.
+        if parsed.asset_id!=asset['asset_id'] or uploaded and parsed.revision!=asset['revision']:raise VerificationFailed('Sharing returned a different exact asset.')
         return parsed
 
     def bindings(self):

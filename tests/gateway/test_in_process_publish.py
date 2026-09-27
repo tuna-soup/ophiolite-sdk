@@ -184,3 +184,16 @@ def test_sdk_export_freezes_exact_revisions_and_applies_permissions(web,kind,tmp
     with pytest.raises((PermissionRefused,Unavailable)):alice.export([(key,r2,['GR']),(key,r1,['GR'])],tmp_path/'withdrawn')
     assert not (tmp_path/'withdrawn').exists() and not list(tmp_path.glob('.withdrawn.staging-*'))
     assert open_bundle(tmp_path/'both').assets[0].revision==r1  # an earlier export stays readable offline
+
+
+@pytest.mark.parametrize('kind',['delegate'])
+def test_sdk_shares_a_result_through_any_of_its_versions(web,kind):
+    alice,bob=client(web,'alice',kind),client(web,'bob',kind)
+    def publish(command,value,**kw):
+        binding=alice.configure(release_id=web.r['id'],curve='GR',name='SDK share versions',runners=['alice'],command_id='s-'+command,publication_profile='curve-edits/1')
+        run=alice.start(binding,application_version='sdk-share/'+command,parameters={},command_id='s-run-'+command);run.input()
+        return alice.publish(run,changes=[{'index':0,'value':value}],**kw)
+    first=publish('1',2);second=publish('2',4,new_version_of=first)
+    snapshot=alice.grants(second)
+    alice.share(second,read=['bob'],expected_generation=snapshot.generation)
+    assert [h.number for h in bob.history(second).revisions]==[1,2]
