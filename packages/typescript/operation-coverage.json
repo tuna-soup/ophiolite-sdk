@@ -516,6 +516,60 @@
     "response": "explicitly-untyped"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/entities/assets",
+    "function": "postProjectsProjectEntitiesAssets",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/entities/associate",
+    "function": "postProjectsProjectEntitiesAssociate",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/entities/create",
+    "function": "postProjectsProjectEntitiesCreate",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/entities/dissociate",
+    "function": "postProjectsProjectEntitiesDissociate",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/entities/get",
+    "function": "postProjectsProjectEntitiesGet",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/entities/identify",
+    "function": "postProjectsProjectEntitiesIdentify",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/entities/lineage",
+    "function": "postProjectsProjectEntitiesLineage",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/entities/list",
+    "function": "postProjectsProjectEntitiesList",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/entities/share",
+    "function": "postProjectsProjectEntitiesShare",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/inbox/list",
     "function": "postProjectsProjectInboxList",
     "request": "explicitly-untyped",

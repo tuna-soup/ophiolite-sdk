@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/relationships/v1/lineage-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.lineage/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "ManagedReference": {
+      "additionalProperties": false,
+      "properties": {
+        "authority": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Authority",
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "profile": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Profile"
+        }
+      },
+      "required": [
+        "authority",
+        "key",
+        "revision"
+      ],
+      "title": "ManagedReference",
+      "type": "object"
+    },
+    "Reference": {
+      "additionalProperties": false,
+      "properties": {
+        "authority": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Authority",
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "profile": {
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+          "title": "Profile",
+          "type": "string"
+        }
+      },
+      "required": [
+        "authority",
+        "key",
+        "revision",
+        "profile"
+      ],
+      "title": "Reference",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "One hop each way from an exact revision. Unreadable neighbours are counted as restricted only\nthrough the visibility flags, never listed.",
+  "properties": {
+    "schema": {
+      "const": "ophiolite.lineage/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "asset_id": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "revision": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Revision",
+      "type": "string"
+    },
+    "parents": {
+      "items": {
+        "$ref": "#/$defs/Reference"
+      },
+      "maxItems": 32,
+      "title": "Parents",
+      "type": "array"
+    },
+    "parent_visibility": {
+      "enum": [
+        "complete",
+        "restricted"
+      ],
+      "title": "Parent Visibility",
+      "type": "string"
+    },
+    "derivations": {
+      "items": {
+        "$ref": "#/$defs/ManagedReference"
+      },
+      "maxItems": 100,
+      "title": "Derivations",
+      "type": "array"
+    },
+    "derivation_visibility": {
+      "enum": [
+        "complete",
+        "restricted"
+      ],
+      "title": "Derivation Visibility",
+      "type": "string"
+    },
+    "supersedes": {
+      "items": {
+        "$ref": "#/$defs/ManagedReference"
+      },
+      "maxItems": 8,
+      "title": "Supersedes",
+      "type": "array"
+    },
+    "superseded_by": {
+      "items": {
+        "$ref": "#/$defs/ManagedReference"
+      },
+      "maxItems": 8,
+      "title": "Superseded By",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema",
+    "asset_id",
+    "revision",
+    "parents",
+    "parent_visibility",
+    "derivations",
+    "derivation_visibility",
+    "supersedes",
+    "superseded_by"
+  ],
+  "title": "Lineage",
+  "type": "object"
+}

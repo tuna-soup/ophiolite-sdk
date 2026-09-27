@@ -1,0 +1,200 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/entities/v1/entity-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.entity/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "EntityRef": {
+      "additionalProperties": false,
+      "properties": {
+        "entity_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$",
+          "title": "Entity Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "well",
+            "wellbore"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "entity_id",
+        "kind",
+        "name"
+      ],
+      "title": "EntityRef",
+      "type": "object"
+    },
+    "Identity": {
+      "additionalProperties": false,
+      "description": "External (authority, key) declared by a person, or provisional (both null).",
+      "properties": {
+        "authority": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Authority"
+        },
+        "key": {
+          "anyOf": [
+            {
+              "maxLength": 160,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Key"
+        },
+        "provisional": {
+          "title": "Provisional",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "provisional"
+      ],
+      "title": "Identity",
+      "type": "object"
+    },
+    "IdentityChange": {
+      "additionalProperties": false,
+      "properties": {
+        "actor": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Actor",
+          "type": "string"
+        },
+        "at": {
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+          "title": "At",
+          "type": "string"
+        },
+        "before": {
+          "$ref": "#/$defs/Identity"
+        },
+        "after": {
+          "$ref": "#/$defs/Identity"
+        }
+      },
+      "required": [
+        "actor",
+        "at",
+        "before",
+        "after"
+      ],
+      "title": "IdentityChange",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "ophiolite.entity/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "entity_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$",
+      "title": "Entity Id",
+      "type": "string"
+    },
+    "project_id": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Project Id",
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "well",
+        "wellbore"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 160,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "identity": {
+      "$ref": "#/$defs/Identity"
+    },
+    "part_of": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/EntityRef"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "parts": {
+      "items": {
+        "$ref": "#/$defs/EntityRef"
+      },
+      "maxItems": 500,
+      "title": "Parts",
+      "type": "array"
+    },
+    "owner": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Owner",
+      "type": "string"
+    },
+    "generation": {
+      "minimum": 1,
+      "title": "Generation",
+      "type": "integer"
+    },
+    "history": {
+      "items": {
+        "$ref": "#/$defs/IdentityChange"
+      },
+      "maxItems": 64,
+      "title": "History",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema",
+    "entity_id",
+    "project_id",
+    "kind",
+    "name",
+    "identity",
+    "owner",
+    "generation"
+  ],
+  "title": "Entity",
+  "type": "object"
+}

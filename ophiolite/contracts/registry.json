@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.13.0",
+  "version": "1.14.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -21,7 +21,7 @@
   "schemas": [
     {
       "id": "ophiolite.contracts-registry/1",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "lifecycle": "preview",
       "path": "registry-schema.json",
       "title": "ContractsRegistry",
@@ -170,6 +170,38 @@
       "path": "assets/v1/seismic-slice-schema.json",
       "title": "SeismicSlice",
       "description": "One inline, crossline or sample slice of a seismic volume at an exact revision, with exact samples and its declared scope."
+    },
+    {
+      "id": "ophiolite.relationship-registry/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "relationships/v1/registry-schema.json",
+      "title": "RelationshipRegistry",
+      "description": "The registered relationship predicates: class, joined kinds, cardinality, exact-revision binding, asserting party and required evidence (E20)."
+    },
+    {
+      "id": "ophiolite.entity/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "entities/v1/entity-schema.json",
+      "title": "Entity",
+      "description": "A well or wellbore with an external or explicitly provisional identity, its part-of link and identity history (E20)."
+    },
+    {
+      "id": "ophiolite.entity-assets/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "entities/v1/entity-assets-schema.json",
+      "title": "EntityAssets",
+      "description": "The exact revisions associated with an entity that the caller may read, with the evidence of each association (E20)."
+    },
+    {
+      "id": "ophiolite.lineage/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "relationships/v1/lineage-schema.json",
+      "title": "Lineage",
+      "description": "One hop each way from an exact revision: parents, derivations and superseded revisions the caller may read (E20)."
     }
   ],
   "profiles": [
@@ -686,6 +718,12 @@
       "path": "assets/v1/fixtures/points.json",
       "title": "Synthetic retained points descriptor (E11)",
       "schema": "ophiolite.scientific-asset/1"
+    },
+    {
+      "id": "ophiolite.relationships/1",
+      "kind": "relationships",
+      "path": "relationships/v1/registry.json",
+      "title": "Relationship predicate registry (E20): the only predicates Ophiolite accepts"
     }
   ]
 }

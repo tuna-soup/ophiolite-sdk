@@ -601,6 +601,63 @@ class BundleSliceV2(Contract):
     shape: Annotated[list[Annotated[int, Field(ge=1)]], Field(min_length=2, max_length=2)] = Field(...)
     scope: Annotated[str, Field(min_length=1, max_length=500)] = Field(...)
 
+class EntityAssets(Contract):
+    schema_: Literal['ophiolite.entity-assets/1'] = Field(..., alias='schema')
+    entity: EntityRef = Field(...)
+    items: Annotated[list[AssociatedRevision], Field(max_length=100)] = Field(...)
+    next_cursor: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(None)
+
+class AssociatedRevision(Contract):
+    asset_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    profile: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    name: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    association: Association = Field(...)
+
+class Association(Contract):
+    assertion_id: Annotated[str, Field(pattern='^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$')] = Field(...)
+    predicate: Literal['of-entity'] = Field(...)
+    evidence: Evidence = Field(...)
+    asserted_by: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    asserted_at: Annotated[str, Field(pattern='^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$')] = Field(...)
+
+class EntityRef(Contract):
+    entity_id: Annotated[str, Field(pattern='^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$')] = Field(...)
+    kind: Literal['well', 'wellbore'] = Field(...)
+    name: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
+
+class Evidence(Contract):
+    source: SourceRevision | None = Field(None)
+    statement: Annotated[str, Field(min_length=1, max_length=500)] | None = Field(None)
+
+class SourceRevision(Contract):
+    asset_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+
+class Entity(Contract):
+    schema_: Literal['ophiolite.entity/1'] = Field(..., alias='schema')
+    entity_id: Annotated[str, Field(pattern='^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$')] = Field(...)
+    project_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    kind: Literal['well', 'wellbore'] = Field(...)
+    name: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
+    identity: Identity = Field(...)
+    part_of: EntityRef | None = Field(None)
+    parts: Annotated[list[EntityRef], Field(max_length=500)] = Field(None)
+    owner: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    generation: Annotated[int, Field(ge=1)] = Field(...)
+    history: Annotated[list[IdentityChange], Field(max_length=64)] = Field(None)
+
+class Identity(Contract):
+    authority: Annotated[str, Field(pattern='^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$')] | None = Field(None)
+    key: Annotated[str, Field(min_length=1, max_length=160)] | None = Field(None)
+    provisional: bool = Field(...)
+
+class IdentityChange(Contract):
+    actor: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    at: Annotated[str, Field(pattern='^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$')] = Field(...)
+    before: Identity = Field(...)
+    after: Identity = Field(...)
+
 class ContractProfile(Contract):
     schema_: Literal['ophiolite.contract-profile/1'] = Field(..., alias='schema')
     id: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] = Field(...)
@@ -675,10 +732,50 @@ class ProfileEntry(Contract):
 
 class DocumentEntry(Contract):
     id: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] = Field(...)
-    kind: Literal['mapping', 'vocabulary', 'generated', 'openapi', 'fixture', 'capability'] = Field(...)
+    kind: Literal['mapping', 'vocabulary', 'generated', 'openapi', 'fixture', 'capability', 'relationships'] = Field(...)
     path: Annotated[str, Field(min_length=1)] = Field(...)
     title: Annotated[str, Field(min_length=1)] = Field(None)
     schema_: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$')] = Field(None, alias='schema')
+
+class Lineage(Contract):
+    schema_: Literal['ophiolite.lineage/1'] = Field(..., alias='schema')
+    asset_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    parents: Annotated[list[Reference], Field(max_length=32)] = Field(...)
+    parent_visibility: Literal['complete', 'restricted'] = Field(...)
+    derivations: Annotated[list[ManagedReference], Field(max_length=100)] = Field(...)
+    derivation_visibility: Literal['complete', 'restricted'] = Field(...)
+    supersedes: Annotated[list[ManagedReference], Field(max_length=8)] = Field(...)
+    superseded_by: Annotated[list[ManagedReference], Field(max_length=8)] = Field(...)
+
+class ManagedReference(Contract):
+    authority: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    key: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    profile: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(None)
+
+class RelationshipRegistry(Contract):
+    schema_: Literal['ophiolite.relationship-registry/1'] = Field(..., alias='schema')
+    version: Annotated[str, Field(pattern='^[0-9]+\\.[0-9]+\\.[0-9]+$')] = Field(...)
+    kinds: Annotated[list[RegistryKind], Field(min_length=1, max_length=16)] = Field(...)
+    predicates: Annotated[list[Predicate], Field(min_length=1, max_length=64)] = Field(...)
+
+class Predicate(Contract):
+    id: Annotated[str, Field(pattern='^[a-z][a-z-]{1,40}$')] = Field(...)
+    class_: Literal['structural', 'data-association', 'scientific-assertion', 'derivation'] = Field(..., alias='class')
+    title: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    subject: Annotated[list[Literal['revision', 'well', 'wellbore', 'result-group']], Field(min_length=1, max_length=4)] = Field(...)
+    object: Annotated[list[Literal['revision', 'well', 'wellbore', 'result-group']], Field(min_length=1, max_length=4)] = Field(...)
+    per_subject_and_object_kind: Annotated[int, Field(ge=1)] | None = Field(...)
+    exact_revisions: bool = Field(...)
+    asserted_by: Literal['people', 'system'] = Field(...)
+    evidence: Literal['source-revision', 'declaration', 'run', 'command', 'system'] = Field(...)
+    status: Literal['active', 'projection'] = Field(...)
+    inverse: Annotated[str, Field(pattern='^[a-z][a-z-]{1,40}$')] = Field(...)
+
+class RegistryKind(Contract):
+    id: Literal['revision', 'well', 'wellbore', 'result-group'] = Field(...)
+    title: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
 
 class ScalarMap(Contract):
     kind: Literal['scalar-map'] = Field(...)
@@ -835,6 +932,15 @@ BundleHistoryV2.model_rebuild()
 BundleGroupV2.model_rebuild()
 BundleSliceChoice.model_rebuild()
 BundleSliceV2.model_rebuild()
+EntityAssets.model_rebuild()
+AssociatedRevision.model_rebuild()
+Association.model_rebuild()
+EntityRef.model_rebuild()
+Evidence.model_rebuild()
+SourceRevision.model_rebuild()
+Entity.model_rebuild()
+Identity.model_rebuild()
+IdentityChange.model_rebuild()
 ContractProfile.model_rebuild()
 ConnectorSemantics.model_rebuild()
 RepresentationRules.model_rebuild()
@@ -844,6 +950,11 @@ Lifecycle.model_rebuild()
 SchemaEntry.model_rebuild()
 ProfileEntry.model_rebuild()
 DocumentEntry.model_rebuild()
+Lineage.model_rebuild()
+ManagedReference.model_rebuild()
+RelationshipRegistry.model_rebuild()
+Predicate.model_rebuild()
+RegistryKind.model_rebuild()
 ScalarMap.model_rebuild()
 ScalarGrid.model_rebuild()
 WellCurve.model_rebuild()

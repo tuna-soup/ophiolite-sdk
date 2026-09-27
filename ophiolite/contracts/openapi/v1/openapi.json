@@ -5,7 +5,7 @@
     "version": "1.0.0-pilot",
     "description": "One public API for every project operation. Three credential kinds reach it: the browser session (opaque HttpOnly cookie plus the X-CSRF-Token proof and, on non-GET requests, the exact Origin), a project-scoped delegate lasting at most five minutes (Bearer oph_api_..., parent session and current native permissions remain mandatory), and a browser-approved provider grant (Bearer provider token plus X-Ophiolite-Application-Grant, capability 1: the scientific read resources and the applications route within its read/write scopes). A request that carries an Authorization header is a machine request and is refused with MACHINE_AUTH_REQUIRED when a cookie or Origin travels with it. Scope and capability are ceilings; every operation runs the same native permission checks whoever calls it. Not a stable SDK or unattended service-account contract.",
     "x-ophiolite-contracts": {
-      "registry_version": "1.13.0",
+      "registry_version": "1.14.0",
       "index": "/api/v1/contracts",
       "served_profiles": [
         "las2/1",
@@ -7693,6 +7693,616 @@
     "/api/v1/projects/{project}/context/save": {
       "post": {
         "summary": "Save the project scientific context policy",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Operation-specific JSON object; project_id must match the path where the row names a project."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/entities/assets": {
+      "post": {
+        "summary": "The exact revisions associated with a well or wellbore that you may read",
+        "description": "Scope read; accepted principals: session, delegate, agent; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Operation-specific JSON object; project_id must match the path where the row names a project."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/entities/associate": {
+      "post": {
+        "summary": "Assert a registered relationship with evidence (part-of, of-entity)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Operation-specific JSON object; project_id must match the path where the row names a project."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/entities/create": {
+      "post": {
+        "summary": "Create a well or wellbore with a declared external identity or as provisional",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Operation-specific JSON object; project_id must match the path where the row names a project."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/entities/dissociate": {
+      "post": {
+        "summary": "Revoke an association; its history is kept",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Operation-specific JSON object; project_id must match the path where the row names a project."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/entities/get": {
+      "post": {
+        "summary": "One well or wellbore with its identity, parts and identity history",
+        "description": "Scope read; accepted principals: session, delegate, agent; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Operation-specific JSON object; project_id must match the path where the row names a project."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/entities/identify": {
+      "post": {
+        "summary": "Attach an external identity to a provisional well or wellbore (audited)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Operation-specific JSON object; project_id must match the path where the row names a project."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/entities/lineage": {
+      "post": {
+        "summary": "One hop each way from an exact revision: parents, derivations, superseded revisions",
+        "description": "Scope read; accepted principals: session, delegate, agent; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Operation-specific JSON object; project_id must match the path where the row names a project."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/entities/list": {
+      "post": {
+        "summary": "Wells and wellbores you may read",
+        "description": "Scope read; accepted principals: session, delegate, agent; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Operation-specific JSON object; project_id must match the path where the row names a project."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/entities/share": {
+      "post": {
+        "summary": "Replace who may read a well or wellbore (compare-and-set)",
         "description": "Scope write; accepted principals: session, delegate; project extractor top.",
         "security": [
           {
@@ -28073,7 +28683,7 @@
       "ContractsRegistry": {
         "x-ophiolite": {
           "id": "ophiolite.contracts-registry/1",
-          "version": "1.1.0",
+          "version": "1.2.0",
           "lifecycle": "preview"
         },
         "title": "ContractsRegistry",
@@ -28278,7 +28888,8 @@
                     "generated",
                     "openapi",
                     "fixture",
-                    "capability"
+                    "capability",
+                    "relationships"
                   ]
                 },
                 "path": {

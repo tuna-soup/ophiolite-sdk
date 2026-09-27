@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/entities/v1/entity-assets-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.entity-assets/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "AssociatedRevision": {
+      "additionalProperties": false,
+      "properties": {
+        "asset_id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "profile": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Profile",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "association": {
+          "$ref": "#/$defs/Association"
+        }
+      },
+      "required": [
+        "asset_id",
+        "revision",
+        "profile",
+        "name",
+        "association"
+      ],
+      "title": "AssociatedRevision",
+      "type": "object"
+    },
+    "Association": {
+      "additionalProperties": false,
+      "properties": {
+        "assertion_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$",
+          "title": "Assertion Id",
+          "type": "string"
+        },
+        "predicate": {
+          "const": "of-entity",
+          "title": "Predicate",
+          "type": "string"
+        },
+        "evidence": {
+          "$ref": "#/$defs/Evidence"
+        },
+        "asserted_by": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Asserted By",
+          "type": "string"
+        },
+        "asserted_at": {
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+          "title": "Asserted At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "assertion_id",
+        "predicate",
+        "evidence",
+        "asserted_by",
+        "asserted_at"
+      ],
+      "title": "Association",
+      "type": "object"
+    },
+    "EntityRef": {
+      "additionalProperties": false,
+      "properties": {
+        "entity_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$",
+          "title": "Entity Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "well",
+            "wellbore"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "entity_id",
+        "kind",
+        "name"
+      ],
+      "title": "EntityRef",
+      "type": "object"
+    },
+    "Evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceRevision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "statement": {
+          "anyOf": [
+            {
+              "maxLength": 500,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Statement"
+        }
+      },
+      "title": "Evidence",
+      "type": "object"
+    },
+    "SourceRevision": {
+      "additionalProperties": false,
+      "properties": {
+        "asset_id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "asset_id",
+        "revision"
+      ],
+      "title": "SourceRevision",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "ophiolite.entity-assets/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "entity": {
+      "$ref": "#/$defs/EntityRef"
+    },
+    "items": {
+      "items": {
+        "$ref": "#/$defs/AssociatedRevision"
+      },
+      "maxItems": 100,
+      "title": "Items",
+      "type": "array"
+    },
+    "next_cursor": {
+      "anyOf": [
+        {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Next Cursor"
+    }
+  },
+  "required": [
+    "schema",
+    "entity",
+    "items"
+  ],
+  "title": "EntityAssets",
+  "type": "object"
+}

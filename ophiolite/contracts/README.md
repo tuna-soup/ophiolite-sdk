@@ -11,6 +11,8 @@ itself, so it can move to a public Contracts repository without renaming.
 | `profiles/v1/*.json`, `profile-schema.json` | one document per profile: display name, description, role, media types, rules |
 | `assets/v1/` | the scientific asset envelope, the normalized LAS curve, the curve context, the discovery summary, synthetic fixtures |
 | `scientific/v1/` | the two native protobuf exchange profiles and their structural schemas |
+| `relationships/v1/` | the relationship predicate registry (E20) and the lineage document schema |
+| `entities/v1/` | the entity (well, wellbore) and entity-assets schemas (E20) |
 | `connectors/v1/` | the connector semantics vocabulary, copied byte for byte into Connectors and pinned by digest there |
 | `tools/generate.py` | maintainer generator for every derived document |
 

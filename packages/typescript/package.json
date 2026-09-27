@@ -4,7 +4,7 @@
   "description": "Preview browser client for exact Ophiolite scientific revisions",
   "type": "module",
   "license": "Apache-2.0",
-  "exports": {".": "./dist/src/client.js", "./operations": "./dist/src/generated/operations.js", "./contracts": "./dist/src/generated/contracts.js"},
+  "exports": {".": "./dist/src/client.js", "./operations": "./dist/src/generated/operations.js", "./contracts": "./dist/src/generated/contracts.js", "./navigation": "./dist/src/generated/navigation.js"},
   "types": "./dist/src/client.d.ts",
   "files": ["dist/src", "README.md", "LICENSE", "NOTICE"],
   "scripts": {"build": "tsc", "test": "tsc && node --test dist/tests/*.test.js"},

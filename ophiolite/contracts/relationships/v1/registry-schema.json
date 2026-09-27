@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/relationships/v1/registry-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.relationship-registry/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "Predicate": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z-]{1,40}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "class": {
+          "enum": [
+            "structural",
+            "data-association",
+            "scientific-assertion",
+            "derivation"
+          ],
+          "title": "Class",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "subject": {
+          "items": {
+            "enum": [
+              "revision",
+              "well",
+              "wellbore",
+              "result-group"
+            ],
+            "type": "string"
+          },
+          "maxItems": 4,
+          "minItems": 1,
+          "title": "Subject",
+          "type": "array"
+        },
+        "object": {
+          "items": {
+            "enum": [
+              "revision",
+              "well",
+              "wellbore",
+              "result-group"
+            ],
+            "type": "string"
+          },
+          "maxItems": 4,
+          "minItems": 1,
+          "title": "Object",
+          "type": "array"
+        },
+        "per_subject_and_object_kind": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Per Subject And Object Kind"
+        },
+        "exact_revisions": {
+          "title": "Exact Revisions",
+          "type": "boolean"
+        },
+        "asserted_by": {
+          "enum": [
+            "people",
+            "system"
+          ],
+          "title": "Asserted By",
+          "type": "string"
+        },
+        "evidence": {
+          "enum": [
+            "source-revision",
+            "declaration",
+            "run",
+            "command",
+            "system"
+          ],
+          "title": "Evidence",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "active",
+            "projection"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "inverse": {
+          "pattern": "^[a-z][a-z-]{1,40}$",
+          "title": "Inverse",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "class",
+        "title",
+        "subject",
+        "object",
+        "per_subject_and_object_kind",
+        "exact_revisions",
+        "asserted_by",
+        "evidence",
+        "status",
+        "inverse"
+      ],
+      "title": "Predicate",
+      "type": "object"
+    },
+    "RegistryKind": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "enum": [
+            "revision",
+            "well",
+            "wellbore",
+            "result-group"
+          ],
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title"
+      ],
+      "title": "RegistryKind",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "ophiolite.relationship-registry/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "version": {
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "title": "Version",
+      "type": "string"
+    },
+    "kinds": {
+      "items": {
+        "$ref": "#/$defs/RegistryKind"
+      },
+      "maxItems": 16,
+      "minItems": 1,
+      "title": "Kinds",
+      "type": "array"
+    },
+    "predicates": {
+      "items": {
+        "$ref": "#/$defs/Predicate"
+      },
+      "maxItems": 64,
+      "minItems": 1,
+      "title": "Predicates",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema",
+    "version",
+    "kinds",
+    "predicates"
+  ],
+  "title": "RelationshipRegistry",
+  "type": "object"
+}

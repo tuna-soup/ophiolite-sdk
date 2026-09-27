@@ -2,7 +2,7 @@
 import type * as Contracts from "./contracts.js";
 import type * as API from "../api-types.js";
 import type { Transport, OperationOptions } from "../client.js";
-type WireContractsRegistry = { "schema": "ophiolite.contracts-registry/1"; "version": string; "title": string; "description": string; "id_grammar": string; "lifecycles": Array<{ "id": "preview" | "supported" | "deprecated"; "meaning": string }>; "schemas": Array<{ "id": string; "version": string; "lifecycle": "preview" | "supported" | "deprecated"; "path": string; "title": string; "description": string; "qualified_by"?: string; "cutoff"?: string; "replaced_by"?: string }>; "profiles": Array<{ "id": string; "kind": "source" | "normalized"; "display_name": string; "description": string; "lifecycle": "preview" | "supported" | "deprecated"; "path": string; "qualified_by"?: string; "cutoff"?: string; "replaced_by"?: string }>; "documents": Array<{ "id": string; "kind": "mapping" | "vocabulary" | "generated" | "openapi" | "fixture" | "capability"; "path": string; "title"?: string; "schema"?: string }> };
+type WireContractsRegistry = { "schema": "ophiolite.contracts-registry/1"; "version": string; "title": string; "description": string; "id_grammar": string; "lifecycles": Array<{ "id": "preview" | "supported" | "deprecated"; "meaning": string }>; "schemas": Array<{ "id": string; "version": string; "lifecycle": "preview" | "supported" | "deprecated"; "path": string; "title": string; "description": string; "qualified_by"?: string; "cutoff"?: string; "replaced_by"?: string }>; "profiles": Array<{ "id": string; "kind": "source" | "normalized"; "display_name": string; "description": string; "lifecycle": "preview" | "supported" | "deprecated"; "path": string; "qualified_by"?: string; "cutoff"?: string; "replaced_by"?: string }>; "documents": Array<{ "id": string; "kind": "mapping" | "vocabulary" | "generated" | "openapi" | "fixture" | "capability" | "relationships"; "path": string; "title"?: string; "schema"?: string }> };
 type WireDraftRef = { "id": string; "generation": number };
 type WireError = { "error": string; "code": string; [key: string]: unknown };
 type WireRef = { "project_id": string; "asset_id": string; "revision": string };
@@ -319,6 +319,42 @@ export function postProjectsProjectContextReturnPreview(transport: Transport, in
 export type postProjectsProjectContextSaveInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
 export function postProjectsProjectContextSave(transport: Transport, input: postProjectsProjectContextSaveInput): Promise<unknown> {
   return transport.request<unknown>("POST", "/api/v1/projects/{project}/context/save", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectEntitiesAssetsInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectEntitiesAssets(transport: Transport, input: postProjectsProjectEntitiesAssetsInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/entities/assets", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectEntitiesAssociateInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectEntitiesAssociate(transport: Transport, input: postProjectsProjectEntitiesAssociateInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/entities/associate", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectEntitiesCreateInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectEntitiesCreate(transport: Transport, input: postProjectsProjectEntitiesCreateInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/entities/create", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectEntitiesDissociateInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectEntitiesDissociate(transport: Transport, input: postProjectsProjectEntitiesDissociateInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/entities/dissociate", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectEntitiesGetInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectEntitiesGet(transport: Transport, input: postProjectsProjectEntitiesGetInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/entities/get", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectEntitiesIdentifyInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectEntitiesIdentify(transport: Transport, input: postProjectsProjectEntitiesIdentifyInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/entities/identify", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectEntitiesLineageInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectEntitiesLineage(transport: Transport, input: postProjectsProjectEntitiesLineageInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/entities/lineage", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectEntitiesListInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectEntitiesList(transport: Transport, input: postProjectsProjectEntitiesListInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/entities/list", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectEntitiesShareInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectEntitiesShare(transport: Transport, input: postProjectsProjectEntitiesShareInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/entities/share", input.path, undefined, input.body, input.options, null, false);
 }
 export type postProjectsProjectInboxListInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
 export function postProjectsProjectInboxList(transport: Transport, input: postProjectsProjectInboxListInput): Promise<unknown> {
