@@ -3,7 +3,7 @@
   "id": "typed-upload",
   "display_name": "Tops, survey and grid upload",
   "kind": "source",
-  "summary": "Upload well tops (CSV), a deviation survey (CSV) or a horizon grid (ESRI ASCII); declared context stays as declared.",
+  "summary": "Upload well tops, deviation surveys, horizon grids, triangulated surfaces or point sets; declared context stays as declared.",
   "host": {
     "name": "Web browser",
     "versions": [],
@@ -78,6 +78,47 @@
         ],
         "date": "2026-09-27",
         "evidence": "integration:docs/program-2026-09-25/E11-live-four-types.py"
+      }
+    },
+    {
+      "profile": "mesh-text/1",
+      "data": "Triangulated surface",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "Text formatting is kept only in the exact original"
+      ],
+      "unsupported": [
+        "CRS transformation",
+        "mesh editing",
+        "non-triangular faces"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    },
+    {
+      "profile": "points-csv/1",
+      "data": "Point set",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "Text formatting is kept only in the exact original"
+      ],
+      "unsupported": [
+        "CRS transformation",
+        "text attributes"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
       }
     }
   ],

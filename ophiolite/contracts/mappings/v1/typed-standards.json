@@ -2,7 +2,11 @@
   "schema": "ophiolite.standards-declaration/1",
   "id": "ophiolite.mapping/typed-standards/1",
   "status": "declaration only: no import or export to these standards is implemented; names are for orientation and future connectors",
-  "pinned": {"osdu": "OSDU Data Platform schemas M23 (well-known names)", "energistics": "RESQML 2.0.1, WITSML 2.1", "evo": "not declared: no public, version-pinned schema was verified for this checkpoint"},
+  "pinned": {
+    "osdu": "OSDU Data Platform schemas M23 (well-known names)",
+    "energistics": "RESQML 2.0.1, WITSML 2.1",
+    "evo": "not declared: no public, version-pinned schema was verified for this checkpoint"
+  },
   "types": [
     {
       "profile": "ophiolite.well-tops/1",
@@ -32,6 +36,25 @@
         "Axis-aligned lattice only (no rotation, single cell size); first row is the northmost as in ESRI ASCII grids.",
         "CRS is an EPSG code or unknown; no transformation is applied; vertical datum and positive direction are declarations.",
         "Differs from ophiolite/scalar-map/1 (native exchange): that profile has no registration, positive-direction or vertical-datum declaration and requires a declared CRS status; E11 does not convert between them."
+      ]
+    },
+    {
+      "profile": "ophiolite.triangulated-surface/1",
+      "osdu": "work-product-component--SeismicHorizon / generic surface (no direct OSDU storage schema declared)",
+      "energistics": "RESQML 2.0.1 TriangulatedSetRepresentation",
+      "differences": [
+        "One triangle patch; no split edges, faults or multiple patches.",
+        "Coordinates as written; the declared CRS is not transformed.",
+        "Attributes are numeric per-vertex values only."
+      ]
+    },
+    {
+      "profile": "ophiolite.point-set/1",
+      "osdu": "work-product-component--GenericRepresentation / point-set-like (no direct OSDU storage schema declared)",
+      "energistics": "RESQML 2.0.1 PointSetRepresentation",
+      "differences": [
+        "A single patch of points; no property kinds beyond numeric attributes.",
+        "Coordinates as written; the declared CRS is not transformed."
       ]
     }
   ],

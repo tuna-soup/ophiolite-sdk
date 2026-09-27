@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/bundles/v2/manifest-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.portable-bundle/2",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "lifecycle": "preview"
   },
   "title": "PortableBundleManifestV2",
@@ -287,7 +287,9 @@
             "well-log",
             "well-tops",
             "trajectory",
-            "regular-grid-surface"
+            "regular-grid-surface",
+            "triangulated-surface",
+            "point-set"
           ]
         },
         "relationships": {

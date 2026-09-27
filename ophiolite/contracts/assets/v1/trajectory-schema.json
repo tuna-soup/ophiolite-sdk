@@ -237,7 +237,9 @@
           "enum": [
             "well-tops/1",
             "trajectory/1",
-            "regular-grid-surface/1"
+            "regular-grid-surface/1",
+            "triangulated-surface/1",
+            "point-set/1"
           ],
           "title": "Mapping",
           "type": "string"

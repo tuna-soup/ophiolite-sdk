@@ -1,0 +1,8 @@
+# ophiolite-mesh 1
+attributes amplitude
+vertices
+0 0 100 1.5
+10 0 - -
+0 10 110 0
+triangles
+0 1 2

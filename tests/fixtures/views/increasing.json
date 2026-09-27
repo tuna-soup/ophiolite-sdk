@@ -256,7 +256,7 @@
     },
     "workspace_url": "https://workspace.example/project/synthetic-project/asset/sdk-view-fixture?revision=7730299fc435d7922e4e164d78f240848e9e758c847b2a3b0314a8c36a0f1e20&kind=scientific&curve=GR",
     "contracts": {
-      "registry_version": "1.11.0",
+      "registry_version": "1.12.0",
       "schema_ids": [
         "ophiolite.scientific-asset/1",
         "ophiolite.application-curve/1"

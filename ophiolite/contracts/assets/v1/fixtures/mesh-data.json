@@ -1,0 +1,93 @@
+{
+  "schema": "ophiolite.triangulated-surface/1",
+  "representation": "normalized",
+  "source": {
+    "authority": "ophiolite:uploaded",
+    "key": "synthetic-mesh",
+    "revision": "2428a0cef50c3e69bc8c970ac0d2327d1d5ffdab1b08e93984439b9b13278613",
+    "profile": "mesh-text/1"
+  },
+  "source_sha256": "2428a0cef50c3e69bc8c970ac0d2327d1d5ffdab1b08e93984439b9b13278613",
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "mapping": "triangulated-surface/1",
+    "parsing_policy": "typed-strict/1",
+    "null_policy": "empty cell or declared NODATA value is missing; never zero-filled"
+  },
+  "context": {
+    "type": "triangulated-surface",
+    "crs": "EPSG:28992",
+    "xy_unit": "unknown",
+    "z_unit": "m",
+    "z_meaning": "depth",
+    "positive": "down",
+    "vertical_datum": "unknown",
+    "vertex_count": 3,
+    "triangle_count": 1,
+    "attributes": [
+      "amplitude"
+    ],
+    "missing_z_count": 1,
+    "x_range": [
+      0.0,
+      10.0
+    ],
+    "y_range": [
+      0.0,
+      10.0
+    ],
+    "z_range": [
+      100.0,
+      110.0
+    ],
+    "fidelity": {
+      "status": "assessed",
+      "preserved": [
+        "every vertex and triangle in file order",
+        "missing z and attribute values as null",
+        "attribute names as written"
+      ],
+      "losses": [
+        "Text formatting (whitespace, quoting, line endings, number spelling) is kept only in the exact original"
+      ],
+      "unknown_context": [
+        "vertical_datum",
+        "xy_unit"
+      ]
+    }
+  },
+  "vertices": [
+    [
+      0.0,
+      0.0,
+      100.0
+    ],
+    [
+      10.0,
+      0.0,
+      null
+    ],
+    [
+      0.0,
+      10.0,
+      110.0
+    ]
+  ],
+  "triangles": [
+    [
+      0,
+      1,
+      2
+    ]
+  ],
+  "attributes": [
+    {
+      "name": "amplitude",
+      "values": [
+        1.5,
+        null,
+        0.0
+      ]
+    }
+  ]
+}

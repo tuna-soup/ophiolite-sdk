@@ -1,0 +1,82 @@
+{
+  "schema": "ophiolite.point-set/1",
+  "representation": "normalized",
+  "source": {
+    "authority": "ophiolite:uploaded",
+    "key": "synthetic-points",
+    "revision": "9f0095c2dfdc7fd26ad36f47c5c924bd6ea091848557168c9e6a31d0b50f753b",
+    "profile": "points-csv/1"
+  },
+  "source_sha256": "9f0095c2dfdc7fd26ad36f47c5c924bd6ea091848557168c9e6a31d0b50f753b",
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "mapping": "point-set/1",
+    "parsing_policy": "typed-strict/1",
+    "null_policy": "empty cell or declared NODATA value is missing; never zero-filled"
+  },
+  "context": {
+    "type": "point-set",
+    "crs": "EPSG:28992",
+    "xy_unit": "unknown",
+    "z_unit": "m",
+    "z_meaning": "unknown",
+    "positive": "unknown",
+    "vertical_datum": "unknown",
+    "count": 2,
+    "z_provided": true,
+    "attributes": [
+      "porosity"
+    ],
+    "missing_z_count": 1,
+    "x_range": [
+      1.0,
+      4.0
+    ],
+    "y_range": [
+      2.0,
+      5.0
+    ],
+    "z_range": [
+      3.0,
+      3.0
+    ],
+    "fidelity": {
+      "status": "assessed",
+      "preserved": [
+        "every point in file order",
+        "missing z and attribute values as null",
+        "attribute names as written"
+      ],
+      "losses": [
+        "Text formatting (whitespace, quoting, line endings, number spelling) is kept only in the exact original"
+      ],
+      "unknown_context": [
+        "positive",
+        "vertical_datum",
+        "xy_unit",
+        "z_meaning"
+      ]
+    }
+  },
+  "points": [
+    [
+      1.0,
+      2.0,
+      3.0
+    ],
+    [
+      4.0,
+      5.0,
+      null
+    ]
+  ],
+  "attributes": [
+    {
+      "name": "porosity",
+      "values": [
+        0.25,
+        0.0
+      ]
+    }
+  ]
+}

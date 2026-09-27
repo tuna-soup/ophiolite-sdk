@@ -36,8 +36,8 @@ def digest(raw):
 
 def schemas():
     """Publish the Pydantic-generated schemas listed in the registry."""
-    from project_gateway.scientific_assets import Asset, AssetSummary, Curve, ScientificContext, TypedContext, WellTops, Trajectory, GridSurface
-    for model in (Asset, Curve, ScientificContext, AssetSummary, TypedContext, WellTops, Trajectory, GridSurface):
+    from project_gateway.scientific_assets import Asset, AssetSummary, Curve, ScientificContext, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface, PointSet
+    for model in (Asset, Curve, ScientificContext, AssetSummary, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface, PointSet):
         write(CONTRACTS / model.CONTRACT['path'], model.model_json_schema())
 
 
@@ -107,6 +107,8 @@ def fixtures(target=FIX):
 TYPED = {
     'tops': ('well-tops-csv/1', 'text/csv', b'name,md,tvd,source\nTop Chalk,100.5,,picked\nBase Chalk,103,102.9,\n', {'depth_unit': 'M', 'depth_basis': 'same-as-log'}),
     'trajectory': ('deviation-csv/1', 'text/csv', b'md,inclination,azimuth\n100,0,0\n200,10,0\n300,,\n', {'depth_unit': 'M', 'azimuth_reference': 'grid-north'}),
+    'mesh': ('mesh-text/1', 'text/plain', b'# ophiolite-mesh 1\nattributes amplitude\nvertices\n0 0 100 1.5\n10 0 - -\n0 10 110 0\ntriangles\n0 1 2\n', {'crs': 'EPSG:28992', 'z_unit': 'm', 'z_meaning': 'depth', 'positive': 'down'}),
+    'points': ('points-csv/1', 'text/csv', b'x,y,z,porosity\n1,2,3,0.25\n4,5,,0\n', {'crs': 'EPSG:28992', 'z_unit': 'm'}),
     'grid': ('esri-ascii-grid/1', 'text/plain', b'ncols 3\nnrows 2\nxllcorner 1000\nyllcorner 5000\ncellsize 25\nNODATA_value -9999\n1 0 -9999\n4 5 6\n', {'crs': 'EPSG:28992', 'z_unit': 'm', 'z_meaning': 'depth', 'positive': 'down'}),
 }
 

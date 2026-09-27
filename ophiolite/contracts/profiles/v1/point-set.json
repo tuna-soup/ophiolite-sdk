@@ -1,0 +1,21 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "ophiolite.point-set/1",
+  "kind": "normalized",
+  "lifecycle": "preview",
+  "display_name": "Normalized point set",
+  "description": "Every point in file order (missing z null) with numeric attributes, extent and the declared CRS, units and vertical meaning.",
+  "payload_schema": "ophiolite.point-set/1",
+  "role": "normalized",
+  "media_types": [
+    "application/json"
+  ],
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "parsing_policy": "typed-strict/1",
+    "mapping": "point-set/1"
+  },
+  "mappings": [
+    "ophiolite.mapping/typed-standards/1"
+  ]
+}

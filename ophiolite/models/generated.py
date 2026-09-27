@@ -90,9 +90,40 @@ class GridContext(Contract):
 
 class TypedInterpretation(Contract):
     reader: Literal['asset_connectors.typed_reader/1'] = Field(...)
-    mapping: Literal['well-tops/1', 'trajectory/1', 'regular-grid-surface/1'] = Field(...)
+    mapping: Literal['well-tops/1', 'trajectory/1', 'regular-grid-surface/1', 'triangulated-surface/1', 'point-set/1'] = Field(...)
     parsing_policy: Literal['typed-strict/1'] = Field(...)
     null_policy: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+
+class PointSet(Contract):
+    representation: Literal['normalized'] = Field(...)
+    source: Reference = Field(...)
+    source_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    interpretation: TypedInterpretation = Field(...)
+    schema_: Literal['ophiolite.point-set/1'] = Field(..., alias='schema')
+    context: PointContext = Field(...)
+    points: Annotated[list[Annotated[list[float | None], Field(min_length=3, max_length=3)]], Field(min_length=1, max_length=100000)] = Field(...)
+    attributes: Annotated[list[Attribute], Field(max_length=16)] = Field(...)
+
+class Attribute(Contract):
+    name: Annotated[str, Field(pattern='^[A-Za-z][A-Za-z0-9_]{0,31}$')] = Field(...)
+    values: Annotated[list[float | None], Field(max_length=200000)] = Field(...)
+
+class PointContext(Contract):
+    crs: Annotated[str, Field(pattern='^(EPSG:[0-9]{4,6}|unknown)$')] = Field(...)
+    xy_unit: Annotated[str, Field(pattern='^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$')] = Field(...)
+    z_unit: Annotated[str, Field(pattern='^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$')] = Field(...)
+    z_meaning: Literal['depth', 'elevation', 'time', 'unknown'] = Field(...)
+    positive: Literal['up', 'down', 'unknown'] = Field(...)
+    vertical_datum: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+    x_range: Annotated[list[float], Field(min_length=2, max_length=2)] = Field(...)
+    y_range: Annotated[list[float], Field(min_length=2, max_length=2)] = Field(...)
+    z_range: Annotated[list[float], Field(min_length=2, max_length=2)] | None = Field(...)
+    attributes: Annotated[list[Annotated[str, Field(pattern='^[A-Za-z][A-Za-z0-9_]{0,31}$')]], Field(max_length=16)] = Field(...)
+    fidelity: Fidelity = Field(...)
+    type: Literal['point-set'] = Field(...)
+    count: Annotated[int, Field(ge=1, le=100000)] = Field(...)
+    z_provided: bool = Field(...)
+    missing_z_count: Annotated[int, Field(ge=0, le=100000)] = Field(...)
 
 class ScientificAsset(Contract):
     acquisition: Acquisition | None = Field(None)
@@ -108,7 +139,7 @@ class ScientificAsset(Contract):
     custodian: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(...)
     source_reference: Reference | None = Field(...)
     profile: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] = Field(...)
-    scientific: ScientificContext | TopsContext | TrajectoryContext | GridContext = Field(...)
+    scientific: ScientificContext | TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext = Field(...)
     interpretation: Interpretation | TypedInterpretation = Field(...)
     interpretation_evidence: Literal['live', 'recorded', 'recorded-differs', 'not-recorded'] = Field('live')
     recorded_interpretation: RecordedInterpretation | None = Field(None)
@@ -156,6 +187,23 @@ class History(Contract):
     count: Annotated[int, Field(ge=1)] = Field(...)
     head_revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     parent_revision: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(None)
+
+class MeshContext(Contract):
+    crs: Annotated[str, Field(pattern='^(EPSG:[0-9]{4,6}|unknown)$')] = Field(...)
+    xy_unit: Annotated[str, Field(pattern='^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$')] = Field(...)
+    z_unit: Annotated[str, Field(pattern='^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$')] = Field(...)
+    z_meaning: Literal['depth', 'elevation', 'time', 'unknown'] = Field(...)
+    positive: Literal['up', 'down', 'unknown'] = Field(...)
+    vertical_datum: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+    x_range: Annotated[list[float], Field(min_length=2, max_length=2)] = Field(...)
+    y_range: Annotated[list[float], Field(min_length=2, max_length=2)] = Field(...)
+    z_range: Annotated[list[float], Field(min_length=2, max_length=2)] | None = Field(...)
+    attributes: Annotated[list[Annotated[str, Field(pattern='^[A-Za-z][A-Za-z0-9_]{0,31}$')]], Field(max_length=16)] = Field(...)
+    fidelity: Fidelity = Field(...)
+    type: Literal['triangulated-surface'] = Field(...)
+    vertex_count: Annotated[int, Field(ge=3, le=200000)] = Field(...)
+    triangle_count: Annotated[int, Field(ge=1, le=400000)] = Field(...)
+    missing_z_count: Annotated[int, Field(ge=0, le=200000)] = Field(...)
 
 class NotEvaluated(Contract):
     status: Literal['not-evaluated'] = Field(...)
@@ -256,8 +304,19 @@ class Station(Contract):
     azimuth: Annotated[float, Field(ge=0, le=360)] | None = Field(...)
     tvd: float | None = Field(...)
 
+class TriangulatedSurface(Contract):
+    representation: Literal['normalized'] = Field(...)
+    source: Reference = Field(...)
+    source_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    interpretation: TypedInterpretation = Field(...)
+    schema_: Literal['ophiolite.triangulated-surface/1'] = Field(..., alias='schema')
+    context: MeshContext = Field(...)
+    vertices: Annotated[list[Annotated[list[float | None], Field(min_length=3, max_length=3)]], Field(min_length=3, max_length=200000)] = Field(...)
+    triangles: Annotated[list[Annotated[list[Annotated[int, Field(ge=0)]], Field(min_length=3, max_length=3)]], Field(min_length=1, max_length=400000)] = Field(...)
+    attributes: Annotated[list[Attribute], Field(max_length=16)] = Field(...)
+
 class TypedContext(Contract):
-    context: Annotated[TopsContext | TrajectoryContext | GridContext, Field(discriminator='type')] = Field(...)
+    context: Annotated[TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext, Field(discriminator='type')] = Field(...)
 
 class WellTops(Contract):
     representation: Literal['normalized'] = Field(...)
@@ -370,7 +429,7 @@ class BundleAssetV2(Contract):
     parent_visibility: Literal['complete', 'restricted'] = Field(...)
     omissions: list[str] = Field(...)
     losses: list[str] = Field(...)
-    type: Literal['well-log', 'well-tops', 'trajectory', 'regular-grid-surface'] = Field(...)
+    type: Literal['well-log', 'well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set'] = Field(...)
     relationships: BundleAssetV2Relationships = Field(None)
 
 class BundleHistoryV2(Contract):
@@ -555,11 +614,15 @@ GridSurface.model_rebuild()
 Fidelity.model_rebuild()
 GridContext.model_rebuild()
 TypedInterpretation.model_rebuild()
+PointSet.model_rebuild()
+Attribute.model_rebuild()
+PointContext.model_rebuild()
 ScientificAsset.model_rebuild()
 Acquisition.model_rebuild()
 Display.model_rebuild()
 Evaluated.model_rebuild()
 History.model_rebuild()
+MeshContext.model_rebuild()
 NotEvaluated.model_rebuild()
 Person.model_rebuild()
 Provenance.model_rebuild()
@@ -574,6 +637,7 @@ WellLogLink.model_rebuild()
 AssetSummary.model_rebuild()
 Trajectory.model_rebuild()
 Station.model_rebuild()
+TriangulatedSurface.model_rebuild()
 TypedContext.model_rebuild()
 WellTops.model_rebuild()
 Top.model_rebuild()

@@ -1,12 +1,43 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ophiolite.dev/contracts/assets/v1/grid-surface-schema.json",
+  "$id": "https://ophiolite.dev/contracts/assets/v1/triangulated-surface-schema.json",
   "x-ophiolite": {
-    "id": "ophiolite.regular-grid-surface/1",
+    "id": "ophiolite.triangulated-surface/1",
     "version": "1.0.0",
     "lifecycle": "preview"
   },
   "$defs": {
+    "Attribute": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_]{0,31}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "values": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "maxItems": 200000,
+          "title": "Values",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "values"
+      ],
+      "title": "Attribute",
+      "type": "object"
+    },
     "Fidelity": {
       "additionalProperties": false,
       "properties": {
@@ -55,14 +86,9 @@
       "title": "Fidelity",
       "type": "object"
     },
-    "GridContext": {
+    "MeshContext": {
       "additionalProperties": false,
       "properties": {
-        "type": {
-          "const": "regular-grid-surface",
-          "title": "Type",
-          "type": "string"
-        },
         "crs": {
           "pattern": "^(EPSG:[0-9]{4,6}|unknown)$",
           "title": "Crs",
@@ -103,51 +129,25 @@
           "title": "Vertical Datum",
           "type": "string"
         },
-        "registration": {
-          "enum": [
-            "corner",
-            "center"
-          ],
-          "title": "Registration",
-          "type": "string"
+        "x_range": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "title": "X Range",
+          "type": "array"
         },
-        "row_order": {
-          "const": "north-to-south",
-          "title": "Row Order",
-          "type": "string"
+        "y_range": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "title": "Y Range",
+          "type": "array"
         },
-        "ncols": {
-          "maximum": 262144,
-          "minimum": 1,
-          "title": "Ncols",
-          "type": "integer"
-        },
-        "nrows": {
-          "maximum": 262144,
-          "minimum": 1,
-          "title": "Nrows",
-          "type": "integer"
-        },
-        "cell_size": {
-          "exclusiveMinimum": 0,
-          "title": "Cell Size",
-          "type": "number"
-        },
-        "x_first_center": {
-          "title": "X First Center",
-          "type": "number"
-        },
-        "y_first_center": {
-          "title": "Y First Center",
-          "type": "number"
-        },
-        "missing_count": {
-          "maximum": 262144,
-          "minimum": 0,
-          "title": "Missing Count",
-          "type": "integer"
-        },
-        "value_range": {
+        "z_range": {
           "anyOf": [
             {
               "items": {
@@ -161,32 +161,62 @@
               "type": "null"
             }
           ],
-          "title": "Value Range"
+          "title": "Z Range"
+        },
+        "attributes": {
+          "items": {
+            "pattern": "^[A-Za-z][A-Za-z0-9_]{0,31}$",
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Attributes",
+          "type": "array"
         },
         "fidelity": {
           "$ref": "#/$defs/Fidelity"
+        },
+        "type": {
+          "const": "triangulated-surface",
+          "title": "Type",
+          "type": "string"
+        },
+        "vertex_count": {
+          "maximum": 200000,
+          "minimum": 3,
+          "title": "Vertex Count",
+          "type": "integer"
+        },
+        "triangle_count": {
+          "maximum": 400000,
+          "minimum": 1,
+          "title": "Triangle Count",
+          "type": "integer"
+        },
+        "missing_z_count": {
+          "maximum": 200000,
+          "minimum": 0,
+          "title": "Missing Z Count",
+          "type": "integer"
         }
       },
       "required": [
-        "type",
         "crs",
         "xy_unit",
         "z_unit",
         "z_meaning",
         "positive",
         "vertical_datum",
-        "registration",
-        "row_order",
-        "ncols",
-        "nrows",
-        "cell_size",
-        "x_first_center",
-        "y_first_center",
-        "missing_count",
-        "value_range",
-        "fidelity"
+        "x_range",
+        "y_range",
+        "z_range",
+        "attributes",
+        "fidelity",
+        "type",
+        "vertex_count",
+        "triangle_count",
+        "missing_z_count"
       ],
-      "title": "GridContext",
+      "title": "MeshContext",
       "type": "object"
     },
     "Reference": {
@@ -287,39 +317,56 @@
       "$ref": "#/$defs/TypedInterpretation"
     },
     "schema": {
-      "const": "ophiolite.regular-grid-surface/1",
+      "const": "ophiolite.triangulated-surface/1",
       "title": "Schema",
       "type": "string"
     },
     "context": {
-      "$ref": "#/$defs/GridContext"
+      "$ref": "#/$defs/MeshContext"
     },
-    "values": {
+    "vertices": {
       "items": {
-        "anyOf": [
-          {
-            "type": "number"
-          },
-          {
-            "type": "null"
-          }
-        ]
+        "items": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "maxItems": 3,
+        "minItems": 3,
+        "type": "array"
       },
-      "maxItems": 262144,
-      "minItems": 1,
-      "title": "Values",
+      "maxItems": 200000,
+      "minItems": 3,
+      "title": "Vertices",
       "type": "array"
     },
-    "nodata_value": {
-      "anyOf": [
-        {
-          "type": "number"
+    "triangles": {
+      "items": {
+        "items": {
+          "minimum": 0,
+          "type": "integer"
         },
-        {
-          "type": "null"
-        }
-      ],
-      "title": "Nodata Value"
+        "maxItems": 3,
+        "minItems": 3,
+        "type": "array"
+      },
+      "maxItems": 400000,
+      "minItems": 1,
+      "title": "Triangles",
+      "type": "array"
+    },
+    "attributes": {
+      "items": {
+        "$ref": "#/$defs/Attribute"
+      },
+      "maxItems": 16,
+      "title": "Attributes",
+      "type": "array"
     }
   },
   "required": [
@@ -329,9 +376,10 @@
     "interpretation",
     "schema",
     "context",
-    "values",
-    "nodata_value"
+    "vertices",
+    "triangles",
+    "attributes"
   ],
-  "title": "GridSurface",
+  "title": "TriangulatedSurface",
   "type": "object"
 }

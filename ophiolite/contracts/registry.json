@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.11.0",
+  "version": "1.12.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -37,7 +37,7 @@
     },
     {
       "id": "ophiolite.scientific-asset/1",
-      "version": "1.5.0",
+      "version": "1.6.0",
       "lifecycle": "preview",
       "path": "assets/v1/schema.json",
       "title": "ScientificAsset",
@@ -69,7 +69,7 @@
     },
     {
       "id": "ophiolite.typed-context/1",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "lifecycle": "preview",
       "path": "assets/v1/typed-context-schema.json",
       "title": "TypedContext",
@@ -100,6 +100,22 @@
       "description": "A normalized regular-grid surface: every cell value in file order with its source reference, digest, context and reader identity."
     },
     {
+      "id": "ophiolite.triangulated-surface/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/triangulated-surface-schema.json",
+      "title": "TriangulatedSurface",
+      "description": "A normalized triangulated surface: vertices, triangles and attributes in file order with source reference, digest, context and reader identity."
+    },
+    {
+      "id": "ophiolite.point-set/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/point-set-schema.json",
+      "title": "PointSet",
+      "description": "A normalized point set: points and numeric attributes in file order with source reference, digest, context and reader identity."
+    },
+    {
       "id": "ophiolite/well-curve/1",
       "version": "1.0.0",
       "lifecycle": "preview",
@@ -125,7 +141,7 @@
     },
     {
       "id": "ophiolite.portable-bundle/2",
-      "version": "2.1.0",
+      "version": "2.2.0",
       "lifecycle": "preview",
       "path": "bundles/v2/manifest-schema.json",
       "title": "PortableBundleManifestV2",
@@ -260,6 +276,38 @@
       "description": "Every grid cell value in file order (first row north) with missing cells null, origin, cell size, registration and the declared CRS, units and vertical meaning.",
       "lifecycle": "preview",
       "path": "profiles/v1/grid-surface.json"
+    },
+    {
+      "id": "mesh-text/1",
+      "kind": "source",
+      "display_name": "Triangulated surface (text)",
+      "description": "A triangulated surface in the documented ophiolite-mesh text format (vertices, triangles, optional attributes), kept byte for byte.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/mesh-text.json"
+    },
+    {
+      "id": "points-csv/1",
+      "kind": "source",
+      "display_name": "Point set (CSV)",
+      "description": "A CSV of points (x, y, optional z and numeric attributes), kept byte for byte as the uploader provided it.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/points-csv.json"
+    },
+    {
+      "id": "ophiolite.triangulated-surface/1",
+      "kind": "normalized",
+      "display_name": "Normalized triangulated surface",
+      "description": "Every vertex (missing z null) and triangle in file order with attributes, extent and the declared CRS, units and vertical meaning.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/triangulated-surface.json"
+    },
+    {
+      "id": "ophiolite.point-set/1",
+      "kind": "normalized",
+      "display_name": "Normalized point set",
+      "description": "Every point in file order (missing z null) with numeric attributes, extent and the declared CRS, units and vertical meaning.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/point-set.json"
     }
   ],
   "documents": [
@@ -542,6 +590,46 @@
       "kind": "capability",
       "path": "connectors/v1/capabilities/typed-upload.json",
       "title": "Tops, survey and grid upload: types, directions, change detection, losses and qualification"
+    },
+    {
+      "id": "ophiolite.fixture/assets/mesh.original/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/mesh.original",
+      "title": "Synthetic mesh original bytes (E11)"
+    },
+    {
+      "id": "ophiolite.fixture/assets/mesh-data.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/mesh-data.json",
+      "title": "Synthetic normalized mesh data (E11)",
+      "schema": "ophiolite.triangulated-surface/1"
+    },
+    {
+      "id": "ophiolite.fixture/assets/mesh.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/mesh.json",
+      "title": "Synthetic retained mesh descriptor (E11)",
+      "schema": "ophiolite.scientific-asset/1"
+    },
+    {
+      "id": "ophiolite.fixture/assets/points.original/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/points.original",
+      "title": "Synthetic points original bytes (E11)"
+    },
+    {
+      "id": "ophiolite.fixture/assets/points-data.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/points-data.json",
+      "title": "Synthetic normalized points data (E11)",
+      "schema": "ophiolite.point-set/1"
+    },
+    {
+      "id": "ophiolite.fixture/assets/points.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/points.json",
+      "title": "Synthetic retained points descriptor (E11)",
+      "schema": "ophiolite.scientific-asset/1"
     }
   ]
 }
