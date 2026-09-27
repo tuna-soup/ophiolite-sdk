@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/bundles/v1/manifest-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.portable-bundle/1",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "lifecycle": "preview"
   },
   "title": "PortableBundleManifest",
@@ -105,6 +105,26 @@
     "notice": {
       "type": "string",
       "minLength": 1
+    },
+    "observations": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Optional export-time observations (1.1/2.1): readers that do not know them keep them as extensions. Not scientific properties of the data.",
+      "properties": {
+        "groups": {
+          "type": "array",
+          "maxItems": 128,
+          "items": {
+            "$ref": "#/$defs/BundleGroup"
+          }
+        },
+        "groups_omitted": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Why groups were not observed (for example, the exporting credential may not list them); never silently empty."
+        }
+      }
     }
   },
   "$defs": {
@@ -314,6 +334,84 @@
         },
         "profile": {
           "type": "string"
+        }
+      }
+    },
+    "BundleGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "observed_at",
+        "meaning",
+        "members",
+        "recommended"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "observed_at": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "meaning": {
+          "const": "observation-at-export"
+        },
+        "members": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 127
+          }
+        },
+        "recommended": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "asset_position",
+                "revision",
+                "by",
+                "at",
+                "reason"
+              ],
+              "properties": {
+                "asset_position": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 127
+                },
+                "revision": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "by": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                },
+                "at": {
+                  "type": "number"
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 500
+                }
+              }
+            }
+          ]
         }
       }
     }

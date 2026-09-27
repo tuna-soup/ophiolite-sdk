@@ -13,12 +13,15 @@ the exporter; a well log the exporter could not read is `"restricted"` and carri
 identifier. Exporters write `1.0.0` when every selected asset is a well log, so 1.x
 readers keep working for curve-only bundles; a 1.x reader refuses 2.0 by its major.
 
-## 2.1 — result groups as observations
+## 1.1 / 2.1 — result groups as observations
 
-`groups` may list the result groups the exporter could see that contain selected
-results: the group name, when it was observed, the **selected** members only (by their
-position in `assets`) and the recommendation when it names a selected exact revision the
-exporter could read (who, when, why). `meaning` is always `observation-at-export`: a group
-or recommendation is a person's organisation at that moment, not a scientific property of
-the data, and it is not updated after export. Members and recommendations the exporter
-could not see are absent, never counted. `recommendations` stays `null`.
+An optional `observations.groups` lists the result groups the exporter could see that
+contain selected results: the group name, when it was observed, the **selected** members
+only (every position in `assets` holding that result) and the recommendation when it
+names a selected exact revision the exporter could read (who, when, why), bound by asset
+and revision. `meaning` is always `observation-at-export`: a group or recommendation is a
+person's organisation at that moment, not a scientific property of the data, and it is
+not updated after export. Members and recommendations the exporter could not see are
+absent, never counted. The manifest fields `groups` and `recommendations` stay `null`, so
+readers that predate observations keep reading these bundles (unknown fields are kept as
+extensions). Curve-only bundles with observations are 1.1; bundles with typed data 2.1.

@@ -465,6 +465,20 @@ export type BundleParent = {
   profile?: string;
 };
 
+export type BundleGroup = {
+  name: string;
+  observed_at: string;
+  meaning: "observation-at-export";
+  members: number[];
+  recommended: null | {
+    asset_position: number;
+    revision: string;
+    by: string;
+    at: number;
+    reason: string;
+  };
+};
+
 export type PortableBundleManifest = {
   schema: "ophiolite.portable-bundle/1";
   bundle_version: string;
@@ -484,6 +498,10 @@ export type PortableBundleManifest = {
     max_total_bytes: number;
   };
   notice: string;
+  observations?: {
+    groups?: BundleGroup[];
+    groups_omitted?: string;
+  };
 };
 
 export type BundleSelectedV2 = {
@@ -553,7 +571,7 @@ export type PortableBundleManifestV2 = {
   scope: "selection";
   selection: BundleSelectedV2[];
   assets: BundleAssetV2[];
-  groups: null | BundleGroupV2[];
+  groups: null;
   recommendations: null;
   limits: {
     max_assets: number;
@@ -561,4 +579,8 @@ export type PortableBundleManifestV2 = {
     max_total_bytes: number;
   };
   notice: string;
+  observations?: {
+    groups?: BundleGroupV2[];
+    groups_omitted?: string;
+  };
 };

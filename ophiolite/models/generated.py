@@ -286,6 +286,7 @@ class PortableBundleManifest(Contract):
     recommendations: None = Field(...)
     limits: PortableBundleManifestLimits = Field(...)
     notice: Annotated[str, Field(min_length=1)] = Field(...)
+    observations: PortableBundleManifestObservations = Field(None)
 
 class BundleSelected(Contract):
     asset_id: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
@@ -324,6 +325,13 @@ class BundleParent(Contract):
     revision: str = Field(...)
     profile: str = Field(None)
 
+class BundleGroup(Contract):
+    name: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
+    observed_at: Annotated[str, Field(min_length=1, max_length=64)] = Field(...)
+    meaning: Literal['observation-at-export'] = Field(...)
+    members: Annotated[list[Annotated[int, Field(ge=0, le=127)]], Field(min_length=1, max_length=128)] = Field(...)
+    recommended: None | BundleGroupRecommended1 = Field(...)
+
 class PortableBundleManifestV2(Contract):
     schema_: Literal['ophiolite.portable-bundle/2'] = Field(..., alias='schema')
     bundle_version: Annotated[str, Field(pattern='^2\\.[0-9]+\\.[0-9]+$')] = Field(...)
@@ -332,10 +340,11 @@ class PortableBundleManifestV2(Contract):
     scope: Literal['selection'] = Field(...)
     selection: Annotated[list[BundleSelectedV2], Field(min_length=1, max_length=128)] = Field(...)
     assets: Annotated[list[BundleAssetV2], Field(min_length=1, max_length=128)] = Field(...)
-    groups: None | Annotated[list[BundleGroupV2], Field(max_length=128)] = Field(...)
+    groups: None = Field(...)
     recommendations: None = Field(...)
     limits: PortableBundleManifestV2Limits = Field(...)
     notice: Annotated[str, Field(min_length=1)] = Field(...)
+    observations: PortableBundleManifestV2Observations = Field(None)
 
 class BundleSelectedV2(Contract):
     asset_id: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
@@ -494,6 +503,17 @@ class PortableBundleManifestLimits(Contract):
     max_file_bytes: Annotated[int, Field(ge=1)] = Field(...)
     max_total_bytes: Annotated[int, Field(ge=1)] = Field(...)
 
+class PortableBundleManifestObservations(Contract):
+    groups: Annotated[list[BundleGroup], Field(max_length=128)] = Field(None)
+    groups_omitted: Annotated[str, Field(min_length=1, max_length=200)] = Field(None)
+
+class BundleGroupRecommended1(Contract):
+    asset_position: Annotated[int, Field(ge=0, le=127)] = Field(...)
+    revision: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    by: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
+    at: float = Field(...)
+    reason: Annotated[str, Field(min_length=1, max_length=500)] = Field(...)
+
 class PortableBundleManifestV2Exporter(Contract):
     name: Annotated[str, Field(max_length=64)] = Field(...)
     version: Annotated[str, Field(max_length=64)] = Field(...)
@@ -502,6 +522,10 @@ class PortableBundleManifestV2Limits(Contract):
     max_assets: Annotated[int, Field(ge=1)] = Field(...)
     max_file_bytes: Annotated[int, Field(ge=1)] = Field(...)
     max_total_bytes: Annotated[int, Field(ge=1)] = Field(...)
+
+class PortableBundleManifestV2Observations(Contract):
+    groups: Annotated[list[BundleGroupV2], Field(max_length=128)] = Field(None)
+    groups_omitted: Annotated[str, Field(min_length=1, max_length=200)] = Field(None)
 
 class BundleAssetV2Relationships(Contract):
     well_log: None | Literal['restricted'] | BundleAssetV2RelationshipsWell_Log2 = Field(None)
@@ -559,6 +583,7 @@ BundleFile.model_rebuild()
 BundleAsset.model_rebuild()
 BundleHistory.model_rebuild()
 BundleParent.model_rebuild()
+BundleGroup.model_rebuild()
 PortableBundleManifestV2.model_rebuild()
 BundleSelectedV2.model_rebuild()
 BundleFileV2.model_rebuild()
@@ -579,8 +604,11 @@ ScalarGrid.model_rebuild()
 WellCurve.model_rebuild()
 PortableBundleManifestExporter.model_rebuild()
 PortableBundleManifestLimits.model_rebuild()
+PortableBundleManifestObservations.model_rebuild()
+BundleGroupRecommended1.model_rebuild()
 PortableBundleManifestV2Exporter.model_rebuild()
 PortableBundleManifestV2Limits.model_rebuild()
+PortableBundleManifestV2Observations.model_rebuild()
 BundleAssetV2Relationships.model_rebuild()
 BundleGroupV2Recommended1.model_rebuild()
 RepresentationRulesArtifact_Kind_By_Origin.model_rebuild()

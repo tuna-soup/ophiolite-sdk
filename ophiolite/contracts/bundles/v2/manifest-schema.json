@@ -73,19 +73,8 @@
       }
     },
     "groups": {
-      "description": "2.1: result groups the exporter could see that contain selected results, as observed at export time (not timeless scientific truth); null when none or before 2.1.",
-      "anyOf": [
-        {
-          "type": "null"
-        },
-        {
-          "type": "array",
-          "maxItems": 128,
-          "items": {
-            "$ref": "#/$defs/BundleGroupV2"
-          }
-        }
-      ]
+      "type": "null",
+      "description": "Result groups are not a manifest field; see observations.groups (2.1)."
     },
     "recommendations": {
       "type": "null",
@@ -116,6 +105,26 @@
     "notice": {
       "type": "string",
       "minLength": 1
+    },
+    "observations": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Optional export-time observations (1.1/2.1): readers that do not know them keep them as extensions. Not scientific properties of the data.",
+      "properties": {
+        "groups": {
+          "type": "array",
+          "maxItems": 128,
+          "items": {
+            "$ref": "#/$defs/BundleGroupV2"
+          }
+        },
+        "groups_omitted": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Why groups were not observed (for example, the exporting credential may not list them); never silently empty."
+        }
+      }
     }
   },
   "$defs": {
