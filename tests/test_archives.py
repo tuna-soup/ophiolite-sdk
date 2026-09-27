@@ -137,3 +137,11 @@ def test_lying_sizes_and_disagreeing_headers_are_refused(tmp_path, staging):
     path = tmp_path / 'headers.zip'; path.write_bytes(bytes(raw))
     with pytest.raises(VerificationFailed): bundle.open_bundle(path)
     assert list(staging.iterdir()) == []
+
+
+def test_a_migration_package_is_not_a_bundle(tmp_path):
+    """E18: a project-move package (E10) is refused by the bundle reader for what it is."""
+    folder = tmp_path / 'package'; (folder / 'rows').mkdir(parents=True)
+    raw = json.dumps({'schema': 'ophiolite.project-migration/1', 'files': {}, 'tables': {}}).encode()
+    (folder / 'manifest.json').write_bytes(raw); (folder / 'COMPLETE').write_text(hashlib.sha256(raw).hexdigest())
+    with pytest.raises(VerificationFailed, match='not an Ophiolite portable bundle'): bundle.open_bundle(folder)
