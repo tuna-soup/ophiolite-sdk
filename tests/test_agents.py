@@ -65,3 +65,15 @@ def test_capabilities_and_mcp_settings():
     assert mcp_settings('http://127.0.0.1:8080/', 'oph_agent_k')['url'] == 'http://127.0.0.1:8080/mcp'
     with pytest.raises(Refused): mcp_settings('http://ophiolite.example', 'oph_agent_k')  # no credential over plain HTTP to another host
     with pytest.raises(AuthenticationRequired): mcp_settings('https://x.example', 'oph_api_k')
+
+
+def test_an_assistant_uses_its_sign_in_with_the_grant_and_plans():
+    from ophiolite.auth import Credential
+    seen = []
+    def handler(request):
+        seen.append((request.headers.get('authorization'), request.headers.get('x-ophiolite-application-grant'), request.headers.get('x-ophiolite-plan')))
+        return httpx.Response(200, json={'ok': True})
+    agent = AgentClient('https://x.example', 'p', Credential.bearer('provider-token', grant='g-1'), http=httpx.Client(transport=httpx.MockTransport(handler)))
+    agent.execute('applications/start', {'id': 'b'}, 'a' * 64)
+    assert seen == [('Bearer provider-token', 'g-1', 'a' * 64)]
+    with pytest.raises(Refused): agent.mcp_settings()  # an assistant's MCP client signs in itself

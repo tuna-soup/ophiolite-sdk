@@ -323,7 +323,7 @@ class Credential:
 
 
 def device_login(url, project, *, path=None, write=False, label='Local Python curve application',
-                 notify=None, http=None, cancel=None):
+                 notify=None, http=None, cancel=None, assistant=None, compute=False):
     """Obtain a fresh provider family and explicit Workspace consent, then save it.
 
     ``notify(url, message)`` presents browser URLs/codes to the caller. Nothing is
@@ -369,8 +369,10 @@ def device_login(url, project, *, path=None, write=False, label='Local Python cu
             data = _updated({'url':url,'project':project,'issuer':issuer,'client_id':client_id,
                              'token_endpoint':token_endpoint,'revocation_endpoint':revocation},tokens)
             headers = {'Authorization':'Bearer '+data['access_token']}
-            grant = request(url+'/api/v1/application-access/request',{'project_id':project,
-                'scopes':['read']+(['write'] if write else []),'label':label},headers,http=http)
+            # E5: an assistant (capability 2) acts for you under the agent rules; every change waits for approval.
+            body = {'project_id':project,'scopes':['read']+(['write'] if write else [])+(['compute'] if compute and assistant else []),'label':assistant or label}
+            if assistant: body['capability'] = 2
+            grant = request(url+'/api/v1/application-access/request',body,headers,http=http)
             data['grant_id'] = _token(grant['id'])
             approval = _browser_url(grant['approval_url'],url)
             if notify: notify(approval,'Confirm this application code in Workspace: '+str(grant['confirmation_code']))

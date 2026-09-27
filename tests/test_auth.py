@@ -248,3 +248,20 @@ def test_non_object_saved_credential(tmp_path,value):
     data=envelope();data['credential']=value;path=cache(tmp_path,data)
     with pytest.raises(AuthenticationRequired,match='Invalid saved authorization'):
         Credential.open(path)
+
+
+def test_device_login_for_an_assistant_asks_for_capability_2(tmp_path,monkeypatch):
+    sent=[]
+    provider=Provider(monkeypatch);provider.change=lambda route,value:None
+    original=provider.http._transport.handle_request
+    def spy(req):
+        if req.url.path.endswith('/request'):
+            body=json.loads(req.content);sent.append(body)
+            req=httpx.Request(req.method,req.url,headers=req.headers,content=json.dumps({**body,'label':'Example'}).encode())  # the helper checks the label
+        return original(req)
+    provider.http._transport.handle_request=spy
+    auth.device_login('http://localhost:8765','test',path=tmp_path/'a'/'auth.json',http=provider.http,assistant='Notebook assistant',write=True,compute=True)
+    assert sent==[{'project_id':'test','scopes':['read','write','compute'],'label':'Notebook assistant','capability':2}]
+    sent.clear()
+    auth.device_login('http://localhost:8765','test',path=tmp_path/'b'/'auth.json',http=provider.http,label='Example',compute=True)
+    assert sent==[{'project_id':'test','scopes':['read'],'label':'Example'}]  # compute only for assistants; capability 1 unchanged

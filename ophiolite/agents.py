@@ -27,14 +27,23 @@ class CommandOwned(IntegrityConflict): code = 'command-owned'
 
 class AgentClient:
     def __init__(self, base_url, project, credential, *, http=None):
-        if not isinstance(credential, str) or not credential.startswith('oph_agent_'):
-            raise AuthenticationRequired('Use the agent credential shown once in Settings → Agents.')
+        """`credential` is an agent key (`oph_agent_…`) or, for an assistant acting through your own
+        sign-in, the saved credential from `device_login(..., assistant='name')`."""
+        from .auth import Credential
         self.url, self.project = base_url.rstrip('/'), project
         self.http = http or httpx.Client(timeout=60, follow_redirects=False, trust_env=False)
-        self._headers = {'Authorization': 'Bearer ' + credential}
+        if isinstance(credential, Credential):
+            self._credential, self._headers = credential, None
+        elif isinstance(credential, str) and credential.startswith('oph_agent_'):
+            self._credential, self._headers = None, {'Authorization': 'Bearer ' + credential}
+        else:
+            raise AuthenticationRequired('Use the agent credential shown once in Settings → Agents, or an assistant sign-in.')
+
+    def _auth(self):
+        return self._credential.headers(self.url, self.project) if self._credential else self._headers
 
     def _post(self, area, operation, body, plan=None):
-        headers = {**self._headers, **({'X-Ophiolite-Plan': plan} if plan else {})}
+        headers = {**self._auth(), **({'X-Ophiolite-Plan': plan} if plan else {})}
         try:
             response = self.http.post('%s/api/v1/projects/%s/%s/%s' % (self.url, self.project, area, operation),
                                       json={'project_id': self.project, **body}, headers=headers)
@@ -61,7 +70,9 @@ class AgentClient:
         return self._post('capabilities', 'describe', {})
 
     def mcp_settings(self):
-        """The address and header an MCP client needs to use this agent over the remote MCP endpoint."""
+        """The address and header an MCP client needs to use this agent key over the remote MCP endpoint.
+        (An assistant's MCP client signs in itself; its access token expires and is refreshed by that client.)"""
+        if self._headers is None: raise Refused('An assistant\'s MCP client signs in itself; no key is handed over.')
         return mcp_settings(self.url, self._headers['Authorization'][7:])
 
     def propose(self, operation, request, summary=''):
