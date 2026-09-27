@@ -303,6 +303,24 @@ class Client:
         if not isinstance(value.get('results'),list):raise VerificationFailed('Invalid result catalogue response.')
         return [planning.parse_result(item) for item in value['results']]
 
+    def ai_use(self,asset):
+        """Who may use this item for AI (as its owner) or your own permission (as a reader)."""
+        return self._post('ai-use','get',{'asset_id':asset})
+
+    def grant_ai_use(self,asset,grants,*,expected_generation,command_id=None):
+        """Owner only: {person: ['embedding'|'training'|'evaluation', ...]} for people who can read the item."""
+        import uuid
+        return self._post('ai-use','grant',{'asset_id':asset,'grants':grants,'expected_generation':expected_generation,'command_id':command_id or uuid.uuid4().hex})
+
+    def search(self,text,*,method=None,limit=20):
+        """Rank what you may read by its description ('words', or 'embedding' with the deployment's local model)."""
+        return self._post('search','query',{'text':text,'limit':limit,**({'method':method} if method else {})})
+
+    def export_corpus(self,selections,destination,*,purpose,seed=0,fractions=(0.8,0.1,0.1),groups=None):
+        """An AI corpus of exact curves the server authorized for `purpose`; see ophiolite.corpus."""
+        from .corpus import export_corpus
+        return export_corpus(self,selections,destination,purpose=purpose,seed=seed,fractions=fractions,groups=groups)
+
     def result_groups(self):
         """Project result groups you can see, with only the members and recommendation you may open."""
         from . import publish as planning

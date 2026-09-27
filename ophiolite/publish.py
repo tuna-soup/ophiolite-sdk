@@ -107,10 +107,12 @@ from .models.generated import ApplicationCurve
 READ_OPERATIONS={'list','get','read','original','download','options','inspect','result-list','result-preview','result-download','result-history','info','members'}
 WRITE_OPERATIONS={'configure','start','publish','upload','share'}
 GROUP_OPERATIONS={'list','diff'}  # E8: result groups and diffs are read operations
+AI_OPERATIONS={'ai-use':{'get','grant','corpus'},'search':{'query'}}  # E14
 
 
 def operation_path(project,area,operation):
-    allowed=GROUP_OPERATIONS if area=='result-groups' else READ_OPERATIONS|WRITE_OPERATIONS if area in ('applications','las-uploads') else set()
+    allowed=(GROUP_OPERATIONS if area=='result-groups' else READ_OPERATIONS|WRITE_OPERATIONS if area in ('applications','las-uploads')
+             else AI_OPERATIONS.get(area,set()))
     if operation not in allowed:
         raise Refused('Unsupported application operation.')
     return '/api/v1/projects/'+quote(project,safe='')+'/'+area+'/'+operation
