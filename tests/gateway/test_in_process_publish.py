@@ -134,3 +134,22 @@ def test_sdk_conditional_share_against_the_gateway(web,kind):
     alice.share(receipt,read=[],expected_generation=2,command_id='revoke-bob')
     with pytest.raises(IntegrityConflict):alice.share(receipt,read=['bob'],expected_generation=1,command_id='add-bob')
     assert alice.grants(receipt).recipients==['alice'] and alice.grants(receipt).generation==3
+
+
+@pytest.mark.parametrize('kind',['delegate','grant'])
+def test_sdk_new_version_history_and_stale_parent(web,kind):
+    """E8: the reviewed revision is the expected parent; a stale one is refused."""
+    from ophiolite.errors import IntegrityConflict
+    alice=client(web,'alice',kind)
+    def publish(command,value,**kw):
+        binding=alice.configure(release_id=web.r['id'],curve='GR',name='SDK versions',runners=['alice'],command_id='v-'+command,publication_profile='curve-edits/1')
+        run=alice.start(binding,application_version='sdk-example/'+command,parameters={},command_id='v-run-'+command);run.input()
+        return alice.publish(run,changes=[{'index':0,'value':value}],**kw)
+    first=publish('1',2)
+    second=publish('2',4,new_version_of=first)
+    assert second.output_reference.key==first.output_reference.key and second.output_reference.revision_number==2
+    history=alice.history(second)
+    assert [(h.number,h.revision) for h in history.revisions]==[(1,first.output_reference.revision),(2,second.output_reference.revision)]
+    assert history.revisions[1].parent_revision==first.output_reference.revision
+    with pytest.raises(IntegrityConflict):publish('3',6,new_version_of=first)
+    assert alice.download(first)!=alice.download(second)

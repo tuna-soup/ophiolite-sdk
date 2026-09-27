@@ -5,7 +5,7 @@
     "version": "1.0.0-pilot",
     "description": "One public API for every project operation. Three credential kinds reach it: the browser session (opaque HttpOnly cookie plus the X-CSRF-Token proof and, on non-GET requests, the exact Origin), a project-scoped delegate lasting at most five minutes (Bearer oph_api_..., parent session and current native permissions remain mandatory), and a browser-approved provider grant (Bearer provider token plus X-Ophiolite-Application-Grant, capability 1: the scientific read resources and the applications route within its read/write scopes). A request that carries an Authorization header is a machine request and is refused with MACHINE_AUTH_REQUIRED when a cookie or Origin travels with it. Scope and capability are ceilings; every operation runs the same native permission checks whoever calls it. Not a stable SDK or unattended service-account contract.",
     "x-ophiolite-contracts": {
-      "registry_version": "1.6.0",
+      "registry_version": "1.7.0",
       "index": "/api/v1/contracts",
       "served_profiles": [
         "las2/1"
@@ -702,6 +702,34 @@
                     "default": null,
                     "title": "Expected Generation"
                   },
+                  "append_to": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Append To"
+                  },
+                  "expected_parent": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Expected Parent"
+                  },
                   "asset_id": {
                     "anyOf": [
                       {
@@ -973,6 +1001,34 @@
                     ],
                     "default": null,
                     "title": "Expected Generation"
+                  },
+                  "append_to": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Append To"
+                  },
+                  "expected_parent": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Expected Parent"
                   },
                   "asset_id": {
                     "anyOf": [
@@ -1246,6 +1302,34 @@
                     "default": null,
                     "title": "Expected Generation"
                   },
+                  "append_to": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Append To"
+                  },
+                  "expected_parent": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Expected Parent"
+                  },
                   "asset_id": {
                     "anyOf": [
                       {
@@ -1517,6 +1601,34 @@
                     ],
                     "default": null,
                     "title": "Expected Generation"
+                  },
+                  "append_to": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Append To"
+                  },
+                  "expected_parent": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Expected Parent"
                   },
                   "asset_id": {
                     "anyOf": [
@@ -1790,6 +1902,34 @@
                     "default": null,
                     "title": "Expected Generation"
                   },
+                  "append_to": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Append To"
+                  },
+                  "expected_parent": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Expected Parent"
+                  },
                   "asset_id": {
                     "anyOf": [
                       {
@@ -2061,6 +2201,34 @@
                     ],
                     "default": null,
                     "title": "Expected Generation"
+                  },
+                  "append_to": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Append To"
+                  },
+                  "expected_parent": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Expected Parent"
                   },
                   "asset_id": {
                     "anyOf": [
@@ -2334,6 +2502,34 @@
                     "default": null,
                     "title": "Expected Generation"
                   },
+                  "append_to": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Append To"
+                  },
+                  "expected_parent": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Expected Parent"
+                  },
                   "asset_id": {
                     "anyOf": [
                       {
@@ -2605,6 +2801,34 @@
                     ],
                     "default": null,
                     "title": "Expected Generation"
+                  },
+                  "append_to": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Append To"
+                  },
+                  "expected_parent": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Expected Parent"
                   },
                   "asset_id": {
                     "anyOf": [
@@ -2878,6 +3102,34 @@
                     "default": null,
                     "title": "Expected Generation"
                   },
+                  "append_to": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Append To"
+                  },
+                  "expected_parent": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Expected Parent"
+                  },
                   "asset_id": {
                     "anyOf": [
                       {
@@ -3149,6 +3401,334 @@
                     ],
                     "default": null,
                     "title": "Expected Generation"
+                  },
+                  "append_to": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Append To"
+                  },
+                  "expected_parent": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Expected Parent"
+                  },
+                  "asset_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Asset Id"
+                  },
+                  "asset_revision": {
+                    "anyOf": [
+                      {
+                        "maxLength": 128,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Asset Revision"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "Request",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/applications/result-history": {
+      "post": {
+        "summary": "result-history application (read scope)",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "grant",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "name": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "selection_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Selection Id"
+                  },
+                  "curve": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Curve",
+                    "type": "string"
+                  },
+                  "expected_revision": {
+                    "anyOf": [
+                      {
+                        "maxLength": 128,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Expected Revision"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "command_id": {
+                    "default": "",
+                    "maxLength": 64,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "application_version": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Application Version",
+                    "type": "string"
+                  },
+                  "parameters": {
+                    "additionalProperties": true,
+                    "title": "Parameters",
+                    "type": "object"
+                  },
+                  "changes": {
+                    "items": {
+                      "additionalProperties": true,
+                      "type": "object"
+                    },
+                    "maxItems": 1000,
+                    "title": "Changes",
+                    "type": "array"
+                  },
+                  "publication_profile": {
+                    "default": "curve-edits/1",
+                    "enum": [
+                      "curve-edits/1",
+                      "las-derived-curves/1"
+                    ],
+                    "title": "Publication Profile",
+                    "type": "string"
+                  },
+                  "derived_curves": {
+                    "items": {
+                      "additionalProperties": true,
+                      "type": "object"
+                    },
+                    "maxItems": 8,
+                    "title": "Derived Curves",
+                    "type": "array"
+                  },
+                  "destination": {
+                    "const": "portable",
+                    "default": "portable",
+                    "title": "Destination",
+                    "type": "string"
+                  },
+                  "release_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Release Id"
+                  },
+                  "asset_index": {
+                    "default": 0,
+                    "maximum": 9,
+                    "minimum": 0,
+                    "title": "Asset Index",
+                    "type": "integer"
+                  },
+                  "runners": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 100,
+                    "title": "Runners",
+                    "type": "array"
+                  },
+                  "audience": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 100,
+                    "title": "Audience",
+                    "type": "array"
+                  },
+                  "reuse_audience": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 100,
+                    "title": "Reuse Audience",
+                    "type": "array"
+                  },
+                  "expected_generation": {
+                    "anyOf": [
+                      {
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Expected Generation"
+                  },
+                  "append_to": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Append To"
+                  },
+                  "expected_parent": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Expected Parent"
                   },
                   "asset_id": {
                     "anyOf": [
@@ -3422,6 +4002,34 @@
                     "default": null,
                     "title": "Expected Generation"
                   },
+                  "append_to": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Append To"
+                  },
+                  "expected_parent": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Expected Parent"
+                  },
                   "asset_id": {
                     "anyOf": [
                       {
@@ -3693,6 +4301,34 @@
                     ],
                     "default": null,
                     "title": "Expected Generation"
+                  },
+                  "append_to": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Append To"
+                  },
+                  "expected_parent": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Expected Parent"
                   },
                   "asset_id": {
                     "anyOf": [
@@ -3966,6 +4602,34 @@
                     "default": null,
                     "title": "Expected Generation"
                   },
+                  "append_to": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Append To"
+                  },
+                  "expected_parent": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Expected Parent"
+                  },
                   "asset_id": {
                     "anyOf": [
                       {
@@ -4237,6 +4901,34 @@
                     ],
                     "default": null,
                     "title": "Expected Generation"
+                  },
+                  "append_to": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Append To"
+                  },
+                  "expected_parent": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Expected Parent"
                   },
                   "asset_id": {
                     "anyOf": [
@@ -22537,7 +23229,7 @@
                 "schema": {
                   "x-ophiolite": {
                     "id": "ophiolite.scientific-asset/1",
-                    "version": "1.3.0",
+                    "version": "1.4.0",
                     "lifecycle": "preview"
                   },
                   "additionalProperties": false,
@@ -22907,6 +23599,57 @@
                             }
                           },
                           "title": "Display",
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "history": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "description": "1.4.0: where this exact revision sits in its result's version history (E8).\nCurrent observations (count, head) may grow; number and parent never change.",
+                          "properties": {
+                            "number": {
+                              "minimum": 1,
+                              "title": "Number",
+                              "type": "integer"
+                            },
+                            "count": {
+                              "minimum": 1,
+                              "title": "Count",
+                              "type": "integer"
+                            },
+                            "head_revision": {
+                              "maxLength": 512,
+                              "minLength": 1,
+                              "title": "Head Revision",
+                              "type": "string"
+                            },
+                            "parent_revision": {
+                              "anyOf": [
+                                {
+                                  "maxLength": 512,
+                                  "minLength": 1,
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "default": null,
+                              "title": "Parent Revision"
+                            }
+                          },
+                          "required": [
+                            "number",
+                            "count",
+                            "head_revision"
+                          ],
+                          "title": "History",
                           "type": "object"
                         },
                         {

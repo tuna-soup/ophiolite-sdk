@@ -104,7 +104,7 @@ from .errors import Refused,VerificationFailed,PermissionRefused
 from .models import api
 from .models.generated import ApplicationCurve
 
-READ_OPERATIONS={'list','get','read','original','download','options','inspect','result-list','result-preview','result-download','info','members'}
+READ_OPERATIONS={'list','get','read','original','download','options','inspect','result-list','result-preview','result-download','result-history','info','members'}
 WRITE_OPERATIONS={'configure','start','publish','upload','share'}
 
 
@@ -193,7 +193,7 @@ def start_body(binding,command_id,application_version,parameters):
     return {'id':binding.id,'generation':binding.generation,'command_id':command_id,'application_version':application_version,'parameters':parameters}
 
 
-def publication_body(run,original,view,*,derived_curves=None,changes=None):
+def publication_body(run,original,view,*,derived_curves=None,changes=None,new_version_of=None):
     if not isinstance(run,api.Run):raise Refused('Use a resolved run owned by this application.')
     if (derived_curves is None)==(changes is None):raise ValidationFailed(['Choose derived curves or sample changes, exclusively.'])
     if hashlib.sha256(original).hexdigest()!=run.input_sha256:raise VerificationFailed('Resolved input checksum differs.')
@@ -204,6 +204,11 @@ def publication_body(run,original,view,*,derived_curves=None,changes=None):
     body={'id':run.id,'publication_profile':profile}
     if derived_curves is not None:body['derived_curves']=validate_derived_curves(derived_curves,source=original,sample_count=len(view.values))
     else:body['changes']=validate_changes(changes,values=view.values,null_marker=source_null_marker(original))
+    if new_version_of is not None:
+        # The revision you reviewed is the expected parent: a newer head is refused (409), never overwritten.
+        target=selection(new_version_of)
+        if target['authority']!='ophiolite:derived':raise Refused('New versions apply to your published results only.')
+        body.update(append_to=target['asset_id'],expected_parent=target['revision'])
     json_bytes(body)
     return body
 
@@ -466,10 +471,10 @@ class WorkFolder:
             _checkpoint(self.path/'normalized.json',view.model_dump(by_alias=True,exclude_unset=True))
             return original,view
 
-    def publish(self,run,*,derived_curves=None,changes=None):
+    def publish(self,run,*,derived_curves=None,changes=None,new_version_of=None):
         original=_private_bytes(self.path/'input.las')
         view=parse(ApplicationCurve,_stored(self.path/'normalized.json'))
-        body=publication_body(run,original,view,derived_curves=derived_curves,changes=changes)
+        body=publication_body(run,original,view,derived_curves=derived_curves,changes=changes,new_version_of=new_version_of)
         with self._locked(),self._identity() as headers:
             if derived_curves is not None:_checkpoint(self.path/'curves.json',derived_curves)
             _checkpoint(self.path/'publication.json',body)
@@ -592,4 +597,6 @@ def verify_application_reply(operation,body,data,project,client=None):
             raise VerificationFailed('Publication returned a different or incomplete run.')
         if result.receipt.manifest.parent!=result.input_reference:
             raise VerificationFailed('Publication ancestry differs from its resolved input.')
+        if body.get('append_to') and (result.receipt.output_reference.key!=body['append_to'] or result.receipt.output_reference.revision_number is None):
+            raise VerificationFailed('The new version was published to a different result.')
     return result

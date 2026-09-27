@@ -229,11 +229,14 @@ class Client:
         run._original_reference={k:v for k,v in result.items() if k!='payload_base64'}
         return original,view
 
-    def publish(self,run,*,derived_curves=None,changes=None):
-        """Publish reviewed values. Without a WorkFolder this is not recoverable after restart."""
+    def publish(self,run,*,derived_curves=None,changes=None,new_version_of=None):
+        """Publish reviewed values. Without a WorkFolder this is not recoverable after restart.
+
+        ``new_version_of`` (a receipt or exact result you author) adds the values as the
+        next version of that result; its revision is the expected parent."""
         from . import publish as planning
         if run._original is None or run._view is None:raise Refused('Read the exact run input before validating and publishing values.')
-        body=planning.publication_body(run,run._original,run._view,derived_curves=derived_curves,changes=changes)
+        body=planning.publication_body(run,run._original,run._view,derived_curves=derived_curves,changes=changes,new_version_of=new_version_of)
         published=planning.verify_application_reply('publish',body,self._post('applications','publish',body),self.project,self)
         if published.input_reference!=run.input_reference or published.input_sha256!=run.input_sha256:raise VerificationFailed('Publication changed the resolved scientific input.')
         return published.receipt
@@ -248,6 +251,13 @@ class Client:
         value=self._post('applications','result-list',{})
         if not isinstance(value.get('results'),list):raise VerificationFailed('Invalid result catalogue response.')
         return [planning.parse_result(item) for item in value['results']]
+
+    def history(self,asset):
+        """Every version of a result you can read, oldest first."""
+        from . import publish as planning
+        from .models.api import History
+        target=planning.selection(asset)
+        return planning.parse(History,self._post('applications','result-history',{'asset_id':target['asset_id']}))
 
     def grants(self,asset):
         from . import publish as planning

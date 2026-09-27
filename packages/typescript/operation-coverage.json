@@ -276,6 +276,12 @@
     "response": "explicitly-untyped"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/applications/result-history",
+    "function": "postProjectsProjectApplicationsResultHistory",
+    "request": "schema",
+    "response": "explicitly-untyped"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/applications/result-list",
     "function": "postProjectsProjectApplicationsResultList",
     "request": "schema",

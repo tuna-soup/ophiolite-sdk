@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/schema.json",
   "x-ophiolite": {
     "id": "ophiolite.scientific-asset/1",
-    "version": "1.3.0",
+    "version": "1.4.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -306,6 +306,49 @@
         "allowed_operations"
       ],
       "title": "Evaluated",
+      "type": "object"
+    },
+    "History": {
+      "additionalProperties": false,
+      "description": "1.4.0: where this exact revision sits in its result's version history (E8).\nCurrent observations (count, head) may grow; number and parent never change.",
+      "properties": {
+        "number": {
+          "minimum": 1,
+          "title": "Number",
+          "type": "integer"
+        },
+        "count": {
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        },
+        "head_revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Head Revision",
+          "type": "string"
+        },
+        "parent_revision": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parent Revision"
+        }
+      },
+      "required": [
+        "number",
+        "count",
+        "head_revision"
+      ],
+      "title": "History",
       "type": "object"
     },
     "Interpretation": {
@@ -857,6 +900,17 @@
       "anyOf": [
         {
           "$ref": "#/$defs/Display"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "history": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/History"
         },
         {
           "type": "null"

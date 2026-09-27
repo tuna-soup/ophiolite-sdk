@@ -128,6 +128,13 @@ export type Evaluated = {
   allowed_operations: ("read" | "export" | "use-as-input")[];
 };
 
+export type History = {
+  number: number;
+  count: number;
+  head_revision: string;
+  parent_revision?: string | null;
+};
+
 export type Interpretation = {
   reader: "asset_connectors.las_reader/1";
   lasio_version: string;
@@ -210,6 +217,7 @@ export type Version = {
 export type ScientificAsset = {
   acquisition?: Acquisition | null;
   display?: Display | null;
+  history?: History | null;
   schema: "ophiolite.scientific-asset/1";
   asset_id: string;
   revision: string;

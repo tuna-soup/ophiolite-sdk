@@ -56,6 +56,7 @@ class Reference(Contract):
 class ScientificAsset(Contract):
     acquisition: Acquisition | None = Field(None)
     display: Display | None = Field(None)
+    history: History | None = Field(None)
     schema_: Literal['ophiolite.scientific-asset/1'] = Field(..., alias='schema')
     asset_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
@@ -107,6 +108,12 @@ class Evaluated(Contract):
     evaluated_for: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     evaluated_at: Annotated[str, Field(pattern='^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$')] = Field(...)
     allowed_operations: Annotated[list[Literal['read', 'export', 'use-as-input']], Field(max_length=3)] = Field(...)
+
+class History(Contract):
+    number: Annotated[int, Field(ge=1)] = Field(...)
+    count: Annotated[int, Field(ge=1)] = Field(...)
+    head_revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    parent_revision: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(None)
 
 class NotEvaluated(Contract):
     status: Literal['not-evaluated'] = Field(...)
@@ -286,6 +293,7 @@ ScientificAsset.model_rebuild()
 Acquisition.model_rebuild()
 Display.model_rebuild()
 Evaluated.model_rebuild()
+History.model_rebuild()
 NotEvaluated.model_rebuild()
 Person.model_rebuild()
 Provenance.model_rebuild()

@@ -27,6 +27,7 @@ class OutputReference(Contract):
     authority: str
     key: str
     revision: str
+    revision_number: int | None = Field(default=None,ge=1)  # present when the publication added a version (E8)
 
 class ResultManifest(Contract):
     schema_: str = Field(alias='schema')
@@ -110,6 +111,27 @@ class RestrictedRun(Contract):
     state: str
     receipt: RestrictedReceipt
 
+class InputUpdate(Contract):
+    newer_revision_available: bool
+
+class HistoryEntry(Contract):
+    number: int = Field(ge=1)
+    revision: str
+    parent_revision: str | None = None
+    published_at: float | None = None
+    by: str | None = None
+    calculation: str | None = None
+    application_version: str | None = None
+    input: Reference | None = None
+    run_id: str | None = None
+    stage: str
+
+class History(Contract):
+    asset_id: str
+    head_revision: str
+    count: int = Field(ge=1)
+    revisions: list[HistoryEntry] = Field(min_length=1)
+
 class ResultSummary(Contract):
     asset_id: str
     revision: str
@@ -123,6 +145,9 @@ class ResultSummary(Contract):
     recipients: list[str]
     reuse_recipients: list[str]
     published: float
+    revision_number: int | None = Field(default=None,ge=1)
+    revision_count: int | None = Field(default=None,ge=1)
+    input_update: InputUpdate | None = None  # derived signal; never a recommendation
 
 class RestrictedResultSummary(ResultSummary):
     model_config=ConfigDict(extra='ignore',strict=True,allow_inf_nan=False)

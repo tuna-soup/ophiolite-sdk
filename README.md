@@ -254,6 +254,14 @@ never represented as an empty audience. Publication and sharing are separate.
 Restricted result models retain permitted scientific data without fabricating or
 exposing inaccessible parent identifiers. Revocation cannot recall earlier exports.
 
+To correct a result you published, publish the new values with
+`new_version_of=previous_receipt`: they become the next version of the same
+result, and the revision you reviewed is the expected parent — if someone added a
+newer version meanwhile the server refuses with `IntegrityConflict` and nothing
+changes. Earlier versions stay exactly readable; `client.history(result)` lists
+them. `input_update.newer_revision_available` on a result summary only tells you
+that its input has a newer version; nothing is recalculated.
+
 `work.upload_las(path, name=..., attribution=..., audience=[...],
 rights_confirmed=True)` persists an owned original copy before sending (8 MiB cap).
 Changing/deleting the source file cannot change recovery. Upload permission is
