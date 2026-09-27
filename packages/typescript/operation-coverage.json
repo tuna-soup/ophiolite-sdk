@@ -246,6 +246,24 @@
     "response": "explicitly-untyped"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/ai-use/corpus",
+    "function": "postProjectsProjectAiUseCorpus",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/ai-use/get",
+    "function": "postProjectsProjectAiUseGet",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/ai-use/grant",
+    "function": "postProjectsProjectAiUseGrant",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/applications/configure",
     "function": "postProjectsProjectApplicationsConfigure",
     "request": "schema",
@@ -856,6 +874,12 @@
     "function": "getProjectsProjectScientificAssetsAssetRevisionsRevisionRepresentationsRepresentation",
     "request": "explicitly-untyped",
     "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/search/query",
+    "function": "postProjectsProjectSearchQuery",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/advance",

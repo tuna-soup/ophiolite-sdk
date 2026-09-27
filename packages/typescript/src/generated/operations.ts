@@ -172,6 +172,18 @@ export type postProjectsProjectAgentsStatusInput = { path: { "project": string }
 export function postProjectsProjectAgentsStatus(transport: Transport, input: postProjectsProjectAgentsStatusInput): Promise<unknown> {
   return transport.request<unknown>("POST", "/api/v1/projects/{project}/agents/status", input.path, undefined, input.body, input.options, null, false);
 }
+export type postProjectsProjectAiUseCorpusInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectAiUseCorpus(transport: Transport, input: postProjectsProjectAiUseCorpusInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/ai-use/corpus", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectAiUseGetInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectAiUseGet(transport: Transport, input: postProjectsProjectAiUseGetInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/ai-use/get", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectAiUseGrantInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectAiUseGrant(transport: Transport, input: postProjectsProjectAiUseGrantInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/ai-use/grant", input.path, undefined, input.body, input.options, null, false);
+}
 export type postProjectsProjectApplicationsConfigureInput = { path: { "project": string }; body: { "project_id": string; "id"?: (string) | (null); "name"?: string; "selection_id"?: (string) | (null); "curve"?: string; "expected_revision"?: (string) | (null); "generation"?: number; "command_id"?: string; "application_version"?: string; "parameters"?: Record<string, unknown>; "changes"?: Array<Record<string, unknown>>; "publication_profile"?: "curve-edits/1" | "las-derived-curves/1"; "derived_curves"?: Array<Record<string, unknown>>; "destination"?: "portable"; "release_id"?: (string) | (null); "asset_index"?: number; "runners"?: Array<string>; "audience"?: Array<string>; "reuse_audience"?: Array<string>; "expected_generation"?: (number) | (null); "append_to"?: (string) | (null); "expected_parent"?: (string) | (null); "asset_id"?: (string) | (null); "asset_revision"?: (string) | (null) }; options?: OperationOptions };
 export function postProjectsProjectApplicationsConfigure(transport: Transport, input: postProjectsProjectApplicationsConfigureInput): Promise<API.Binding> {
   return transport.request<API.Binding>("POST", "/api/v1/projects/{project}/applications/configure", input.path, undefined, input.body, input.options, "binding", false);
@@ -539,6 +551,10 @@ export function getProjectsProjectScientificAssetsAssetRevisionsRevision(transpo
 export type getProjectsProjectScientificAssetsAssetRevisionsRevisionRepresentationsRepresentationInput = { path: { "project": string; "asset": string; "revision": string; "representation": string }; query?: { "curve"?: string }; options?: OperationOptions };
 export function getProjectsProjectScientificAssetsAssetRevisionsRevisionRepresentationsRepresentation(transport: Transport, input: getProjectsProjectScientificAssetsAssetRevisionsRevisionRepresentationsRepresentationInput): Promise<string> {
   return transport.request<string>("GET", "/api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/representations/{representation}", input.path, input.query, undefined, input.options, null, false);
+}
+export type postProjectsProjectSearchQueryInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectSearchQuery(transport: Transport, input: postProjectsProjectSearchQueryInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/search/query", input.path, undefined, input.body, input.options, null, false);
 }
 export type postProjectsProjectSourcesAdvanceInput = { path: { "project": string }; body: { "project_id": string; "connection_id"?: (string) | (null); "key"?: (string) | (null); "profile"?: (string) | (null); "kind"?: (string) | (null); "offset"?: number; "limit"?: number; "id"?: (string) | (null); "mode"?: "follow" | "pin"; "revision"?: (string) | (null); "preview_digest"?: (string) | (null); "acknowledge_unknowns"?: boolean; "mapping"?: (Record<string, unknown>) | (null); "context"?: (Record<string, unknown>) | (null); "context_policy_revision"?: (number) | (null); "expected_generation"?: number }; options?: OperationOptions };
 export function postProjectsProjectSourcesAdvance(transport: Transport, input: postProjectsProjectSourcesAdvanceInput): Promise<unknown> {
