@@ -281,6 +281,19 @@ class Client:
         if not isinstance(value.get('results'),list):raise VerificationFailed('Invalid result catalogue response.')
         return [planning.parse_result(item) for item in value['results']]
 
+    def result_groups(self):
+        """Project result groups you can see, with only the members and recommendation you may open."""
+        from . import publish as planning
+        from .models.api import ResultGroup
+        return [planning.parse(ResultGroup,g) for g in self._post('result-groups','list',{})['groups']]
+
+    def diff(self,a,b):
+        """Changes between two exact result versions: parameters, input and (when comparable) samples."""
+        from . import publish as planning
+        from .models.api import ResultDiff
+        pick=lambda x:{k:v for k,v in planning.selection(x).items() if k in ('asset_id','revision')} if not isinstance(x,(tuple,list)) else {'asset_id':x[0],'revision':x[1]}
+        return planning.parse(ResultDiff,self._post('result-groups','diff',{'a':pick(a),'b':pick(b)}))
+
     def history(self,asset):
         """Every version of a result you can read, oldest first."""
         from . import publish as planning

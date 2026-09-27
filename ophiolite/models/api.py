@@ -132,6 +132,42 @@ class History(Contract):
     count: int = Field(ge=1)
     revisions: list[HistoryEntry] = Field(min_length=1)
 
+class Recommendation(Contract):
+    asset_id: str | None = None
+    revision: str | None = None
+    by: str
+    at: float
+    reason: str
+    stage: str | None = None
+
+class GroupMember(Contract):
+    asset_id: str
+    name: str | None = None
+    head_revision: str
+    revision_count: int = Field(ge=1)
+
+class ResultGroup(Contract):
+    """E8: a project result group as the caller may see it (hidden members are omitted, never counted)."""
+    id: str
+    name: str
+    description: str
+    owner: str
+    members: list[GroupMember]
+    recommended: Recommendation | None = None
+    history: list[Recommendation] = Field(default_factory=list)
+    generation: int = Field(ge=1)
+    can_edit: bool
+    can_recommend: bool
+
+class ResultDiff(Contract):
+    """E8: parameter, input and sample changes between two exact result versions."""
+    a: dict
+    b: dict
+    parameters: dict
+    application_version: dict
+    input: dict
+    samples: dict
+
 class ResultSummary(Contract):
     asset_id: str
     revision: str

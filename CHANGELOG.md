@@ -21,6 +21,9 @@ No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
   and array views); `Trajectory.minimum_curvature()` is an explicit calculation of
   offsets from the first station. `ophiolite read-data`. Portable bundle 2.0 carries
   all four types; curve-only exports stay 1.0.
+- Result groups and diffs (E8): `result_groups()` lists the groups you can see with only the
+  members and recommendation you may open; `diff(a, b)` names parameter, input and sample
+  changes between two exact result versions.
 - SDK CLI with transitional pilot compatibility modules, generated TypeScript
   transport, four tested starter templates and six packaged workflow guides.
 

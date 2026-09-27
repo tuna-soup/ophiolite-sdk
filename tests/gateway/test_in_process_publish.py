@@ -247,3 +247,21 @@ def test_sdk_reads_and_exports_typed_data(web,kind,tmp_path):
     uploads.call('share',{'project_id':'p','asset_id':tops['asset_id'],'audience':[]},'alice')
     with pytest.raises((PermissionRefused,Unavailable)):bob.export([(tops['asset_id'],tops['revision'],None)],tmp_path/'bob-revoked')
     assert not (tmp_path/'bob-revoked').exists()
+
+
+@pytest.mark.parametrize('kind',['delegate'])
+def test_sdk_reads_result_groups_and_compares_versions(web,kind):
+    """E8: groups show only what the caller may open; a diff names parameters and sample changes."""
+    from project_gateway.result_groups import ResultGroups
+    alice,bob=client(web,'alice',kind),client(web,'bob',kind)
+    def publish(command,changes,parameters):
+        binding=alice.configure(release_id=web.r['id'],curve='GR',name='SDK groups',runners=['alice'],command_id='gr-'+command,publication_profile='curve-edits/1')
+        run=alice.start(binding,application_version='sdk-groups/'+command,parameters=parameters,command_id='gr-run-'+command);run.input()
+        return alice.publish(run,changes=changes)
+    one=publish('1',[{'index':0,'value':2}],{'offset':2});two=publish('2',[{'index':0,'value':5}],{'offset':5})
+    ResultGroups(web.a).call('save',{'project_id':'p','name':'Corrections','members':[one.output_reference.key,two.output_reference.key]},'alice')
+    alice.share(one,read=['bob'],expected_generation=alice.grants(one).generation)
+    [mine]=alice.result_groups();[seen]=bob.result_groups()
+    assert len(mine.members)==2 and [m.asset_id for m in seen.members]==[one.output_reference.key] and seen.recommended is None
+    d=alice.diff(one,two)
+    assert d.parameters['changed']==['offset'] and d.samples['changed']==1 and d.samples['largest_change']==3.0
