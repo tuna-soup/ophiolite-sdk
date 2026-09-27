@@ -42,3 +42,13 @@ def test_wait_returns_on_approval_and_raises_on_decline_expiry_or_timeout():
     with pytest.raises(PlanExpired) as waited:
         client(lambda r: httpx.Response(200, json={'state': 'pending'})).wait('h', timeout=10, clock=lambda: next(ticks), sleep=lambda s: None)
     assert waited.value.code == 'plan-pending'
+
+
+def test_runner_jobs_are_agent_changes_and_readable():
+    seen = []
+    def handler(request):
+        seen.append(request.url.path); return httpx.Response(200, json={'id': 'j', 'state': 'queued'})
+    agent = client(handler)
+    agent.propose('runners/submit', {'run_id': 'r', 'script': 'print(1)', 'command_id': 'c'})
+    assert agent.job('j')['state'] == 'queued'
+    assert seen == ['/api/v1/projects/p/agents/propose', '/api/v1/projects/p/runners/job']

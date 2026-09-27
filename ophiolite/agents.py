@@ -16,7 +16,7 @@ import httpx
 from .errors import (OphioliteError, AuthenticationRequired, PermissionRefused, Unavailable, IntegrityConflict,
                      Refused, Busy)
 
-CHANGES = ('applications/configure', 'applications/start', 'applications/publish', 'applications/share')
+CHANGES = ('applications/configure', 'applications/start', 'applications/publish', 'applications/share', 'runners/submit', 'runners/cancel')
 
 
 class PlanDeclined(OphioliteError): code = 'plan-declined'
@@ -56,7 +56,7 @@ class AgentClient:
         return self._post(area, name, body or {})
 
     def propose(self, operation, request, summary=''):
-        if operation not in CHANGES: raise Refused('Agents change application configurations, runs, publications and recipients only.')
+        if operation not in CHANGES: raise Refused('Agents change application configurations, runs, publications, recipients and runner jobs only.')
         return self._post('agents', 'propose', {'operation': operation, 'request': {'project_id': self.project, **request}, 'summary': summary})
 
     def status(self, plan):
@@ -82,6 +82,10 @@ class AgentClient:
         plan = self.propose(operation, request, summary)['hash']
         self.wait(plan, **wait)
         return self.execute(operation, request, plan)
+
+    def job(self, job_id):
+        """A runner job (E13): state, reason, limits, bounded logs and the published result."""
+        return self._post('runners', 'job', {'id': job_id})
 
     def recover(self, *, command_id=None, plan=None):
         """The recorded outcome of an execution whose response was lost."""
