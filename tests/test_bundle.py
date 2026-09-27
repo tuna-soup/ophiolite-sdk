@@ -160,3 +160,94 @@ def test_concurrent_exports_never_overwrite_and_live_staging_survives(tmp_path):
     (tmp_path / 'claimed').mkdir()  # a concurrent writer claimed the name first
     with pytest.raises(Refused): bundle.write_bundle(tmp_path / 'claimed', item)
     assert not any((tmp_path / 'claimed').iterdir())
+
+
+# --- E11: bundle 2 carries typed assets --------------------------------------------------
+
+def typed_read(name):
+    from ophiolite import _core
+    return _core.typed_result(json.loads(FIXTURES.joinpath(f'{name}.json').read_bytes()), FIXTURES.joinpath(f'{name}-data.json').read_bytes(),
+                              FIXTURES.joinpath(f'{name}.original').read_bytes())
+
+
+def typed_items():
+    d = Read()._wire_descriptors[0]
+    items = [({'asset_id': d['asset_id'], 'revision': d['revision'], 'curves': ['GR']}, Read())]
+    for name in ('tops', 'trajectory', 'grid'):
+        r = typed_read(name); items.append(({'asset_id': r._wire_descriptor['asset_id'], 'revision': r._wire_descriptor['revision'], 'curves': None}, r))
+    return items
+
+
+def test_bundle_two_round_trips_all_four_types(tmp_path):
+    opened = bundle.write_bundle(tmp_path / 'b', typed_items())
+    assert opened.manifest['bundle_version'] == '2.0.0' and opened.manifest['schema'] == 'ophiolite.portable-bundle/2'
+    log, tops, trajectory, grid = opened.assets
+    assert [a.type for a in opened.assets] == ['well-log', 'well-tops', 'trajectory', 'regular-grid-surface']
+    assert log.curves['GR'].values[0] == 0.0 and tops.curves == {} and opened.manifest['selection'][1]['curves'] == []
+    assert [t['md'] for t in tops.data.tops] == [100.5, 103.0] and tops.data.tops[0]['tvd'] is None
+    assert grid.data.values[1] == 0.0 and grid.data.values[2] is None and grid.data.cell_center(0, 0) == (1012.5, 5037.5)
+    assert trajectory.data.stations[2]['inclination'] is None and tops.relationships == {'well_log': None}
+    assert (opened.path / 'assets/1/original.csv').read_bytes() == FIXTURES.joinpath('tops.original').read_bytes()
+    assert opened.summary()['types'] == ['regular-grid-surface', 'trajectory', 'well-log', 'well-tops']
+    # A curve-only export stays 1.0 so released readers keep reading it.
+    assert written(tmp_path / 'curves').manifest['bundle_version'] == '1.0.0'
+
+
+@pytest.mark.parametrize('case', ['type', 'relationships', 'curves', 'data-context', 'schema-version', 'extra-file'])
+def test_bundle_two_refusals(tmp_path, case):
+    import hashlib as h
+    root = bundle.write_bundle(tmp_path / 'b', typed_items()).path
+    tops = lambda m: m['assets'][1]
+    if case == 'type': rewrite(root, lambda m: tops(m).update(type='trajectory'))
+    if case == 'relationships': rewrite(root, lambda m: tops(m).update(relationships={'well_log': 'restricted'}))
+    if case == 'curves': rewrite(root, lambda m: m['selection'][1].update(curves=['GR']))
+    if case == 'schema-version': rewrite(root, lambda m: m.update(bundle_version='1.0.0'))
+    if case == 'data-context':  # consistent data with a different declared context; digests recomputed everywhere
+        target = root / 'assets/1/data.json'; payload = json.loads(target.read_text()); payload['context']['depth_basis'] = 'other'
+        raw = json.dumps(payload).encode(); target.write_bytes(raw)
+        dpath = root / 'assets/1/descriptor.json'; descriptor = json.loads(dpath.read_text())
+        rep = next(r for r in descriptor['representations'] if r['kind'] == 'normalized'); rep['bytes'], rep['sha256'] = len(raw), h.sha256(raw).hexdigest()
+        draw = (json.dumps(descriptor) + '\n').encode(); dpath.write_bytes(draw)
+        def fix(m):
+            for f in tops(m)['files']:
+                data = (root / f['path']).read_bytes(); f['bytes'], f['sha256'] = len(data), h.sha256(data).hexdigest()
+        rewrite(root, fix)
+    if case == 'extra-file':
+        (root / 'assets/1/second.csv').write_bytes(b'name,md\nX,1\n')
+        rewrite(root, lambda m: tops(m)['files'].append({'path': 'assets/1/second.csv', 'role': 'normalized', 'sha256': h.sha256(b'name,md\nX,1\n').hexdigest(), 'bytes': 12}))
+    with pytest.raises((VerificationFailed, Refused)): bundle.open_bundle(root)
+
+
+def test_released_reader_refuses_bundle_two_by_its_major(tmp_path):
+    """The E18 reader (SDK 23c0acd), loaded from Git, refuses 2.0 before reading any content.
+
+    Its message is the generic "not an Ophiolite portable bundle" (it predates schema /2);
+    it never misreads a typed asset as a curve."""
+    import importlib.util, subprocess
+    source = subprocess.run(['git', '-C', str(Path(__file__).parents[1]), 'show', '23c0acd:ophiolite/bundle.py'], capture_output=True, text=True, check=True).stdout
+    frozen_path = tmp_path / 'frozen_bundle.py'; frozen_path.write_text(source)
+    spec = importlib.util.spec_from_file_location('ophiolite._frozen_bundle', frozen_path); frozen = importlib.util.module_from_spec(spec); spec.loader.exec_module(frozen)
+    root = bundle.write_bundle(tmp_path / 'b', typed_items()).path
+    with pytest.raises(VerificationFailed, match='not an Ophiolite portable bundle'): frozen.open_bundle(root)
+    assert frozen.open_bundle(written(tmp_path / 'c').path).assets[0].curves['GR'].values[0] == 0.0
+
+
+def test_fresh_environment_reads_typed_bundle_offline(tmp_path):
+    import subprocess, sys
+    python = os.environ.get('OPHIOLITE_TEST_WHEEL_PYTHON')
+    if not python: pytest.fail('Set OPHIOLITE_TEST_WHEEL_PYTHON to the independently installed SDK wheel interpreter')
+    root = bundle.write_bundle(tmp_path / 'b', typed_items()).path
+    script = '''
+import socket,sys,json
+def refuse(*a,**k):raise OSError("network blocked")
+socket.socket=refuse;socket.create_connection=refuse;socket.getaddrinfo=refuse
+from ophiolite.bundle import open_bundle
+from ophiolite.typed import minimum_curvature
+b=open_bundle(sys.argv[1]);tops,traj,grid=b.assets[1].data,b.assets[2].data,b.assets[3].data
+print(json.dumps({"tops":[t["md"] for t in tops.tops],"grid":grid.values,"corner":grid.cell_center(1,2),"offsets":minimum_curvature(traj.stations[:2])[1]["dtvd"]}))
+'''
+    done = subprocess.run([python, '-I', '-c', script, str(root)], capture_output=True, text=True, env={'PATH': os.environ.get('PATH', ''), 'HOME': str(tmp_path)}, timeout=60)
+    assert done.returncode == 0, done.stderr
+    result = json.loads(done.stdout)
+    assert result['tops'] == [100.5, 103.0] and result['grid'] == [1.0, 0.0, None, 4.0, 5.0, 6.0] and result['corner'] == [1062.5, 5012.5]
+    assert abs(result['offsets'] - 99.4931) < 1e-3   # 0→10° over 100: R·sin θ

@@ -1,4 +1,4 @@
-"""Portable bundles (``ophiolite.portable-bundle/1``): write, check and read offline.
+"""Portable bundles (``ophiolite.portable-bundle/1`` and ``/2``): write, check and read offline.
 
 A bundle is a directory whose only entry point is ``manifest.json``. Reading needs no
 server, account, credentials or network: this module imports no transport or
@@ -22,6 +22,10 @@ from .errors import VerificationFailed, Refused
 
 SCHEMA = 'ophiolite.portable-bundle/1'
 VERSION = '1.0.0'
+# Bundle 2 (E11) adds typed assets; curve-only exports stay 1.0 for released readers.
+SCHEMA_2 = 'ophiolite.portable-bundle/2'
+VERSION_2 = '2.0.0'
+TYPED_ORIGINALS = {'well-tops-csv/1': 'original.csv', 'deviation-csv/1': 'original.csv', 'esri-ascii-grid/1': 'original.asc'}
 MAX_ASSETS = 128
 MAX_FILE_BYTES = 32 * 1024 * 1024
 MAX_TOTAL_BYTES = 512 * 1024 * 1024
@@ -61,10 +65,12 @@ class Curve:
 
 
 class BundleAsset:
-    def __init__(self, entry, original, curves):
+    """A verified asset: `curves` for a well log, `data` (a typed object) for tops, trajectories and grids."""
+    def __init__(self, entry, original, curves, data=None):
         self.entry = entry; self.asset_id = entry['asset_id']; self.revision = entry['revision']; self.name = entry.get('name')
         self.origin = entry['origin']; self.history = entry.get('history'); self.parents = entry['parents']
         self.parent_visibility = entry['parent_visibility']; self.original = original; self.curves = curves
+        self.type = entry.get('type', 'well-log'); self.data = data; self.relationships = entry.get('relationships')
 
 
 class Bundle:
@@ -73,15 +79,16 @@ class Bundle:
 
     def summary(self):
         return {'bundle_version': self.manifest['bundle_version'], 'scope': self.manifest['scope'], 'assets': len(self.assets),
-                'curves': sum(len(a.curves) for a in self.assets), 'unlisted_files': self.unlisted,
+                'curves': sum(len(a.curves) for a in self.assets), 'types': sorted({a.type for a in self.assets}), 'unlisted_files': self.unlisted,
                 'groups': self.manifest['groups'], 'recommendations': self.manifest['recommendations']}
 
 
 def _check_manifest(manifest):
-    if not isinstance(manifest, dict) or manifest.get('schema') != SCHEMA: raise VerificationFailed('This is not an Ophiolite portable bundle.')
+    if not isinstance(manifest, dict) or manifest.get('schema') not in (SCHEMA, SCHEMA_2): raise VerificationFailed('This is not an Ophiolite portable bundle.')
     version = manifest.get('bundle_version')
     if not isinstance(version, str) or not re.fullmatch(r'[0-9]+\.[0-9]+\.[0-9]+', version): raise VerificationFailed('The bundle version is not readable.')
-    if version.split('.')[0] != '1': raise Refused('This bundle uses version %s; this reader supports major version 1. Update the SDK.' % version)
+    if version.split('.')[0] not in ('1', '2'): raise Refused('This bundle uses version %s; this reader supports major versions 1 and 2. Update the SDK.' % version)
+    if (version.split('.')[0] == '2') != (manifest['schema'] == SCHEMA_2): raise VerificationFailed('The bundle schema and version disagree.')
     if manifest.get('scope') != 'selection': raise VerificationFailed('The bundle scope is not a selection.')
     if manifest.get('groups', 0) is not None or manifest.get('recommendations', 0) is not None: raise VerificationFailed('Groups and recommendations are not part of bundle 1.0.')
     assets = manifest.get('assets')
@@ -128,6 +135,10 @@ def open_bundle(path):
         roles = [item.get('role') for item in files]
         if roles.count('original') != 1 or set(roles) - {'original', 'descriptor', 'normalized'}:
             raise VerificationFailed('Bundle 1.0 carries exactly one original per asset and only known file roles.')
+        kind = entry.get('type', 'well-log') if manifest['schema'] == SCHEMA_2 else 'well-log'
+        if manifest['schema'] == SCHEMA_2 and kind not in ('well-log', 'well-tops', 'trajectory', 'regular-grid-surface'): raise VerificationFailed('An asset has an unknown type.')
+        if kind != 'well-log':
+            loaded.append(_typed_asset(entry, chosen, content, files, kind)); continue
         if sorted(content.get('descriptor', {})) != sorted(chosen.get('curves') or []) or sorted(content.get('normalized', {})) != sorted(chosen.get('curves') or []):
             raise VerificationFailed('The curve files are not exactly the selected curves.')
         original = content.get('original', {}).get(None)
@@ -150,6 +161,24 @@ def open_bundle(path):
     listed = seen | {'manifest.json'}
     unlisted = sorted(p.relative_to(root).as_posix() for p in root.rglob('*') if p.is_file() and p.relative_to(root).as_posix() not in listed)
     return Bundle(root, manifest, loaded, unlisted)
+
+
+def _typed_asset(entry, chosen, content, files, kind):
+    from . import _core
+    if chosen.get('curves') != [] or roles_of(files) != ['descriptor', 'normalized', 'original'] or any(item.get('curve') is not None for item in files):
+        raise VerificationFailed('A typed asset carries exactly one original, one descriptor and one data file, and no curves.')
+    wire_descriptor = _finite_json(content['descriptor'][None], 'A descriptor'); body = content['normalized'][None]; _finite_json(body, 'Typed data')
+    if (wire_descriptor.get('asset_id'), wire_descriptor.get('revision')) != (entry.get('asset_id'), entry.get('revision')):
+        raise VerificationFailed('A descriptor belongs to another exact revision.')
+    if (wire_descriptor.get('scientific') or {}).get('type') != kind: raise VerificationFailed('The manifest disagrees with a descriptor (type).')
+    for field in ('origin', 'profile', 'parents', 'parent_visibility', 'relationships'):
+        if wire_descriptor.get(field, 'complete' if field == 'parent_visibility' else None) != entry.get(field): raise VerificationFailed('The manifest disagrees with a descriptor (' + field + ').')
+    data = _core.typed_result(wire_descriptor, body, content['original'][None])
+    return BundleAsset(entry, content['original'][None], {}, data)
+
+
+def roles_of(files):
+    return sorted(item.get('role') for item in files)
 
 
 def write_bundle(destination, items, *, grace=3600):
@@ -178,8 +207,20 @@ def write_bundle(destination, items, *, grace=3600):
             entry = {'path': relative, 'role': role, 'sha256': hashlib.sha256(raw).hexdigest(), 'bytes': len(raw)}
             if curve is not None: entry['curve'] = curve
             return entry
+        typed_bundle = any(hasattr(read, '_wire_data_bytes') for _, read in items)
         for index, (chosen, read) in enumerate(items):
             folder = 'assets/%d/' % index
+            if hasattr(read, '_wire_data_bytes'):  # E11 typed data: exact original, descriptor and data as served
+                first = read._wire_descriptor
+                files = [put(folder + TYPED_ORIGINALS[first['profile']], read.original, 'original'),
+                         put(folder + 'descriptor.json', (json.dumps(first, indent=2, allow_nan=False) + '\n').encode(), 'descriptor'),
+                         put(folder + 'data.json', read._wire_data_bytes, 'normalized')]
+                assets.append({'asset_id': first['asset_id'], 'revision': first['revision'], 'origin': first['origin'], 'profile': first['profile'],
+                               'type': first['scientific']['type'], 'name': None, 'files': files, 'history': first.get('history'), 'parents': first.get('parents', []),
+                               'parent_visibility': first.get('parent_visibility', 'complete'), 'relationships': first.get('relationships'),
+                               'omissions': list(first.get('provenance', {}).get('omissions', [])),
+                               'losses': sorted({loss for r in first.get('representations', []) for loss in r.get('losses', [])})})
+                selection.append({**chosen, 'curves': []}); continue
             files = [put(folder + 'original.las', read.artifact, 'original')]
             first = read._wire_descriptors[0]
             for wire_descriptor, wire_curve, body in zip(read._wire_descriptors, read._wire_curves, read._wire_curve_bytes):
@@ -192,8 +233,9 @@ def write_bundle(destination, items, *, grace=3600):
                            'name': (first.get('display') or {}).get('name') if isinstance(first.get('display'), dict) else None,
                            'files': files, 'history': first.get('history'), 'parents': first.get('parents', []),
                            'parent_visibility': first.get('parent_visibility', 'complete'), 'omissions': omissions, 'losses': losses})
+            if typed_bundle: assets[-1]['type'] = 'well-log'
             selection.append(chosen)
-        manifest = {'schema': SCHEMA, 'bundle_version': VERSION, 'created_at': datetime.now(timezone.utc).isoformat(timespec='seconds'),
+        manifest = {'schema': SCHEMA_2 if typed_bundle else SCHEMA, 'bundle_version': VERSION_2 if typed_bundle else VERSION, 'created_at': datetime.now(timezone.utc).isoformat(timespec='seconds'),
                     'exporter': {'name': 'ophiolite-sdk', 'version': __version__}, 'scope': 'selection', 'selection': selection, 'assets': assets,
                     'groups': None, 'recommendations': None,
                     'limits': {'max_assets': MAX_ASSETS, 'max_file_bytes': MAX_FILE_BYTES, 'max_total_bytes': MAX_TOTAL_BYTES}, 'notice': NOTICE}
