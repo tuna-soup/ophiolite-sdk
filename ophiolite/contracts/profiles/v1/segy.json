@@ -1,0 +1,32 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "segy/1",
+  "kind": "source",
+  "lifecycle": "preview",
+  "display_name": "Seismic volume (SEG-Y)",
+  "description": "A SEG-Y volume (revision 1 or 2, IBM or IEEE floating-point samples, big-endian, fixed-length traces on a full grid) kept byte for byte; slices are read one inline at a time.",
+  "serves": [
+    "ophiolite.scientific-asset/1"
+  ],
+  "connector": {
+    "scientific_profile": "seismic-volume-source/1",
+    "source_schema": "SEG-Y/rev1-2,formats-1-5,big-endian,fixed",
+    "mapping_version": "seismic-volume/1",
+    "history": "retained-exact-read"
+  },
+  "role": "artifact",
+  "media_types": [
+    "application/octet-stream"
+  ],
+  "normalized_profile": "ophiolite.seismic-volume/1",
+  "context_schema": "ophiolite.typed-context/1",
+  "representation_rules": {
+    "artifact_kind_by_origin": {
+      "source-reference": "original",
+      "retained-capture": "original",
+      "managed-derived": "derived-artifact"
+    },
+    "normalized": 1,
+    "total": 2
+  }
+}

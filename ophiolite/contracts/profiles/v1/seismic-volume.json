@@ -1,0 +1,21 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "ophiolite.seismic-volume/1",
+  "kind": "normalized",
+  "lifecycle": "preview",
+  "display_name": "Seismic volume description",
+  "description": "The volume grid, sample meaning, every header decision and the digests of its per-inline chunks; samples are read as slices.",
+  "payload_schema": "ophiolite.seismic-volume/1",
+  "role": "normalized",
+  "media_types": [
+    "application/json"
+  ],
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "parsing_policy": "typed-strict/1",
+    "mapping": "seismic-volume/1"
+  },
+  "mappings": [
+    "ophiolite.mapping/typed-standards/1"
+  ]
+}

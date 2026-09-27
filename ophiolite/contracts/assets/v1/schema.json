@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/schema.json",
   "x-ophiolite": {
     "id": "ophiolite.scientific-asset/1",
-    "version": "1.6.0",
+    "version": "1.7.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -345,6 +345,24 @@
           "maxItems": 16,
           "title": "Unknown Context",
           "type": "array"
+        },
+        "decisions": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 512,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 64,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decisions"
         }
       },
       "required": [
@@ -573,6 +591,38 @@
         "null_policy"
       ],
       "title": "Interpretation",
+      "type": "object"
+    },
+    "LineRange": {
+      "additionalProperties": false,
+      "properties": {
+        "first": {
+          "title": "First",
+          "type": "integer"
+        },
+        "last": {
+          "title": "Last",
+          "type": "integer"
+        },
+        "step": {
+          "minimum": 1,
+          "title": "Step",
+          "type": "integer"
+        },
+        "count": {
+          "maximum": 100000,
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "first",
+        "last",
+        "step",
+        "count"
+      ],
+      "title": "LineRange",
       "type": "object"
     },
     "MeshContext": {
@@ -885,6 +935,132 @@
       "title": "PointContext",
       "type": "object"
     },
+    "PolylineContext": {
+      "additionalProperties": false,
+      "properties": {
+        "crs": {
+          "pattern": "^(EPSG:[0-9]{4,6}|unknown)$",
+          "title": "Crs",
+          "type": "string"
+        },
+        "xy_unit": {
+          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+          "title": "Xy Unit",
+          "type": "string"
+        },
+        "z_unit": {
+          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+          "title": "Z Unit",
+          "type": "string"
+        },
+        "z_meaning": {
+          "enum": [
+            "depth",
+            "elevation",
+            "time",
+            "unknown"
+          ],
+          "title": "Z Meaning",
+          "type": "string"
+        },
+        "positive": {
+          "enum": [
+            "up",
+            "down",
+            "unknown"
+          ],
+          "title": "Positive",
+          "type": "string"
+        },
+        "vertical_datum": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Vertical Datum",
+          "type": "string"
+        },
+        "x_range": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "title": "X Range",
+          "type": "array"
+        },
+        "y_range": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "title": "Y Range",
+          "type": "array"
+        },
+        "z_range": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "number"
+              },
+              "maxItems": 2,
+              "minItems": 2,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Z Range"
+        },
+        "attributes": {
+          "items": {
+            "pattern": "^[A-Za-z][A-Za-z0-9_]{0,31}$",
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Attributes",
+          "type": "array"
+        },
+        "fidelity": {
+          "$ref": "#/$defs/Fidelity"
+        },
+        "type": {
+          "const": "polyline-set",
+          "title": "Type",
+          "type": "string"
+        },
+        "sticks": {
+          "maximum": 20000,
+          "minimum": 1,
+          "title": "Sticks",
+          "type": "integer"
+        },
+        "points": {
+          "maximum": 200000,
+          "minimum": 2,
+          "title": "Points",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "crs",
+        "xy_unit",
+        "z_unit",
+        "z_meaning",
+        "positive",
+        "vertical_datum",
+        "x_range",
+        "y_range",
+        "z_range",
+        "attributes",
+        "fidelity",
+        "type",
+        "sticks",
+        "points"
+      ],
+      "title": "PolylineContext",
+      "type": "object"
+    },
     "Provenance": {
       "additionalProperties": false,
       "properties": {
@@ -1107,7 +1283,8 @@
             "application/x-las",
             "application/json",
             "text/csv",
-            "text/plain"
+            "text/plain",
+            "application/octet-stream"
           ],
           "title": "Media Type",
           "type": "string"
@@ -1281,6 +1458,125 @@
       "title": "ScientificContext",
       "type": "object"
     },
+    "SeismicContext": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "seismic-volume",
+          "title": "Type",
+          "type": "string"
+        },
+        "format": {
+          "enum": [
+            "IBM 4-byte floating point",
+            "IEEE 4-byte floating point"
+          ],
+          "title": "Format",
+          "type": "string"
+        },
+        "format_code": {
+          "enum": [
+            1,
+            5
+          ],
+          "title": "Format Code",
+          "type": "integer"
+        },
+        "segy_revision": {
+          "pattern": "^[0-9]{1,3}\\.[0-9]{1,3}$",
+          "title": "Segy Revision",
+          "type": "string"
+        },
+        "traces": {
+          "maximum": 1000000,
+          "minimum": 1,
+          "title": "Traces",
+          "type": "integer"
+        },
+        "samples": {
+          "maximum": 20000,
+          "minimum": 1,
+          "title": "Samples",
+          "type": "integer"
+        },
+        "trace_bytes": {
+          "minimum": 244,
+          "title": "Trace Bytes",
+          "type": "integer"
+        },
+        "inline": {
+          "$ref": "#/$defs/LineRange"
+        },
+        "crossline": {
+          "$ref": "#/$defs/LineRange"
+        },
+        "sample_interval": {
+          "exclusiveMinimum": 0,
+          "title": "Sample Interval",
+          "type": "number"
+        },
+        "sample_unit": {
+          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+          "title": "Sample Unit",
+          "type": "string"
+        },
+        "first_sample": {
+          "title": "First Sample",
+          "type": "number"
+        },
+        "z_domain": {
+          "enum": [
+            "time",
+            "depth",
+            "unknown"
+          ],
+          "title": "Z Domain",
+          "type": "string"
+        },
+        "crs": {
+          "pattern": "^(EPSG:[0-9]{4,6}|unknown)$",
+          "title": "Crs",
+          "type": "string"
+        },
+        "datum": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Datum",
+          "type": "string"
+        },
+        "first_cdp": {
+          "$ref": "#/$defs/XY"
+        },
+        "last_cdp": {
+          "$ref": "#/$defs/XY"
+        },
+        "fidelity": {
+          "$ref": "#/$defs/Fidelity"
+        }
+      },
+      "required": [
+        "type",
+        "format",
+        "format_code",
+        "segy_revision",
+        "traces",
+        "samples",
+        "trace_bytes",
+        "inline",
+        "crossline",
+        "sample_interval",
+        "sample_unit",
+        "first_sample",
+        "z_domain",
+        "crs",
+        "datum",
+        "first_cdp",
+        "last_cdp",
+        "fidelity"
+      ],
+      "title": "SeismicContext",
+      "type": "object"
+    },
     "TopsContext": {
       "additionalProperties": false,
       "properties": {
@@ -1431,7 +1727,9 @@
             "trajectory/1",
             "regular-grid-surface/1",
             "triangulated-surface/1",
-            "point-set/1"
+            "point-set/1",
+            "polyline-set/1",
+            "seismic-volume/1"
           ],
           "title": "Mapping",
           "type": "string"
@@ -1551,6 +1849,25 @@
         "revision"
       ],
       "title": "WellLogLink",
+      "type": "object"
+    },
+    "XY": {
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "title": "Y",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "title": "XY",
       "type": "object"
     }
   },
@@ -1686,6 +2003,12 @@
         },
         {
           "$ref": "#/$defs/PointContext"
+        },
+        {
+          "$ref": "#/$defs/PolylineContext"
+        },
+        {
+          "$ref": "#/$defs/SeismicContext"
         }
       ],
       "title": "Scientific"

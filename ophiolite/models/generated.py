@@ -68,6 +68,7 @@ class Fidelity(Contract):
     preserved: Annotated[list[Annotated[str, Field(min_length=1, max_length=512)]], Field(max_length=16)] = Field(...)
     losses: Annotated[list[Annotated[str, Field(min_length=1, max_length=512)]], Field(max_length=16)] = Field(...)
     unknown_context: Annotated[list[Annotated[str, Field(min_length=1, max_length=128)]], Field(max_length=16)] = Field(...)
+    decisions: Annotated[list[Annotated[str, Field(min_length=1, max_length=512)]], Field(max_length=64)] | None = Field(None)
 
 class GridContext(Contract):
     type: Literal['regular-grid-surface'] = Field(...)
@@ -90,7 +91,7 @@ class GridContext(Contract):
 
 class TypedInterpretation(Contract):
     reader: Literal['asset_connectors.typed_reader/1'] = Field(...)
-    mapping: Literal['well-tops/1', 'trajectory/1', 'regular-grid-surface/1', 'triangulated-surface/1', 'point-set/1'] = Field(...)
+    mapping: Literal['well-tops/1', 'trajectory/1', 'regular-grid-surface/1', 'triangulated-surface/1', 'point-set/1', 'polyline-set/1', 'seismic-volume/1'] = Field(...)
     parsing_policy: Literal['typed-strict/1'] = Field(...)
     null_policy: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
 
@@ -125,6 +126,40 @@ class PointContext(Contract):
     z_provided: bool = Field(...)
     missing_z_count: Annotated[int, Field(ge=0, le=100000)] = Field(...)
 
+class PolylineSet(Contract):
+    representation: Literal['normalized'] = Field(...)
+    source: Reference = Field(...)
+    source_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    interpretation: TypedInterpretation = Field(...)
+    schema_: Literal['ophiolite.polyline-set/1'] = Field(..., alias='schema')
+    context: PolylineContext = Field(...)
+    sticks: Annotated[list[Stick], Field(min_length=1, max_length=20000)] = Field(...)
+
+class PolylineContext(Contract):
+    crs: Annotated[str, Field(pattern='^(EPSG:[0-9]{4,6}|unknown)$')] = Field(...)
+    xy_unit: Annotated[str, Field(pattern='^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$')] = Field(...)
+    z_unit: Annotated[str, Field(pattern='^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$')] = Field(...)
+    z_meaning: Literal['depth', 'elevation', 'time', 'unknown'] = Field(...)
+    positive: Literal['up', 'down', 'unknown'] = Field(...)
+    vertical_datum: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+    x_range: Annotated[list[float], Field(min_length=2, max_length=2)] = Field(...)
+    y_range: Annotated[list[float], Field(min_length=2, max_length=2)] = Field(...)
+    z_range: Annotated[list[float], Field(min_length=2, max_length=2)] | None = Field(...)
+    attributes: Annotated[list[Annotated[str, Field(pattern='^[A-Za-z][A-Za-z0-9_]{0,31}$')]], Field(max_length=16)] = Field(...)
+    fidelity: Fidelity = Field(...)
+    type: Literal['polyline-set'] = Field(...)
+    sticks: Annotated[int, Field(ge=1, le=20000)] = Field(...)
+    points: Annotated[int, Field(ge=2, le=200000)] = Field(...)
+
+class Stick(Contract):
+    index: int = Field(...)
+    points: Annotated[list[XYZ], Field(min_length=2, max_length=200000)] = Field(...)
+
+class XYZ(Contract):
+    x: float = Field(...)
+    y: float = Field(...)
+    z: float = Field(...)
+
 class ScientificAsset(Contract):
     acquisition: Acquisition | None = Field(None)
     relationships: Relationships | None = Field(None)
@@ -139,7 +174,7 @@ class ScientificAsset(Contract):
     custodian: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(...)
     source_reference: Reference | None = Field(...)
     profile: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] = Field(...)
-    scientific: ScientificContext | TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext = Field(...)
+    scientific: ScientificContext | TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext = Field(...)
     interpretation: Interpretation | TypedInterpretation = Field(...)
     interpretation_evidence: Literal['live', 'recorded', 'recorded-differs', 'not-recorded'] = Field('live')
     recorded_interpretation: RecordedInterpretation | None = Field(None)
@@ -188,6 +223,12 @@ class History(Contract):
     head_revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     parent_revision: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(None)
 
+class LineRange(Contract):
+    first: int = Field(...)
+    last: int = Field(...)
+    step: Annotated[int, Field(ge=1)] = Field(...)
+    count: Annotated[int, Field(ge=1, le=100000)] = Field(...)
+
 class MeshContext(Contract):
     crs: Annotated[str, Field(pattern='^(EPSG:[0-9]{4,6}|unknown)$')] = Field(...)
     xy_unit: Annotated[str, Field(pattern='^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$')] = Field(...)
@@ -232,7 +273,7 @@ class Relationships(Contract):
 class Representation(Contract):
     id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     kind: Literal['original', 'captured-result', 'derived-artifact', 'normalized'] = Field(...)
-    media_type: Literal['application/x-las', 'application/json', 'text/csv', 'text/plain'] = Field(...)
+    media_type: Literal['application/x-las', 'application/json', 'text/csv', 'text/plain', 'application/octet-stream'] = Field(...)
     profile: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] = Field(...)
     bytes: Annotated[int, Field(ge=0, le=33554432)] = Field(...)
     sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
@@ -243,6 +284,26 @@ class Retention(Contract):
     mode: Literal['upstream-only', 'retained'] = Field(...)
     policy: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     historical_reads: Literal['not-guaranteed', 'while-retained-and-authorized'] = Field(...)
+
+class SeismicContext(Contract):
+    type: Literal['seismic-volume'] = Field(...)
+    format: Literal['IBM 4-byte floating point', 'IEEE 4-byte floating point'] = Field(...)
+    format_code: Literal[1, 5] = Field(...)
+    segy_revision: Annotated[str, Field(pattern='^[0-9]{1,3}\\.[0-9]{1,3}$')] = Field(...)
+    traces: Annotated[int, Field(ge=1, le=1000000)] = Field(...)
+    samples: Annotated[int, Field(ge=1, le=20000)] = Field(...)
+    trace_bytes: Annotated[int, Field(ge=244)] = Field(...)
+    inline: LineRange = Field(...)
+    crossline: LineRange = Field(...)
+    sample_interval: Annotated[float, Field(gt=0)] = Field(...)
+    sample_unit: Annotated[str, Field(pattern='^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$')] = Field(...)
+    first_sample: float = Field(...)
+    z_domain: Literal['time', 'depth', 'unknown'] = Field(...)
+    crs: Annotated[str, Field(pattern='^(EPSG:[0-9]{4,6}|unknown)$')] = Field(...)
+    datum: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+    first_cdp: XY = Field(...)
+    last_cdp: XY = Field(...)
+    fidelity: Fidelity = Field(...)
 
 class TopsContext(Contract):
     type: Literal['well-tops'] = Field(...)
@@ -275,6 +336,59 @@ class Version(Contract):
 class WellLogLink(Contract):
     asset_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+
+class XY(Contract):
+    x: float = Field(...)
+    y: float = Field(...)
+
+class SeismicSlice(Contract):
+    schema_: Literal['ophiolite.seismic-slice/1'] = Field(..., alias='schema')
+    representation: Literal['slice'] = Field(...)
+    asset_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    source: Reference = Field(...)
+    source_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    interpretation: TypedInterpretation = Field(...)
+    axis: Literal['inline', 'crossline', 'sample'] = Field(...)
+    label: int = Field(...)
+    scope: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    rows: SliceAxis = Field(...)
+    columns: SliceAxis = Field(...)
+    sample: SampleMeaning = Field(...)
+    values: Annotated[list[list[float]], Field(min_length=1, max_length=100000)] = Field(...)
+    chunks: Annotated[list[Annotated[str, Field(pattern='^[0-9a-f]{64}$')]], Field(min_length=1, max_length=100000)] = Field(...)
+
+class SampleMeaning(Contract):
+    domain: Literal['time', 'depth', 'unknown'] = Field(...)
+    unit: Annotated[str, Field(pattern='^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$')] = Field(...)
+    first: float = Field(...)
+    interval: Annotated[float, Field(gt=0)] = Field(...)
+
+class SliceAxis(Contract):
+    name: Literal['inline', 'crossline', 'sample'] = Field(...)
+    values: Annotated[list[float], Field(min_length=1, max_length=100000)] = Field(...)
+
+class SeismicVolume(Contract):
+    representation: Literal['normalized'] = Field(...)
+    source: Reference = Field(...)
+    source_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    interpretation: TypedInterpretation = Field(...)
+    schema_: Literal['ophiolite.seismic-volume/1'] = Field(..., alias='schema')
+    context: SeismicContext = Field(...)
+    decisions: Annotated[list[Annotated[str, Field(min_length=1, max_length=512)]], Field(min_length=1, max_length=64)] = Field(...)
+    positions: HeaderPositions = Field(...)
+    chunks: Annotated[list[Chunk], Field(min_length=1, max_length=100000)] = Field(...)
+
+class Chunk(Contract):
+    inline: int = Field(...)
+    sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    bytes: Annotated[int, Field(ge=4)] = Field(...)
+
+class HeaderPositions(Contract):
+    inline_byte: Annotated[int, Field(ge=1, le=237)] = Field(...)
+    crossline_byte: Annotated[int, Field(ge=1, le=237)] = Field(...)
+    cdp_x_byte: Annotated[int, Field(ge=1, le=237)] = Field(...)
+    cdp_y_byte: Annotated[int, Field(ge=1, le=237)] = Field(...)
 
 class AssetSummary(Contract):
     asset_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
@@ -316,7 +430,7 @@ class TriangulatedSurface(Contract):
     attributes: Annotated[list[Attribute], Field(max_length=16)] = Field(...)
 
 class TypedContext(Contract):
-    context: Annotated[TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext, Field(discriminator='type')] = Field(...)
+    context: Annotated[TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext, Field(discriminator='type')] = Field(...)
 
 class WellTops(Contract):
     representation: Literal['normalized'] = Field(...)
@@ -409,10 +523,11 @@ class BundleSelectedV2(Contract):
     asset_id: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
     revision: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
     curves: Annotated[list[Annotated[str, Field(min_length=1, max_length=80)]], Field(min_length=0, max_length=64)] = Field(...)
+    slices: Annotated[list[BundleSliceChoice], Field(min_length=1, max_length=64)] = Field(None)
 
 class BundleFileV2(Contract):
     path: Annotated[str, Field(pattern='^assets/[0-9]{1,3}/[A-Za-z0-9._-]{1,120}$')] = Field(...)
-    role: Literal['original', 'descriptor', 'normalized'] = Field(...)
+    role: Literal['original', 'descriptor', 'normalized', 'slice'] = Field(...)
     curve: Annotated[str, Field(min_length=1, max_length=80)] = Field(None)
     sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
     bytes: Annotated[int, Field(ge=0, le=33554432)] = Field(...)
@@ -429,8 +544,10 @@ class BundleAssetV2(Contract):
     parent_visibility: Literal['complete', 'restricted'] = Field(...)
     omissions: list[str] = Field(...)
     losses: list[str] = Field(...)
-    type: Literal['well-log', 'well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set'] = Field(...)
+    type: Literal['well-log', 'well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-slice'] = Field(...)
     relationships: BundleAssetV2Relationships = Field(None)
+    original: BundleAssetV2Original = Field(None)
+    slices: Annotated[list[BundleSliceV2], Field(min_length=1, max_length=64)] = Field(None)
 
 class BundleHistoryV2(Contract):
     number: Annotated[int, Field(ge=1)] = Field(...)
@@ -444,6 +561,16 @@ class BundleGroupV2(Contract):
     meaning: Literal['observation-at-export'] = Field(...)
     members: Annotated[list[Annotated[int, Field(ge=0, le=127)]], Field(min_length=1, max_length=128)] = Field(...)
     recommended: None | BundleGroupV2Recommended1 = Field(...)
+
+class BundleSliceChoice(Contract):
+    axis: Literal['inline', 'crossline', 'sample'] = Field(...)
+    label: int = Field(...)
+
+class BundleSliceV2(Contract):
+    axis: Literal['inline', 'crossline', 'sample'] = Field(...)
+    label: int = Field(...)
+    shape: Annotated[list[Annotated[int, Field(ge=1)]], Field(min_length=2, max_length=2)] = Field(...)
+    scope: Annotated[str, Field(min_length=1, max_length=500)] = Field(...)
 
 class ContractProfile(Contract):
     schema_: Literal['ophiolite.contract-profile/1'] = Field(..., alias='schema')
@@ -589,6 +716,11 @@ class PortableBundleManifestV2Observations(Contract):
 class BundleAssetV2Relationships(Contract):
     well_log: None | Literal['restricted'] | BundleAssetV2RelationshipsWell_Log2 = Field(None)
 
+class BundleAssetV2Original(Contract):
+    sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    bytes: Annotated[int, Field(ge=0)] = Field(...)
+    included: Literal[False] = Field(...)
+
 class BundleGroupV2Recommended1(Contract):
     asset_position: Annotated[int, Field(ge=0, le=127)] = Field(...)
     revision: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
@@ -617,11 +749,16 @@ TypedInterpretation.model_rebuild()
 PointSet.model_rebuild()
 Attribute.model_rebuild()
 PointContext.model_rebuild()
+PolylineSet.model_rebuild()
+PolylineContext.model_rebuild()
+Stick.model_rebuild()
+XYZ.model_rebuild()
 ScientificAsset.model_rebuild()
 Acquisition.model_rebuild()
 Display.model_rebuild()
 Evaluated.model_rebuild()
 History.model_rebuild()
+LineRange.model_rebuild()
 MeshContext.model_rebuild()
 NotEvaluated.model_rebuild()
 Person.model_rebuild()
@@ -630,10 +767,18 @@ RecordedInterpretation.model_rebuild()
 Relationships.model_rebuild()
 Representation.model_rebuild()
 Retention.model_rebuild()
+SeismicContext.model_rebuild()
 TopsContext.model_rebuild()
 TrajectoryContext.model_rebuild()
 Version.model_rebuild()
 WellLogLink.model_rebuild()
+XY.model_rebuild()
+SeismicSlice.model_rebuild()
+SampleMeaning.model_rebuild()
+SliceAxis.model_rebuild()
+SeismicVolume.model_rebuild()
+Chunk.model_rebuild()
+HeaderPositions.model_rebuild()
 AssetSummary.model_rebuild()
 Trajectory.model_rebuild()
 Station.model_rebuild()
@@ -654,6 +799,8 @@ BundleFileV2.model_rebuild()
 BundleAssetV2.model_rebuild()
 BundleHistoryV2.model_rebuild()
 BundleGroupV2.model_rebuild()
+BundleSliceChoice.model_rebuild()
+BundleSliceV2.model_rebuild()
 ContractProfile.model_rebuild()
 ConnectorSemantics.model_rebuild()
 RepresentationRules.model_rebuild()
@@ -674,6 +821,7 @@ PortableBundleManifestV2Exporter.model_rebuild()
 PortableBundleManifestV2Limits.model_rebuild()
 PortableBundleManifestV2Observations.model_rebuild()
 BundleAssetV2Relationships.model_rebuild()
+BundleAssetV2Original.model_rebuild()
 BundleGroupV2Recommended1.model_rebuild()
 RepresentationRulesArtifact_Kind_By_Origin.model_rebuild()
 BundleAssetV2RelationshipsWell_Log2.model_rebuild()

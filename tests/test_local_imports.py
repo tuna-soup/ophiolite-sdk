@@ -27,7 +27,7 @@ root=files('ophiolite').joinpath('contracts/assets/v1/fixtures')
 d=json.loads(root.joinpath('source.json').read_text());raw=root.joinpath('curve.json').read_bytes()
 asset,curve=validate.pair(d,raw)
 assert curve.values==[0,10,None,30,40]
-assert ophiolite.__contracts__['registry_version']=='1.12.0'
+assert ophiolite.__contracts__['registry_version']=='1.13.0'
 assert not any(x in sys.modules for x in ('ophiolite.client','ophiolite.auth','httpx','project_gateway'))
 assert '/site-packages/' in ophiolite.__file__,ophiolite.__file__
 print('installed local validation PASS')

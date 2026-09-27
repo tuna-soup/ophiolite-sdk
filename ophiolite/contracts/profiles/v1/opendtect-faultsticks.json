@@ -1,0 +1,32 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "opendtect-faultsticks/1",
+  "kind": "source",
+  "lifecycle": "preview",
+  "display_name": "Fault sticks (OpendTect)",
+  "description": "Fault sticks exported by OpendTect as FaultStickSet ASCII (x y z stick-index), kept byte for byte.",
+  "serves": [
+    "ophiolite.scientific-asset/1"
+  ],
+  "connector": {
+    "scientific_profile": "polyline-set-source/1",
+    "source_schema": "OpendTect-FaultStickSet-ASCII",
+    "mapping_version": "polyline-set/1",
+    "history": "retained-exact-read"
+  },
+  "role": "artifact",
+  "media_types": [
+    "text/plain"
+  ],
+  "normalized_profile": "ophiolite.polyline-set/1",
+  "context_schema": "ophiolite.typed-context/1",
+  "representation_rules": {
+    "artifact_kind_by_origin": {
+      "source-reference": "original",
+      "retained-capture": "original",
+      "managed-derived": "derived-artifact"
+    },
+    "normalized": 1,
+    "total": 2
+  }
+}

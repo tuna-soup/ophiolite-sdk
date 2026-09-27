@@ -44,6 +44,24 @@
           "maxItems": 16,
           "title": "Unknown Context",
           "type": "array"
+        },
+        "decisions": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 512,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 64,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decisions"
         }
       },
       "required": [
@@ -239,7 +257,9 @@
             "trajectory/1",
             "regular-grid-surface/1",
             "triangulated-surface/1",
-            "point-set/1"
+            "point-set/1",
+            "polyline-set/1",
+            "seismic-volume/1"
           ],
           "title": "Mapping",
           "type": "string"

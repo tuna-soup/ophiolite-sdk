@@ -1,0 +1,110 @@
+{
+  "schema": "ophiolite.seismic-volume/1",
+  "representation": "normalized",
+  "source": {
+    "authority": "ophiolite:uploaded",
+    "key": "synthetic-seismic",
+    "revision": "b42095c0c9aab74a659cfd8e70375a80994b2d24dd7c3b5ed6f10def06bb468e",
+    "profile": "segy/1"
+  },
+  "source_sha256": "b42095c0c9aab74a659cfd8e70375a80994b2d24dd7c3b5ed6f10def06bb468e",
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "mapping": "seismic-volume/1",
+    "parsing_policy": "typed-strict/1",
+    "null_policy": "empty cell or declared NODATA value is missing; never zero-filled"
+  },
+  "context": {
+    "type": "seismic-volume",
+    "format": "IBM 4-byte floating point",
+    "format_code": 1,
+    "segy_revision": "1.0",
+    "traces": 6,
+    "samples": 4,
+    "trace_bytes": 256,
+    "inline": {
+      "first": 10,
+      "last": 12,
+      "step": 2,
+      "count": 2
+    },
+    "crossline": {
+      "first": 100,
+      "last": 102,
+      "step": 1,
+      "count": 3
+    },
+    "sample_interval": 4.0,
+    "sample_unit": "ms",
+    "z_domain": "time",
+    "crs": "EPSG:23031",
+    "datum": "unknown",
+    "first_cdp": {
+      "x": 500000.0,
+      "y": 5800000.0
+    },
+    "last_cdp": {
+      "x": 500025.0,
+      "y": 5800050.0
+    },
+    "first_sample": 0,
+    "fidelity": {
+      "status": "assessed",
+      "preserved": [
+        "every trace header and sample byte for byte (the exact original is the stored representation)"
+      ],
+      "losses": [
+        "Slices convert samples to float64 exactly; nothing is resampled"
+      ],
+      "unknown_context": [
+        "datum"
+      ],
+      "decisions": [
+        "Textual header read as EBCDIC (cp037).",
+        "Binary header bytes 3217\u20133218: sample interval 4000, read as microseconds, so 4 ms.",
+        "Binary header bytes 3221\u20133222: 4 samples per trace; every trace agrees.",
+        "Binary header bytes 3225\u20133226: data format 1 (IBM 4-byte floating point), big-endian.",
+        "Trace header bytes 189\u2013192: inline number.",
+        "Trace header bytes 193\u2013196: crossline number.",
+        "Trace header bytes 181\u2013184 and 185\u2013188: CDP x and y, scaled by the coordinate scalar -100 (bytes 71\u201372).",
+        "6 traces form a full grid of 2 inlines \u00d7 3 crosslines; trace order in the file does not matter.",
+        "Trace header bytes 109\u2013110: delay recording time 0, the same on every trace; sample k is at delay + k \u00d7 interval (ms).",
+        "Coordinate scalar -100: coordinates divided by 100.",
+        "Slices address lines by their inline and crossline numbers as written in the trace headers, and samples by zero-based position.",
+        "IBM samples are converted to IEEE float64 exactly (no rounding)."
+      ]
+    }
+  },
+  "decisions": [
+    "Textual header read as EBCDIC (cp037).",
+    "Binary header bytes 3217\u20133218: sample interval 4000, read as microseconds, so 4 ms.",
+    "Binary header bytes 3221\u20133222: 4 samples per trace; every trace agrees.",
+    "Binary header bytes 3225\u20133226: data format 1 (IBM 4-byte floating point), big-endian.",
+    "Trace header bytes 189\u2013192: inline number.",
+    "Trace header bytes 193\u2013196: crossline number.",
+    "Trace header bytes 181\u2013184 and 185\u2013188: CDP x and y, scaled by the coordinate scalar -100 (bytes 71\u201372).",
+    "6 traces form a full grid of 2 inlines \u00d7 3 crosslines; trace order in the file does not matter.",
+    "Trace header bytes 109\u2013110: delay recording time 0, the same on every trace; sample k is at delay + k \u00d7 interval (ms).",
+    "Coordinate scalar -100: coordinates divided by 100.",
+    "Slices address lines by their inline and crossline numbers as written in the trace headers, and samples by zero-based position.",
+    "IBM samples are converted to IEEE float64 exactly (no rounding)."
+  ],
+  "chunks": [
+    {
+      "inline": 10,
+      "sha256": "7d599e833e50fa90996374c635690af86c4ecf7ca939e02a3fadb7dab56da998",
+      "bytes": 48
+    },
+    {
+      "inline": 12,
+      "sha256": "5e59014f0c9270f8c8bb8cee211b651342b5ea5930ad88795c8cfbebd9985197",
+      "bytes": 48
+    }
+  ],
+  "positions": {
+    "inline_byte": 189,
+    "crossline_byte": 193,
+    "cdp_x_byte": 181,
+    "cdp_y_byte": 185
+  }
+}

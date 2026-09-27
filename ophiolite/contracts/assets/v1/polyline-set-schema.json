@@ -1,43 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ophiolite.dev/contracts/assets/v1/triangulated-surface-schema.json",
+  "$id": "https://ophiolite.dev/contracts/assets/v1/polyline-set-schema.json",
   "x-ophiolite": {
-    "id": "ophiolite.triangulated-surface/1",
+    "id": "ophiolite.polyline-set/1",
     "version": "1.0.0",
     "lifecycle": "preview"
   },
   "$defs": {
-    "Attribute": {
-      "additionalProperties": false,
-      "properties": {
-        "name": {
-          "pattern": "^[A-Za-z][A-Za-z0-9_]{0,31}$",
-          "title": "Name",
-          "type": "string"
-        },
-        "values": {
-          "items": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "maxItems": 200000,
-          "title": "Values",
-          "type": "array"
-        }
-      },
-      "required": [
-        "name",
-        "values"
-      ],
-      "title": "Attribute",
-      "type": "object"
-    },
     "Fidelity": {
       "additionalProperties": false,
       "properties": {
@@ -104,7 +73,7 @@
       "title": "Fidelity",
       "type": "object"
     },
-    "MeshContext": {
+    "PolylineContext": {
       "additionalProperties": false,
       "properties": {
         "crs": {
@@ -194,26 +163,20 @@
           "$ref": "#/$defs/Fidelity"
         },
         "type": {
-          "const": "triangulated-surface",
+          "const": "polyline-set",
           "title": "Type",
           "type": "string"
         },
-        "vertex_count": {
-          "maximum": 200000,
-          "minimum": 3,
-          "title": "Vertex Count",
-          "type": "integer"
-        },
-        "triangle_count": {
-          "maximum": 400000,
+        "sticks": {
+          "maximum": 20000,
           "minimum": 1,
-          "title": "Triangle Count",
+          "title": "Sticks",
           "type": "integer"
         },
-        "missing_z_count": {
+        "points": {
           "maximum": 200000,
-          "minimum": 0,
-          "title": "Missing Z Count",
+          "minimum": 2,
+          "title": "Points",
           "type": "integer"
         }
       },
@@ -230,11 +193,10 @@
         "attributes",
         "fidelity",
         "type",
-        "vertex_count",
-        "triangle_count",
-        "missing_z_count"
+        "sticks",
+        "points"
       ],
-      "title": "MeshContext",
+      "title": "PolylineContext",
       "type": "object"
     },
     "Reference": {
@@ -272,6 +234,30 @@
         "profile"
       ],
       "title": "Reference",
+      "type": "object"
+    },
+    "Stick": {
+      "additionalProperties": false,
+      "properties": {
+        "index": {
+          "title": "Index",
+          "type": "integer"
+        },
+        "points": {
+          "items": {
+            "$ref": "#/$defs/XYZ"
+          },
+          "maxItems": 200000,
+          "minItems": 2,
+          "title": "Points",
+          "type": "array"
+        }
+      },
+      "required": [
+        "index",
+        "points"
+      ],
+      "title": "Stick",
       "type": "object"
     },
     "TypedInterpretation": {
@@ -316,6 +302,30 @@
       ],
       "title": "TypedInterpretation",
       "type": "object"
+    },
+    "XYZ": {
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "title": "Y",
+          "type": "number"
+        },
+        "z": {
+          "title": "Z",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "z"
+      ],
+      "title": "XYZ",
+      "type": "object"
     }
   },
   "additionalProperties": false,
@@ -337,55 +347,20 @@
       "$ref": "#/$defs/TypedInterpretation"
     },
     "schema": {
-      "const": "ophiolite.triangulated-surface/1",
+      "const": "ophiolite.polyline-set/1",
       "title": "Schema",
       "type": "string"
     },
     "context": {
-      "$ref": "#/$defs/MeshContext"
+      "$ref": "#/$defs/PolylineContext"
     },
-    "vertices": {
+    "sticks": {
       "items": {
-        "items": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "maxItems": 3,
-        "minItems": 3,
-        "type": "array"
+        "$ref": "#/$defs/Stick"
       },
-      "maxItems": 200000,
-      "minItems": 3,
-      "title": "Vertices",
-      "type": "array"
-    },
-    "triangles": {
-      "items": {
-        "items": {
-          "minimum": 0,
-          "type": "integer"
-        },
-        "maxItems": 3,
-        "minItems": 3,
-        "type": "array"
-      },
-      "maxItems": 400000,
+      "maxItems": 20000,
       "minItems": 1,
-      "title": "Triangles",
-      "type": "array"
-    },
-    "attributes": {
-      "items": {
-        "$ref": "#/$defs/Attribute"
-      },
-      "maxItems": 16,
-      "title": "Attributes",
+      "title": "Sticks",
       "type": "array"
     }
   },
@@ -396,10 +371,8 @@
     "interpretation",
     "schema",
     "context",
-    "vertices",
-    "triangles",
-    "attributes"
+    "sticks"
   ],
-  "title": "TriangulatedSurface",
+  "title": "PolylineSet",
   "type": "object"
 }

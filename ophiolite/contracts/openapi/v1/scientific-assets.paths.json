@@ -256,6 +256,96 @@
           }
         }
       }
+    },
+    "/api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/slices/{axis}/{label}": {
+      "get": {
+        "description": "One inline, crossline or sample slice of a seismic volume (ophiolite.seismic-slice/1), read one inline chunk at a time; X-Content-SHA256 is the digest of the returned document",
+        "parameters": [
+          {
+            "name": "project",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "asset",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "revision",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "axis",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "inline",
+                "crossline",
+                "sample"
+              ]
+            }
+          },
+          {
+            "name": "label",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Inline or crossline number as recorded in the trace headers; for a sample slice the 0-based sample number."
+          }
+        ],
+        "security": [
+          {
+            "scopedBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authorized slice",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Versioned error; see README",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Busy: retry the same exact request after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

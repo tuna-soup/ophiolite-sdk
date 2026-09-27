@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.12.0",
+  "version": "1.13.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -37,7 +37,7 @@
     },
     {
       "id": "ophiolite.scientific-asset/1",
-      "version": "1.6.0",
+      "version": "1.7.0",
       "lifecycle": "preview",
       "path": "assets/v1/schema.json",
       "title": "ScientificAsset",
@@ -69,11 +69,11 @@
     },
     {
       "id": "ophiolite.typed-context/1",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "lifecycle": "preview",
       "path": "assets/v1/typed-context-schema.json",
       "title": "TypedContext",
-      "description": "Observed and declared context of a typed asset: well tops, trajectory or regular-grid surface, with its fidelity report."
+      "description": "Observed and declared context of a typed asset (tops, trajectory, grid, triangulated surface, point set, fault sticks, seismic volume) with its fidelity report."
     },
     {
       "id": "ophiolite.well-tops/1",
@@ -141,11 +141,35 @@
     },
     {
       "id": "ophiolite.portable-bundle/2",
-      "version": "2.2.0",
+      "version": "2.3.0",
       "lifecycle": "preview",
       "path": "bundles/v2/manifest-schema.json",
       "title": "PortableBundleManifestV2",
-      "description": "Portable bundle 2: exact selected revisions of well logs, well tops, trajectories and regular-grid surfaces with files, digests, served context, permitted lineage and relationships."
+      "description": "Portable bundle 2: exact selected revisions of well logs, well tops, trajectories, regular-grid surfaces, meshes, point sets, fault sticks and seismic slices with files, digests, served context, permitted lineage and relationships."
+    },
+    {
+      "id": "ophiolite.polyline-set/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/polyline-set-schema.json",
+      "title": "PolylineSet",
+      "description": "Normalized fault sticks: sticks and points in file order with source reference, digest, context and reader identity."
+    },
+    {
+      "id": "ophiolite.seismic-volume/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/seismic-volume-schema.json",
+      "title": "SeismicVolume",
+      "description": "A seismic volume description: grid, sample meaning, header decisions and per-inline chunk digests."
+    },
+    {
+      "id": "ophiolite.seismic-slice/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/seismic-slice-schema.json",
+      "title": "SeismicSlice",
+      "description": "One inline, crossline or sample slice of a seismic volume at an exact revision, with exact samples and its declared scope."
     }
   ],
   "profiles": [
@@ -308,6 +332,38 @@
       "description": "Every point in file order (missing z null) with numeric attributes, extent and the declared CRS, units and vertical meaning.",
       "lifecycle": "preview",
       "path": "profiles/v1/point-set.json"
+    },
+    {
+      "id": "opendtect-faultsticks/1",
+      "kind": "source",
+      "display_name": "Fault sticks (OpendTect)",
+      "description": "Fault sticks exported by OpendTect as FaultStickSet ASCII (x y z stick-index), kept byte for byte.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/opendtect-faultsticks.json"
+    },
+    {
+      "id": "ophiolite.polyline-set/1",
+      "kind": "normalized",
+      "display_name": "Normalized fault sticks",
+      "description": "Every stick in first-appearance order with its points in file order and stick indices as written, with the declared CRS, units and vertical meaning.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/polyline-set.json"
+    },
+    {
+      "id": "segy/1",
+      "kind": "source",
+      "display_name": "Seismic volume (SEG-Y)",
+      "description": "A SEG-Y volume (revision 1 or 2, IBM or IEEE floating-point samples, big-endian, fixed-length traces on a full grid) kept byte for byte; slices are read one inline at a time.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/segy.json"
+    },
+    {
+      "id": "ophiolite.seismic-volume/1",
+      "kind": "normalized",
+      "display_name": "Seismic volume description",
+      "description": "The volume grid, sample meaning, every header decision and the digests of its per-inline chunks; samples are read as slices.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/seismic-volume.json"
     }
   ],
   "documents": [

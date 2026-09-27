@@ -552,6 +552,10 @@ export type getProjectsProjectScientificAssetsAssetRevisionsRevisionRepresentati
 export function getProjectsProjectScientificAssetsAssetRevisionsRevisionRepresentationsRepresentation(transport: Transport, input: getProjectsProjectScientificAssetsAssetRevisionsRevisionRepresentationsRepresentationInput): Promise<string> {
   return transport.request<string>("GET", "/api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/representations/{representation}", input.path, input.query, undefined, input.options, null, false);
 }
+export type getProjectsProjectScientificAssetsAssetRevisionsRevisionSlicesAxisLabelInput = { path: { "project": string; "asset": string; "revision": string; "axis": "inline" | "crossline" | "sample"; "label": number }; options?: OperationOptions };
+export function getProjectsProjectScientificAssetsAssetRevisionsRevisionSlicesAxisLabel(transport: Transport, input: getProjectsProjectScientificAssetsAssetRevisionsRevisionSlicesAxisLabelInput): Promise<unknown> {
+  return transport.request<unknown>("GET", "/api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/slices/{axis}/{label}", input.path, undefined, undefined, input.options, null, false);
+}
 export type postProjectsProjectSearchQueryInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
 export function postProjectsProjectSearchQuery(transport: Transport, input: postProjectsProjectSearchQueryInput): Promise<unknown> {
   return transport.request<unknown>("POST", "/api/v1/projects/{project}/search/query", input.path, undefined, input.body, input.options, null, false);

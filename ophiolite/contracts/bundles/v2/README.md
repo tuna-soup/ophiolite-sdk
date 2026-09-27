@@ -25,3 +25,20 @@ not updated after export. Members and recommendations the exporter could not see
 absent, never counted. The manifest fields `groups` and `recommendations` stay `null`, so
 readers that predate observations keep reading these bundles (unknown fields are kept as
 extensions). Curve-only bundles with observations are 1.1; bundles with typed data 2.1.
+
+## 2.2 — meshes and point sets; 2.3 — fault sticks and seismic slices
+
+2.2 adds `triangulated-surface` and `point-set` (files as the other typed assets). 2.3 adds
+`polyline-set` (fault sticks: `original.txt`, `descriptor.json`, `data.json`) and
+`seismic-slice`. A seismic-slice asset carries **no original**: the volume is identified
+by `original: {sha256, bytes, included: false}` (the SHA-256 is the revision). Its files are
+`descriptor.json` (the volume descriptor as served), `volume.json` (`normalized`, the served
+`ophiolite.seismic-volume/1`: grid, sample meaning, header decisions, per-inline chunk
+digests) and one `slice-<axis>-<label>.json` per chosen slice (`slice`, the served
+`ophiolite.seismic-slice/1`). The selection names the slices (`slices: [{axis, label}]`)
+and the asset lists each with its shape and declared scope. Readers check every slice
+against the volume description — identity, direction, axes, sample meaning, shape and the
+chunks it was read from — so a slice whose meaning changed is refused even when its
+checksum was recomputed. A slice is not the complete volume. Exporters write the lowest
+minor that expresses the content, so 2.2 readers keep reading older content and refuse
+2.3 content.

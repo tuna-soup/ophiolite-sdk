@@ -1,9 +1,9 @@
 {
   "schema": "ophiolite.connector-capability/1",
   "id": "typed-upload",
-  "display_name": "Tops, survey and grid upload",
+  "display_name": "Tops, survey, grid, fault and seismic upload",
   "kind": "source",
-  "summary": "Upload well tops, deviation surveys, horizon grids, triangulated surfaces or point sets; declared context stays as declared.",
+  "summary": "Upload well tops, deviation surveys, horizon grids, triangulated surfaces, point sets, fault sticks or SEG-Y seismic volumes; declared context stays as declared.",
   "host": {
     "name": "Web browser",
     "versions": [],
@@ -113,6 +113,48 @@
       "unsupported": [
         "CRS transformation",
         "text attributes"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    },
+    {
+      "profile": "opendtect-faultsticks/1",
+      "data": "Fault sticks",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "Text formatting is kept only in the exact original"
+      ],
+      "unsupported": [
+        "CRS transformation",
+        "fault surfaces (triangulated planes)"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    },
+    {
+      "profile": "segy/1",
+      "data": "Seismic volume",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "Slice samples are converted to float64 exactly; header interpretations are recorded as decisions"
+      ],
+      "unsupported": [
+        "SEG-Y formats other than IBM and IEEE float",
+        "little-endian or variable-length traces",
+        "irregular grids",
+        "volume export"
       ],
       "qualification": {
         "status": "unverified",

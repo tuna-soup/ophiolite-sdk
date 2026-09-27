@@ -56,6 +56,30 @@
         "A single patch of points; no property kinds beyond numeric attributes.",
         "Coordinates as written; the declared CRS is not transformed."
       ]
+    },
+    {
+      "profile": "ophiolite.polyline-set/1",
+      "osdu": "work-product-component--FaultInterpretation with polyline geometry (no one-to-one stick set)",
+      "energistics": "RESQML 2.0.1 PolylineSetRepresentation (fault sticks as polylines of a FaultInterpretation)",
+      "opendtect": "FaultStickSet ASCII export (x y z stick-index [node-index])",
+      "evo": "not declared: an Evo line-segment mapping was not verified against a public, version-pinned schema",
+      "differences": [
+        "No fault identity or interpretation is carried; sticks are geometry only.",
+        "The node-index column of the OpendTect export is not kept (point order is).",
+        "CRS, units and vertical meaning are the uploader's declarations; no transformation is applied."
+      ]
+    },
+    {
+      "profile": "ophiolite.seismic-volume/1",
+      "osdu": "work-product-component--SeismicTraceData (with a SeismicBinGrid)",
+      "energistics": "RESQML 2.0.1 Grid2dRepresentation for the survey geometry; samples stay in the SEG-Y original",
+      "segy": "SEG-Y rev 1 / rev 2.0: formats 1 and 5, big-endian, fixed-length traces, full inline × crossline grid",
+      "evo": "not declared",
+      "differences": [
+        "Only regular full grids are supported; the survey's bin-grid corner points are not derived, first and last CDP coordinates are reported as written.",
+        "Every header interpretation is recorded as a decision in the fidelity report; nothing else from the textual header is interpreted.",
+        "Slices are the published representation of samples; the full volume is available only as the exact original."
+      ]
     }
   ],
   "licences": "The standards are referenced by name only; no schema text is copied."

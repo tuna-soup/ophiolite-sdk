@@ -1,0 +1,455 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/assets/v1/seismic-volume-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.seismic-volume/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "Chunk": {
+      "additionalProperties": false,
+      "properties": {
+        "inline": {
+          "title": "Inline",
+          "type": "integer"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "bytes": {
+          "minimum": 4,
+          "title": "Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "inline",
+        "sha256",
+        "bytes"
+      ],
+      "title": "Chunk",
+      "type": "object"
+    },
+    "Fidelity": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "const": "assessed",
+          "title": "Status",
+          "type": "string"
+        },
+        "preserved": {
+          "items": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Preserved",
+          "type": "array"
+        },
+        "losses": {
+          "items": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Losses",
+          "type": "array"
+        },
+        "unknown_context": {
+          "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Unknown Context",
+          "type": "array"
+        },
+        "decisions": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 512,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 64,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decisions"
+        }
+      },
+      "required": [
+        "status",
+        "preserved",
+        "losses",
+        "unknown_context"
+      ],
+      "title": "Fidelity",
+      "type": "object"
+    },
+    "HeaderPositions": {
+      "additionalProperties": false,
+      "description": "1-based trace-header byte positions the reader used (defaults or the uploader's declaration).",
+      "properties": {
+        "inline_byte": {
+          "maximum": 237,
+          "minimum": 1,
+          "title": "Inline Byte",
+          "type": "integer"
+        },
+        "crossline_byte": {
+          "maximum": 237,
+          "minimum": 1,
+          "title": "Crossline Byte",
+          "type": "integer"
+        },
+        "cdp_x_byte": {
+          "maximum": 237,
+          "minimum": 1,
+          "title": "Cdp X Byte",
+          "type": "integer"
+        },
+        "cdp_y_byte": {
+          "maximum": 237,
+          "minimum": 1,
+          "title": "Cdp Y Byte",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "inline_byte",
+        "crossline_byte",
+        "cdp_x_byte",
+        "cdp_y_byte"
+      ],
+      "title": "HeaderPositions",
+      "type": "object"
+    },
+    "LineRange": {
+      "additionalProperties": false,
+      "properties": {
+        "first": {
+          "title": "First",
+          "type": "integer"
+        },
+        "last": {
+          "title": "Last",
+          "type": "integer"
+        },
+        "step": {
+          "minimum": 1,
+          "title": "Step",
+          "type": "integer"
+        },
+        "count": {
+          "maximum": 100000,
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "first",
+        "last",
+        "step",
+        "count"
+      ],
+      "title": "LineRange",
+      "type": "object"
+    },
+    "Reference": {
+      "additionalProperties": false,
+      "properties": {
+        "authority": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Authority",
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "profile": {
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+          "title": "Profile",
+          "type": "string"
+        }
+      },
+      "required": [
+        "authority",
+        "key",
+        "revision",
+        "profile"
+      ],
+      "title": "Reference",
+      "type": "object"
+    },
+    "SeismicContext": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "seismic-volume",
+          "title": "Type",
+          "type": "string"
+        },
+        "format": {
+          "enum": [
+            "IBM 4-byte floating point",
+            "IEEE 4-byte floating point"
+          ],
+          "title": "Format",
+          "type": "string"
+        },
+        "format_code": {
+          "enum": [
+            1,
+            5
+          ],
+          "title": "Format Code",
+          "type": "integer"
+        },
+        "segy_revision": {
+          "pattern": "^[0-9]{1,3}\\.[0-9]{1,3}$",
+          "title": "Segy Revision",
+          "type": "string"
+        },
+        "traces": {
+          "maximum": 1000000,
+          "minimum": 1,
+          "title": "Traces",
+          "type": "integer"
+        },
+        "samples": {
+          "maximum": 20000,
+          "minimum": 1,
+          "title": "Samples",
+          "type": "integer"
+        },
+        "trace_bytes": {
+          "minimum": 244,
+          "title": "Trace Bytes",
+          "type": "integer"
+        },
+        "inline": {
+          "$ref": "#/$defs/LineRange"
+        },
+        "crossline": {
+          "$ref": "#/$defs/LineRange"
+        },
+        "sample_interval": {
+          "exclusiveMinimum": 0,
+          "title": "Sample Interval",
+          "type": "number"
+        },
+        "sample_unit": {
+          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+          "title": "Sample Unit",
+          "type": "string"
+        },
+        "first_sample": {
+          "title": "First Sample",
+          "type": "number"
+        },
+        "z_domain": {
+          "enum": [
+            "time",
+            "depth",
+            "unknown"
+          ],
+          "title": "Z Domain",
+          "type": "string"
+        },
+        "crs": {
+          "pattern": "^(EPSG:[0-9]{4,6}|unknown)$",
+          "title": "Crs",
+          "type": "string"
+        },
+        "datum": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Datum",
+          "type": "string"
+        },
+        "first_cdp": {
+          "$ref": "#/$defs/XY"
+        },
+        "last_cdp": {
+          "$ref": "#/$defs/XY"
+        },
+        "fidelity": {
+          "$ref": "#/$defs/Fidelity"
+        }
+      },
+      "required": [
+        "type",
+        "format",
+        "format_code",
+        "segy_revision",
+        "traces",
+        "samples",
+        "trace_bytes",
+        "inline",
+        "crossline",
+        "sample_interval",
+        "sample_unit",
+        "first_sample",
+        "z_domain",
+        "crs",
+        "datum",
+        "first_cdp",
+        "last_cdp",
+        "fidelity"
+      ],
+      "title": "SeismicContext",
+      "type": "object"
+    },
+    "TypedInterpretation": {
+      "additionalProperties": false,
+      "description": "The executable identity of the typed reader (Connectors typed_reader).",
+      "properties": {
+        "reader": {
+          "const": "asset_connectors.typed_reader/1",
+          "title": "Reader",
+          "type": "string"
+        },
+        "mapping": {
+          "enum": [
+            "well-tops/1",
+            "trajectory/1",
+            "regular-grid-surface/1",
+            "triangulated-surface/1",
+            "point-set/1",
+            "polyline-set/1",
+            "seismic-volume/1"
+          ],
+          "title": "Mapping",
+          "type": "string"
+        },
+        "parsing_policy": {
+          "const": "typed-strict/1",
+          "title": "Parsing Policy",
+          "type": "string"
+        },
+        "null_policy": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Null Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reader",
+        "mapping",
+        "parsing_policy",
+        "null_policy"
+      ],
+      "title": "TypedInterpretation",
+      "type": "object"
+    },
+    "XY": {
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "title": "Y",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "title": "XY",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "The volume's description: context, header decisions and the digests of its per-inline sample\nchunks. Samples are read as slices; the exact original is the stored representation.",
+  "properties": {
+    "representation": {
+      "const": "normalized",
+      "title": "Representation",
+      "type": "string"
+    },
+    "source": {
+      "$ref": "#/$defs/Reference"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "interpretation": {
+      "$ref": "#/$defs/TypedInterpretation"
+    },
+    "schema": {
+      "const": "ophiolite.seismic-volume/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "context": {
+      "$ref": "#/$defs/SeismicContext"
+    },
+    "decisions": {
+      "items": {
+        "maxLength": 512,
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 64,
+      "minItems": 1,
+      "title": "Decisions",
+      "type": "array"
+    },
+    "positions": {
+      "$ref": "#/$defs/HeaderPositions"
+    },
+    "chunks": {
+      "items": {
+        "$ref": "#/$defs/Chunk"
+      },
+      "maxItems": 100000,
+      "minItems": 1,
+      "title": "Chunks",
+      "type": "array"
+    }
+  },
+  "required": [
+    "representation",
+    "source",
+    "source_sha256",
+    "interpretation",
+    "schema",
+    "context",
+    "decisions",
+    "positions",
+    "chunks"
+  ],
+  "title": "SeismicVolume",
+  "type": "object"
+}

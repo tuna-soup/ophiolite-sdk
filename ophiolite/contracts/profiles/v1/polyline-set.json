@@ -1,0 +1,21 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "ophiolite.polyline-set/1",
+  "kind": "normalized",
+  "lifecycle": "preview",
+  "display_name": "Normalized fault sticks",
+  "description": "Every stick in first-appearance order with its points in file order and stick indices as written, with the declared CRS, units and vertical meaning.",
+  "payload_schema": "ophiolite.polyline-set/1",
+  "role": "normalized",
+  "media_types": [
+    "application/json"
+  ],
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "parsing_policy": "typed-strict/1",
+    "mapping": "polyline-set/1"
+  },
+  "mappings": [
+    "ophiolite.mapping/typed-standards/1"
+  ]
+}

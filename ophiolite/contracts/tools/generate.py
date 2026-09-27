@@ -36,8 +36,9 @@ def digest(raw):
 
 def schemas():
     """Publish the Pydantic-generated schemas listed in the registry."""
-    from project_gateway.scientific_assets import Asset, AssetSummary, Curve, ScientificContext, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface, PointSet
-    for model in (Asset, Curve, ScientificContext, AssetSummary, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface, PointSet):
+    from project_gateway.scientific_assets import (Asset, AssetSummary, Curve, ScientificContext, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface,
+                                                   PointSet, PolylineSet, SeismicVolume, SeismicSlice)
+    for model in (Asset, Curve, ScientificContext, AssetSummary, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface, PointSet, PolylineSet, SeismicVolume, SeismicSlice):
         write(CONTRACTS / model.CONTRACT['path'], model.model_json_schema())
 
 
@@ -110,7 +111,17 @@ TYPED = {
     'mesh': ('mesh-text/1', 'text/plain', b'# ophiolite-mesh 1\nattributes amplitude\nvertices\n0 0 100 1.5\n10 0 - -\n0 10 110 0\ntriangles\n0 1 2\n', {'crs': 'EPSG:28992', 'z_unit': 'm', 'z_meaning': 'depth', 'positive': 'down'}),
     'points': ('points-csv/1', 'text/csv', b'x,y,z,porosity\n1,2,3,0.25\n4,5,,0\n', {'crs': 'EPSG:28992', 'z_unit': 'm'}),
     'grid': ('esri-ascii-grid/1', 'text/plain', b'ncols 3\nnrows 2\nxllcorner 1000\nyllcorner 5000\ncellsize 25\nNODATA_value -9999\n1 0 -9999\n4 5 6\n', {'crs': 'EPSG:28992', 'z_unit': 'm', 'z_meaning': 'depth', 'positive': 'down'}),
+    'faults': ('opendtect-faultsticks/1', 'text/plain', b'# synthetic FaultStickSet\n500100.5 5800200.25 1200 3 0\n500110 5800210 1350 3 1\n500300 5800400 1100 1 0\n500310 5800410 1250.125 1 1\n',
+               {'crs': 'EPSG:23031', 'xy_unit': 'm', 'z_unit': 'm', 'z_meaning': 'depth', 'positive': 'down'}),
+    'seismic': ('segy/1', 'application/octet-stream', None, {'crs': 'EPSG:23031', 'z_domain': 'time'}),
 }
+
+
+def seismic_original():
+    """A tiny synthetic IBM SEG-Y volume: 2 inlines (10, 12) x 3 crosslines (100-102) x 4 samples, distinct values."""
+    from asset_connectors.segy import write
+    cube = [[[i * 100 + j * 10 + k + 0.5 for k in range(4)] for j in range(3)] for i in range(2)]
+    return write(None, cube, inlines=[10, 12], crosslines=[100, 101, 102], interval=4000)
 
 
 def typed(FIX):
@@ -119,6 +130,7 @@ def typed(FIX):
     from project_gateway.scientific_assets import Asset, TYPED_PAYLOADS
     from project_gateway.contracts_registry import registry
     for name, (profile, media, raw, declared) in TYPED.items():
+        raw = raw if raw is not None else seismic_original()
         context, data, fidelity = read_typed(profile, raw, declared)
         kind = context['type']; ref = {'authority': 'ophiolite:uploaded', 'key': 'synthetic-' + name, 'revision': digest(raw), 'profile': profile}
         normalized = registry().normalized_profile(profile)

@@ -876,6 +876,12 @@
     "response": "schema"
   },
   {
+    "operation": "GET /api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/slices/{axis}/{label}",
+    "function": "getProjectsProjectScientificAssetsAssetRevisionsRevisionSlicesAxisLabel",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/search/query",
     "function": "postProjectsProjectSearchQuery",
     "request": "explicitly-untyped",
