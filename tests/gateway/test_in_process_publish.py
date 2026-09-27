@@ -153,3 +153,16 @@ def test_sdk_new_version_history_and_stale_parent(web,kind):
     assert history.revisions[1].parent_revision==first.output_reference.revision
     with pytest.raises(IntegrityConflict):publish('3',6,new_version_of=first)
     assert alice.download(first)!=alice.download(second)
+
+
+@pytest.mark.parametrize('kind',['delegate'])
+def test_sdk_shares_a_result_through_any_of_its_versions(web,kind):
+    alice,bob=client(web,'alice',kind),client(web,'bob',kind)
+    def publish(command,value,**kw):
+        binding=alice.configure(release_id=web.r['id'],curve='GR',name='SDK share versions',runners=['alice'],command_id='s-'+command,publication_profile='curve-edits/1')
+        run=alice.start(binding,application_version='sdk-share/'+command,parameters={},command_id='s-run-'+command);run.input()
+        return alice.publish(run,changes=[{'index':0,'value':value}],**kw)
+    first=publish('1',2);second=publish('2',4,new_version_of=first)
+    snapshot=alice.grants(second)
+    alice.share(second,read=['bob'],expected_generation=snapshot.generation)
+    assert [h.number for h in bob.history(second).revisions]==[1,2]
