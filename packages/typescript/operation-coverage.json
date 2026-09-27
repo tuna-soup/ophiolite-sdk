@@ -186,6 +186,66 @@
     "response": "explicitly-untyped"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/agents/approve",
+    "function": "postProjectsProjectAgentsApprove",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/agents/audit",
+    "function": "postProjectsProjectAgentsAudit",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/agents/command",
+    "function": "postProjectsProjectAgentsCommand",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/agents/decline",
+    "function": "postProjectsProjectAgentsDecline",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/agents/list",
+    "function": "postProjectsProjectAgentsList",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/agents/plans",
+    "function": "postProjectsProjectAgentsPlans",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/agents/propose",
+    "function": "postProjectsProjectAgentsPropose",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/agents/register",
+    "function": "postProjectsProjectAgentsRegister",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/agents/revoke",
+    "function": "postProjectsProjectAgentsRevoke",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/agents/status",
+    "function": "postProjectsProjectAgentsStatus",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/applications/configure",
     "function": "postProjectsProjectApplicationsConfigure",
     "request": "schema",

@@ -132,6 +132,46 @@ export type postProjectsProjectActivityListInput = { path: { "project": string }
 export function postProjectsProjectActivityList(transport: Transport, input: postProjectsProjectActivityListInput): Promise<unknown> {
   return transport.request<unknown>("POST", "/api/v1/projects/{project}/activity/list", input.path, undefined, input.body, input.options, null, false);
 }
+export type postProjectsProjectAgentsApproveInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectAgentsApprove(transport: Transport, input: postProjectsProjectAgentsApproveInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/agents/approve", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectAgentsAuditInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectAgentsAudit(transport: Transport, input: postProjectsProjectAgentsAuditInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/agents/audit", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectAgentsCommandInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectAgentsCommand(transport: Transport, input: postProjectsProjectAgentsCommandInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/agents/command", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectAgentsDeclineInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectAgentsDecline(transport: Transport, input: postProjectsProjectAgentsDeclineInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/agents/decline", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectAgentsListInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectAgentsList(transport: Transport, input: postProjectsProjectAgentsListInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/agents/list", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectAgentsPlansInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectAgentsPlans(transport: Transport, input: postProjectsProjectAgentsPlansInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/agents/plans", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectAgentsProposeInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectAgentsPropose(transport: Transport, input: postProjectsProjectAgentsProposeInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/agents/propose", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectAgentsRegisterInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectAgentsRegister(transport: Transport, input: postProjectsProjectAgentsRegisterInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/agents/register", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectAgentsRevokeInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectAgentsRevoke(transport: Transport, input: postProjectsProjectAgentsRevokeInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/agents/revoke", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectAgentsStatusInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectAgentsStatus(transport: Transport, input: postProjectsProjectAgentsStatusInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/agents/status", input.path, undefined, input.body, input.options, null, false);
+}
 export type postProjectsProjectApplicationsConfigureInput = { path: { "project": string }; body: { "project_id": string; "id"?: (string) | (null); "name"?: string; "selection_id"?: (string) | (null); "curve"?: string; "expected_revision"?: (string) | (null); "generation"?: number; "command_id"?: string; "application_version"?: string; "parameters"?: Record<string, unknown>; "changes"?: Array<Record<string, unknown>>; "publication_profile"?: "curve-edits/1" | "las-derived-curves/1"; "derived_curves"?: Array<Record<string, unknown>>; "destination"?: "portable"; "release_id"?: (string) | (null); "asset_index"?: number; "runners"?: Array<string>; "audience"?: Array<string>; "reuse_audience"?: Array<string>; "expected_generation"?: (number) | (null); "append_to"?: (string) | (null); "expected_parent"?: (string) | (null); "asset_id"?: (string) | (null); "asset_revision"?: (string) | (null) }; options?: OperationOptions };
 export function postProjectsProjectApplicationsConfigure(transport: Transport, input: postProjectsProjectApplicationsConfigureInput): Promise<API.Binding> {
   return transport.request<API.Binding>("POST", "/api/v1/projects/{project}/applications/configure", input.path, undefined, input.body, input.options, "binding", false);
