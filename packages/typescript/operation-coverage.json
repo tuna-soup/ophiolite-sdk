@@ -726,6 +726,36 @@
     "response": "explicitly-untyped"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/result-groups/delete",
+    "function": "postProjectsProjectResultGroupsDelete",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/result-groups/diff",
+    "function": "postProjectsProjectResultGroupsDiff",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/result-groups/list",
+    "function": "postProjectsProjectResultGroupsList",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/result-groups/recommend",
+    "function": "postProjectsProjectResultGroupsRecommend",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/result-groups/save",
+    "function": "postProjectsProjectResultGroupsSave",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
     "operation": "GET /api/v1/projects/{project}/scientific-assets",
     "function": "getProjectsProjectScientificAssets",
     "request": "explicitly-untyped",

@@ -452,6 +452,26 @@ export type postProjectsProjectReleasesWithdrawInput = { path: { "project": stri
 export function postProjectsProjectReleasesWithdraw(transport: Transport, input: postProjectsProjectReleasesWithdrawInput): Promise<unknown> {
   return transport.request<unknown>("POST", "/api/v1/projects/{project}/releases/withdraw", input.path, undefined, input.body, input.options, null, false);
 }
+export type postProjectsProjectResultGroupsDeleteInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectResultGroupsDelete(transport: Transport, input: postProjectsProjectResultGroupsDeleteInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/result-groups/delete", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectResultGroupsDiffInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectResultGroupsDiff(transport: Transport, input: postProjectsProjectResultGroupsDiffInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/result-groups/diff", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectResultGroupsListInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectResultGroupsList(transport: Transport, input: postProjectsProjectResultGroupsListInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/result-groups/list", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectResultGroupsRecommendInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectResultGroupsRecommend(transport: Transport, input: postProjectsProjectResultGroupsRecommendInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/result-groups/recommend", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectResultGroupsSaveInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectResultGroupsSave(transport: Transport, input: postProjectsProjectResultGroupsSaveInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/result-groups/save", input.path, undefined, input.body, input.options, null, false);
+}
 export type getProjectsProjectScientificAssetsInput = { path: { "project": string }; query?: { "limit"?: number; "cursor"?: string }; options?: OperationOptions };
 export function getProjectsProjectScientificAssets(transport: Transport, input: getProjectsProjectScientificAssetsInput): Promise<{ "items": Array<{ "asset_id": string; "revision": string; "name": string; "origin": "source-reference" | "retained-capture" | "managed-derived"; "authority": string; "profile": string; "custodian": (string) | (null); "curves": Array<string>; "sample_count": (number) | (null); "allowed_operations": Array<"read" | "export" | "use-as-input">; "display"?: ({ "type"?: (string) | (null); "type_help"?: (string) | (null); "source"?: (string) | (null); "held_as"?: (string) | (null); "updates"?: (string) | (null); "status"?: (string) | (null); "version"?: ({ "at"?: (string) | (null); "by"?: ({ "id": string; "label"?: (string) | (null) }) | (null); "ordinal"?: (number) | (null); "of"?: (number) | (null); "source_version"?: (string) | (null) }) | (null); "last_checked"?: (string) | (null); "method"?: (string) | (null); "settings"?: (string) | (null); "evidence"?: (string) | (null); "checked"?: (string) | (null); "built_on"?: (string) | (null); "available_as"?: (Array<string>) | (null) }) | (null) }>; "next_cursor": string | null; [key: string]: unknown }> {
   return transport.request<{ "items": Array<{ "asset_id": string; "revision": string; "name": string; "origin": "source-reference" | "retained-capture" | "managed-derived"; "authority": string; "profile": string; "custodian": (string) | (null); "curves": Array<string>; "sample_count": (number) | (null); "allowed_operations": Array<"read" | "export" | "use-as-input">; "display"?: ({ "type"?: (string) | (null); "type_help"?: (string) | (null); "source"?: (string) | (null); "held_as"?: (string) | (null); "updates"?: (string) | (null); "status"?: (string) | (null); "version"?: ({ "at"?: (string) | (null); "by"?: ({ "id": string; "label"?: (string) | (null) }) | (null); "ordinal"?: (number) | (null); "of"?: (number) | (null); "source_version"?: (string) | (null) }) | (null); "last_checked"?: (string) | (null); "method"?: (string) | (null); "settings"?: (string) | (null); "evidence"?: (string) | (null); "checked"?: (string) | (null); "built_on"?: (string) | (null); "available_as"?: (Array<string>) | (null) }) | (null) }>; "next_cursor": string | null; [key: string]: unknown }>("GET", "/api/v1/projects/{project}/scientific-assets", input.path, input.query, undefined, input.options, null, false);

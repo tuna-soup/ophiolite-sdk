@@ -5,7 +5,7 @@
     {
       "path": "ophiolite/contracts/README.md",
       "sha256": "d9180aa3630f48dcbe72a58d2f9eeab86d5b57a65ef7be77a5211bce2a8faa16",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/README.md",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -14,7 +14,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/README.md",
       "sha256": "ddf0bdb37597d47e1b2a3371a2be9a6a082c930aded1dc0cb004b5d13043d496",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/README.md",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -23,7 +23,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/curve-context-schema.json",
       "sha256": "f8c921088d0dea15554e3e65aa766e136fbb878c059bff018c5e8e512fb1320d",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/curve-context-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -32,7 +32,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/curve-schema.json",
       "sha256": "937f4aa2cdec719eb520e2713872871c90e4d3cde69694d673baf9395be40dab",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/curve-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -41,7 +41,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/capture.json",
       "sha256": "3f114488d82f60fd084618e30a53350ceb385da5246312e33fdb09511caa2f51",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/capture.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -50,7 +50,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/curve.json",
       "sha256": "81992992a1a15daac792bebf5979c51e0f8c3c1869a75a125999e6466e38bfba",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/curve.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -59,7 +59,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/derived-curve.json",
       "sha256": "3b54d2d0436fbab49e467d3dac8cbd29c9e2747e3b2a6e0c69538d390e2c68a8",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/derived-curve.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -68,7 +68,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/derived.json",
       "sha256": "a496db9781c67092f650203fba777bf59f51e5002d40566141d3c50c0e858d6e",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/derived.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -77,7 +77,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/derived.las",
       "sha256": "2fdbfc25b866dc766f2c8a31b2c7dee178950f6a9e4f09cac623f67f51d9ba6d",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/derived.las",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -86,7 +86,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/expected.json",
       "sha256": "e6c2d7be8bb681cf2b6cf475b77b2ccf87304d941adba6e35cc09cb16d2baf44",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/expected.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -95,7 +95,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/frozen/pre-e1/capture.json",
       "sha256": "462413dfa5a94b02477eb6551c5662477c69e4865b0da4d2a0a26c8fb6d543ce",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/frozen/pre-e1/capture.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -104,7 +104,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/frozen/pre-e1/curve.json",
       "sha256": "254f1050a0d98e327037ca22b5faf8c860dbe03a9504b8df09f1289682942af7",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/frozen/pre-e1/curve.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -113,7 +113,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/frozen/pre-e1/derived-curve.json",
       "sha256": "507fc56a07d8aa1c7b9e467b17700c75b5e8ffbe7ea4c9817ae062aa65d5dbb1",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/frozen/pre-e1/derived-curve.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -122,7 +122,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/frozen/pre-e1/derived.json",
       "sha256": "f4b67431848646f328bb3ef087bbbe8b034fdad66fa4c54edf440247a5359c08",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/frozen/pre-e1/derived.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -131,7 +131,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/frozen/pre-e1/derived.las",
       "sha256": "2fdbfc25b866dc766f2c8a31b2c7dee178950f6a9e4f09cac623f67f51d9ba6d",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/frozen/pre-e1/derived.las",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -140,7 +140,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/frozen/pre-e1/expected.json",
       "sha256": "e6c2d7be8bb681cf2b6cf475b77b2ccf87304d941adba6e35cc09cb16d2baf44",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/frozen/pre-e1/expected.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -149,7 +149,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/frozen/pre-e1/original.las",
       "sha256": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/frozen/pre-e1/original.las",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -158,7 +158,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/frozen/pre-e1/source.json",
       "sha256": "bb290f59576ab708535a23a059eded5351dff94ed9f053c2fb654b41b075ff95",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/frozen/pre-e1/source.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -167,7 +167,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/grid-data.json",
       "sha256": "1df023c38be49107a88e8c63a8a11e9aeeae747ffd80c24f94a048e62739565b",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/grid-data.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -176,7 +176,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/grid.json",
       "sha256": "a3f98e52b963d2004535bbaae720ff2633ece092ca361bb9acf43fe12b8fc9e8",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/grid.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -185,7 +185,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/grid.original",
       "sha256": "e003a5f2db034f6c8bf82ef1df6dbcb751e43278718ace029829fc8cf92d0da7",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/grid.original",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -194,7 +194,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/original.las",
       "sha256": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/original.las",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -203,7 +203,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/source.json",
       "sha256": "7bb6af90ffb90a754b3985f1679eaa16f2a32efa384aef028c6b5d0d0719145d",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/source.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -212,7 +212,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/tops-data.json",
       "sha256": "eae5778eca7ced6e1010cbe7ef342efb23298da1de5a634e9a4c9f3bb70e305b",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/tops-data.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -221,7 +221,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/tops.json",
       "sha256": "2dd7494de3d35cba7f7194759daefea7ad5692e618d0d93e4173f56b5e0917c1",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/tops.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -230,7 +230,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/tops.original",
       "sha256": "7bca6c523913b58113d3fa23aa97424ce907af3b27915c18ada91b845b71a594",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/tops.original",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -239,7 +239,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/trajectory-data.json",
       "sha256": "d7e1a2bfb6c952276c5568a82fe54e167f6f1436bd6ab5863131e514e14d34df",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/trajectory-data.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -248,7 +248,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/trajectory.json",
       "sha256": "d8a209a77ba44817cf589f9fc904763e6f8b719fb8ae963b3795f5ead0648693",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/trajectory.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -257,7 +257,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/trajectory.original",
       "sha256": "7d32d1cac27c05e0cce1e26d72d4dac409a9f9cd03feda0139944ba448aa9842",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/trajectory.original",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -266,7 +266,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/grid-surface-schema.json",
       "sha256": "fec9ab523d15befce6467ac51c0b2981fb274c568e5817cb1ef3d03402bd208d",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/grid-surface-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -275,7 +275,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/schema.json",
       "sha256": "f2550d43296c9f92b2d525db62e2ed527fdfe61f75e46381f4145f479010c60c",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -284,7 +284,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/summary-schema.json",
       "sha256": "2c0445b8cbb8f31cf4975f3e009edc082017a127de8e4b3d2a7625ac636d2932",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/summary-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -293,7 +293,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/trajectory-schema.json",
       "sha256": "9a60c62a66b9e365ce6b3fda843bc9f492975f60337596bb1fc78c7627a4eaca",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/trajectory-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -302,7 +302,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/typed-context-schema.json",
       "sha256": "67ca8b2eb84688ef45e28247a7fb5dc8d464dc80aeeb0983d8f96f5739ffa5d0",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/typed-context-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -311,7 +311,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/well-tops-schema.json",
       "sha256": "95164ce5739e679f45c1c267471d4c4441d64c6e2eed6c77995e6c60afa1dccd",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/assets/v1/well-tops-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -320,7 +320,7 @@
     {
       "path": "ophiolite/contracts/bundles/v1/README.md",
       "sha256": "e2ed5fff6043069152d52ec7b09052f5841c298c863bf1d8734e5f8bb88ab0af",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/bundles/v1/README.md",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -329,7 +329,7 @@
     {
       "path": "ophiolite/contracts/bundles/v1/fixtures/manifest.json",
       "sha256": "8e15e66e2498cf28e2b648f8e0062836b1b514be97e74bc6f7e4609b1dbcd243",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/bundles/v1/fixtures/manifest.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -338,7 +338,7 @@
     {
       "path": "ophiolite/contracts/bundles/v1/manifest-schema.json",
       "sha256": "bdff9e9bdb640a45be4ffddd4797faa60d48857e8be9981423f784fc247b5ae8",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/bundles/v1/manifest-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -347,7 +347,7 @@
     {
       "path": "ophiolite/contracts/bundles/v2/README.md",
       "sha256": "b821e42672eaab40d898d3074a0dcab018d0c68194819bbe4b1e475172234dba",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/bundles/v2/README.md",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -356,7 +356,7 @@
     {
       "path": "ophiolite/contracts/bundles/v2/fixtures/manifest.json",
       "sha256": "60d8a983b749537c8218bb6452ee21b2c22220f20e165143d5e518ca5518952c",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/bundles/v2/fixtures/manifest.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -365,7 +365,7 @@
     {
       "path": "ophiolite/contracts/bundles/v2/manifest-schema.json",
       "sha256": "811432877b625c5942de7c5808648790fdb574656d2f9ee17afe4b91bdeefbe0",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/bundles/v2/manifest-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -374,7 +374,7 @@
     {
       "path": "ophiolite/contracts/connectors/v1/README.md",
       "sha256": "93f7d3a5c9d0441f9012a696a5ad48e4a7c4f0064d591a36b95755367770b43a",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/connectors/v1/README.md",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -383,7 +383,7 @@
     {
       "path": "ophiolite/contracts/connectors/v1/capabilities/file-geotiff.json",
       "sha256": "d51b22a62281b408fa3972d3e346430f54843022a453471adc2f6738255a0214",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/connectors/v1/capabilities/file-geotiff.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -392,7 +392,7 @@
     {
       "path": "ophiolite/contracts/connectors/v1/capabilities/las-upload.json",
       "sha256": "f84b9fae7382fd9842da7de3da0bbe6c7efcb5875a53a984b512cef43e02f3f0",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/connectors/v1/capabilities/las-upload.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -401,7 +401,7 @@
     {
       "path": "ophiolite/contracts/connectors/v1/capabilities/opendtect.json",
       "sha256": "12b7c4292f4aeb5be2103b466caafb1994ed3f7bfdc6c95d024f6f54c90043e7",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/connectors/v1/capabilities/opendtect.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -410,7 +410,7 @@
     {
       "path": "ophiolite/contracts/connectors/v1/capabilities/osdu-record.json",
       "sha256": "a08d32e14295f7745341e4c8c53b9366811e03e40e0905a6e0cd353134582693",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/connectors/v1/capabilities/osdu-record.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -419,7 +419,7 @@
     {
       "path": "ophiolite/contracts/connectors/v1/capabilities/postgresql-wells.json",
       "sha256": "c355ed0e0ba38f03f44cbae018dfc065528fe110e3f5ee6a94c53c87796551a0",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/connectors/v1/capabilities/postgresql-wells.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -428,7 +428,7 @@
     {
       "path": "ophiolite/contracts/connectors/v1/capabilities/qgis.json",
       "sha256": "ba669258b6433fd8952b2aec2244b2436b2dfd145fd11f18ad9bcdc66b47eac4",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/connectors/v1/capabilities/qgis.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -437,7 +437,7 @@
     {
       "path": "ophiolite/contracts/connectors/v1/capabilities/resinsight.json",
       "sha256": "3c4eac6d7d243343405a001b4cee45b9d210994cb336d1ff2f64a0e554149c0d",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/connectors/v1/capabilities/resinsight.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -446,7 +446,7 @@
     {
       "path": "ophiolite/contracts/connectors/v1/capabilities/schema.json",
       "sha256": "8bc50e5130f381361e35caf46fe74900bc4c034484f7c6c6b113772c304518d6",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/connectors/v1/capabilities/schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -455,7 +455,7 @@
     {
       "path": "ophiolite/contracts/connectors/v1/capabilities/sqlite-wells.json",
       "sha256": "2ea4e6594f4ec1be31e1106d84b290a69bedd1b243b4ba61022ada46572a12f2",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/connectors/v1/capabilities/sqlite-wells.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -464,7 +464,7 @@
     {
       "path": "ophiolite/contracts/connectors/v1/capabilities/typed-upload.json",
       "sha256": "e1c535d909ecfaef0859f5994e82cfc7052e547e93b3edc4643a9a2cb99bf6c8",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/connectors/v1/capabilities/typed-upload.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -473,7 +473,7 @@
     {
       "path": "ophiolite/contracts/connectors/v1/contract.json",
       "sha256": "13f7f5b03f752946ff85115eb7ee09a30ab91a7d0feb2a846c784ccc559bf8c3",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/connectors/v1/contract.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -482,7 +482,7 @@
     {
       "path": "ophiolite/contracts/generated/v1/ophiolite-contracts.ts",
       "sha256": "4da8cbcb59917ea3570a5f4518e59e7df6552db6adb06beabc66a30f59197ec9",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/generated/v1/ophiolite-contracts.ts",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -491,7 +491,7 @@
     {
       "path": "ophiolite/contracts/mappings/v1/application-curve-to-well-curve.json",
       "sha256": "aa2e1c1925f68aede0b3c5e7d8d7e7921ad69ea35733bc2e7d936a21c233c0dc",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/mappings/v1/application-curve-to-well-curve.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -500,7 +500,7 @@
     {
       "path": "ophiolite/contracts/mappings/v1/typed-standards.json",
       "sha256": "ca4a81fef4af6cf488c7736e34a52f16a1815120751881716e0c79f20d727428",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/mappings/v1/typed-standards.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -508,8 +508,8 @@
     },
     {
       "path": "ophiolite/contracts/openapi/v1/openapi.json",
-      "sha256": "2b32774424f2492c9bfd4e730c08093a703e7aa12257a8b7d22abccb90344cf2",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "sha256": "ae13ea4440439d362e8d47109f9e2be6f772516d0e2099d48dbe0a5ac40db87e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/openapi/v1/openapi.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -518,7 +518,7 @@
     {
       "path": "ophiolite/contracts/openapi/v1/scientific-assets.paths.json",
       "sha256": "9c3103ec49d79f72116d985fcdf512f6d55de45d6af4d8b0ea1bd0a01b8a31e5",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/openapi/v1/scientific-assets.paths.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -527,7 +527,7 @@
     {
       "path": "ophiolite/contracts/profile-schema.json",
       "sha256": "95594f3818c36f93727ff28ca9a4734792a3d2d957df73850305e75557a32b2f",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/profile-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -536,7 +536,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/application-curve.json",
       "sha256": "f2783cc80d26fb8a40e2d1e5f4ef24ddbf77b6f9adf217436904b160b6b5ce87",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/profiles/v1/application-curve.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -545,7 +545,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/deviation-csv.json",
       "sha256": "d9fc8bcdcaa667fd3facdbc8a9efbc1280fcc188fae12709646580d431693665",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/profiles/v1/deviation-csv.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -554,7 +554,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/edited-wells.json",
       "sha256": "f4254350b371b5cf847f2aa0eae662a9672a144f1ca590868019cc84e34053fa",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/profiles/v1/edited-wells.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -563,7 +563,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/esri-ascii-grid.json",
       "sha256": "8c2b0a79a368211b9d01c3a5b2dddaaa5d858f4ba2d34835ea6a221d8142b1f7",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/profiles/v1/esri-ascii-grid.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -572,7 +572,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/geotiff.json",
       "sha256": "7084084f5429c61ef8f3e1902d82d1099336148dda138e8a0a5f7942b0adb535",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/profiles/v1/geotiff.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -581,7 +581,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/grid-surface.json",
       "sha256": "a038681d0e5da458fa82f0809a3660e356a427e04125c2bc9ad8a51a56419512",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/profiles/v1/grid-surface.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -590,7 +590,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/las2.json",
       "sha256": "43b5824865465555f594bd60265ce56df488a280405a72c1a271a9266140d98a",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/profiles/v1/las2.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -599,7 +599,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/native-external.json",
       "sha256": "60a26da624f4d23e06881c6330cc3f83171f9f109482e07e34dc869c7527ace9",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/profiles/v1/native-external.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -608,7 +608,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/osdu-record.json",
       "sha256": "2e2bd3c5b0890bee2d3498efeab91ae81dbaae9a50d3327394bd58eb3189d735",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/profiles/v1/osdu-record.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -617,7 +617,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/osdu-welllog-parquet.json",
       "sha256": "1c53e2a2be2b52c548984088e603329ce26b80d1f20aa8fd34c98049aac93d8d",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/profiles/v1/osdu-welllog-parquet.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -626,7 +626,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/scalar-map.json",
       "sha256": "459101751e3372adeaef08d60752918ea576d4356505e5f054a6f532e46b1bb9",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/profiles/v1/scalar-map.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -635,7 +635,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/sql-wells.json",
       "sha256": "767753bcccd1ce91d8d0c1d4c8b9d9bc44a5155188ea8522ec5ad9f6eb90ae2a",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/profiles/v1/sql-wells.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -644,7 +644,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/trajectory.json",
       "sha256": "8819f96a20c6f5f9587f47ef6756e37c14aba6554e20377d1fc95234c5db96ae",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/profiles/v1/trajectory.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -653,7 +653,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/well-curve.json",
       "sha256": "d3354bbb9658411cc587e254cb616a2d0536b688e55132b806b3dff09e73e35d",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/profiles/v1/well-curve.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -662,7 +662,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/well-tops-csv.json",
       "sha256": "ebb0cfa95a7f062c0c2b802f53d8efa3466e55c4cdaceff5d061ae7b00b473be",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/profiles/v1/well-tops-csv.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -671,7 +671,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/well-tops.json",
       "sha256": "7c7d636d50460a3733268fad808ba47f81234a2b8feb619f07c3d1212d73dd88",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/profiles/v1/well-tops.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -680,7 +680,7 @@
     {
       "path": "ophiolite/contracts/registry-schema.json",
       "sha256": "b273d9b16fdcaadcc2e2b5f7ad89250387133a7c50f633a8f62c90ac95bac179",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/registry-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -689,7 +689,7 @@
     {
       "path": "ophiolite/contracts/registry.json",
       "sha256": "9547c95e4650e62cbdbecba6dadb6d3be8e6c01fbfa9d1e7c457d1980e51e97b",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/registry.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -698,7 +698,7 @@
     {
       "path": "ophiolite/contracts/scientific/v1/README.md",
       "sha256": "ac3dd879de274a7f7c97937ff124ed9fe0d072418a45c5975be760b5adc34ac8",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/scientific/v1/README.md",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -707,7 +707,7 @@
     {
       "path": "ophiolite/contracts/scientific/v1/fixtures/scalar-map.json",
       "sha256": "807e8653e9f7a0314475880541bf39ac11ff79e3453be243d7cf079492c43319",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/scientific/v1/fixtures/scalar-map.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -716,7 +716,7 @@
     {
       "path": "ophiolite/contracts/scientific/v1/fixtures/well-curve.json",
       "sha256": "30be2d326017262b4eb5c4a3a3ad95e8a74f63d7aa931210110d98e3f94eaa7d",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/scientific/v1/fixtures/well-curve.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -725,7 +725,7 @@
     {
       "path": "ophiolite/contracts/scientific/v1/scalar-map-schema.json",
       "sha256": "94df8c9470557d2ac9de4145eb6465945ea04a7c8b6efdfae24985627e27332d",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/scientific/v1/scalar-map-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -734,7 +734,7 @@
     {
       "path": "ophiolite/contracts/scientific/v1/well-curve-schema.json",
       "sha256": "0e87a51188f5a59b9c8b841001fd0167b82966f33d8214ea2f68cf444411571f",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/scientific/v1/well-curve-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -743,7 +743,7 @@
     {
       "path": "ophiolite/contracts/tools/generate.py",
       "sha256": "948eaf4fd3befd604bf6e11239c6a78e8a0b610e8ac9cbfbd926e7708fecfaa3",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/tools/generate.py",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -752,7 +752,7 @@
     {
       "path": "ophiolite/contracts/vocabulary/v1/vocabulary.json",
       "sha256": "6deb7e13f3e7a45fe9b57e70909a62d037f7d90fd826985a724fda457716eb2e",
-      "source_commit": "441eb31eebdfeb639fd4ae178b80431515ec572e",
+      "source_commit": "4428a6cdb8d5ae1a39713154629ac3d636732675",
       "origin": "Ophiolite Platform contracts/vocabulary/v1/vocabulary.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
