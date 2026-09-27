@@ -332,7 +332,7 @@ class PortableBundleManifestV2(Contract):
     scope: Literal['selection'] = Field(...)
     selection: Annotated[list[BundleSelectedV2], Field(min_length=1, max_length=128)] = Field(...)
     assets: Annotated[list[BundleAssetV2], Field(min_length=1, max_length=128)] = Field(...)
-    groups: None = Field(...)
+    groups: None | Annotated[list[BundleGroupV2], Field(max_length=128)] = Field(...)
     recommendations: None = Field(...)
     limits: PortableBundleManifestV2Limits = Field(...)
     notice: Annotated[str, Field(min_length=1)] = Field(...)
@@ -369,6 +369,13 @@ class BundleHistoryV2(Contract):
     count: Annotated[int, Field(ge=1)] = Field(...)
     head_revision: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
     parent_revision: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] | None = Field(None)
+
+class BundleGroupV2(Contract):
+    name: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
+    observed_at: Annotated[str, Field(min_length=1, max_length=64)] = Field(...)
+    meaning: Literal['observation-at-export'] = Field(...)
+    members: Annotated[list[Annotated[int, Field(ge=0, le=127)]], Field(min_length=1, max_length=128)] = Field(...)
+    recommended: None | BundleGroupV2Recommended1 = Field(...)
 
 class ContractProfile(Contract):
     schema_: Literal['ophiolite.contract-profile/1'] = Field(..., alias='schema')
@@ -499,6 +506,13 @@ class PortableBundleManifestV2Limits(Contract):
 class BundleAssetV2Relationships(Contract):
     well_log: None | Literal['restricted'] | BundleAssetV2RelationshipsWell_Log2 = Field(None)
 
+class BundleGroupV2Recommended1(Contract):
+    asset_position: Annotated[int, Field(ge=0, le=127)] = Field(...)
+    revision: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    by: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
+    at: float = Field(...)
+    reason: Annotated[str, Field(min_length=1, max_length=500)] = Field(...)
+
 class RepresentationRulesArtifact_Kind_By_Origin(Contract):
     source_reference: Literal['original', 'captured-result', 'derived-artifact'] = Field(..., alias='source-reference')
     retained_capture: Literal['original', 'captured-result', 'derived-artifact'] = Field(..., alias='retained-capture')
@@ -550,6 +564,7 @@ BundleSelectedV2.model_rebuild()
 BundleFileV2.model_rebuild()
 BundleAssetV2.model_rebuild()
 BundleHistoryV2.model_rebuild()
+BundleGroupV2.model_rebuild()
 ContractProfile.model_rebuild()
 ConnectorSemantics.model_rebuild()
 RepresentationRules.model_rebuild()
@@ -567,5 +582,6 @@ PortableBundleManifestLimits.model_rebuild()
 PortableBundleManifestV2Exporter.model_rebuild()
 PortableBundleManifestV2Limits.model_rebuild()
 BundleAssetV2Relationships.model_rebuild()
+BundleGroupV2Recommended1.model_rebuild()
 RepresentationRulesArtifact_Kind_By_Origin.model_rebuild()
 BundleAssetV2RelationshipsWell_Log2.model_rebuild()

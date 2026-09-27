@@ -528,6 +528,20 @@ export type BundleHistoryV2 = {
   parent_revision?: string | null;
 };
 
+export type BundleGroupV2 = {
+  name: string;
+  observed_at: string;
+  meaning: "observation-at-export";
+  members: number[];
+  recommended: null | {
+    asset_position: number;
+    revision: string;
+    by: string;
+    at: number;
+    reason: string;
+  };
+};
+
 export type PortableBundleManifestV2 = {
   schema: "ophiolite.portable-bundle/2";
   bundle_version: string;
@@ -539,7 +553,7 @@ export type PortableBundleManifestV2 = {
   scope: "selection";
   selection: BundleSelectedV2[];
   assets: BundleAssetV2[];
-  groups: null;
+  groups: null | BundleGroupV2[];
   recommendations: null;
   limits: {
     max_assets: number;

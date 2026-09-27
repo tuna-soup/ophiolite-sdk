@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/bundles/v2/manifest-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.portable-bundle/2",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "lifecycle": "preview"
   },
   "title": "PortableBundleManifestV2",
@@ -73,8 +73,19 @@
       }
     },
     "groups": {
-      "type": "null",
-      "description": "Result groups are not represented in bundle 2.0; explicitly absent."
+      "description": "2.1: result groups the exporter could see that contain selected results, as observed at export time (not timeless scientific truth); null when none or before 2.1.",
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "maxItems": 128,
+          "items": {
+            "$ref": "#/$defs/BundleGroupV2"
+          }
+        }
+      ]
     },
     "recommendations": {
       "type": "null",
@@ -359,6 +370,84 @@
         },
         "profile": {
           "type": "string"
+        }
+      }
+    },
+    "BundleGroupV2": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "observed_at",
+        "meaning",
+        "members",
+        "recommended"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "observed_at": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "meaning": {
+          "const": "observation-at-export"
+        },
+        "members": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 127
+          }
+        },
+        "recommended": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "asset_position",
+                "revision",
+                "by",
+                "at",
+                "reason"
+              ],
+              "properties": {
+                "asset_position": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 127
+                },
+                "revision": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "by": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                },
+                "at": {
+                  "type": "number"
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 500
+                }
+              }
+            }
+          ]
         }
       }
     }

@@ -22,16 +22,16 @@ def test_doctor_is_local_and_does_not_open_credentials(tmp_path,monkeypatch,caps
     monkeypatch.setattr(httpx.Client,'send',forbidden)
     monkeypatch.setattr(Credential,'from_file',forbidden);monkeypatch.setattr(cli.auth,'request',forbidden)
     cli.main(['doctor','--configuration',str(config),'--credentials',str(tmp_path/'missing')])
-    assert 'Local contracts: 1.10.0' in capsys.readouterr().out
+    assert 'Local contracts: 1.11.0' in capsys.readouterr().out
     assert not (tmp_path/'missing').exists()
 
 
 def test_doctor_online_is_explicit(tmp_path,monkeypatch,capsys):
     config=configuration(tmp_path);calls=[]
-    monkeypatch.setattr(cli.auth,'request',lambda url:calls.append(url) or {'version':'1.10.0'})
+    monkeypatch.setattr(cli.auth,'request',lambda url:calls.append(url) or {'version':'1.11.0'})
     cli.main(['doctor','--configuration',str(config),'--online'])
     assert calls==['http://localhost/api/v1/contracts']
-    assert 'Server contracts: 1.10.0' in capsys.readouterr().out
+    assert 'Server contracts: 1.11.0' in capsys.readouterr().out
 
 
 def test_login_write_and_sdk_namespace(tmp_path,monkeypatch):
