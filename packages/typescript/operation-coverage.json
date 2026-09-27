@@ -816,6 +816,30 @@
     "response": "explicitly-untyped"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/runners/cancel",
+    "function": "postProjectsProjectRunnersCancel",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/runners/job",
+    "function": "postProjectsProjectRunnersJob",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/runners/list",
+    "function": "postProjectsProjectRunnersList",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/runners/submit",
+    "function": "postProjectsProjectRunnersSubmit",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
     "operation": "GET /api/v1/projects/{project}/scientific-assets",
     "function": "getProjectsProjectScientificAssets",
     "request": "explicitly-untyped",
