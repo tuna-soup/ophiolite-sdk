@@ -163,11 +163,23 @@ class Client:
             wire_descriptors.append(data);wire_curves.append(json.loads(body));wire_curve_bytes.append(body)
         return CurveSet(descriptors,views,artifact,url=self.url,project=self.project,wire_descriptors=wire_descriptors,wire_curves=wire_curves,wire_curve_bytes=wire_curve_bytes)
 
+    def read_data(self,asset,revision):
+        """E11: read well tops, a trajectory or a regular-grid surface at an exact revision."""
+        if not all(isinstance(x,str) and x for x in (asset,revision)):raise Refused('Choose an asset and exact revision.')
+        path=self.prefix+'/'+quote(asset,safe='')+'/revisions/'+quote(revision,safe='')
+        data=self._json(path,256*1024)
+        _core.verify_typed_descriptor(data,self.project,asset,revision)
+        raw=next(r for r in data['representations'] if r['kind']!='normalized')
+        normalized=next(r for r in data['representations'] if r['kind']=='normalized')
+        artifact=self._get(path+'/representations/'+quote(raw['id'],safe=''),raw['bytes'])
+        body=self._get(path+'/representations/'+quote(normalized['id'],safe=''),normalized['bytes'])
+        return _core.typed_result(data,body,artifact)
+
     def read_many(self,selections,**options):
         return [self.read(asset,revision,curves,**options) for asset,revision,curves in selections]
 
     def export(self,selections,destination):
-        """Export exact revisions [(asset, revision, [curves])] into a new portable bundle.
+        """Export exact revisions [(asset, revision, [curves] or None)] into a new portable bundle.
 
         Every item is read through the ordinary exact-read path, so the server's current
         permissions apply to each representation; one refusal fails the whole export and
@@ -177,6 +189,8 @@ class Client:
         if not isinstance(selections,(list,tuple)) or not selections:raise Refused('Choose at least one exact revision to export.')
         items=[]
         for asset,revision,curves in selections:
+            if not curves:  # E11: well tops, trajectories and grids have no curves (bundle 2)
+                items.append(({'asset_id':asset,'revision':revision,'curves':[]},self.read_data(asset,revision)));continue
             items.append(({'asset_id':asset,'revision':revision,'curves':list(curves)},self.read(asset,revision,list(curves))))
         return write_bundle(destination,items)
 

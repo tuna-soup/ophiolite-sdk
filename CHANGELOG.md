@@ -16,6 +16,11 @@ No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
 - Conditional sharing: `grants().generation` and `share(..., expected_generation=)`
   with one idempotent replay after a lost response; a replay never undoes a later
   revocation. Unconditional `share()` is deprecated for one transition release.
+- Typed data (E11): `read_data(asset, revision)` returns `WellTops`, `Trajectory`
+  or `GridSurface` with the exact original, verified descriptor and data (DataFrame
+  and array views); `Trajectory.minimum_curvature()` is an explicit calculation of
+  offsets from the first station. `ophiolite read-data`. Portable bundle 2.0 carries
+  all four types; curve-only exports stay 1.0.
 - SDK CLI with transitional pilot compatibility modules, generated TypeScript
   transport, four tested starter templates and six packaged workflow guides.
 

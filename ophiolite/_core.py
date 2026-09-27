@@ -13,8 +13,28 @@ def verify_descriptor(value, project, asset, revision, curve):
     model=validate.model(ScientificAsset,value); data=model.model_dump(by_alias=True)
     rules.asset(data)
     rules.require((data['project_id'],data['asset_id'],data['revision'])==(project,asset,revision), 'Scientific descriptor does not match the requested exact identity')
+    rules.require('type' not in data['scientific'], 'This is not a well log; read it with read_data')
     rules.require(data['scientific']['curve']==curve, 'Requested curve differs from returned data')
     return model
+
+
+def verify_typed_descriptor(value, project, asset, revision):
+    model=validate.model(ScientificAsset,value); data=model.model_dump(by_alias=True)
+    rules.asset(data)
+    rules.require((data['project_id'],data['asset_id'],data['revision'])==(project,asset,revision), 'Scientific descriptor does not match the requested exact identity')
+    rules.require('type' in data['scientific'], 'This is a well log; read its curves with read')
+    return model
+
+
+def typed_result(descriptor, body, artifact):
+    """Verify a typed read and build its object; exact served bytes are kept for export."""
+    import json
+    from .typed import CLASSES
+    asset,_=validate.typed_pair(descriptor,body)
+    data=asset.model_dump(by_alias=True)
+    verify_bytes(next(r for r in data['representations'] if r['kind']!='normalized'),artifact)
+    value=json.loads(body)
+    return CLASSES[value['context']['type']](asset,value,artifact,wire_descriptor=descriptor,wire_data_bytes=body)
 
 
 def verify_bytes(rep, raw):

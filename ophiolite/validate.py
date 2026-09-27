@@ -34,6 +34,27 @@ def pair(descriptor, raw):
     return asset, view
 
 
+def typed_pair(descriptor, raw):
+    """E11: a typed descriptor and its served data agree on bytes, identity, context and reader."""
+    from .models import generated
+    asset = model(ScientificAsset, descriptor)
+    data = asset.model_dump(by_alias=True)
+    rules.asset(data)
+    rules.require('type' in data['scientific'], 'This descriptor is not typed data')
+    rep=next(r for r in data['representations'] if r['kind']=='normalized')
+    rules.require(rep['available'] and len(raw)==rep['bytes'] and hashlib.sha256(raw).hexdigest()==rep['sha256'], 'Normalized representation unavailable or integrity mismatch')
+    try: value=json.loads(raw)
+    except (ValueError,UnicodeError): raise VerificationFailed('Normalized data is not valid JSON.') from None
+    kind={'well-tops':generated.WellTops,'trajectory':generated.Trajectory,'regular-grid-surface':generated.GridSurface}[data['scientific']['type']]
+    payload=model(kind,value).model_dump(by_alias=True)
+    expected=data['source_reference'] or dict(authority=data['authority'],key=data['asset_id'],revision=data['revision'],profile=data['profile'])
+    artifact=next(r for r in data['representations'] if r['kind']!='normalized')
+    rules.require(rules.known(payload['source'],rules.REFERENCE)==rules.known(expected,rules.REFERENCE) and payload['source_sha256']==artifact['sha256'], 'Typed data and artifact source identities disagree')
+    rules.require(payload['context']==data['scientific'] and payload['interpretation']==data['interpretation'], 'Descriptor scientific context or interpretation disagrees with the data')
+    rules.interpretation(asset.model_dump(by_alias=True,exclude_unset=True))
+    return asset, value
+
+
 def schema(value, schema_id, *, strict=True):
     from jsonschema import Draft202012Validator
     index,_=rules.registry()

@@ -76,7 +76,11 @@ def parser():
     export.add_argument('--configuration',type=Path,default=Path('configuration.json'))
     export.add_argument('--credentials',type=Path)
     export.add_argument('--asset',required=True);export.add_argument('--revision',required=True)
-    export.add_argument('--curve',action='append',required=True);export.add_argument('--output',type=Path,required=True)
+    export.add_argument('--curve',action='append',help='Well log curves; omit for well tops, trajectories and grids');export.add_argument('--output',type=Path,required=True)
+    typed=sub.add_parser('read-data',help='Read well tops, a trajectory or a horizon grid at an exact revision and save it')
+    typed.add_argument('--configuration',type=Path,default=Path('configuration.json'))
+    typed.add_argument('--credentials',type=Path)
+    typed.add_argument('--asset',required=True);typed.add_argument('--revision',required=True);typed.add_argument('--output',type=Path,required=True)
     recover=sub.add_parser('recover',help='Recover a saved exact request from its private work folder')
     recover.add_argument('--configuration',type=Path,default=Path('configuration.json'))
     recover.add_argument('--credentials',type=Path)
@@ -122,8 +126,8 @@ def main(argv=None):
         # Offline: no configuration, credentials or network are read.
         from .bundle import open_bundle
         opened=open_bundle(args.path)
-        if args.action=='check':print('Bundle verified:',len(opened.assets),'exact revisions,',sum(len(a.curves) for a in opened.assets),'curves. Checksums show integrity, not authorship.');return
-        print(json.dumps({**opened.summary(),'items':[{'asset_id':a.asset_id,'revision':a.revision,'name':a.name,'curves':sorted(a.curves),'history':a.history,'parent_visibility':a.parent_visibility} for a in opened.assets]},indent=2));return
+        if args.action=='check':print('Bundle verified:',len(opened.assets),'exact revisions,',sum(len(a.curves) for a in opened.assets),'curves,',sum(a.data is not None for a in opened.assets),'other data. Checksums show integrity, not authorship.');return
+        print(json.dumps({**opened.summary(),'items':[{'asset_id':a.asset_id,'revision':a.revision,'name':a.name,'type':a.type,'curves':sorted(a.curves),'history':a.history,'parent_visibility':a.parent_visibility} for a in opened.assets]},indent=2));return
     _load()
     config=configuration(args.configuration)
     path=args.credentials or credentials_path(config)
@@ -155,8 +159,15 @@ def main(argv=None):
         if args.command=='list':
             for item in client.assets():print(json.dumps(item))
             return
+        if args.command=='read-data':
+            data=client.read_data(args.asset,args.revision)
+            if args.output.exists():raise Refused('The output folder already exists; choose a new folder.')
+            args.output.mkdir(parents=True)
+            (args.output/'original').write_bytes(data.original);(args.output/'data.json').write_bytes(data._wire_data_bytes)
+            (args.output/'descriptor.json').write_text(json.dumps(data._wire_descriptor,indent=2)+'\n')
+            print('Saved the exact original, data.json and descriptor.json for',data.type,'- units and references are as declared; unknown stays unknown.');return
         if args.command=='export':
-            opened=client.export([(args.asset,args.revision,args.curve)],args.output)
+            opened=client.export([(args.asset,args.revision,args.curve or None)],args.output)
             print('Exported',len(opened.assets),'exact revision to',args.output,'- check it offline with: ophiolite bundle check',args.output);return
         if args.command=='fetch':
             asset,revision,curve=[getattr(args,k) or config.get(k) for k in ('asset','revision','curve')]

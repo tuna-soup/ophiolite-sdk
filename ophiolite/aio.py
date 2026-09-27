@@ -124,6 +124,18 @@ class AsyncClient(Client):
             wire_descriptors.append(data);wire_curves.append(json.loads(body))
         return CurveSet(descriptors,views,artifact,url=self.url,project=self.project,wire_descriptors=wire_descriptors,wire_curves=wire_curves)
 
+    async def read_data(self,asset,revision):
+        """E11: typed read (well tops, trajectory, regular-grid surface); same checks as Client.read_data."""
+        if not all(isinstance(x,str) and x for x in (asset,revision)):raise Refused('Choose an asset and exact revision.')
+        path=self.prefix+'/'+quote(asset,safe='')+'/revisions/'+quote(revision,safe='')
+        data=await self._json(path,256*1024)
+        _core.verify_typed_descriptor(data,self.project,asset,revision)
+        raw=next(r for r in data['representations'] if r['kind']!='normalized')
+        normalized=next(r for r in data['representations'] if r['kind']=='normalized')
+        artifact=await self._get(path+'/representations/'+quote(raw['id'],safe=''),raw['bytes'])
+        body=await self._get(path+'/representations/'+quote(normalized['id'],safe=''),normalized['bytes'])
+        return _core.typed_result(data,body,artifact)
+
     async def read_many(self,selections,**options):
         results=[None]*len(selections)
         async def read_one(index,selection):

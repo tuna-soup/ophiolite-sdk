@@ -212,3 +212,38 @@ def test_sdk_shares_a_result_through_any_of_its_versions(web,kind):
     snapshot=alice.grants(second)
     alice.share(second,read=['bob'],expected_generation=snapshot.generation)
     assert [h.number for h in bob.history(second).revisions]==[1,2]
+
+
+@pytest.mark.parametrize('kind',['delegate'])
+def test_sdk_reads_and_exports_typed_data(web,kind,tmp_path):
+    """E11: tops (explicitly associated with an uploaded log), a survey and a grid read exactly and export offline."""
+    from project_gateway.las_uploads import LASUploads,Upload,WellLog
+    from project_gateway.tests.test_applications import LAS
+    from ophiolite.errors import PermissionRefused,Unavailable
+    from ophiolite.typed import WellTops,Trajectory,GridSurface
+    uploads=LASUploads(web.a);prior=web.a.sources.platform
+    web.a.sources.platform=lambda m,b,t:({'members':[{'user_id':u} for u in ('alice','bob')]} if m=='ListProjectMembers' else prior(m,b,t))
+    base=dict(project_id='p',filename='x',attribution='Synthetic',audience=['alice','bob'],rights_confirmed=True)
+    log=uploads.ingest(Upload(command_id='t-log',name='Log',**base),LAS.encode(),'alice')
+    link=WellLog(asset_id=log['asset_id'],revision=log['revision'])
+    tops=uploads.ingest(Upload(command_id='t-tops',name='Tops',profile='well-tops-csv/1',declared={'depth_unit':'M','depth_basis':'same-as-log'},well_log=link,**base),b'name,md\nTop A,100\nTop B,101.5\n','alice')
+    survey=uploads.ingest(Upload(command_id='t-survey',name='Survey',profile='deviation-csv/1',declared={'azimuth_reference':'grid-north'},well_log=link,**base),b'md,inclination,azimuth\n100,0,0\n200,10,0\n','alice')
+    grid=uploads.ingest(Upload(command_id='t-grid',name='Grid',profile='esri-ascii-grid/1',declared={'crs':'EPSG:28992','z_unit':'m','z_meaning':'depth','positive':'down'},**base),b'ncols 2\nnrows 1\nxllcenter 0\nyllcenter 0\ncellsize 5\nNODATA_value -1\n0 -1\n','alice')
+    alice,bob=client(web,'alice',kind),client(web,'bob',kind)
+    t=alice.read_data(tops['asset_id'],tops['revision'])
+    assert isinstance(t,WellTops) and [x['md'] for x in t.tops]==[100.0,101.5] and t.relationships=={'well_log':{'asset_id':log['asset_id'],'revision':log['revision']}}
+    s=alice.read_data(survey['asset_id'],survey['revision']);g=alice.read_data(grid['asset_id'],grid['revision'])
+    assert isinstance(s,Trajectory) and abs(s.minimum_curvature()[1]['dtvd']-99.4931)<1e-3 and s.context['azimuth_reference']=='grid-north'
+    assert isinstance(g,GridSurface) and g.values==[0.0,None] and g.context['registration']=='center' and g.original.startswith(b'ncols')
+    from ophiolite.errors import Incompatible
+    with pytest.raises(Incompatible):alice.read(tops['asset_id'],tops['revision'],['md'])  # the server refuses curves on typed data
+    opened=alice.export([(log['asset_id'],log['revision'],['GR']),(tops['asset_id'],tops['revision'],None),(survey['asset_id'],survey['revision'],None),(grid['asset_id'],grid['revision'],None)],tmp_path/'four')
+    assert opened.manifest['bundle_version']=='2.0.0' and [a.type for a in opened.assets]==['well-log','well-tops','trajectory','regular-grid-surface']
+    # Bob: refused until shared; then the tops show a restricted log (not shared) and export succeeds without its id.
+    with pytest.raises((PermissionRefused,Unavailable)):bob.read_data(tops['asset_id'],tops['revision'])
+    uploads.call('share',{'project_id':'p','asset_id':tops['asset_id'],'audience':['bob']},'alice')
+    exported=bob.export([(tops['asset_id'],tops['revision'],None)],tmp_path/'bob')
+    assert exported.assets[0].relationships=={'well_log':'restricted'} and log['asset_id'] not in (tmp_path/'bob'/'manifest.json').read_text()+(tmp_path/'bob'/'assets/0/descriptor.json').read_text()
+    uploads.call('share',{'project_id':'p','asset_id':tops['asset_id'],'audience':[]},'alice')
+    with pytest.raises((PermissionRefused,Unavailable)):bob.export([(tops['asset_id'],tops['revision'],None)],tmp_path/'bob-revoked')
+    assert not (tmp_path/'bob-revoked').exists()

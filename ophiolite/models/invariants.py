@@ -78,7 +78,13 @@ def representation(value):
 def asset(value):
     profiles = registry()[1]; reference(value['source_reference'])
     for parent in value['parents']: reference(parent)
-    context(value['scientific'])
+    typed = 'type' in value['scientific']
+    if typed:
+        mapping = {'well-tops': 'well-tops/1', 'trajectory': 'trajectory/1', 'regular-grid-surface': 'regular-grid-surface/1'}
+        require(value['interpretation'].get('mapping') == mapping.get(value['scientific']['type']), 'Scientific context and interpretation disagree')
+    else:
+        context(value['scientific'])
+        require(value.get('relationships') is None, 'Relationships belong to typed uploads only')
     for rep in value['representations']: representation(rep)
     retained = value['origin'] != 'source-reference'; retention = value['retention']
     require(retained == (value['custodian'] is not None) and retained == (retention['mode']=='retained'), 'Origin, custody and retention disagree')
@@ -101,6 +107,8 @@ def asset(value):
     require(kinds.count(artifact_kind)==1 and len(kinds)==rules['total'], 'Profile requires one exact artifact and one normalized curve')
     raw=next(r for r in reps if r['kind']==artifact_kind); normalized=next(r for r in reps if r['kind']=='normalized')
     require(raw['profile']==value['profile'] and normalized['profile']==profile['normalized_profile'], 'Representation profiles must be the asset profile and its normalized profile')
+    declared=(profiles.get(profile['normalized_profile']) or {}).get('interpretation') or {}
+    require(value['interpretation'].get('mapping')==declared.get('mapping'), 'Interpretation is not the one this profile declares')
     if value['origin']=='managed-derived': require(value['revision']==raw['sha256'], 'Derived revision must identify the exact artifact')
     require(len(set(value['supported_operations']))==len(value['supported_operations']), 'Duplicate supported operations')
     auth=value['authorization']
