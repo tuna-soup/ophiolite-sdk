@@ -161,6 +161,7 @@ class XYZ(Contract):
     z: float = Field(...)
 
 class ScientificAsset(Contract):
+    manifest: RevisionManifest | None = Field(None)
     acquisition: Acquisition | None = Field(None)
     relationships: Relationships | None = Field(None)
     display: Display | None = Field(None)
@@ -229,6 +230,27 @@ class LineRange(Contract):
     step: Annotated[int, Field(ge=1)] = Field(...)
     count: Annotated[int, Field(ge=1, le=100000)] = Field(...)
 
+class LineageEntry(Contract):
+    commitment: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    predicate: Literal['derived-from', 'supersedes'] | None = Field(None)
+    reference: LineageReference | None = Field(None)
+    salt: Annotated[str, Field(pattern='^[0-9a-f]{32}$')] | None = Field(None)
+
+class LineageReference(Contract):
+    authority: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    key: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    profile: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] | None = Field(None)
+
+class ManifestArtifact(Contract):
+    sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    bytes: Annotated[int, Field(ge=0, le=33554432)] = Field(...)
+
+class ManifestRepresentation(Contract):
+    id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    bytes: Annotated[int, Field(ge=0, le=33554432)] = Field(...)
+
 class MeshContext(Contract):
     crs: Annotated[str, Field(pattern='^(EPSG:[0-9]{4,6}|unknown)$')] = Field(...)
     xy_unit: Annotated[str, Field(pattern='^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$')] = Field(...)
@@ -284,6 +306,13 @@ class Retention(Contract):
     mode: Literal['upstream-only', 'retained'] = Field(...)
     policy: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     historical_reads: Literal['not-guaranteed', 'while-retained-and-authorized'] = Field(...)
+
+class RevisionManifest(Contract):
+    schema_: Literal['ophiolite.revision-manifest/1'] = Field(..., alias='schema')
+    digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    artifact: ManifestArtifact = Field(...)
+    representations: Annotated[list[ManifestRepresentation], Field(max_length=512)] = Field(...)
+    lineage: Annotated[list[LineageEntry], Field(max_length=64)] = Field(...)
 
 class SeismicContext(Contract):
     type: Literal['seismic-volume'] = Field(...)
@@ -759,6 +788,10 @@ Display.model_rebuild()
 Evaluated.model_rebuild()
 History.model_rebuild()
 LineRange.model_rebuild()
+LineageEntry.model_rebuild()
+LineageReference.model_rebuild()
+ManifestArtifact.model_rebuild()
+ManifestRepresentation.model_rebuild()
 MeshContext.model_rebuild()
 NotEvaluated.model_rebuild()
 Person.model_rebuild()
@@ -767,6 +800,7 @@ RecordedInterpretation.model_rebuild()
 Relationships.model_rebuild()
 Representation.model_rebuild()
 Retention.model_rebuild()
+RevisionManifest.model_rebuild()
 SeismicContext.model_rebuild()
 TopsContext.model_rebuild()
 TrajectoryContext.model_rebuild()

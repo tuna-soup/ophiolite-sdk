@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/schema.json",
   "x-ophiolite": {
     "id": "ophiolite.scientific-asset/1",
-    "version": "1.7.0",
+    "version": "1.8.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -623,6 +623,158 @@
         "count"
       ],
       "title": "LineRange",
+      "type": "object"
+    },
+    "LineageEntry": {
+      "additionalProperties": false,
+      "description": "1.8.0: one lineage assertion as a commitment sha256(salt + canonical([predicate, reference])).\nDisclosed (predicate, reference, salt) only when the caller may see the other revision.",
+      "properties": {
+        "commitment": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Commitment",
+          "type": "string"
+        },
+        "predicate": {
+          "anyOf": [
+            {
+              "enum": [
+                "derived-from",
+                "supersedes"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Predicate"
+        },
+        "reference": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LineageReference"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "salt": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{32}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Salt"
+        }
+      },
+      "required": [
+        "commitment"
+      ],
+      "title": "LineageEntry",
+      "type": "object"
+    },
+    "LineageReference": {
+      "additionalProperties": false,
+      "description": "An exact revision a lineage assertion names; `ophiolite:managed` means another revision of this asset.",
+      "properties": {
+        "authority": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Authority",
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "profile": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Profile"
+        }
+      },
+      "required": [
+        "authority",
+        "key",
+        "revision"
+      ],
+      "title": "LineageReference",
+      "type": "object"
+    },
+    "ManifestArtifact": {
+      "additionalProperties": false,
+      "properties": {
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "bytes": {
+          "maximum": 33554432,
+          "minimum": 0,
+          "title": "Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "sha256",
+        "bytes"
+      ],
+      "title": "ManifestArtifact",
+      "type": "object"
+    },
+    "ManifestRepresentation": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "bytes": {
+          "maximum": 33554432,
+          "minimum": 0,
+          "title": "Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "sha256",
+        "bytes"
+      ],
+      "title": "ManifestRepresentation",
       "type": "object"
     },
     "MeshContext": {
@@ -1368,6 +1520,50 @@
       "title": "Retention",
       "type": "object"
     },
+    "RevisionManifest": {
+      "additionalProperties": false,
+      "description": "1.8.0 (E19, ADR 0016 \u00a71a): what an exact revision is made of. The digest is sha256 of the\ncanonical JSON of {schema, asset_id, revision, artifact, representations (sorted by id),\nlineage (the sorted commitments)}; context and interpretation are inside the representation\nbytes it names. Access decisions, labels, heads and times are not part of it.",
+      "properties": {
+        "schema": {
+          "const": "ophiolite.revision-manifest/1",
+          "title": "Schema",
+          "type": "string"
+        },
+        "digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        },
+        "artifact": {
+          "$ref": "#/$defs/ManifestArtifact"
+        },
+        "representations": {
+          "items": {
+            "$ref": "#/$defs/ManifestRepresentation"
+          },
+          "maxItems": 512,
+          "title": "Representations",
+          "type": "array"
+        },
+        "lineage": {
+          "items": {
+            "$ref": "#/$defs/LineageEntry"
+          },
+          "maxItems": 64,
+          "title": "Lineage",
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema",
+        "digest",
+        "artifact",
+        "representations",
+        "lineage"
+      ],
+      "title": "RevisionManifest",
+      "type": "object"
+    },
     "ScientificContext": {
       "additionalProperties": false,
       "properties": {
@@ -1873,6 +2069,17 @@
   },
   "additionalProperties": false,
   "properties": {
+    "manifest": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RevisionManifest"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
     "acquisition": {
       "anyOf": [
         {

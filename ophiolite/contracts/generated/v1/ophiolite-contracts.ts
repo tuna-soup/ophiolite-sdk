@@ -178,6 +178,31 @@ export type LineRange = {
   count: number;
 };
 
+export type LineageEntry = {
+  commitment: string;
+  predicate?: "derived-from" | "supersedes" | null;
+  reference?: LineageReference | null;
+  salt?: string | null;
+};
+
+export type LineageReference = {
+  authority: string;
+  key: string;
+  revision: string;
+  profile?: string | null;
+};
+
+export type ManifestArtifact = {
+  sha256: string;
+  bytes: number;
+};
+
+export type ManifestRepresentation = {
+  id: string;
+  sha256: string;
+  bytes: number;
+};
+
 export type MeshContext = {
   crs: string;
   xy_unit: string;
@@ -284,6 +309,14 @@ export type Retention = {
   historical_reads: "not-guaranteed" | "while-retained-and-authorized";
 };
 
+export type RevisionManifest = {
+  schema: "ophiolite.revision-manifest/1";
+  digest: string;
+  artifact: ManifestArtifact;
+  representations: ManifestRepresentation[];
+  lineage: LineageEntry[];
+};
+
 export type ScientificContext = {
   curve: string;
   unit: string;
@@ -368,6 +401,7 @@ export type XY = {
 };
 
 export type ScientificAsset = {
+  manifest?: RevisionManifest | null;
   acquisition?: Acquisition | null;
   relationships?: Relationships | null;
   display?: Display | null;
