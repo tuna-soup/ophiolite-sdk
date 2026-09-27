@@ -99,6 +99,8 @@ def open_bundle(path):
     if manifest_path.stat().st_size > MAX_MANIFEST_BYTES: raise VerificationFailed('The bundle manifest is too large.')
     manifest = _finite_json(manifest_path.read_bytes(), 'The bundle manifest')
     entries = _check_manifest(manifest)
+    selection = manifest.get('selection')
+    if not isinstance(selection, list) or len(selection) != len(entries): raise VerificationFailed('The selection and the assets disagree.')
     seen, total, loaded = set(), 0, []
     for index, entry in enumerate(entries):
         files = entry.get('files')
@@ -120,6 +122,14 @@ def open_bundle(path):
             raw = target.read_bytes()
             if hashlib.sha256(raw).hexdigest() != item.get('sha256'): raise VerificationFailed('A bundle file does not match its checksum.')
             content.setdefault(item.get('role'), {})[item.get('curve')] = raw
+        chosen = selection[index] if isinstance(selection[index], dict) else {}
+        if (chosen.get('asset_id'), chosen.get('revision')) != (entry.get('asset_id'), entry.get('revision')):
+            raise VerificationFailed('An asset is not the exact revision that was selected.')
+        roles = [item.get('role') for item in files]
+        if roles.count('original') != 1 or set(roles) - {'original', 'descriptor', 'normalized'}:
+            raise VerificationFailed('Bundle 1.0 carries exactly one original per asset and only known file roles.')
+        if sorted(content.get('descriptor', {})) != sorted(chosen.get('curves') or []) or sorted(content.get('normalized', {})) != sorted(chosen.get('curves') or []):
+            raise VerificationFailed('The curve files are not exactly the selected curves.')
         original = content.get('original', {}).get(None)
         curves = {}
         for name, raw in content.get('descriptor', {}).items():
@@ -129,6 +139,10 @@ def open_bundle(path):
             if (wire_descriptor.get('asset_id'), wire_descriptor.get('revision')) != (entry.get('asset_id'), entry.get('revision')):
                 raise VerificationFailed('A descriptor belongs to another exact revision.')
             if original is None: raise VerificationFailed('The original bytes needed to verify this curve are missing.')
+            if wire_descriptor.get('scientific', {}).get('curve') != name: raise VerificationFailed('A descriptor describes another curve.')
+            for field in ('origin', 'profile', 'parents', 'parent_visibility'):
+                if wire_descriptor.get(field, 'complete' if field == 'parent_visibility' else None) != entry.get(field): raise VerificationFailed('The manifest disagrees with a descriptor (' + field + ').')
+            if wire_descriptor.get('history') != entry.get('history'): raise VerificationFailed('The manifest disagrees with a descriptor (history).')
             model, view = _core.verify_pair(wire_descriptor, body, original, name)
             curves[name] = Curve(model, view, wire_descriptor, wire_view)
         if not curves: raise VerificationFailed('An asset carries no curves.')
@@ -144,9 +158,13 @@ def write_bundle(destination, items, *, grace=3600):
     if destination.exists(): raise Refused('The destination already exists; choose a new folder.')
     if not 0 < len(items) <= MAX_ASSETS: raise Refused('Export between 1 and %d exact revisions.' % MAX_ASSETS)
     parent = destination.parent; parent.mkdir(parents=True, exist_ok=True)
-    for stale in parent.glob('.' + destination.name + '.staging-*'):  # abandoned interrupted exports
-        if time.time() - stale.stat().st_mtime > grace: shutil.rmtree(stale, ignore_errors=True)
+    for stale in parent.glob('.' + destination.name + '.staging-*'):  # abandoned interrupted exports only
+        try: owner = int((stale / '.owner').read_text())
+        except (OSError, ValueError): owner = None
+        alive = owner is not None and _alive(owner)
+        if not alive and time.time() - stale.stat().st_mtime > grace: shutil.rmtree(stale, ignore_errors=True)
     staging = Path(tempfile.mkdtemp(prefix='.' + destination.name + '.staging-', dir=parent)); os.chmod(staging, 0o700)
+    (staging / '.owner').write_text(str(os.getpid()))
     try:
         assets, selection, total = [], [], 0
         def put(relative, raw, role, curve=None):
@@ -182,11 +200,22 @@ def write_bundle(destination, items, *, grace=3600):
         raw = (json.dumps(manifest, indent=2, allow_nan=False) + '\n').encode()
         fd = os.open(staging / 'manifest.json', os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
         with os.fdopen(fd, 'wb') as out: out.write(raw)
+        (staging / '.owner').unlink()
         open_bundle(staging)  # the bundle checks as a reader would before it becomes visible
+        # Claim the name exclusively, then swap the finished bundle in: a concurrent export
+        # to the same destination fails at the claim and nothing is ever overwritten.
+        try: os.mkdir(destination, 0o700)
+        except FileExistsError: raise Refused('The destination already exists; choose a new folder.') from None
         os.replace(staging, destination)
         return open_bundle(destination)
     except BaseException:
         shutil.rmtree(staging, ignore_errors=True); raise
+
+
+def _alive(pid):
+    try: os.kill(pid, 0); return True
+    except ProcessLookupError: return False
+    except PermissionError: return True
 
 
 def plot_svg(curve, path, *, width=240, height=640):

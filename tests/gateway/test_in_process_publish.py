@@ -176,9 +176,24 @@ def test_sdk_export_freezes_exact_revisions_and_applies_permissions(web,kind,tmp
     publish('3',5,index=2,new_version_of=second)
     again=alice.export([(key,r1,['GR'])],tmp_path/'later')
     assert again.assets[0].original==opened.assets[0].original and again.assets[0].history['count']==3
-    # Bob cannot read Alice's result: nothing is written.
+    # Bob cannot read Alice's result: nothing is written. Once shared, he can export it.
     with pytest.raises((PermissionRefused,Unavailable)):bob.export([(key,r1,['GR'])],tmp_path/'bob')
     assert not (tmp_path/'bob').exists()
+    grants=alice.grants(second);alice.share(second,read=['bob'],expected_generation=grants.generation)
+    assert bob.export([(key,r2,['GR'])],tmp_path/'bob').assets[0].curves['GR'].values[2]==0.0
+    # Revoking Bob refuses his next export and publishes nothing.
+    alice.share(second,read=[],expected_generation=alice.grants(second).generation)
+    with pytest.raises((PermissionRefused,Unavailable)):bob.export([(key,r2,['GR'])],tmp_path/'bob-revoked')
+    assert not (tmp_path/'bob-revoked').exists()
+    # The exported bundle is read by a separately installed SDK with no network or credentials.
+    import os,subprocess,json as _json
+    python=os.environ.get('OPHIOLITE_TEST_WHEEL_PYTHON')
+    if python:
+        code=('import socket,sys,json;socket.socket=None;from ophiolite.bundle import open_bundle;'
+              'b=open_bundle(sys.argv[1]);c=b.assets[1].curves["GR"];print(json.dumps([c.values,[a.revision for a in b.assets]]))')
+        done=subprocess.run([python,'-I','-c',code,str(tmp_path/'both')],capture_output=True,text=True,env={'PATH':os.environ.get('PATH',''),'HOME':str(tmp_path)},timeout=60)
+        assert done.returncode==0,done.stderr
+        values,revisions=_json.loads(done.stdout);assert values[2]==0.0 and values[1] is None and revisions==[r1,r2]
     # Withdrawing one selected revision fails the whole export.
     Stages(web.a).call('transition',{'project_id':'p','asset_id':key,'revision':r1,'action':'withdraw','expected_generation':0,'reason':'Superseded'},'alice')
     with pytest.raises((PermissionRefused,Unavailable)):alice.export([(key,r2,['GR']),(key,r1,['GR'])],tmp_path/'withdrawn')

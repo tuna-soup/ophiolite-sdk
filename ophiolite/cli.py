@@ -8,8 +8,23 @@ from pathlib import Path
 import subprocess
 import sys
 from importlib.resources import files
-from . import Client,Credential,auth,publish
 from .errors import Refused
+
+_NETWORK=('Client','Credential','auth','publish')
+
+
+def _load():
+    """Import the networked client lazily: offline commands (bundle check/show) never load it."""
+    import importlib
+    package=importlib.import_module('ophiolite')
+    for name in _NETWORK:
+        if name not in globals():globals()[name]=getattr(package,name) if name in ('Client','Credential') else importlib.import_module('ophiolite.'+name)
+
+
+def __getattr__(name):
+    if name in _NETWORK:
+        _load();return globals()[name]
+    raise AttributeError(name)
 
 
 def configuration(path):
@@ -109,6 +124,7 @@ def main(argv=None):
         opened=open_bundle(args.path)
         if args.action=='check':print('Bundle verified:',len(opened.assets),'exact revisions,',sum(len(a.curves) for a in opened.assets),'curves. Checksums show integrity, not authorship.');return
         print(json.dumps({**opened.summary(),'items':[{'asset_id':a.asset_id,'revision':a.revision,'name':a.name,'curves':sorted(a.curves),'history':a.history,'parent_visibility':a.parent_visibility} for a in opened.assets]},indent=2));return
+    _load()
     config=configuration(args.configuration)
     path=args.credentials or credentials_path(config)
     if args.command=='doctor':

@@ -57,7 +57,9 @@ def test_refusals(tmp_path, case):
     if case == 'descriptor-edit':  # same scientific content, edited copy: only the manifest digest can tell
         target = root / 'assets/0/descriptor-GR.json'; target.write_text(target.read_text() + ' ')
         rewrite(root, lambda m: [f.update(bytes=target.stat().st_size) for f in m['assets'][0]['files'] if f['path'].endswith('descriptor-GR.json')])
-    if case == 'traversal': rewrite(root, lambda m: first(m).update(path='assets/0/../../escape'))
+    if case == 'traversal':  # an existing, otherwise valid file outside the bundle: only the path rule can refuse it
+        (tmp_path / 'escape').write_bytes((root / 'assets/0/original.las').read_bytes())
+        rewrite(root, lambda m: [f.update(path='assets/0/../../../escape') for f in m['assets'][0]['files'] if f['role'] == 'original'])
     if case == 'absolute': rewrite(root, lambda m: first(m).update(path='/etc/passwd'))
     if case == 'duplicate': rewrite(root, lambda m: m['assets'][0]['files'].append(dict(first(m))))
     if case == 'oversized': rewrite(root, lambda m: first(m).update(bytes=64 * 1024 * 1024))
@@ -114,3 +116,47 @@ print(json.dumps({"mean":sum(present)/len(present),"missing":curve.values.count(
     served = json.loads(FIXTURES.joinpath('curve.json').read_bytes())['values']
     assert result['missing'] == served.count(None) and result['zero_kept'] and result['derived'][2] is None and result['derived'][0] == 1.0
     assert (tmp_path / 'track.svg').read_text().startswith('<svg')
+    # The installed CLI checks and summarizes the same bundle with sockets unavailable.
+    cli = Path(python).parent / 'ophiolite'
+    for action in ('check', 'show'):
+        wrapped = [python, '-I', '-c', 'import socket,sys;socket.socket=None;socket.create_connection=None;from ophiolite.cli import main;main(sys.argv[1:])', 'bundle', action, str(root)]
+        shown = subprocess.run(wrapped, capture_output=True, text=True, env=env, cwd=tmp_path, timeout=60)
+        assert shown.returncode == 0, shown.stderr
+    assert 'Bundle verified' in subprocess.run(wrapped[:-2] + ['check', str(root)], capture_output=True, text=True, env=env, cwd=tmp_path).stdout
+    assert cli.exists()
+
+
+def test_selection_binding_and_membership(tmp_path):
+    root = written(tmp_path).path
+    rewrite(root, lambda m: m['selection'][0].update(revision='0' * 64))
+    with pytest.raises(VerificationFailed, match='selected'): bundle.open_bundle(root)
+    root = written(tmp_path / 'b').path
+    rewrite(root, lambda m: m['selection'][0].update(curves=['GR', 'RHOB']))
+    with pytest.raises(VerificationFailed, match='selected curves'): bundle.open_bundle(root)
+    root = written(tmp_path / 'c').path
+    rewrite(root, lambda m: m['assets'][0].update(parent_visibility='restricted'))
+    with pytest.raises(VerificationFailed, match='disagrees'): bundle.open_bundle(root)
+    root = written(tmp_path / 'd').path
+    rewrite(root, lambda m: m['assets'][0]['files'].append({'path': 'assets/0/second.las', 'role': 'original', 'sha256': m['assets'][0]['files'][0]['sha256'], 'bytes': m['assets'][0]['files'][0]['bytes']}))
+    (root / 'assets/0/second.las').write_bytes((root / 'assets/0/original.las').read_bytes())
+    with pytest.raises(VerificationFailed, match='exactly one original'): bundle.open_bundle(root)
+
+
+def test_minor_extensions_are_accepted_and_limits_are_reader_owned(tmp_path):
+    root = written(tmp_path).path
+    rewrite(root, lambda m: m.update(bundle_version='1.7.0', future={'kept': True}, limits={'max_assets': 10**9, 'max_file_bytes': 10**12, 'max_total_bytes': 10**15}))
+    assert bundle.open_bundle(root).manifest['future'] == {'kept': True}
+    rewrite(root, lambda m: m['assets'][0]['files'][0].update(bytes=64 * 1024 * 1024))  # declared limits do not raise ours
+    with pytest.raises(VerificationFailed): bundle.open_bundle(root)
+
+
+def test_concurrent_exports_never_overwrite_and_live_staging_survives(tmp_path):
+    d = Read()._wire_descriptors[0]; item = [({'asset_id': d['asset_id'], 'revision': d['revision'], 'curves': ['GR']}, Read())]
+    live = tmp_path / '.same.staging-live'; live.mkdir(); (live / '.owner').write_text(str(os.getpid()))
+    os.utime(live, (0, 0))
+    bundle.write_bundle(tmp_path / 'same', item, grace=1)
+    assert live.exists()  # an export still running (its owner is alive) is left alone
+    with pytest.raises(Refused): bundle.write_bundle(tmp_path / 'same', item)
+    (tmp_path / 'claimed').mkdir()  # a concurrent writer claimed the name first
+    with pytest.raises(Refused): bundle.write_bundle(tmp_path / 'claimed', item)
+    assert not any((tmp_path / 'claimed').iterdir())
