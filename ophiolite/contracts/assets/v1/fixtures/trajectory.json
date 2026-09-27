@@ -1,0 +1,103 @@
+{
+  "schema": "ophiolite.scientific-asset/1",
+  "asset_id": "synthetic-trajectory",
+  "revision": "7d32d1cac27c05e0cce1e26d72d4dac409a9f9cd03feda0139944ba448aa9842",
+  "project_id": "synthetic-project",
+  "authority": "ophiolite:uploaded",
+  "origin": "retained-capture",
+  "custodian": "ophiolite:managed",
+  "source_reference": {
+    "authority": "ophiolite:uploaded",
+    "key": "synthetic-trajectory",
+    "revision": "7d32d1cac27c05e0cce1e26d72d4dac409a9f9cd03feda0139944ba448aa9842",
+    "profile": "deviation-csv/1"
+  },
+  "profile": "deviation-csv/1",
+  "scientific": {
+    "type": "trajectory",
+    "depth_unit": "M",
+    "angle_unit": "deg",
+    "azimuth_reference": "grid-north",
+    "depth_datum": "unknown",
+    "count": 3,
+    "missing_angle_count": 1,
+    "tvd_provided": false,
+    "md_range": [
+      100.0,
+      300.0
+    ],
+    "fidelity": {
+      "status": "assessed",
+      "preserved": [
+        "measured depths",
+        "inclinations",
+        "azimuths",
+        "vertical depths as provided",
+        "station order"
+      ],
+      "losses": [
+        "Text formatting (whitespace, quoting, line endings, number spelling) is kept only in the exact original"
+      ],
+      "unknown_context": [
+        "depth_datum"
+      ]
+    }
+  },
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "mapping": "trajectory/1",
+    "parsing_policy": "typed-strict/1",
+    "null_policy": "empty cell or declared NODATA value is missing; never zero-filled"
+  },
+  "interpretation_evidence": "live",
+  "recorded_interpretation": null,
+  "representations": [
+    {
+      "id": "artifact",
+      "kind": "original",
+      "media_type": "text/csv",
+      "profile": "deviation-csv/1",
+      "bytes": 46,
+      "sha256": "7d32d1cac27c05e0cce1e26d72d4dac409a9f9cd03feda0139944ba448aa9842",
+      "available": true,
+      "losses": []
+    },
+    {
+      "id": "data",
+      "kind": "normalized",
+      "media_type": "application/json",
+      "profile": "ophiolite.trajectory/1",
+      "bytes": 1623,
+      "sha256": "d7e1a2bfb6c952276c5568a82fe54e167f6f1436bd6ab5863131e514e14d34df",
+      "available": true,
+      "losses": [
+        "Text formatting (whitespace, quoting, line endings, number spelling) is kept only in the exact original"
+      ]
+    }
+  ],
+  "retention": {
+    "mode": "retained",
+    "policy": "until authorized lifecycle operation",
+    "historical_reads": "while-retained-and-authorized"
+  },
+  "relationships": {
+    "well_log": null
+  },
+  "parents": [],
+  "provenance": {
+    "evidence": "source-declared",
+    "method": null,
+    "code_reference": null,
+    "environment_reference": null,
+    "omissions": [
+      "Synthetic offline fixture, not a server publication"
+    ]
+  },
+  "supported_operations": [
+    "read",
+    "export"
+  ],
+  "authorization": {
+    "status": "not-evaluated"
+  }
+}

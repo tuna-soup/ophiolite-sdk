@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -37,7 +37,7 @@
     },
     {
       "id": "ophiolite.scientific-asset/1",
-      "version": "1.4.0",
+      "version": "1.5.0",
       "lifecycle": "preview",
       "path": "assets/v1/schema.json",
       "title": "ScientificAsset",
@@ -68,6 +68,38 @@
       "description": "A discovery summary: identity, origin, profile, curve names and the operations allowed to the caller."
     },
     {
+      "id": "ophiolite.typed-context/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/typed-context-schema.json",
+      "title": "TypedContext",
+      "description": "Observed and declared context of a typed asset: well tops, trajectory or regular-grid surface, with its fidelity report."
+    },
+    {
+      "id": "ophiolite.well-tops/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/well-tops-schema.json",
+      "title": "WellTops",
+      "description": "Normalized well tops in source order with their source reference, digest, context and reader identity."
+    },
+    {
+      "id": "ophiolite.trajectory/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/trajectory-schema.json",
+      "title": "Trajectory",
+      "description": "Normalized survey stations with their source reference, digest, context and reader identity."
+    },
+    {
+      "id": "ophiolite.regular-grid-surface/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/grid-surface-schema.json",
+      "title": "GridSurface",
+      "description": "A normalized regular-grid surface: every cell value in file order with its source reference, digest, context and reader identity."
+    },
+    {
       "id": "ophiolite/well-curve/1",
       "version": "1.0.0",
       "lifecycle": "preview",
@@ -90,6 +122,14 @@
       "path": "bundles/v1/manifest-schema.json",
       "title": "PortableBundleManifest",
       "description": "The portable bundle manifest: exact selected revisions with files, digests, served context, permitted lineage, omissions and losses (E18)."
+    },
+    {
+      "id": "ophiolite.portable-bundle/2",
+      "version": "2.0.0",
+      "lifecycle": "preview",
+      "path": "bundles/v2/manifest-schema.json",
+      "title": "PortableBundleManifestV2",
+      "description": "Portable bundle 2: exact selected revisions of well logs, well tops, trajectories and regular-grid surfaces with files, digests, served context, permitted lineage and relationships."
     }
   ],
   "profiles": [
@@ -172,6 +212,54 @@
       "description": "An ExternalSnapshot supplied by a caller through the native protobuf API with caller-declared mapping.",
       "lifecycle": "preview",
       "path": "profiles/v1/native-external.json"
+    },
+    {
+      "id": "well-tops-csv/1",
+      "kind": "source",
+      "display_name": "Well tops (CSV)",
+      "description": "A CSV of formation tops by name and measured depth, kept byte for byte as the uploader provided it.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/well-tops-csv.json"
+    },
+    {
+      "id": "deviation-csv/1",
+      "kind": "source",
+      "display_name": "Deviation survey (CSV)",
+      "description": "A CSV of survey stations (measured depth, inclination, azimuth), kept byte for byte as the uploader provided it.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/deviation-csv.json"
+    },
+    {
+      "id": "esri-ascii-grid/1",
+      "kind": "source",
+      "display_name": "Horizon grid (ESRI ASCII)",
+      "description": "A regular grid of surface values in the ESRI ASCII grid format, kept byte for byte as the uploader provided it.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/esri-ascii-grid.json"
+    },
+    {
+      "id": "ophiolite.well-tops/1",
+      "kind": "normalized",
+      "display_name": "Normalized well tops",
+      "description": "Tops in source order with names, measured depths and any provided vertical depths, the declared depth unit and basis, and the reader identity.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/well-tops.json"
+    },
+    {
+      "id": "ophiolite.trajectory/1",
+      "kind": "normalized",
+      "display_name": "Normalized trajectory",
+      "description": "Survey stations in increasing measured depth with inclination and azimuth as provided (missing angles null), the declared azimuth reference and datum.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/trajectory.json"
+    },
+    {
+      "id": "ophiolite.regular-grid-surface/1",
+      "kind": "normalized",
+      "display_name": "Normalized regular-grid surface",
+      "description": "Every grid cell value in file order (first row north) with missing cells null, origin, cell size, registration and the declared CRS, units and vertical meaning.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/grid-surface.json"
     }
   ],
   "documents": [
@@ -180,6 +268,12 @@
       "kind": "mapping",
       "path": "mappings/v1/application-curve-to-well-curve.json",
       "title": "Application curve to ordered well curve: pairs, caller-supplied evidence, refusals, losses"
+    },
+    {
+      "id": "ophiolite.mapping/typed-standards/1",
+      "kind": "mapping",
+      "path": "mappings/v1/typed-standards.json",
+      "title": "Well tops, trajectory and grid surface: standards names and scientific differences (declaration only)"
     },
     {
       "id": "ophiolite.vocabulary/1",
@@ -321,6 +415,73 @@
       "path": "bundles/v1/fixtures/manifest.json",
       "title": "Structural portable bundle manifest fixture",
       "schema": "ophiolite.portable-bundle/1"
+    },
+    {
+      "id": "ophiolite.fixture/bundles/manifest.json/2",
+      "kind": "fixture",
+      "path": "bundles/v2/fixtures/manifest.json",
+      "title": "Structural portable bundle 2 manifest fixture",
+      "schema": "ophiolite.portable-bundle/2"
+    },
+    {
+      "id": "ophiolite.fixture/assets/tops.original/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/tops.original",
+      "title": "Synthetic tops original bytes (E11)"
+    },
+    {
+      "id": "ophiolite.fixture/assets/tops-data.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/tops-data.json",
+      "title": "Synthetic normalized tops data (E11)",
+      "schema": "ophiolite.well-tops/1"
+    },
+    {
+      "id": "ophiolite.fixture/assets/tops.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/tops.json",
+      "title": "Synthetic retained tops descriptor (E11)",
+      "schema": "ophiolite.scientific-asset/1"
+    },
+    {
+      "id": "ophiolite.fixture/assets/trajectory.original/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/trajectory.original",
+      "title": "Synthetic trajectory original bytes (E11)"
+    },
+    {
+      "id": "ophiolite.fixture/assets/trajectory-data.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/trajectory-data.json",
+      "title": "Synthetic normalized trajectory data (E11)",
+      "schema": "ophiolite.trajectory/1"
+    },
+    {
+      "id": "ophiolite.fixture/assets/trajectory.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/trajectory.json",
+      "title": "Synthetic retained trajectory descriptor (E11)",
+      "schema": "ophiolite.scientific-asset/1"
+    },
+    {
+      "id": "ophiolite.fixture/assets/grid.original/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/grid.original",
+      "title": "Synthetic grid original bytes (E11)"
+    },
+    {
+      "id": "ophiolite.fixture/assets/grid-data.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/grid-data.json",
+      "title": "Synthetic normalized grid data (E11)",
+      "schema": "ophiolite.regular-grid-surface/1"
+    },
+    {
+      "id": "ophiolite.fixture/assets/grid.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/grid.json",
+      "title": "Synthetic retained grid descriptor (E11)",
+      "schema": "ophiolite.scientific-asset/1"
     }
   ]
 }

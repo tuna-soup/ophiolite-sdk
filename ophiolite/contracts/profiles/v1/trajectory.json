@@ -1,0 +1,21 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "ophiolite.trajectory/1",
+  "kind": "normalized",
+  "lifecycle": "preview",
+  "display_name": "Normalized trajectory",
+  "description": "Survey stations in increasing measured depth with inclination and azimuth as provided (missing angles null), the declared azimuth reference and datum.",
+  "payload_schema": "ophiolite.trajectory/1",
+  "role": "normalized",
+  "media_types": [
+    "application/json"
+  ],
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "parsing_policy": "typed-strict/1",
+    "mapping": "trajectory/1"
+  },
+  "mappings": [
+    "ophiolite.mapping/typed-standards/1"
+  ]
+}

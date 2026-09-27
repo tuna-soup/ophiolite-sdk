@@ -5,10 +5,13 @@
     "version": "1.0.0-pilot",
     "description": "One public API for every project operation. Three credential kinds reach it: the browser session (opaque HttpOnly cookie plus the X-CSRF-Token proof and, on non-GET requests, the exact Origin), a project-scoped delegate lasting at most five minutes (Bearer oph_api_..., parent session and current native permissions remain mandatory), and a browser-approved provider grant (Bearer provider token plus X-Ophiolite-Application-Grant, capability 1: the scientific read resources and the applications route within its read/write scopes). A request that carries an Authorization header is a machine request and is refused with MACHINE_AUTH_REQUIRED when a cookie or Origin travels with it. Scope and capability are ceilings; every operation runs the same native permission checks whoever calls it. Not a stable SDK or unattended service-account contract.",
     "x-ophiolite-contracts": {
-      "registry_version": "1.8.0",
+      "registry_version": "1.9.0",
       "index": "/api/v1/contracts",
       "served_profiles": [
-        "las2/1"
+        "las2/1",
+        "well-tops-csv/1",
+        "deviation-csv/1",
+        "esri-ascii-grid/1"
       ]
     },
     "x-ophiolite-capabilities": {
@@ -7114,7 +7117,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "base64 of a UTF-8 JSON object with this shape: {\"additionalProperties\": false, \"properties\": {\"project_id\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Project Id\", \"type\": \"string\"}}, \"required\": [\"project_id\"], \"title\": \"Inspection\", \"type\": \"object\"}"
+            "description": "base64 of a UTF-8 JSON object with this shape: {\"additionalProperties\": false, \"properties\": {\"declared\": {\"additionalProperties\": {\"type\": \"string\"}, \"maxProperties\": 12, \"title\": \"Declared\", \"type\": \"object\"}, \"profile\": {\"default\": \"las2/1\", \"enum\": [\"las2/1\", \"well-tops-csv/1\", \"deviation-csv/1\", \"esri-ascii-grid/1\"], \"title\": \"Profile\", \"type\": \"string\"}, \"project_id\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Project Id\", \"type\": \"string\"}}, \"required\": [\"project_id\"], \"title\": \"Inspection\", \"type\": \"object\"}"
           }
         ],
         "requestBody": {
@@ -7388,7 +7391,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "base64 of a UTF-8 JSON object with this shape: {\"additionalProperties\": false, \"properties\": {\"attribution\": {\"maxLength\": 500, \"minLength\": 1, \"title\": \"Attribution\", \"type\": \"string\"}, \"audience\": {\"items\": {\"type\": \"string\"}, \"maxItems\": 100, \"title\": \"Audience\", \"type\": \"array\"}, \"command_id\": {\"maxLength\": 64, \"minLength\": 1, \"title\": \"Command Id\", \"type\": \"string\"}, \"filename\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Filename\", \"type\": \"string\"}, \"name\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Name\", \"type\": \"string\"}, \"project_id\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Project Id\", \"type\": \"string\"}, \"rights_confirmed\": {\"const\": true, \"title\": \"Rights Confirmed\", \"type\": \"boolean\"}, \"well_notes\": {\"default\": \"\", \"maxLength\": 1000, \"title\": \"Well Notes\", \"type\": \"string\"}}, \"required\": [\"project_id\", \"command_id\", \"filename\", \"name\", \"attribution\", \"audience\", \"rights_confirmed\"], \"title\": \"Upload\", \"type\": \"object\"}"
+            "description": "base64 of a UTF-8 JSON object with this shape: {\"additionalProperties\": false, \"properties\": {\"attribution\": {\"maxLength\": 500, \"minLength\": 1, \"title\": \"Attribution\", \"type\": \"string\"}, \"audience\": {\"items\": {\"type\": \"string\"}, \"maxItems\": 100, \"title\": \"Audience\", \"type\": \"array\"}, \"command_id\": {\"maxLength\": 64, \"minLength\": 1, \"title\": \"Command Id\", \"type\": \"string\"}, \"declared\": {\"additionalProperties\": {\"type\": \"string\"}, \"maxProperties\": 12, \"title\": \"Declared\", \"type\": \"object\"}, \"filename\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Filename\", \"type\": \"string\"}, \"name\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Name\", \"type\": \"string\"}, \"profile\": {\"default\": \"las2/1\", \"enum\": [\"las2/1\", \"well-tops-csv/1\", \"deviation-csv/1\", \"esri-ascii-grid/1\"], \"title\": \"Profile\", \"type\": \"string\"}, \"project_id\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Project Id\", \"type\": \"string\"}, \"rights_confirmed\": {\"const\": true, \"title\": \"Rights Confirmed\", \"type\": \"boolean\"}, \"well_log\": {\"anyOf\": [{\"$ref\": \"#/components/schemas/WellLog\"}, {\"type\": \"null\"}], \"default\": null}, \"well_notes\": {\"default\": \"\", \"maxLength\": 1000, \"title\": \"Well Notes\", \"type\": \"string\"}}, \"required\": [\"project_id\", \"command_id\", \"filename\", \"name\", \"attribution\", \"audience\", \"rights_confirmed\"], \"title\": \"Upload\", \"type\": \"object\"}"
           }
         ],
         "requestBody": {
@@ -23229,7 +23232,7 @@
                 "schema": {
                   "x-ophiolite": {
                     "id": "ophiolite.scientific-asset/1",
-                    "version": "1.4.0",
+                    "version": "1.5.0",
                     "lifecycle": "preview"
                   },
                   "additionalProperties": false,
@@ -23288,6 +23291,58 @@
                             "rights"
                           ],
                           "title": "Acquisition",
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "relationships": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "description": "1.5.0: relationships the uploader declared, filtered for the caller.\n\"restricted\" means one exists that this caller may not see.",
+                          "properties": {
+                            "well_log": {
+                              "anyOf": [
+                                {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "asset_id": {
+                                      "maxLength": 512,
+                                      "minLength": 1,
+                                      "title": "Asset Id",
+                                      "type": "string"
+                                    },
+                                    "revision": {
+                                      "maxLength": 512,
+                                      "minLength": 1,
+                                      "title": "Revision",
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "asset_id",
+                                    "revision"
+                                  ],
+                                  "title": "WellLogLink",
+                                  "type": "object"
+                                },
+                                {
+                                  "const": "restricted",
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "default": null,
+                              "title": "Well Log"
+                            }
+                          },
+                          "title": "Relationships",
                           "type": "object"
                         },
                         {
@@ -23760,136 +23815,589 @@
                       "type": "string"
                     },
                     "scientific": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "curve": {
-                          "maxLength": 512,
-                          "minLength": 1,
-                          "title": "Curve",
-                          "type": "string"
-                        },
-                        "unit": {
-                          "maxLength": 128,
-                          "title": "Unit",
-                          "type": "string"
-                        },
-                        "unit_status": {
-                          "enum": [
-                            "declared",
-                            "unknown"
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "curve": {
+                              "maxLength": 512,
+                              "minLength": 1,
+                              "title": "Curve",
+                              "type": "string"
+                            },
+                            "unit": {
+                              "maxLength": 128,
+                              "title": "Unit",
+                              "type": "string"
+                            },
+                            "unit_status": {
+                              "enum": [
+                                "declared",
+                                "unknown"
+                              ],
+                              "title": "Unit Status",
+                              "type": "string"
+                            },
+                            "axis_unit": {
+                              "maxLength": 128,
+                              "title": "Axis Unit",
+                              "type": "string"
+                            },
+                            "axis_unit_status": {
+                              "enum": [
+                                "declared",
+                                "unknown"
+                              ],
+                              "title": "Axis Unit Status",
+                              "type": "string"
+                            },
+                            "depth_reference": {
+                              "maxLength": 512,
+                              "minLength": 1,
+                              "title": "Depth Reference",
+                              "type": "string"
+                            },
+                            "sample_count": {
+                              "maximum": 100000,
+                              "minimum": 0,
+                              "title": "Sample Count",
+                              "type": "integer"
+                            },
+                            "axis_order": {
+                              "enum": [
+                                "increasing",
+                                "decreasing",
+                                "unordered",
+                                "insufficient"
+                              ],
+                              "title": "Axis Order",
+                              "type": "string"
+                            },
+                            "axis_duplicates": {
+                              "title": "Axis Duplicates",
+                              "type": "boolean"
+                            },
+                            "missing_count": {
+                              "maximum": 100000,
+                              "minimum": 0,
+                              "title": "Missing Count",
+                              "type": "integer"
+                            },
+                            "missing_value_marker": {
+                              "maxLength": 512,
+                              "minLength": 1,
+                              "title": "Missing Value Marker",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "curve",
+                            "unit",
+                            "unit_status",
+                            "axis_unit",
+                            "axis_unit_status",
+                            "depth_reference",
+                            "sample_count",
+                            "axis_order",
+                            "axis_duplicates",
+                            "missing_count",
+                            "missing_value_marker"
                           ],
-                          "title": "Unit Status",
-                          "type": "string"
+                          "title": "ScientificContext",
+                          "type": "object"
                         },
-                        "axis_unit": {
-                          "maxLength": 128,
-                          "title": "Axis Unit",
-                          "type": "string"
-                        },
-                        "axis_unit_status": {
-                          "enum": [
-                            "declared",
-                            "unknown"
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "type": {
+                              "const": "well-tops",
+                              "title": "Type",
+                              "type": "string"
+                            },
+                            "depth_unit": {
+                              "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+                              "title": "Depth Unit",
+                              "type": "string"
+                            },
+                            "depth_basis": {
+                              "enum": [
+                                "same-as-log",
+                                "other",
+                                "unknown"
+                              ],
+                              "title": "Depth Basis",
+                              "type": "string"
+                            },
+                            "count": {
+                              "maximum": 10000,
+                              "minimum": 1,
+                              "title": "Count",
+                              "type": "integer"
+                            },
+                            "tvd_provided": {
+                              "title": "Tvd Provided",
+                              "type": "boolean"
+                            },
+                            "md_range": {
+                              "items": {
+                                "type": "number"
+                              },
+                              "maxItems": 2,
+                              "minItems": 2,
+                              "title": "Md Range",
+                              "type": "array"
+                            },
+                            "fidelity": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "status": {
+                                  "const": "assessed",
+                                  "title": "Status",
+                                  "type": "string"
+                                },
+                                "preserved": {
+                                  "items": {
+                                    "maxLength": 512,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Preserved",
+                                  "type": "array"
+                                },
+                                "losses": {
+                                  "items": {
+                                    "maxLength": 512,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Losses",
+                                  "type": "array"
+                                },
+                                "unknown_context": {
+                                  "items": {
+                                    "maxLength": 128,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Unknown Context",
+                                  "type": "array"
+                                }
+                              },
+                              "required": [
+                                "status",
+                                "preserved",
+                                "losses",
+                                "unknown_context"
+                              ],
+                              "title": "Fidelity",
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "depth_unit",
+                            "depth_basis",
+                            "count",
+                            "tvd_provided",
+                            "md_range",
+                            "fidelity"
                           ],
-                          "title": "Axis Unit Status",
-                          "type": "string"
+                          "title": "TopsContext",
+                          "type": "object"
                         },
-                        "depth_reference": {
-                          "maxLength": 512,
-                          "minLength": 1,
-                          "title": "Depth Reference",
-                          "type": "string"
-                        },
-                        "sample_count": {
-                          "maximum": 100000,
-                          "minimum": 0,
-                          "title": "Sample Count",
-                          "type": "integer"
-                        },
-                        "axis_order": {
-                          "enum": [
-                            "increasing",
-                            "decreasing",
-                            "unordered",
-                            "insufficient"
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "type": {
+                              "const": "trajectory",
+                              "title": "Type",
+                              "type": "string"
+                            },
+                            "depth_unit": {
+                              "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+                              "title": "Depth Unit",
+                              "type": "string"
+                            },
+                            "angle_unit": {
+                              "const": "deg",
+                              "title": "Angle Unit",
+                              "type": "string"
+                            },
+                            "azimuth_reference": {
+                              "enum": [
+                                "true-north",
+                                "grid-north",
+                                "magnetic-north",
+                                "unknown"
+                              ],
+                              "title": "Azimuth Reference",
+                              "type": "string"
+                            },
+                            "depth_datum": {
+                              "maxLength": 128,
+                              "minLength": 1,
+                              "title": "Depth Datum",
+                              "type": "string"
+                            },
+                            "count": {
+                              "maximum": 10000,
+                              "minimum": 1,
+                              "title": "Count",
+                              "type": "integer"
+                            },
+                            "missing_angle_count": {
+                              "maximum": 10000,
+                              "minimum": 0,
+                              "title": "Missing Angle Count",
+                              "type": "integer"
+                            },
+                            "tvd_provided": {
+                              "title": "Tvd Provided",
+                              "type": "boolean"
+                            },
+                            "md_range": {
+                              "items": {
+                                "type": "number"
+                              },
+                              "maxItems": 2,
+                              "minItems": 2,
+                              "title": "Md Range",
+                              "type": "array"
+                            },
+                            "fidelity": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "status": {
+                                  "const": "assessed",
+                                  "title": "Status",
+                                  "type": "string"
+                                },
+                                "preserved": {
+                                  "items": {
+                                    "maxLength": 512,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Preserved",
+                                  "type": "array"
+                                },
+                                "losses": {
+                                  "items": {
+                                    "maxLength": 512,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Losses",
+                                  "type": "array"
+                                },
+                                "unknown_context": {
+                                  "items": {
+                                    "maxLength": 128,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Unknown Context",
+                                  "type": "array"
+                                }
+                              },
+                              "required": [
+                                "status",
+                                "preserved",
+                                "losses",
+                                "unknown_context"
+                              ],
+                              "title": "Fidelity",
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "depth_unit",
+                            "angle_unit",
+                            "azimuth_reference",
+                            "depth_datum",
+                            "count",
+                            "missing_angle_count",
+                            "tvd_provided",
+                            "md_range",
+                            "fidelity"
                           ],
-                          "title": "Axis Order",
-                          "type": "string"
+                          "title": "TrajectoryContext",
+                          "type": "object"
                         },
-                        "axis_duplicates": {
-                          "title": "Axis Duplicates",
-                          "type": "boolean"
-                        },
-                        "missing_count": {
-                          "maximum": 100000,
-                          "minimum": 0,
-                          "title": "Missing Count",
-                          "type": "integer"
-                        },
-                        "missing_value_marker": {
-                          "maxLength": 512,
-                          "minLength": 1,
-                          "title": "Missing Value Marker",
-                          "type": "string"
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "type": {
+                              "const": "regular-grid-surface",
+                              "title": "Type",
+                              "type": "string"
+                            },
+                            "crs": {
+                              "pattern": "^(EPSG:[0-9]{4,6}|unknown)$",
+                              "title": "Crs",
+                              "type": "string"
+                            },
+                            "xy_unit": {
+                              "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+                              "title": "Xy Unit",
+                              "type": "string"
+                            },
+                            "z_unit": {
+                              "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+                              "title": "Z Unit",
+                              "type": "string"
+                            },
+                            "z_meaning": {
+                              "enum": [
+                                "depth",
+                                "elevation",
+                                "time",
+                                "unknown"
+                              ],
+                              "title": "Z Meaning",
+                              "type": "string"
+                            },
+                            "positive": {
+                              "enum": [
+                                "up",
+                                "down",
+                                "unknown"
+                              ],
+                              "title": "Positive",
+                              "type": "string"
+                            },
+                            "vertical_datum": {
+                              "maxLength": 128,
+                              "minLength": 1,
+                              "title": "Vertical Datum",
+                              "type": "string"
+                            },
+                            "registration": {
+                              "enum": [
+                                "corner",
+                                "center"
+                              ],
+                              "title": "Registration",
+                              "type": "string"
+                            },
+                            "row_order": {
+                              "const": "north-to-south",
+                              "title": "Row Order",
+                              "type": "string"
+                            },
+                            "ncols": {
+                              "maximum": 262144,
+                              "minimum": 1,
+                              "title": "Ncols",
+                              "type": "integer"
+                            },
+                            "nrows": {
+                              "maximum": 262144,
+                              "minimum": 1,
+                              "title": "Nrows",
+                              "type": "integer"
+                            },
+                            "cell_size": {
+                              "exclusiveMinimum": 0,
+                              "title": "Cell Size",
+                              "type": "number"
+                            },
+                            "x_first_center": {
+                              "title": "X First Center",
+                              "type": "number"
+                            },
+                            "y_first_center": {
+                              "title": "Y First Center",
+                              "type": "number"
+                            },
+                            "missing_count": {
+                              "maximum": 262144,
+                              "minimum": 0,
+                              "title": "Missing Count",
+                              "type": "integer"
+                            },
+                            "value_range": {
+                              "anyOf": [
+                                {
+                                  "items": {
+                                    "type": "number"
+                                  },
+                                  "maxItems": 2,
+                                  "minItems": 2,
+                                  "type": "array"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "title": "Value Range"
+                            },
+                            "fidelity": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "status": {
+                                  "const": "assessed",
+                                  "title": "Status",
+                                  "type": "string"
+                                },
+                                "preserved": {
+                                  "items": {
+                                    "maxLength": 512,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Preserved",
+                                  "type": "array"
+                                },
+                                "losses": {
+                                  "items": {
+                                    "maxLength": 512,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Losses",
+                                  "type": "array"
+                                },
+                                "unknown_context": {
+                                  "items": {
+                                    "maxLength": 128,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Unknown Context",
+                                  "type": "array"
+                                }
+                              },
+                              "required": [
+                                "status",
+                                "preserved",
+                                "losses",
+                                "unknown_context"
+                              ],
+                              "title": "Fidelity",
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "crs",
+                            "xy_unit",
+                            "z_unit",
+                            "z_meaning",
+                            "positive",
+                            "vertical_datum",
+                            "registration",
+                            "row_order",
+                            "ncols",
+                            "nrows",
+                            "cell_size",
+                            "x_first_center",
+                            "y_first_center",
+                            "missing_count",
+                            "value_range",
+                            "fidelity"
+                          ],
+                          "title": "GridContext",
+                          "type": "object"
                         }
-                      },
-                      "required": [
-                        "curve",
-                        "unit",
-                        "unit_status",
-                        "axis_unit",
-                        "axis_unit_status",
-                        "depth_reference",
-                        "sample_count",
-                        "axis_order",
-                        "axis_duplicates",
-                        "missing_count",
-                        "missing_value_marker"
                       ],
-                      "title": "ScientificContext",
-                      "type": "object"
+                      "title": "Scientific"
                     },
                     "interpretation": {
-                      "additionalProperties": false,
-                      "description": "The executable identity of the deployed reader; literals name what runs now.",
-                      "properties": {
-                        "reader": {
-                          "const": "asset_connectors.las_reader/1",
-                          "title": "Reader",
-                          "type": "string"
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "description": "The executable identity of the deployed reader; literals name what runs now.",
+                          "properties": {
+                            "reader": {
+                              "const": "asset_connectors.las_reader/1",
+                              "title": "Reader",
+                              "type": "string"
+                            },
+                            "lasio_version": {
+                              "maxLength": 512,
+                              "minLength": 1,
+                              "title": "Lasio Version",
+                              "type": "string"
+                            },
+                            "mapping": {
+                              "const": "application-curve/1",
+                              "title": "Mapping",
+                              "type": "string"
+                            },
+                            "null_policy": {
+                              "maxLength": 512,
+                              "minLength": 1,
+                              "title": "Null Policy",
+                              "type": "string"
+                            },
+                            "parsing_policy": {
+                              "const": "las2-strict-null/1",
+                              "default": "las2-strict-null/1",
+                              "title": "Parsing Policy",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "reader",
+                            "lasio_version",
+                            "mapping",
+                            "null_policy"
+                          ],
+                          "title": "Interpretation",
+                          "type": "object"
                         },
-                        "lasio_version": {
-                          "maxLength": 512,
-                          "minLength": 1,
-                          "title": "Lasio Version",
-                          "type": "string"
-                        },
-                        "mapping": {
-                          "const": "application-curve/1",
-                          "title": "Mapping",
-                          "type": "string"
-                        },
-                        "null_policy": {
-                          "maxLength": 512,
-                          "minLength": 1,
-                          "title": "Null Policy",
-                          "type": "string"
-                        },
-                        "parsing_policy": {
-                          "const": "las2-strict-null/1",
-                          "default": "las2-strict-null/1",
-                          "title": "Parsing Policy",
-                          "type": "string"
+                        {
+                          "additionalProperties": false,
+                          "description": "The executable identity of the typed reader (Connectors typed_reader).",
+                          "properties": {
+                            "reader": {
+                              "const": "asset_connectors.typed_reader/1",
+                              "title": "Reader",
+                              "type": "string"
+                            },
+                            "mapping": {
+                              "enum": [
+                                "well-tops/1",
+                                "trajectory/1",
+                                "regular-grid-surface/1"
+                              ],
+                              "title": "Mapping",
+                              "type": "string"
+                            },
+                            "parsing_policy": {
+                              "const": "typed-strict/1",
+                              "title": "Parsing Policy",
+                              "type": "string"
+                            },
+                            "null_policy": {
+                              "maxLength": 512,
+                              "minLength": 1,
+                              "title": "Null Policy",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "reader",
+                            "mapping",
+                            "parsing_policy",
+                            "null_policy"
+                          ],
+                          "title": "TypedInterpretation",
+                          "type": "object"
                         }
-                      },
-                      "required": [
-                        "reader",
-                        "lasio_version",
-                        "mapping",
-                        "null_policy"
                       ],
-                      "title": "Interpretation",
-                      "type": "object"
+                      "title": "Interpretation"
                     },
                     "interpretation_evidence": {
                       "default": "live",
@@ -23999,7 +24507,9 @@
                           "media_type": {
                             "enum": [
                               "application/x-las",
-                              "application/json"
+                              "application/json",
+                              "text/csv",
+                              "text/plain"
                             ],
                             "title": "Media Type",
                             "type": "string"
@@ -24853,6 +25363,29 @@
           "revision"
         ],
         "title": "SourceParent",
+        "type": "object"
+      },
+      "WellLog": {
+        "additionalProperties": false,
+        "properties": {
+          "asset_id": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "revision": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Revision",
+            "type": "string"
+          }
+        },
+        "required": [
+          "asset_id",
+          "revision"
+        ],
+        "title": "WellLog",
         "type": "object"
       }
     }

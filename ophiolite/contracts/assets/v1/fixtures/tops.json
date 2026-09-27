@@ -1,0 +1,98 @@
+{
+  "schema": "ophiolite.scientific-asset/1",
+  "asset_id": "synthetic-tops",
+  "revision": "7bca6c523913b58113d3fa23aa97424ce907af3b27915c18ada91b845b71a594",
+  "project_id": "synthetic-project",
+  "authority": "ophiolite:uploaded",
+  "origin": "retained-capture",
+  "custodian": "ophiolite:managed",
+  "source_reference": {
+    "authority": "ophiolite:uploaded",
+    "key": "synthetic-tops",
+    "revision": "7bca6c523913b58113d3fa23aa97424ce907af3b27915c18ada91b845b71a594",
+    "profile": "well-tops-csv/1"
+  },
+  "profile": "well-tops-csv/1",
+  "scientific": {
+    "type": "well-tops",
+    "depth_unit": "M",
+    "depth_basis": "same-as-log",
+    "count": 2,
+    "tvd_provided": true,
+    "md_range": [
+      100.5,
+      103.0
+    ],
+    "fidelity": {
+      "status": "assessed",
+      "preserved": [
+        "names",
+        "measured depths",
+        "vertical depths as provided",
+        "source labels",
+        "source order including repeated names"
+      ],
+      "losses": [
+        "Text formatting (whitespace, quoting, line endings, number spelling) is kept only in the exact original"
+      ],
+      "unknown_context": []
+    }
+  },
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "mapping": "well-tops/1",
+    "parsing_policy": "typed-strict/1",
+    "null_policy": "empty cell or declared NODATA value is missing; never zero-filled"
+  },
+  "interpretation_evidence": "live",
+  "recorded_interpretation": null,
+  "representations": [
+    {
+      "id": "artifact",
+      "kind": "original",
+      "media_type": "text/csv",
+      "profile": "well-tops-csv/1",
+      "bytes": 65,
+      "sha256": "7bca6c523913b58113d3fa23aa97424ce907af3b27915c18ada91b845b71a594",
+      "available": true,
+      "losses": []
+    },
+    {
+      "id": "data",
+      "kind": "normalized",
+      "media_type": "application/json",
+      "profile": "ophiolite.well-tops/1",
+      "bytes": 1419,
+      "sha256": "eae5778eca7ced6e1010cbe7ef342efb23298da1de5a634e9a4c9f3bb70e305b",
+      "available": true,
+      "losses": [
+        "Text formatting (whitespace, quoting, line endings, number spelling) is kept only in the exact original"
+      ]
+    }
+  ],
+  "retention": {
+    "mode": "retained",
+    "policy": "until authorized lifecycle operation",
+    "historical_reads": "while-retained-and-authorized"
+  },
+  "relationships": {
+    "well_log": null
+  },
+  "parents": [],
+  "provenance": {
+    "evidence": "source-declared",
+    "method": null,
+    "code_reference": null,
+    "environment_reference": null,
+    "omissions": [
+      "Synthetic offline fixture, not a server publication"
+    ]
+  },
+  "supported_operations": [
+    "read",
+    "export"
+  ],
+  "authorization": {
+    "status": "not-evaluated"
+  }
+}

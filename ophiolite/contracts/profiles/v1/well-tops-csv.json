@@ -1,0 +1,32 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "well-tops-csv/1",
+  "kind": "source",
+  "lifecycle": "preview",
+  "display_name": "Well tops (CSV)",
+  "description": "A CSV of formation tops by name and measured depth, kept byte for byte as the uploader provided it.",
+  "serves": [
+    "ophiolite.scientific-asset/1"
+  ],
+  "connector": {
+    "scientific_profile": "well-tops-source/1",
+    "source_schema": "CSV/name,md[,tvd][,source]",
+    "mapping_version": "well-tops/1",
+    "history": "retained-exact-read"
+  },
+  "role": "artifact",
+  "media_types": [
+    "text/csv"
+  ],
+  "normalized_profile": "ophiolite.well-tops/1",
+  "context_schema": "ophiolite.typed-context/1",
+  "representation_rules": {
+    "artifact_kind_by_origin": {
+      "source-reference": "original",
+      "retained-capture": "original",
+      "managed-derived": "derived-artifact"
+    },
+    "normalized": 1,
+    "total": 2
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "ophiolite.well-tops/1",
+  "kind": "normalized",
+  "lifecycle": "preview",
+  "display_name": "Normalized well tops",
+  "description": "Tops in source order with names, measured depths and any provided vertical depths, the declared depth unit and basis, and the reader identity.",
+  "payload_schema": "ophiolite.well-tops/1",
+  "role": "normalized",
+  "media_types": [
+    "application/json"
+  ],
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "parsing_policy": "typed-strict/1",
+    "mapping": "well-tops/1"
+  },
+  "mappings": [
+    "ophiolite.mapping/typed-standards/1"
+  ]
+}

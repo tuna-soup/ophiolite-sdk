@@ -10,7 +10,10 @@
     "sql-wells/1": {"scientific_profile": "well-location/1", "source_schema": "schema-digest", "mapping_version": "customer-mapping", "history": "current-only"},
     "osdu-record/1": {"scientific_profile": "well-record-source/1", "source_schema": "exact-approved-kind", "mapping_version": "osdu-record-reader/1", "history": "upstream-exact-read"},
     "osdu-welllog-parquet/1": {"scientific_profile": "well-log-source/1", "source_schema": "exact-approved-kind", "mapping_version": "osdu-welllog-reader/1", "history": "upstream-exact-read"},
-    "native-external/1": {"scientific_profile": "native-external-snapshot/1", "source_schema": "arraybridge.v1.ExternalSnapshot", "mapping_version": "caller-declared", "history": "not-assessed"}
+    "native-external/1": {"scientific_profile": "native-external-snapshot/1", "source_schema": "arraybridge.v1.ExternalSnapshot", "mapping_version": "caller-declared", "history": "not-assessed"},
+    "well-tops-csv/1": {"scientific_profile": "well-tops-source/1", "source_schema": "CSV/name,md[,tvd][,source]", "mapping_version": "well-tops/1", "history": "retained-exact-read"},
+    "deviation-csv/1": {"scientific_profile": "trajectory-source/1", "source_schema": "CSV/md,inclination,azimuth[,tvd]", "mapping_version": "trajectory/1", "history": "retained-exact-read"},
+    "esri-ascii-grid/1": {"scientific_profile": "regular-grid-surface-source/1", "source_schema": "ESRI-ASCII-grid", "mapping_version": "regular-grid-surface/1", "history": "retained-exact-read"}
   },
   "policy_defaults": {"retained": false, "retention_permitted": false, "redistribution_permitted": false, "audience": []},
   "identity": {"entity": "source namespace plus explicit stable entity key; never name or coordinate inference", "revision": "exact source revision; opaque string", "representation": "profile plus payload SHA-256; does not create a new authority"},

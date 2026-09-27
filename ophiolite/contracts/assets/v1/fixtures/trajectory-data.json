@@ -1,0 +1,67 @@
+{
+  "schema": "ophiolite.trajectory/1",
+  "representation": "normalized",
+  "source": {
+    "authority": "ophiolite:uploaded",
+    "key": "synthetic-trajectory",
+    "revision": "7d32d1cac27c05e0cce1e26d72d4dac409a9f9cd03feda0139944ba448aa9842",
+    "profile": "deviation-csv/1"
+  },
+  "source_sha256": "7d32d1cac27c05e0cce1e26d72d4dac409a9f9cd03feda0139944ba448aa9842",
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "mapping": "trajectory/1",
+    "parsing_policy": "typed-strict/1",
+    "null_policy": "empty cell or declared NODATA value is missing; never zero-filled"
+  },
+  "context": {
+    "type": "trajectory",
+    "depth_unit": "M",
+    "angle_unit": "deg",
+    "azimuth_reference": "grid-north",
+    "depth_datum": "unknown",
+    "count": 3,
+    "missing_angle_count": 1,
+    "tvd_provided": false,
+    "md_range": [
+      100.0,
+      300.0
+    ],
+    "fidelity": {
+      "status": "assessed",
+      "preserved": [
+        "measured depths",
+        "inclinations",
+        "azimuths",
+        "vertical depths as provided",
+        "station order"
+      ],
+      "losses": [
+        "Text formatting (whitespace, quoting, line endings, number spelling) is kept only in the exact original"
+      ],
+      "unknown_context": [
+        "depth_datum"
+      ]
+    }
+  },
+  "stations": [
+    {
+      "md": 100.0,
+      "inclination": 0.0,
+      "azimuth": 0.0,
+      "tvd": null
+    },
+    {
+      "md": 200.0,
+      "inclination": 10.0,
+      "azimuth": 0.0,
+      "tvd": null
+    },
+    {
+      "md": 300.0,
+      "inclination": null,
+      "azimuth": null,
+      "tvd": null
+    }
+  ]
+}

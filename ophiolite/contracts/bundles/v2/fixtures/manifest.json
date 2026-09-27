@@ -1,0 +1,64 @@
+{
+  "schema": "ophiolite.portable-bundle/2",
+  "bundle_version": "2.0.0",
+  "created_at": "2026-09-27T00:00:00Z",
+  "exporter": {
+    "name": "ophiolite-sdk",
+    "version": "0.1.0"
+  },
+  "scope": "selection",
+  "selection": [
+    {
+      "asset_id": "fixture-asset",
+      "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "curves": [
+        "GR"
+      ]
+    }
+  ],
+  "assets": [
+    {
+      "asset_id": "fixture-asset",
+      "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "origin": "retained-capture",
+      "profile": "las2/1",
+      "name": "Fixture",
+      "files": [
+        {
+          "path": "assets/0/original.las",
+          "role": "original",
+          "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "bytes": 18
+        },
+        {
+          "path": "assets/0/descriptor-GR.json",
+          "role": "descriptor",
+          "curve": "GR",
+          "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "bytes": 10
+        },
+        {
+          "path": "assets/0/curve-GR.json",
+          "role": "normalized",
+          "curve": "GR",
+          "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "bytes": 10
+        }
+      ],
+      "history": null,
+      "parents": [],
+      "parent_visibility": "complete",
+      "omissions": [],
+      "losses": [],
+      "type": "well-log"
+    }
+  ],
+  "groups": null,
+  "recommendations": null,
+  "limits": {
+    "max_assets": 128,
+    "max_file_bytes": 33554432,
+    "max_total_bytes": 536870912
+  },
+  "notice": "Checksums show integrity, not authorship or scientific correctness."
+}

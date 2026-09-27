@@ -210,3 +210,18 @@ and missing sample. Their generator uses the qualified current reader. Optional
 ran. Schema equality is tested against Pydantic generation; no claim of an external
 JSON-Schema engine test. See the [offline user example](../../../docs/scientific-assets.md)
 and [migration inventory](../../../docs/scientific-asset-migration.md).
+
+## Typed assets (1.5.0, E11)
+
+Three further source profiles are served through the same envelope: `well-tops-csv/1`,
+`deviation-csv/1` and `esri-ascii-grid/1`. Each has one exact original (`artifact`,
+`text/csv` or `text/plain`) and one normalized representation (`data`,
+`application/json`) whose schema is `ophiolite.well-tops/1`, `ophiolite.trajectory/1`
+or `ophiolite.regular-grid-surface/1`. `scientific` is then the typed context
+(`ophiolite.typed-context/1`) including an assessed fidelity report, and
+`interpretation` names `asset_connectors.typed_reader/1`. Declared context the
+uploader did not know is the value `unknown`. `relationships.well_log` carries the
+exact well log a tops or trajectory upload was explicitly associated with, or
+`"restricted"` when the caller cannot read it. Readers before 1.5.0 refuse typed
+descriptors as contract-invalid; curve descriptors are unchanged. Fixtures:
+`fixtures/{tops,trajectory,grid}{.original,-data.json,.json}`.

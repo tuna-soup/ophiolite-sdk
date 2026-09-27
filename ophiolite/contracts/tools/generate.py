@@ -36,8 +36,8 @@ def digest(raw):
 
 def schemas():
     """Publish the Pydantic-generated schemas listed in the registry."""
-    from project_gateway.scientific_assets import Asset, AssetSummary, Curve, ScientificContext
-    for model in (Asset, Curve, ScientificContext, AssetSummary):
+    from project_gateway.scientific_assets import Asset, AssetSummary, Curve, ScientificContext, TypedContext, WellTops, Trajectory, GridSurface
+    for model in (Asset, Curve, ScientificContext, AssetSummary, TypedContext, WellTops, Trajectory, GridSurface):
         write(CONTRACTS / model.CONTRACT['path'], model.model_json_schema())
 
 
@@ -100,7 +100,43 @@ def fixtures(target=FIX):
           'supported_operations':['read','export','use-as-input'],'authorization':{'status':'not-evaluated'}}
         Asset.model_validate(descriptor)
         write(FIX / f'{name}.json', descriptor)
+    typed(FIX)
     write(FIX/'expected.json', {'axis':[100,101,102,103,104], 'values':[2,12,None,32,40], 'changes':[{'index':0,'value':2.0},{'index':1,'value':12.0},{'index':3,'value':32.0}]})
+
+
+TYPED = {
+    'tops': ('well-tops-csv/1', 'text/csv', b'name,md,tvd,source\nTop Chalk,100.5,,picked\nBase Chalk,103,102.9,\n', {'depth_unit': 'M', 'depth_basis': 'same-as-log'}),
+    'trajectory': ('deviation-csv/1', 'text/csv', b'md,inclination,azimuth\n100,0,0\n200,10,0\n300,,\n', {'depth_unit': 'M', 'azimuth_reference': 'grid-north'}),
+    'grid': ('esri-ascii-grid/1', 'text/plain', b'ncols 3\nnrows 2\nxllcorner 1000\nyllcorner 5000\ncellsize 25\nNODATA_value -9999\n1 0 -9999\n4 5 6\n', {'crs': 'EPSG:28992', 'z_unit': 'm', 'z_meaning': 'depth', 'positive': 'down'}),
+}
+
+
+def typed(FIX):
+    """Synthetic typed fixtures (E11): exact original, normalized data and a retained descriptor."""
+    from asset_connectors.typed_reader import read_typed, interpretation
+    from project_gateway.scientific_assets import Asset, TYPED_PAYLOADS
+    from project_gateway.contracts_registry import registry
+    for name, (profile, media, raw, declared) in TYPED.items():
+        context, data, fidelity = read_typed(profile, raw, declared)
+        kind = context['type']; ref = {'authority': 'ophiolite:uploaded', 'key': 'synthetic-' + name, 'revision': digest(raw), 'profile': profile}
+        normalized = registry().normalized_profile(profile)
+        payload = {'schema': normalized, 'representation': 'normalized', 'source': ref, 'source_sha256': digest(raw),
+                   'interpretation': interpretation(kind), 'context': {**context, 'fidelity': fidelity}, **data}
+        TYPED_PAYLOADS[kind].model_validate(payload)
+        (FIX / f'{name}.original').write_bytes(raw)
+        write(FIX / f'{name}-data.json', payload)
+        encoded = (FIX / f'{name}-data.json').read_bytes()
+        descriptor = {'schema': 'ophiolite.scientific-asset/1', 'asset_id': ref['key'], 'revision': ref['revision'], 'project_id': 'synthetic-project',
+            'authority': ref['authority'], 'origin': 'retained-capture', 'custodian': 'ophiolite:managed', 'source_reference': ref, 'profile': profile,
+            'scientific': payload['context'], 'interpretation': payload['interpretation'], 'interpretation_evidence': 'live', 'recorded_interpretation': None,
+            'representations': [{'id': 'artifact', 'kind': 'original', 'media_type': media, 'profile': profile, 'bytes': len(raw), 'sha256': digest(raw), 'available': True, 'losses': []},
+                                {'id': 'data', 'kind': 'normalized', 'media_type': 'application/json', 'profile': normalized, 'bytes': len(encoded), 'sha256': digest(encoded), 'available': True, 'losses': fidelity['losses']}],
+            'retention': {'mode': 'retained', 'policy': 'until authorized lifecycle operation', 'historical_reads': 'while-retained-and-authorized'},
+            'relationships': {'well_log': None}, 'parents': [],
+            'provenance': {'evidence': 'source-declared', 'method': None, 'code_reference': None, 'environment_reference': None, 'omissions': ['Synthetic offline fixture, not a server publication']},
+            'supported_operations': ['read', 'export'], 'authorization': {'status': 'not-evaluated'}}
+        Asset.model_validate(descriptor)
+        write(FIX / f'{name}.json', descriptor)
 
 
 # ---------------------------------------------------------------------------

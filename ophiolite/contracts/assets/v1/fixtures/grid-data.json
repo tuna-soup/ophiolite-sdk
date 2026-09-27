@@ -1,0 +1,62 @@
+{
+  "schema": "ophiolite.regular-grid-surface/1",
+  "representation": "normalized",
+  "source": {
+    "authority": "ophiolite:uploaded",
+    "key": "synthetic-grid",
+    "revision": "e003a5f2db034f6c8bf82ef1df6dbcb751e43278718ace029829fc8cf92d0da7",
+    "profile": "esri-ascii-grid/1"
+  },
+  "source_sha256": "e003a5f2db034f6c8bf82ef1df6dbcb751e43278718ace029829fc8cf92d0da7",
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "mapping": "regular-grid-surface/1",
+    "parsing_policy": "typed-strict/1",
+    "null_policy": "empty cell or declared NODATA value is missing; never zero-filled"
+  },
+  "context": {
+    "type": "regular-grid-surface",
+    "crs": "EPSG:28992",
+    "xy_unit": "unknown",
+    "z_unit": "m",
+    "z_meaning": "depth",
+    "positive": "down",
+    "vertical_datum": "unknown",
+    "registration": "corner",
+    "row_order": "north-to-south",
+    "ncols": 3,
+    "nrows": 2,
+    "cell_size": 25.0,
+    "x_first_center": 1012.5,
+    "y_first_center": 5037.5,
+    "missing_count": 1,
+    "value_range": [
+      0.0,
+      6.0
+    ],
+    "fidelity": {
+      "status": "assessed",
+      "preserved": [
+        "every cell value in file order",
+        "missing cells as null",
+        "origin, cell size and registration as written"
+      ],
+      "losses": [
+        "Text formatting (whitespace, quoting, line endings, number spelling) is kept only in the exact original"
+      ],
+      "unknown_context": [
+        "vertical_datum",
+        "xy_unit"
+      ]
+    }
+  },
+  "values": [
+    1.0,
+    0.0,
+    null,
+    4.0,
+    5.0,
+    6.0
+  ],
+  "nodata_value": -9999.0
+}

@@ -1,0 +1,21 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "ophiolite.regular-grid-surface/1",
+  "kind": "normalized",
+  "lifecycle": "preview",
+  "display_name": "Normalized regular-grid surface",
+  "description": "Every grid cell value in file order (first row north) with missing cells null, origin, cell size, registration and the declared CRS, units and vertical meaning.",
+  "payload_schema": "ophiolite.regular-grid-surface/1",
+  "role": "normalized",
+  "media_types": [
+    "application/json"
+  ],
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "parsing_policy": "typed-strict/1",
+    "mapping": "regular-grid-surface/1"
+  },
+  "mappings": [
+    "ophiolite.mapping/typed-standards/1"
+  ]
+}

@@ -7,6 +7,7 @@ type WireDraftRef = { "id": string; "generation": number };
 type WireError = { "error": string; "code": string; [key: string]: unknown };
 type WireRef = { "project_id": string; "asset_id": string; "revision": string };
 type WireSourceParent = { "project_id": string; "asset_id": string; "revision": string };
+type WireWellLog = { "asset_id": string; "revision": string };
 export type postAccountRevokeInput = { body: Record<string, unknown>; options?: OperationOptions };
 export function postAccountRevoke(transport: Transport, input: postAccountRevokeInput): Promise<unknown> {
   return transport.request<unknown>("POST", "/api/v1/account/revoke", {}, undefined, input.body, input.options, null, false);

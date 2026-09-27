@@ -1,0 +1,359 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/assets/v1/typed-context-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.typed-context/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "Fidelity": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "const": "assessed",
+          "title": "Status",
+          "type": "string"
+        },
+        "preserved": {
+          "items": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Preserved",
+          "type": "array"
+        },
+        "losses": {
+          "items": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Losses",
+          "type": "array"
+        },
+        "unknown_context": {
+          "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Unknown Context",
+          "type": "array"
+        }
+      },
+      "required": [
+        "status",
+        "preserved",
+        "losses",
+        "unknown_context"
+      ],
+      "title": "Fidelity",
+      "type": "object"
+    },
+    "GridContext": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "regular-grid-surface",
+          "title": "Type",
+          "type": "string"
+        },
+        "crs": {
+          "pattern": "^(EPSG:[0-9]{4,6}|unknown)$",
+          "title": "Crs",
+          "type": "string"
+        },
+        "xy_unit": {
+          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+          "title": "Xy Unit",
+          "type": "string"
+        },
+        "z_unit": {
+          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+          "title": "Z Unit",
+          "type": "string"
+        },
+        "z_meaning": {
+          "enum": [
+            "depth",
+            "elevation",
+            "time",
+            "unknown"
+          ],
+          "title": "Z Meaning",
+          "type": "string"
+        },
+        "positive": {
+          "enum": [
+            "up",
+            "down",
+            "unknown"
+          ],
+          "title": "Positive",
+          "type": "string"
+        },
+        "vertical_datum": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Vertical Datum",
+          "type": "string"
+        },
+        "registration": {
+          "enum": [
+            "corner",
+            "center"
+          ],
+          "title": "Registration",
+          "type": "string"
+        },
+        "row_order": {
+          "const": "north-to-south",
+          "title": "Row Order",
+          "type": "string"
+        },
+        "ncols": {
+          "maximum": 262144,
+          "minimum": 1,
+          "title": "Ncols",
+          "type": "integer"
+        },
+        "nrows": {
+          "maximum": 262144,
+          "minimum": 1,
+          "title": "Nrows",
+          "type": "integer"
+        },
+        "cell_size": {
+          "exclusiveMinimum": 0,
+          "title": "Cell Size",
+          "type": "number"
+        },
+        "x_first_center": {
+          "title": "X First Center",
+          "type": "number"
+        },
+        "y_first_center": {
+          "title": "Y First Center",
+          "type": "number"
+        },
+        "missing_count": {
+          "maximum": 262144,
+          "minimum": 0,
+          "title": "Missing Count",
+          "type": "integer"
+        },
+        "value_range": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "number"
+              },
+              "maxItems": 2,
+              "minItems": 2,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value Range"
+        },
+        "fidelity": {
+          "$ref": "#/$defs/Fidelity"
+        }
+      },
+      "required": [
+        "type",
+        "crs",
+        "xy_unit",
+        "z_unit",
+        "z_meaning",
+        "positive",
+        "vertical_datum",
+        "registration",
+        "row_order",
+        "ncols",
+        "nrows",
+        "cell_size",
+        "x_first_center",
+        "y_first_center",
+        "missing_count",
+        "value_range",
+        "fidelity"
+      ],
+      "title": "GridContext",
+      "type": "object"
+    },
+    "TopsContext": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "well-tops",
+          "title": "Type",
+          "type": "string"
+        },
+        "depth_unit": {
+          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+          "title": "Depth Unit",
+          "type": "string"
+        },
+        "depth_basis": {
+          "enum": [
+            "same-as-log",
+            "other",
+            "unknown"
+          ],
+          "title": "Depth Basis",
+          "type": "string"
+        },
+        "count": {
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        },
+        "tvd_provided": {
+          "title": "Tvd Provided",
+          "type": "boolean"
+        },
+        "md_range": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "title": "Md Range",
+          "type": "array"
+        },
+        "fidelity": {
+          "$ref": "#/$defs/Fidelity"
+        }
+      },
+      "required": [
+        "type",
+        "depth_unit",
+        "depth_basis",
+        "count",
+        "tvd_provided",
+        "md_range",
+        "fidelity"
+      ],
+      "title": "TopsContext",
+      "type": "object"
+    },
+    "TrajectoryContext": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "trajectory",
+          "title": "Type",
+          "type": "string"
+        },
+        "depth_unit": {
+          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+          "title": "Depth Unit",
+          "type": "string"
+        },
+        "angle_unit": {
+          "const": "deg",
+          "title": "Angle Unit",
+          "type": "string"
+        },
+        "azimuth_reference": {
+          "enum": [
+            "true-north",
+            "grid-north",
+            "magnetic-north",
+            "unknown"
+          ],
+          "title": "Azimuth Reference",
+          "type": "string"
+        },
+        "depth_datum": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Depth Datum",
+          "type": "string"
+        },
+        "count": {
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        },
+        "missing_angle_count": {
+          "maximum": 10000,
+          "minimum": 0,
+          "title": "Missing Angle Count",
+          "type": "integer"
+        },
+        "tvd_provided": {
+          "title": "Tvd Provided",
+          "type": "boolean"
+        },
+        "md_range": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "title": "Md Range",
+          "type": "array"
+        },
+        "fidelity": {
+          "$ref": "#/$defs/Fidelity"
+        }
+      },
+      "required": [
+        "type",
+        "depth_unit",
+        "angle_unit",
+        "azimuth_reference",
+        "depth_datum",
+        "count",
+        "missing_angle_count",
+        "tvd_provided",
+        "md_range",
+        "fidelity"
+      ],
+      "title": "TrajectoryContext",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "The context schema shared by the typed profiles (one of three shapes).",
+  "properties": {
+    "context": {
+      "discriminator": {
+        "mapping": {
+          "regular-grid-surface": "#/$defs/GridContext",
+          "trajectory": "#/$defs/TrajectoryContext",
+          "well-tops": "#/$defs/TopsContext"
+        },
+        "propertyName": "type"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/TopsContext"
+        },
+        {
+          "$ref": "#/$defs/TrajectoryContext"
+        },
+        {
+          "$ref": "#/$defs/GridContext"
+        }
+      ],
+      "title": "Context"
+    }
+  },
+  "required": [
+    "context"
+  ],
+  "title": "TypedContext",
+  "type": "object"
+}
