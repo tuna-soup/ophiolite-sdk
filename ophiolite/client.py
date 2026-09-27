@@ -492,6 +492,43 @@ class Client(Navigation, EntityClient):
         if result.revision!=hashlib.sha256(raw).hexdigest():raise VerificationFailed('The uploaded original has a different checksum revision.')
         return result
 
+    def upload_data(self,source,*,profile,name,attribution,audience,rights_confirmed,declared=None,filename=None,well_log=None,well_notes='',command_id=None,origin=None):
+        """E11/E18: upload an original of any supported type with the context you declare (units, CRS,
+        meanings; nothing is inferred). Starts private. A repeated command id returns the same asset."""
+        import uuid,hashlib
+        from . import publish as planning
+        from .models.api import UploadResult
+        raw=planning.upload_bytes(source)
+        filename=filename or (Path(source).name if not isinstance(source,bytes) else 'upload')
+        _,extra=planning.upload_metadata(self.project,command_id or uuid.uuid4().hex,filename=filename,name=name,attribution=attribution,audience=audience,
+                                         rights_confirmed=rights_confirmed,well_notes=well_notes,profile=profile,declared=declared,well_log=well_log,origin=origin)
+        result=planning.parse(UploadResult,self._post_bytes('las-uploads','upload',raw,extra_headers=extra))
+        if result.revision!=hashlib.sha256(raw).hexdigest():raise VerificationFailed('The uploaded original has a different checksum revision.')
+        return result
+
+    def import_bundle(self,bundle,*,audience,attribution,rights_confirmed,well_logs=None):
+        """E18: upload every original a portable bundle carries as your own new, private upload, with
+        the context the bundle declares and its origin recorded as provenance (not authority). History,
+        groups, grants and lineage stay behind. Safe to repeat: each asset's upload uses a stable
+        command, so a retry after a lost answer returns the same destination asset."""
+        from .bundle import import_plan
+        from .errors import ImportIncomplete,ValidationFailed
+        if rights_confirmed is not True:raise ValidationFailed(['Confirm that you may retain these files, derive results and share them within the audience; holding a bundle grants no rights.'])
+        plan=import_plan(bundle,well_logs or {})
+        results=[]
+        for position,step in enumerate(plan):
+            if step['state']!='ready':results.append(step);continue
+            try:
+                done=self.upload_data(step['original'],profile=step['profile'],name=step['name'],attribution=attribution,audience=list(audience),
+                                      rights_confirmed=rights_confirmed,declared=step['declared'] or None,filename=step['filename'],well_log=step['well_log'],
+                                      command_id=step['command_id'],origin=step['origin'])
+            except Exception as error:
+                results.append({**_public(step),'state':'failed','reason':str(error)[:300]})
+                results+=[{**_public(s),'state':'not attempted' if s['state']=='ready' else s['state']} for s in plan[position+1:]]
+                raise ImportIncomplete('The import stopped; repeat it to continue (finished assets are not duplicated).',details={'assets':results}) from error
+            results.append({**_public(step),'state':'imported','destination':{'asset_id':done.asset_id,'revision':done.revision}})
+        return [_public(r) if 'original' in r else r for r in results]
+
     def inspect_las(self,source):
         import base64
         from . import publish as planning
@@ -529,3 +566,7 @@ class Client(Navigation, EntityClient):
         if receipt.asset!= {key:chosen[key] for key in ('asset_id','revision','authority')}:raise VerificationFailed('The download refers to a different exact result.')
         raw=planning.decode_payload(data,sha256=receipt.manifest.sha256,length=receipt.manifest.bytes)
         return raw,receipt,run
+
+
+def _public(step):
+    return {k:v for k,v in step.items() if k not in ('original','declared','profile','filename','well_log','command_id','name')}

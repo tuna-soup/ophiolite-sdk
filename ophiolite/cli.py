@@ -71,7 +71,7 @@ def parser():
         if name=='share':
             p.add_argument('--asset',required=True);p.add_argument('--read',action='append');p.add_argument('--reuse',action='append')
     bundle=sub.add_parser('bundle',help='Check or summarize a portable bundle offline (no server or account needed)')
-    bundle.add_argument('action',choices=['check','show']);bundle.add_argument('path',type=Path)
+    bundle.add_argument('action',choices=['check','show','pack']);bundle.add_argument('path',type=Path);bundle.add_argument('archive',type=Path,nargs='?',help='pack: the .zip to write')
     export=sub.add_parser('export',help='Export exact revisions into a new portable bundle')
     export.add_argument('--configuration',type=Path,default=Path('configuration.json'))
     export.add_argument('--credentials',type=Path)
@@ -125,7 +125,10 @@ def main(argv=None):
         print(files('ophiolite').joinpath('skills'));return
     if args.command=='bundle':
         # Offline: no configuration, credentials or network are read.
-        from .bundle import open_bundle
+        from .bundle import open_bundle,pack
+        if args.action=='pack':
+            if args.archive is None:raise SystemExit('Name the .zip to write: ophiolite bundle pack FOLDER ARCHIVE.zip')
+            print('Packed',pack(args.path,args.archive),'- check it with: ophiolite bundle check',args.archive);return
         opened=open_bundle(args.path)
         if args.action=='check':print('Bundle verified:',len(opened.assets),'exact revisions,',sum(len(a.curves) for a in opened.assets),'curves,',sum(a.data is not None for a in opened.assets),'other data. Checksums show integrity, not authorship.');return
         print(json.dumps({**opened.summary(),'items':[{'asset_id':a.asset_id,'revision':a.revision,'name':a.name,'type':a.type,'curves':sorted(a.curves),'history':a.history,'parent_visibility':a.parent_visibility} for a in opened.assets]},indent=2));return

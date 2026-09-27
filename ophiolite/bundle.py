@@ -121,9 +121,97 @@ def _check_manifest(manifest):
     return assets
 
 
+ZIP_RATIO = 100  # largest accepted uncompressed/compressed ratio per entry
+MAX_ENTRIES = 1 + MAX_ASSETS * 131
+FIXED_TIME = (1980, 1, 1, 0, 0, 0)
+
+
+def pack(folder, destination):
+    """Write a verified bundle folder as one deterministic `.zip` (manifest first, sorted entries, fixed
+    times and permissions). Refuses unlisted files and names that collide ignoring case; never
+    overwrites; a failed pack leaves nothing."""
+    import zipfile, zlib
+    opened = open_bundle(folder)
+    if opened.unlisted: raise Refused('The bundle folder holds files it does not list (%s); remove them before packing.' % ', '.join(opened.unlisted[:3]))
+    names = sorted(item['path'] for entry in opened.manifest['assets'] for item in entry['files'])
+    if len({n.lower() for n in names + ['manifest.json']}) != len(names) + 1: raise Refused('Two bundle paths differ only in letter case; a zip would not keep both.')
+    destination = Path(destination)
+    if destination.exists(): raise Refused('The destination already exists; choose a new file.')
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    handle, temporary = tempfile.mkstemp(prefix='.' + destination.name + '.packing-', dir=destination.parent); os.close(handle)
+    try:
+        with zipfile.ZipFile(temporary, 'w') as archive:
+            for name in ['manifest.json'] + names:
+                data = (opened.path / name).read_bytes()
+                info = zipfile.ZipInfo(name, date_time=FIXED_TIME); info.external_attr = 0o100600 << 16
+                deflated = len(zlib.compress(data, 9)) if data else 0
+                info.compress_type = zipfile.ZIP_DEFLATED if data and len(data) <= deflated * ZIP_RATIO else zipfile.ZIP_STORED
+                archive.writestr(info, data, compresslevel=9 if info.compress_type == zipfile.ZIP_DEFLATED else None)
+        try: os.link(temporary, destination)  # claims the name only if nobody else has
+        except FileExistsError: raise Refused('The destination already exists; choose a new file.') from None
+        return destination
+    finally:
+        os.unlink(temporary)
+
+
+def _open_zip(path):
+    """Check a zip before extracting anything, then extract into a private folder the bundle owns."""
+    import stat, weakref, zipfile
+    try: archive = zipfile.ZipFile(path)
+    except (zipfile.BadZipFile, OSError): raise VerificationFailed('This is not a readable bundle archive.') from None
+    with archive:
+        infos = archive.infolist()
+        if not 0 < len(infos) <= MAX_ENTRIES: raise VerificationFailed('The archive holds no entries or too many.')
+        seen, total = set(), 0
+        for info in infos:
+            name = info.filename
+            if name != 'manifest.json' and (not PATH.fullmatch(name) or set(PurePosixPath(name).parts) & {'.', '..'} or name.split('/')[-1] in ('.', '..')):
+                raise VerificationFailed('An archive entry name is unsafe or outside the bundle layout.')
+            if name.lower() in seen: raise VerificationFailed('Two archive entries have the same name (ignoring letter case).')
+            seen.add(name.lower())
+            kind = stat.S_IFMT(info.external_attr >> 16)
+            if info.is_dir() or (kind and kind != stat.S_IFREG): raise VerificationFailed('An archive entry is a link, folder or special file.')
+            limit = MAX_MANIFEST_BYTES if name == 'manifest.json' else MAX_FILE_BYTES
+            if info.file_size > limit: raise VerificationFailed('An archive entry exceeds the supported size.')
+            if info.compress_size and info.file_size > info.compress_size * ZIP_RATIO: raise VerificationFailed('An archive entry is compressed beyond the supported ratio.')
+            total += info.file_size
+            if total > MAX_TOTAL_BYTES: raise VerificationFailed('The archive exceeds the supported total size.')
+        if 'manifest.json' not in {i.filename for i in infos}: raise VerificationFailed('The archive has no bundle manifest.')
+        def read(info):
+            data = b''
+            with archive.open(info) as stream:  # never more than the declared size; the CRC check follows
+                while True:
+                    chunk = stream.read(1 << 20)
+                    if not chunk: break
+                    data += chunk
+                    if len(data) > info.file_size: raise VerificationFailed('An archive entry is larger than it declares.')
+            return data
+        try:
+            manifest = _finite_json(read(archive.getinfo('manifest.json')), 'The bundle manifest')
+            entries = _check_manifest(manifest)
+            listed = {item.get('path') for entry in entries for item in (entry.get('files') or []) if isinstance(item, dict)}
+            if {i.filename for i in infos} != listed | {'manifest.json'}: raise VerificationFailed('The archive holds entries its manifest does not list, or lacks listed ones.')
+            staging = Path(tempfile.mkdtemp(prefix='ophiolite-bundle-')); os.chmod(staging, 0o700)
+            try:
+                for info in infos:
+                    target = staging / info.filename; target.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+                    fd = os.open(target, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+                    with os.fdopen(fd, 'wb') as out: out.write(read(info))
+                bundle = open_bundle(staging)
+            except BaseException:
+                shutil.rmtree(staging, ignore_errors=True); raise
+        except zipfile.BadZipFile as error:
+            raise VerificationFailed('The archive is damaged (%s).' % str(error)[:80]) from None
+    bundle.archive = Path(path)
+    bundle.close = weakref.finalize(bundle, shutil.rmtree, staging, True)
+    return bundle
+
+
 def open_bundle(path):
-    """Check a bundle completely, then return its verified contents. Offline."""
+    """Check a bundle completely, then return its verified contents. Offline. `path` is a bundle folder
+    or a `.zip` written by `pack` (checked before anything is extracted)."""
     from . import _core
+    if Path(path).is_file() and not Path(path).is_symlink(): return _open_zip(path)
     root = Path(path)
     if root.is_symlink() or not root.is_dir(): raise VerificationFailed('A bundle is a directory.')
     manifest_path = root / 'manifest.json'
@@ -431,3 +519,49 @@ def plot_svg(curve, path, *, width=240, height=640):
            '<text x="20" y="14" font-size="11">%s</text></svg>\n') % (width, height, label, lines, label)
     Path(path).write_text(svg)
     return Path(path)
+
+
+# E18: what an import may declare, per data type — the uploader's declarations the descriptor carries.
+DECLARABLE = {'well-tops': ('depth_unit', 'depth_basis'), 'trajectory': ('depth_unit', 'azimuth_reference', 'depth_datum'),
+              'regular-grid-surface': ('crs', 'xy_unit', 'z_unit', 'z_meaning', 'positive', 'vertical_datum'),
+              'triangulated-surface': ('crs', 'xy_unit', 'z_unit', 'z_meaning', 'positive', 'vertical_datum'),
+              'point-set': ('crs', 'xy_unit', 'z_unit', 'z_meaning', 'positive', 'vertical_datum'),
+              'polyline-set': ('crs', 'xy_unit', 'z_unit', 'z_meaning', 'positive', 'vertical_datum')}
+
+
+def import_plan(bundle, well_logs):
+    """Per asset: what an import uploads (original, profile, declared context, name, stable command,
+    origin) or why it cannot (state 'refused', reason). Checks the bundle first; reads nothing else."""
+    opened = bundle if isinstance(bundle, Bundle) else open_bundle(bundle)
+    digest = hashlib.sha256((opened.path / 'manifest.json').read_bytes()).hexdigest()
+    exporter = '%s %s' % (opened.manifest['exporter'].get('name', 'unknown'), opened.manifest['exporter'].get('version', ''))
+    steps = []
+    for position, asset in enumerate(opened.assets):
+        entry = asset.entry
+        step = {'position': position, 'asset_id': asset.asset_id, 'revision': asset.revision, 'type': asset.type,
+                'command_id': hashlib.sha256(('%s:%d' % (digest, position)).encode()).hexdigest()[:32],
+                'origin': {'kind': 'portable-bundle', 'manifest_sha256': digest, 'asset_id': asset.asset_id, 'revision': asset.revision, 'exporter': exporter.strip()[:80]}}
+        def refuse(reason): steps.append({**step, 'state': 'refused', 'reason': reason})
+        if asset.original is None:
+            refuse('This bundle carries no original for it (a seismic slice is not the volume)'); continue
+        original = next(f for f in entry['files'] if f['role'] == 'original')
+        wire = asset.data._wire_descriptor if asset.data is not None else next(iter(asset.curves.values())).wire_descriptor
+        name = entry.get('name') or ((wire.get('display') or {}).get('name') if isinstance(wire.get('display'), dict) else None) or 'Imported ' + asset.type.replace('-', ' ')
+        declared, well_log = {}, None
+        if asset.type == 'well-log':
+            profile = 'las2/1'
+        else:
+            profile = entry['profile']; context = asset.data.context
+            for key in DECLARABLE.get(asset.type, ()):
+                value = context.get(key)
+                if isinstance(value, str) and value and value != 'unknown': declared[key] = value
+            link = (entry.get('relationships') or {}).get('well_log')
+            if link:
+                exported = link if isinstance(link, str) else link.get('asset_id')
+                target = well_logs.get(exported) if exported != 'restricted' else None
+                if target is None:
+                    refuse('It belongs to a well log; name the imported well log for it (well_logs)'); continue
+                well_log = {'asset_id': target[0], 'revision': target[1]}
+        steps.append({**step, 'state': 'ready', 'original': asset.original, 'profile': profile, 'declared': declared, 'well_log': well_log,
+                      'filename': PurePosixPath(original['path']).name, 'name': name[:160]})
+    return steps

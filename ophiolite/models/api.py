@@ -217,6 +217,11 @@ class UploadRequest(Contract):
     well_notes: str = Field(default='',max_length=1000)
     audience: list[str] = Field(max_length=100)
     rights_confirmed: Literal[True]
+    # E11 typed data and E18 import provenance (sent only when used).
+    profile: str | None = Field(default=None, max_length=64)
+    declared: dict[str, str] | None = Field(default=None, max_length=12)
+    well_log: dict | None = None
+    origin: dict | None = None
 
 class ResultPreview(ResultSummary):
     rows: list[dict]

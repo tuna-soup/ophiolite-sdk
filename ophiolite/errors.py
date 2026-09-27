@@ -50,3 +50,4 @@ class ValidationFailed(Refused):
 
 class RecoveryUnavailable(Refused):code='recovery-unavailable'
 class ShareOutcomeUnknown(Unavailable):code='share-outcome-unknown'
+class ImportIncomplete(OphioliteError):code='import-incomplete'

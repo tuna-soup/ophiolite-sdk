@@ -551,9 +551,14 @@ def upload_bytes(source):
     return raw
 
 
-def upload_metadata(project,command_id,*,filename,name,attribution,audience,rights_confirmed,well_notes=''):
+def upload_metadata(project,command_id,*,filename,name,attribution,audience,rights_confirmed,well_notes='',profile=None,declared=None,well_log=None,origin=None):
     value={'project_id':project,'command_id':command_id,'filename':filename,'name':name,'attribution':attribution,
            'audience':audience,'rights_confirmed':rights_confirmed,'well_notes':well_notes}
+    # Fields are sent only when used, so existing LAS uploads keep their exact request (and retry fingerprint).
+    if profile not in (None,'las2/1'):value['profile']=profile
+    if declared:value['declared']=declared
+    if well_log is not None:value['well_log']=well_log
+    if origin is not None:value['origin']=origin
     try:api.UploadRequest.model_validate(value)
     except ValidationError:raise ValidationFailed(['Confirm rights, project, name, attribution and bounded upload details.']) from None
     validate_recipients(audience,[])
