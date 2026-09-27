@@ -52,3 +52,16 @@ def test_runner_jobs_are_agent_changes_and_readable():
     agent.propose('runners/submit', {'run_id': 'r', 'script': 'print(1)', 'command_id': 'c'})
     assert agent.job('j')['state'] == 'queued'
     assert seen == ['/api/v1/projects/p/agents/propose', '/api/v1/projects/p/runners/job']
+
+
+def test_capabilities_and_mcp_settings():
+    from ophiolite.agents import mcp_settings
+    seen = []
+    def handler(request):
+        seen.append(request.url.path); return httpx.Response(200, json={'operations': [], 'mcp': {'endpoint': '/mcp', 'tools': 3}})
+    agent = client(handler)
+    assert agent.capabilities()['mcp']['tools'] == 3 and seen == ['/api/v1/projects/p/capabilities/describe']
+    assert agent.mcp_settings() == {'url': 'https://x.example/mcp', 'transport': 'streamable-http', 'headers': {'Authorization': 'Bearer oph_agent_test'}}
+    assert mcp_settings('http://127.0.0.1:8080/', 'oph_agent_k')['url'] == 'http://127.0.0.1:8080/mcp'
+    with pytest.raises(Refused): mcp_settings('http://ophiolite.example', 'oph_agent_k')  # no credential over plain HTTP to another host
+    with pytest.raises(AuthenticationRequired): mcp_settings('https://x.example', 'oph_api_k')

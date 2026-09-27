@@ -55,6 +55,15 @@ class AgentClient:
         area, name = operation.split('/', 1)
         return self._post(area, name, body or {})
 
+    def capabilities(self):
+        """What this agent may ask for: every operation with eligibility, whether it needs a plan,
+        the agent's scopes, budgets (used by the admission rule) and expiry, and the MCP endpoint."""
+        return self._post('capabilities', 'describe', {})
+
+    def mcp_settings(self):
+        """The address and header an MCP client needs to use this agent over the remote MCP endpoint."""
+        return mcp_settings(self.url, self._headers['Authorization'][7:])
+
     def propose(self, operation, request, summary=''):
         if operation not in CHANGES: raise Refused('Agents change application configurations, runs, publications, recipients and runner jobs only.')
         return self._post('agents', 'propose', {'operation': operation, 'request': {'project_id': self.project, **request}, 'summary': summary})
@@ -91,3 +100,14 @@ class AgentClient:
         """The recorded outcome of an execution whose response was lost."""
         if bool(command_id) == bool(plan): raise Refused('Name either the command id or the plan.')
         return self._post('agents', 'command', {'command_id': command_id} if command_id else {'plan': plan})
+
+
+def mcp_settings(base_url, credential):
+    """MCP client settings for an agent credential: the streamable HTTP endpoint and its header.
+    The credential is sent to that endpoint only; keep the returned value as secret as the key."""
+    if not isinstance(credential, str) or not credential.startswith('oph_agent_'):
+        raise AuthenticationRequired('Use the agent credential shown once in Settings → Agents.')
+    url = base_url.rstrip('/')
+    if not url.startswith('https://') and not url.startswith(('http://127.0.0.1', 'http://localhost', 'http://[::1]')):
+        raise Refused('Use the HTTPS address of the service (plain HTTP only for this computer).')
+    return {'url': url + '/mcp', 'transport': 'streamable-http', 'headers': {'Authorization': 'Bearer ' + credential}}
