@@ -244,6 +244,10 @@ export type postProjectsProjectApplicationsStartInput = { path: { "project": str
 export function postProjectsProjectApplicationsStart(transport: Transport, input: postProjectsProjectApplicationsStartInput): Promise<API.Run> {
   return transport.request<API.Run>("POST", "/api/v1/projects/{project}/applications/start", input.path, undefined, input.body, input.options, "run", false);
 }
+export type postProjectsProjectCapabilitiesDescribeInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectCapabilitiesDescribe(transport: Transport, input: postProjectsProjectCapabilitiesDescribeInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/capabilities/describe", input.path, undefined, input.body, input.options, null, false);
+}
 export type postProjectsProjectCatalogDescribeInput = { path: { "project": string }; body: { "reference": WireRef }; options?: OperationOptions };
 export function postProjectsProjectCatalogDescribe(transport: Transport, input: postProjectsProjectCatalogDescribeInput): Promise<unknown> {
   return transport.request<unknown>("POST", "/api/v1/projects/{project}/catalog/describe", input.path, undefined, input.body, input.options, null, false);

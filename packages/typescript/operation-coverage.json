@@ -402,6 +402,12 @@
     }
   },
   {
+    "operation": "POST /api/v1/projects/{project}/capabilities/describe",
+    "function": "postProjectsProjectCapabilitiesDescribe",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/catalog/describe",
     "function": "postProjectsProjectCatalogDescribe",
     "request": "schema",
