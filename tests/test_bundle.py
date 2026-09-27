@@ -308,3 +308,11 @@ def test_older_readers_and_newer_types(tmp_path):
     assert new.manifest['bundle_version'] == '2.2.0' and [a.type for a in new.assets][-2:] == ['triangulated-surface', 'point-set']
     assert new.assets[-2].data.vertices[1] == [10.0, 0.0, None]
     with pytest.raises(VerificationFailed, match='unknown type'): frozen.open_bundle(new.path)
+
+
+@pytest.mark.parametrize('schema,version', [('ophiolite.portable-bundle/1', '3.0.0'), ('ophiolite.portable-bundle/2', '3.0.0')])
+def test_an_unsupported_major_is_refused_for_its_major(tmp_path, schema, version):
+    """E17 review: schema and major agree, so only the supported-major rule can refuse it."""
+    root = written(tmp_path).path
+    rewrite(root, lambda m: m.update(schema=schema, bundle_version=version))
+    with pytest.raises(Refused, match='major versions 1 and 2'): bundle.open_bundle(root)
