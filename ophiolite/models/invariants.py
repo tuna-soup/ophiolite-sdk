@@ -111,6 +111,7 @@ def asset(value):
     declared=(profiles.get(profile['normalized_profile']) or {}).get('interpretation') or {}
     require(value['interpretation'].get('mapping')==declared.get('mapping'), 'Interpretation is not the one this profile declares')
     if value['origin']=='managed-derived': require(value['revision']==raw['sha256'], 'Derived revision must identify the exact artifact')
+    if value.get('manifest') is not None: manifest(value, raw, normalized)
     require(len(set(value['supported_operations']))==len(value['supported_operations']), 'Duplicate supported operations')
     auth=value['authorization']
     if auth['status']=='evaluated':
@@ -118,6 +119,41 @@ def asset(value):
         except ValueError: raise VerificationFailed('Authorization timestamp is not a real calendar time') from None
         allowed=auth['allowed_operations']
         require(len(set(allowed))==len(allowed) and set(allowed)<=set(value['supported_operations']), 'Allowed operations must be a unique supported subset')
+
+
+def _canonical(value):
+    return json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False)
+
+
+def _sha(text):
+    import hashlib
+    return hashlib.sha256(text.encode()).hexdigest()
+
+
+def manifest(value, raw, normalized):
+    """E19 (asset contract 1.8.0): recompute the revision manifest digest offline and tie it to what
+    was served: the artifact, the normalized representation, every disclosed lineage entry and the
+    parents. Hidden entries stay bare commitments; the digest covers them all."""
+    m = value['manifest']
+    require(m['schema'] == 'ophiolite.revision-manifest/1', 'Unknown revision manifest')
+    require((m['artifact']['sha256'], m['artifact']['bytes']) == (raw['sha256'], raw['bytes']), 'The revision manifest names another artifact')
+    listed = {r['id']: (r['sha256'], r['bytes']) for r in m['representations']}
+    require(len(listed) == len(m['representations']) and listed.get(normalized['id']) == (normalized['sha256'], normalized['bytes']),
+            'The served representation is not the one the revision manifest names')
+    disclosed = set()
+    for entry in m['lineage']:
+        parts = [entry.get(k) for k in ('predicate', 'reference', 'salt')]
+        require(all(p is None for p in parts) or all(p is not None for p in parts), 'A lineage entry is disclosed partly')
+        if entry.get('salt') is not None:
+            reference = {k: v for k, v in entry['reference'].items() if v is not None}
+            require(_sha(entry['salt'] + _canonical([entry['predicate'], reference])) == entry['commitment'], 'A disclosed lineage entry does not match its commitment')
+            if entry['predicate'] == 'derived-from': disclosed.add(known(reference, REFERENCE[:3]))
+    require({known(p, REFERENCE[:3]) for p in value['parents']} <= disclosed, 'A parent is not a disclosed lineage entry')
+    body = {'schema': 'ophiolite.revision-manifest/1', 'asset_id': value['asset_id'], 'revision': value['revision'],
+            'artifact': {'sha256': m['artifact']['sha256'], 'bytes': m['artifact']['bytes']},
+            'representations': sorted(({'id': r['id'], 'sha256': r['sha256'], 'bytes': r['bytes']} for r in m['representations']), key=lambda r: r['id']),
+            'lineage': sorted(e['commitment'] for e in m['lineage'])}
+    require(_sha(_canonical(body)) == m['digest'], 'The revision manifest digest does not match its contents')
 
 
 def interpretation(value):
