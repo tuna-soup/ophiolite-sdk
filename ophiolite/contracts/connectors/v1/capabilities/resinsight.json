@@ -1,0 +1,40 @@
+{
+  "schema": "ophiolite.connector-capability/1",
+  "id": "resinsight",
+  "display_name": "ResInsight",
+  "kind": "application",
+  "summary": "Read ResInsight property maps through its Python API (rips) into Ophiolite for QGIS and Excel.",
+  "host": {
+    "name": "ResInsight",
+    "versions": [],
+    "os": [
+      "linux"
+    ]
+  },
+  "routes": [
+    {
+      "profile": "ophiolite/scalar-map/1",
+      "data": "Property map",
+      "direction": "read",
+      "exact_old_revisions": "upstream",
+      "change_detection": "explicit",
+      "losses": [
+        "Synthetic local coordinates in the pilot"
+      ],
+      "unsupported": [
+        "writing into ResInsight",
+        "Mac qualification"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-09-20",
+        "evidence": "integration:docs/resinsight-qgis-demo.md"
+      }
+    }
+  ],
+  "redistribution": "Ophiolite adapter source; ResInsight is installed by the user.",
+  "example": null
+}

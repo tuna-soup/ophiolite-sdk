@@ -1,0 +1,62 @@
+{
+  "schema": "ophiolite.connector-capability/1",
+  "id": "qgis",
+  "display_name": "QGIS",
+  "kind": "application",
+  "summary": "Open exact Ophiolite raster revisions in QGIS, follow or pin them, and reopen after reconnecting.",
+  "host": {
+    "name": "QGIS",
+    "versions": [
+      "4.2.2"
+    ],
+    "os": [
+      "macos"
+    ]
+  },
+  "routes": [
+    {
+      "profile": "geotiff/1",
+      "data": "Raster surface",
+      "direction": "read",
+      "exact_old_revisions": "upstream",
+      "change_detection": "polling",
+      "losses": [
+        "Display styling is QGIS-side and not returned"
+      ],
+      "unsupported": [
+        "editing",
+        "publication from QGIS"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "macos"
+        ],
+        "date": "2026-09-25",
+        "evidence": "integration:web/docs/src/content/docs/availability.md (Mac QGIS 4.2.2 follow/pin)"
+      }
+    },
+    {
+      "profile": "esri-ascii-grid/1",
+      "data": "Horizon grid",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "Not yet exercised in QGIS"
+      ],
+      "unsupported": [
+        "editing",
+        "publication from QGIS"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    }
+  ],
+  "redistribution": "Plugin source in this repository; QGIS itself is installed by the user (GPL).",
+  "example": null
+}

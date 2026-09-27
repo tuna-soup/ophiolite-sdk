@@ -1,0 +1,61 @@
+{
+  "schema": "ophiolite.connector-capability/1",
+  "id": "osdu-record",
+  "display_name": "OSDU records",
+  "kind": "source",
+  "summary": "Approved OSDU record kinds and Parquet well logs read exactly from an upstream OSDU service.",
+  "host": {
+    "name": "OSDU Data Platform",
+    "versions": [],
+    "os": [
+      "any"
+    ]
+  },
+  "routes": [
+    {
+      "profile": "osdu-record/1",
+      "data": "Approved record kinds",
+      "direction": "read",
+      "exact_old_revisions": "upstream",
+      "change_detection": "polling",
+      "losses": [
+        "Only approved kinds and fields"
+      ],
+      "unsupported": [
+        "writing to OSDU",
+        "general raster kinds"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-09-21",
+        "evidence": "integration:docs/osdu-experiment.md"
+      }
+    },
+    {
+      "profile": "osdu-welllog-parquet/1",
+      "data": "Well log",
+      "direction": "read",
+      "exact_old_revisions": "upstream",
+      "change_detection": "polling",
+      "losses": [
+        "Bounded Parquet fidelity"
+      ],
+      "unsupported": [
+        "writing to OSDU"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-09-21",
+        "evidence": "integration:docs/osdu-experiment.md"
+      }
+    }
+  ],
+  "redistribution": "Ophiolite adapter source; the OSDU service and its permissions are the operator's.",
+  "example": null
+}

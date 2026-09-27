@@ -1,0 +1,46 @@
+{
+  "schema": "ophiolite.connector-capability/1",
+  "id": "opendtect",
+  "display_name": "OpendTect",
+  "kind": "application",
+  "summary": "Write a bounded GR log patch into an explicitly selected OpendTect well and read it back.",
+  "host": {
+    "name": "OpendTect Free",
+    "versions": [
+      "7.0.10"
+    ],
+    "os": [
+      "linux"
+    ]
+  },
+  "routes": [
+    {
+      "profile": "las2/1",
+      "data": "Well log curve",
+      "direction": "write",
+      "exact_old_revisions": "retained",
+      "change_detection": "explicit",
+      "losses": [
+        "Float32 values and depth",
+        "missing endpoints absent in native log",
+        "gamma unit label canonicalized to API"
+      ],
+      "unsupported": [
+        "source overwrite",
+        "resampling",
+        "automatic synchronization",
+        "Windows/macOS"
+      ],
+      "qualification": {
+        "status": "qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-09-24",
+        "evidence": "integration:docs/verification/stage3b-opendtect.md"
+      }
+    }
+  ],
+  "redistribution": "Ophiolite adapter source; OpendTect Free is installed by the user.",
+  "example": null
+}

@@ -1,0 +1,67 @@
+{
+  "schema": "ophiolite.connector-capability/1",
+  "id": "postgresql-wells",
+  "display_name": "PostgreSQL well headers",
+  "kind": "source",
+  "summary": "Operator-approved PostgreSQL tables of well locations and headers through a reviewed mapping; well metadata, not curves.",
+  "host": {
+    "name": "PostgreSQL",
+    "versions": [
+      "16"
+    ],
+    "os": [
+      "linux"
+    ]
+  },
+  "routes": [
+    {
+      "profile": "sql-wells/1",
+      "data": "Well locations and headers",
+      "direction": "read",
+      "exact_old_revisions": "unavailable",
+      "change_detection": "polling",
+      "losses": [
+        "Only mapped columns are read",
+        "Coordinates are as stored; the declared CRS is not transformed"
+      ],
+      "unsupported": [
+        "change data capture",
+        "curves in SQL",
+        "schema changes without a new reviewed mapping"
+      ],
+      "qualification": {
+        "status": "qualified",
+        "platforms": [
+          "linux",
+          "browser"
+        ],
+        "date": "2026-09-27",
+        "evidence": "integration:docs/program-2026-09-25/E12-live-updates.py"
+      }
+    },
+    {
+      "profile": "sql-wells/1",
+      "data": "Well locations and headers",
+      "direction": "write",
+      "exact_old_revisions": "unavailable",
+      "change_detection": "explicit",
+      "losses": [
+        "Only explicitly granted columns are written"
+      ],
+      "unsupported": [
+        "creating or deleting rows"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux",
+          "browser"
+        ],
+        "date": "2026-09-24",
+        "evidence": "integration:web/docs/src/content/docs/guides/workspace-updates.md (earlier SQL editing pilot)"
+      }
+    }
+  ],
+  "redistribution": "Ophiolite source; the PostgreSQL server is customer-operated.",
+  "example": null
+}

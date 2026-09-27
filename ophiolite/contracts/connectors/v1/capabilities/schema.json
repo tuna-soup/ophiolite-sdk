@@ -1,0 +1,213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/connectors/v1/capabilities/schema.json",
+  "title": "ConnectorCapability",
+  "description": "What one connector route can do, with directions, exact-version support, change detection, losses and qualification evidence. Unverified is a value, not an omission. Qualification is stated per route (data, direction and host), not per connector.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "id",
+    "display_name",
+    "kind",
+    "summary",
+    "host",
+    "routes",
+    "redistribution",
+    "example"
+  ],
+  "properties": {
+    "schema": {
+      "const": "ophiolite.connector-capability/1"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]{2,40}$"
+    },
+    "display_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60
+    },
+    "kind": {
+      "enum": [
+        "source",
+        "application"
+      ]
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300
+    },
+    "host": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "versions",
+        "os"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "versions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "maxItems": 8
+        },
+        "os": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "linux",
+              "macos",
+              "windows",
+              "browser",
+              "any"
+            ]
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "routes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "profile",
+          "data",
+          "direction",
+          "exact_old_revisions",
+          "change_detection",
+          "losses",
+          "unsupported",
+          "qualification"
+        ],
+        "properties": {
+          "profile": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "data": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "direction": {
+            "enum": [
+              "read",
+              "write",
+              "publish",
+              "export"
+            ]
+          },
+          "exact_old_revisions": {
+            "enum": [
+              "retained",
+              "upstream",
+              "unavailable"
+            ]
+          },
+          "change_detection": {
+            "enum": [
+              "event",
+              "polling",
+              "explicit",
+              "none"
+            ]
+          },
+          "losses": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 12,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          },
+          "unsupported": {
+            "type": "array",
+            "maxItems": 12,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          },
+          "qualification": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "status",
+              "platforms",
+              "date",
+              "evidence"
+            ],
+            "properties": {
+              "status": {
+                "enum": [
+                  "qualified",
+                  "partly-qualified",
+                  "unverified"
+                ]
+              },
+              "platforms": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "linux",
+                    "macos",
+                    "windows",
+                    "browser"
+                  ]
+                }
+              },
+              "date": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              },
+              "evidence": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 300,
+                "description": "\"<repository>:<path>\" (integration, platform, connectors, sdk, workspace) or null when unverified",
+                "pattern": "^(integration|platform|connectors|sdk|workspace):[A-Za-z0-9_./-]+( \\(.{1,200}\\))?$"
+              }
+            }
+          }
+        }
+      }
+    },
+    "redistribution": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300
+    },
+    "example": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 300
+    }
+  }
+}

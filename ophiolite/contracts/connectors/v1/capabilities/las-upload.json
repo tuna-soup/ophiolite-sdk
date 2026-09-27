@@ -1,0 +1,42 @@
+{
+  "schema": "ophiolite.connector-capability/1",
+  "id": "las-upload",
+  "display_name": "LAS file upload",
+  "kind": "source",
+  "summary": "Upload an exact LAS 2.0 well log from your computer; the bytes are retained.",
+  "host": {
+    "name": "Web browser",
+    "versions": [],
+    "os": [
+      "browser"
+    ]
+  },
+  "routes": [
+    {
+      "profile": "las2/1",
+      "data": "Well log curves",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "LAS formatting is kept only in the exact original"
+      ],
+      "unsupported": [
+        "LAS 3",
+        "wrapped LAS with repeated curve names",
+        "automatic re-upload"
+      ],
+      "qualification": {
+        "status": "qualified",
+        "platforms": [
+          "browser",
+          "linux"
+        ],
+        "date": "2026-09-27",
+        "evidence": "integration:docs/program-2026-09-25/E07-live-contributor.py"
+      }
+    }
+  ],
+  "redistribution": "Ophiolite source in this repository; no third-party runtime needed.",
+  "example": "ophiolite export --asset <id> --revision <rev> --curve GR --output bundle"
+}

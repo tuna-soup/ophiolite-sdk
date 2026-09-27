@@ -1,0 +1,42 @@
+{
+  "schema": "ophiolite.connector-capability/1",
+  "id": "sqlite-wells",
+  "display_name": "SQLite well locations",
+  "kind": "source",
+  "summary": "A gateway-readable SQLite file of well locations through a reviewed mapping.",
+  "host": {
+    "name": "SQLite",
+    "versions": [
+      "3"
+    ],
+    "os": [
+      "linux",
+      "macos"
+    ]
+  },
+  "routes": [
+    {
+      "profile": "sql-wells/1",
+      "data": "Well locations",
+      "direction": "read",
+      "exact_old_revisions": "unavailable",
+      "change_detection": "polling",
+      "losses": [
+        "Only mapped columns are read"
+      ],
+      "unsupported": [
+        "files outside the gateway allowlist"
+      ],
+      "qualification": {
+        "status": "qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-09-24",
+        "evidence": "platform:services/project_gateway/tests/test_sources.py"
+      }
+    }
+  ],
+  "redistribution": "Ophiolite source in this repository; no third-party runtime needed.",
+  "example": null
+}

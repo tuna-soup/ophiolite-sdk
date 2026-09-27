@@ -744,6 +744,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/sources/advance",
+    "function": "postProjectsProjectSourcesAdvance",
+    "request": "schema",
+    "response": "explicitly-untyped"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/sources/bind",
     "function": "postProjectsProjectSourcesBind",
     "request": "schema",

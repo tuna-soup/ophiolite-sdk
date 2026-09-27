@@ -7,7 +7,7 @@ ROOT=Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('public_inputs',ROOT/'tools/check_public_inputs.py')
 audit=importlib.util.module_from_spec(spec);spec.loader.exec_module(audit)
 
-def test_current_inputs():assert audit.verify()==100
+def test_current_inputs():assert audit.verify()==110
 
 @pytest.mark.parametrize('case',['missing','duplicate','hash','rights','evidence','source','canary','notice'])
 def test_unqualified_input_refusal(tmp_path,case):

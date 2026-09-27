@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.9.0",
+  "version": "1.10.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -21,7 +21,7 @@
   "schemas": [
     {
       "id": "ophiolite.contracts-registry/1",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "lifecycle": "preview",
       "path": "registry-schema.json",
       "title": "ContractsRegistry",
@@ -482,6 +482,66 @@
       "path": "assets/v1/fixtures/grid.json",
       "title": "Synthetic retained grid descriptor (E11)",
       "schema": "ophiolite.scientific-asset/1"
+    },
+    {
+      "id": "ophiolite.connector-capability/file-geotiff/1",
+      "kind": "capability",
+      "path": "connectors/v1/capabilities/file-geotiff.json",
+      "title": "GeoTIFF files: types, directions, change detection, losses and qualification"
+    },
+    {
+      "id": "ophiolite.connector-capability/las-upload/1",
+      "kind": "capability",
+      "path": "connectors/v1/capabilities/las-upload.json",
+      "title": "LAS file upload: types, directions, change detection, losses and qualification"
+    },
+    {
+      "id": "ophiolite.connector-capability/opendtect/1",
+      "kind": "capability",
+      "path": "connectors/v1/capabilities/opendtect.json",
+      "title": "OpendTect: types, directions, change detection, losses and qualification"
+    },
+    {
+      "id": "ophiolite.connector-capability/osdu-record/1",
+      "kind": "capability",
+      "path": "connectors/v1/capabilities/osdu-record.json",
+      "title": "OSDU records: types, directions, change detection, losses and qualification"
+    },
+    {
+      "id": "ophiolite.connector-capability/postgresql-wells/1",
+      "kind": "capability",
+      "path": "connectors/v1/capabilities/postgresql-wells.json",
+      "title": "PostgreSQL well headers: types, directions, change detection, losses and qualification"
+    },
+    {
+      "id": "ophiolite.connector-capability/qgis/1",
+      "kind": "capability",
+      "path": "connectors/v1/capabilities/qgis.json",
+      "title": "QGIS: types, directions, change detection, losses and qualification"
+    },
+    {
+      "id": "ophiolite.connector-capability/resinsight/1",
+      "kind": "capability",
+      "path": "connectors/v1/capabilities/resinsight.json",
+      "title": "ResInsight: types, directions, change detection, losses and qualification"
+    },
+    {
+      "id": "ophiolite.connector-capability/schema/1",
+      "kind": "capability",
+      "path": "connectors/v1/capabilities/schema.json",
+      "title": "Connector capability document schema (ophiolite.connector-capability/1)"
+    },
+    {
+      "id": "ophiolite.connector-capability/sqlite-wells/1",
+      "kind": "capability",
+      "path": "connectors/v1/capabilities/sqlite-wells.json",
+      "title": "SQLite well locations: types, directions, change detection, losses and qualification"
+    },
+    {
+      "id": "ophiolite.connector-capability/typed-upload/1",
+      "kind": "capability",
+      "path": "connectors/v1/capabilities/typed-upload.json",
+      "title": "Tops, survey and grid upload: types, directions, change detection, losses and qualification"
     }
   ]
 }

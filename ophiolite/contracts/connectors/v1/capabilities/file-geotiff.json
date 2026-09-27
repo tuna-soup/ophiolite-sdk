@@ -1,0 +1,42 @@
+{
+  "schema": "ophiolite.connector-capability/1",
+  "id": "file-geotiff",
+  "display_name": "GeoTIFF files",
+  "kind": "source",
+  "summary": "Single-band GeoTIFF rasters the gateway can read; nodata and CRS are the source declarations.",
+  "host": {
+    "name": "File system",
+    "versions": [],
+    "os": [
+      "linux"
+    ]
+  },
+  "routes": [
+    {
+      "profile": "geotiff/1",
+      "data": "Raster surface",
+      "direction": "read",
+      "exact_old_revisions": "unavailable",
+      "change_detection": "polling",
+      "losses": [
+        "Only band 1 is read",
+        "Horizontal CRS conversion is limited to the qualified pair"
+      ],
+      "unsupported": [
+        "multi-band rasters",
+        "vertical datum shifts"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux",
+          "macos"
+        ],
+        "date": "2026-09-25",
+        "evidence": "integration:web/docs/src/content/docs/availability.md (horizontal raster CRS conversion)"
+      }
+    }
+  ],
+  "redistribution": "Ophiolite source in this repository; no third-party runtime needed.",
+  "example": null
+}

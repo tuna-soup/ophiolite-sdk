@@ -33,7 +33,7 @@ export type ProfileEntry = {
 
 export type DocumentEntry = {
   id: string;
-  kind: "mapping" | "vocabulary" | "generated" | "openapi" | "fixture";
+  kind: "mapping" | "vocabulary" | "generated" | "openapi" | "fixture" | "capability";
   path: string;
   title?: string;
   schema?: string;
