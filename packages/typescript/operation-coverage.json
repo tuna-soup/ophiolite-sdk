@@ -912,6 +912,36 @@
     "response": "explicitly-untyped"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/stages/board",
+    "function": "postProjectsProjectStagesBoard",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/stages/get",
+    "function": "postProjectsProjectStagesGet",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/stages/names",
+    "function": "postProjectsProjectStagesNames",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/stages/names-save",
+    "function": "postProjectsProjectStagesNamesSave",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/stages/transition",
+    "function": "postProjectsProjectStagesTransition",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/subscriptions/acknowledge",
     "function": "postProjectsProjectSubscriptionsAcknowledge",
     "request": "schema",

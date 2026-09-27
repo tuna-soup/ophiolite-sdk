@@ -575,6 +575,26 @@ export type postProjectsProjectSourcesSchemaInput = { path: { "project": string 
 export function postProjectsProjectSourcesSchema(transport: Transport, input: postProjectsProjectSourcesSchemaInput): Promise<unknown> {
   return transport.request<unknown>("POST", "/api/v1/projects/{project}/sources/schema", input.path, undefined, input.body, input.options, null, false);
 }
+export type postProjectsProjectStagesBoardInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectStagesBoard(transport: Transport, input: postProjectsProjectStagesBoardInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/stages/board", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectStagesGetInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectStagesGet(transport: Transport, input: postProjectsProjectStagesGetInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/stages/get", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectStagesNamesInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectStagesNames(transport: Transport, input: postProjectsProjectStagesNamesInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/stages/names", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectStagesNamesSaveInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectStagesNamesSave(transport: Transport, input: postProjectsProjectStagesNamesSaveInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/stages/names-save", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectStagesTransitionInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectStagesTransition(transport: Transport, input: postProjectsProjectStagesTransitionInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/stages/transition", input.path, undefined, input.body, input.options, null, false);
+}
 export type postProjectsProjectSubscriptionsAcknowledgeInput = { path: { "project": string }; body: { "project_id": string; "stream_id"?: (string) | (null); "release_id"?: (string) | (null); "command_id"?: (string) | (null); "name"?: string; "kind"?: "dataset" | "collection"; "generation"?: number; "mode"?: "review" | "follow" | "pin"; "approved_only"?: boolean; "acknowledge_exclusions"?: boolean; "version"?: number; "manifest_digest"?: (string) | (null); "patches"?: Array<Record<string, unknown>>; "automatic"?: boolean }; options?: OperationOptions };
 export function postProjectsProjectSubscriptionsAcknowledge(transport: Transport, input: postProjectsProjectSubscriptionsAcknowledgeInput): Promise<unknown> {
   return transport.request<unknown>("POST", "/api/v1/projects/{project}/subscriptions/acknowledge", input.path, undefined, input.body, input.options, null, false);
