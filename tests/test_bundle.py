@@ -219,13 +219,13 @@ def test_bundle_two_refusals(tmp_path, case):
 
 
 def test_released_reader_refuses_bundle_two_by_its_major(tmp_path):
-    """The E18 reader (SDK 23c0acd), loaded from Git, refuses 2.0 before reading any content.
-
-    Its message is the generic "not an Ophiolite portable bundle" (it predates schema /2);
-    it never misreads a typed asset as a curve."""
+    """The released E18 reader (SDK 23c0acd, frozen byte for byte in tests/frozen) refuses 2.0
+    before reading any content. Its message is the generic "not an Ophiolite portable bundle"
+    (it predates schema /2); it never misreads a typed asset as a curve."""
     import importlib.util, subprocess
-    source = subprocess.run(['git', '-C', str(Path(__file__).parents[1]), 'show', '23c0acd:ophiolite/bundle.py'], capture_output=True, text=True, check=True).stdout
-    frozen_path = tmp_path / 'frozen_bundle.py'; frozen_path.write_text(source)
+    frozen_path = Path(__file__).parent / 'frozen/bundle_1_0.py'
+    released = subprocess.run(['git', '-C', str(Path(__file__).parents[1]), 'show', '23c0acd:ophiolite/bundle.py'], capture_output=True)
+    if released.returncode == 0: assert released.stdout == frozen_path.read_bytes()  # full clones prove the copy is exact
     spec = importlib.util.spec_from_file_location('ophiolite._frozen_bundle', frozen_path); frozen = importlib.util.module_from_spec(spec); spec.loader.exec_module(frozen)
     root = bundle.write_bundle(tmp_path / 'b', typed_items()).path
     with pytest.raises(VerificationFailed, match='not an Ophiolite portable bundle'): frozen.open_bundle(root)
