@@ -16,7 +16,10 @@ def load(name):
     return json.loads(FIX.joinpath(f'{name}.json').read_bytes()), FIX.joinpath(f'{name}-data.json').read_bytes(), FIX.joinpath(f'{name}.original').read_bytes()
 
 
-@pytest.mark.parametrize('name,kind', [('tops', WellTops), ('trajectory', Trajectory), ('grid', GridSurface)])
+from ophiolite.typed import TriangulatedSurface, PointSet
+
+
+@pytest.mark.parametrize('name,kind', [('tops', WellTops), ('trajectory', Trajectory), ('grid', GridSurface), ('mesh', TriangulatedSurface), ('points', PointSet)])
 def test_fixtures_read_as_typed_objects(name, kind):
     descriptor, body, original = load(name)
     result = _core.typed_result(descriptor, body, original)
@@ -64,3 +67,27 @@ def test_tampering_and_mixing_are_refused():
     las = json.loads(FIX.joinpath('source.json').read_bytes())
     with pytest.raises(VerificationFailed, match='curves with read'):
         _core.verify_typed_descriptor(las, las['project_id'], las['asset_id'], las['revision'])
+
+
+def test_mesh_and_points_keep_order_and_missing_values():
+    mesh = _core.typed_result(*load('mesh'))
+    assert mesh.vertices == [[0.0, 0.0, 100.0], [10.0, 0.0, None], [0.0, 10.0, 110.0]] and mesh.triangles == [[0, 1, 2]]
+    v, t = mesh.to_numpy(); assert v.shape == (3, 3) and math.isnan(v[1, 2]) and t.tolist() == [[0, 1, 2]]
+    frame = mesh.to_frame(); assert list(frame.columns) == ['x', 'y', 'z', 'amplitude'] and frame['amplitude'].isna().sum() == 1
+    points = _core.typed_result(*load('points'))
+    assert points.points == [[1.0, 2.0, 3.0], [4.0, 5.0, None]] and list(points.to_frame()['porosity']) == [0.25, 0.0]
+
+
+@pytest.mark.parametrize('edit', [
+    lambda p: p['triangles'][0].__setitem__(2, 7),                       # index out of bounds
+    lambda p: p['attributes'][0]['values'].pop(),                         # attribute shorter than the vertices
+    lambda p: p['context'].__setitem__('x_range', [0.0, 11.0]),          # extent that does not match
+    lambda p: p['triangles'][0].__setitem__(2, 0),                       # repeated vertex
+])
+def test_semantic_corruption_with_recomputed_digests_is_refused_offline(edit):
+    descriptor, body, original = load('mesh')
+    payload = json.loads(body); edit(payload)
+    if 'x_range' in json.dumps(payload['context']) and payload['context']['x_range'] != descriptor['scientific']['x_range']:
+        descriptor = copy.deepcopy(descriptor); descriptor['scientific'] = payload['context']  # keep context equality so only the invariant can refuse
+    raw = json.dumps(payload).encode(); d = copy.deepcopy(descriptor); rehash(d, raw)
+    with pytest.raises(VerificationFailed): _core.typed_result(d, raw, original)

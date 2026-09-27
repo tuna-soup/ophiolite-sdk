@@ -8,7 +8,7 @@ not contact a server.
 import math
 from .errors import Refused
 
-TYPES = ('well-tops', 'trajectory', 'regular-grid-surface')
+TYPES = ('well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set')
 
 
 class TypedData:
@@ -89,7 +89,48 @@ class GridSurface(TypedData):
                              'value': pd.array(self.values, dtype='Float64')})
 
 
-CLASSES = {'well-tops': WellTops, 'trajectory': Trajectory, 'regular-grid-surface': GridSurface}
+class _Spatial(TypedData):
+    def _attribute_columns(self, pd, reserved):
+        """Attribute columns keep their written names; a name that collides with a coordinate column gets an 'attribute_' prefix."""
+        return {('attribute_' + a['name'] if a['name'] in reserved else a['name']): pd.array(a['values'], dtype='Float64') for a in self.data['attributes']}
+
+
+class TriangulatedSurface(_Spatial):
+    """Vertices (missing z is None) and triangles exactly as written; no geometric repair."""
+    type = 'triangulated-surface'
+
+    @property
+    def vertices(self): return self.data['vertices']
+
+    @property
+    def triangles(self): return self.data['triangles']
+
+    def to_numpy(self):
+        try: import numpy as np
+        except ImportError: raise Refused('Install ophiolite[numpy] for arrays.') from None
+        return (np.array([[math.nan if c is None else c for c in v] for v in self.vertices], dtype=float), np.array(self.triangles, dtype=np.int64))
+
+    def to_frame(self):
+        pd = self._pandas()
+        return pd.DataFrame({'x': [v[0] for v in self.vertices], 'y': [v[1] for v in self.vertices], 'z': pd.array([v[2] for v in self.vertices], dtype='Float64'),
+                             **self._attribute_columns(pd, {'x', 'y', 'z'})})
+
+
+class PointSet(_Spatial):
+    type = 'point-set'
+
+    @property
+    def points(self): return self.data['points']
+
+    def to_frame(self):
+        pd = self._pandas()
+        columns = {'x': [p[0] for p in self.points], 'y': [p[1] for p in self.points]}
+        if self.context['z_provided']: columns['z'] = pd.array([p[2] for p in self.points], dtype='Float64')
+        return pd.DataFrame({**columns, **self._attribute_columns(pd, set(columns))})
+
+
+CLASSES = {'well-tops': WellTops, 'trajectory': Trajectory, 'regular-grid-surface': GridSurface,
+           'triangulated-surface': TriangulatedSurface, 'point-set': PointSet}
 
 
 def minimum_curvature(stations):

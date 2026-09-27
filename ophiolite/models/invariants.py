@@ -80,7 +80,8 @@ def asset(value):
     for parent in value['parents']: reference(parent)
     typed = 'type' in value['scientific']
     if typed:
-        mapping = {'well-tops': 'well-tops/1', 'trajectory': 'trajectory/1', 'regular-grid-surface': 'regular-grid-surface/1'}
+        mapping = {'well-tops': 'well-tops/1', 'trajectory': 'trajectory/1', 'regular-grid-surface': 'regular-grid-surface/1',
+                   'triangulated-surface': 'triangulated-surface/1', 'point-set': 'point-set/1'}
         require(value['interpretation'].get('mapping') == mapping.get(value['scientific']['type']), 'Scientific context and interpretation disagree')
     else:
         context(value['scientific'])
@@ -132,3 +133,24 @@ def interpretation(value):
     expected='recorded' if known(recorded,comparison)==known(live,comparison) else 'recorded-differs'
     require(label==expected, 'evidence-inconsistent')
     return expected
+
+
+def typed_payload(value):
+    """Cross-field rules the schema cannot state, checked offline for every typed payload (E11)."""
+    c = value['context']; kind = c['type']
+    def spatial(rows):
+        require(all(r[0] is not None and r[1] is not None for r in rows), 'Every row needs x and y')
+        xs, ys, zs = [r[0] for r in rows], [r[1] for r in rows], [r[2] for r in rows if r[2] is not None]
+        require(c['x_range'] == [min(xs), max(xs)] and c['y_range'] == [min(ys), max(ys)] and c['z_range'] == ([min(zs), max(zs)] if zs else None), 'Coordinates and their context disagree')
+        names = [a['name'] for a in value['attributes']]
+        require(names == list(c['attributes']) and len(set(names)) == len(names) and all(len(a['values']) == len(rows) for a in value['attributes']), 'Attributes and their context disagree')
+    if kind == 'triangulated-surface':
+        v, t = value['vertices'], value['triangles']
+        require(len(v) == c['vertex_count'] and len(t) == c['triangle_count'] and c['missing_z_count'] == sum(p[2] is None for p in v), 'Vertices, triangles and their context disagree')
+        require(all(0 <= i < len(v) for tri in t for i in tri) and all(len(set(tri)) == 3 for tri in t), 'A triangle refers to a missing or repeated vertex')
+        spatial(v)
+    elif kind == 'point-set':
+        p = value['points']
+        require(len(p) == c['count'] and c['missing_z_count'] == (sum(q[2] is None for q in p) if c['z_provided'] else 0), 'Points and their context disagree')
+        require(c['z_provided'] or all(q[2] is None for q in p), 'Points carry z although the file has none')
+        spatial(p)

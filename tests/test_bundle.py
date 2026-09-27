@@ -295,3 +295,16 @@ def test_released_readers_still_read_grouped_bundles(tmp_path):
     assert opened.manifest['bundle_version'] == '1.1.0' and opened.groups == [group]
     spec = importlib.util.spec_from_file_location('ophiolite._frozen_bundle', Path(__file__).parent / 'frozen/bundle_1_0.py'); frozen = importlib.util.module_from_spec(spec); spec.loader.exec_module(frozen)
     assert frozen.open_bundle(opened.path).assets[0].curves['GR'].values[0] == 0.0
+
+
+def test_older_readers_and_newer_types(tmp_path):
+    """2.2 only when a newer type is present; the released 2.1 reader refuses it and still reads older content."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('ophiolite._frozen_bundle_21', Path(__file__).parent / 'frozen/bundle_2_1.py'); frozen = importlib.util.module_from_spec(spec); spec.loader.exec_module(frozen)
+    old = bundle.write_bundle(tmp_path / 'old', typed_items())
+    assert old.manifest['bundle_version'] == '2.0.0' and [a.type for a in frozen.open_bundle(old.path).assets][1] == 'well-tops'
+    mesh = typed_read('mesh'); points = typed_read('points')
+    new = bundle.write_bundle(tmp_path / 'new', typed_items() + [({'asset_id': r._wire_descriptor['asset_id'], 'revision': r._wire_descriptor['revision'], 'curves': None}, r) for r in (mesh, points)])
+    assert new.manifest['bundle_version'] == '2.2.0' and [a.type for a in new.assets][-2:] == ['triangulated-surface', 'point-set']
+    assert new.assets[-2].data.vertices[1] == [10.0, 0.0, None]
+    with pytest.raises(VerificationFailed, match='unknown type'): frozen.open_bundle(new.path)

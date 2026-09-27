@@ -45,8 +45,11 @@ def typed_pair(descriptor, raw):
     rules.require(rep['available'] and len(raw)==rep['bytes'] and hashlib.sha256(raw).hexdigest()==rep['sha256'], 'Normalized representation unavailable or integrity mismatch')
     try: value=json.loads(raw)
     except (ValueError,UnicodeError): raise VerificationFailed('Normalized data is not valid JSON.') from None
-    kind={'well-tops':generated.WellTops,'trajectory':generated.Trajectory,'regular-grid-surface':generated.GridSurface}[data['scientific']['type']]
-    payload=model(kind,value).model_dump(by_alias=True)
+    kinds={'well-tops':generated.WellTops,'trajectory':generated.Trajectory,'regular-grid-surface':generated.GridSurface,
+           'triangulated-surface':generated.TriangulatedSurface,'point-set':generated.PointSet}
+    if data['scientific']['type'] not in kinds:raise VerificationFailed('This kind of data is not supported by this SDK; update it.')
+    payload=model(kinds[data['scientific']['type']],value).model_dump(by_alias=True)
+    rules.typed_payload(payload)
     expected=data['source_reference'] or dict(authority=data['authority'],key=data['asset_id'],revision=data['revision'],profile=data['profile'])
     artifact=next(r for r in data['representations'] if r['kind']!='normalized')
     rules.require(rules.known(payload['source'],rules.REFERENCE)==rules.known(expected,rules.REFERENCE) and payload['source_sha256']==artifact['sha256'], 'Typed data and artifact source identities disagree')

@@ -293,3 +293,21 @@ def test_sdk_export_carries_visible_groups_only(web,kind,tmp_path):
     theirs=bob.export([ref(two)],tmp_path/'bob')
     assert theirs.groups[0]['members']==[0] and theirs.groups[0]['recommended'] is None
     assert one.output_reference.key not in (tmp_path/'bob'/'manifest.json').read_text()
+
+
+@pytest.mark.parametrize('kind',['delegate'])
+def test_sdk_reads_and_exports_meshes_and_points(web,kind,tmp_path):
+    """E11 continuation: triangulated surfaces and point sets read exactly and leave in bundle 2.2."""
+    from project_gateway.las_uploads import LASUploads,Upload
+    from ophiolite.typed import TriangulatedSurface,PointSet
+    uploads=LASUploads(web.a);prior=web.a.sources.platform
+    web.a.sources.platform=lambda m,b,t:({'members':[{'user_id':u} for u in ('alice','bob')]} if m=='ListProjectMembers' else prior(m,b,t))
+    base=dict(project_id='p',filename='x',attribution='Synthetic',audience=['alice','bob'],rights_confirmed=True)
+    mesh=uploads.ingest(Upload(command_id='m-1',name='Mesh',profile='mesh-text/1',declared={'crs':'EPSG:28992','z_unit':'m'},**base),b'# ophiolite-mesh 1\nattributes amp\nvertices\n0 0 100 1\n10 0 - 0\n0 10 110 -\ntriangles\n0 1 2\n','alice')
+    points=uploads.ingest(Upload(command_id='p-1',name='Points',profile='points-csv/1',**base),b'x,y,z,phi\n1,2,3,0\n4,5,,0.2\n','alice')
+    alice=client(web,'alice',kind)
+    m=alice.read_data(mesh['asset_id'],mesh['revision']);p=alice.read_data(points['asset_id'],points['revision'])
+    assert isinstance(m,TriangulatedSurface) and m.vertices[1]==[10.0,0.0,None] and m.data['attributes'][0]['values']==[1.0,0.0,None]
+    assert isinstance(p,PointSet) and p.points[1]==[4.0,5.0,None] and list(p.to_frame()['phi'])==[0.0,0.2]
+    opened=alice.export([(mesh['asset_id'],mesh['revision'],None),(points['asset_id'],points['revision'],None)],tmp_path/'b')
+    assert opened.manifest['bundle_version']=='2.2.0' and opened.assets[0].data.triangles==[[0,1,2]]

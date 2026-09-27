@@ -25,8 +25,7 @@ VERSION = '1.0.0'
 # Bundle 2 (E11) adds typed assets; curve-only exports stay 1.0 for released readers.
 SCHEMA_2 = 'ophiolite.portable-bundle/2'
 VERSION_2 = '2.0.0'
-TYPED_ORIGINALS = {'well-tops-csv/1': 'original.csv', 'deviation-csv/1': 'original.csv', 'esri-ascii-grid/1': 'original.asc', 'mesh-text/1': 'original.txt', 'points-csv/1': 'original.csv'}
-NEWER_TYPES = {'triangulated-surface': 2, 'point-set': 2}  # the 2.x minor that introduced them
+TYPED_ORIGINALS = {'well-tops-csv/1': 'original.csv', 'deviation-csv/1': 'original.csv', 'esri-ascii-grid/1': 'original.asc'}
 MAX_ASSETS = 128
 MAX_FILE_BYTES = 32 * 1024 * 1024
 MAX_TOTAL_BYTES = 512 * 1024 * 1024
@@ -141,7 +140,7 @@ def open_bundle(path):
         if roles.count('original') != 1 or set(roles) - {'original', 'descriptor', 'normalized'}:
             raise VerificationFailed('Bundle 1.0 carries exactly one original per asset and only known file roles.')
         kind = entry.get('type', 'well-log') if manifest['schema'] == SCHEMA_2 else 'well-log'
-        if manifest['schema'] == SCHEMA_2 and kind not in ('well-log', 'well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set'): raise VerificationFailed('An asset has an unknown type.')
+        if manifest['schema'] == SCHEMA_2 and kind not in ('well-log', 'well-tops', 'trajectory', 'regular-grid-surface'): raise VerificationFailed('An asset has an unknown type.')
         if kind != 'well-log':
             loaded.append(_typed_asset(entry, chosen, content, files, kind)); continue
         if sorted(content.get('descriptor', {})) != sorted(chosen.get('curves') or []) or sorted(content.get('normalized', {})) != sorted(chosen.get('curves') or []):
@@ -254,10 +253,7 @@ def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=
             if typed_bundle: assets[-1]['type'] = 'well-log'
             selection.append(chosen)
         observations = {**({'groups': groups} if groups else {}), **({'groups_omitted': groups_omitted} if groups_omitted else {})}
-        # The lowest version that expresses this content: 1.x for well logs, 2.x for typed data;
-        # the minor rises only for observations (1) or the newer types (2), so older readers keep working.
-        minor = max([1 if observations else 0] + [NEWER_TYPES.get(a.get('type'), 0) for a in assets])
-        version = ('2' if typed_bundle else '1') + f'.{minor}.0'
+        version = (VERSION_2 if typed_bundle else VERSION).replace('.0.0', '.1.0') if observations else (VERSION_2 if typed_bundle else VERSION)
         manifest = {'schema': SCHEMA_2 if typed_bundle else SCHEMA, 'bundle_version': version, 'created_at': datetime.now(timezone.utc).isoformat(timespec='seconds'),
                     'exporter': {'name': 'ophiolite-sdk', 'version': __version__}, 'scope': 'selection', 'selection': selection, 'assets': assets,
                     'groups': None, 'recommendations': None, **({'observations': observations} if observations else {}),
