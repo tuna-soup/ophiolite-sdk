@@ -81,7 +81,7 @@ def asset(value):
     typed = 'type' in value['scientific']
     if typed:
         mapping = {'well-tops': 'well-tops/1', 'trajectory': 'trajectory/1', 'regular-grid-surface': 'regular-grid-surface/1',
-                   'triangulated-surface': 'triangulated-surface/1', 'point-set': 'point-set/1'}
+                   'triangulated-surface': 'triangulated-surface/1', 'point-set': 'point-set/1', 'polyline-set': 'polyline-set/1', 'seismic-volume': 'seismic-volume/1'}
         require(value['interpretation'].get('mapping') == mapping.get(value['scientific']['type']), 'Scientific context and interpretation disagree')
     else:
         context(value['scientific'])
@@ -154,3 +154,52 @@ def typed_payload(value):
         require(len(p) == c['count'] and c['missing_z_count'] == (sum(q[2] is None for q in p) if c['z_provided'] else 0), 'Points and their context disagree')
         require(c['z_provided'] or all(q[2] is None for q in p), 'Points carry z although the file has none')
         spatial(p)
+    elif kind == 'polyline-set':
+        sticks = value['sticks']; points = [[p['x'], p['y'], p['z']] for s in sticks for p in s['points']]
+        require(len({s['index'] for s in sticks}) == len(sticks), 'A stick index repeats')
+        require(len(sticks) == c['sticks'] and len(points) == c['points'], 'Sticks, points and their context disagree')
+        value = {**value, 'attributes': []}; spatial(points)
+    elif kind == 'seismic-volume':
+        seismic_context(c)
+        il = c['inline']
+        require([k['inline'] for k in value['chunks']] == line_numbers(il), 'Chunks do not follow the inline numbers')
+        require(all(k['bytes'] == c['crossline']['count'] * c['samples'] * 4 for k in value['chunks']), 'A chunk has the wrong size')
+        require(value['decisions'] == c['fidelity']['decisions'], 'Decisions disagree with the fidelity report')
+
+
+def line_numbers(line):
+    return [line['first'] + i * line['step'] for i in range(line['count'])]
+
+
+def seismic_context(c):
+    """E16: a volume's grid, trace length and line ranges agree."""
+    for axis in ('inline', 'crossline'):
+        line = c[axis]; require(line['first'] + (line['count'] - 1) * line['step'] == line['last'], 'Line range, step and count disagree')
+    require(c['inline']['count'] * c['crossline']['count'] == c['traces'] and c['trace_bytes'] == 240 + 4 * c['samples'], 'Trace count, grid and trace length disagree')
+    require(bool(c['fidelity']['decisions']), 'A seismic volume records its header decisions')
+
+
+SLICE_AXES = {'inline': ('crossline', 'sample'), 'crossline': ('inline', 'sample'), 'sample': ('inline', 'crossline')}
+
+
+def seismic_slice(value, volume, asset, revision, axis, label):
+    """E16: a slice agrees with the volume it was read from — identity, direction, axes, sample
+    meaning, shape and exactly the chunks that hold it. Offline; no bytes of the volume needed."""
+    c = volume['context']
+    require((value['asset_id'], value['revision'], value['source_sha256']) == (asset, revision, volume['source_sha256']), 'The slice belongs to another exact revision')
+    require(value['source'] == volume['source'] and value['interpretation'] == volume['interpretation'], 'The slice and the volume disagree on source or reader')
+    require((value['axis'], value['label']) == (axis, label), 'The slice is not the one requested')
+    require('not the complete volume' in value['scope'], 'The slice does not state its scope')
+    inlines, crosslines = line_numbers(c['inline']), line_numbers(c['crossline'])
+    z = [c['first_sample'] + k * c['sample_interval'] for k in range(c['samples'])]
+    values = {'inline': inlines, 'crossline': crosslines, 'sample': z}
+    rows, columns = SLICE_AXES[axis]
+    require((value['rows']['name'], value['columns']['name']) == (rows, columns), 'Slice axes do not match the slice direction')
+    require(value['rows']['values'] == values[rows] and value['columns']['values'] == values[columns], 'Slice axes disagree with the volume')
+    require(value['sample'] == {'domain': c['z_domain'], 'unit': c['sample_unit'], 'first': c['first_sample'], 'interval': c['sample_interval']}, 'Sample meaning disagrees with the volume')
+    require(len(value['values']) == len(values[rows]) and all(len(r) == len(values[columns]) for r in value['values']), 'Slice values and axes disagree')
+    chunks = [k['sha256'] for k in volume['chunks']]
+    if axis == 'inline':
+        require(label in inlines and value['chunks'] == [chunks[inlines.index(label)]], 'The slice was not read from its inline')
+    else:
+        require(label in (crosslines if axis == 'crossline' else range(c['samples'])) and value['chunks'] == chunks, 'The slice was not read from every inline')

@@ -8,7 +8,7 @@ not contact a server.
 import math
 from .errors import Refused
 
-TYPES = ('well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set')
+TYPES = ('well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-volume')
 
 
 class TypedData:
@@ -129,8 +129,74 @@ class PointSet(_Spatial):
         return pd.DataFrame({**columns, **self._attribute_columns(pd, set(columns))})
 
 
+class PolylineSet(TypedData):
+    """Fault sticks (E16): sticks in file order, each with its points in file order, indices as written."""
+    type = 'polyline-set'
+
+    @property
+    def sticks(self): return self.data['sticks']
+
+    def to_frame(self):
+        pd = self._pandas()
+        rows = [(s['index'], n, p) for s in self.sticks for n, p in enumerate(s['points'])]
+        return pd.DataFrame({'stick': [r[0] for r in rows], 'point': [r[1] for r in rows],
+                             'x': [r[2]['x'] for r in rows], 'y': [r[2]['y'] for r in rows], 'z': [r[2]['z'] for r in rows]})
+
+
+class SeismicVolume(TypedData):
+    """A seismic volume's description (E16): grid, sample meaning, every header decision and the
+    digests of its per-inline chunks. Samples are read as slices (Client.read_slice); the exact
+    original is not downloaded (`original` is None) unless read explicitly as the artifact."""
+    type = 'seismic-volume'
+
+    @property
+    def decisions(self): return self.data['decisions']
+
+    @property
+    def inlines(self):
+        c = self.context['inline']; return [c['first'] + i * c['step'] for i in range(c['count'])]
+
+    @property
+    def crosslines(self):
+        c = self.context['crossline']; return [c['first'] + i * c['step'] for i in range(c['count'])]
+
+    @property
+    def sample_values(self):
+        c = self.context; return [c['first_sample'] + k * c['sample_interval'] for k in range(c['samples'])]
+
+    def __repr__(self):
+        c = self.context
+        return f'<SeismicVolume {c["inline"]["count"]}×{c["crossline"]["count"]}×{c["samples"]} {c["z_domain"]}>'
+
+
+class SeismicSlice:
+    """One inline, crossline or sample slice (E16) at an exact revision, verified against its volume.
+    Values are the exact decoded samples; a slice is not the complete volume (`scope`)."""
+    type = 'seismic-slice'
+
+    def __init__(self, value, raw, volume):
+        self.value = value; self.raw = raw; self.volume = volume
+        self.asset_id, self.revision, self.axis, self.label = value['asset_id'], value['revision'], value['axis'], value['label']
+        self.scope = value['scope']; self.sample = value['sample']; self.values = value['values']
+        self.rows = (value['rows']['name'], value['rows']['values']); self.columns = (value['columns']['name'], value['columns']['values'])
+        self.original_sha256 = value['source_sha256']; self.chunks = value['chunks']
+
+    def to_numpy(self):
+        try: import numpy as np
+        except ImportError: raise Refused('Install ophiolite[numpy] for arrays.') from None
+        return np.array(self.values, dtype=float)
+
+    def value_at(self, row, column):
+        """The exact sample at (row label, column label), e.g. (crossline, time) on an inline slice."""
+        try: return self.values[self.rows[1].index(row)][self.columns[1].index(column)]
+        except ValueError: raise Refused('That position is not on this slice.') from None
+
+    def __repr__(self):
+        return f'<SeismicSlice {self.axis} {self.label}: {len(self.rows[1])}×{len(self.columns[1])}>'
+
+
 CLASSES = {'well-tops': WellTops, 'trajectory': Trajectory, 'regular-grid-surface': GridSurface,
-           'triangulated-surface': TriangulatedSurface, 'point-set': PointSet}
+           'triangulated-surface': TriangulatedSurface, 'point-set': PointSet, 'polyline-set': PolylineSet, 'seismic-volume': SeismicVolume}
 
 
 def minimum_curvature(stations):

@@ -171,9 +171,42 @@ class Client:
         _core.verify_typed_descriptor(data,self.project,asset,revision)
         raw=next(r for r in data['representations'] if r['kind']!='normalized')
         normalized=next(r for r in data['representations'] if r['kind']=='normalized')
-        artifact=self._get(path+'/representations/'+quote(raw['id'],safe=''),raw['bytes'])
+        # E16: a seismic volume is described, never downloaded here; read_slice reads its samples.
+        artifact=None if data['scientific'].get('type')=='seismic-volume' else self._get(path+'/representations/'+quote(raw['id'],safe=''),raw['bytes'])
         body=self._get(path+'/representations/'+quote(normalized['id'],safe=''),normalized['bytes'])
         return _core.typed_result(data,body,artifact)
+
+    def read_slice(self,asset,revision,axis,label,*,volume=None):
+        """E16: one slice of a seismic volume at an exact revision. `axis` is 'inline', 'crossline'
+        or 'sample'; `label` is the inline or crossline number from the trace headers, or the
+        0-based sample number. Verified against the volume's description (read once and reusable
+        through `volume=`); only the chunks holding the slice are read on the server."""
+        volume=self._volume(asset,revision,axis,label,volume)
+        path=self.prefix+'/'+quote(asset,safe='')+'/revisions/'+quote(revision,safe='')+'/slices/'+quote(axis,safe='')+'/'+str(label)
+        return _core.slice_result(volume,self._get(path,32*1024*1024),asset,revision,axis,label)
+
+    def _volume(self,asset,revision,axis,label,volume):
+        if axis not in ('inline','crossline','sample') or type(label) is not int:raise Refused('Choose an inline, crossline or sample slice by its whole number.')
+        if volume is None:volume=self.read_data(asset,revision)
+        if getattr(volume,'type',None)!='seismic-volume' or (volume.descriptor.asset_id,volume.descriptor.revision)!=(asset,revision):raise Refused('Slices come from a seismic volume at this exact revision.')
+        return volume
+
+    def export_slices(self,asset,revision,slices,destination):
+        """E16: export chosen slices [(axis, label), ...] of one exact volume revision into a new
+        portable bundle (2.3). The bundle carries the volume's description and each slice with its
+        declared scope; the original volume is named by its digest and not included."""
+        from .bundle import write_bundle
+        chosen=self._slice_choice(slices)
+        volume=self.read_data(asset,revision)
+        read=[self.read_slice(asset,revision,axis,label,volume=volume) for axis,label in chosen]
+        return write_bundle(destination,[({'asset_id':asset,'revision':revision,'curves':[],'slices':[{'axis':a,'label':l} for a,l in chosen]},(volume,read))])
+
+    @staticmethod
+    def _slice_choice(slices):
+        if not isinstance(slices,(list,tuple)) or not slices or len(slices)>64:raise Refused('Choose between 1 and 64 slices.')
+        chosen=[tuple(s) for s in slices]
+        if len(set(chosen))!=len(chosen):raise Refused('Each slice is chosen once.')
+        return chosen
 
     def read_many(self,selections,**options):
         return [self.read(asset,revision,curves,**options) for asset,revision,curves in selections]
@@ -190,7 +223,9 @@ class Client:
         items=[]
         for asset,revision,curves in selections:
             if not curves:  # E11: well tops, trajectories and grids have no curves (bundle 2)
-                items.append(({'asset_id':asset,'revision':revision,'curves':[]},self.read_data(asset,revision)));continue
+                read=self.read_data(asset,revision)
+                if read.type=='seismic-volume':raise Refused('A seismic volume is exported as chosen slices (export_slices); the complete volume is not exported.')
+                items.append(({'asset_id':asset,'revision':revision,'curves':[]},read));continue
             items.append(({'asset_id':asset,'revision':revision,'curves':list(curves)},self.read(asset,revision,list(curves))))
         found,omitted=self._bundle_groups(items) if groups else (None,None)
         return write_bundle(destination,items,groups=found,groups_omitted=omitted)

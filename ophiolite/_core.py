@@ -32,8 +32,9 @@ def typed_result(descriptor, body, artifact):
     from .typed import CLASSES
     asset,_=validate.typed_pair(descriptor,body)
     data=asset.model_dump(by_alias=True)
-    verify_bytes(next(r for r in data['representations'] if r['kind']!='normalized'),artifact)
     value=json.loads(body)
+    if value['context']['type']=='seismic-volume' and artifact is None:pass  # E16: a volume is read as slices; its original stays on the server
+    else:verify_bytes(next(r for r in data['representations'] if r['kind']!='normalized'),artifact)
     return CLASSES[value['context']['type']](asset,value,artifact,wire_descriptor=descriptor,wire_data_bytes=body)
 
 
@@ -60,3 +61,10 @@ def origin(value):
         or parsed.scheme=='http' and parsed.hostname not in ('localhost','127.0.0.1','::1')):
         raise Refused('Use HTTPS or a loopback origin without credentials or a path.')
     return value.rstrip('/')
+
+
+def slice_result(volume, raw, asset, revision, axis, label):
+    """E16: verify a served slice against its volume and build the SeismicSlice object."""
+    from .typed import SeismicSlice
+    value=validate.seismic_slice(raw,volume.data,asset,revision,axis,label)
+    return SeismicSlice(value,raw,volume)

@@ -25,11 +25,8 @@ VERSION = '1.0.0'
 # Bundle 2 (E11) adds typed assets; curve-only exports stay 1.0 for released readers.
 SCHEMA_2 = 'ophiolite.portable-bundle/2'
 VERSION_2 = '2.0.0'
-TYPED_ORIGINALS = {'well-tops-csv/1': 'original.csv', 'deviation-csv/1': 'original.csv', 'esri-ascii-grid/1': 'original.asc', 'mesh-text/1': 'original.txt', 'points-csv/1': 'original.csv',
-                   'opendtect-faultsticks/1': 'original.txt'}
-NEWER_TYPES = {'triangulated-surface': 2, 'point-set': 2, 'polyline-set': 3, 'seismic-slice': 3}  # the 2.x minor that introduced them
-TYPES_2 = ('well-log', 'well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-slice')
-SLICE_NAME = re.compile(r'^slice-(inline|crossline|sample)-(-?[0-9]{1,9})\.json$')
+TYPED_ORIGINALS = {'well-tops-csv/1': 'original.csv', 'deviation-csv/1': 'original.csv', 'esri-ascii-grid/1': 'original.asc', 'mesh-text/1': 'original.txt', 'points-csv/1': 'original.csv'}
+NEWER_TYPES = {'triangulated-surface': 2, 'point-set': 2}  # the 2.x minor that introduced them
 MAX_ASSETS = 128
 MAX_FILE_BYTES = 32 * 1024 * 1024
 MAX_TOTAL_BYTES = 512 * 1024 * 1024
@@ -69,10 +66,8 @@ class Curve:
 
 
 class BundleAsset:
-    """A verified asset: `curves` for a well log, `data` (a typed object) for tops, trajectories and grids,
-    `slices` (with `data` the volume's description and no original) for exported seismic slices."""
-    def __init__(self, entry, original, curves, data=None, slices=None):
-        self.slices = slices or []
+    """A verified asset: `curves` for a well log, `data` (a typed object) for tops, trajectories and grids."""
+    def __init__(self, entry, original, curves, data=None):
         self.entry = entry; self.asset_id = entry['asset_id']; self.revision = entry['revision']; self.name = entry.get('name')
         self.origin = entry['origin']; self.history = entry.get('history'); self.parents = entry['parents']
         self.parent_visibility = entry['parent_visibility']; self.original = original; self.curves = curves
@@ -138,19 +133,15 @@ def open_bundle(path):
             if not target.is_file() or target.stat().st_size != size: raise VerificationFailed('A bundle file is missing or has the wrong size.')
             raw = target.read_bytes()
             if hashlib.sha256(raw).hexdigest() != item.get('sha256'): raise VerificationFailed('A bundle file does not match its checksum.')
-            content.setdefault(item.get('role'), {})[relative if item.get('role') == 'slice' else item.get('curve')] = raw
+            content.setdefault(item.get('role'), {})[item.get('curve')] = raw
         chosen = selection[index] if isinstance(selection[index], dict) else {}
         if (chosen.get('asset_id'), chosen.get('revision')) != (entry.get('asset_id'), entry.get('revision')):
             raise VerificationFailed('An asset is not the exact revision that was selected.')
         roles = [item.get('role') for item in files]
-        kind = entry.get('type', 'well-log') if manifest['schema'] == SCHEMA_2 else 'well-log'
-        if manifest['schema'] == SCHEMA_2 and kind not in TYPES_2: raise VerificationFailed('An asset has an unknown type.')
-        if kind != 'seismic-slice' and ('original' in entry or 'slices' in entry or 'slices' in chosen):
-            raise VerificationFailed('Only seismic slices omit their original.')
-        if kind == 'seismic-slice':  # 2.3: slices of a volume; the original is named by digest, not carried
-            loaded.append(_slice_asset(entry, chosen, content, files)); continue
         if roles.count('original') != 1 or set(roles) - {'original', 'descriptor', 'normalized'}:
             raise VerificationFailed('Bundle 1.0 carries exactly one original per asset and only known file roles.')
+        kind = entry.get('type', 'well-log') if manifest['schema'] == SCHEMA_2 else 'well-log'
+        if manifest['schema'] == SCHEMA_2 and kind not in ('well-log', 'well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set'): raise VerificationFailed('An asset has an unknown type.')
         if kind != 'well-log':
             loaded.append(_typed_asset(entry, chosen, content, files, kind)); continue
         if sorted(content.get('descriptor', {})) != sorted(chosen.get('curves') or []) or sorted(content.get('normalized', {})) != sorted(chosen.get('curves') or []):
@@ -204,41 +195,6 @@ def _typed_asset(entry, chosen, content, files, kind):
     return BundleAsset(entry, content['original'][None], {}, data)
 
 
-def _slice_asset(entry, chosen, content, files):
-    """Seismic slices: one volume descriptor, its description, and each chosen slice exactly as
-    served. Every slice is checked against the description (identity, direction, axes, sample
-    meaning, shape, chunks); the absent original is identified by its digest."""
-    from . import _core
-    from .typed import SeismicSlice
-    wanted = chosen.get('slices')
-    if chosen.get('curves') != [] or not isinstance(wanted, list) or not wanted or any(not isinstance(w, dict) or set(w) != {'axis', 'label'} for w in wanted):
-        raise VerificationFailed('A slice export names the slices it carries and no curves.')
-    listed = [item for item in files if item.get('role') == 'slice']
-    if sorted(item.get('role') for item in files if item.get('role') != 'slice') != ['descriptor', 'normalized'] or any(item.get('curve') is not None for item in files):
-        raise VerificationFailed('A slice export carries one descriptor, one volume description and its slices, and no original.')
-    names = [(SLICE_NAME.fullmatch(PurePosixPath(item['path']).name), item) for item in listed]
-    if any(m is None for m, _ in names): raise VerificationFailed('A slice file is not named by its direction and number.')
-    order = [{'axis': m.group(1), 'label': int(m.group(2))} for m, _ in names]
-    if order != wanted: raise VerificationFailed('The slice files are not exactly the selected slices.')
-    wire_descriptor = _finite_json(content['descriptor'][None], 'A descriptor'); body = content['normalized'][None]; _finite_json(body, 'The volume description')
-    if (wire_descriptor.get('asset_id'), wire_descriptor.get('revision')) != (entry.get('asset_id'), entry.get('revision')):
-        raise VerificationFailed('A descriptor belongs to another exact revision.')
-    if (wire_descriptor.get('scientific') or {}).get('type') != 'seismic-volume': raise VerificationFailed('Slices come from a seismic volume.')
-    for field in ('origin', 'profile', 'parents', 'parent_visibility'):
-        if wire_descriptor.get(field, 'complete' if field == 'parent_visibility' else None) != entry.get(field): raise VerificationFailed('The manifest disagrees with a descriptor (' + field + ').')
-    volume = _core.typed_result(wire_descriptor, body, None)
-    original = next(r for r in wire_descriptor['representations'] if r['kind'] != 'normalized')
-    if entry.get('original') != {'sha256': original['sha256'], 'bytes': original['bytes'], 'included': False} or original['sha256'] != entry.get('revision'):
-        raise VerificationFailed('The manifest does not identify the original volume by its digest.')
-    slices = []
-    for (m, item), want in zip(names, wanted):
-        raw = content['slice'][item['path']]
-        slices.append(_core.slice_result(volume, raw, entry['asset_id'], entry['revision'], want['axis'], want['label']))
-    if entry.get('slices') != [{'axis': s.axis, 'label': s.label, 'shape': [len(s.rows[1]), len(s.columns[1])], 'scope': s.scope} for s in slices]:
-        raise VerificationFailed('The manifest disagrees with a slice.')
-    return BundleAsset(entry, None, {}, volume, slices)
-
-
 def roles_of(files):
     return sorted(item.get('role') for item in files)
 
@@ -269,24 +225,9 @@ def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=
             entry = {'path': relative, 'role': role, 'sha256': hashlib.sha256(raw).hexdigest(), 'bytes': len(raw)}
             if curve is not None: entry['curve'] = curve
             return entry
-        typed_bundle = any(hasattr(read, '_wire_data_bytes') or isinstance(read, tuple) for _, read in items)
+        typed_bundle = any(hasattr(read, '_wire_data_bytes') for _, read in items)
         for index, (chosen, read) in enumerate(items):
             folder = 'assets/%d/' % index
-            if isinstance(read, tuple):  # E16: (volume description, [slices]) — the original is named, not carried
-                volume, slices = read; first = volume._wire_descriptor
-                original = next(r for r in first['representations'] if r['kind'] != 'normalized')
-                files = [put(folder + 'descriptor.json', (json.dumps(first, indent=2, allow_nan=False) + '\n').encode(), 'descriptor'),
-                         put(folder + 'volume.json', volume._wire_data_bytes, 'normalized')]
-                files += [put(folder + 'slice-%s-%d.json' % (x.axis, x.label), x.raw, 'slice') for x in slices]
-                assets.append({'asset_id': first['asset_id'], 'revision': first['revision'], 'origin': first['origin'], 'profile': first['profile'],
-                               'type': 'seismic-slice', 'name': None, 'files': files, 'history': first.get('history'), 'parents': first.get('parents', []),
-                               'parent_visibility': first.get('parent_visibility', 'complete'),
-                               'original': {'sha256': original['sha256'], 'bytes': original['bytes'], 'included': False},
-                               'slices': [{'axis': x.axis, 'label': x.label, 'shape': [len(x.rows[1]), len(x.columns[1])], 'scope': x.scope} for x in slices],
-                               'omissions': list(first.get('provenance', {}).get('omissions', [])) + ['The original volume is not included; it is identified by its SHA-256'],
-                               'losses': sorted({loss for r in first.get('representations', []) for loss in r.get('losses', [])})})
-                selection.append(chosen); continue
-            if getattr(read, 'type', None) == 'seismic-volume': raise Refused('A seismic volume is exported as chosen slices; the complete volume is not exported.')
             if hasattr(read, '_wire_data_bytes'):  # E11 typed data: exact original, descriptor and data as served
                 first = read._wire_descriptor
                 files = [put(folder + TYPED_ORIGINALS[first['profile']], read.original, 'original'),

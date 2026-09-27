@@ -46,7 +46,8 @@ def typed_pair(descriptor, raw):
     try: value=json.loads(raw)
     except (ValueError,UnicodeError): raise VerificationFailed('Normalized data is not valid JSON.') from None
     kinds={'well-tops':generated.WellTops,'trajectory':generated.Trajectory,'regular-grid-surface':generated.GridSurface,
-           'triangulated-surface':generated.TriangulatedSurface,'point-set':generated.PointSet}
+           'triangulated-surface':generated.TriangulatedSurface,'point-set':generated.PointSet,
+           'polyline-set':generated.PolylineSet,'seismic-volume':generated.SeismicVolume}
     if data['scientific']['type'] not in kinds:raise VerificationFailed('This kind of data is not supported by this SDK; update it.')
     payload=model(kinds[data['scientific']['type']],value).model_dump(by_alias=True)
     rules.typed_payload(payload)
@@ -75,4 +76,15 @@ def schema(value, schema_id, *, strict=True):
         tolerant(document)
     errors=list(Draft202012Validator(document).iter_errors(value))
     if errors: raise VerificationFailed('Scientific data does not satisfy the selected local schema.')
+    return value
+
+
+def seismic_slice(raw, volume, asset, revision, axis, label):
+    """E16: a served slice document, checked against its (verified) volume description."""
+    from .models import generated
+    try: value=json.loads(raw)
+    except (ValueError,UnicodeError): raise VerificationFailed('The slice is not valid JSON.') from None
+    if not isinstance(value,dict):raise VerificationFailed('The slice is not a slice document.')
+    model(generated.SeismicSlice,value)
+    rules.seismic_slice(value,volume,asset,revision,axis,label)  # on the served document itself
     return value

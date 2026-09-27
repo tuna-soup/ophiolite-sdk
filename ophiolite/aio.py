@@ -132,9 +132,25 @@ class AsyncClient(Client):
         _core.verify_typed_descriptor(data,self.project,asset,revision)
         raw=next(r for r in data['representations'] if r['kind']!='normalized')
         normalized=next(r for r in data['representations'] if r['kind']=='normalized')
-        artifact=await self._get(path+'/representations/'+quote(raw['id'],safe=''),raw['bytes'])
+        artifact=None if data['scientific'].get('type')=='seismic-volume' else await self._get(path+'/representations/'+quote(raw['id'],safe=''),raw['bytes'])
         body=await self._get(path+'/representations/'+quote(normalized['id'],safe=''),normalized['bytes'])
         return _core.typed_result(data,body,artifact)
+
+    async def read_slice(self,asset,revision,axis,label,*,volume=None):
+        """E16: one slice of a seismic volume; same checks as Client.read_slice."""
+        if axis not in ('inline','crossline','sample') or type(label) is not int:raise Refused('Choose an inline, crossline or sample slice by its whole number.')
+        if volume is None:volume=await self.read_data(asset,revision)
+        volume=self._volume(asset,revision,axis,label,volume)
+        path=self.prefix+'/'+quote(asset,safe='')+'/revisions/'+quote(revision,safe='')+'/slices/'+quote(axis,safe='')+'/'+str(label)
+        return _core.slice_result(volume,await self._get(path,32*1024*1024),asset,revision,axis,label)
+
+    async def export_slices(self,asset,revision,slices,destination):
+        """E16: same as Client.export_slices."""
+        from .bundle import write_bundle
+        chosen=self._slice_choice(slices)
+        volume=await self.read_data(asset,revision)
+        read=[await self.read_slice(asset,revision,axis,label,volume=volume) for axis,label in chosen]
+        return await anyio.to_thread.run_sync(lambda:write_bundle(destination,[({'asset_id':asset,'revision':revision,'curves':[],'slices':[{'axis':a,'label':l} for a,l in chosen]},(volume,read))]))
 
     async def read_many(self,selections,**options):
         results=[None]*len(selections)
