@@ -213,7 +213,7 @@ class Client(Navigation, EntityClient):
     def read_many(self,selections,**options):
         return [self.read(asset,revision,curves,**options) for asset,revision,curves in selections]
 
-    def export(self,selections,destination,*,groups=True):
+    def export(self,selections,destination,*,groups=True,entities=True):
         """Export exact revisions [(asset, revision, [curves] or None)] into a new portable bundle.
 
         Every item is read through the ordinary exact-read path, so the server's current
@@ -230,7 +230,35 @@ class Client(Navigation, EntityClient):
                 items.append(({'asset_id':asset,'revision':revision,'curves':[]},read));continue
             items.append(({'asset_id':asset,'revision':revision,'curves':list(curves)},self.read(asset,revision,list(curves))))
         found,omitted=self._bundle_groups(items) if groups else (None,None)
-        return write_bundle(destination,items,groups=found,groups_omitted=omitted)
+        graph=self._bundle_graph(items) if entities else None
+        return write_bundle(destination,items,groups=found,groups_omitted=omitted,graph=graph)
+
+    def _bundle_graph(self,items):
+        """E20: the wells and wellbores (you may read) that exported revisions belong to, their wells one
+        part-of hop up, and those associations with their evidence. None when there are none."""
+        from .errors import Unavailable,PermissionRefused
+        selected={(chosen['asset_id'],chosen['revision']) for chosen,_ in items}
+        try:visible={e.entity_id:e for e in self.entities()}
+        except PermissionRefused:return None  # this credential reads no entities (application grants): none travel
+        except Unavailable as error:
+            if getattr(error,'status',None)==404:return None  # a server without entities
+            raise
+        included,edges={},[]
+        for e in visible.values():
+            for item in self.data(e):
+                if (item['asset_id'],item['revision']) in selected:
+                    included[e.entity_id]=e
+                    edges.append({'predicate':'of-entity','subject':{'kind':'revision','asset_id':item['asset_id'],'revision':item['revision']},
+                                  'object':{'kind':e.kind,'entity_id':e.entity_id},'evidence':item['association']['evidence']})
+        for e in list(included.values()):
+            link=e.document.get('part_of')
+            if e.kind=='wellbore' and link and link['entity_id'] in visible:
+                included[link['entity_id']]=visible[link['entity_id']]
+                edges.append({'predicate':'part-of','subject':{'kind':'wellbore','entity_id':e.entity_id},'object':{'kind':'well','entity_id':link['entity_id']},
+                              'evidence':None})  # the statement stays with the deployment; the link is what the bundle records
+        if not included:return None
+        entities=[{k:e.document[k] for k in ('entity_id','kind','name','identity')} for e in sorted(included.values(),key=lambda x:x.entity_id)]
+        return {'entities':entities,'relationships':sorted(edges,key=lambda r:json.dumps(r,sort_keys=True))}
 
     def _bundle_groups(self,items):
         """Result groups (as this account sees them now) that contain selected results, by bundle position."""

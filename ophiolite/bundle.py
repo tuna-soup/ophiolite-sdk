@@ -84,6 +84,21 @@ class Bundle:
         self.path, self.manifest, self.assets, self.unlisted = path, manifest, assets, unlisted
         # 1.1/2.1: result groups as observed at export time (members by position; not scientific truth).
         self.groups = (manifest.get('observations') or {}).get('groups') or []
+        self.entities, self.relationships = [], []  # 2.4 (E20), set by open_bundle after checking
+
+    def entity(self, entity_id):
+        found = next((e for e in self.entities if e.entity_id == entity_id), None)
+        if found is None: raise Refused('This bundle lists no such entity.')
+        return found
+
+    def assets_of(self, entity, profile=None):
+        """Offline: the bundle's exact revisions associated with an entity (optionally one profile)."""
+        wanted = set((entity if isinstance(entity, BundleEntity) else self.entity(entity)).revisions())
+        return [a for a in self.assets if (a.asset_id, a.revision) in wanted and (profile is None or a.entry.get('profile') == profile)]
+
+    def wellbores(self, well):
+        well_id = getattr(well, 'entity_id', well)
+        return [e for e in self.entities if e.kind == 'wellbore' and e.well_id() == well_id]
 
     def summary(self):
         return {'bundle_version': self.manifest['bundle_version'], 'scope': self.manifest['scope'], 'assets': len(self.assets),
@@ -173,9 +188,62 @@ def open_bundle(path):
         if not curves: raise VerificationFailed('An asset carries no curves.')
         loaded.append(BundleAsset(entry, original, curves))
     _check_groups(manifest, entries)
+    entities, relationships = _check_graph(manifest, entries)
     listed = seen | {'manifest.json'}
     unlisted = sorted(p.relative_to(root).as_posix() for p in root.rglob('*') if p.is_file() and p.relative_to(root).as_posix() not in listed)
-    return Bundle(root, manifest, loaded, unlisted)
+    bundle = Bundle(root, manifest, loaded, unlisted)
+    bundle.entities, bundle.relationships = entities, relationships
+    return bundle
+
+
+def _check_graph(manifest, entries):
+    """E20 (bundle 2.4): every entity once; every relationship registered, of the kinds its predicate
+    joins, between exported exact revisions and listed entities; a listed wellbore's well is listed."""
+    from .navigation import PREDICATES
+    entities, relationships = manifest.get('entities'), manifest.get('relationships')
+    if entities is None and relationships is None: return [], []
+    if manifest.get('schema') != SCHEMA_2 or not isinstance(entities, list) or not isinstance(relationships, list):
+        raise VerificationFailed('Entities and relationships travel together in a bundle 2.4 or later.')
+    listed = {}
+    for e in entities:
+        if not isinstance(e, dict) or set(e) != {'entity_id', 'kind', 'name', 'identity'} or e['kind'] not in ('well', 'wellbore') or e['entity_id'] in listed:
+            raise VerificationFailed('An entity is malformed or listed twice.')
+        listed[e['entity_id']] = e
+    exported = {(a.get('asset_id'), a.get('revision')) for a in entries}
+    seen = set()
+    for r in relationships:
+        p = PREDICATES.get(r.get('predicate')) if isinstance(r, dict) else None
+        if p is None or p['asserted_by'] != 'people' or p['status'] != 'active':
+            raise VerificationFailed('A relationship is not a registered association.')
+        subject, obj = r.get('subject') or {}, r.get('object') or {}
+        if subject.get('kind') not in p['subject'] or obj.get('kind') not in p['object']:
+            raise VerificationFailed('A relationship joins kinds its predicate does not join.')
+        if subject['kind'] == 'revision':
+            if (subject.get('asset_id'), subject.get('revision')) not in exported: raise VerificationFailed('A relationship names a revision that is not in this bundle.')
+        elif listed.get(subject.get('entity_id'), {}).get('kind') != subject['kind']: raise VerificationFailed('A relationship names an entity that is not listed.')
+        if listed.get(obj.get('entity_id'), {}).get('kind') != obj['kind']: raise VerificationFailed('A relationship names an entity that is not listed.')
+        key = json.dumps([r['predicate'], subject, obj], sort_keys=True)
+        if key in seen: raise VerificationFailed('A relationship is listed twice.')
+        seen.add(key)
+    return [BundleEntity(e, relationships) for e in entities], relationships
+
+
+class BundleEntity:
+    """A well or wellbore as exported, with offline navigation over the bundle's relationships."""
+    def __init__(self, document, relationships):
+        self.document, self._relationships = document, relationships
+        self.entity_id, self.kind, self.name, self.identity = document['entity_id'], document['kind'], document['name'], document['identity']
+
+    def __repr__(self):
+        return 'BundleEntity(%s %r)' % (self.kind, self.name)
+
+    def revisions(self):
+        """[(asset_id, revision)] associated with this entity in the bundle."""
+        return [(r['subject']['asset_id'], r['subject']['revision']) for r in self._relationships
+                if r['predicate'] == 'of-entity' and r['object']['entity_id'] == self.entity_id]
+
+    def well_id(self):
+        return next((r['object']['entity_id'] for r in self._relationships if r['predicate'] == 'part-of' and r['subject']['entity_id'] == self.entity_id), None)
 
 
 def _check_groups(manifest, entries):
@@ -243,7 +311,7 @@ def roles_of(files):
     return sorted(item.get('role') for item in files)
 
 
-def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=None):
+def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=None, graph=None):
     """Write verified exact reads [(selection, CurveSet-like)] atomically. Internal to export."""
     destination = Path(destination)
     if destination.exists(): raise Refused('The destination already exists; choose a new folder.')
@@ -269,7 +337,7 @@ def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=
             entry = {'path': relative, 'role': role, 'sha256': hashlib.sha256(raw).hexdigest(), 'bytes': len(raw)}
             if curve is not None: entry['curve'] = curve
             return entry
-        typed_bundle = any(hasattr(read, '_wire_data_bytes') or isinstance(read, tuple) for _, read in items)
+        typed_bundle = any(hasattr(read, '_wire_data_bytes') or isinstance(read, tuple) for _, read in items) or bool(graph)  # entities need 2.4
         for index, (chosen, read) in enumerate(items):
             folder = 'assets/%d/' % index
             if isinstance(read, tuple):  # E16: (volume description, [slices]) — the original is named, not carried
@@ -315,11 +383,12 @@ def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=
         observations = {**({'groups': groups} if groups else {}), **({'groups_omitted': groups_omitted} if groups_omitted else {})}
         # The lowest version that expresses this content: 1.x for well logs, 2.x for typed data;
         # the minor rises only for observations (1) or the newer types (2), so older readers keep working.
-        minor = max([1 if observations else 0] + [NEWER_TYPES.get(a.get('type'), 0) for a in assets])
+        minor = max([1 if observations else 0, 4 if graph else 0] + [NEWER_TYPES.get(a.get('type'), 0) for a in assets])
         version = ('2' if typed_bundle else '1') + f'.{minor}.0'
         manifest = {'schema': SCHEMA_2 if typed_bundle else SCHEMA, 'bundle_version': version, 'created_at': datetime.now(timezone.utc).isoformat(timespec='seconds'),
                     'exporter': {'name': 'ophiolite-sdk', 'version': __version__}, 'scope': 'selection', 'selection': selection, 'assets': assets,
                     'groups': None, 'recommendations': None, **({'observations': observations} if observations else {}),
+                    **({'entities': graph['entities'], 'relationships': graph['relationships']} if graph else {}),
                     'limits': {'max_assets': MAX_ASSETS, 'max_file_bytes': MAX_FILE_BYTES, 'max_total_bytes': MAX_TOTAL_BYTES}, 'notice': NOTICE}
         raw = (json.dumps(manifest, indent=2, allow_nan=False) + '\n').encode()
         fd = os.open(staging / 'manifest.json', os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
