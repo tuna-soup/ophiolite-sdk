@@ -171,6 +171,56 @@ class AssetSummary(Contract):
     allowed_operations: Annotated[list[Literal['read', 'export', 'use-as-input']], Field(max_length=3)] = Field(...)
     display: Display | None = Field(None)
 
+class PortableBundleManifest(Contract):
+    schema_: Literal['ophiolite.portable-bundle/1'] = Field(..., alias='schema')
+    bundle_version: Annotated[str, Field(pattern='^1\\.[0-9]+\\.[0-9]+$')] = Field(...)
+    created_at: Annotated[str, Field(min_length=1, max_length=64)] = Field(...)
+    exporter: PortableBundleManifestExporter = Field(...)
+    scope: Literal['selection'] = Field(...)
+    selection: Annotated[list[BundleSelected], Field(min_length=1, max_length=128)] = Field(...)
+    assets: Annotated[list[BundleAsset], Field(min_length=1, max_length=128)] = Field(...)
+    groups: None = Field(...)
+    recommendations: None = Field(...)
+    limits: PortableBundleManifestLimits = Field(...)
+    notice: Annotated[str, Field(min_length=1)] = Field(...)
+
+class BundleSelected(Contract):
+    asset_id: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
+    revision: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    curves: Annotated[list[Annotated[str, Field(min_length=1, max_length=80)]], Field(min_length=1, max_length=64)] = Field(...)
+
+class BundleFile(Contract):
+    path: Annotated[str, Field(pattern='^assets/[0-9]{1,3}/[A-Za-z0-9._-]{1,120}$')] = Field(...)
+    role: Literal['original', 'descriptor', 'normalized'] = Field(...)
+    curve: Annotated[str, Field(min_length=1, max_length=80)] = Field(None)
+    sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    bytes: Annotated[int, Field(ge=0, le=33554432)] = Field(...)
+
+class BundleAsset(Contract):
+    asset_id: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
+    revision: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    origin: Literal['source-reference', 'retained-capture', 'managed-derived'] = Field(...)
+    profile: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+    name: Annotated[str, Field(max_length=160)] | Annotated[None, Field(max_length=160)] = Field(None)
+    files: Annotated[list[BundleFile], Field(min_length=2, max_length=129)] = Field(...)
+    history: BundleHistory | None = Field(None)
+    parents: Annotated[list[BundleParent], Field(max_length=8)] = Field(...)
+    parent_visibility: Literal['complete', 'restricted'] = Field(...)
+    omissions: list[str] = Field(...)
+    losses: list[str] = Field(...)
+
+class BundleHistory(Contract):
+    number: Annotated[int, Field(ge=1)] = Field(...)
+    count: Annotated[int, Field(ge=1)] = Field(...)
+    head_revision: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    parent_revision: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] | None = Field(None)
+
+class BundleParent(Contract):
+    authority: str = Field(...)
+    key: str = Field(...)
+    revision: str = Field(...)
+    profile: str = Field(None)
+
 class ContractProfile(Contract):
     schema_: Literal['ophiolite.contract-profile/1'] = Field(..., alias='schema')
     id: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] = Field(...)
@@ -279,6 +329,15 @@ class WellCurve(Contract):
     original_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(None)
     source_revision: str = Field(None)
 
+class PortableBundleManifestExporter(Contract):
+    name: Annotated[str, Field(max_length=64)] = Field(...)
+    version: Annotated[str, Field(max_length=64)] = Field(...)
+
+class PortableBundleManifestLimits(Contract):
+    max_assets: Annotated[int, Field(ge=1)] = Field(...)
+    max_file_bytes: Annotated[int, Field(ge=1)] = Field(...)
+    max_total_bytes: Annotated[int, Field(ge=1)] = Field(...)
+
 class RepresentationRulesArtifact_Kind_By_Origin(Contract):
     source_reference: Literal['original', 'captured-result', 'derived-artifact'] = Field(..., alias='source-reference')
     retained_capture: Literal['original', 'captured-result', 'derived-artifact'] = Field(..., alias='retained-capture')
@@ -302,6 +361,12 @@ Representation.model_rebuild()
 Retention.model_rebuild()
 Version.model_rebuild()
 AssetSummary.model_rebuild()
+PortableBundleManifest.model_rebuild()
+BundleSelected.model_rebuild()
+BundleFile.model_rebuild()
+BundleAsset.model_rebuild()
+BundleHistory.model_rebuild()
+BundleParent.model_rebuild()
 ContractProfile.model_rebuild()
 ConnectorSemantics.model_rebuild()
 RepresentationRules.model_rebuild()
@@ -314,4 +379,6 @@ DocumentEntry.model_rebuild()
 ScalarMap.model_rebuild()
 ScalarGrid.model_rebuild()
 WellCurve.model_rebuild()
+PortableBundleManifestExporter.model_rebuild()
+PortableBundleManifestLimits.model_rebuild()
 RepresentationRulesArtifact_Kind_By_Origin.model_rebuild()

@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -82,6 +82,14 @@
       "path": "scientific/v1/scalar-map-schema.json",
       "title": "ScalarMap",
       "description": "Structural shape of a regular scalar map exchange snapshot; cross-field rules stay in catalog.validate_snapshot."
+    },
+    {
+      "id": "ophiolite.portable-bundle/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "bundles/v1/manifest-schema.json",
+      "title": "PortableBundleManifest",
+      "description": "The portable bundle manifest: exact selected revisions with files, digests, served context, permitted lineage, omissions and losses (E18)."
     }
   ],
   "profiles": [
@@ -306,6 +314,13 @@
       "kind": "fixture",
       "path": "assets/v1/fixtures/frozen/pre-e1/derived.las",
       "title": "Pre-E1 fixture bytes, frozen; never regenerated"
+    },
+    {
+      "id": "ophiolite.fixture/bundles/manifest.json/1",
+      "kind": "fixture",
+      "path": "bundles/v1/fixtures/manifest.json",
+      "title": "Structural portable bundle manifest fixture",
+      "schema": "ophiolite.portable-bundle/1"
     }
   ]
 }
