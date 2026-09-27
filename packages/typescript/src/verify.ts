@@ -85,6 +85,8 @@ function context(value: ScientificContext): void {
 export function validateDescriptor(value: unknown): ScientificAsset {
   validateSchema(value, schemas["ophiolite.scientific-asset/1"]);
   const asset = value as ScientificAsset;
+  // E11: tops, trajectories and grids are typed data; this client reads well-log curves only.
+  if ("type" in asset.scientific) throw new Error("This data is not a well log; read it with the Python SDK read_data.");
   reference(asset.source_reference); asset.parents.forEach(reference); context(asset.scientific);
   for (const rep of asset.representations) {
     const profile = object(profiles[rep.profile]);

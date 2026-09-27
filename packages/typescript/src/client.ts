@@ -88,7 +88,7 @@ export class Client implements Transport {
     const path = "/api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}";
     const params = { project, asset, revision };
     const descriptor = validateDescriptor(await this.request<unknown>("GET", path, params, { curve }, undefined, options));
-    requireValue(descriptor.project_id === project && descriptor.asset_id === asset && descriptor.revision === revision && descriptor.scientific.curve === curve);
+    requireValue(descriptor.project_id === project && descriptor.asset_id === asset && descriptor.revision === revision && (descriptor.scientific as { curve?: string }).curve === curve);
     const rep = descriptor.representations.find(x => x.kind === "normalized")!;
     const bytes = await this.send("GET", path + "/representations/{representation}", { ...params, representation: rep.id }, { curve }, undefined, options, false);
     return verifyPair(descriptor, bytes);
