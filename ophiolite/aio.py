@@ -235,7 +235,7 @@ def _async_work(name):
     return method
 
 
-for _name in ('configure','start','run_input','publish','download','results','history','grants','share','options','inspect',
+for _name in ('configure','start','run_input','publish','download','results','history','grants','share','options','inspect','export',
               'upload_las','inspect_las','upload_info','members','result_preview','result_download','recover'):
     setattr(AsyncClient,_name,_async_application(_name))
 for _name in ('configure','start','input','publish','download','upload_las','recover'):

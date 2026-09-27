@@ -55,6 +55,13 @@ def parser():
             p.add_argument('--release');p.add_argument('--asset-index',type=int);p.add_argument('--runner',action='append')
         if name=='share':
             p.add_argument('--asset',required=True);p.add_argument('--read',action='append');p.add_argument('--reuse',action='append')
+    bundle=sub.add_parser('bundle',help='Check or summarize a portable bundle offline (no server or account needed)')
+    bundle.add_argument('action',choices=['check','show']);bundle.add_argument('path',type=Path)
+    export=sub.add_parser('export',help='Export exact revisions into a new portable bundle')
+    export.add_argument('--configuration',type=Path,default=Path('configuration.json'))
+    export.add_argument('--credentials',type=Path)
+    export.add_argument('--asset',required=True);export.add_argument('--revision',required=True)
+    export.add_argument('--curve',action='append',required=True);export.add_argument('--output',type=Path,required=True)
     recover=sub.add_parser('recover',help='Recover a saved exact request from its private work folder')
     recover.add_argument('--configuration',type=Path,default=Path('configuration.json'))
     recover.add_argument('--credentials',type=Path)
@@ -96,6 +103,12 @@ def main(argv=None):
     args=parser().parse_args(argv)
     if args.command=='skills':
         print(files('ophiolite').joinpath('skills'));return
+    if args.command=='bundle':
+        # Offline: no configuration, credentials or network are read.
+        from .bundle import open_bundle
+        opened=open_bundle(args.path)
+        if args.action=='check':print('Bundle verified:',len(opened.assets),'exact revisions,',sum(len(a.curves) for a in opened.assets),'curves. Checksums show integrity, not authorship.');return
+        print(json.dumps({**opened.summary(),'items':[{'asset_id':a.asset_id,'revision':a.revision,'name':a.name,'curves':sorted(a.curves),'history':a.history,'parent_visibility':a.parent_visibility} for a in opened.assets]},indent=2));return
     config=configuration(args.configuration)
     path=args.credentials or credentials_path(config)
     if args.command=='doctor':
@@ -126,6 +139,9 @@ def main(argv=None):
         if args.command=='list':
             for item in client.assets():print(json.dumps(item))
             return
+        if args.command=='export':
+            opened=client.export([(args.asset,args.revision,args.curve)],args.output)
+            print('Exported',len(opened.assets),'exact revision to',args.output,'- check it offline with: ophiolite bundle check',args.output);return
         if args.command=='fetch':
             asset,revision,curve=[getattr(args,k) or config.get(k) for k in ('asset','revision','curve')]
             client.read(asset,revision,[curve]).save(args.output,legacy_order=True)

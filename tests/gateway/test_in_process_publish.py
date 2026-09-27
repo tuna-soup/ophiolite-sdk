@@ -153,3 +153,34 @@ def test_sdk_new_version_history_and_stale_parent(web,kind):
     assert history.revisions[1].parent_revision==first.output_reference.revision
     with pytest.raises(IntegrityConflict):publish('3',6,new_version_of=first)
     assert alice.download(first)!=alice.download(second)
+
+
+@pytest.mark.parametrize('kind',['delegate','grant'])
+def test_sdk_export_freezes_exact_revisions_and_applies_permissions(web,kind,tmp_path):
+    """E18: export through the ordinary exact-read path; refusals publish nothing."""
+    from ophiolite.bundle import open_bundle
+    from ophiolite.errors import PermissionRefused,Unavailable
+    from project_gateway.stages import Stages
+    alice,bob=client(web,'alice',kind),client(web,'bob',kind)
+    def publish(command,value,index=0,**kw):
+        binding=alice.configure(release_id=web.r['id'],curve='GR',name='SDK export',runners=['alice'],command_id='x-'+command,publication_profile='curve-edits/1')
+        run=alice.start(binding,application_version='sdk-export/'+command,parameters={},command_id='x-run-'+command);run.input()
+        return alice.publish(run,changes=[{'index':index,'value':value}],**kw)
+    first=publish('1',2);second=publish('2',0,index=2,new_version_of=first)
+    key,r1,r2=first.output_reference.key,first.output_reference.revision,second.output_reference.revision
+    opened=alice.export([(key,r1,['GR']),(key,r2,['GR'])],tmp_path/'both')
+    assert [(a.revision,a.history['number']) for a in opened.assets]==[(r1,1),(r2,2)]
+    assert opened.assets[1].curves['GR'].values[2]==0.0 and opened.assets[1].curves['GR'].values[1] is None  # zero stays zero, missing stays missing
+    assert opened.assets[0].original==alice.download(first) and opened.manifest['groups'] is None
+    # A later version does not retarget an earlier selection.
+    publish('3',5,index=2,new_version_of=second)
+    again=alice.export([(key,r1,['GR'])],tmp_path/'later')
+    assert again.assets[0].original==opened.assets[0].original and again.assets[0].history['count']==3
+    # Bob cannot read Alice's result: nothing is written.
+    with pytest.raises((PermissionRefused,Unavailable)):bob.export([(key,r1,['GR'])],tmp_path/'bob')
+    assert not (tmp_path/'bob').exists()
+    # Withdrawing one selected revision fails the whole export.
+    Stages(web.a).call('transition',{'project_id':'p','asset_id':key,'revision':r1,'action':'withdraw','expected_generation':0,'reason':'Superseded'},'alice')
+    with pytest.raises((PermissionRefused,Unavailable)):alice.export([(key,r2,['GR']),(key,r1,['GR'])],tmp_path/'withdrawn')
+    assert not (tmp_path/'withdrawn').exists() and not list(tmp_path.glob('.withdrawn.staging-*'))
+    assert open_bundle(tmp_path/'both').assets[0].revision==r1  # an earlier export stays readable offline

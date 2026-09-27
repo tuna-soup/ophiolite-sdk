@@ -20,10 +20,11 @@ from .auth import Credential
 
 
 class CurveSet:
-    def __init__(self,descriptors,curves,artifact,*,url='',project='',wire_descriptors=None,wire_curves=None):
+    def __init__(self,descriptors,curves,artifact,*,url='',project='',wire_descriptors=None,wire_curves=None,wire_curve_bytes=None):
         self.descriptors,self.curves,self.artifact=descriptors,curves,artifact
         self.url,self.project=url,project
         self._wire_descriptors,self._wire_curves=wire_descriptors,wire_curves
+        self._wire_curve_bytes=wire_curve_bytes  # exact served bytes; their digest is in the descriptor
 
     @property
     def evidence(self):
@@ -147,7 +148,7 @@ class Client:
     def read(self,asset,revision,curves,*,strict_interpretation=False):
         if not isinstance(curves,(list,tuple)) or not curves or len(set(curves))!=len(curves):
             raise Refused('Choose distinct value curves explicitly.')
-        descriptors=[];views=[];artifact=None;wire_descriptors=[];wire_curves=[]
+        descriptors=[];views=[];artifact=None;wire_descriptors=[];wire_curves=[];wire_curve_bytes=[]
         for curve in curves:
             path,query=self._path(asset,revision,curve)
             data=self._json(path+query,256*1024)
@@ -159,11 +160,25 @@ class Client:
             body=self._get(path+'/representations/'+quote(normalized['id'],safe='')+query,normalized['bytes'])
             model,view=_core.verify_pair(data,body,artifact,curve,strict_interpretation=strict_interpretation)
             descriptors.append(model);views.append(view)
-            wire_descriptors.append(data);wire_curves.append(json.loads(body))
-        return CurveSet(descriptors,views,artifact,url=self.url,project=self.project,wire_descriptors=wire_descriptors,wire_curves=wire_curves)
+            wire_descriptors.append(data);wire_curves.append(json.loads(body));wire_curve_bytes.append(body)
+        return CurveSet(descriptors,views,artifact,url=self.url,project=self.project,wire_descriptors=wire_descriptors,wire_curves=wire_curves,wire_curve_bytes=wire_curve_bytes)
 
     def read_many(self,selections,**options):
         return [self.read(asset,revision,curves,**options) for asset,revision,curves in selections]
+
+    def export(self,selections,destination):
+        """Export exact revisions [(asset, revision, [curves])] into a new portable bundle.
+
+        Every item is read through the ordinary exact-read path, so the server's current
+        permissions apply to each representation; one refusal fails the whole export and
+        nothing is published. The bundle becomes visible only after it checks as a reader
+        would. Returns the opened Bundle."""
+        from .bundle import write_bundle
+        if not isinstance(selections,(list,tuple)) or not selections:raise Refused('Choose at least one exact revision to export.')
+        items=[]
+        for asset,revision,curves in selections:
+            items.append(({'asset_id':asset,'revision':revision,'curves':list(curves)},self.read(asset,revision,list(curves))))
+        return write_bundle(destination,items)
 
     def _headers(self):
         return self.credential.headers(self.url,self.project) if self.credential else {}
