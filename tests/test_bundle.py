@@ -251,3 +251,33 @@ print(json.dumps({"tops":[t["md"] for t in tops.tops],"grid":grid.values,"corner
     result = json.loads(done.stdout)
     assert result['tops'] == [100.5, 103.0] and result['grid'] == [1.0, 0.0, None, 4.0, 5.0, 6.0] and result['corner'] == [1062.5, 5012.5]
     assert abs(result['offsets'] - 99.4931) < 1e-3   # 0→10° over 100: R·sin θ
+
+
+# --- E18 completion: bundle 2.1 groups ---------------------------------------------------
+
+def grouped(tmp_path, **recommended):
+    items = typed_items(); rev = items[0][1]._wire_descriptors[0]['revision']
+    group = {'name': 'Corrections', 'observed_at': '2026-09-27T10:00:00Z', 'meaning': 'observation-at-export', 'members': [0, 1],
+             'recommended': {'asset_position': 0, 'revision': rev, 'by': 'bob', 'at': 1790000000.0, 'reason': 'Closer to the core', **recommended}}
+    return bundle.write_bundle(tmp_path / 'g', items, groups=[group])
+
+
+def test_groups_are_written_as_observations_and_read_back(tmp_path):
+    opened = grouped(tmp_path)
+    assert opened.manifest['bundle_version'] == '2.1.0' and opened.groups[0]['meaning'] == 'observation-at-export'
+    assert opened.groups[0]['members'] == [0, 1] and opened.groups[0]['recommended']['reason'] == 'Closer to the core'
+    assert written(tmp_path / 'plain').groups == []  # no groups: unchanged 1.0
+
+
+@pytest.mark.parametrize('edit', [
+    lambda m: m['groups'][0].update(members=[0, 9]),
+    lambda m: m['groups'][0].update(meaning='truth'),
+    lambda m: m['groups'][0]['recommended'].update(revision='0' * 64),
+    lambda m: m['groups'][0]['recommended'].update(asset_position=2),
+    lambda m: m.update(bundle_version='2.0.0'),
+    lambda m: m.update(recommendations=[]),
+])
+def test_group_refusals(tmp_path, edit):
+    root = grouped(tmp_path).path
+    rewrite(root, edit)
+    with pytest.raises(VerificationFailed): bundle.open_bundle(root)
