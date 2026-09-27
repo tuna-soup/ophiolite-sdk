@@ -76,8 +76,8 @@ class BundleAsset:
 class Bundle:
     def __init__(self, path, manifest, assets, unlisted):
         self.path, self.manifest, self.assets, self.unlisted = path, manifest, assets, unlisted
-        # 2.1: result groups as observed at export time (members by position; not scientific truth).
-        self.groups = manifest.get('groups') or []
+        # 1.1/2.1: result groups as observed at export time (members by position; not scientific truth).
+        self.groups = (manifest.get('observations') or {}).get('groups') or []
 
     def summary(self):
         return {'bundle_version': self.manifest['bundle_version'], 'scope': self.manifest['scope'], 'assets': len(self.assets),
@@ -92,11 +92,9 @@ def _check_manifest(manifest):
     if version.split('.')[0] not in ('1', '2'): raise Refused('This bundle uses version %s; this reader supports major versions 1 and 2. Update the SDK.' % version)
     if (version.split('.')[0] == '2') != (manifest['schema'] == SCHEMA_2): raise VerificationFailed('The bundle schema and version disagree.')
     if manifest.get('scope') != 'selection': raise VerificationFailed('The bundle scope is not a selection.')
-    if manifest.get('recommendations', 0) is not None: raise VerificationFailed('Recommendations travel inside groups; the manifest field must be null.')
-    groups = manifest.get('groups', 0)
-    minor = int(version.split('.')[1])
-    if groups is not None and not (manifest['schema'] == SCHEMA_2 and minor >= 1 and isinstance(groups, list)):
-        raise VerificationFailed('Groups are part of bundle 2.1 and later only.')
+    if manifest.get('groups', 0) is not None or manifest.get('recommendations', 0) is not None: raise VerificationFailed('Groups and recommendations travel as observations; the manifest fields must be null.')
+    observations = manifest.get('observations')
+    if observations is not None and (not isinstance(observations, dict) or not isinstance(observations.get('groups', []), list)): raise VerificationFailed('Observations are not readable.')
     assets = manifest.get('assets')
     if not isinstance(assets, list) or not 0 < len(assets) <= MAX_ASSETS: raise VerificationFailed('The bundle lists no assets or too many.')
     return assets
@@ -171,14 +169,14 @@ def open_bundle(path):
 
 
 def _check_groups(manifest, entries):
-    for group in manifest.get('groups') or []:
+    for group in (manifest.get('observations') or {}).get('groups') or []:
         if not isinstance(group, dict) or group.get('meaning') != 'observation-at-export' or not isinstance(group.get('name'), str):
             raise VerificationFailed('A group is not an export-time observation.')
         members = group.get('members')
         if not isinstance(members, list) or not members or len(set(members)) != len(members) or any(type(m) is not int or not 0 <= m < len(entries) for m in members):
             raise VerificationFailed('A group names assets that are not in this bundle.')
         rec = group.get('recommended')
-        if rec is not None and (not isinstance(rec, dict) or rec.get('asset_position') not in members or entries[rec['asset_position']].get('revision') != rec.get('revision')):
+        if rec is not None and (not isinstance(rec, dict) or type(rec.get('asset_position')) is not int or rec['asset_position'] not in members or entries[rec['asset_position']].get('revision') != rec.get('revision')):
             raise VerificationFailed('A group recommends a version that is not in this bundle.')
 
 
@@ -200,7 +198,7 @@ def roles_of(files):
     return sorted(item.get('role') for item in files)
 
 
-def write_bundle(destination, items, *, grace=3600, groups=None):
+def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=None):
     """Write verified exact reads [(selection, CurveSet-like)] atomically. Internal to export."""
     destination = Path(destination)
     if destination.exists(): raise Refused('The destination already exists; choose a new folder.')
@@ -226,7 +224,7 @@ def write_bundle(destination, items, *, grace=3600, groups=None):
             entry = {'path': relative, 'role': role, 'sha256': hashlib.sha256(raw).hexdigest(), 'bytes': len(raw)}
             if curve is not None: entry['curve'] = curve
             return entry
-        typed_bundle = any(hasattr(read, '_wire_data_bytes') for _, read in items) or bool(groups)
+        typed_bundle = any(hasattr(read, '_wire_data_bytes') for _, read in items)
         for index, (chosen, read) in enumerate(items):
             folder = 'assets/%d/' % index
             if hasattr(read, '_wire_data_bytes'):  # E11 typed data: exact original, descriptor and data as served
@@ -254,9 +252,11 @@ def write_bundle(destination, items, *, grace=3600, groups=None):
                            'parent_visibility': first.get('parent_visibility', 'complete'), 'omissions': omissions, 'losses': losses})
             if typed_bundle: assets[-1]['type'] = 'well-log'
             selection.append(chosen)
-        manifest = {'schema': SCHEMA_2 if typed_bundle else SCHEMA, 'bundle_version': '2.1.0' if groups else VERSION_2 if typed_bundle else VERSION, 'created_at': datetime.now(timezone.utc).isoformat(timespec='seconds'),
+        observations = {**({'groups': groups} if groups else {}), **({'groups_omitted': groups_omitted} if groups_omitted else {})}
+        version = (VERSION_2 if typed_bundle else VERSION).replace('.0.0', '.1.0') if observations else (VERSION_2 if typed_bundle else VERSION)
+        manifest = {'schema': SCHEMA_2 if typed_bundle else SCHEMA, 'bundle_version': version, 'created_at': datetime.now(timezone.utc).isoformat(timespec='seconds'),
                     'exporter': {'name': 'ophiolite-sdk', 'version': __version__}, 'scope': 'selection', 'selection': selection, 'assets': assets,
-                    'groups': groups or None, 'recommendations': None,
+                    'groups': None, 'recommendations': None, **({'observations': observations} if observations else {}),
                     'limits': {'max_assets': MAX_ASSETS, 'max_file_bytes': MAX_FILE_BYTES, 'max_total_bytes': MAX_TOTAL_BYTES}, 'notice': NOTICE}
         raw = (json.dumps(manifest, indent=2, allow_nan=False) + '\n').encode()
         fd = os.open(staging / 'manifest.json', os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)

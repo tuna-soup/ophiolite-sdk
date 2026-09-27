@@ -170,6 +170,7 @@ def test_sdk_export_freezes_exact_revisions_and_applies_permissions(web,kind,tmp
     key,r1,r2=first.output_reference.key,first.output_reference.revision,second.output_reference.revision
     opened=alice.export([(key,r1,['GR']),(key,r2,['GR'])],tmp_path/'both')
     assert [(a.revision,a.history['number']) for a in opened.assets]==[(r1,1),(r2,2)]
+    if kind=='grant':assert opened.manifest['observations']=={'groups_omitted':'This credential may not list result groups'}
     assert opened.assets[1].curves['GR'].values[2]==0.0 and opened.assets[1].curves['GR'].values[1] is None  # zero stays zero, missing stays missing
     assert opened.assets[0].original==alice.download(first) and opened.manifest['groups'] is None
     # A later version does not retarget an earlier selection.
@@ -272,17 +273,23 @@ def test_sdk_export_carries_visible_groups_only(web,kind,tmp_path):
     """E18 completion: groups travel as observations; members and recommendations the exporter cannot see do not."""
     from project_gateway.result_groups import ResultGroups
     alice,bob=client(web,'alice',kind),client(web,'bob',kind)
-    def publish(command,value):
+    def publish(command,value,**kw):
         binding=alice.configure(release_id=web.r['id'],curve='GR',name='SDK bundle groups',runners=['alice'],command_id='bg-'+command,publication_profile='curve-edits/1')
         run=alice.start(binding,application_version='sdk-bg/'+command,parameters={'v':value},command_id='bg-run-'+command);run.input()
-        return alice.publish(run,changes=[{'index':0,'value':value}])
-    one,two=publish('1',2),publish('2',5)
+        return alice.publish(run,changes=[{'index':0,'value':value}],**kw)
+    one,two=publish('1',2),publish('2',5);one_v2=publish('3',3,new_version_of=one)
     groups=ResultGroups(web.a);g=groups.call('save',{'project_id':'p','name':'Corrections','members':[one.output_reference.key,two.output_reference.key]},'alice')
-    groups.call('recommend',{'project_id':'p','id':g['id'],'expected_generation':g['generation'],'recommended':{'asset_id':two.output_reference.key,'revision':two.output_reference.revision},'reason':'Closer'},'alice')
+    # Recommend the OLDER version of "one"; select both versions in reversed order.
+    groups.call('recommend',{'project_id':'p','id':g['id'],'expected_generation':g['generation'],'recommended':{'asset_id':one.output_reference.key,'revision':one.output_reference.revision},'reason':'Closer'},'alice')
     ref=lambda r:(r.output_reference.key,r.output_reference.revision,['GR'])
-    mine=alice.export([ref(one),ref(two)],tmp_path/'alice')
-    assert mine.manifest['bundle_version']=='2.1.0' and mine.groups[0]['members']==[0,1] and mine.groups[0]['recommended']['asset_position']==1
-    alice.share(one,read=['bob'],expected_generation=alice.grants(one).generation)
-    theirs=bob.export([ref(one)],tmp_path/'bob')
-    assert theirs.groups[0]['members']==[0] and theirs.groups[0]['recommended'] is None  # two is Alice's alone
-    assert two.output_reference.key not in (tmp_path/'bob'/'manifest.json').read_text()
+    mine=alice.export([ref(one_v2),ref(one),ref(two)],tmp_path/'alice')
+    assert mine.manifest['bundle_version']=='1.1.0' and mine.groups[0]['members']==[0,1,2]
+    assert mine.groups[0]['recommended']['asset_position']==1 and mine.groups[0]['recommended']['revision']==one.output_reference.revision
+    assert alice.export([ref(one)],tmp_path/'plain',groups=False).manifest['bundle_version']=='1.0.0'
+    # Bob: the server itself hides Alice-only members, then the bundle carries only what he can see.
+    alice.share(two,read=['bob'],expected_generation=alice.grants(two).generation)
+    [raw]=bob.result_groups()
+    assert [m.asset_id for m in raw.members]==[two.output_reference.key] and raw.recommended is None
+    theirs=bob.export([ref(two)],tmp_path/'bob')
+    assert theirs.groups[0]['members']==[0] and theirs.groups[0]['recommended'] is None
+    assert one.output_reference.key not in (tmp_path/'bob'/'manifest.json').read_text()

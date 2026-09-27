@@ -265,19 +265,33 @@ def grouped(tmp_path, **recommended):
 def test_groups_are_written_as_observations_and_read_back(tmp_path):
     opened = grouped(tmp_path)
     assert opened.manifest['bundle_version'] == '2.1.0' and opened.groups[0]['meaning'] == 'observation-at-export'
+    assert opened.manifest['groups'] is None and opened.manifest['recommendations'] is None
     assert opened.groups[0]['members'] == [0, 1] and opened.groups[0]['recommended']['reason'] == 'Closer to the core'
     assert written(tmp_path / 'plain').groups == []  # no groups: unchanged 1.0
 
 
 @pytest.mark.parametrize('edit', [
-    lambda m: m['groups'][0].update(members=[0, 9]),
-    lambda m: m['groups'][0].update(meaning='truth'),
-    lambda m: m['groups'][0]['recommended'].update(revision='0' * 64),
-    lambda m: m['groups'][0]['recommended'].update(asset_position=2),
-    lambda m: m.update(bundle_version='2.0.0'),
+    lambda m: m['observations']['groups'][0].update(members=[0, 9]),
+    lambda m: m['observations']['groups'][0].update(members=[0, -1]),
+    lambda m: m['observations']['groups'][0].update(meaning='truth'),
+    lambda m: m['observations']['groups'][0]['recommended'].update(revision='0' * 64),
+    lambda m: m['observations']['groups'][0]['recommended'].update(asset_position=2),
+    lambda m: m['observations']['groups'][0]['recommended'].update(asset_position=True),
+    lambda m: m.update(groups=m['observations']['groups']),
     lambda m: m.update(recommendations=[]),
 ])
 def test_group_refusals(tmp_path, edit):
     root = grouped(tmp_path).path
     rewrite(root, edit)
     with pytest.raises(VerificationFailed): bundle.open_bundle(root)
+
+
+def test_released_readers_still_read_grouped_bundles(tmp_path):
+    """Observations are an extension: the frozen 1.0 reader reads a grouped curve-only bundle."""
+    import importlib.util
+    d = Read()._wire_descriptors[0]
+    group = {'name': 'G', 'observed_at': 't', 'meaning': 'observation-at-export', 'members': [0], 'recommended': None}
+    opened = bundle.write_bundle(tmp_path / 'b', [({'asset_id': d['asset_id'], 'revision': d['revision'], 'curves': ['GR']}, Read())], groups=[group])
+    assert opened.manifest['bundle_version'] == '1.1.0' and opened.groups == [group]
+    spec = importlib.util.spec_from_file_location('ophiolite._frozen_bundle', Path(__file__).parent / 'frozen/bundle_1_0.py'); frozen = importlib.util.module_from_spec(spec); spec.loader.exec_module(frozen)
+    assert frozen.open_bundle(opened.path).assets[0].curves['GR'].values[0] == 0.0

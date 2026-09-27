@@ -192,15 +192,20 @@ class Client:
             if not curves:  # E11: well tops, trajectories and grids have no curves (bundle 2)
                 items.append(({'asset_id':asset,'revision':revision,'curves':[]},self.read_data(asset,revision)));continue
             items.append(({'asset_id':asset,'revision':revision,'curves':list(curves)},self.read(asset,revision,list(curves))))
-        return write_bundle(destination,items,groups=self._bundle_groups(items) if groups else None)
+        found,omitted=self._bundle_groups(items) if groups else (None,None)
+        return write_bundle(destination,items,groups=found,groups_omitted=omitted)
 
     def _bundle_groups(self,items):
         """Result groups (as this account sees them now) that contain selected results, by bundle position."""
         from datetime import datetime,timezone
         selected=[(chosen['asset_id'],chosen['revision']) for chosen,_ in items]
-        if not any(getattr(read,'descriptors',None) and read.descriptors[0].origin=='managed-derived' for _,read in items):return None
+        if not any(getattr(read,'descriptors',None) and read.descriptors[0].origin=='managed-derived' for _,read in items):return None,None
+        from .errors import Unavailable,PermissionRefused
         try:groups=self.result_groups()
-        except Exception:return None  # a server without result groups exports without them
+        except Unavailable as error:
+            if getattr(error,'status',None)==404:return None,'This server does not offer result groups'
+            raise
+        except PermissionRefused:return None,'This credential may not list result groups'  # stated in the bundle, never silently empty
         observed=datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ');out=[]
         for g in groups:
             members=[i for i,(asset,_) in enumerate(selected) if asset in {m.asset_id for m in g.members}]
@@ -209,7 +214,7 @@ class Client:
             if rec and rec.asset_id and (rec.asset_id,rec.revision) in selected:
                 recommended={'asset_position':selected.index((rec.asset_id,rec.revision)),'revision':rec.revision,'by':rec.by,'at':float(rec.at),'reason':rec.reason}
             out.append({'name':g.name,'observed_at':observed,'meaning':'observation-at-export','members':members,'recommended':recommended})
-        return out or None
+        return out or None,None
 
     def _headers(self):
         return self.credential.headers(self.url,self.project) if self.credential else {}
