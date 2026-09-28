@@ -5,6 +5,9 @@
 Supported 0.x client over preview contracts, installable from reviewed source.
 No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
 
+- E7 transition release: `share()` requires `expected_generation` (from
+  `grants()`); servers refuse unconditional replacement with 428 `condition-required`.
+
 - Sync and async exact curve reads with typed contracts, scientific verification,
   NumPy/DataFrame views, descriptors and exact Workspace links.
 - SDK-owned browser credentials, bounded local validation, publication work folders,

@@ -182,8 +182,8 @@ def main(argv=None):
             if item is None:raise Refused('Asset unavailable to this credential; check the asset ID and your project access')
             # Fetch-and-replace: guarded from this read onwards, and safe to retry after a lost response.
             snapshot=client.grants(item)
-            if snapshot.generation is None:result=client.share(item,read=args.read or [],reuse=args.reuse or [])
-            else:result=client.share(item,read=args.read or [],reuse=args.reuse or [],expected_generation=snapshot.generation)
+            if snapshot.generation is None:raise Refused('This server does not support conditional sharing; upgrade it before changing recipients.')
+            result=client.share(item,read=args.read or [],reuse=args.reuse or [],expected_generation=snapshot.generation)
             print('Uploaded original' if item.get('authority')=='ophiolite:uploaded' else 'Published result',args.asset,'readers:',', '.join(result.recipients) or 'none','reuse:',', '.join(result.reuse_recipients) or 'none');return result
         if args.command=='recover':return client.recover(args.work)
         if config.get('schema')!='ophiolite.local-configuration/1':

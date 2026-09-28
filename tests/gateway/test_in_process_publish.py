@@ -32,7 +32,7 @@ def test_sdk_alice_bob_eve_chain(web,kind):
     assert receipt.identity=='alice' and receipt.upstream_write is False
     assert alice.download(receipt)!=original
     assert alice.grants(receipt).recipients==['alice']
-    alice.share(receipt,read=['bob'],reuse=['bob'])
+    alice.share(receipt,read=['bob'],reuse=['bob'],expected_generation=alice.grants(receipt).generation)
     assert set(alice.grants(receipt).recipients)=={'alice','bob'}
     b=bob.configure(receipt.output_reference.key,receipt.output_reference.revision,curve='GR',name='SDK Bob',command_id='sdk-bob',publication_profile='curve-edits/1')
     second=bob.start(b,application_version='sdk-example/1',parameters={},command_id='sdk-bob-run')
@@ -40,8 +40,8 @@ def test_sdk_alice_bob_eve_chain(web,kind):
     result=bob.publish(second,changes=[{'index':0,'value':3}]);assert result.identity=='bob'
     assert eve.results()==[]
     with pytest.raises((PermissionRefused,Unavailable)):eve.describe(receipt.output_reference.key,receipt.output_reference.revision,'GR')
-    with pytest.raises(PermissionRefused):bob.share(receipt,read=['outsider'])
-    bob.share(result,read=['alice'])
+    with pytest.raises(PermissionRefused):bob.share(receipt,read=['outsider'],expected_generation=bob.grants(receipt).generation)
+    bob.share(result,read=['alice'],expected_generation=bob.grants(result).generation)
     assert result.output_reference.key in [item.asset_id for item in alice.results()]
 
 
@@ -87,7 +87,7 @@ async def test_sdk_async_work_folder_and_upload(web,tmp_path):
         async with AsyncClient('https://workspace.example','p',credential,http) as alice:
             uploaded=await alice.work_folder(tmp_path/'upload').upload_las(LAS.encode(),name='SDK original',attribution='Original synthetic fixture',audience=['alice','bob'],rights_confirmed=True)
             assert uploaded.can_share
-            await alice.share(uploaded,read=['bob'],reuse=['bob'])
+            await alice.share(uploaded,read=['bob'],reuse=['bob'],expected_generation=(await alice.grants(uploaded)).generation)
             assert 'bob' in (await alice.grants(uploaded)).recipients
             work=alice.work_folder(tmp_path/'calculate')
             binding=await work.configure(uploaded.asset_id,uploaded.revision,curve='GR',name='Async calculation')
@@ -110,7 +110,7 @@ def test_sdk_restricted_result_models_do_not_restore_parent(web):
     binding=alice.configure(original.asset_id,original.revision,curve='GR',name='Shared calculation',command_id='private-parent')
     run=alice.start(binding,application_version='derived/1',parameters={},command_id='private-parent-run');run.input()
     receipt=alice.publish(run,derived_curves=[{'mnemonic':'NEW','unit':'gAPI','description':'Shared result','values':[0,None,60]}])
-    alice.share(receipt,read=['bob'])
+    alice.share(receipt,read=['bob'],expected_generation=alice.grants(receipt).generation)
     summaries=[item for item in bob.results() if item.asset_id==receipt.publication_id];assert len(summaries)==1
     preview=bob.result_preview(receipt);raw,result,visible=bob.result_download(receipt)
     assert raw==alice.download(receipt) and visible.input is None
@@ -242,10 +242,10 @@ def test_sdk_reads_and_exports_typed_data(web,kind,tmp_path):
     assert opened.manifest['bundle_version']=='2.0.0' and [a.type for a in opened.assets]==['well-log','well-tops','trajectory','regular-grid-surface']
     # Bob: refused until shared; then the tops show a restricted log (not shared) and export succeeds without its id.
     with pytest.raises((PermissionRefused,Unavailable)):bob.read_data(tops['asset_id'],tops['revision'])
-    uploads.call('share',{'project_id':'p','asset_id':tops['asset_id'],'audience':['bob']},'alice')
+    uploads.call('share',{'project_id':'p','asset_id':tops['asset_id'],'audience':['bob'],'expected_generation':1},'alice')
     exported=bob.export([(tops['asset_id'],tops['revision'],None)],tmp_path/'bob')
     assert exported.assets[0].relationships=={'well_log':'restricted'} and log['asset_id'] not in (tmp_path/'bob'/'manifest.json').read_text()+(tmp_path/'bob'/'assets/0/descriptor.json').read_text()
-    uploads.call('share',{'project_id':'p','asset_id':tops['asset_id'],'audience':[]},'alice')
+    uploads.call('share',{'project_id':'p','asset_id':tops['asset_id'],'audience':[],'expected_generation':2},'alice')
     with pytest.raises((PermissionRefused,Unavailable)):bob.export([(tops['asset_id'],tops['revision'],None)],tmp_path/'bob-revoked')
     assert not (tmp_path/'bob-revoked').exists()
 

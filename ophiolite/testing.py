@@ -150,7 +150,9 @@ class _MemoryApplications:
                 return 200,copy.deepcopy(answer)
             elif operation=='share':
                 ident=body.get('asset_id',body.get('id'));generation=self.generations.get(ident,1)
-                if self.conditional and body.get('expected_generation') is not None:
+                if self.conditional and body.get('expected_generation') is None:  # E7 cutover: as the server does
+                    return 428,{'error':'Reload who can see this and share again with the version you saw','code':'condition-required'}
+                if self.conditional:
                     command,digest=body.get('command_id'),json.dumps([sorted(body['audience']),sorted(body.get('reuse_audience',[]))])
                     last=self.share_commands.get(ident)
                     if command and last and last[0]==command:

@@ -35,7 +35,7 @@ def test_live_publication(tmp_path):
         after=client.read(receipt.asset['asset_id'],receipt.asset['revision'],['GR','NEW'])
         assert after.curves[1].values==[0,20,None,60,80]
         before=client.grants(receipt)
-        client.share(receipt,read=['reviewer'],reuse=['reviewer'])
+        client.share(receipt,read=['reviewer'],reuse=['reviewer'],expected_generation=client.grants(receipt).generation)
         assert 'reviewer' in client.grants(receipt).recipients
         code="import json,sys;from pathlib import Path;from ophiolite import Client,Credential;c=json.loads(Path(sys.argv[1]).read_text());client=Client(c['url'],c['project'],Credential.bearer(c['token']));assert client.recover(sys.argv[2]) is None;client.close()"
         result=subprocess.run([sys.executable,'-c',code,location,str(work.path)],capture_output=True,text=True,timeout=30)

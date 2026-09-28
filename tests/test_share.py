@@ -12,29 +12,15 @@ def result(client):
     return client.publish(run,derived_curves=[{'mnemonic':'NEW','unit':'gAPI','description':'Synthetic','values':[0]*len(view.values)}])
 
 
-@pytest.mark.filterwarnings('ignore::DeprecationWarning')
-@pytest.mark.parametrize('area',['applications','las-uploads'])
-@pytest.mark.parametrize('failure',['connection','busy'])
-def test_share_ambiguous_outcome_never_replays(area,failure):
+def test_share_requires_the_reviewed_generation():
+    """E7 cutover: there is no unconditional share() any more; a server refuses one sent raw (428)."""
+    import inspect
+    assert inspect.signature(Client.share).parameters['expected_generation'].default is inspect.Parameter.empty
     with fixture_server() as server,Client(server.url,'p',Credential.bearer('oph_api_alice')) as client:
-        asset=result(client) if area=='applications' else client.upload_las(server.handler.original,name='Synthetic',attribution='Original synthetic fixture',audience=['alice','bob'],rights_confirmed=True)
-        handler=server.handler;failed=[]
-        if failure=='connection':server.drop('share',1)
-        else:
-            def busy(method,path,raw,headers):
-                answer=handler(method,path,raw,headers)
-                if path.endswith('/share') and not failed:failed.append(True);return 503,{'error':'busy after commit'}
-                return answer
-            server.handler=busy
-        with pytest.raises(ShareOutcomeUnknown,match='Read the current recipients first') as error:client.share(asset,read=['bob'])
-        assert error.value.retryable is False
-        assert handler.mutations['share']==1
-        assert len([request for request in server.requests if request['path'].endswith('/share')])==1
-        assert client.grants(asset).recipients==['bob']
-        # A replay would succeed and replace the grant set again: it is deliberately
-        # a new, explicit decision after reading the current recipients.
-        client.share(asset,read=['bob'],reuse=['bob'])
-        assert handler.mutations['share']==2
+        asset=client.upload_las(server.handler.original,name='Synthetic',attribution='Original synthetic fixture',audience=['alice','bob'],rights_confirmed=True)
+        with pytest.raises(TypeError):client.share(asset,read=['bob'])
+        raw=client.http.post(server.url+'/api/v1/projects/p/las-uploads/share',json={'project_id':'p','asset_id':asset.asset_id,'audience':['bob']},headers=client._headers())
+        assert raw.status_code==428 and raw.json()['code']=='condition-required' and server.handler.mutations.get('share',0)==0
 
 
 @pytest.mark.parametrize('case',['missing','revision','non-owner','fields','empty','changed'])
@@ -59,7 +45,7 @@ def test_invalid_share_sends_nothing():
     with httpx.Client(transport=httpx.MockTransport(lambda request:requests.append(request))) as http:
         client=Client('http://localhost','p',http=http)
         for read,reuse in (([],['bob']),(['bob','bob'],[]),([True],[])):
-            with pytest.raises(ValidationFailed):client.share({'asset_id':'r','revision':'v','authority':'ophiolite:derived'},read=read,reuse=reuse)
+            with pytest.raises(ValidationFailed):client.share({'asset_id':'r','revision':'v','authority':'ophiolite:derived'},read=read,reuse=reuse,expected_generation=1)
     assert requests==[]
 
 
@@ -107,7 +93,6 @@ def test_conditional_share_refuses_on_a_server_without_generations():
         assert client.grants(asset).generation is None
         with pytest.raises(Exception,match='does not support conditional sharing'):client.share(asset,read=['bob'],expected_generation=1)
         assert server.handler.mutations.get('share',0)==0
-        with pytest.warns(DeprecationWarning,match='expected_generation'):client.share(asset,read=['bob'])
 
 
 @pytest.mark.parametrize('bad',[True,-1,'1',1.0])

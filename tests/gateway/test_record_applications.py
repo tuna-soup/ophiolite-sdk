@@ -24,7 +24,7 @@ def test_gateway_recording_roundtrip(web,tmp_path):
     binding=work.configure(upload.asset_id,upload.revision,curve='GR',name='Recorded calculation')
     run=work.start(binding,application_version='recording/1',parameters={});run.input()
     receipt=work.publish(run,derived_curves=[{'mnemonic':'NEW','unit':'gAPI','description':'Original synthetic result','values':[0,None,60]}])
-    work.download(receipt);alice.share(receipt,read=['bob']);alice.grants(receipt)
+    work.download(receipt);alice.share(receipt,read=['bob'],expected_generation=alice.grants(receipt).generation);alice.grants(receipt)
     assert records and all(row['status']==200 for row in records)
     destination=os.environ.get('OPHIOLITE_RECORDING_DIR')
     if destination:

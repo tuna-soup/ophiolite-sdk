@@ -237,7 +237,6 @@ Linux process-restart/durability-order qualification, not a power-loss guarantee
 | Reads, inspect, options, info, members, results and downloads | Up to three attempts for transient transport/busy responses. |
 | Configure, start, upload and publish | Up to three attempts with the same command/body; folders persist them for later recovery. |
 | Share with `expected_generation` | Once more with the identical command: returns the applied result, or `IntegrityConflict` if anyone changed the recipients meanwhile. |
-| Share without `expected_generation` (deprecated) | Never; an uncertain response raises `ShareOutcomeUnknown`. |
 | Login, refresh and revoke | Never after an ambiguous request outcome. |
 
 Read `grants = client.grants(receipt.asset)`, decide the complete intended
@@ -247,8 +246,8 @@ additive invitation. If someone changed the recipients after your read, the
 server refuses with `IntegrityConflict` and nothing changes: read again and
 decide. A lost response is retried once automatically and can never undo a later
 revocation. Servers without conditional sharing report `generation=None`; the
-conditional form then refuses without sending anything. The unconditional form
-(no `expected_generation`) is deprecated for one announced transition release.
+conditional form then refuses without sending anything. `expected_generation` is
+required: since the E7 transition release servers refuse unconditional replacement (428).
 Unavailable grants (non-owner, absent or mismatching exact revision) are refused,
 never represented as an empty audience. Publication and sharing are separate.
 Restricted result models retain permitted scientific data without fabricating or

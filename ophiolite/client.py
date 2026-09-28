@@ -413,18 +413,16 @@ class Client(Navigation, EntityClient):
                 else self._post('applications','result-list',{}))
         return planning.grants(asset,result)
 
-    def share(self,asset,*,read,reuse=None,expected_generation=None,command_id=None):
-        """Replace recipients.
+    def share(self,asset,*,read,expected_generation,reuse=None,command_id=None):
+        """Replace recipients, conditionally.
 
-        Conditional form (recommended): pass ``expected_generation`` from the
-        ``client.grants(asset)`` snapshot you reviewed. The request carries a
-        command id; after an unknown outcome it is replayed once, which returns
-        the applied result or refuses with IntegrityConflict if anyone changed
-        the recipients meanwhile (a revocation is never undone).
-
-        Without ``expected_generation`` (deprecated) the replacement is
-        unconditional and an ambiguous outcome is never replayed."""
-        import uuid,warnings
+        Pass ``expected_generation`` from the ``client.grants(asset)`` snapshot you
+        reviewed. The request carries a command id; after an unknown outcome it is
+        replayed once, which returns the applied result or refuses with
+        IntegrityConflict if anyone changed the recipients meanwhile (a revocation
+        is never undone). Unconditional replacement ended with the E7 transition
+        release; servers refuse it (428)."""
+        import uuid
         from . import publish as planning
         from .errors import ShareOutcomeUnknown
         from .models.api import UploadResult
@@ -433,17 +431,13 @@ class Client(Navigation, EntityClient):
         uploaded=asset['authority']=='ophiolite:uploaded'
         body={'asset_id' if uploaded else 'id':asset['asset_id'],'audience':read,'reuse_audience':reuse}
         area='las-uploads' if uploaded else 'applications'
-        if expected_generation is None:
-            warnings.warn('Unconditional share() is deprecated; pass expected_generation from client.grants(asset).',DeprecationWarning,stacklevel=2)
-            result=self._post(area,'share',body)
-        else:
-            if type(expected_generation) is not int or expected_generation<0:raise Refused('expected_generation must be a non-negative integer from client.grants(asset).')
-            if command_id is not None and (not isinstance(command_id,str) or not 0<len(command_id)<=64):raise Refused('command_id must be 1-64 characters.')
-            # Never infer support: an older server would apply the request unconditionally.
-            if self.grants(asset).generation is None:raise Refused('This server does not support conditional sharing.')
-            body.update(expected_generation=expected_generation,command_id=command_id or uuid.uuid4().hex)
-            try:result=self._post(area,'share',body)
-            except ShareOutcomeUnknown:result=self._post(area,'share',body)  # identical replay: idempotent or refused
+        if type(expected_generation) is not int or expected_generation<0:raise Refused('expected_generation must be a non-negative integer from client.grants(asset).')
+        if command_id is not None and (not isinstance(command_id,str) or not 0<len(command_id)<=64):raise Refused('command_id must be 1-64 characters.')
+        # Never infer support: an older server would apply the request unconditionally.
+        if self.grants(asset).generation is None:raise Refused('This server does not support conditional sharing.')
+        body.update(expected_generation=expected_generation,command_id=command_id or uuid.uuid4().hex)
+        try:result=self._post(area,'share',body)
+        except ShareOutcomeUnknown:result=self._post(area,'share',body)  # identical replay: idempotent or refused
         parsed=planning.parse(UploadResult,result) if uploaded else planning.parse_result(result)
         # Recipients belong to a result as a whole (every version, E8); an upload has one revision.
         if parsed.asset_id!=asset['asset_id'] or uploaded and parsed.revision!=asset['revision']:raise VerificationFailed('Sharing returned a different exact asset.')
