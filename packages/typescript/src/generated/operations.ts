@@ -257,6 +257,10 @@ export type postProjectsProjectCatalogDescribeInput = { path: { "project": strin
 export function postProjectsProjectCatalogDescribe(transport: Transport, input: postProjectsProjectCatalogDescribeInput): Promise<unknown> {
   return transport.request<unknown>("POST", "/api/v1/projects/{project}/catalog/describe", input.path, undefined, input.body, input.options, null, false);
 }
+export type postProjectsProjectCatalogGetInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectCatalogGet(transport: Transport, input: postProjectsProjectCatalogGetInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/catalog/get", input.path, undefined, input.body, input.options, null, false);
+}
 export type postProjectsProjectCatalogHistoryInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
 export function postProjectsProjectCatalogHistory(transport: Transport, input: postProjectsProjectCatalogHistoryInput): Promise<unknown> {
   return transport.request<unknown>("POST", "/api/v1/projects/{project}/catalog/history", input.path, undefined, input.body, input.options, null, false);
@@ -264,6 +268,14 @@ export function postProjectsProjectCatalogHistory(transport: Transport, input: p
 export type postProjectsProjectCatalogListInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
 export function postProjectsProjectCatalogList(transport: Transport, input: postProjectsProjectCatalogListInput): Promise<unknown> {
   return transport.request<unknown>("POST", "/api/v1/projects/{project}/catalog/list", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectCatalogOriginalInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectCatalogOriginal(transport: Transport, input: postProjectsProjectCatalogOriginalInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/catalog/original", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectCatalogSnapshotInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectCatalogSnapshot(transport: Transport, input: postProjectsProjectCatalogSnapshotInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/catalog/snapshot", input.path, undefined, input.body, input.options, null, false);
 }
 export type postProjectsProjectCollectionsDeleteInput = { path: { "project": string }; body: { "project_id": string; "id"?: (string) | (null); "name"?: string; "description"?: string; "members"?: Array<string>; "generation"?: number }; options?: OperationOptions };
 export function postProjectsProjectCollectionsDelete(transport: Transport, input: postProjectsProjectCollectionsDeleteInput): Promise<unknown> {

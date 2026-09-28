@@ -420,6 +420,12 @@
     "response": "explicitly-untyped"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/catalog/get",
+    "function": "postProjectsProjectCatalogGet",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/catalog/history",
     "function": "postProjectsProjectCatalogHistory",
     "request": "explicitly-untyped",
@@ -428,6 +434,18 @@
   {
     "operation": "POST /api/v1/projects/{project}/catalog/list",
     "function": "postProjectsProjectCatalogList",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/catalog/original",
+    "function": "postProjectsProjectCatalogOriginal",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/catalog/snapshot",
+    "function": "postProjectsProjectCatalogSnapshot",
     "request": "explicitly-untyped",
     "response": "explicitly-untyped"
   },
