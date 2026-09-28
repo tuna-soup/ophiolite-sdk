@@ -408,9 +408,27 @@
     "response": "explicitly-untyped"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/catalog/changes",
+    "function": "postProjectsProjectCatalogChanges",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/catalog/describe",
     "function": "postProjectsProjectCatalogDescribe",
     "request": "schema",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/catalog/history",
+    "function": "postProjectsProjectCatalogHistory",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/catalog/list",
+    "function": "postProjectsProjectCatalogList",
+    "request": "explicitly-untyped",
     "response": "explicitly-untyped"
   },
   {
@@ -566,6 +584,30 @@
   {
     "operation": "POST /api/v1/projects/{project}/entities/share",
     "function": "postProjectsProjectEntitiesShare",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/imports/original-chunk",
+    "function": "postProjectsProjectImportsOriginalChunk",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/imports/snapshot",
+    "function": "postProjectsProjectImportsSnapshot",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/imports/source",
+    "function": "postProjectsProjectImportsSource",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/imports/sources",
+    "function": "postProjectsProjectImportsSources",
     "request": "explicitly-untyped",
     "response": "explicitly-untyped"
   },
@@ -890,6 +932,36 @@
   {
     "operation": "POST /api/v1/projects/{project}/result-groups/save",
     "function": "postProjectsProjectResultGroupsSave",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/reviews/comment-add",
+    "function": "postProjectsProjectReviewsCommentAdd",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/reviews/comment-list",
+    "function": "postProjectsProjectReviewsCommentList",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/reviews/scene-get",
+    "function": "postProjectsProjectReviewsSceneGet",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/reviews/scene-list",
+    "function": "postProjectsProjectReviewsSceneList",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/reviews/scene-save",
+    "function": "postProjectsProjectReviewsSceneSave",
     "request": "explicitly-untyped",
     "response": "explicitly-untyped"
   },
