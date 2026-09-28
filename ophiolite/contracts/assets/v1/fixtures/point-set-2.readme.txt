@@ -1,0 +1,2 @@
+Synthetic export in the shape of the ConSeil 2026 horizon points (authored for the contract fixtures).
+The Z value is two-way travel time in ms, negative below NAP (EPSG:5709).

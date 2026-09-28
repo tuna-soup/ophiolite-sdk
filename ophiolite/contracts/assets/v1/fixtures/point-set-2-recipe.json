@@ -1,0 +1,129 @@
+{
+  "schema": "ophiolite.import-recipe/1",
+  "profile": "petrel-points-attributes/1",
+  "parsing": {
+    "delimiter": "whitespace",
+    "missing": []
+  },
+  "columns": [
+    {
+      "source": "X",
+      "role": "x",
+      "kind": "number"
+    },
+    {
+      "source": "Y",
+      "role": "y",
+      "kind": "number"
+    },
+    {
+      "source": "Z",
+      "role": "z",
+      "kind": "number"
+    },
+    {
+      "source": "TWT auto",
+      "role": "attribute",
+      "kind": "number"
+    },
+    {
+      "source": "KIDTAG,Name",
+      "role": "attribute",
+      "kind": "text"
+    },
+    {
+      "source": "KIDTAG,Data type",
+      "role": "attribute",
+      "kind": "category"
+    },
+    {
+      "source": "FLOAT,PointsNr",
+      "role": "attribute",
+      "kind": "number"
+    }
+  ],
+  "fields": {
+    "z_meaning": {
+      "rules": [
+        {
+          "role": "readme",
+          "pattern": "(?i)\\btime\\b.*\\bms\\b|\\bms\\b.*\\btime\\b",
+          "value": "time"
+        },
+        {
+          "role": "readme",
+          "pattern": "(?i)\\bZ\\b[^.\\n]*\\bdepth\\b",
+          "value": "depth"
+        },
+        {
+          "role": "primary",
+          "pattern": "(?i)^#\\s*Unit in depth",
+          "value": "depth",
+          "sufficient": false
+        }
+      ],
+      "precedence": [
+        "readme",
+        "declaration",
+        "primary"
+      ]
+    },
+    "z_unit": {
+      "rules": [
+        {
+          "role": "readme",
+          "pattern": "(?i)\\btime\\b.*\\b(ms)\\b|\\b(ms)\\b.*\\btime\\b",
+          "value": "ms"
+        },
+        {
+          "role": "primary",
+          "pattern": "(?i)^#\\s*Unit in depth:\\s*(\\S+)",
+          "value": "{1}",
+          "sufficient": false
+        }
+      ],
+      "precedence": [
+        "readme",
+        "declaration",
+        "primary"
+      ]
+    },
+    "vertical_datum": {
+      "rules": [
+        {
+          "role": "readme",
+          "pattern": "EPSG:5709",
+          "value": "NAP (EPSG:5709)"
+        }
+      ]
+    },
+    "positive": {
+      "rules": [
+        {
+          "role": "readme",
+          "pattern": "(?i)\\bnegative below\\b",
+          "value": "up"
+        }
+      ]
+    },
+    "crs": {
+      "rules": [
+        {
+          "role": "crs-metadata",
+          "pattern": "EPSG:?:?(\\d{4,5})",
+          "value": "EPSG:{1}"
+        }
+      ]
+    },
+    "xy_unit": {
+      "rules": [
+        {
+          "role": "primary",
+          "pattern": "(?i)^#\\s*Unit in X and Y direction:\\s*(\\S+)",
+          "value": "{1}"
+        }
+      ]
+    }
+  },
+  "operations": []
+}

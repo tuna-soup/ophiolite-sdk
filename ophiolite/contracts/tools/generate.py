@@ -37,10 +37,10 @@ def digest(raw):
 def schemas():
     """Publish the Pydantic-generated schemas listed in the registry."""
     from project_gateway.scientific_assets import (Asset, AssetSummary, Curve, ScientificContext, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface,
-                                                   PointSet, PolylineSet, SeismicVolume, SeismicSlice)
+                                                   PointSet, PolylineSet, SeismicVolume, SeismicSlice, ImportRecipe, PointSet2)
     from project_gateway.domain import RelationshipRegistry, Entity, EntityAssets, Lineage
     for model in (Asset, Curve, ScientificContext, AssetSummary, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface, PointSet, PolylineSet, SeismicVolume, SeismicSlice,
-                  RelationshipRegistry, Entity, EntityAssets, Lineage):
+                  RelationshipRegistry, Entity, EntityAssets, Lineage, ImportRecipe, PointSet2):
         write(CONTRACTS / model.CONTRACT['path'], model.model_json_schema())
 
 
@@ -104,6 +104,7 @@ def fixtures(target=FIX):
         Asset.model_validate(descriptor)
         write(FIX / f'{name}.json', descriptor)
     typed(FIX)
+    recipe_points(FIX)
     write(FIX/'expected.json', {'axis':[100,101,102,103,104], 'values':[2,12,None,32,40], 'changes':[{'index':0,'value':2.0},{'index':1,'value':12.0},{'index':3,'value':32.0}]})
 
 
@@ -153,6 +154,70 @@ def typed(FIX):
             'supported_operations': ['read', 'export'], 'authorization': {'status': 'not-evaluated'}}
         Asset.model_validate(descriptor)
         write(FIX / f'{name}.json', descriptor)
+
+
+# E23a: a synthetic Petrel "Points with attributes" package (primary, README, CRS metadata) in the
+# ConSeil shape, read through the default recipe into point-set/2. Authored here, not observed data.
+PETREL_PACKAGE = {
+    'point-set-2.original': ('primary', b"""# Petrel Points with attributes
+# Unit in X and Y direction: m
+# Unit in depth: m
+VERSION 1
+BEGIN HEADER
+X
+Y
+Z
+TWT auto
+KIDTAG,Name
+KIDTAG,Data type
+FLOAT,PointsNr
+END HEADER
+614000.12 5873000.50 -1234.5 -1234.5 "SLDND_B_SCANALP2022_T" "Horizon" 1
+614050.00 5873025.75 0 0 "Pick with spaces" "Horizon" 2
+614075.00 5873050.00 -1240.0 -1240.0 "Quoted \\"name\\"" "Fault" 3
+614100.00 5873075.25 -1242.75 -1242.75 "" "Horizon" 4
+"""),
+    'point-set-2.readme.txt': ('readme', b'Synthetic export in the shape of the ConSeil 2026 horizon points (authored for the contract fixtures).\n'
+                                         b'The Z value is two-way travel time in ms, negative below NAP (EPSG:5709).\n'),
+    'point-set-2.crsmeta.xml': ('crs-metadata', b'<?xml version="1.0" encoding="UTF-8"?>\n<CRSMeta><Name>ED50 / UTM zone 31N</Name><Code>EPSG:23031</Code></CRSMeta>\n'),
+}
+
+
+def recipe_points(FIX):
+    """point-set-2 fixtures: the package members, the default recipe and the normalized point-set/2 payload."""
+    from asset_connectors import import_recipe, petrel_points
+    from asset_connectors.source_package import build
+    from asset_connectors.sources import canonical
+    from project_gateway.scientific_assets import ImportRecipe, PointSet2
+    package = build([(name, role, raw) for name, (role, raw) in PETREL_PACKAGE.items()])
+    for name, (_, raw) in PETREL_PACKAGE.items():
+        (FIX / name).write_bytes(raw)
+    ImportRecipe.model_validate(petrel_points.DEFAULT_RECIPE)
+    write(FIX / 'point-set-2-recipe.json', petrel_points.DEFAULT_RECIPE)
+    context, data, fidelity = petrel_points.read(package)
+    raw = package.primary.raw
+    ref = {'authority': 'ophiolite:uploaded', 'key': 'synthetic-petrel-points', 'revision': digest(raw), 'profile': petrel_points.PROFILE}
+    payload = {'schema': 'ophiolite.point-set/2', 'representation': 'normalized', 'source': ref, 'source_sha256': digest(raw),
+               'interpretation': import_recipe.interpretation(petrel_points.READER), 'context': {**context, 'fidelity': fidelity}, **data}
+    PointSet2.model_validate(payload)
+    write(FIX / 'point-set-2-data.json', payload)
+    encoded = (FIX / 'point-set-2-data.json').read_bytes()
+    execution = fidelity['execution']
+    descriptor = {'schema': 'ophiolite.scientific-asset/1', 'asset_id': ref['key'], 'revision': ref['revision'], 'project_id': 'synthetic-project',
+        'authority': ref['authority'], 'origin': 'retained-capture', 'custodian': 'ophiolite:managed', 'source_reference': ref, 'profile': ref['profile'],
+        'scientific': payload['context'], 'interpretation': payload['interpretation'], 'interpretation_evidence': 'live', 'recorded_interpretation': None,
+        'representations': [{'id': 'artifact', 'kind': 'original', 'media_type': 'text/plain', 'profile': ref['profile'], 'bytes': len(raw), 'sha256': digest(raw), 'available': True, 'losses': []},
+                            {'id': 'data', 'kind': 'normalized', 'media_type': 'application/json', 'profile': 'ophiolite.point-set/2', 'bytes': len(encoded), 'sha256': digest(encoded), 'available': True, 'losses': fidelity['losses']}],
+        'package': {'package_digest': package.digest, 'members': [{'name': m['name'], 'role': m['role'], 'sha256': m['digest'], 'bytes': m['bytes']} for m in package.manifest['members']],
+                    'recipe': {'reference': None, 'sha256': digest(canonical(petrel_points.DEFAULT_RECIPE).encode())},
+                    'status': execution['status'], 'unresolved': execution['unresolved']},
+        'retention': {'mode': 'retained', 'policy': 'until authorized lifecycle operation', 'historical_reads': 'while-retained-and-authorized'},
+        'relationships': {'well_log': None}, 'parents': [],
+        'provenance': {'evidence': 'source-declared', 'method': None, 'code_reference': None, 'environment_reference': None, 'omissions': ['Synthetic offline fixture, not a server publication']},
+        'supported_operations': ['read', 'export'], 'authorization': {'status': 'not-evaluated'}}
+    from project_gateway.scientific_assets import Asset
+    Asset.model_validate(descriptor)
+    write(FIX / 'point-set-2.json', descriptor)
 
 
 # ---------------------------------------------------------------------------

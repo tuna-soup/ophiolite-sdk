@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.15.0",
+  "version": "1.17.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -29,7 +29,7 @@
     },
     {
       "id": "ophiolite.contract-profile/1",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "lifecycle": "preview",
       "path": "profile-schema.json",
       "title": "ContractProfile",
@@ -37,7 +37,7 @@
     },
     {
       "id": "ophiolite.scientific-asset/1",
-      "version": "1.9.0",
+      "version": "1.10.0",
       "lifecycle": "preview",
       "path": "assets/v1/schema.json",
       "title": "ScientificAsset",
@@ -114,6 +114,22 @@
       "path": "assets/v1/point-set-schema.json",
       "title": "PointSet",
       "description": "A normalized point set: points and numeric attributes in file order with source reference, digest, context and reader identity."
+    },
+    {
+      "id": "ophiolite.point-set/2",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/point-set-2-schema.json",
+      "title": "PointSet2",
+      "description": "A recipe-read point set: points in file order, number/text/category attributes with exact source labels, and the decisions that set its context."
+    },
+    {
+      "id": "ophiolite.import-recipe/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/import-recipe-schema.json",
+      "title": "ImportRecipe",
+      "description": "An import recipe: columns, parsing, observation rules with precedence, declarations and the registered operations declare, select-column and mark-missing."
     },
     {
       "id": "ophiolite/well-curve/1",
@@ -364,6 +380,38 @@
       "description": "Every point in file order (missing z null) with numeric attributes, extent and the declared CRS, units and vertical meaning.",
       "lifecycle": "preview",
       "path": "profiles/v1/point-set.json"
+    },
+    {
+      "id": "petrel-points-attributes/1",
+      "kind": "source",
+      "display_name": "Petrel points with attributes",
+      "description": "A Petrel \"Points with attributes\" export with its README and CRS metadata, kept byte for byte and read through an import recipe (number, text and category attributes).",
+      "lifecycle": "preview",
+      "path": "profiles/v1/petrel-points-attributes.json"
+    },
+    {
+      "id": "opendtect-horizon-ascii/1",
+      "kind": "source",
+      "display_name": "OpendTect horizon (x y z)",
+      "description": "An OpendTect horizon ASCII export with x, y and z columns, kept byte for byte and read through an import recipe; inline/crossline exports are refused.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/opendtect-horizon-ascii.json"
+    },
+    {
+      "id": "ophiolite.point-set/2",
+      "kind": "normalized",
+      "display_name": "Recipe-read point set",
+      "description": "Every point in file order (missing z null) with number, text and category attributes, each field of context taken from a recorded decision.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/point-set-2.json"
+    },
+    {
+      "id": "ophiolite.import-recipe/1",
+      "kind": "normalized",
+      "display_name": "Import recipe",
+      "description": "How one source dialect is read: column roles and kinds, parsing, missing markers, how each field of context is observed and which observation wins, and only registered operations.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/import-recipe.json"
     },
     {
       "id": "opendtect-faultsticks/1",
@@ -717,6 +765,45 @@
       "kind": "fixture",
       "path": "assets/v1/fixtures/points.json",
       "title": "Synthetic retained points descriptor (E11)",
+      "schema": "ophiolite.scientific-asset/1"
+    },
+    {
+      "id": "ophiolite.fixture/assets/point-set-2.original/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/point-set-2.original",
+      "title": "Synthetic Petrel points-with-attributes primary file (E23a)"
+    },
+    {
+      "id": "ophiolite.fixture/assets/point-set-2.readme.txt/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/point-set-2.readme.txt",
+      "title": "Synthetic README companion stating z meaning, unit and datum (E23a)"
+    },
+    {
+      "id": "ophiolite.fixture/assets/point-set-2.crsmeta.xml/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/point-set-2.crsmeta.xml",
+      "title": "Synthetic CRS metadata companion (E23a)"
+    },
+    {
+      "id": "ophiolite.fixture/assets/point-set-2-recipe.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/point-set-2-recipe.json",
+      "title": "Default Petrel points recipe (E23a)",
+      "schema": "ophiolite.import-recipe/1"
+    },
+    {
+      "id": "ophiolite.fixture/assets/point-set-2-data.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/point-set-2-data.json",
+      "title": "Synthetic normalized point-set/2 data (E23a)",
+      "schema": "ophiolite.point-set/2"
+    },
+    {
+      "id": "ophiolite.fixture/assets/point-set-2.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/point-set-2.json",
+      "title": "Synthetic retained recipe-read points descriptor (E23a)",
       "schema": "ophiolite.scientific-asset/1"
     },
     {

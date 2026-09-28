@@ -95,6 +95,143 @@ class TypedInterpretation(Contract):
     parsing_policy: Literal['typed-strict/1'] = Field(...)
     null_policy: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
 
+class ImportRecipe(Contract):
+    schema_: Literal['ophiolite.import-recipe/1'] = Field(..., alias='schema')
+    profile: Literal['petrel-points-attributes/1', 'opendtect-horizon-ascii/1'] = Field(...)
+    parsing: RecipeParsing = Field({'delimiter': 'whitespace', 'missing': []})
+    columns: Annotated[list[RecipeColumn], Field(min_length=2, max_length=64)] = Field(...)
+    fields: RecipeFields = Field({'crs': None, 'xy_unit': None, 'z_unit': None, 'z_meaning': None, 'positive': None, 'vertical_datum': None})
+    operations: Annotated[list[Annotated[Declare | SelectColumn | MarkMissing, Field(discriminator='op')]], Field(max_length=64)] = Field([])
+    expect: RecipeExpect = Field({'crs': None, 'xy_unit': None, 'z_unit': None, 'z_meaning': None, 'positive': None, 'vertical_datum': None})
+
+class Declare(Contract):
+    op: Literal['declare'] = Field(...)
+    field: Literal['crs', 'xy_unit', 'z_unit', 'z_meaning', 'positive', 'vertical_datum'] = Field(...)
+    value: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+
+class MarkMissing(Contract):
+    op: Literal['mark-missing'] = Field(...)
+    value: Annotated[str, Field(min_length=1, max_length=64)] = Field(...)
+
+class RecipeColumn(Contract):
+    source: Annotated[str, Field(min_length=1, max_length=256)] = Field(...)
+    role: Literal['x', 'y', 'z', 'attribute'] = Field(...)
+    kind: Literal['number', 'text', 'category'] = Field(...)
+    name: Annotated[str, Field(pattern='^[A-Za-z][A-Za-z0-9_]{0,63}$')] | None = Field(None)
+
+class RecipeExpect(Contract):
+    crs: Annotated[str, Field(min_length=1, max_length=128)] | None = Field(None)
+    xy_unit: Annotated[str, Field(min_length=1, max_length=128)] | None = Field(None)
+    z_unit: Annotated[str, Field(min_length=1, max_length=128)] | None = Field(None)
+    z_meaning: Annotated[str, Field(min_length=1, max_length=128)] | None = Field(None)
+    positive: Annotated[str, Field(min_length=1, max_length=128)] | None = Field(None)
+    vertical_datum: Annotated[str, Field(min_length=1, max_length=128)] | None = Field(None)
+
+class RecipeFieldRules(Contract):
+    rules: Annotated[list[RecipeRule], Field(max_length=16)] = Field(...)
+    precedence: Annotated[list[Literal['primary', 'crs-metadata', 'readme', 'companion', 'declaration']], Field(max_length=5)] = Field([])
+
+class RecipeFields(Contract):
+    crs: RecipeFieldRules | None = Field(None)
+    xy_unit: RecipeFieldRules | None = Field(None)
+    z_unit: RecipeFieldRules | None = Field(None)
+    z_meaning: RecipeFieldRules | None = Field(None)
+    positive: RecipeFieldRules | None = Field(None)
+    vertical_datum: RecipeFieldRules | None = Field(None)
+
+class RecipeParsing(Contract):
+    delimiter: Literal['whitespace', 'comma', 'semicolon', 'tab'] = Field('whitespace')
+    missing: Annotated[list[Annotated[str, Field(min_length=1, max_length=64)]], Field(max_length=16)] = Field([])
+
+class RecipeRule(Contract):
+    role: Literal['primary', 'crs-metadata', 'readme', 'companion'] = Field(...)
+    pattern: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    value: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+    sufficient: bool = Field(True)
+
+class SelectColumn(Contract):
+    op: Literal['select-column'] = Field(...)
+    source: Annotated[str, Field(min_length=1, max_length=256)] = Field(...)
+    as_: Literal['x', 'y', 'z', 'attribute'] = Field(..., alias='as')
+
+class PointSet2(Contract):
+    representation: Literal['normalized'] = Field(...)
+    source: Reference = Field(...)
+    source_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    interpretation: RecipeInterpretation = Field(...)
+    schema_: Literal['ophiolite.point-set/2'] = Field(..., alias='schema')
+    context: RecipePointContext = Field(...)
+    points: Annotated[list[Annotated[list[float | None], Field(min_length=3, max_length=3)]], Field(min_length=1, max_length=200000)] = Field(...)
+    attributes: Annotated[list[KindedAttribute], Field(max_length=64)] = Field(...)
+
+class AttributeSpec(Contract):
+    name: Annotated[str, Field(pattern='^[A-Za-z][A-Za-z0-9_]{0,63}$')] = Field(...)
+    source_name: Annotated[str, Field(min_length=1, max_length=256)] = Field(...)
+    kind: Literal['number', 'text', 'category'] = Field(...)
+
+class Decision(Contract):
+    field: Literal['crs', 'xy_unit', 'z_unit', 'z_meaning', 'positive', 'vertical_datum'] = Field(...)
+    observations: Annotated[list[Observation], Field(max_length=32)] = Field(...)
+    selected: Annotated[str, Field(min_length=1, max_length=128)] | None = Field(...)
+    selected_by: Literal['recipe', 'declaration'] | None = Field(...)
+    reason: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    status: Literal['decided', 'needs-decision'] = Field(...)
+
+class Execution(Contract):
+    package_digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    status: Literal['decided', 'needs-decision'] = Field(...)
+    unresolved: Annotated[list[Literal['crs', 'xy_unit', 'z_unit', 'z_meaning', 'positive', 'vertical_datum']], Field(max_length=6)] = Field(...)
+    scientific_problems: Annotated[list[Annotated[str, Field(min_length=1, max_length=512)]], Field(max_length=16)] = Field(...)
+
+class KindedAttribute(Contract):
+    name: Annotated[str, Field(pattern='^[A-Za-z][A-Za-z0-9_]{0,63}$')] = Field(...)
+    source_name: Annotated[str, Field(min_length=1, max_length=256)] = Field(...)
+    kind: Literal['number', 'text', 'category'] = Field(...)
+    values: Annotated[list[float | Annotated[str, Field(max_length=256)] | None], Field(max_length=200000)] = Field(...)
+
+class Observation(Contract):
+    value: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+    source: Literal['member', 'declaration'] = Field(...)
+    role: Literal['primary', 'crs-metadata', 'readme', 'companion', 'declaration'] = Field(...)
+    member: Annotated[str, Field(min_length=1, max_length=200)] | None = Field(None)
+    digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] | None = Field(None)
+    locator: Annotated[str, Field(pattern='^line [1-9][0-9]*$')] | None = Field(None)
+    text: Annotated[str, Field(max_length=200)] | None = Field(None)
+    sufficient: bool = Field(...)
+
+class RecipeFidelity(Contract):
+    status: Literal['assessed'] = Field(...)
+    preserved: Annotated[list[Annotated[str, Field(min_length=1, max_length=512)]], Field(max_length=16)] = Field(...)
+    losses: Annotated[list[Annotated[str, Field(min_length=1, max_length=512)]], Field(max_length=16)] = Field(...)
+    unknown_context: Annotated[list[Literal['crs', 'xy_unit', 'z_unit', 'z_meaning', 'positive', 'vertical_datum']], Field(max_length=6)] = Field(...)
+    decisions: Annotated[list[Decision], Field(max_length=6)] = Field(...)
+    execution: Execution = Field(...)
+    comments: Annotated[list[Annotated[str, Field(max_length=512)]], Field(max_length=256)] | None = Field(None)
+    column_labels: Annotated[list[Annotated[str, Field(min_length=1, max_length=256)]], Field(max_length=64)] | None = Field(None)
+
+class RecipeInterpretation(Contract):
+    reader: Literal['asset_connectors.petrel_points/1', 'asset_connectors.opendtect_horizon/1'] = Field(...)
+    mapping: Literal['point-set/2'] = Field(...)
+    parsing_policy: Literal['import-recipe/1'] = Field(...)
+    null_policy: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+
+class RecipePointContext(Contract):
+    crs: Annotated[str, Field(pattern='^(EPSG:[0-9]{4,6}|unknown)$')] = Field(...)
+    xy_unit: Annotated[str, Field(pattern='^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$')] = Field(...)
+    z_unit: Annotated[str, Field(pattern='^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$')] = Field(...)
+    z_meaning: Literal['depth', 'elevation', 'time', 'unknown'] = Field(...)
+    positive: Literal['up', 'down', 'unknown'] = Field(...)
+    vertical_datum: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+    x_range: Annotated[list[float], Field(min_length=2, max_length=2)] = Field(...)
+    y_range: Annotated[list[float], Field(min_length=2, max_length=2)] = Field(...)
+    z_range: Annotated[list[float], Field(min_length=2, max_length=2)] | None = Field(...)
+    attributes: Annotated[list[AttributeSpec], Field(max_length=64)] = Field(...)
+    fidelity: RecipeFidelity = Field(...)
+    type: Literal['point-set'] = Field(...)
+    count: Annotated[int, Field(ge=1, le=200000)] = Field(...)
+    z_provided: bool = Field(...)
+    missing_z_count: Annotated[int, Field(ge=0, le=200000)] = Field(...)
+
 class PointSet(Contract):
     representation: Literal['normalized'] = Field(...)
     source: Reference = Field(...)
@@ -161,6 +298,7 @@ class XYZ(Contract):
     z: float = Field(...)
 
 class ScientificAsset(Contract):
+    package: PackageRecord | None = Field(None)
     manifest: RevisionManifest | None = Field(None)
     acquisition: Acquisition | None = Field(None)
     relationships: Relationships | None = Field(None)
@@ -175,8 +313,8 @@ class ScientificAsset(Contract):
     custodian: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(...)
     source_reference: Reference | None = Field(...)
     profile: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] = Field(...)
-    scientific: ScientificContext | TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext = Field(...)
-    interpretation: Interpretation | TypedInterpretation = Field(...)
+    scientific: ScientificContext | TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext | RecipePointContext = Field(...)
+    interpretation: Interpretation | TypedInterpretation | RecipeInterpretation = Field(...)
     interpretation_evidence: Literal['live', 'recorded', 'recorded-differs', 'not-recorded'] = Field('live')
     recorded_interpretation: RecordedInterpretation | None = Field(None)
     representations: Annotated[list[Representation], Field(min_length=2, max_length=8)] = Field(...)
@@ -279,6 +417,19 @@ class MeshContext(Contract):
 class NotEvaluated(Contract):
     status: Literal['not-evaluated'] = Field(...)
 
+class PackageMemberRecord(Contract):
+    name: Annotated[str, Field(min_length=1, max_length=200)] = Field(...)
+    role: Literal['primary', 'crs-metadata', 'readme', 'companion'] = Field(...)
+    sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    bytes: Annotated[int, Field(ge=1, le=33554432)] = Field(...)
+
+class PackageRecord(Contract):
+    package_digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    members: Annotated[list[PackageMemberRecord], Field(min_length=1, max_length=8)] = Field(...)
+    recipe: RecipePin = Field(...)
+    status: Literal['decided', 'needs-decision'] = Field(...)
+    unresolved: Annotated[list[Literal['crs', 'xy_unit', 'z_unit', 'z_meaning', 'positive', 'vertical_datum']], Field(max_length=6)] = Field(...)
+
 class Person(Contract):
     id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     label: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(None)
@@ -289,6 +440,14 @@ class Provenance(Contract):
     code_reference: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(...)
     environment_reference: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(...)
     omissions: Annotated[list[Annotated[str, Field(min_length=1, max_length=512)]], Field(max_length=32)] = Field(...)
+
+class RecipePin(Contract):
+    reference: RecipeReference | None = Field(...)
+    sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+
+class RecipeReference(Contract):
+    asset_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    revision: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
 
 class RecordedInterpretation(Contract):
     reader: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9._-]*(/[a-z0-9._-]+)*/[0-9]+$', max_length=128)] = Field(...)
@@ -682,6 +841,7 @@ class ContractProfile(Contract):
     media_types: Annotated[list[Annotated[str, Field(min_length=1)]], Field(min_length=1)] = Field(None)
     normalized_profile: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$')] = Field(None)
     context_schema: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$')] = Field(None)
+    recipe_schema: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$')] = Field(None)
     representation_rules: RepresentationRules = Field(None)
     interpretation: InterpretationIdentity = Field(None)
     mappings: list[Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$')]] = Field(None)
@@ -919,6 +1079,25 @@ GridSurface.model_rebuild()
 Fidelity.model_rebuild()
 GridContext.model_rebuild()
 TypedInterpretation.model_rebuild()
+ImportRecipe.model_rebuild()
+Declare.model_rebuild()
+MarkMissing.model_rebuild()
+RecipeColumn.model_rebuild()
+RecipeExpect.model_rebuild()
+RecipeFieldRules.model_rebuild()
+RecipeFields.model_rebuild()
+RecipeParsing.model_rebuild()
+RecipeRule.model_rebuild()
+SelectColumn.model_rebuild()
+PointSet2.model_rebuild()
+AttributeSpec.model_rebuild()
+Decision.model_rebuild()
+Execution.model_rebuild()
+KindedAttribute.model_rebuild()
+Observation.model_rebuild()
+RecipeFidelity.model_rebuild()
+RecipeInterpretation.model_rebuild()
+RecipePointContext.model_rebuild()
 PointSet.model_rebuild()
 Attribute.model_rebuild()
 PointContext.model_rebuild()
@@ -939,8 +1118,12 @@ ManifestArtifact.model_rebuild()
 ManifestRepresentation.model_rebuild()
 MeshContext.model_rebuild()
 NotEvaluated.model_rebuild()
+PackageMemberRecord.model_rebuild()
+PackageRecord.model_rebuild()
 Person.model_rebuild()
 Provenance.model_rebuild()
+RecipePin.model_rebuild()
+RecipeReference.model_rebuild()
 RecordedInterpretation.model_rebuild()
 Relationships.model_rebuild()
 Representation.model_rebuild()

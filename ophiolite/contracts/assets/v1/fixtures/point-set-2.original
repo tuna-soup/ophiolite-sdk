@@ -1,0 +1,17 @@
+# Petrel Points with attributes
+# Unit in X and Y direction: m
+# Unit in depth: m
+VERSION 1
+BEGIN HEADER
+X
+Y
+Z
+TWT auto
+KIDTAG,Name
+KIDTAG,Data type
+FLOAT,PointsNr
+END HEADER
+614000.12 5873000.50 -1234.5 -1234.5 "SLDND_B_SCANALP2022_T" "Horizon" 1
+614050.00 5873025.75 0 0 "Pick with spaces" "Horizon" 2
+614075.00 5873050.00 -1240.0 -1240.0 "Quoted \"name\"" "Fault" 3
+614100.00 5873075.25 -1242.75 -1242.75 "" "Horizon" 4

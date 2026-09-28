@@ -5,7 +5,7 @@
     "version": "1.0.0-pilot",
     "description": "One public API for every project operation. Three credential kinds reach it: the browser session (opaque HttpOnly cookie plus the X-CSRF-Token proof and, on non-GET requests, the exact Origin), a project-scoped delegate lasting at most five minutes (Bearer oph_api_..., parent session and current native permissions remain mandatory), and a browser-approved provider grant (Bearer provider token plus X-Ophiolite-Application-Grant; capability 1: the scientific read resources and the applications route within its read/write scopes; capability 3 adds reading wells, wellbores and lineage and the LAS upload routes). A request that carries an Authorization header is a machine request and is refused with MACHINE_AUTH_REQUIRED when a cookie or Origin travels with it. Scope and capability are ceilings; every operation runs the same native permission checks whoever calls it. Not a stable SDK or unattended service-account contract.",
     "x-ophiolite-contracts": {
-      "registry_version": "1.15.0",
+      "registry_version": "1.17.0",
       "index": "/api/v1/contracts",
       "served_profiles": [
         "las2/1",
@@ -14,6 +14,8 @@
         "esri-ascii-grid/1",
         "mesh-text/1",
         "points-csv/1",
+        "petrel-points-attributes/1",
+        "opendtect-horizon-ascii/1",
         "opendtect-faultsticks/1",
         "segy/1"
       ]
@@ -9313,7 +9315,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "base64 of a UTF-8 JSON object with this shape: {\"additionalProperties\": false, \"properties\": {\"declared\": {\"additionalProperties\": {\"type\": \"string\"}, \"maxProperties\": 12, \"title\": \"Declared\", \"type\": \"object\"}, \"profile\": {\"default\": \"las2/1\", \"enum\": [\"las2/1\", \"well-tops-csv/1\", \"deviation-csv/1\", \"esri-ascii-grid/1\", \"mesh-text/1\", \"points-csv/1\", \"opendtect-faultsticks/1\", \"segy/1\"], \"title\": \"Profile\", \"type\": \"string\"}, \"project_id\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Project Id\", \"type\": \"string\"}}, \"required\": [\"project_id\"], \"title\": \"Inspection\", \"type\": \"object\"}"
+            "description": "base64 of a UTF-8 JSON object with this shape: {\"additionalProperties\": false, \"properties\": {\"declared\": {\"additionalProperties\": {\"type\": \"string\"}, \"maxProperties\": 12, \"title\": \"Declared\", \"type\": \"object\"}, \"package\": {\"anyOf\": [{\"items\": {\"$ref\": \"#/components/schemas/PackageMember\"}, \"maxItems\": 8, \"minItems\": 1, \"type\": \"array\"}, {\"type\": \"null\"}], \"default\": null, \"title\": \"Package\"}, \"profile\": {\"default\": \"las2/1\", \"enum\": [\"las2/1\", \"well-tops-csv/1\", \"deviation-csv/1\", \"esri-ascii-grid/1\", \"mesh-text/1\", \"points-csv/1\", \"opendtect-faultsticks/1\", \"segy/1\", \"petrel-points-attributes/1\", \"opendtect-horizon-ascii/1\"], \"title\": \"Profile\", \"type\": \"string\"}, \"project_id\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Project Id\", \"type\": \"string\"}, \"recipe\": {\"anyOf\": [{\"$ref\": \"#/components/schemas/RecipeReference\"}, {\"type\": \"null\"}], \"default\": null}}, \"required\": [\"project_id\"], \"title\": \"Inspection\", \"type\": \"object\"}"
           }
         ],
         "requestBody": {
@@ -9409,6 +9411,270 @@
           }
         ],
         "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Operation-specific JSON object; project_id must match the path where the row names a project."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/las-uploads/recipe": {
+      "post": {
+        "summary": "One import recipe at its head or an exact revision, with its document",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Operation-specific JSON object; project_id must match the path where the row names a project."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/las-uploads/recipe-save": {
+      "post": {
+        "summary": "Create an import recipe, or revise yours at the revision you saw (command_id required)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Operation-specific JSON object; project_id must match the path where the row names a project."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/las-uploads/recipe-share": {
+      "post": {
+        "summary": "Set who in the project may read and use your import recipe (expected generation required)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Operation-specific JSON object; project_id must match the path where the row names a project."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/las-uploads/recipes": {
+      "post": {
+        "summary": "Import recipes in this project you may read (heads)",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
           "session"
@@ -9591,7 +9857,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "base64 of a UTF-8 JSON object with this shape: {\"additionalProperties\": false, \"properties\": {\"attribution\": {\"maxLength\": 500, \"minLength\": 1, \"title\": \"Attribution\", \"type\": \"string\"}, \"audience\": {\"items\": {\"type\": \"string\"}, \"maxItems\": 100, \"title\": \"Audience\", \"type\": \"array\"}, \"command_id\": {\"maxLength\": 64, \"minLength\": 1, \"title\": \"Command Id\", \"type\": \"string\"}, \"declared\": {\"additionalProperties\": {\"type\": \"string\"}, \"maxProperties\": 12, \"title\": \"Declared\", \"type\": \"object\"}, \"filename\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Filename\", \"type\": \"string\"}, \"name\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Name\", \"type\": \"string\"}, \"origin\": {\"anyOf\": [{\"$ref\": \"#/components/schemas/BundleOrigin\"}, {\"type\": \"null\"}], \"default\": null}, \"profile\": {\"default\": \"las2/1\", \"enum\": [\"las2/1\", \"well-tops-csv/1\", \"deviation-csv/1\", \"esri-ascii-grid/1\", \"mesh-text/1\", \"points-csv/1\", \"opendtect-faultsticks/1\", \"segy/1\"], \"title\": \"Profile\", \"type\": \"string\"}, \"project_id\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Project Id\", \"type\": \"string\"}, \"rights_confirmed\": {\"const\": true, \"title\": \"Rights Confirmed\", \"type\": \"boolean\"}, \"well_log\": {\"anyOf\": [{\"$ref\": \"#/components/schemas/WellLog\"}, {\"type\": \"null\"}], \"default\": null}, \"well_notes\": {\"default\": \"\", \"maxLength\": 1000, \"title\": \"Well Notes\", \"type\": \"string\"}}, \"required\": [\"project_id\", \"command_id\", \"filename\", \"name\", \"attribution\", \"audience\", \"rights_confirmed\"], \"title\": \"Upload\", \"type\": \"object\"}"
+            "description": "base64 of a UTF-8 JSON object with this shape: {\"additionalProperties\": false, \"properties\": {\"attribution\": {\"maxLength\": 500, \"minLength\": 1, \"title\": \"Attribution\", \"type\": \"string\"}, \"audience\": {\"items\": {\"type\": \"string\"}, \"maxItems\": 100, \"title\": \"Audience\", \"type\": \"array\"}, \"command_id\": {\"maxLength\": 64, \"minLength\": 1, \"title\": \"Command Id\", \"type\": \"string\"}, \"declared\": {\"additionalProperties\": {\"type\": \"string\"}, \"maxProperties\": 12, \"title\": \"Declared\", \"type\": \"object\"}, \"filename\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Filename\", \"type\": \"string\"}, \"name\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Name\", \"type\": \"string\"}, \"origin\": {\"anyOf\": [{\"$ref\": \"#/components/schemas/BundleOrigin\"}, {\"type\": \"null\"}], \"default\": null}, \"package\": {\"anyOf\": [{\"items\": {\"$ref\": \"#/components/schemas/PackageMember\"}, \"maxItems\": 8, \"minItems\": 1, \"type\": \"array\"}, {\"type\": \"null\"}], \"default\": null, \"title\": \"Package\"}, \"profile\": {\"default\": \"las2/1\", \"enum\": [\"las2/1\", \"well-tops-csv/1\", \"deviation-csv/1\", \"esri-ascii-grid/1\", \"mesh-text/1\", \"points-csv/1\", \"opendtect-faultsticks/1\", \"segy/1\", \"petrel-points-attributes/1\", \"opendtect-horizon-ascii/1\"], \"title\": \"Profile\", \"type\": \"string\"}, \"project_id\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Project Id\", \"type\": \"string\"}, \"recipe\": {\"anyOf\": [{\"$ref\": \"#/components/schemas/RecipeReference\"}, {\"type\": \"null\"}], \"default\": null}, \"rights_confirmed\": {\"const\": true, \"title\": \"Rights Confirmed\", \"type\": \"boolean\"}, \"well_log\": {\"anyOf\": [{\"$ref\": \"#/components/schemas/WellLog\"}, {\"type\": \"null\"}], \"default\": null}, \"well_notes\": {\"default\": \"\", \"maxLength\": 1000, \"title\": \"Well Notes\", \"type\": \"string\"}}, \"required\": [\"project_id\", \"command_id\", \"filename\", \"name\", \"attribution\", \"audience\", \"rights_confirmed\"], \"title\": \"Upload\", \"type\": \"object\"}"
           }
         ],
         "requestBody": {
@@ -26825,11 +27091,155 @@
                 "schema": {
                   "x-ophiolite": {
                     "id": "ophiolite.scientific-asset/1",
-                    "version": "1.9.0",
+                    "version": "1.10.0",
                     "lifecycle": "preview"
                   },
                   "additionalProperties": false,
                   "properties": {
+                    "package": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "description": "1.10.0 (E23a): the source package and recipe a recipe-read revision was read with. The manifest\nlists 'package' (the package manifest), 'interpretation' (recipe, decisions, evidence) and one\n'companion:<name>' row per companion member; each is readable as a representation.",
+                          "properties": {
+                            "package_digest": {
+                              "pattern": "^[0-9a-f]{64}$",
+                              "title": "Package Digest",
+                              "type": "string"
+                            },
+                            "members": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "name": {
+                                    "maxLength": 200,
+                                    "minLength": 1,
+                                    "title": "Name",
+                                    "type": "string"
+                                  },
+                                  "role": {
+                                    "enum": [
+                                      "primary",
+                                      "crs-metadata",
+                                      "readme",
+                                      "companion"
+                                    ],
+                                    "title": "Role",
+                                    "type": "string"
+                                  },
+                                  "sha256": {
+                                    "pattern": "^[0-9a-f]{64}$",
+                                    "title": "Sha256",
+                                    "type": "string"
+                                  },
+                                  "bytes": {
+                                    "maximum": 33554432,
+                                    "minimum": 1,
+                                    "title": "Bytes",
+                                    "type": "integer"
+                                  }
+                                },
+                                "required": [
+                                  "name",
+                                  "role",
+                                  "sha256",
+                                  "bytes"
+                                ],
+                                "title": "PackageMemberRecord",
+                                "type": "object"
+                              },
+                              "maxItems": 8,
+                              "minItems": 1,
+                              "title": "Members",
+                              "type": "array"
+                            },
+                            "recipe": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "reference": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": false,
+                                      "description": "A recipe is a project-scoped asset, pinned by asset id and revision (never by a schema version).",
+                                      "properties": {
+                                        "asset_id": {
+                                          "maxLength": 512,
+                                          "minLength": 1,
+                                          "title": "Asset Id",
+                                          "type": "string"
+                                        },
+                                        "revision": {
+                                          "pattern": "^[0-9a-f]{64}$",
+                                          "title": "Revision",
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "asset_id",
+                                        "revision"
+                                      ],
+                                      "title": "RecipeReference",
+                                      "type": "object"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "sha256": {
+                                  "pattern": "^[0-9a-f]{64}$",
+                                  "title": "Sha256",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "reference",
+                                "sha256"
+                              ],
+                              "title": "RecipePin",
+                              "type": "object"
+                            },
+                            "status": {
+                              "enum": [
+                                "decided",
+                                "needs-decision"
+                              ],
+                              "title": "Status",
+                              "type": "string"
+                            },
+                            "unresolved": {
+                              "items": {
+                                "enum": [
+                                  "crs",
+                                  "xy_unit",
+                                  "z_unit",
+                                  "z_meaning",
+                                  "positive",
+                                  "vertical_datum"
+                                ],
+                                "type": "string"
+                              },
+                              "maxItems": 6,
+                              "title": "Unresolved",
+                              "type": "array"
+                            }
+                          },
+                          "required": [
+                            "package_digest",
+                            "members",
+                            "recipe",
+                            "status",
+                            "unresolved"
+                          ],
+                          "title": "PackageRecord",
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
                     "manifest": {
                       "anyOf": [
                         {
@@ -29050,6 +29460,479 @@
                           ],
                           "title": "SeismicContext",
                           "type": "object"
+                        },
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "crs": {
+                              "pattern": "^(EPSG:[0-9]{4,6}|unknown)$",
+                              "title": "Crs",
+                              "type": "string"
+                            },
+                            "xy_unit": {
+                              "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+                              "title": "Xy Unit",
+                              "type": "string"
+                            },
+                            "z_unit": {
+                              "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+                              "title": "Z Unit",
+                              "type": "string"
+                            },
+                            "z_meaning": {
+                              "enum": [
+                                "depth",
+                                "elevation",
+                                "time",
+                                "unknown"
+                              ],
+                              "title": "Z Meaning",
+                              "type": "string"
+                            },
+                            "positive": {
+                              "enum": [
+                                "up",
+                                "down",
+                                "unknown"
+                              ],
+                              "title": "Positive",
+                              "type": "string"
+                            },
+                            "vertical_datum": {
+                              "maxLength": 128,
+                              "minLength": 1,
+                              "title": "Vertical Datum",
+                              "type": "string"
+                            },
+                            "x_range": {
+                              "items": {
+                                "type": "number"
+                              },
+                              "maxItems": 2,
+                              "minItems": 2,
+                              "title": "X Range",
+                              "type": "array"
+                            },
+                            "y_range": {
+                              "items": {
+                                "type": "number"
+                              },
+                              "maxItems": 2,
+                              "minItems": 2,
+                              "title": "Y Range",
+                              "type": "array"
+                            },
+                            "z_range": {
+                              "anyOf": [
+                                {
+                                  "items": {
+                                    "type": "number"
+                                  },
+                                  "maxItems": 2,
+                                  "minItems": 2,
+                                  "type": "array"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "title": "Z Range"
+                            },
+                            "attributes": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "name": {
+                                    "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$",
+                                    "title": "Name",
+                                    "type": "string"
+                                  },
+                                  "source_name": {
+                                    "maxLength": 256,
+                                    "minLength": 1,
+                                    "title": "Source Name",
+                                    "type": "string"
+                                  },
+                                  "kind": {
+                                    "enum": [
+                                      "number",
+                                      "text",
+                                      "category"
+                                    ],
+                                    "title": "Kind",
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "name",
+                                  "source_name",
+                                  "kind"
+                                ],
+                                "title": "AttributeSpec",
+                                "type": "object"
+                              },
+                              "maxItems": 64,
+                              "title": "Attributes",
+                              "type": "array"
+                            },
+                            "fidelity": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "status": {
+                                  "const": "assessed",
+                                  "title": "Status",
+                                  "type": "string"
+                                },
+                                "preserved": {
+                                  "items": {
+                                    "maxLength": 512,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Preserved",
+                                  "type": "array"
+                                },
+                                "losses": {
+                                  "items": {
+                                    "maxLength": 512,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Losses",
+                                  "type": "array"
+                                },
+                                "unknown_context": {
+                                  "items": {
+                                    "enum": [
+                                      "crs",
+                                      "xy_unit",
+                                      "z_unit",
+                                      "z_meaning",
+                                      "positive",
+                                      "vertical_datum"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  "maxItems": 6,
+                                  "title": "Unknown Context",
+                                  "type": "array"
+                                },
+                                "decisions": {
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "field": {
+                                        "enum": [
+                                          "crs",
+                                          "xy_unit",
+                                          "z_unit",
+                                          "z_meaning",
+                                          "positive",
+                                          "vertical_datum"
+                                        ],
+                                        "title": "Field",
+                                        "type": "string"
+                                      },
+                                      "observations": {
+                                        "items": {
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "value": {
+                                              "maxLength": 128,
+                                              "minLength": 1,
+                                              "title": "Value",
+                                              "type": "string"
+                                            },
+                                            "source": {
+                                              "enum": [
+                                                "member",
+                                                "declaration"
+                                              ],
+                                              "title": "Source",
+                                              "type": "string"
+                                            },
+                                            "role": {
+                                              "enum": [
+                                                "primary",
+                                                "crs-metadata",
+                                                "readme",
+                                                "companion",
+                                                "declaration"
+                                              ],
+                                              "title": "Role",
+                                              "type": "string"
+                                            },
+                                            "member": {
+                                              "anyOf": [
+                                                {
+                                                  "maxLength": 200,
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "type": "null"
+                                                }
+                                              ],
+                                              "default": null,
+                                              "title": "Member"
+                                            },
+                                            "digest": {
+                                              "anyOf": [
+                                                {
+                                                  "pattern": "^[0-9a-f]{64}$",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "type": "null"
+                                                }
+                                              ],
+                                              "default": null,
+                                              "title": "Digest"
+                                            },
+                                            "locator": {
+                                              "anyOf": [
+                                                {
+                                                  "pattern": "^line [1-9][0-9]*$",
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "type": "null"
+                                                }
+                                              ],
+                                              "default": null,
+                                              "title": "Locator"
+                                            },
+                                            "text": {
+                                              "anyOf": [
+                                                {
+                                                  "maxLength": 200,
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "type": "null"
+                                                }
+                                              ],
+                                              "default": null,
+                                              "title": "Text"
+                                            },
+                                            "sufficient": {
+                                              "title": "Sufficient",
+                                              "type": "boolean"
+                                            }
+                                          },
+                                          "required": [
+                                            "value",
+                                            "source",
+                                            "role",
+                                            "sufficient"
+                                          ],
+                                          "title": "Observation",
+                                          "type": "object"
+                                        },
+                                        "maxItems": 32,
+                                        "title": "Observations",
+                                        "type": "array"
+                                      },
+                                      "selected": {
+                                        "anyOf": [
+                                          {
+                                            "maxLength": 128,
+                                            "minLength": 1,
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ],
+                                        "title": "Selected"
+                                      },
+                                      "selected_by": {
+                                        "anyOf": [
+                                          {
+                                            "enum": [
+                                              "recipe",
+                                              "declaration"
+                                            ],
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ],
+                                        "title": "Selected By"
+                                      },
+                                      "reason": {
+                                        "maxLength": 512,
+                                        "minLength": 1,
+                                        "title": "Reason",
+                                        "type": "string"
+                                      },
+                                      "status": {
+                                        "enum": [
+                                          "decided",
+                                          "needs-decision"
+                                        ],
+                                        "title": "Status",
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "field",
+                                      "observations",
+                                      "selected",
+                                      "selected_by",
+                                      "reason",
+                                      "status"
+                                    ],
+                                    "title": "Decision",
+                                    "type": "object"
+                                  },
+                                  "maxItems": 6,
+                                  "title": "Decisions",
+                                  "type": "array"
+                                },
+                                "execution": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "package_digest": {
+                                      "pattern": "^[0-9a-f]{64}$",
+                                      "title": "Package Digest",
+                                      "type": "string"
+                                    },
+                                    "status": {
+                                      "enum": [
+                                        "decided",
+                                        "needs-decision"
+                                      ],
+                                      "title": "Status",
+                                      "type": "string"
+                                    },
+                                    "unresolved": {
+                                      "items": {
+                                        "enum": [
+                                          "crs",
+                                          "xy_unit",
+                                          "z_unit",
+                                          "z_meaning",
+                                          "positive",
+                                          "vertical_datum"
+                                        ],
+                                        "type": "string"
+                                      },
+                                      "maxItems": 6,
+                                      "title": "Unresolved",
+                                      "type": "array"
+                                    },
+                                    "scientific_problems": {
+                                      "items": {
+                                        "maxLength": 512,
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      "maxItems": 16,
+                                      "title": "Scientific Problems",
+                                      "type": "array"
+                                    }
+                                  },
+                                  "required": [
+                                    "package_digest",
+                                    "status",
+                                    "unresolved",
+                                    "scientific_problems"
+                                  ],
+                                  "title": "Execution",
+                                  "type": "object"
+                                },
+                                "comments": {
+                                  "anyOf": [
+                                    {
+                                      "items": {
+                                        "maxLength": 512,
+                                        "type": "string"
+                                      },
+                                      "maxItems": 256,
+                                      "type": "array"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "default": null,
+                                  "title": "Comments"
+                                },
+                                "column_labels": {
+                                  "anyOf": [
+                                    {
+                                      "items": {
+                                        "maxLength": 256,
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      "maxItems": 64,
+                                      "type": "array"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "default": null,
+                                  "title": "Column Labels"
+                                }
+                              },
+                              "required": [
+                                "status",
+                                "preserved",
+                                "losses",
+                                "unknown_context",
+                                "decisions",
+                                "execution"
+                              ],
+                              "title": "RecipeFidelity",
+                              "type": "object"
+                            },
+                            "type": {
+                              "const": "point-set",
+                              "title": "Type",
+                              "type": "string"
+                            },
+                            "count": {
+                              "maximum": 200000,
+                              "minimum": 1,
+                              "title": "Count",
+                              "type": "integer"
+                            },
+                            "z_provided": {
+                              "title": "Z Provided",
+                              "type": "boolean"
+                            },
+                            "missing_z_count": {
+                              "maximum": 200000,
+                              "minimum": 0,
+                              "title": "Missing Z Count",
+                              "type": "integer"
+                            }
+                          },
+                          "required": [
+                            "crs",
+                            "xy_unit",
+                            "z_unit",
+                            "z_meaning",
+                            "positive",
+                            "vertical_datum",
+                            "x_range",
+                            "y_range",
+                            "z_range",
+                            "attributes",
+                            "fidelity",
+                            "type",
+                            "count",
+                            "z_provided",
+                            "missing_z_count"
+                          ],
+                          "title": "RecipePointContext",
+                          "type": "object"
                         }
                       ],
                       "title": "Scientific"
@@ -29139,6 +30022,44 @@
                             "null_policy"
                           ],
                           "title": "TypedInterpretation",
+                          "type": "object"
+                        },
+                        {
+                          "additionalProperties": false,
+                          "description": "The executable identity of a recipe reader (Connectors petrel_points / opendtect_horizon).",
+                          "properties": {
+                            "reader": {
+                              "enum": [
+                                "asset_connectors.petrel_points/1",
+                                "asset_connectors.opendtect_horizon/1"
+                              ],
+                              "title": "Reader",
+                              "type": "string"
+                            },
+                            "mapping": {
+                              "const": "point-set/2",
+                              "title": "Mapping",
+                              "type": "string"
+                            },
+                            "parsing_policy": {
+                              "const": "import-recipe/1",
+                              "title": "Parsing Policy",
+                              "type": "string"
+                            },
+                            "null_policy": {
+                              "maxLength": 512,
+                              "minLength": 1,
+                              "title": "Null Policy",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "reader",
+                            "mapping",
+                            "parsing_policy",
+                            "null_policy"
+                          ],
+                          "title": "RecipeInterpretation",
                           "type": "object"
                         }
                       ],
@@ -30208,6 +31129,70 @@
             "type": "string"
           }
         }
+      },
+      "PackageMember": {
+        "additionalProperties": false,
+        "description": "E23a: one file of a source package; the request body is the members' bytes in the listed order.",
+        "properties": {
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "primary",
+              "crs-metadata",
+              "readme",
+              "companion"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "bytes": {
+            "maximum": 33554432,
+            "minimum": 1,
+            "title": "Bytes",
+            "type": "integer"
+          },
+          "sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "role",
+          "bytes",
+          "sha256"
+        ],
+        "title": "PackageMember",
+        "type": "object"
+      },
+      "RecipeReference": {
+        "additionalProperties": false,
+        "description": "E23a: a recipe is a project-scoped asset at an exact revision.",
+        "properties": {
+          "asset_id": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "revision": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Revision",
+            "type": "string"
+          }
+        },
+        "required": [
+          "asset_id",
+          "revision"
+        ],
+        "title": "RecipeReference",
+        "type": "object"
       },
       "Ref": {
         "additionalProperties": false,

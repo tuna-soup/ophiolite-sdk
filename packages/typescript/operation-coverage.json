@@ -672,6 +672,30 @@
     "response": "explicitly-untyped"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/las-uploads/recipe",
+    "function": "postProjectsProjectLasUploadsRecipe",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/las-uploads/recipe-save",
+    "function": "postProjectsProjectLasUploadsRecipeSave",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/las-uploads/recipe-share",
+    "function": "postProjectsProjectLasUploadsRecipeShare",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/las-uploads/recipes",
+    "function": "postProjectsProjectLasUploadsRecipes",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/las-uploads/share",
     "function": "postProjectsProjectLasUploadsShare",
     "request": "explicitly-untyped",

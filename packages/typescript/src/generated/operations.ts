@@ -6,6 +6,8 @@ type WireBundleOrigin = { "kind": "portable-bundle"; "manifest_sha256": string; 
 type WireContractsRegistry = { "schema": "ophiolite.contracts-registry/1"; "version": string; "title": string; "description": string; "id_grammar": string; "lifecycles": Array<{ "id": "preview" | "supported" | "deprecated"; "meaning": string }>; "schemas": Array<{ "id": string; "version": string; "lifecycle": "preview" | "supported" | "deprecated"; "path": string; "title": string; "description": string; "qualified_by"?: string; "cutoff"?: string; "replaced_by"?: string }>; "profiles": Array<{ "id": string; "kind": "source" | "normalized"; "display_name": string; "description": string; "lifecycle": "preview" | "supported" | "deprecated"; "path": string; "qualified_by"?: string; "cutoff"?: string; "replaced_by"?: string }>; "documents": Array<{ "id": string; "kind": "mapping" | "vocabulary" | "generated" | "openapi" | "fixture" | "capability" | "relationships"; "path": string; "title"?: string; "schema"?: string }> };
 type WireDraftRef = { "id": string; "generation": number };
 type WireError = { "error": string; "code": string; [key: string]: unknown };
+type WirePackageMember = { "name": string; "role": "primary" | "crs-metadata" | "readme" | "companion"; "bytes": number; "sha256": string };
+type WireRecipeReference = { "asset_id": string; "revision": string };
 type WireRef = { "project_id": string; "asset_id": string; "revision": string };
 type WireSourceParent = { "project_id": string; "asset_id": string; "revision": string };
 type WireWellLog = { "asset_id": string; "revision": string };
@@ -420,6 +422,22 @@ export function postProjectsProjectLasUploadsMembers(transport: Transport, input
 export type postProjectsProjectLasUploadsPolicyInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
 export function postProjectsProjectLasUploadsPolicy(transport: Transport, input: postProjectsProjectLasUploadsPolicyInput): Promise<unknown> {
   return transport.request<unknown>("POST", "/api/v1/projects/{project}/las-uploads/policy", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectLasUploadsRecipeInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectLasUploadsRecipe(transport: Transport, input: postProjectsProjectLasUploadsRecipeInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/las-uploads/recipe", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectLasUploadsRecipeSaveInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectLasUploadsRecipeSave(transport: Transport, input: postProjectsProjectLasUploadsRecipeSaveInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/las-uploads/recipe-save", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectLasUploadsRecipeShareInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectLasUploadsRecipeShare(transport: Transport, input: postProjectsProjectLasUploadsRecipeShareInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/las-uploads/recipe-share", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectLasUploadsRecipesInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectLasUploadsRecipes(transport: Transport, input: postProjectsProjectLasUploadsRecipesInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/las-uploads/recipes", input.path, undefined, input.body, input.options, null, false);
 }
 export type postProjectsProjectLasUploadsShareInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
 export function postProjectsProjectLasUploadsShare(transport: Transport, input: postProjectsProjectLasUploadsShareInput): Promise<unknown> {

@@ -1,0 +1,290 @@
+{
+  "schema": "ophiolite.point-set/2",
+  "representation": "normalized",
+  "source": {
+    "authority": "ophiolite:uploaded",
+    "key": "synthetic-petrel-points",
+    "revision": "c3070963e51644452b9fbdcfed354579d03259a5ee20ad7dae5909bc908d2dfb",
+    "profile": "petrel-points-attributes/1"
+  },
+  "source_sha256": "c3070963e51644452b9fbdcfed354579d03259a5ee20ad7dae5909bc908d2dfb",
+  "interpretation": {
+    "reader": "asset_connectors.petrel_points/1",
+    "mapping": "point-set/2",
+    "parsing_policy": "import-recipe/1",
+    "null_policy": "only the recipe's declared missing markers are missing; never zero-filled"
+  },
+  "context": {
+    "type": "point-set",
+    "crs": "EPSG:23031",
+    "xy_unit": "m",
+    "z_unit": "ms",
+    "z_meaning": "time",
+    "positive": "up",
+    "vertical_datum": "NAP (EPSG:5709)",
+    "x_range": [
+      614000.12,
+      614100.0
+    ],
+    "y_range": [
+      5873000.5,
+      5873075.25
+    ],
+    "z_range": [
+      -1242.75,
+      0.0
+    ],
+    "count": 4,
+    "z_provided": true,
+    "missing_z_count": 0,
+    "attributes": [
+      {
+        "name": "TWT_auto",
+        "source_name": "TWT auto",
+        "kind": "number"
+      },
+      {
+        "name": "KIDTAG_Name",
+        "source_name": "KIDTAG,Name",
+        "kind": "text"
+      },
+      {
+        "name": "KIDTAG_Data_type",
+        "source_name": "KIDTAG,Data type",
+        "kind": "category"
+      },
+      {
+        "name": "FLOAT_PointsNr",
+        "source_name": "FLOAT,PointsNr",
+        "kind": "number"
+      }
+    ],
+    "fidelity": {
+      "status": "assessed",
+      "preserved": [
+        "every point in file order",
+        "text and category values exactly as quoted",
+        "missing values as null (recipe markers only)",
+        "source column labels as source_name"
+      ],
+      "losses": [
+        "Comment lines and number spelling are kept only in the exact original"
+      ],
+      "unknown_context": [],
+      "decisions": [
+        {
+          "field": "crs",
+          "observations": [
+            {
+              "value": "EPSG:23031",
+              "source": "member",
+              "member": "point-set-2.crsmeta.xml",
+              "role": "crs-metadata",
+              "digest": "059fd3ba90975429682cc08221cafc55a48182a5da3d4cf651b5a3d9593e2549",
+              "locator": "line 2",
+              "text": "<CRSMeta><Name>ED50 / UTM zone 31N</Name><Code>EPSG:23031</Code></CRSMeta>",
+              "sufficient": true
+            }
+          ],
+          "selected": "EPSG:23031",
+          "selected_by": "recipe",
+          "reason": "all observations agree: point-set-2.crsmeta.xml (059fd3ba9097, line 2)",
+          "status": "decided"
+        },
+        {
+          "field": "positive",
+          "observations": [
+            {
+              "value": "up",
+              "source": "member",
+              "member": "point-set-2.readme.txt",
+              "role": "readme",
+              "digest": "7f90ca1184f3af05cae6bdb28499db5992ee3c7d9edcf00f95b8e6d629833905",
+              "locator": "line 2",
+              "text": "The Z value is two-way travel time in ms, negative below NAP (EPSG:5709).",
+              "sufficient": true
+            }
+          ],
+          "selected": "up",
+          "selected_by": "recipe",
+          "reason": "all observations agree: point-set-2.readme.txt (7f90ca1184f3, line 2)",
+          "status": "decided"
+        },
+        {
+          "field": "vertical_datum",
+          "observations": [
+            {
+              "value": "NAP (EPSG:5709)",
+              "source": "member",
+              "member": "point-set-2.readme.txt",
+              "role": "readme",
+              "digest": "7f90ca1184f3af05cae6bdb28499db5992ee3c7d9edcf00f95b8e6d629833905",
+              "locator": "line 2",
+              "text": "The Z value is two-way travel time in ms, negative below NAP (EPSG:5709).",
+              "sufficient": true
+            }
+          ],
+          "selected": "NAP (EPSG:5709)",
+          "selected_by": "recipe",
+          "reason": "all observations agree: point-set-2.readme.txt (7f90ca1184f3, line 2)",
+          "status": "decided"
+        },
+        {
+          "field": "xy_unit",
+          "observations": [
+            {
+              "value": "m",
+              "source": "member",
+              "member": "point-set-2.original",
+              "role": "primary",
+              "digest": "c3070963e51644452b9fbdcfed354579d03259a5ee20ad7dae5909bc908d2dfb",
+              "locator": "line 2",
+              "text": "# Unit in X and Y direction: m",
+              "sufficient": true
+            }
+          ],
+          "selected": "m",
+          "selected_by": "recipe",
+          "reason": "all observations agree: point-set-2.original (c3070963e516, line 2)",
+          "status": "decided"
+        },
+        {
+          "field": "z_meaning",
+          "observations": [
+            {
+              "value": "time",
+              "source": "member",
+              "member": "point-set-2.readme.txt",
+              "role": "readme",
+              "digest": "7f90ca1184f3af05cae6bdb28499db5992ee3c7d9edcf00f95b8e6d629833905",
+              "locator": "line 2",
+              "text": "The Z value is two-way travel time in ms, negative below NAP (EPSG:5709).",
+              "sufficient": true
+            },
+            {
+              "value": "depth",
+              "source": "member",
+              "member": "point-set-2.original",
+              "role": "primary",
+              "digest": "c3070963e51644452b9fbdcfed354579d03259a5ee20ad7dae5909bc908d2dfb",
+              "locator": "line 3",
+              "text": "# Unit in depth: m",
+              "sufficient": false
+            }
+          ],
+          "selected": "time",
+          "selected_by": "recipe",
+          "reason": "the recipe ranks readme first among conflicting observations: point-set-2.readme.txt (7f90ca1184f3, line 2)",
+          "status": "decided"
+        },
+        {
+          "field": "z_unit",
+          "observations": [
+            {
+              "value": "ms",
+              "source": "member",
+              "member": "point-set-2.readme.txt",
+              "role": "readme",
+              "digest": "7f90ca1184f3af05cae6bdb28499db5992ee3c7d9edcf00f95b8e6d629833905",
+              "locator": "line 2",
+              "text": "The Z value is two-way travel time in ms, negative below NAP (EPSG:5709).",
+              "sufficient": true
+            },
+            {
+              "value": "m",
+              "source": "member",
+              "member": "point-set-2.original",
+              "role": "primary",
+              "digest": "c3070963e51644452b9fbdcfed354579d03259a5ee20ad7dae5909bc908d2dfb",
+              "locator": "line 3",
+              "text": "# Unit in depth: m",
+              "sufficient": false
+            }
+          ],
+          "selected": "ms",
+          "selected_by": "recipe",
+          "reason": "the recipe ranks readme first among conflicting observations: point-set-2.readme.txt (7f90ca1184f3, line 2)",
+          "status": "decided"
+        }
+      ],
+      "execution": {
+        "package_digest": "90524498601813dd6c8ed5991f5fa7e8499ea2f2f739c4e3b6846056014def63",
+        "status": "decided",
+        "unresolved": [],
+        "scientific_problems": []
+      },
+      "comments": [
+        "# Unit in X and Y direction: m",
+        "# Unit in depth: m"
+      ]
+    }
+  },
+  "points": [
+    [
+      614000.12,
+      5873000.5,
+      -1234.5
+    ],
+    [
+      614050.0,
+      5873025.75,
+      0.0
+    ],
+    [
+      614075.0,
+      5873050.0,
+      -1240.0
+    ],
+    [
+      614100.0,
+      5873075.25,
+      -1242.75
+    ]
+  ],
+  "attributes": [
+    {
+      "name": "TWT_auto",
+      "source_name": "TWT auto",
+      "kind": "number",
+      "values": [
+        -1234.5,
+        0.0,
+        -1240.0,
+        -1242.75
+      ]
+    },
+    {
+      "name": "KIDTAG_Name",
+      "source_name": "KIDTAG,Name",
+      "kind": "text",
+      "values": [
+        "SLDND_B_SCANALP2022_T",
+        "Pick with spaces",
+        "Quoted \"name\"",
+        ""
+      ]
+    },
+    {
+      "name": "KIDTAG_Data_type",
+      "source_name": "KIDTAG,Data type",
+      "kind": "category",
+      "values": [
+        "Horizon",
+        "Horizon",
+        "Fault",
+        "Horizon"
+      ]
+    },
+    {
+      "name": "FLOAT_PointsNr",
+      "source_name": "FLOAT,PointsNr",
+      "kind": "number",
+      "values": [
+        1.0,
+        2.0,
+        3.0,
+        4.0
+      ]
+    }
+  ]
+}

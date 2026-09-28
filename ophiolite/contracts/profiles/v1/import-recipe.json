@@ -1,0 +1,13 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "ophiolite.import-recipe/1",
+  "kind": "normalized",
+  "lifecycle": "preview",
+  "display_name": "Import recipe",
+  "description": "How one source dialect is read: column roles and kinds, parsing, missing markers, how each field of context is observed and which observation wins, and only registered operations.",
+  "payload_schema": "ophiolite.import-recipe/1",
+  "role": "normalized",
+  "media_types": [
+    "application/json"
+  ]
+}

@@ -58,6 +58,15 @@
       ]
     },
     {
+      "profile": "ophiolite.point-set/2",
+      "osdu": "work-product-component--GenericRepresentation / point-set-like (no direct OSDU storage schema declared)",
+      "energistics": "RESQML 2.0.1 PointSetRepresentation with continuous, discrete (text) and categorical properties",
+      "differences": [
+        "A single patch of points; text and category attributes are kept as written, with no RESQML property-kind or string-lookup mapping.",
+        "Coordinates as written; the decided CRS is not transformed and time is not converted to depth."
+      ]
+    },
+    {
       "profile": "ophiolite.polyline-set/1",
       "osdu": "work-product-component--FaultInterpretation with polyline geometry (no one-to-one stick set)",
       "energistics": "RESQML 2.0.1 PolylineSetRepresentation (fault sticks as polylines of a FaultInterpretation)",

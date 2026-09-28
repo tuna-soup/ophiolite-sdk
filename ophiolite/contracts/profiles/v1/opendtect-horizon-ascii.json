@@ -1,0 +1,33 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "opendtect-horizon-ascii/1",
+  "kind": "source",
+  "lifecycle": "preview",
+  "display_name": "OpendTect horizon (x y z)",
+  "description": "An OpendTect horizon ASCII export with x, y and z columns, kept byte for byte and read through an import recipe; inline/crossline exports are refused.",
+  "serves": [
+    "ophiolite.scientific-asset/1"
+  ],
+  "connector": {
+    "scientific_profile": "point-set-source/2",
+    "source_schema": "OpendTect/horizon-ascii/x-y-z",
+    "mapping_version": "point-set/2",
+    "history": "retained-exact-read"
+  },
+  "role": "artifact",
+  "media_types": [
+    "text/plain"
+  ],
+  "normalized_profile": "ophiolite.point-set/2",
+  "context_schema": "ophiolite.point-set/2",
+  "recipe_schema": "ophiolite.import-recipe/1",
+  "representation_rules": {
+    "artifact_kind_by_origin": {
+      "source-reference": "original",
+      "retained-capture": "original",
+      "managed-derived": "derived-artifact"
+    },
+    "normalized": 1,
+    "total": 2
+  }
+}

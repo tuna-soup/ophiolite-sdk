@@ -1,0 +1,508 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/assets/v1/import-recipe-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.import-recipe/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "Declare": {
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "const": "declare",
+          "title": "Op",
+          "type": "string"
+        },
+        "field": {
+          "enum": [
+            "crs",
+            "xy_unit",
+            "z_unit",
+            "z_meaning",
+            "positive",
+            "vertical_datum"
+          ],
+          "title": "Field",
+          "type": "string"
+        },
+        "value": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "op",
+        "field",
+        "value"
+      ],
+      "title": "Declare",
+      "type": "object"
+    },
+    "MarkMissing": {
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "const": "mark-missing",
+          "title": "Op",
+          "type": "string"
+        },
+        "value": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "op",
+        "value"
+      ],
+      "title": "MarkMissing",
+      "type": "object"
+    },
+    "RecipeColumn": {
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "x",
+            "y",
+            "z",
+            "attribute"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "number",
+            "text",
+            "category"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        }
+      },
+      "required": [
+        "source",
+        "role",
+        "kind"
+      ],
+      "title": "RecipeColumn",
+      "type": "object"
+    },
+    "RecipeExpect": {
+      "additionalProperties": false,
+      "description": "Reusable scientific constraints: a later upload's fresh decision must still select these values.",
+      "properties": {
+        "crs": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Crs"
+        },
+        "xy_unit": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Xy Unit"
+        },
+        "z_unit": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Z Unit"
+        },
+        "z_meaning": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Z Meaning"
+        },
+        "positive": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Positive"
+        },
+        "vertical_datum": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Vertical Datum"
+        }
+      },
+      "title": "RecipeExpect",
+      "type": "object"
+    },
+    "RecipeFieldRules": {
+      "additionalProperties": false,
+      "properties": {
+        "rules": {
+          "items": {
+            "$ref": "#/$defs/RecipeRule"
+          },
+          "maxItems": 16,
+          "title": "Rules",
+          "type": "array"
+        },
+        "precedence": {
+          "default": [],
+          "items": {
+            "enum": [
+              "primary",
+              "crs-metadata",
+              "readme",
+              "companion",
+              "declaration"
+            ],
+            "type": "string"
+          },
+          "maxItems": 5,
+          "title": "Precedence",
+          "type": "array"
+        }
+      },
+      "required": [
+        "rules"
+      ],
+      "title": "RecipeFieldRules",
+      "type": "object"
+    },
+    "RecipeFields": {
+      "additionalProperties": false,
+      "description": "Observation rules per interpreted field; a field without rules is decided only by a declaration.",
+      "properties": {
+        "crs": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecipeFieldRules"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "xy_unit": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecipeFieldRules"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "z_unit": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecipeFieldRules"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "z_meaning": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecipeFieldRules"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "positive": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecipeFieldRules"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "vertical_datum": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecipeFieldRules"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "RecipeFields",
+      "type": "object"
+    },
+    "RecipeParsing": {
+      "additionalProperties": false,
+      "properties": {
+        "delimiter": {
+          "default": "whitespace",
+          "enum": [
+            "whitespace",
+            "comma",
+            "semicolon",
+            "tab"
+          ],
+          "title": "Delimiter",
+          "type": "string"
+        },
+        "missing": {
+          "default": [],
+          "items": {
+            "maxLength": 64,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Missing",
+          "type": "array"
+        }
+      },
+      "title": "RecipeParsing",
+      "type": "object"
+    },
+    "RecipeRule": {
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "enum": [
+            "primary",
+            "crs-metadata",
+            "readme",
+            "companion"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "pattern": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Pattern",
+          "type": "string"
+        },
+        "value": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Value",
+          "type": "string"
+        },
+        "sufficient": {
+          "default": true,
+          "title": "Sufficient",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "role",
+        "pattern",
+        "value"
+      ],
+      "title": "RecipeRule",
+      "type": "object"
+    },
+    "SelectColumn": {
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "const": "select-column",
+          "title": "Op",
+          "type": "string"
+        },
+        "source": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "as": {
+          "enum": [
+            "x",
+            "y",
+            "z",
+            "attribute"
+          ],
+          "title": "As",
+          "type": "string"
+        }
+      },
+      "required": [
+        "op",
+        "source",
+        "as"
+      ],
+      "title": "SelectColumn",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "ophiolite.import-recipe/1. Only declare, select-column and mark-missing are registered operations;\nanything else (a unit conversion, time-to-depth, a new reader) is refused by the schema.",
+  "properties": {
+    "schema": {
+      "const": "ophiolite.import-recipe/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "profile": {
+      "enum": [
+        "petrel-points-attributes/1",
+        "opendtect-horizon-ascii/1"
+      ],
+      "title": "Profile",
+      "type": "string"
+    },
+    "parsing": {
+      "$ref": "#/$defs/RecipeParsing",
+      "default": {
+        "delimiter": "whitespace",
+        "missing": []
+      }
+    },
+    "columns": {
+      "items": {
+        "$ref": "#/$defs/RecipeColumn"
+      },
+      "maxItems": 64,
+      "minItems": 2,
+      "title": "Columns",
+      "type": "array"
+    },
+    "fields": {
+      "$ref": "#/$defs/RecipeFields",
+      "default": {
+        "crs": null,
+        "xy_unit": null,
+        "z_unit": null,
+        "z_meaning": null,
+        "positive": null,
+        "vertical_datum": null
+      }
+    },
+    "operations": {
+      "default": [],
+      "items": {
+        "discriminator": {
+          "mapping": {
+            "declare": "#/$defs/Declare",
+            "mark-missing": "#/$defs/MarkMissing",
+            "select-column": "#/$defs/SelectColumn"
+          },
+          "propertyName": "op"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/Declare"
+          },
+          {
+            "$ref": "#/$defs/SelectColumn"
+          },
+          {
+            "$ref": "#/$defs/MarkMissing"
+          }
+        ]
+      },
+      "maxItems": 64,
+      "title": "Operations",
+      "type": "array"
+    },
+    "expect": {
+      "$ref": "#/$defs/RecipeExpect",
+      "default": {
+        "crs": null,
+        "xy_unit": null,
+        "z_unit": null,
+        "z_meaning": null,
+        "positive": null,
+        "vertical_datum": null
+      }
+    }
+  },
+  "required": [
+    "schema",
+    "profile",
+    "columns"
+  ],
+  "title": "ImportRecipe",
+  "type": "object"
+}

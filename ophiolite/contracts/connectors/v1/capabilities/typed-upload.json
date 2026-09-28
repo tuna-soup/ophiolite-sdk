@@ -3,7 +3,7 @@
   "id": "typed-upload",
   "display_name": "Tops, survey, grid, fault and seismic upload",
   "kind": "source",
-  "summary": "Upload well tops, deviation surveys, horizon grids, triangulated surfaces, point sets, fault sticks or SEG-Y seismic volumes; declared context stays as declared.",
+  "summary": "Upload well tops, deviation surveys, horizon grids, triangulated surfaces, point sets, fault sticks, SEG-Y seismic volumes, or Petrel and OpendTect horizon point exports; declared context stays as declared.",
   "host": {
     "name": "Web browser",
     "versions": [],
@@ -155,6 +155,50 @@
         "little-endian or variable-length traces",
         "irregular grids",
         "volume export"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    },
+    {
+      "profile": "petrel-points-attributes/1",
+      "data": "Petrel points with attributes (horizon points)",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "Comment lines and number spelling are kept only in the exact original"
+      ],
+      "unsupported": [
+        "CRS transformation",
+        "unit conversion",
+        "time-to-depth",
+        "inline/crossline horizons"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    },
+    {
+      "profile": "opendtect-horizon-ascii/1",
+      "data": "OpendTect horizon (x y z)",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "Number spelling and spacing are kept only in the exact original"
+      ],
+      "unsupported": [
+        "CRS transformation",
+        "unit conversion",
+        "time-to-depth",
+        "inline/crossline horizons"
       ],
       "qualification": {
         "status": "unverified",

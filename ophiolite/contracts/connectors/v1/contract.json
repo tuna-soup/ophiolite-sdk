@@ -17,7 +17,9 @@
     "mesh-text/1": {"scientific_profile": "triangulated-surface-source/1", "source_schema": "ophiolite-mesh/1", "mapping_version": "triangulated-surface/1", "history": "retained-exact-read"},
     "points-csv/1": {"scientific_profile": "point-set-source/1", "source_schema": "CSV/x,y[,z][,attributes]", "mapping_version": "point-set/1", "history": "retained-exact-read"},
     "opendtect-faultsticks/1": {"scientific_profile": "polyline-set-source/1", "source_schema": "OpendTect-FaultStickSet-ASCII", "mapping_version": "polyline-set/1", "history": "retained-exact-read"},
-    "segy/1": {"scientific_profile": "seismic-volume-source/1", "source_schema": "SEG-Y/rev1-2,formats-1-5,big-endian,fixed", "mapping_version": "seismic-volume/1", "history": "retained-exact-read"}
+    "segy/1": {"scientific_profile": "seismic-volume-source/1", "source_schema": "SEG-Y/rev1-2,formats-1-5,big-endian,fixed", "mapping_version": "seismic-volume/1", "history": "retained-exact-read"},
+    "petrel-points-attributes/1": {"scientific_profile": "point-set-source/2", "source_schema": "Petrel/points-with-attributes/VERSION-1", "mapping_version": "point-set/2", "history": "retained-exact-read"},
+    "opendtect-horizon-ascii/1": {"scientific_profile": "point-set-source/2", "source_schema": "OpendTect/horizon-ascii/x-y-z", "mapping_version": "point-set/2", "history": "retained-exact-read"}
   },
   "policy_defaults": {"retained": false, "retention_permitted": false, "redistribution_permitted": false, "audience": []},
   "identity": {"entity": "source namespace plus explicit stable entity key; never name or coordinate inference", "revision": "exact source revision; opaque string", "representation": "profile plus payload SHA-256; does not create a new authority"},

@@ -1,0 +1,695 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/assets/v1/point-set-2-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.point-set/2",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "AttributeSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "source_name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Source Name",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "number",
+            "text",
+            "category"
+          ],
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "source_name",
+        "kind"
+      ],
+      "title": "AttributeSpec",
+      "type": "object"
+    },
+    "Decision": {
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "enum": [
+            "crs",
+            "xy_unit",
+            "z_unit",
+            "z_meaning",
+            "positive",
+            "vertical_datum"
+          ],
+          "title": "Field",
+          "type": "string"
+        },
+        "observations": {
+          "items": {
+            "$ref": "#/$defs/Observation"
+          },
+          "maxItems": 32,
+          "title": "Observations",
+          "type": "array"
+        },
+        "selected": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Selected"
+        },
+        "selected_by": {
+          "anyOf": [
+            {
+              "enum": [
+                "recipe",
+                "declaration"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Selected By"
+        },
+        "reason": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "decided",
+            "needs-decision"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "observations",
+        "selected",
+        "selected_by",
+        "reason",
+        "status"
+      ],
+      "title": "Decision",
+      "type": "object"
+    },
+    "Execution": {
+      "additionalProperties": false,
+      "properties": {
+        "package_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Package Digest",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "decided",
+            "needs-decision"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "unresolved": {
+          "items": {
+            "enum": [
+              "crs",
+              "xy_unit",
+              "z_unit",
+              "z_meaning",
+              "positive",
+              "vertical_datum"
+            ],
+            "type": "string"
+          },
+          "maxItems": 6,
+          "title": "Unresolved",
+          "type": "array"
+        },
+        "scientific_problems": {
+          "items": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Scientific Problems",
+          "type": "array"
+        }
+      },
+      "required": [
+        "package_digest",
+        "status",
+        "unresolved",
+        "scientific_problems"
+      ],
+      "title": "Execution",
+      "type": "object"
+    },
+    "KindedAttribute": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "source_name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Source Name",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "number",
+            "text",
+            "category"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "values": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "maxLength": 256,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "maxItems": 200000,
+          "title": "Values",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "source_name",
+        "kind",
+        "values"
+      ],
+      "title": "KindedAttribute",
+      "type": "object"
+    },
+    "Observation": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Value",
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "member",
+            "declaration"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "primary",
+            "crs-metadata",
+            "readme",
+            "companion",
+            "declaration"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "member": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Member"
+        },
+        "digest": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Digest"
+        },
+        "locator": {
+          "anyOf": [
+            {
+              "pattern": "^line [1-9][0-9]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Locator"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Text"
+        },
+        "sufficient": {
+          "title": "Sufficient",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "value",
+        "source",
+        "role",
+        "sufficient"
+      ],
+      "title": "Observation",
+      "type": "object"
+    },
+    "RecipeFidelity": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "const": "assessed",
+          "title": "Status",
+          "type": "string"
+        },
+        "preserved": {
+          "items": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Preserved",
+          "type": "array"
+        },
+        "losses": {
+          "items": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Losses",
+          "type": "array"
+        },
+        "unknown_context": {
+          "items": {
+            "enum": [
+              "crs",
+              "xy_unit",
+              "z_unit",
+              "z_meaning",
+              "positive",
+              "vertical_datum"
+            ],
+            "type": "string"
+          },
+          "maxItems": 6,
+          "title": "Unknown Context",
+          "type": "array"
+        },
+        "decisions": {
+          "items": {
+            "$ref": "#/$defs/Decision"
+          },
+          "maxItems": 6,
+          "title": "Decisions",
+          "type": "array"
+        },
+        "execution": {
+          "$ref": "#/$defs/Execution"
+        },
+        "comments": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 512,
+                "type": "string"
+              },
+              "maxItems": 256,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Comments"
+        },
+        "column_labels": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 256,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 64,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Column Labels"
+        }
+      },
+      "required": [
+        "status",
+        "preserved",
+        "losses",
+        "unknown_context",
+        "decisions",
+        "execution"
+      ],
+      "title": "RecipeFidelity",
+      "type": "object"
+    },
+    "RecipeInterpretation": {
+      "additionalProperties": false,
+      "description": "The executable identity of a recipe reader (Connectors petrel_points / opendtect_horizon).",
+      "properties": {
+        "reader": {
+          "enum": [
+            "asset_connectors.petrel_points/1",
+            "asset_connectors.opendtect_horizon/1"
+          ],
+          "title": "Reader",
+          "type": "string"
+        },
+        "mapping": {
+          "const": "point-set/2",
+          "title": "Mapping",
+          "type": "string"
+        },
+        "parsing_policy": {
+          "const": "import-recipe/1",
+          "title": "Parsing Policy",
+          "type": "string"
+        },
+        "null_policy": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Null Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reader",
+        "mapping",
+        "parsing_policy",
+        "null_policy"
+      ],
+      "title": "RecipeInterpretation",
+      "type": "object"
+    },
+    "RecipePointContext": {
+      "additionalProperties": false,
+      "properties": {
+        "crs": {
+          "pattern": "^(EPSG:[0-9]{4,6}|unknown)$",
+          "title": "Crs",
+          "type": "string"
+        },
+        "xy_unit": {
+          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+          "title": "Xy Unit",
+          "type": "string"
+        },
+        "z_unit": {
+          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+          "title": "Z Unit",
+          "type": "string"
+        },
+        "z_meaning": {
+          "enum": [
+            "depth",
+            "elevation",
+            "time",
+            "unknown"
+          ],
+          "title": "Z Meaning",
+          "type": "string"
+        },
+        "positive": {
+          "enum": [
+            "up",
+            "down",
+            "unknown"
+          ],
+          "title": "Positive",
+          "type": "string"
+        },
+        "vertical_datum": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Vertical Datum",
+          "type": "string"
+        },
+        "x_range": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "title": "X Range",
+          "type": "array"
+        },
+        "y_range": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "title": "Y Range",
+          "type": "array"
+        },
+        "z_range": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "number"
+              },
+              "maxItems": 2,
+              "minItems": 2,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Z Range"
+        },
+        "attributes": {
+          "items": {
+            "$ref": "#/$defs/AttributeSpec"
+          },
+          "maxItems": 64,
+          "title": "Attributes",
+          "type": "array"
+        },
+        "fidelity": {
+          "$ref": "#/$defs/RecipeFidelity"
+        },
+        "type": {
+          "const": "point-set",
+          "title": "Type",
+          "type": "string"
+        },
+        "count": {
+          "maximum": 200000,
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        },
+        "z_provided": {
+          "title": "Z Provided",
+          "type": "boolean"
+        },
+        "missing_z_count": {
+          "maximum": 200000,
+          "minimum": 0,
+          "title": "Missing Z Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "crs",
+        "xy_unit",
+        "z_unit",
+        "z_meaning",
+        "positive",
+        "vertical_datum",
+        "x_range",
+        "y_range",
+        "z_range",
+        "attributes",
+        "fidelity",
+        "type",
+        "count",
+        "z_provided",
+        "missing_z_count"
+      ],
+      "title": "RecipePointContext",
+      "type": "object"
+    },
+    "Reference": {
+      "additionalProperties": false,
+      "properties": {
+        "authority": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Authority",
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "profile": {
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+          "title": "Profile",
+          "type": "string"
+        }
+      },
+      "required": [
+        "authority",
+        "key",
+        "revision",
+        "profile"
+      ],
+      "title": "Reference",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "ophiolite.point-set/2: a recipe-read point set; point-set/1 is unchanged and still served.",
+  "properties": {
+    "representation": {
+      "const": "normalized",
+      "title": "Representation",
+      "type": "string"
+    },
+    "source": {
+      "$ref": "#/$defs/Reference"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "interpretation": {
+      "$ref": "#/$defs/RecipeInterpretation"
+    },
+    "schema": {
+      "const": "ophiolite.point-set/2",
+      "title": "Schema",
+      "type": "string"
+    },
+    "context": {
+      "$ref": "#/$defs/RecipePointContext"
+    },
+    "points": {
+      "items": {
+        "items": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "maxItems": 3,
+        "minItems": 3,
+        "type": "array"
+      },
+      "maxItems": 200000,
+      "minItems": 1,
+      "title": "Points",
+      "type": "array"
+    },
+    "attributes": {
+      "items": {
+        "$ref": "#/$defs/KindedAttribute"
+      },
+      "maxItems": 64,
+      "title": "Attributes",
+      "type": "array"
+    }
+  },
+  "required": [
+    "representation",
+    "source",
+    "source_sha256",
+    "interpretation",
+    "schema",
+    "context",
+    "points",
+    "attributes"
+  ],
+  "title": "PointSet2",
+  "type": "object"
+}
