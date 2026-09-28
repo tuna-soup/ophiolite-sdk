@@ -461,6 +461,14 @@ export type postProjectsProjectMapsWatchInput = { path: { "project": string }; b
 export function postProjectsProjectMapsWatch(transport: Transport, input: postProjectsProjectMapsWatchInput): Promise<unknown> {
   return transport.request<unknown>("POST", "/api/v1/projects/{project}/maps/watch", input.path, undefined, input.body, input.options, null, false);
 }
+export type postProjectsProjectMembersListInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectMembersList(transport: Transport, input: postProjectsProjectMembersListInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/members/list", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectMembersSetInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectMembersSet(transport: Transport, input: postProjectsProjectMembersSetInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/projects/{project}/members/set", input.path, undefined, input.body, input.options, null, false);
+}
 export type postProjectsProjectNativeAddReviewCommentInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
 export function postProjectsProjectNativeAddReviewComment(transport: Transport, input: postProjectsProjectNativeAddReviewCommentInput): Promise<unknown> {
   return transport.request<unknown>("POST", "/api/v1/projects/{project}/native/AddReviewComment", input.path, undefined, input.body, input.options, null, false);

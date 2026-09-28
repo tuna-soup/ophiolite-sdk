@@ -738,6 +738,18 @@
     "response": "explicitly-untyped"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/members/list",
+    "function": "postProjectsProjectMembersList",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/members/set",
+    "function": "postProjectsProjectMembersSet",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/native/AddReviewComment",
     "function": "postProjectsProjectNativeAddReviewComment",
     "request": "explicitly-untyped",
