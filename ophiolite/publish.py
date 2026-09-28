@@ -540,14 +540,14 @@ class WorkFolder:
                 if through is None or operation==through:return result
             return result
 
-MAX_UPLOAD=8*1024*1024
+MAX_UPLOAD=32*1024*1024  # the gateway's absolute maximum; each deployment's own limit is the server's to state
 
 
 def upload_bytes(source):
     if isinstance(source,bytes):raw=source
     else:
         with Path(source).open('rb') as stream:raw=stream.read(MAX_UPLOAD+1)
-    if not raw or len(raw)>MAX_UPLOAD:raise ValidationFailed(['LAS uploads must contain between one byte and 8 MiB.'])
+    if not raw or len(raw)>MAX_UPLOAD:raise ValidationFailed(['LAS uploads must contain between one byte and 32 MiB; a deployment may set a lower limit.'])
     return raw
 
 

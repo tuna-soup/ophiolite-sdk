@@ -250,7 +250,7 @@ def test_non_object_saved_credential(tmp_path,value):
         Credential.open(path)
 
 
-def test_device_login_for_an_assistant_asks_for_capability_2(tmp_path,monkeypatch):
+def test_device_login_asks_for_capability_2_for_an_assistant_and_3_for_an_application(tmp_path,monkeypatch):
     sent=[]
     provider=Provider(monkeypatch);provider.change=lambda route,value:None
     original=provider.http._transport.handle_request
@@ -264,4 +264,4 @@ def test_device_login_for_an_assistant_asks_for_capability_2(tmp_path,monkeypatc
     assert sent==[{'project_id':'test','scopes':['read','write','compute'],'label':'Notebook assistant','capability':2}]
     sent.clear()
     auth.device_login('http://localhost:8765','test',path=tmp_path/'b'/'auth.json',http=provider.http,label='Example',compute=True)
-    assert sent==[{'project_id':'test','scopes':['read'],'label':'Example'}]  # compute only for assistants; capability 1 unchanged
+    assert sent==[{'project_id':'test','scopes':['read'],'label':'Example','capability':3}]  # compute only for assistants; E22b: applications ask for capability 3

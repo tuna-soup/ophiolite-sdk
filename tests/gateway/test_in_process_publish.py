@@ -170,7 +170,8 @@ def test_sdk_export_freezes_exact_revisions_and_applies_permissions(web,kind,tmp
     key,r1,r2=first.output_reference.key,first.output_reference.revision,second.output_reference.revision
     opened=alice.export([(key,r1,['GR']),(key,r2,['GR'])],tmp_path/'both')
     assert [(a.revision,a.history['number']) for a in opened.assets]==[(r1,1),(r2,2)]
-    if kind=='grant':assert opened.manifest['observations']=={'groups_omitted':'This credential may not list result groups'}
+    if kind=='grant':assert opened.manifest['observations']=={'groups_omitted':'This credential may not list result groups',
+                                                              'entities_omitted':'this sign-in may not read wells and wellbores'}  # capability 1 (E22b: said, not silent)
     assert opened.assets[1].curves['GR'].values[2]==0.0 and opened.assets[1].curves['GR'].values[1] is None  # zero stays zero, missing stays missing
     assert opened.assets[0].original==alice.download(first) and opened.manifest['groups'] is None
     # A later version does not retarget an earlier selection.

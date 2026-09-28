@@ -27,7 +27,18 @@ def status(response,operation):
         413:(CapacityExceeded,'This operation exceeds its supported size.'),
         429:(Busy,'The service is busy.'),503:(Busy,'The service is busy.')}.get(code,(Refused,'The application request was refused. Check the input and supported profile.'))
     if kind is Busy:raise Busy(message,status=code,retry_after=delay(response))
+    if code==413:message=upload_limit(response) or message
     raise kind(message,status=code)
+
+
+def upload_limit(response):
+    """E22b: the deployment's own upload-limit refusal names its limit; pass exactly that sentence on."""
+    try:
+        if len(response.read())>4096:return None  # a streamed answer is read here; a refusal is small
+        body=response.json()
+    except Exception:return None
+    text=body.get('error') if isinstance(body,dict) else None
+    return text if isinstance(text,str) and text.startswith("The file exceeds this deployment's upload limit") and len(text)<120 else None
 
 
 def decode(raw):

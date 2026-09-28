@@ -103,7 +103,8 @@ class Bundle:
     def summary(self):
         return {'bundle_version': self.manifest['bundle_version'], 'scope': self.manifest['scope'], 'assets': len(self.assets),
                 'curves': sum(len(a.curves) for a in self.assets), 'types': sorted({a.type for a in self.assets}), 'unlisted_files': self.unlisted,
-                'groups': self.manifest['groups'], 'recommendations': self.manifest['recommendations']}
+                'groups': self.manifest['groups'], 'recommendations': self.manifest['recommendations'],
+                **({'entities_omitted': (self.manifest.get('observations') or {})['entities_omitted']} if (self.manifest.get('observations') or {}).get('entities_omitted') else {})}
 
 
 def _check_manifest(manifest):
@@ -399,7 +400,7 @@ def roles_of(files):
     return sorted(item.get('role') for item in files)
 
 
-def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=None, graph=None):
+def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=None, graph=None, entities_omitted=None):
     """Write verified exact reads [(selection, CurveSet-like)] atomically. Internal to export."""
     destination = Path(destination)
     if destination.exists(): raise Refused('The destination already exists; choose a new folder.')
@@ -468,7 +469,8 @@ def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=
                            'parent_visibility': first.get('parent_visibility', 'complete'), 'omissions': omissions, 'losses': losses})
             if typed_bundle: assets[-1]['type'] = 'well-log'
             selection.append(chosen)
-        observations = {**({'groups': groups} if groups else {}), **({'groups_omitted': groups_omitted} if groups_omitted else {})}
+        observations = {**({'groups': groups} if groups else {}), **({'groups_omitted': groups_omitted} if groups_omitted else {}),
+                        **({'entities_omitted': entities_omitted} if entities_omitted else {})}  # E22b: why no wells travel
         # The lowest version that expresses this content: 1.x for well logs, 2.x for typed data;
         # the minor rises only for observations (1) or the newer types (2), so older readers keep working.
         minor = max([1 if observations else 0, 4 if graph else 0] + [NEWER_TYPES.get(a.get('type'), 0) for a in assets])

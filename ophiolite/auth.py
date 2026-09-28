@@ -371,7 +371,8 @@ def device_login(url, project, *, path=None, write=False, label='Local Python cu
             headers = {'Authorization':'Bearer '+data['access_token']}
             # E5: an assistant (capability 2) acts for you under the agent rules; every change waits for approval.
             body = {'project_id':project,'scopes':['read']+(['write'] if write else [])+(['compute'] if compute and assistant else []),'label':assistant or label}
-            if assistant: body['capability'] = 2
+            # E22b: capability 3 also reads wells, wellbores and lineage and uploads originals (bundle import).
+            body['capability'] = 2 if assistant else 3
             grant = request(url+'/api/v1/application-access/request',body,headers,http=http)
             data['grant_id'] = _token(grant['id'])
             approval = _browser_url(grant['approval_url'],url)
