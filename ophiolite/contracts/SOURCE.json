@@ -1,6 +1,6 @@
 {
-  "platform_commit": "60cbe6361ffa2f7ae7a656644b0b6c864351ea85",
-  "contracts_tree": "993f637131608296f18639c6b1f6fbad58aca733",
+  "platform_commit": "fd917043b40ed8219b0ff3b00d2064baa9bbb670",
+  "contracts_tree": "10b9563f081363b8c2f81a4111a7e7fbfbd8176c",
   "registry_version": "1.17.0",
   "files": {
     "README.md": "668c32afad894ec0a0167e307013f87eefca4ede323c17408bac12cac3fcdfdb",
@@ -32,9 +32,9 @@
     "assets/v1/fixtures/mesh.original": "2428a0cef50c3e69bc8c970ac0d2327d1d5ffdab1b08e93984439b9b13278613",
     "assets/v1/fixtures/original.las": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
     "assets/v1/fixtures/point-set-2-data.json": "8930eb160145033bbe5a461e790c066cdd025fda1127d85eb75b127e76ce25d9",
-    "assets/v1/fixtures/point-set-2-recipe.json": "dd88f64908c5ead8e25d349f108283aff4a462a3d324e2e2cd89a552f3a67e5b",
+    "assets/v1/fixtures/point-set-2-recipe.json": "e4b3ee4cb1ea61bea1da2ad09fecab98309460c5e921b9b5ef40e32ce01d4af6",
     "assets/v1/fixtures/point-set-2.crsmeta.xml": "059fd3ba90975429682cc08221cafc55a48182a5da3d4cf651b5a3d9593e2549",
-    "assets/v1/fixtures/point-set-2.json": "e589f4e568aa848d5e770a24971dc4c49b082e9cdaa06865aabd74b499a3b6fa",
+    "assets/v1/fixtures/point-set-2.json": "e1941615a0452fe6e57dd90c6296e02b1d207ac53c02919169e758b96f06009a",
     "assets/v1/fixtures/point-set-2.original": "c3070963e51644452b9fbdcfed354579d03259a5ee20ad7dae5909bc908d2dfb",
     "assets/v1/fixtures/point-set-2.readme.txt": "7f90ca1184f3af05cae6bdb28499db5992ee3c7d9edcf00f95b8e6d629833905",
     "assets/v1/fixtures/points-data.json": "90acd93fb33b361e86d6d35a00fe54656f5e7efafe2f4c9acdff547f340b04ee",

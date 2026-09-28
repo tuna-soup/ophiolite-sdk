@@ -101,7 +101,7 @@
       "rules": [
         {
           "role": "readme",
-          "pattern": "(?i)\\bnegative below\\b",
+          "pattern": "(?i)\\bnegative\\b[^.\\n]*\\bbelow\\b",
           "value": "up"
         }
       ]
@@ -110,7 +110,7 @@
       "rules": [
         {
           "role": "crs-metadata",
-          "pattern": "EPSG:?:?(\\d{4,5})",
+          "pattern": "EPSG[:,]{1,2}\\s*(\\d{4,5})",
           "value": "EPSG:{1}"
         }
       ]
