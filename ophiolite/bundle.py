@@ -446,6 +446,8 @@ def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=
             if getattr(read, 'type', None) == 'seismic-volume': raise Refused('A seismic volume is exported as chosen slices; the complete volume is not exported.')
             if hasattr(read, '_wire_data_bytes'):  # E11 typed data: exact original, descriptor and data as served
                 first = read._wire_descriptor
+                if first.get('package') is not None:  # E23a: until E23c the package and its decisions have no bundle form
+                    raise Refused('Portable export is not yet supported for this type: a recipe-read point set carries its source package and decisions, which a bundle cannot hold yet.')
                 files = [put(folder + TYPED_ORIGINALS[first['profile']], read.original, 'original'),
                          put(folder + 'descriptor.json', (json.dumps(first, indent=2, allow_nan=False) + '\n').encode(), 'descriptor'),
                          put(folder + 'data.json', read._wire_data_bytes, 'normalized')]

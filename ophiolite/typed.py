@@ -116,17 +116,101 @@ class TriangulatedSurface(_Spatial):
                              **self._attribute_columns(pd, {'x', 'y', 'z'})})
 
 
+class Evidence:
+    """One observation behind a decision (E23a): a line of a package file, cited by member name, digest
+    and line, or the uploader's declaration. `sufficient` is False for a statement the recipe does not
+    accept on its own."""
+
+    def __init__(self, value):
+        self.value, self.source, self.role, self.sufficient = value['value'], value['source'], value['role'], value['sufficient']
+        self.member, self.digest, self.locator, self.text = value.get('member'), value.get('digest'), value.get('locator'), value.get('text')
+
+    def __repr__(self):
+        return f'<Evidence {self.value!r} from {self.member + ", " + self.locator if self.member else "the declaration"}>'
+
+
+class Decision:
+    """How one field of context was decided (E23a): every observation, the one selected and why, or
+    'needs-decision' with nothing selected. Nothing is filled in by default."""
+
+    def __init__(self, value):
+        self.field, self.selected, self.selected_by, self.reason, self.status = value['field'], value['selected'], value['selected_by'], value['reason'], value['status']
+        self.evidence = [Evidence(o) for o in value['observations']]
+
+    @property
+    def decided(self): return self.status == 'decided'
+
+    def __repr__(self):
+        return f'<Decision {self.field}={self.selected!r}>' if self.decided else f'<Decision {self.field}: needs decision>'
+
+
+class Recipe:
+    """The import recipe a revision was read with (E23a): a project recipe at an exact revision, or None
+    for the profile's default, and the digest of the exact rules applied. The rules themselves are the
+    revision's 'interpretation' representation."""
+
+    def __init__(self, value):
+        reference = value['reference']
+        self.asset_id, self.revision = (reference['asset_id'], reference['revision']) if reference else (None, None)
+        self.sha256 = value['sha256']
+
+    @property
+    def default(self): return self.asset_id is None
+
+    def __repr__(self):
+        return '<Recipe default>' if self.default else f'<Recipe {self.asset_id}@{self.revision[:12]}>'
+
+
 class PointSet(_Spatial):
+    """Points in file order. point-set/2 (E23a, a recipe-read Petrel or OpendTect export) adds number,
+    text and category attributes with their exact source labels, and the decisions behind its context."""
     type = 'point-set'
+    DTYPES = {'number': 'Float64', 'text': 'string', 'category': 'category'}
 
     @property
     def points(self): return self.data['points']
+
+    @property
+    def version(self): return 2 if self.data['schema'] == 'ophiolite.point-set/2' else 1
+
+    @property
+    def attributes(self):
+        """[{name, source_name, kind}] in file order (point-set/1 attributes are numbers named as written)."""
+        if self.version == 1: return [{'name': a['name'], 'source_name': a['name'], 'kind': 'number'} for a in self.data['attributes']]
+        return [{k: a[k] for k in ('name', 'source_name', 'kind')} for a in self.data['attributes']]
+
+    @property
+    def decisions(self):
+        return [Decision(d) for d in self.context['fidelity'].get('decisions') or []] if self.version == 2 else []
+
+    @property
+    def status(self):
+        """'decided', or 'needs-decision' while any field of context is undecided (point-set/2)."""
+        return self.context['fidelity']['execution']['status'] if self.version == 2 else 'decided'
+
+    @property
+    def unresolved(self):
+        return list(self.context['fidelity']['execution']['unresolved']) if self.version == 2 else []
+
+    @property
+    def recipe(self):
+        package = (self._wire_descriptor or {}).get('package')
+        return Recipe(package['recipe']) if package else None
 
     def to_frame(self):
         pd = self._pandas()
         columns = {'x': [p[0] for p in self.points], 'y': [p[1] for p in self.points]}
         if self.context['z_provided']: columns['z'] = pd.array([p[2] for p in self.points], dtype='Float64')
-        return pd.DataFrame({**columns, **self._attribute_columns(pd, set(columns))})
+        if self.version == 1: return pd.DataFrame({**columns, **self._attribute_columns(pd, set(columns))})
+        # point-set/2 names are unique, grammar-safe and never a coordinate (the contract refuses otherwise);
+        # the exact labels travel in frame.attrs['source_names'].
+        frame = pd.DataFrame({**columns, **{a['name']: pd.array(a['values'], dtype=self.DTYPES[a['kind']]) for a in self.data['attributes']}})
+        frame.attrs['source_names'] = {a['name']: a['source_name'] for a in self.data['attributes']}
+        return frame
+
+    def __repr__(self):
+        pending = ' (needs decision: ' + ', '.join(self.unresolved) + ')' if self.unresolved else ''
+        return f'<PointSet {self.context["count"]} point-set{pending}>'
 
 
 class PolylineSet(TypedData):

@@ -75,11 +75,25 @@ def representation(value):
     require(value['media_type'] in profile.get('media_types',[]), 'Media type is not declared for this profile')
 
 
+ARTIFACT_KINDS = ('original', 'captured-result', 'derived-artifact')
+
+
+def artifact(value):
+    """The one exact artifact of a descriptor, matched by its kind exactly (never 'not normalized')."""
+    found = [r for r in value['representations'] if r['kind'] in ARTIFACT_KINDS]
+    require(len(found) == 1, 'A descriptor names exactly one exact artifact')
+    return found[0]
+
+
 def asset(value):
     profiles = registry()[1]; reference(value['source_reference'])
     for parent in value['parents']: reference(parent)
     typed = 'type' in value['scientific']
-    if typed:
+    recipe = 'recipe_schema' in profiles.get(value['profile'], {})  # E23a: read through an import recipe
+    require(recipe == (value.get('package') is not None), 'A recipe-read file and its package go together')
+    if typed and recipe:
+        require(value['interpretation'].get('mapping') == profiles[value['profile']]['connector']['mapping_version'], 'Scientific context and interpretation disagree')
+    elif typed:
         mapping = {'well-tops': 'well-tops/1', 'trajectory': 'trajectory/1', 'regular-grid-surface': 'regular-grid-surface/1',
                    'triangulated-surface': 'triangulated-surface/1', 'point-set': 'point-set/1', 'polyline-set': 'polyline-set/1', 'seismic-volume': 'seismic-volume/1'}
         require(value['interpretation'].get('mapping') == mapping.get(value['scientific']['type']), 'Scientific context and interpretation disagree')
@@ -108,8 +122,9 @@ def asset(value):
     require(kinds.count(artifact_kind)==1 and len(kinds)==rules['total'], 'Profile requires one exact artifact and one normalized curve')
     raw=next(r for r in reps if r['kind']==artifact_kind); normalized=next(r for r in reps if r['kind']=='normalized')
     require(raw['profile']==value['profile'] and normalized['profile']==profile['normalized_profile'], 'Representation profiles must be the asset profile and its normalized profile')
-    declared=(profiles.get(profile['normalized_profile']) or {}).get('interpretation') or {}
-    require(value['interpretation'].get('mapping')==declared.get('mapping'), 'Interpretation is not the one this profile declares')
+    declared=profile['connector']['mapping_version'] if recipe else ((profiles.get(profile['normalized_profile']) or {}).get('interpretation') or {}).get('mapping')
+    require(value['interpretation'].get('mapping')==declared, 'Interpretation is not the one this profile declares')
+    if recipe: package(value, raw)
     if value['origin']=='managed-derived': require(value['revision']==raw['sha256'], 'Derived revision must identify the exact artifact')
     if value.get('manifest') is not None: manifest(value, raw, normalized)
     require(len(set(value['supported_operations']))==len(value['supported_operations']), 'Duplicate supported operations')
@@ -128,6 +143,19 @@ def _canonical(value):
 def _sha(text):
     import hashlib
     return hashlib.sha256(text.encode()).hexdigest()
+
+
+def package(value, raw):
+    """E23a: the package a recipe-read revision was read with: its primary is the exact artifact, its
+    status is the decisions' status, and the revision manifest names every package row."""
+    p = value['package']; execution = value['scientific']['fidelity']['execution']
+    primaries = [m for m in p['members'] if m['role'] == 'primary']
+    require(len(primaries) == 1 and (primaries[0]['sha256'], primaries[0]['bytes']) == (raw['sha256'], raw['bytes']), 'The package primary is not the exact artifact')
+    require((p['status'], p['unresolved'], p['package_digest']) == (execution['status'], execution['unresolved'], execution['package_digest']), 'The package record and the decisions disagree')
+    if value.get('manifest') is not None:
+        listed = {r['id']: (r['sha256'], r['bytes']) for r in value['manifest']['representations']}
+        require({'package', 'interpretation'} <= set(listed), 'The revision manifest does not name the package and its interpretation')
+        require(all(listed.get('companion:' + m['name']) == (m['sha256'], m['bytes']) for m in p['members'] if m['role'] != 'primary'), 'A package member is not the one the revision manifest names')
 
 
 def manifest(value, raw, normalized):
@@ -189,7 +217,8 @@ def typed_payload(value):
         p = value['points']
         require(len(p) == c['count'] and c['missing_z_count'] == (sum(q[2] is None for q in p) if c['z_provided'] else 0), 'Points and their context disagree')
         require(c['z_provided'] or all(q[2] is None for q in p), 'Points carry z although the file has none')
-        spatial(p)
+        if value['schema'] == 'ophiolite.point-set/2': recipe_points(value, p)
+        else: spatial(p)
     elif kind == 'polyline-set':
         sticks = value['sticks']; points = [[p['x'], p['y'], p['z']] for s in sticks for p in s['points']]
         require(len({s['index'] for s in sticks}) == len(sticks), 'A stick index repeats')
@@ -201,6 +230,27 @@ def typed_payload(value):
         require([k['inline'] for k in value['chunks']] == line_numbers(il), 'Chunks do not follow the inline numbers')
         require(all(k['bytes'] == c['crossline']['count'] * c['samples'] * 4 for k in value['chunks']), 'A chunk has the wrong size')
         require(value['decisions'] == c['fidelity']['decisions'], 'Decisions disagree with the fidelity report')
+
+
+RECIPE_FIELDS = ('crs', 'xy_unit', 'z_unit', 'z_meaning', 'positive', 'vertical_datum')
+
+
+def recipe_points(value, rows):
+    """E23a point-set/2: kinded attributes beside their exact labels, and context taken only from decisions."""
+    c = value['context']; f = c['fidelity']; attributes = value['attributes']
+    require(all(r[0] is not None and r[1] is not None for r in rows), 'Every row needs x and y')
+    xs, ys, zs = [r[0] for r in rows], [r[1] for r in rows], [r[2] for r in rows if r[2] is not None]
+    require(c['x_range'] == [min(xs), max(xs)] and c['y_range'] == [min(ys), max(ys)] and c['z_range'] == ([min(zs), max(zs)] if zs else None), 'Coordinates and their context disagree')
+    names = [a['name'] for a in attributes]
+    require(len(set(names)) == len(names) and len({a['source_name'] for a in attributes}) == len(names) and not any(n.lower() in ('x', 'y', 'z') for n in names), 'Attribute names repeat or collide with a coordinate')
+    require([{k: a[k] for k in ('name', 'source_name', 'kind')} for a in attributes] == c['attributes'] and all(len(a['values']) == len(rows) for a in attributes), 'Attributes and their context disagree')
+    require(all(v is None or isinstance(v, str) != (a['kind'] == 'number') for a in attributes for v in a['values']), 'An attribute holds values of another kind')
+    decided = {d['field']: d['selected'] for d in f['decisions'] if d['status'] == 'decided'}
+    require(len({d['field'] for d in f['decisions']}) == len(f['decisions']) and all(c[k] == decided.get(k, 'unknown') for k in RECIPE_FIELDS), 'The context is not the decided values')
+    for d in f['decisions']:
+        if d['status'] == 'decided': require(any(o['value'] == d['selected'] and o['sufficient'] for o in d['observations']), 'A decided field names no sufficient observation')
+    unresolved = [d['field'] for d in f['decisions'] if d['status'] != 'decided']
+    require(f['execution']['unresolved'] == unresolved and f['execution']['status'] == ('decided' if not unresolved and not f['execution']['scientific_problems'] else 'needs-decision'), 'The execution status and the decisions disagree')
 
 
 def line_numbers(line):

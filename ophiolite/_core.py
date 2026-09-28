@@ -34,7 +34,7 @@ def typed_result(descriptor, body, artifact):
     data=asset.model_dump(by_alias=True)
     value=json.loads(body)
     if value['context']['type']=='seismic-volume' and artifact is None:pass  # E16: a volume is read as slices; its original stays on the server
-    else:verify_bytes(next(r for r in data['representations'] if r['kind']!='normalized'),artifact)
+    else:verify_bytes(rules.artifact(data),artifact)
     return CLASSES[value['context']['type']](asset,value,artifact,wire_descriptor=descriptor,wire_data_bytes=body)
 
 
@@ -46,7 +46,7 @@ def verify_pair(descriptor, normalized, artifact, requested_curve, *, strict_int
     asset, view=validate.pair(descriptor,normalized)
     data=asset.model_dump(by_alias=True); values=view.model_dump(by_alias=True)
     rules.require(values['curve']==requested_curve, 'Requested curve differs from returned data')
-    raw=next(r for r in data['representations'] if r['kind']!='normalized')
+    raw=rules.artifact(data)
     verify_bytes(raw,artifact)
     evidence=rules.interpretation(asset.model_dump(by_alias=True,exclude_unset=True))
     if evidence=='recorded-differs':

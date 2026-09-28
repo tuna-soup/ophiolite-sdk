@@ -5,6 +5,15 @@
 Supported 0.x client over preview contracts, installable from reviewed source.
 No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
 
+- Recipe-read point sets (E23a): Petrel points-with-attributes and OpendTect x-y-z
+  horizon exports read as `PointSet` with `version == 2`: number, text and category
+  attribute columns (`Float64`, `string`, `category`) named by their grammar-safe
+  names, exact labels in `frame.attrs['source_names']`; `decisions` (`Decision` with
+  its `Evidence`), `status`/`unresolved` (`needs-decision` while any field of context
+  is undecided) and `recipe` (`Recipe`). Typed data is verified against the normalized
+  profile its descriptor names, and the exact artifact is matched by kind. Portable
+  export refuses these assets until bundles can hold the source package.
+
 - E7 transition release: `share()` requires `expected_generation` (from
   `grants()`); servers refuse unconditional replacement with 428 `condition-required`.
 

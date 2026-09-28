@@ -26,7 +26,7 @@ def pair(descriptor, raw):
     view=model(ApplicationCurve,value); value=view.model_dump(by_alias=True)
     rules.curve(value)
     expected=data['source_reference'] or dict(authority=data['authority'],key=data['asset_id'],revision=data['revision'],profile=data['profile'])
-    artifact=next(r for r in data['representations'] if r['kind']!='normalized')
+    artifact=rules.artifact(data)
     rules.require(rules.known(value['source'],rules.REFERENCE)==rules.known(expected,rules.REFERENCE) and value['source_sha256']==artifact['sha256'], 'Curve and artifact source identities disagree')
     facts=rules.facts(value)
     rules.require(all(data['scientific'].get(k)==v for k,v in facts.items()) and rules.known(value['interpretation'],rules.INTERPRETATION)==rules.known(data['interpretation'],rules.INTERPRETATION), 'Descriptor scientific context or interpretation disagrees with curve')
@@ -45,14 +45,16 @@ def typed_pair(descriptor, raw):
     rules.require(rep['available'] and len(raw)==rep['bytes'] and hashlib.sha256(raw).hexdigest()==rep['sha256'], 'Normalized representation unavailable or integrity mismatch')
     try: value=json.loads(raw)
     except (ValueError,UnicodeError): raise VerificationFailed('Normalized data is not valid JSON.') from None
-    kinds={'well-tops':generated.WellTops,'trajectory':generated.Trajectory,'regular-grid-surface':generated.GridSurface,
-           'triangulated-surface':generated.TriangulatedSurface,'point-set':generated.PointSet,
-           'polyline-set':generated.PolylineSet,'seismic-volume':generated.SeismicVolume}
-    if data['scientific']['type'] not in kinds:raise VerificationFailed('This kind of data is not supported by this SDK; update it.')
-    payload=model(kinds[data['scientific']['type']],value).model_dump(by_alias=True)
+    # E23a: the payload model is the normalized profile the descriptor names (point-set/1 and /2 share a type).
+    kinds={'ophiolite.well-tops/1':generated.WellTops,'ophiolite.trajectory/1':generated.Trajectory,'ophiolite.regular-grid-surface/1':generated.GridSurface,
+           'ophiolite.triangulated-surface/1':generated.TriangulatedSurface,'ophiolite.point-set/1':generated.PointSet,'ophiolite.point-set/2':generated.PointSet2,
+           'ophiolite.polyline-set/1':generated.PolylineSet,'ophiolite.seismic-volume/1':generated.SeismicVolume}
+    if rep['profile'] not in kinds:raise VerificationFailed('This kind of data is not supported by this SDK; update it.')
+    rules.require(isinstance(value,dict) and value.get('schema')==rep['profile'], 'The normalized data is not the profile the descriptor names')
+    payload=model(kinds[rep['profile']],value).model_dump(by_alias=True)
     rules.typed_payload(payload)
     expected=data['source_reference'] or dict(authority=data['authority'],key=data['asset_id'],revision=data['revision'],profile=data['profile'])
-    artifact=next(r for r in data['representations'] if r['kind']!='normalized')
+    artifact=rules.artifact(data)
     rules.require(rules.known(payload['source'],rules.REFERENCE)==rules.known(expected,rules.REFERENCE) and payload['source_sha256']==artifact['sha256'], 'Typed data and artifact source identities disagree')
     rules.require(payload['context']==data['scientific'] and payload['interpretation']==data['interpretation'], 'Descriptor scientific context or interpretation disagrees with the data')
     rules.interpretation(asset.model_dump(by_alias=True,exclude_unset=True))

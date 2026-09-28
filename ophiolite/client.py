@@ -155,7 +155,7 @@ class Client(Navigation, EntityClient):
             path,query=self._path(asset,revision,curve)
             data=self._json(path+query,256*1024)
             _core.verify_descriptor(data,self.project,asset,revision,curve)
-            raw=next(r for r in data['representations'] if r['kind']!='normalized')
+            raw=_core.rules.artifact(data)
             normalized=next(r for r in data['representations'] if r['kind']=='normalized')
             if artifact is None:artifact=self._get(path+'/representations/'+quote(raw['id'],safe='')+query,raw['bytes'])
             _core.verify_bytes(raw,artifact)
@@ -171,7 +171,7 @@ class Client(Navigation, EntityClient):
         path=self.prefix+'/'+quote(asset,safe='')+'/revisions/'+quote(revision,safe='')
         data=self._json(path,256*1024)
         _core.verify_typed_descriptor(data,self.project,asset,revision)
-        raw=next(r for r in data['representations'] if r['kind']!='normalized')
+        raw=_core.rules.artifact(data)
         normalized=next(r for r in data['representations'] if r['kind']=='normalized')
         # E16: a seismic volume is described, never downloaded here; read_slice reads its samples.
         artifact=None if data['scientific'].get('type')=='seismic-volume' else self._get(path+'/representations/'+quote(raw['id'],safe=''),raw['bytes'])
