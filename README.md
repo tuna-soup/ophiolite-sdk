@@ -262,7 +262,7 @@ them. `input_update.newer_revision_available` on a result summary only tells you
 that its input has a newer version; nothing is recalculated.
 
 `work.upload_las(path, name=..., attribution=..., audience=[...],
-rights_confirmed=True)` persists an owned original copy before sending (8 MiB cap).
+rights_confirmed=True)` persists an owned original copy before sending (up to 32 MiB; a deployment may set a lower limit, which its refusal names).
 Changing/deleting the source file cannot change recovery. Upload permission is
 separate from application-grant consent; use an explicitly authorised delegate
 client/folder when required. The SDK never falls back to a different credential.
