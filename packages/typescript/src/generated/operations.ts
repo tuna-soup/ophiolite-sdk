@@ -2,6 +2,7 @@
 import type * as Contracts from "./contracts.js";
 import type * as API from "../api-types.js";
 import type { Transport, OperationOptions } from "../client.js";
+type WireBundleOrigin = { "kind": "portable-bundle"; "manifest_sha256": string; "asset_id": string; "revision": string; "exporter": string };
 type WireContractsRegistry = { "schema": "ophiolite.contracts-registry/1"; "version": string; "title": string; "description": string; "id_grammar": string; "lifecycles": Array<{ "id": "preview" | "supported" | "deprecated"; "meaning": string }>; "schemas": Array<{ "id": string; "version": string; "lifecycle": "preview" | "supported" | "deprecated"; "path": string; "title": string; "description": string; "qualified_by"?: string; "cutoff"?: string; "replaced_by"?: string }>; "profiles": Array<{ "id": string; "kind": "source" | "normalized"; "display_name": string; "description": string; "lifecycle": "preview" | "supported" | "deprecated"; "path": string; "qualified_by"?: string; "cutoff"?: string; "replaced_by"?: string }>; "documents": Array<{ "id": string; "kind": "mapping" | "vocabulary" | "generated" | "openapi" | "fixture" | "capability" | "relationships"; "path": string; "title"?: string; "schema"?: string }> };
 type WireDraftRef = { "id": string; "generation": number };
 type WireError = { "error": string; "code": string; [key: string]: unknown };

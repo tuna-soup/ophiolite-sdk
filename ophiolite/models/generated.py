@@ -195,6 +195,7 @@ class Acquisition(Contract):
     identity: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     uploaded_at: float = Field(...)
     rights: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    origin: ImportOrigin | None = Field(None)
 
 class Display(Contract):
     type: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(None)
@@ -223,6 +224,13 @@ class History(Contract):
     count: Annotated[int, Field(ge=1)] = Field(...)
     head_revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     parent_revision: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(None)
+
+class ImportOrigin(Contract):
+    kind: Literal['portable-bundle'] = Field(...)
+    manifest_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    asset_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    exporter: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
 
 class LineRange(Contract):
     first: int = Field(...)
@@ -923,6 +931,7 @@ Acquisition.model_rebuild()
 Display.model_rebuild()
 Evaluated.model_rebuild()
 History.model_rebuild()
+ImportOrigin.model_rebuild()
 LineRange.model_rebuild()
 LineageEntry.model_rebuild()
 LineageReference.model_rebuild()

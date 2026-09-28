@@ -102,6 +102,7 @@ export type Acquisition = {
   identity: string;
   uploaded_at: number;
   rights: string;
+  origin?: ImportOrigin | null;
 };
 
 export type Display = {
@@ -161,6 +162,14 @@ export type History = {
   count: number;
   head_revision: string;
   parent_revision?: string | null;
+};
+
+export type ImportOrigin = {
+  kind: "portable-bundle";
+  manifest_sha256: string;
+  asset_id: string;
+  revision: string;
+  exporter: string;
 };
 
 export type Interpretation = {

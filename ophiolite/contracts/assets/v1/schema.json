@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/schema.json",
   "x-ophiolite": {
     "id": "ophiolite.scientific-asset/1",
-    "version": "1.8.0",
+    "version": "1.9.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -47,6 +47,17 @@
           "minLength": 1,
           "title": "Rights",
           "type": "string"
+        },
+        "origin": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ImportOrigin"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
@@ -549,6 +560,49 @@
         "head_revision"
       ],
       "title": "History",
+      "type": "object"
+    },
+    "ImportOrigin": {
+      "additionalProperties": false,
+      "description": "1.9.0: a file imported from a portable bundle \u2014 provenance, not authority.",
+      "properties": {
+        "kind": {
+          "const": "portable-bundle",
+          "title": "Kind",
+          "type": "string"
+        },
+        "manifest_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Manifest Sha256",
+          "type": "string"
+        },
+        "asset_id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "exporter": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Exporter",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "manifest_sha256",
+        "asset_id",
+        "revision",
+        "exporter"
+      ],
+      "title": "ImportOrigin",
       "type": "object"
     },
     "Interpretation": {

@@ -31,7 +31,7 @@ cli.main(['doctor','--configuration',sys.argv[1]])
     env=dict(os.environ,HOME=str(tmp_path/'empty-home'),XDG_CONFIG_HOME=str(tmp_path/'empty-xdg'))
     result=subprocess.run([python,'-I','-c',code,str(config)],env=env,capture_output=True,text=True,timeout=15)
     assert result.returncode==0,result.stderr
-    assert 'Local contracts: 1.14.0' in result.stdout
+    assert 'Local contracts: 1.15.0' in result.stdout
     assert not (tmp_path/'empty-home').exists() and not (tmp_path/'empty-xdg').exists()
 
 
