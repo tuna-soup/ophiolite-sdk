@@ -176,3 +176,19 @@ def test_checkpoint_permission_error_is_not_reported_as_invalid_json(tmp_path):
     path=tmp_path/'checkpoint.json';path.write_text('{}');path.chmod(0o644)
     with pytest.raises(RecoveryUnavailable,match='Cannot read the private work checkpoint'):
         publish._stored(path)
+
+
+def test_export_keeps_every_asset_it_is_given(tmp_path,monkeypatch,capsys):
+    """E22 run 3 (F21): repeated --asset/--revision export every pair, never only the last."""
+    config=configuration(tmp_path);seen=[]
+    class FakeClient:
+        def __init__(self,*a,**k):pass
+        def __enter__(self):return self
+        def __exit__(self,*a):return False
+        def export(self,selections,output,groups=True):
+            seen.append(selections);return type('B',(),{'assets':selections})()
+    monkeypatch.setattr(cli,'Client',FakeClient);monkeypatch.setattr(cli.Credential,'from_file',staticmethod(lambda path:object()))
+    cli.main(['export','--configuration',str(config),'--asset','a1','--revision','r1','--asset','a2','--revision','r2','--curve','GR','--output',str(tmp_path/'b')])
+    assert seen==[[('a1','r1',['GR']),('a2','r2',['GR'])]]
+    with pytest.raises(Refused):
+        cli.main(['export','--configuration',str(config),'--asset','a1','--revision','r1','--asset','a2','--output',str(tmp_path/'c')])

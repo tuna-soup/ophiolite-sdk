@@ -75,7 +75,7 @@ def parser():
     export=sub.add_parser('export',help='Export exact revisions into a new portable bundle')
     export.add_argument('--configuration',type=Path,default=Path('configuration.json'))
     export.add_argument('--credentials',type=Path)
-    export.add_argument('--asset',required=True);export.add_argument('--revision',required=True)
+    export.add_argument('--asset',required=True,action='append',help='Repeat --asset and --revision once per exact revision');export.add_argument('--revision',required=True,action='append')
     export.add_argument('--curve',action='append',help='Well log curves; omit for well tops, trajectories and grids');export.add_argument('--output',type=Path,required=True)
     export.add_argument('--no-groups',action='store_true',help='Leave out the result groups observed at export time')
     typed=sub.add_parser('read-data',help='Read well tops, a trajectory or a horizon grid at an exact revision and save it')
@@ -171,8 +171,9 @@ def main(argv=None):
             (args.output/'descriptor.json').write_text(json.dumps(data._wire_descriptor,indent=2)+'\n')
             print('Saved the exact original, data.json and descriptor.json for',data.type,'- units and references are as declared; unknown stays unknown.');return
         if args.command=='export':
-            opened=client.export([(args.asset,args.revision,args.curve or None)],args.output,groups=not args.no_groups)
-            print('Exported',len(opened.assets),'exact revision to',args.output,'- check it offline with: ophiolite bundle check',args.output);return
+            if len(args.asset)!=len(args.revision):raise Refused('Give one --revision for each --asset, in the same order.')
+            opened=client.export([(a,r,args.curve or None) for a,r in zip(args.asset,args.revision)],args.output,groups=not args.no_groups)
+            print('Exported',len(opened.assets),'exact revision(s) to',args.output,'- check it offline with: ophiolite bundle check',args.output);return
         if args.command=='fetch':
             asset,revision,curve=[getattr(args,k) or config.get(k) for k in ('asset','revision','curve')]
             client.read(asset,revision,[curve]).save(args.output,legacy_order=True)
