@@ -53,6 +53,7 @@ def with_method(d, method=METHOD):
     body = {'schema': 'ophiolite.revision-manifest/2', 'asset_id': d['asset_id'], 'revision': d['revision'], 'artifact': m['artifact'],
             'representations': sorted(m['representations'], key=lambda r: r['id']), 'lineage': sorted(e['commitment'] for e in m['lineage']), 'method': method}
     d['manifest'] = {**m, 'schema': 'ophiolite.revision-manifest/2', 'digest': hashlib.sha256(canonical(body).encode()).hexdigest(), 'method': method}
+    d['derivation'] = {'method': method}
     return d
 
 
@@ -66,6 +67,8 @@ def test_a_2_manifest_with_its_method_verifies_and_a_changed_method_is_refused(f
     refused(lambda c: c['manifest'].pop('method'))  # a /2 manifest without its method
     refused(lambda c: c['manifest'].__setitem__('schema', 'ophiolite.revision-manifest/1'))  # relabelled: /1 carries no method
     refused(lambda c: c['manifest'].__setitem__('schema', 'ophiolite.revision-manifest/3'))  # a schema this reader does not know
+    refused(lambda c: c['derivation']['method'].__setitem__('name', 'Something else'))  # the descriptor's copy
+    refused(lambda c: c.pop('derivation'))  # a /2 manifest's method must be declared
 
 
 def test_an_unknown_manifest_schema_keeps_its_exact_message(fixture):

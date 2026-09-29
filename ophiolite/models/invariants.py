@@ -165,6 +165,8 @@ def manifest(value, raw, normalized):
     m = value['manifest']
     require(m['schema'] in ('ophiolite.revision-manifest/1', 'ophiolite.revision-manifest/2'), 'Unknown revision manifest')
     require((m['schema'] == 'ophiolite.revision-manifest/2') == ('method' in m), 'The revision manifest schema does not match its method')  # 1.11.0 (E30a)
+    derivation = value.get('derivation')
+    require((derivation is not None) == ('method' in m) and (derivation is None or derivation['method'] == m['method']), 'A declared derivation method must be the one its manifest records')
     require((m['artifact']['sha256'], m['artifact']['bytes']) == (raw['sha256'], raw['bytes']), 'The revision manifest names another artifact')
     listed = {r['id']: (r['sha256'], r['bytes']) for r in m['representations']}
     require(len(listed) == len(m['representations']) and listed.get(normalized['id']) == (normalized['sha256'], normalized['bytes']),
