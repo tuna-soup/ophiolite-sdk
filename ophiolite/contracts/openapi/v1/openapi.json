@@ -26,10 +26,22 @@
         "scientific-assets"
       ],
       "3": [
+        "activity",
         "applications",
+        "capabilities",
+        "catalog",
+        "collections",
+        "context",
         "entities",
         "las-uploads",
-        "scientific-assets"
+        "projects",
+        "read",
+        "result-groups",
+        "scientific-assets",
+        "search",
+        "sources",
+        "stages",
+        "subscriptions"
       ]
     },
     "x-ophiolite-deprecated-aliases": {
@@ -547,10 +559,13 @@
     "/api/v1/projects/{project}/activity/list": {
       "post": {
         "summary": "Activity page",
-        "description": "Scope read; accepted principals: session, delegate, workload; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant, workload; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -562,6 +577,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session",
           "workload"
         ],
@@ -5964,10 +5980,13 @@
     "/api/v1/projects/{project}/capabilities/describe": {
       "post": {
         "summary": "What this credential may ask for: every operation with eligibility, plan requirement and limits",
-        "description": "Scope read; accepted principals: session, delegate, agent; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant, agent; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -5980,6 +5999,7 @@
         "x-ophiolite-principals": [
           "agent",
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -6034,10 +6054,13 @@
     "/api/v1/projects/{project}/catalog/changes": {
       "post": {
         "summary": "Project change feed of the managed families after a cursor",
-        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -6046,6 +6069,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -6100,10 +6124,13 @@
     "/api/v1/projects/{project}/catalog/describe": {
       "post": {
         "summary": "Describe exact scientific revision",
-        "description": "Scope read; accepted principals: session, delegate; project extractor ref.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor ref.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -6112,6 +6139,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -6175,10 +6203,13 @@
     "/api/v1/projects/{project}/catalog/get": {
       "post": {
         "summary": "One asset at its head or an exact revision (number or digest)",
-        "description": "Scope read; accepted principals: session, delegate; project extractor asset.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor asset.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -6187,6 +6218,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -6241,10 +6273,13 @@
     "/api/v1/projects/{project}/catalog/history": {
       "post": {
         "summary": "Revision history of one asset, newest first",
-        "description": "Scope read; accepted principals: session, delegate; project extractor asset.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor asset.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -6253,6 +6288,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -6307,10 +6343,13 @@
     "/api/v1/projects/{project}/catalog/list": {
       "post": {
         "summary": "Project assets, each marked with its authority (managed or native)",
-        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -6319,6 +6358,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -6373,10 +6413,13 @@
     "/api/v1/projects/{project}/catalog/original": {
       "post": {
         "summary": "A chunk of the original file retained with an exact revision",
-        "description": "Scope read; accepted principals: session, delegate; project extractor asset.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor asset.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -6385,6 +6428,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -6439,10 +6483,13 @@
     "/api/v1/projects/{project}/catalog/snapshot": {
       "post": {
         "summary": "The stored external snapshot of an exact revision",
-        "description": "Scope read; accepted principals: session, delegate; project extractor asset.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor asset.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -6451,6 +6498,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -6623,10 +6671,13 @@
     "/api/v1/projects/{project}/collections/list": {
       "post": {
         "summary": "list collection",
-        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -6635,6 +6686,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -6741,10 +6793,13 @@
     "/api/v1/projects/{project}/collections/options": {
       "post": {
         "summary": "options collection",
-        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -6753,6 +6808,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -7871,10 +7927,13 @@
     "/api/v1/projects/{project}/context/policy": {
       "post": {
         "summary": "Project scientific context policy",
-        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -7883,6 +7942,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -12268,13 +12328,205 @@
         }
       }
     },
-    "/api/v1/projects/{project}/read/Catalog": {
+    "/api/v1/projects/list": {
       "post": {
-        "summary": "Catalog (native protobuf JSON; project must match the path)",
-        "description": "Scope read; accepted principals: session, delegate; project extractor asset.",
+        "summary": "Projects this credential may reach, one page at a time (limit, cursor)",
+        "description": "Scope read; accepted principals: session, delegate, grant, workload, agent; project extractor none.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "grant",
+          "session",
+          "workload"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "projects": {
+                      "items": {
+                        "$ref": "#/components/schemas/ProjectEntry"
+                      },
+                      "title": "Projects",
+                      "type": "array"
+                    },
+                    "next_cursor": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Next Cursor"
+                    }
+                  },
+                  "required": [
+                    "projects",
+                    "next_cursor"
+                  ],
+                  "title": "ProjectsPage",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Operation-specific JSON object; project_id must match the path where the row names a project."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/organizations": {
+      "post": {
+        "summary": "Organisations with at least one project this credential may reach",
+        "description": "Scope read; accepted principals: session, delegate, grant, workload, agent; project extractor none.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "grant",
+          "session",
+          "workload"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "Only organisations with at least one project inside the calling credential's permitted set.",
+                  "properties": {
+                    "organizations": {
+                      "items": {
+                        "$ref": "#/components/schemas/OrganizationEntry"
+                      },
+                      "title": "Organizations",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "organizations"
+                  ],
+                  "title": "OrganizationsPage",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Operation-specific JSON object; project_id must match the path where the row names a project."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/read/Catalog": {
+      "post": {
+        "summary": "Catalog (native protobuf JSON; project must match the path)",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor asset.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -12283,6 +12535,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -12337,10 +12590,13 @@
     "/api/v1/projects/{project}/read/GetAsset": {
       "post": {
         "summary": "GetAsset (native protobuf JSON; project must match the path)",
-        "description": "Scope read; accepted principals: session, delegate; project extractor asset.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor asset.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -12349,6 +12605,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -12403,10 +12660,13 @@
     "/api/v1/projects/{project}/read/GetCurveAsset": {
       "post": {
         "summary": "GetCurveAsset (native protobuf JSON; project must match the path)",
-        "description": "Scope read; accepted principals: session, delegate; project extractor asset.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor asset.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -12415,6 +12675,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -12469,10 +12730,13 @@
     "/api/v1/projects/{project}/read/GetExternalSnapshot": {
       "post": {
         "summary": "GetExternalSnapshot (native protobuf JSON; project must match the path)",
-        "description": "Scope read; accepted principals: session, delegate; project extractor asset.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor asset.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -12481,6 +12745,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -12535,10 +12800,13 @@
     "/api/v1/projects/{project}/read/GetOriginalChunk": {
       "post": {
         "summary": "GetOriginalChunk (native protobuf JSON; project must match the path)",
-        "description": "Scope read; accepted principals: session, delegate; project extractor asset.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor asset.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -12547,6 +12815,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -12667,10 +12936,13 @@
     "/api/v1/projects/{project}/read/GetRun": {
       "post": {
         "summary": "GetRun (native protobuf JSON; project must match the path)",
-        "description": "Scope read; accepted principals: session, delegate; project extractor asset.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor asset.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -12679,6 +12951,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -12733,10 +13006,13 @@
     "/api/v1/projects/{project}/read/ListAssetRevisions": {
       "post": {
         "summary": "ListAssetRevisions (native protobuf JSON; project must match the path)",
-        "description": "Scope read; accepted principals: session, delegate; project extractor asset.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor asset.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -12745,6 +13021,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -12799,10 +13076,13 @@
     "/api/v1/projects/{project}/read/ListAssets": {
       "post": {
         "summary": "ListAssets (native protobuf JSON; project must match the path)",
-        "description": "Scope read; accepted principals: session, delegate; project extractor asset.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor asset.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -12811,6 +13091,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -12865,10 +13146,13 @@
     "/api/v1/projects/{project}/read/ListOperators": {
       "post": {
         "summary": "ListOperators (native protobuf JSON; project must match the path)",
-        "description": "Scope read; accepted principals: session, delegate; project extractor asset.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor asset.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -12877,6 +13161,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -13129,10 +13414,13 @@
     "/api/v1/projects/{project}/read/ListRuns": {
       "post": {
         "summary": "ListRuns (native protobuf JSON; project must match the path)",
-        "description": "Scope read; accepted principals: session, delegate; project extractor asset.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor asset.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -13141,6 +13429,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -15373,10 +15662,13 @@
     "/api/v1/projects/{project}/result-groups/diff": {
       "post": {
         "summary": "Parameter, input and sample changes between two exact result versions",
-        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -15385,6 +15677,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -15439,10 +15732,13 @@
     "/api/v1/projects/{project}/result-groups/list": {
       "post": {
         "summary": "Project result groups with the members and recommendation you may see",
-        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -15451,6 +15747,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -16247,10 +16544,13 @@
     "/api/v1/projects/{project}/search/query": {
       "post": {
         "summary": "Rank the assets you may read by their descriptions (words, or a local operator model)",
-        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -16259,6 +16559,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -16797,10 +17098,13 @@
     "/api/v1/projects/{project}/sources/connections": {
       "post": {
         "summary": "connections upstream source (read scope)",
-        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -16809,6 +17113,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -17039,10 +17344,13 @@
     "/api/v1/projects/{project}/sources/discover": {
       "post": {
         "summary": "discover upstream source (read scope)",
-        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -17051,6 +17359,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -19217,10 +19526,13 @@
     "/api/v1/projects/{project}/sources/export": {
       "post": {
         "summary": "export upstream source (read scope)",
-        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -19229,6 +19541,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -19459,10 +19772,13 @@
     "/api/v1/projects/{project}/sources/head": {
       "post": {
         "summary": "head upstream source (read scope)",
-        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -19471,6 +19787,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -19701,10 +20018,13 @@
     "/api/v1/projects/{project}/sources/list": {
       "post": {
         "summary": "list upstream source (read scope)",
-        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -19713,6 +20033,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -19943,10 +20264,13 @@
     "/api/v1/projects/{project}/sources/map-describe": {
       "post": {
         "summary": "map-describe upstream source (read scope)",
-        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -19955,6 +20279,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -20185,10 +20510,13 @@
     "/api/v1/projects/{project}/sources/map-snapshot": {
       "post": {
         "summary": "map-snapshot upstream source (read scope)",
-        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -20197,6 +20525,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -20427,10 +20756,13 @@
     "/api/v1/projects/{project}/sources/mapping-report": {
       "post": {
         "summary": "mapping-report upstream source (read scope)",
-        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -20439,6 +20771,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -20911,10 +21244,13 @@
     "/api/v1/projects/{project}/sources/mapping-validate": {
       "post": {
         "summary": "mapping-validate upstream source (read scope)",
-        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -20923,6 +21259,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -21395,10 +21732,13 @@
     "/api/v1/projects/{project}/sources/preview": {
       "post": {
         "summary": "preview upstream source (read scope)",
-        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -21407,6 +21747,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -21637,10 +21978,13 @@
     "/api/v1/projects/{project}/sources/records": {
       "post": {
         "summary": "records upstream source (read scope)",
-        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -21649,6 +21993,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -21879,10 +22224,13 @@
     "/api/v1/projects/{project}/sources/refresh": {
       "post": {
         "summary": "refresh upstream source (read scope)",
-        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -21891,6 +22239,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -23149,10 +23498,13 @@
     "/api/v1/projects/{project}/sources/schema": {
       "post": {
         "summary": "schema upstream source (read scope)",
-        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -23161,6 +23513,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -23391,10 +23744,13 @@
     "/api/v1/projects/{project}/stages/board": {
       "post": {
         "summary": "Review stages of the revisions you can read, with releases shown read-only",
-        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -23403,6 +23759,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -23457,10 +23814,13 @@
     "/api/v1/projects/{project}/stages/get": {
       "post": {
         "summary": "Review stage, history and endorsements of one exact revision",
-        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -23469,6 +23829,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -23523,10 +23884,13 @@
     "/api/v1/projects/{project}/stages/names": {
       "post": {
         "summary": "This project's names for the four review stages",
-        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -23535,6 +23899,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -24867,10 +25232,13 @@
     "/api/v1/projects/{project}/subscriptions/fetch": {
       "post": {
         "summary": "fetch subscription",
-        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -24879,6 +25247,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -25058,10 +25427,13 @@
     "/api/v1/projects/{project}/subscriptions/get": {
       "post": {
         "summary": "get subscription",
-        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -25070,6 +25442,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -25249,10 +25622,13 @@
     "/api/v1/projects/{project}/subscriptions/list": {
       "post": {
         "summary": "list subscription",
-        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -25261,6 +25637,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -25631,10 +26008,13 @@
     "/api/v1/projects/{project}/subscriptions/offer-preview": {
       "post": {
         "summary": "offer-preview subscription",
-        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -25643,6 +26023,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session"
         ],
         "responses": {
@@ -26204,10 +26585,13 @@
     "/api/v1/projects/{project}/activity": {
       "post": {
         "summary": "Activity page (historical path of activity/list for existing workload clients)",
-        "description": "Scope read; accepted principals: session, delegate, workload; project extractor top.",
+        "description": "Scope read; accepted principals: session, delegate, grant, workload; project extractor top.",
         "security": [
           {
             "session": []
+          },
+          {
+            "bearer": []
           },
           {
             "bearer": []
@@ -26219,6 +26603,7 @@
         "x-ophiolite-scope": "read",
         "x-ophiolite-principals": [
           "delegate",
+          "grant",
           "session",
           "workload"
         ],
@@ -31286,6 +31671,24 @@
           }
         }
       },
+      "OrganizationEntry": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "OrganizationEntry",
+        "type": "object"
+      },
       "PackageMember": {
         "additionalProperties": false,
         "description": "E23a: one file of a source package; the request body is the members' bytes in the listed order.",
@@ -31325,6 +31728,61 @@
           "sha256"
         ],
         "title": "PackageMember",
+        "type": "object"
+      },
+      "ProjectEntry": {
+        "description": "A project the calling credential may reach. organization_id is null when the project is not bound to\nan organisation the reader belongs to (for example a project shared with the reader directly).",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role"
+          },
+          "can_administer": {
+            "title": "Can Administer",
+            "type": "boolean"
+          },
+          "organization_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Organization Id"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "role",
+          "can_administer",
+          "organization_id"
+        ],
+        "title": "ProjectEntry",
         "type": "object"
       },
       "RecipeReference": {
