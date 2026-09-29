@@ -19,7 +19,14 @@ from ophiolite import Client,Credential
 from ophiolite.bundle import open_bundle
 from ophiolite.errors import VerificationFailed
 from ophiolite.typed import PointSet
-from tests.gateway.test_in_process_publish import LAS_TEXT,UNKNOWN,client
+
+LAS_TEXT='~Version\nVERS. 2.0 : LAS\nWRAP. NO : rows\n~Well\nSTRT.M 100 : start\nSTOP.M 102 : stop\nSTEP.M 1 : step\nNULL. -999.25 : missing\nWELL. SDK : fixture\n~Curve\nDEPT.M : depth\nGR.gAPI : gamma\n~ASCII\n100 0\n101 -999.25\n102 30\n'
+UNKNOWN=dict(crs='unknown',xy_unit='unknown',z_unit='unknown',z_meaning='unknown',positive='unknown',vertical_datum='unknown')
+
+
+def client(web,persona,kind):  # as in test_in_process_publish (the gateway tests are collected one file at a time)
+    credential=(Credential.bearer('oph_api_'+persona+':read,write') if kind=='delegate' else Credential.bearer('provider-'+persona,grant=web.grants[persona]))
+    return Client('https://workspace.example','p',credential,web.c)
 
 FROZEN='72c4bde361e58fd71b806d0c3284c994cb98bdfa'  # the SDK every release before E30 pins (E28)
 ROOT=Path(__file__).resolve().parents[2]
