@@ -5,6 +5,12 @@
 Supported 0.x client over preview contracts, installable from reviewed source.
 No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
 
+- Access keys (E25a): `ophiolite login --key` (or `auth.key_login`) saves an access key created on
+  the account page as its own credential kind, used as a plain Bearer by later processes;
+  `OPHIOLITE_ACCESS_KEY` alone is used for one process and nothing is saved. `status` is local for a
+  key; `logout` removes only the local copy (remove the key on the account page to stop it).
+  `Credential.kind` and `Credential.summary()` describe a credential without its secret.
+
 - Recipe-read point sets (E23a): Petrel points-with-attributes and OpendTect x-y-z
   horizon exports read as `PointSet` with `version == 2`: number, text and category
   attribute columns (`Float64`, `string`, `category`) named by their grammar-safe
