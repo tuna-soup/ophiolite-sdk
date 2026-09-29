@@ -38,8 +38,8 @@ def test_real_get_routes_noncompute_revocation(shared,service,monkeypatch,tmp_pa
     assert not permissions['viewer']['can_compute']
     active=[True];calls=[];bodies=[];recording=[]
     def authorize(self,token,project,scope):
-        if not active[0] or token!='oph_api_sdk_fixture' or project!='p' or scope!='read':raise PermissionError('Denied')
-        return 'viewer'
+        if not active[0] or token!='oph_api_sdk_fixture' or project not in ('p',None) or scope!='read':raise PermissionError('Denied')
+        return 'viewer','p',['read']  # E27: (parent, the delegate's project, its scopes)
     monkeypatch.setattr(Automation,'authorize',authorize)
     web=create_app(a.sources.platform,'https://workspace.example',organizations=service,identity=identity(service),sources=a.sources)
     with TestClient(web,base_url='https://workspace.example') as http:
