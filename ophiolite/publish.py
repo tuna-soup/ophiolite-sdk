@@ -140,17 +140,18 @@ def parse_result(data):
 def selection(asset):
     if isinstance(asset,api.Receipt):asset=asset.asset
     elif isinstance(asset,api.UploadResult):asset={**asset.model_dump(),'authority':'ophiolite:uploaded'}
+    elif isinstance(asset,api.PublicationReceipt):asset={'asset_id':asset.asset_id,'revision':asset.revision,'authority':'ophiolite:publication'}  # E31
     elif hasattr(asset,'model_dump'):asset=asset.model_dump(by_alias=True,exclude_unset=True)
     if not isinstance(asset,dict) or any(not isinstance(asset.get(key),str) or not asset[key] for key in ('asset_id','revision','authority')):
         raise Refused('Supply an exact asset and revision with its source authority.')
-    if asset['authority'] not in ('ophiolite:derived','ophiolite:uploaded'):
-        raise Refused('Sharing here supports retained results and uploaded originals.')
+    if asset['authority'] not in ('ophiolite:derived','ophiolite:uploaded','ophiolite:publication'):
+        raise Refused('Sharing here supports retained results, uploaded originals and derived publications.')
     return dict(asset)
 
 
 def grants(asset,result):
     asset=selection(asset)
-    if asset['authority']=='ophiolite:uploaded':item=result
+    if asset['authority'] in ('ophiolite:uploaded','ophiolite:publication'):item=result
     else:
         items=result.get('results')
         if not isinstance(items,list):raise VerificationFailed('Invalid result catalogue response.')
@@ -656,7 +657,18 @@ def _work_derive(self,written,*,name,from_,method,of_entity=None,new_version_of=
         _checkpoint(self.path/'run.json',state,replace=True)
         return receipt
 
+def _work_derived(self,written):
+    """E31: the receipt this folder already holds for exactly this file, or None (nothing is sent)."""
+    import hashlib
+    if not (self.path/'run.json').exists():return None
+    done=self._state().get('derive') or {}
+    if done.get('done') and done.get('output_sha256')==hashlib.sha256(written.bytes).hexdigest():
+        from .models.api import PublicationReceipt
+        return parse(PublicationReceipt,done['receipt'])
+    return None
+
 WorkFolder.publish_derived=_work_derive
+WorkFolder.published_derived=_work_derived
 
 
 def verify_application_reply(operation,body,data,project,client=None):

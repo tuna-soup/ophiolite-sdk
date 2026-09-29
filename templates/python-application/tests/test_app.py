@@ -15,7 +15,8 @@ def test_application_complete_workflow(tmp_path):
     with synthetic_server() as server,client_for(server.url,fixture=True) as client:
         answer=workflow(client,tmp_path/'work',share=['alice','bob'])
         assert answer['state']=='published' and answer['sharing']['state']=='shared'
-        assert server.template_mutations=={'configure':1,'start':1,'publish':1,'share':1}
+        assert server.template_mutations=={'derive':1,'publication-share':1}  # E31 S5: publications/derive, never the applications route
+        assert not [r for r in server.requests if '/applications/' in r['path']]
 
 
 def test_expired_capacity_and_changed_input_guidance():

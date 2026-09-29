@@ -76,12 +76,12 @@ def test_full_backend_workflow_and_no_credentials_in_responses(server):
     read=post('read',selected);assert read['axis']==[100.0,101.0,102.0,103.0,104.0] and read['values']==[0.0,10.0,None,30.0,40.0]
     post('stage',{**selected,'mnemonic':'bad'});post('stage',{**selected,'mnemonic':'CALC'},status=400)
     bad=post('validate',{'mnemonic':'bad'},status=422);assert bad['violations']
-    post('publish',status=422);assert fixture.template_mutations.get('publish',0)==0
+    post('publish',status=422);assert fixture.template_mutations.get('derive',0)==0
     post('validate',{'mnemonic':'CALC'});receipt=post('publish');assert 'kind=scientific' in receipt['workspace_url']
     fixture.drop('share',1);answer=post('share',{'audience':['alice','bob']});assert answer['state']=='shared'
-    assert fixture.template_mutations['share']==1
+    assert fixture.template_mutations['publication-share']==1
     fixture.template_faults['recipients_changed']=True;answer=post('share',{'audience':['alice']});assert answer['state']=='inspect-recipients'
-    assert fixture.template_mutations['share']==1
+    assert fixture.template_mutations['publication-share']==1
 
 
 def test_bootstrap_proof_changes_per_start_and_configuration_is_loopback_only(server,tmp_path):

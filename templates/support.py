@@ -8,12 +8,13 @@ from importlib.resources import files
 import json
 import os
 from pathlib import Path
+import re
 import tempfile
 from urllib.parse import parse_qs, unquote, urlsplit
 
 from ophiolite import Client, Credential
-from ophiolite.errors import ShareOutcomeUnknown, IntegrityConflict, Refused
-from ophiolite.publish import validate_derived_curves
+from ophiolite.errors import ShareOutcomeUnknown, IntegrityConflict, Refused, ValidationFailed
+from ophiolite.writers import write_curves
 from ophiolite.testing import fixture_server
 from ophiolite import validate
 
@@ -84,30 +85,47 @@ def derive(values, factor=2):
 
 
 def stage(client, folder, *, mnemonic='CALC', factor=2, asset=None, curve='GR'):
+    """Read one exact permitted curve and compute the derived curve locally. Nothing is published yet."""
     asset = asset or next(iter(client.assets()), None)
     if asset is None: raise Refused('No permitted curve is available. Ask the owner to grant access.')
     selected = client.read(asset['asset_id'],asset['revision'],[curve])
     # Explicit local model validation preserves the scientific fields; the SDK read
     # has already verified the original normalized bytes and their exact digest.
-    validate.schema(selected.curves[0].model_dump(by_alias=True),'ophiolite.application-curve/1')
-    work = client.work_folder(folder)
-    binding = work.configure(asset['asset_id'],asset['revision'],curve=curve,name='Synthetic curve calculation')
-    run = work.start(binding,application_version='ophiolite-template/'+TEMPLATE_VERSION,
-                     parameters={'operation':'multiply','factor':factor},script=Path(__file__).read_bytes())
-    original, view = run.input()
-    curves = [{'mnemonic':mnemonic,'unit':view.unit,'description':'Selected values multiplied by '+str(factor),'values':derive(view.values,factor)}]
-    return {'selected':selected,'work':work,'run':run,'original':original,'view':view,'curves':curves}
+    view = selected.curves[0]
+    validate.schema(view.model_dump(by_alias=True),'ophiolite.application-curve/1')
+    values = derive(view.values,factor)
+    method = {'name':'multiply','library':'ophiolite-template','version':TEMPLATE_VERSION,'parameters':{'factor':factor,'curve':curve}}
+    state = {'selected':selected,'asset':asset,'work':client.work_folder(folder),'view':view,'values':values,'method':method}
+    try: return rename_stage(state, mnemonic)
+    except ValidationFailed: return {**state,'mnemonic':mnemonic,'written':None}  # validate_stage names the problem
 
 
 def validate_stage(state):
-    return validate_derived_curves(state['curves'],source=state['original'],sample_count=len(state['view'].values))
+    """The derived curve keeps every sample and every missing value of its input."""
+    view, values = state['view'], state['values']
+    if len(values) != len(view.values) or any((a is None) != (b is None) for a, b in zip(view.values, values)):
+        raise ValidationFailed(['The derived curve must keep every sample and every missing value of its input.'])
+    if not re.fullmatch(r'[A-Z][A-Z0-9_]{0,15}', state['mnemonic']):
+        raise ValidationFailed(['Name the derived curve with 1-16 capital letters, digits or underscores, starting with a letter.'])
+    if state['mnemonic'] == view.curve.upper():
+        raise ValidationFailed(['Name the derived curve differently from its input curve.'])
+    return state['written']
 
 
-def publish_stage(state):
-    validate_stage(state)
-    receipt = state['work'].publish(state['run'],derived_curves=state['curves'])
-    state['work'].download(receipt)
-    return receipt
+def rename_stage(state, mnemonic):
+    """The staged calculation under another curve name (the file is written again; nothing is sent)."""
+    view = state['view']
+    state['mnemonic'] = mnemonic
+    state['written'] = write_curves(view.axis,{mnemonic:(view.unit,state['values'])},depth_unit=view.context.depth_unit,well='TEMPLATE',filename='derived.las')
+    return state
+
+
+def publish_stage(state, *, name='Synthetic curve calculation'):
+    """E31 S5: one publication through publications/derive, recoverable from the work folder: a lost answer is
+    retried with the same saved command id, so the same file is published once."""
+    written = validate_stage(state)
+    parent = (state['asset']['asset_id'], state['asset']['revision'])
+    return state['work'].publish_derived(written,name=name,from_=[parent],method=state['method'])
 
 
 def share_after_read(client, receipt, audience):
@@ -121,11 +139,12 @@ def share_after_read(client, receipt, audience):
 
 
 def workflow(client, folder, *, share=None, mnemonic='CALC'):
+    """Read, compute and publish; run it again on the same folder after a crash or a lost answer and the saved
+    command publishes once."""
     folder = Path(folder)
-    if (folder/'owner.json').is_file():
-        client.recover(folder)
-        return {'state':'recovered','work_folder':str(folder)}
     state = stage(client,folder,mnemonic=mnemonic)
+    done = state['work'].published_derived(state['written'])
+    if done is not None: return {'state':'recovered','receipt':done.model_dump(by_alias=True),'work_folder':str(folder)}  # already published: nothing is sent
     receipt = publish_stage(state)
     answer = {'state':'published','receipt':receipt.model_dump(by_alias=True),'work_folder':str(folder)}
     if share is not None: answer['sharing'] = share_after_read(client,receipt,share)

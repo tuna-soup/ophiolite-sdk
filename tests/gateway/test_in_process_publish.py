@@ -354,3 +354,18 @@ def test_sdk_work_folder_recovers_a_publication_after_a_lost_response(web,tmp_pa
     listed=[r for r in web.a.journal.db.execute("SELECT id FROM retained_assets WHERE kind='derived'").fetchall()]
     assert len(listed)==1 and again.asset_id==listed[0][0]  # one publication, not two
     with pytest.raises(ValidationFailed):alice.publish_derived(points,name='x',from_=[source],method={'name':'m'},command_id='')
+
+
+def test_sdk_shares_a_derived_publication_through_its_own_route(web):
+    """E31 S5: client.grants and client.share take a PublicationReceipt (publications/info and publications/share)."""
+    from ophiolite.bundle import Curve
+    alice,bob=client(web,'alice','delegate'),client(web,'bob','delegate')
+    source=alice.upload_data(LAS_TEXT.encode(),profile='las2/1',name='SDK shared source',attribution='Synthetic',audience=['bob'],rights_confirmed=True,command_id='sdk-src-3')
+    alice.share(source,read=['bob'],reuse=['bob'],expected_generation=alice.grants(source).generation)
+    curve=Curve.write([100,101,102],{'GR3':('gAPI',[2,None,90])},depth_unit='m')
+    receipt=alice.publish_derived(curve,name='SDK shared curve',from_=[source],method={'name':'Tripled','declared':False},command_id='sdk-derive-3')
+    before=alice.grants(receipt)
+    assert 'bob' not in before.recipients and before.generation is not None
+    after=alice.share(receipt,read=['bob'],expected_generation=before.generation)
+    assert 'bob' in after.recipients and after.generation==before.generation+1
+    assert bob.read(receipt.asset_id,receipt.revision,['GR3']).curves[0].values==[2,None,90]

@@ -90,6 +90,7 @@ class _MemoryApplications:
         operation=urlsplit(path).path.rsplit('/',1)[-1]
         if path=='/api/v1/application-access/status':return 200,{'state':'approved','project_id':'p','user_id':owner}
         try:
+            if '/publications/' in path:return self._publication(operation,path,raw,headers,owner)  # E31: derived publications
             upload='/las-uploads/' in path
             if upload and operation in ('upload','inspect'):
                 extra=next(v for k,v in headers.items() if k.lower()=='x-ophiolite-upload')
@@ -171,6 +172,46 @@ class _MemoryApplications:
             self.commands[key]=(fingerprint,copy.deepcopy(answer));self.mutations[operation]=self.mutations.get(operation,0)+1
             return 200,copy.deepcopy(answer)
         except (KeyError,ValueError,TypeError,StopIteration):return 400,{'error':'Invalid synthetic fixture request'}
+    def _publication(self,operation,path,raw,headers,owner):
+        """E31: publications/derive (an exact file with its declared method, idempotent per command id), info and share."""
+        import copy,hashlib
+        if operation=='derive':
+            extra=next(v for k,v in headers.items() if k.lower()=='x-ophiolite-upload')
+            body=json.loads(base64.b64decode(extra,validate=True))
+            if body['project_id']!='p':return 403,{'error':'project unavailable'}
+            if hashlib.sha256(raw).hexdigest()!=body['output_sha256'] or len(raw)!=body['output_bytes']:return 400,{'error':'The file differs from its declared digest or length'}
+            key=('derive',owner,body['command_id']);fingerprint=hashlib.sha256(extra.encode()+raw).hexdigest()
+            if key in self.commands:
+                prior,answer=self.commands[key]
+                return (200,copy.deepcopy(answer)) if prior==fingerprint else (409,{'error':'This command id was already used for a different publication','code':'command-owned'})
+            ident='pub-'+hashlib.sha256(json.dumps(list(key)).encode()).hexdigest()[:24]
+            answer={'asset_id':ident,'revision':body['output_sha256'],'revision_number':1,'profile':body['profile'],
+                    'derived_from':[{'authority':'ophiolite:derived','key':p['asset_id'],'revision':p['revision'],'profile':'las2/1'} for p in body['derived_from']],
+                    'method':body['method'],'command_id':body['command_id']}
+            self.commands[key]=(fingerprint,copy.deepcopy(answer));self.publications=getattr(self,'publications',{})
+            self.publications[ident]={'receipt':answer,'name':body['name'],'owner':owner,'bytes':raw}
+            self.mutations['derive']=self.mutations.get('derive',0)+1
+            return 200,copy.deepcopy(answer)
+        body=json.loads(raw);ident=body.get('asset_id');item=getattr(self,'publications',{}).get(ident)
+        if item is None:return 404,{'error':'Publication unavailable','code':'not-found'}
+        if operation=='share':
+            if body.get('expected_generation') is None:return 428,{'error':'Reload who can see this and share again with the version you saw','code':'condition-required'}
+            command,digest=body.get('command_id'),json.dumps([sorted(body.get('audience',[])),sorted(body.get('reuse_audience',[]))])
+            last=self.share_commands.get(ident)
+            if not (command and last and last==(command,digest)):  # a replay of the applied command answers the current state
+                if command and last and last[0]==command:return 409,{'error':'This sharing request was already used for different recipients','code':'recipients-changed'}
+                if body['expected_generation']!=self.generations.get(ident,1):return 409,{'error':'Recipients changed; reload before saving','code':'recipients-changed'}
+                self.share_commands[ident]=(command,digest)
+                self.audiences[ident]=(body.get('audience',[]),body.get('reuse_audience',[]));self.generations[ident]=self.generations.get(ident,1)+1
+                self.mutations['publication-share']=self.mutations.get('publication-share',0)+1
+        elif operation!='info':return 404,{'error':'Fixture operation unavailable'}
+        read,reuse=self.audiences.get(ident,([],[]))
+        read,reuse=sorted(set(read)|{item['owner']}),sorted(set(reuse)|{item['owner']})  # the author always keeps both, as the server answers
+        answer={'asset_id':ident,'revision':item['receipt']['revision'],'name':item['name'],'owner':item['owner'],'can_share':item['owner']==owner,
+                'permitted_audience':['alice','bob'],'recipients':read,'reuse_recipients':reuse,'grants_generation':self.generations.get(ident,1)}
+        if operation=='share':answer['sharing_contract']='conditional'
+        return 200,answer
+
     def summary(self,ident):
         if ident in self.uploads:
             answer=dict(self.uploads[ident]);read,reuse=self.audiences.get(ident,(answer['recipients'],answer['reuse_recipients']))

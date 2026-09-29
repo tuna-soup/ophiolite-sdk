@@ -11,7 +11,7 @@ import tempfile
 import threading
 from urllib.parse import quote,urlsplit
 sys.path.insert(0,str(Path(__file__).resolve().parents[2]))
-from support import client_for,synthetic_server,stage,validate_stage,publish_stage,share_after_read,guidance
+from support import client_for,synthetic_server,stage,validate_stage,publish_stage,share_after_read,guidance,rename_stage
 from ophiolite.errors import OphioliteError,ValidationFailed,Refused
 
 
@@ -38,14 +38,16 @@ class Backend:
             return {'message':'Calculation staged locally. Review and validate before publishing.'}
         if path=='/api/validate':
             if self.staged is None:raise Refused('Stage a calculation first.')
-            self.staged['curves'][0]['mnemonic']=body['mnemonic']
+            try: rename_stage(self.staged,body['mnemonic'])
+            except ValidationFailed: self.staged.update(mnemonic=body['mnemonic'],written=None)
             validate_stage(self.staged)
             return {'valid':True,'message':'The selected calculation satisfies the supported publication checks.'}
         if path=='/api/publish':
             if self.staged is None:raise Refused('Stage and validate a calculation first.')
+            validate_stage(self.staged)
             self.receipt=publish_stage(self.staged)
-            output=self.receipt.output_reference;curve=self.staged['curves'][0]['mnemonic']
-            link=self.client.url+'/project/'+quote(self.client.project,safe='')+'/asset/'+quote(output.key,safe='')+'?revision='+quote(output.revision,safe='')+'&kind=scientific&curve='+quote(curve,safe='')
+            curve=self.staged['mnemonic']
+            link=self.client.url+'/project/'+quote(self.client.project,safe='')+'/asset/'+quote(self.receipt.asset_id,safe='')+'?revision='+quote(self.receipt.revision,safe='')+'&kind=scientific&curve='+quote(curve,safe='')
             return {'message':'The derived result is saved. The original is unchanged.','workspace_url':link,'receipt':self.receipt.model_dump(by_alias=True)}
         if path=='/api/share':
             if self.receipt is None:raise Refused('Publish a result before sharing it.')

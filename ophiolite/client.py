@@ -424,6 +424,7 @@ class Client(Navigation, EntityClient, LocationClient):  # E29: wells() and exte
         from . import publish as planning
         asset=planning.selection(asset)
         result=(self._post('las-uploads','info',{'asset_id':asset['asset_id']}) if asset['authority']=='ophiolite:uploaded'
+                else self._post('publications','info',{'asset_id':asset['asset_id']}) if asset['authority']=='ophiolite:publication'  # E31
                 else self._post('applications','result-list',{}))
         return planning.grants(asset,result)
 
@@ -442,9 +443,9 @@ class Client(Navigation, EntityClient, LocationClient):  # E29: wells() and exte
         from .models.api import UploadResult
         reuse=[] if reuse is None else reuse
         planning.validate_recipients(read,reuse);asset=planning.selection(asset)
-        uploaded=asset['authority']=='ophiolite:uploaded'
-        body={'asset_id' if uploaded else 'id':asset['asset_id'],'audience':read,'reuse_audience':reuse}
-        area='las-uploads' if uploaded else 'applications'
+        uploaded=asset['authority']=='ophiolite:uploaded';publication=asset['authority']=='ophiolite:publication'
+        body={'asset_id' if uploaded or publication else 'id':asset['asset_id'],'audience':read,'reuse_audience':reuse}
+        area='las-uploads' if uploaded else 'publications' if publication else 'applications'
         if type(expected_generation) is not int or expected_generation<0:raise Refused('expected_generation must be a non-negative integer from client.grants(asset).')
         if command_id is not None and (not isinstance(command_id,str) or not 0<len(command_id)<=64):raise Refused('command_id must be 1-64 characters.')
         # Never infer support: an older server would apply the request unconditionally.
@@ -452,6 +453,10 @@ class Client(Navigation, EntityClient, LocationClient):  # E29: wells() and exte
         body.update(expected_generation=expected_generation,command_id=command_id or uuid.uuid4().hex)
         try:result=self._post(area,'share',body)
         except ShareOutcomeUnknown:result=self._post(area,'share',body)  # identical replay: idempotent or refused
+        if publication:  # E31: a derived publication answers its sharing view; its grants are the result
+            parsed=planning.grants(asset,{k:v for k,v in result.items() if k!='sharing_contract'})
+            if parsed.asset_id!=asset['asset_id']:raise VerificationFailed('Sharing returned a different publication.')
+            return parsed
         parsed=planning.parse(UploadResult,result) if uploaded else planning.parse_result(result)
         # Recipients belong to a result as a whole (every version, E8); an upload has one revision.
         if parsed.asset_id!=asset['asset_id'] or uploaded and parsed.revision!=asset['revision']:raise VerificationFailed('Sharing returned a different exact asset.')
