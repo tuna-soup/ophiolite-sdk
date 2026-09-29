@@ -32234,6 +32234,17 @@
               }
             ],
             "title": "Name"
+          },
+          "can_reuse": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Can Reuse"
           }
         },
         "required": [
@@ -32241,7 +32252,8 @@
           "kind",
           "authority",
           "revision",
-          "name"
+          "name",
+          "can_reuse"
         ],
         "title": "InventoryItem",
         "type": "object"
