@@ -5,6 +5,14 @@
 Supported 0.x client over preview contracts, installable from reviewed source.
 No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
 
+- Application reach (E27): `ophiolite.connect(url, credential)` returns an `Account` whose
+  `projects()` and `organizations()` list what the credential reaches before a project is chosen
+  (one project for an access key or an approved application; every project for a browser sign-in),
+  and `account.client(project)` opens the ordinary project client. `Credential.discovery_headers(url)`
+  serves those two calls only. `ophiolite projects` and `ophiolite orgs` print the same (`--json`).
+  `device_login` asks for capability 3, which adds the project's data reads and discovery to the
+  application operations and no new writes.
+
 - Access keys (E25a): `ophiolite login --key` (or `auth.key_login`) saves an access key created on
   the account page as its own credential kind, used as a plain Bearer by later processes;
   `OPHIOLITE_ACCESS_KEY` alone is used for one process and nothing is saved. `status` is local for a
