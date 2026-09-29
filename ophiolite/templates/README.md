@@ -1,14 +1,14 @@
 # Start with a working scientific example
 
-These four preview templates read exact permitted curve versions through the
-public SDK. They preserve units, depth context, missing samples and lineage.
-The calculations are local, declared script execution; they are not server jobs.
-They do not imply a stable SDK or production support.
+These preview templates start an application on the public SDK. Copy one with `ophiolite init <name>
+[--output DIR]` (the templates ship inside the SDK wheel), or from this directory.
 
-- **agent-workflow:** a recoverable calculation recipe with refusal examples.
+- **map-application:** wells on a web map (MapLibre GL); a Python backend holds the credential.
+- **derive-and-publish:** read an exact curve, compute a derived curve locally, publish it with its method
+  (`publications/derive`), recoverable from a work folder.
+- **sync-worker:** keep a local copy of a project current from its event log and act on each change.
 - **notebook:** a DataFrame, scientific descriptor and plot, with explicit failures.
-- **python-application:** a small command-line calculation and sharing workflow.
-- **react-application:** a local UI with a Python backend that owns the credential.
+- **agent-workflow:** a recoverable calculation recipe with refusal examples.
 
 Keep `support.py` alongside these directories when copying a template. It contains
 one shared recipe and the synthetic fixture adapter. Run the templates from their

@@ -19,6 +19,12 @@ from ophiolite.testing import fixture_server
 from ophiolite import validate
 
 TEMPLATE_VERSION = '0.1.0'
+# Synthetic wells (E31 map-application): two located by a source you may read, one without a location.
+WELLS = [{'entity_id':'well-synthetic-1','kind':'well','name':'Synthetic well 1','owner':'alice','generation':1,
+          'location':{'x':5.1,'y':52.1,'crs':'OGC:CRS84','source':{'asset_id':'wells-table','revision':'r1','profile':'ophiolite/sql-table/1','row':'1'},'elevation_reference':'unknown'}},
+         {'entity_id':'well-synthetic-2','kind':'well','name':'Synthetic well 2','owner':'alice','generation':1,
+          'location':{'x':6.2,'y':52.9,'crs':'OGC:CRS84','source':{'asset_id':'wells-table','revision':'r1','profile':'ophiolite/sql-table/1','row':'2'},'elevation_reference':'unknown'}},
+         {'entity_id':'well-synthetic-3','kind':'well','name':'Synthetic well 3','owner':'alice','generation':1,'location':None}]
 
 
 @contextmanager
@@ -60,6 +66,12 @@ def synthetic_server():
             if route == exact + '/representations/las': return 200, original
             if route == exact + '/representations/curve': return 200, raw
             return 404, {'error':'No such synthetic revision.'}
+        if method == 'POST' and route.endswith(('/entities/list', '/entities/extent')):  # E31: the synthetic wells a map shows
+            if not token: return 401, {'error':'Sign in again.'}
+            request = json.loads(body or b'{}')
+            if route.endswith('/entities/extent'): return 200, {'crs':request.get('crs','OGC:CRS84'),'bbox':[5.1,52.1,6.2,52.9],'count':2,'untransformed':0}
+            return 200, {'entities':[dict(well, location=dict(well['location'], crs=request.get('crs') or 'OGC:CRS84') if well['location'] else None) for well in WELLS],
+                         'next_cursor':None,'untransformed':0}
         return applications(method,path,body,headers)
 
     server.handler = handler

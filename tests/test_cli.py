@@ -192,3 +192,23 @@ def test_export_keeps_every_asset_it_is_given(tmp_path,monkeypatch,capsys):
     assert seen==[[('a1','r1',['GR']),('a2','r2',['GR'])]]
     with pytest.raises(Refused):
         cli.main(['export','--configuration',str(config),'--asset','a1','--revision','r1','--asset','a2','--output',str(tmp_path/'c')])
+
+
+def test_doctor_online_checks_reach_and_expiry(tmp_path,monkeypatch,capsys):
+    """E31 S4: doctor --online says whether the credential reaches the configured project, and until when."""
+    import ophiolite.account
+    config=configuration(tmp_path)
+    monkeypatch.setattr(cli.auth,'request',lambda url:{'version':'1.21.0'})
+    monkeypatch.setenv('OPHIOLITE_ACCESS_KEY','oph_key_example')
+    class Reach:
+        def __init__(self,*a,**k):pass
+        def __enter__(self):return self
+        def __exit__(self,*a):pass
+        def projects(self):return [{'id':'p'}]
+    monkeypatch.setattr(ophiolite.account,'Account',Reach)
+    cli.main(['doctor','--configuration',str(config),'--credentials',str(tmp_path/'none.json'),'--online','--json'])
+    report=json.loads(capsys.readouterr().out)
+    assert report['reach']=='yes' and report['reach_ok'] is True and report['server_contracts']=='1.21.0'
+    Reach.projects=lambda self:[{'id':'other'}]
+    cli.main(['doctor','--configuration',str(config),'--credentials',str(tmp_path/'none.json'),'--online'])
+    assert 'Reach: no - this credential does not reach p' in capsys.readouterr().out

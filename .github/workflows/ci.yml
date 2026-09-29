@@ -47,11 +47,11 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-          cache-dependency-path: templates/react-application/package-lock.json
-      - run: python -m pip install -r templates/notebook/requirements.lock
+          cache-dependency-path: ophiolite/templates/map-application/package-lock.json
+      - run: python -m pip install -r ophiolite/templates/notebook/requirements.lock
       - run: python -m pip install --no-deps .
       - run: npm ci --ignore-scripts
-        working-directory: templates/react-application
+        working-directory: ophiolite/templates/map-application
       - run: npx playwright install --with-deps chromium
-        working-directory: templates/react-application
-      - run: OPHIOLITE_RUN_TEMPLATES=1 python -m pytest -q tests/test_templates.py
+        working-directory: ophiolite/templates/map-application
+      - run: OPHIOLITE_RUN_TEMPLATES=1 python -m pytest -q tests/test_templates.py tests/test_init_wheel.py

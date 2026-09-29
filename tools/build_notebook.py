@@ -25,7 +25,7 @@ def build(source):
 
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--check',action='store_true');args=parser.parse_args()
-    directory=ROOT/'templates/notebook';output=build((directory/'read-and-plot.py').read_text());target=directory/'read-and-plot.ipynb'
+    directory=ROOT/'ophiolite/templates/notebook';output=build((directory/'read-and-plot.py').read_text());target=directory/'read-and-plot.ipynb'
     if args.check:
         if target.read_text()!=output:raise ValueError('Notebook differs from paired script')
     else:target.write_text(output)

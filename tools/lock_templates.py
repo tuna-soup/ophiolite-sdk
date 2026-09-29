@@ -23,8 +23,8 @@ def main():
     with zipfile.ZipFile(wheel) as archive:
         metadata=message_from_bytes(archive.read('ophiolite-0.1.0.dist-info/METADATA'))
         if metadata['Name']!='ophiolite' or metadata['Version']!='0.1.0':raise ValueError('Unexpected SDK wheel')
-    for name in args.template or ['agent-workflow','notebook','python-application','react-application']:
-        directory=ROOT/'templates'/name
+    for name in args.template or ['agent-workflow','notebook','derive-and-publish','map-application','sync-worker']:
+        directory=ROOT/'ophiolite/templates'/name
         source=(directory/'requirements.in').read_text();first=source.splitlines()[0]
         if not first.endswith('@'+accepted):raise ValueError('Template SDK pin differs from the qualified source')
         with tempfile.TemporaryDirectory(prefix='ophiolite-template-lock-') as temporary:

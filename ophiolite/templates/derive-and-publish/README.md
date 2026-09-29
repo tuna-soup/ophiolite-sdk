@@ -1,4 +1,4 @@
-# A local Python scientific application
+# Derive and publish a curve
 
 Preview template version **0.1.0**. Compare `template_version` with the SDK
 CHANGELOG before upgrading. Keep `../support.py` alongside this directory.
@@ -18,12 +18,12 @@ contains zero and a missing sample; units and depth reference remain explicit.
 The included sonic/density file is additional synthetic example data, not an
 automatically converted second source.
 
-The command discovers a permitted exact curve, reads and validates it, multiplies
-nonmissing values by two, publishes a derived curve from a private work folder,
-and saves the verified download. `--work PATH` selects the folder. An existing
-SDK folder is recovered instead of starting another calculation. `--share bob`
-explicitly requests a recipient change after reading current grants. The agent
-recipe also tests a bounded interval-offset correction.
+The command discovers a permitted exact curve, reads and validates it, multiplies nonmissing values by two,
+writes the result as LAS and publishes it with `publications/derive`: the parent revision and the declared
+method (name, library, version, parameters) travel with it. `--work PATH` selects the private work folder that
+keeps the command id: after a lost answer or a crash, running again publishes the same file once; a folder
+that already holds the receipt answers "recovered" and sends nothing. `--share bob` explicitly requests a
+recipient change after reading current grants.
 
 ## Live mode and recovery
 

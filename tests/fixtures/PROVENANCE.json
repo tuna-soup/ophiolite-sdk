@@ -1196,11 +1196,11 @@
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
       "evidence": "Original Ophiolite E0 synthetic sonic/density example; header explicitly declares synthetic company, well, location and round values, no customer data. E04 owner SDK/templates licence scope and reviewed C8 explicitly name this fixture. No third-party source or broader E17 release clearance implied.",
-      "path": "templates/agent-workflow/data/synthetic-sonic-density.las",
+      "path": "ophiolite/templates/agent-workflow/data/synthetic-sonic-density.las",
       "sha256": "dfa71e3a99dadf51e61ab692be20a6f04f554fdad2652919643ab6a25f2c145c"
     },
     {
-      "path": "templates/agent-workflow/data/synthetic.las",
+      "path": "ophiolite/templates/agent-workflow/data/synthetic.las",
       "sha256": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
       "source_commit": "16c1bb13d7cabe7b7d0d97af311ef054e1f7eb16",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/original.las",
@@ -1214,11 +1214,11 @@
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
       "evidence": "Original Ophiolite E0 synthetic sonic/density example; header explicitly declares synthetic company, well, location and round values, no customer data. E04 owner SDK/templates licence scope and reviewed C8 explicitly name this fixture. No third-party source or broader E17 release clearance implied.",
-      "path": "templates/notebook/data/synthetic-sonic-density.las",
+      "path": "ophiolite/templates/derive-and-publish/data/synthetic-sonic-density.las",
       "sha256": "dfa71e3a99dadf51e61ab692be20a6f04f554fdad2652919643ab6a25f2c145c"
     },
     {
-      "path": "templates/notebook/data/synthetic.las",
+      "path": "ophiolite/templates/derive-and-publish/data/synthetic.las",
       "sha256": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
       "source_commit": "16c1bb13d7cabe7b7d0d97af311ef054e1f7eb16",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/original.las",
@@ -1232,11 +1232,11 @@
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
       "evidence": "Original Ophiolite E0 synthetic sonic/density example; header explicitly declares synthetic company, well, location and round values, no customer data. E04 owner SDK/templates licence scope and reviewed C8 explicitly name this fixture. No third-party source or broader E17 release clearance implied.",
-      "path": "templates/python-application/data/synthetic-sonic-density.las",
+      "path": "ophiolite/templates/map-application/data/synthetic-sonic-density.las",
       "sha256": "dfa71e3a99dadf51e61ab692be20a6f04f554fdad2652919643ab6a25f2c145c"
     },
     {
-      "path": "templates/python-application/data/synthetic.las",
+      "path": "ophiolite/templates/map-application/data/synthetic.las",
       "sha256": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
       "source_commit": "16c1bb13d7cabe7b7d0d97af311ef054e1f7eb16",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/original.las",
@@ -1250,11 +1250,11 @@
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
       "evidence": "Original Ophiolite E0 synthetic sonic/density example; header explicitly declares synthetic company, well, location and round values, no customer data. E04 owner SDK/templates licence scope and reviewed C8 explicitly name this fixture. No third-party source or broader E17 release clearance implied.",
-      "path": "templates/react-application/data/synthetic-sonic-density.las",
+      "path": "ophiolite/templates/notebook/data/synthetic-sonic-density.las",
       "sha256": "dfa71e3a99dadf51e61ab692be20a6f04f554fdad2652919643ab6a25f2c145c"
     },
     {
-      "path": "templates/react-application/data/synthetic.las",
+      "path": "ophiolite/templates/notebook/data/synthetic.las",
       "sha256": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
       "source_commit": "16c1bb13d7cabe7b7d0d97af311ef054e1f7eb16",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/original.las",

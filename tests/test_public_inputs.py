@@ -15,7 +15,7 @@ def test_unqualified_input_refusal(tmp_path,case):
     shutil.copytree(ROOT/'ophiolite/contracts',tmp_path/'ophiolite/contracts')
     shutil.copytree(ROOT/'tests/recordings',tmp_path/'tests/recordings')
     shutil.copytree(ROOT/'tests/fixtures',tmp_path/'tests/fixtures')
-    for source in (ROOT/'templates').glob('*/data/*'):
+    for source in (ROOT/'ophiolite/templates').glob('*/data/*'):
         if source.is_file():
             target=tmp_path/source.relative_to(ROOT);target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(source,target)
     path=tmp_path/'tests/fixtures/PROVENANCE.json';path.parent.mkdir(parents=True,exist_ok=True)
@@ -43,7 +43,7 @@ def public_copy(tmp_path):
     shutil.copytree(ROOT/'ophiolite/contracts',tmp_path/'ophiolite/contracts')
     shutil.copytree(ROOT/'tests/recordings',tmp_path/'tests/recordings')
     shutil.copytree(ROOT/'tests/fixtures',tmp_path/'tests/fixtures')
-    for source in (ROOT/'templates').glob('*/data/*'):
+    for source in (ROOT/'ophiolite/templates').glob('*/data/*'):
         if source.is_file():
             target=tmp_path/source.relative_to(ROOT);target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(source,target)
     target=tmp_path/'tests/fixtures/PROVENANCE.json';target.parent.mkdir(parents=True,exist_ok=True)

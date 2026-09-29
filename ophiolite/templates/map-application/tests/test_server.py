@@ -41,7 +41,7 @@ def test_bootstrap_refuses_cross_origin_and_missing_proof_request(server,change)
 def test_every_action_needs_exact_origin_host_and_proof(server,change):
     http,state,fixture=server;proof=bootstrap(http)
     headers={'Origin':state.origin,'X-Ophiolite-Proof':proof};headers.update(change);headers={k:v for k,v in headers.items() if v is not None}
-    for path in ['list','read','stage','validate','publish','share']:
+    for path in ['wells','extent']:
         response=http.post('/api/'+path,headers=headers,json={})
         assert response.status_code==403 and proof not in response.text
     assert fixture.template_mutations=={}
@@ -49,39 +49,35 @@ def test_every_action_needs_exact_origin_host_and_proof(server,change):
 
 def test_get_preflight_query_proof_duplicate_headers_and_body_bounds(server):
     http,state,fixture=server;proof=bootstrap(http)
-    assert http.get('/api/list').status_code==405
+    assert http.get('/api/wells').status_code==405
     response=http.options('/api/bootstrap',headers={'Origin':'http://evil.example','Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'X-Ophiolite-Bootstrap'})
     assert response.status_code==403 and 'access-control-allow-origin' not in response.headers
-    assert http.post('/api/list?proof='+proof,headers={'Origin':state.origin},json={}).status_code==403
+    assert http.post('/api/wells?proof='+proof,headers={'Origin':state.origin},json={}).status_code==403
     headers={'Origin':state.origin,'X-Ophiolite-Proof':proof}
-    assert http.post('/api/list',headers=headers,content=b'x'*65537).status_code==413
-    assert http.post('/api/list',headers=headers,content=b'').status_code==413
-    assert http.post('/api/list',headers=headers,json=[]).status_code==400
+    assert http.post('/api/wells',headers=headers,content=b'x'*65537).status_code==413
+    assert http.post('/api/wells',headers=headers,content=b'').status_code==413
+    assert http.post('/api/wells',headers=headers,json=[]).status_code==400
     for name,value in [('Origin',state.origin),('X-Ophiolite-Proof',proof)]:
         repeated=list(headers.items())+[(name,value)]
-        assert http.post('/api/list',headers=repeated,json={}).status_code==403
+        assert http.post('/api/wells',headers=repeated,json={}).status_code==403
     assert fixture.template_mutations=={}
 
 
-def test_full_backend_workflow_and_no_credentials_in_responses(server):
+def test_wells_and_extent_for_the_map_and_no_credentials_in_responses(server):
     http,state,fixture=server;proof=bootstrap(http);headers={'Origin':state.origin,'X-Ophiolite-Proof':proof}
     def post(path,body={},status=200):
         response=http.post('/api/'+path,headers=headers,json=body);assert response.status_code==status,response.text
         assert 'access_token' not in response.text and 'refresh_token' not in response.text and 'oph_api_' not in response.text
         return response.json()
-    assert 'Stage and validate' in post('publish',status=400)['message']
-    assert 'Stage a calculation first' in post('validate',status=400)['message']
-    assert 'Publish a result' in post('share',status=400)['message']
-    asset=post('list')['assets'][0];selected={key:asset[key] for key in ['asset_id','revision']};selected['curve']='GR'
-    read=post('read',selected);assert read['axis']==[100.0,101.0,102.0,103.0,104.0] and read['values']==[0.0,10.0,None,30.0,40.0]
-    post('stage',{**selected,'mnemonic':'bad'});post('stage',{**selected,'mnemonic':'CALC'},status=400)
-    bad=post('validate',{'mnemonic':'bad'},status=422);assert bad['violations']
-    post('publish',status=422);assert fixture.template_mutations.get('derive',0)==0
-    post('validate',{'mnemonic':'CALC'});receipt=post('publish');assert 'kind=scientific' in receipt['workspace_url']
-    fixture.drop('share',1);answer=post('share',{'audience':['alice','bob']});assert answer['state']=='shared'
-    assert fixture.template_mutations['publication-share']==1
-    fixture.template_faults['recipients_changed']=True;answer=post('share',{'audience':['alice']});assert answer['state']=='inspect-recipients'
-    assert fixture.template_mutations['publication-share']==1
+    extent=post('extent');assert extent=={'bbox':[5.1,52.1,6.2,52.9],'count':2,'untransformed':0}
+    answer=post('wells');features=answer['wells']['features']
+    assert answer['wells']['type']=='FeatureCollection' and answer['unlocated']==1
+    assert [f['properties']['name'] for f in features]==['Synthetic well 1','Synthetic well 2','Synthetic well 3']
+    assert features[0]['geometry']=={'type':'Point','coordinates':[5.1,52.1]} and features[2]['geometry'] is None
+    assert features[0]['properties']['source_row']=='1'  # for the popup's Technical details
+    fixture.template_faults['expired']=True
+    assert 'ophiolite login' in post('wells',status=401)['message']
+    assert fixture.template_mutations=={}  # a map only reads
 
 
 def test_bootstrap_proof_changes_per_start_and_configuration_is_loopback_only(server,tmp_path):

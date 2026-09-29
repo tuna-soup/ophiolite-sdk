@@ -23,4 +23,7 @@ dev = ["pytest>=8", "build>=1", "jsonschema>=4.26"]
 include = ["ophiolite*"]
 
 [tool.setuptools.package-data]
-ophiolite = ["contracts/**/*", "contracts/*", "skills/*/SKILL.md"]
+ophiolite = ["contracts/**/*", "contracts/*", "skills/*/SKILL.md", "templates/*", "templates/**/*"]  # E31: ophiolite init copies the packaged templates
+
+[tool.setuptools.exclude-package-data]
+ophiolite = ["templates/*/node_modules/**/*", "templates/*/node_modules/*", "templates/*/dist/**/*", "templates/**/__pycache__/*"]

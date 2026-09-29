@@ -151,6 +151,9 @@ def parser():
     changes.add_argument('--epoch');changes.add_argument('--after',type=int);changes.add_argument('--seconds',type=int,default=300,help='follow: stop after this long')
     sources=project(sub.add_parser('sources',help='Your upstream source selections in this project'))
     sources.add_argument('action',choices=['list'])
+    init=sub.add_parser('init',help='Start an application from a packaged template (map-application, derive-and-publish, sync-worker, notebook, agent-workflow)')
+    init.add_argument('template',nargs='?',help='The template name; omit with --list');init.add_argument('--output',type=Path,help='An empty or new folder (default: ./TEMPLATE)')
+    init.add_argument('--list',action='store_true',help='List the packaged templates')
     skills=sub.add_parser('skills',help='Locate packaged SDK guidance')
     skills.add_subparsers(dest='action',required=True).add_parser('path')
     return parser
@@ -175,6 +178,20 @@ def _discover(args):
     for row in rows:
         if args.command=='projects':print((row.get('name') or 'Unnamed project')+' - '+{'member':'can edit','viewer':'can view'}.get(row.get('role'),'access')+(' and administer' if row.get('can_administer') else ''))
         else:print(row.get('name') or 'Unnamed organisation')
+
+
+def _reach(config,path):
+    """doctor --online: whether the saved credential (or OPHIOLITE_ACCESS_KEY) reaches the configured project, and its expiry."""
+    from .account import Account
+    from .errors import OphioliteError
+    try:
+        credential=Credential.bearer(os.environ['OPHIOLITE_ACCESS_KEY']) if os.environ.get('OPHIOLITE_ACCESS_KEY') and not path.exists() else Credential.from_file(path)
+        expires=credential.summary().get('expires_at')
+        with Account(config['url'],credential) as account:projects=[p['id'] for p in account.projects()]
+    except OphioliteError as error:
+        return {'reach':'no - '+str(error),'reach_ok':False}
+    reached=config['project'] in projects
+    return {'reach':('yes' if reached else 'no - this credential does not reach '+config['project']),'reach_ok':reached,'credential_expires':expires}
 
 
 def _dry_run(args,config):
@@ -230,6 +247,40 @@ def _journey(args,client):
     return None
 
 
+SKIP=('node_modules','dist','__pycache__','.venv')
+
+
+def templates():
+    """The packaged templates: name -> template.json."""
+    root=files('ophiolite').joinpath('templates')
+    return {d.name:json.loads(d.joinpath('template.json').read_text()) for d in root.iterdir() if d.is_dir() and d.joinpath('template.json').is_file()}
+
+
+def _copy(source,target):
+    target.mkdir(parents=True,exist_ok=True)
+    for item in source.iterdir():
+        if item.name in SKIP:continue
+        if item.is_dir():_copy(item,target/item.name)
+        else:(target/item.name).write_bytes(item.read_bytes())
+
+
+def _init(args):
+    """E31: copy a packaged template (and the shared support.py beside it) into a new folder; nothing is sent."""
+    available=templates()
+    if args.list or not args.template:
+        rows=[{'name':name,'template_version':meta['template_version'],'test_command':meta['test_command']} for name,meta in sorted(available.items())]
+        return done(args,'\n'.join('%s (template %s)' % (r['name'],r['template_version']) for r in rows),{'templates':rows})
+    if args.template not in available:raise Refused('Choose a template: '+', '.join(sorted(available)))
+    output=(args.output or Path(args.template)).resolve()
+    if output.exists() and any(output.iterdir()):raise Refused('Choose a new or empty folder; %s is not empty.' % output)
+    root=files('ophiolite').joinpath('templates')
+    _copy(root.joinpath(args.template),output/args.template)
+    (output/'support.py').write_bytes(root.joinpath('support.py').read_bytes())
+    meta=available[args.template]
+    return done(args,'Created %s in %s. Next: cd %s, install requirements.lock, then run: %s' % (args.template,output,output/args.template,' '.join(meta['test_command'])),
+                {'template':args.template,'path':str(output/args.template),'support':str(output/'support.py'),'test_command':meta['test_command']})
+
+
 def _binding(client,work,config,args,profile):
     if args.asset or args.release:
         if not args.curve or not args.name or (args.asset and (not args.revision or args.release)):
@@ -261,6 +312,7 @@ def _local_run(config,work):
 def main(argv=None):
     args=parser().parse_args(argv)
     if args.command in ('projects','orgs'):return _discover(args)
+    if args.command=='init':return _init(args)  # E31: offline; copies packaged files only
     if args.command=='skills':
         return done(args,str(files('ophiolite').joinpath('skills')),{'path':str(files('ophiolite').joinpath('skills'))})
     if args.command=='bundle':
@@ -283,8 +335,10 @@ def main(argv=None):
         if args.online:
             remote=auth.request(config['url']+'/api/v1/contracts')
             report['server_contracts']=remote.get('version','unreported')
+            report.update(_reach(config,path))  # E31: can this credential reach its project, and until when
         text='\n'.join(['Configuration valid. Execution, if you choose it, stays on your computer.','Python: '+report['python'],'Local contracts: '+report['local_contracts'],
-                        'Run ophiolite status to check current grant/scopes. Use login --write only for advanced publication.']+(['Server contracts: '+report['server_contracts']] if args.online else []))
+                        'Run ophiolite status to check current grant/scopes. Use login --write only for advanced publication.']+
+                       (['Server contracts: '+report['server_contracts'],'Reach: '+report['reach'],'Credential expires: '+str(report.get('credential_expires') or 'not recorded')] if args.online else []))
         return done(args,text,report)
     if args.command=='run':return _local_run(config,args.work.resolve())
     if getattr(args,'dry_run',False):return _dry_run(args,config)  # E31: before any credential, network or file write
