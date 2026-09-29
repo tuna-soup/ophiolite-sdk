@@ -27003,6 +27003,667 @@
         }
       }
     },
+    "/api/v1/projects/{project}/webhooks/create": {
+      "post": {
+        "summary": "Notify an HTTPS address when this project changes; the signing secret is shown once (command_id)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "url": {
+                      "title": "Url",
+                      "type": "string"
+                    },
+                    "active": {
+                      "title": "Active",
+                      "type": "boolean"
+                    },
+                    "paused_reason": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Paused Reason"
+                    },
+                    "generation": {
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "created_by": {
+                      "title": "Created By",
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "title": "Created At",
+                      "type": "number"
+                    },
+                    "failures": {
+                      "title": "Failures",
+                      "type": "integer"
+                    },
+                    "delivered": {
+                      "$ref": "#/components/schemas/WebhookDelivered"
+                    },
+                    "secret": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Secret"
+                    },
+                    "replayed": {
+                      "title": "Replayed",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "url",
+                    "active",
+                    "paused_reason",
+                    "generation",
+                    "created_by",
+                    "created_at",
+                    "failures",
+                    "delivered",
+                    "secret",
+                    "replayed"
+                  ],
+                  "title": "WebhookCreated",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Operation-specific JSON object; project_id must match the path where the row names a project."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/webhooks/delete": {
+      "post": {
+        "summary": "Delete a webhook and its delivery log (expected_generation)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "deleted": {
+                      "title": "Deleted",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "deleted"
+                  ],
+                  "title": "WebhookDeleted",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Operation-specific JSON object; project_id must match the path where the row names a project."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/webhooks/deliveries": {
+      "post": {
+        "summary": "A webhook's delivery log, newest first",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "deliveries": {
+                      "items": {
+                        "$ref": "#/components/schemas/WebhookDelivery"
+                      },
+                      "title": "Deliveries",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "deliveries"
+                  ],
+                  "title": "WebhookDeliveries",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Operation-specific JSON object; project_id must match the path where the row names a project."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/webhooks/list": {
+      "post": {
+        "summary": "This project's webhooks (project administrators; never the secret)",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "webhooks": {
+                      "items": {
+                        "$ref": "#/components/schemas/Webhook"
+                      },
+                      "title": "Webhooks",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "webhooks"
+                  ],
+                  "title": "WebhookList",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Operation-specific JSON object; project_id must match the path where the row names a project."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/webhooks/replay": {
+      "post": {
+        "summary": "Deliver again from a kept cursor of the current epoch (expected_generation)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "E28b: a webhook as its project's administrators see it (never its secret or pinned address).",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "url": {
+                      "title": "Url",
+                      "type": "string"
+                    },
+                    "active": {
+                      "title": "Active",
+                      "type": "boolean"
+                    },
+                    "paused_reason": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Paused Reason"
+                    },
+                    "generation": {
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "created_by": {
+                      "title": "Created By",
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "title": "Created At",
+                      "type": "number"
+                    },
+                    "failures": {
+                      "title": "Failures",
+                      "type": "integer"
+                    },
+                    "delivered": {
+                      "$ref": "#/components/schemas/WebhookDelivered"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "url",
+                    "active",
+                    "paused_reason",
+                    "generation",
+                    "created_by",
+                    "created_at",
+                    "failures",
+                    "delivered"
+                  ],
+                  "title": "Webhook",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Operation-specific JSON object; project_id must match the path where the row names a project."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/webhooks/update": {
+      "post": {
+        "summary": "Change a webhook's address, or pause or resume it (expected_generation)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "E28b: a webhook as its project's administrators see it (never its secret or pinned address).",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "url": {
+                      "title": "Url",
+                      "type": "string"
+                    },
+                    "active": {
+                      "title": "Active",
+                      "type": "boolean"
+                    },
+                    "paused_reason": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Paused Reason"
+                    },
+                    "generation": {
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "created_by": {
+                      "title": "Created By",
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "title": "Created At",
+                      "type": "number"
+                    },
+                    "failures": {
+                      "title": "Failures",
+                      "type": "integer"
+                    },
+                    "delivered": {
+                      "$ref": "#/components/schemas/WebhookDelivered"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "url",
+                    "active",
+                    "paused_reason",
+                    "generation",
+                    "created_by",
+                    "created_at",
+                    "failures",
+                    "delivered"
+                  ],
+                  "title": "Webhook",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Operation-specific JSON object; project_id must match the path where the row names a project."
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/activity": {
       "post": {
         "summary": "Activity page (historical path of activity/list for existing workload clients)",
@@ -32451,6 +33112,155 @@
           "revision"
         ],
         "title": "SourceParent",
+        "type": "object"
+      },
+      "Webhook": {
+        "description": "E28b: a webhook as its project's administrators see it (never its secret or pinned address).",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "active": {
+            "title": "Active",
+            "type": "boolean"
+          },
+          "paused_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Paused Reason"
+          },
+          "generation": {
+            "title": "Generation",
+            "type": "integer"
+          },
+          "created_by": {
+            "title": "Created By",
+            "type": "string"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "number"
+          },
+          "failures": {
+            "title": "Failures",
+            "type": "integer"
+          },
+          "delivered": {
+            "$ref": "#/components/schemas/WebhookDelivered"
+          }
+        },
+        "required": [
+          "id",
+          "url",
+          "active",
+          "paused_reason",
+          "generation",
+          "created_by",
+          "created_at",
+          "failures",
+          "delivered"
+        ],
+        "title": "Webhook",
+        "type": "object"
+      },
+      "WebhookDelivered": {
+        "properties": {
+          "epoch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Epoch"
+          },
+          "cursor": {
+            "title": "Cursor",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "epoch",
+          "cursor"
+        ],
+        "title": "WebhookDelivered",
+        "type": "object"
+      },
+      "WebhookDelivery": {
+        "properties": {
+          "epoch": {
+            "title": "Epoch",
+            "type": "string"
+          },
+          "cursor": {
+            "title": "Cursor",
+            "type": "integer"
+          },
+          "attempt": {
+            "title": "Attempt",
+            "type": "integer"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          },
+          "next_attempt_at": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Attempt At"
+          },
+          "responded_at": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responded At"
+          }
+        },
+        "required": [
+          "epoch",
+          "cursor",
+          "attempt",
+          "status",
+          "detail",
+          "next_attempt_at",
+          "responded_at"
+        ],
+        "title": "WebhookDelivery",
         "type": "object"
       },
       "WellLog": {

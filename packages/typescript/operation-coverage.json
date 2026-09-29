@@ -1414,5 +1414,41 @@
     "function": "postProjectsProjectSubscriptionsUnsubscribe",
     "request": "schema",
     "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/webhooks/create",
+    "function": "postProjectsProjectWebhooksCreate",
+    "request": "explicitly-untyped",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/webhooks/delete",
+    "function": "postProjectsProjectWebhooksDelete",
+    "request": "explicitly-untyped",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/webhooks/deliveries",
+    "function": "postProjectsProjectWebhooksDeliveries",
+    "request": "explicitly-untyped",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/webhooks/list",
+    "function": "postProjectsProjectWebhooksList",
+    "request": "explicitly-untyped",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/webhooks/replay",
+    "function": "postProjectsProjectWebhooksReplay",
+    "request": "explicitly-untyped",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/webhooks/update",
+    "function": "postProjectsProjectWebhooksUpdate",
+    "request": "explicitly-untyped",
+    "response": "schema"
   }
 ]
