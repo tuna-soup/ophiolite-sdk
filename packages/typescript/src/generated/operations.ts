@@ -3,9 +3,11 @@ import type * as Contracts from "./contracts.js";
 import type * as API from "../api-types.js";
 import type { Transport, OperationOptions } from "../client.js";
 type WireBundleOrigin = { "kind": "portable-bundle"; "manifest_sha256": string; "asset_id": string; "revision": string; "exporter": string };
+type WireChangeEvent = { "project": string; "cursor": number; "epoch": string; "kind": string; "subject_kind": (string) | (null); "subject_id": (string) | (null); "generation": (number) | (null); "revision": (string) | (null); "actor_kind": (string) | (null); "actor": (string) | (null); "at": number; [key: string]: unknown };
 type WireContractsRegistry = { "schema": "ophiolite.contracts-registry/1"; "version": string; "title": string; "description": string; "id_grammar": string; "lifecycles": Array<{ "id": "preview" | "supported" | "deprecated"; "meaning": string }>; "schemas": Array<{ "id": string; "version": string; "lifecycle": "preview" | "supported" | "deprecated"; "path": string; "title": string; "description": string; "qualified_by"?: string; "cutoff"?: string; "replaced_by"?: string }>; "profiles": Array<{ "id": string; "kind": "source" | "normalized"; "display_name": string; "description": string; "lifecycle": "preview" | "supported" | "deprecated"; "path": string; "qualified_by"?: string; "cutoff"?: string; "replaced_by"?: string }>; "documents": Array<{ "id": string; "kind": "mapping" | "vocabulary" | "generated" | "openapi" | "fixture" | "capability" | "relationships"; "path": string; "title"?: string; "schema"?: string }> };
 type WireDraftRef = { "id": string; "generation": number };
 type WireError = { "error": string; "code": string; [key: string]: unknown };
+type WireInventoryItem = { "asset_id": string; "kind": (string) | (null); "authority": string; "revision": string; "name": (string) | (null); [key: string]: unknown };
 type WireOrganizationEntry = { "id": string; "name": string; [key: string]: unknown };
 type WirePackageMember = { "name": string; "role": "primary" | "crs-metadata" | "readme" | "companion"; "bytes": number; "sha256": string };
 type WireProjectEntry = { "id": string; "name": (string) | (null); "role": (string) | (null); "can_administer": boolean; "organization_id": (string) | (null); [key: string]: unknown };
@@ -289,6 +291,10 @@ export type postProjectsProjectCatalogHistoryInput = { path: { "project": string
 export function postProjectsProjectCatalogHistory(transport: Transport, input: postProjectsProjectCatalogHistoryInput): Promise<unknown> {
   return transport.request<unknown>("POST", "/api/v1/projects/{project}/catalog/history", input.path, undefined, input.body, input.options, null, false);
 }
+export type postProjectsProjectCatalogInventoryInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectCatalogInventory(transport: Transport, input: postProjectsProjectCatalogInventoryInput): Promise<{ "assets": Array<WireInventoryItem>; "next_cursor": (string) | (null); [key: string]: unknown }> {
+  return transport.request<{ "assets": Array<WireInventoryItem>; "next_cursor": (string) | (null); [key: string]: unknown }>("POST", "/api/v1/projects/{project}/catalog/inventory", input.path, undefined, input.body, input.options, null, false);
+}
 export type postProjectsProjectCatalogListInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
 export function postProjectsProjectCatalogList(transport: Transport, input: postProjectsProjectCatalogListInput): Promise<unknown> {
   return transport.request<unknown>("POST", "/api/v1/projects/{project}/catalog/list", input.path, undefined, input.body, input.options, null, false);
@@ -300,6 +306,18 @@ export function postProjectsProjectCatalogOriginal(transport: Transport, input: 
 export type postProjectsProjectCatalogSnapshotInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
 export function postProjectsProjectCatalogSnapshot(transport: Transport, input: postProjectsProjectCatalogSnapshotInput): Promise<unknown> {
   return transport.request<unknown>("POST", "/api/v1/projects/{project}/catalog/snapshot", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectChangesHeadInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectChangesHead(transport: Transport, input: postProjectsProjectChangesHeadInput): Promise<{ "epoch": string; "cursor": number; [key: string]: unknown }> {
+  return transport.request<{ "epoch": string; "cursor": number; [key: string]: unknown }>("POST", "/api/v1/projects/{project}/changes/head", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectChangesListInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectChangesList(transport: Transport, input: postProjectsProjectChangesListInput): Promise<{ "epoch": string; "changes": Array<WireChangeEvent>; "cursor": number; "has_more": boolean; [key: string]: unknown }> {
+  return transport.request<{ "epoch": string; "changes": Array<WireChangeEvent>; "cursor": number; "has_more": boolean; [key: string]: unknown }>("POST", "/api/v1/projects/{project}/changes/list", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectChangesStreamInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectChangesStream(transport: Transport, input: postProjectsProjectChangesStreamInput): Promise<{ "epoch": string; "changes": Array<WireChangeEvent>; "cursor": number; "has_more": boolean; [key: string]: unknown }> {
+  return transport.request<{ "epoch": string; "changes": Array<WireChangeEvent>; "cursor": number; "has_more": boolean; [key: string]: unknown }>("POST", "/api/v1/projects/{project}/changes/stream", input.path, undefined, input.body, input.options, null, false);
 }
 export type postProjectsProjectCollectionsDeleteInput = { path: { "project": string }; body: { "project_id": string; "id"?: (string) | (null); "name"?: string; "description"?: string; "members"?: Array<string>; "generation"?: number }; options?: OperationOptions };
 export function postProjectsProjectCollectionsDelete(transport: Transport, input: postProjectsProjectCollectionsDeleteInput): Promise<unknown> {

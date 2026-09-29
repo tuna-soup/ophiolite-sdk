@@ -462,6 +462,12 @@
     "response": "explicitly-untyped"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/catalog/inventory",
+    "function": "postProjectsProjectCatalogInventory",
+    "request": "explicitly-untyped",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/catalog/list",
     "function": "postProjectsProjectCatalogList",
     "request": "explicitly-untyped",
@@ -478,6 +484,24 @@
     "function": "postProjectsProjectCatalogSnapshot",
     "request": "explicitly-untyped",
     "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/changes/head",
+    "function": "postProjectsProjectChangesHead",
+    "request": "explicitly-untyped",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/changes/list",
+    "function": "postProjectsProjectChangesList",
+    "request": "explicitly-untyped",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/changes/stream",
+    "function": "postProjectsProjectChangesStream",
+    "request": "explicitly-untyped",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/collections/delete",
