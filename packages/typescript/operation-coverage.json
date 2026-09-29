@@ -2,72 +2,90 @@
   {
     "operation": "POST /api/v1/access-keys/create",
     "function": "postAccessKeysCreate",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/access-keys/list",
     "function": "postAccessKeysList",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/access-keys/remove",
     "function": "postAccessKeysRemove",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/account/revoke",
     "function": "postAccountRevoke",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/account/sessions",
     "function": "postAccountSessions",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/application-access/approve",
     "function": "postApplicationAccessApprove",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "GET /api/v1/application-access/config",
+    "function": "getApplicationAccessConfig",
     "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/application-access/deny",
     "function": "postApplicationAccessDeny",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/application-access/get",
     "function": "postApplicationAccessGet",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/application-access/list",
     "function": "postApplicationAccessList",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/application-access/request",
     "function": "postApplicationAccessRequest",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/application-access/revoke",
     "function": "postApplicationAccessRevoke",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/application-access/status",
     "function": "postApplicationAccessStatus",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "GET /api/v1/connector/config",
+    "function": "getConnectorConfig",
+    "request": "explicitly-untyped",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/connector/{operation}",
+    "function": "postConnectorOperation",
     "request": "explicitly-untyped",
     "response": "explicitly-untyped"
   },
@@ -84,214 +102,220 @@
     "response": "explicitly-untyped"
   },
   {
+    "operation": "GET /api/v1/openapi.json",
+    "function": "getOpenapiJson",
+    "request": "explicitly-untyped",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/organizations/access-preview",
     "function": "postOrganizationsAccessPreview",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/organizations/archive",
     "function": "postOrganizationsArchive",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/organizations/bind",
     "function": "postOrganizationsBind",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/organizations/create",
     "function": "postOrganizationsCreate",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/organizations/detail",
     "function": "postOrganizationsDetail",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/organizations/history",
     "function": "postOrganizationsHistory",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/organizations/invite-create",
     "function": "postOrganizationsInviteCreate",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/organizations/invite-list",
     "function": "postOrganizationsInviteList",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/organizations/invite-resend",
     "function": "postOrganizationsInviteResend",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/organizations/invite-revoke",
     "function": "postOrganizationsInviteRevoke",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/organizations/list",
     "function": "postOrganizationsList",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/organizations/member",
     "function": "postOrganizationsMember",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/organizations/offboard",
     "function": "postOrganizationsOffboard",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/organizations/project-create",
     "function": "postOrganizationsProjectCreate",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/organizations/rename",
     "function": "postOrganizationsRename",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/list",
     "function": "postProjectsList",
-    "request": "explicitly-untyped",
+    "request": "schema",
     "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/organizations",
     "function": "postProjectsOrganizations",
-    "request": "explicitly-untyped",
+    "request": "schema",
     "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/access/block",
     "function": "postProjectsProjectAccessBlock",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/access/effective",
     "function": "postProjectsProjectAccessEffective",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/activity",
     "function": "postProjectsProjectActivity",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/activity/export",
     "function": "postProjectsProjectActivityExport",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/activity/list",
     "function": "postProjectsProjectActivityList",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/agents/approve",
     "function": "postProjectsProjectAgentsApprove",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/agents/audit",
     "function": "postProjectsProjectAgentsAudit",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/agents/command",
     "function": "postProjectsProjectAgentsCommand",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/agents/decline",
     "function": "postProjectsProjectAgentsDecline",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/agents/list",
     "function": "postProjectsProjectAgentsList",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/agents/plans",
     "function": "postProjectsProjectAgentsPlans",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/agents/propose",
     "function": "postProjectsProjectAgentsPropose",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/agents/register",
     "function": "postProjectsProjectAgentsRegister",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/agents/revoke",
     "function": "postProjectsProjectAgentsRevoke",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/agents/status",
     "function": "postProjectsProjectAgentsStatus",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/ai-use/corpus",
     "function": "postProjectsProjectAiUseCorpus",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/ai-use/get",
     "function": "postProjectsProjectAiUseGet",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/ai-use/grant",
     "function": "postProjectsProjectAiUseGrant",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/applications/configure",
@@ -321,25 +345,25 @@
     "operation": "POST /api/v1/projects/{project}/applications/get",
     "function": "postProjectsProjectApplicationsGet",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/applications/inspect",
     "function": "postProjectsProjectApplicationsInspect",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/applications/list",
     "function": "postProjectsProjectApplicationsList",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/applications/options",
     "function": "postProjectsProjectApplicationsOptions",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/applications/original",
@@ -381,13 +405,13 @@
     "operation": "POST /api/v1/projects/{project}/applications/result-download",
     "function": "postProjectsProjectApplicationsResultDownload",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/applications/result-history",
     "function": "postProjectsProjectApplicationsResultHistory",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/applications/result-list",
@@ -405,7 +429,7 @@
     "operation": "POST /api/v1/projects/{project}/applications/result-preview",
     "function": "postProjectsProjectApplicationsResultPreview",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/applications/share",
@@ -434,200 +458,200 @@
   {
     "operation": "POST /api/v1/projects/{project}/capabilities/describe",
     "function": "postProjectsProjectCapabilitiesDescribe",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/catalog/changes",
     "function": "postProjectsProjectCatalogChanges",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/catalog/describe",
     "function": "postProjectsProjectCatalogDescribe",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/catalog/get",
     "function": "postProjectsProjectCatalogGet",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/catalog/history",
     "function": "postProjectsProjectCatalogHistory",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/catalog/inventory",
     "function": "postProjectsProjectCatalogInventory",
-    "request": "explicitly-untyped",
+    "request": "schema",
     "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/catalog/list",
     "function": "postProjectsProjectCatalogList",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/catalog/original",
     "function": "postProjectsProjectCatalogOriginal",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/catalog/snapshot",
     "function": "postProjectsProjectCatalogSnapshot",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/changes/head",
     "function": "postProjectsProjectChangesHead",
-    "request": "explicitly-untyped",
+    "request": "schema",
     "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/changes/list",
     "function": "postProjectsProjectChangesList",
-    "request": "explicitly-untyped",
+    "request": "schema",
     "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/changes/stream",
     "function": "postProjectsProjectChangesStream",
-    "request": "explicitly-untyped",
+    "request": "schema",
     "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/collections/delete",
     "function": "postProjectsProjectCollectionsDelete",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/collections/list",
     "function": "postProjectsProjectCollectionsList",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/collections/options",
     "function": "postProjectsProjectCollectionsOptions",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/collections/save",
     "function": "postProjectsProjectCollectionsSave",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/connection-admin/create",
     "function": "postProjectsProjectConnectionAdminCreate",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/connection-admin/enable",
     "function": "postProjectsProjectConnectionAdminEnable",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/connection-admin/list",
     "function": "postProjectsProjectConnectionAdminList",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/connection-admin/rotate",
     "function": "postProjectsProjectConnectionAdminRotate",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/connection-admin/test",
     "function": "postProjectsProjectConnectionAdminTest",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/connections/create",
     "function": "postProjectsProjectConnectionsCreate",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/connections/list",
     "function": "postProjectsProjectConnectionsList",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/connections/remove",
     "function": "postProjectsProjectConnectionsRemove",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/context/native-report",
     "function": "postProjectsProjectContextNativeReport",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/context/policy",
     "function": "postProjectsProjectContextPolicy",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/context/return",
     "function": "postProjectsProjectContextReturn",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/context/return-preview",
     "function": "postProjectsProjectContextReturnPreview",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/context/save",
     "function": "postProjectsProjectContextSave",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/entities/assets",
     "function": "postProjectsProjectEntitiesAssets",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/entities/associate",
     "function": "postProjectsProjectEntitiesAssociate",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/entities/create",
     "function": "postProjectsProjectEntitiesCreate",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/entities/dissociate",
     "function": "postProjectsProjectEntitiesDissociate",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/entities/extent",
@@ -638,20 +662,20 @@
   {
     "operation": "POST /api/v1/projects/{project}/entities/get",
     "function": "postProjectsProjectEntitiesGet",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/entities/identify",
     "function": "postProjectsProjectEntitiesIdentify",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/entities/lineage",
     "function": "postProjectsProjectEntitiesLineage",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/entities/list",
@@ -662,8 +686,8 @@
   {
     "operation": "POST /api/v1/projects/{project}/entities/share",
     "function": "postProjectsProjectEntitiesShare",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "GET /api/v1/projects/{project}/features",
@@ -704,43 +728,43 @@
   {
     "operation": "POST /api/v1/projects/{project}/imports/original-chunk",
     "function": "postProjectsProjectImportsOriginalChunk",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/imports/snapshot",
     "function": "postProjectsProjectImportsSnapshot",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/imports/source",
     "function": "postProjectsProjectImportsSource",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/imports/sources",
     "function": "postProjectsProjectImportsSources",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/inbox/list",
     "function": "postProjectsProjectInboxList",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/inbox/mark-read",
     "function": "postProjectsProjectInboxMarkRead",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/las-uploads/info",
     "function": "postProjectsProjectLasUploadsInfo",
-    "request": "explicitly-untyped",
+    "request": "schema",
     "response": "tested-override",
     "override": {
       "source": "ophiolite/models/api.py; Platform services/project_gateway/las_uploads.py at 16c1bb13d7cabe7b7d0d97af311ef054e1f7eb16",
@@ -753,49 +777,49 @@
     "operation": "POST /api/v1/projects/{project}/las-uploads/inspect",
     "function": "postProjectsProjectLasUploadsInspect",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/las-uploads/members",
     "function": "postProjectsProjectLasUploadsMembers",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/las-uploads/policy",
     "function": "postProjectsProjectLasUploadsPolicy",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/las-uploads/recipe",
     "function": "postProjectsProjectLasUploadsRecipe",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/las-uploads/recipe-save",
     "function": "postProjectsProjectLasUploadsRecipeSave",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/las-uploads/recipe-share",
     "function": "postProjectsProjectLasUploadsRecipeShare",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/las-uploads/recipes",
     "function": "postProjectsProjectLasUploadsRecipes",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/las-uploads/share",
     "function": "postProjectsProjectLasUploadsShare",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/las-uploads/upload",
@@ -813,97 +837,97 @@
     "operation": "POST /api/v1/projects/{project}/maps/curve-import",
     "function": "postProjectsProjectMapsCurveImport",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/maps/curve-preview",
     "function": "postProjectsProjectMapsCurvePreview",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/maps/export",
     "function": "postProjectsProjectMapsExport",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/maps/frame",
     "function": "postProjectsProjectMapsFrame",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/maps/import",
     "function": "postProjectsProjectMapsImport",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/maps/lifecycle",
     "function": "postProjectsProjectMapsLifecycle",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/maps/operate",
     "function": "postProjectsProjectMapsOperate",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/maps/pick",
     "function": "postProjectsProjectMapsPick",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/maps/preview",
     "function": "postProjectsProjectMapsPreview",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/maps/scene",
     "function": "postProjectsProjectMapsScene",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/maps/watch",
     "function": "postProjectsProjectMapsWatch",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/members/list",
     "function": "postProjectsProjectMembersList",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/members/set",
     "function": "postProjectsProjectMembersSet",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/native/AddReviewComment",
     "function": "postProjectsProjectNativeAddReviewComment",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/native/SaveReviewScene",
     "function": "postProjectsProjectNativeSaveReviewScene",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/native/SetProjectMember",
     "function": "postProjectsProjectNativeSetProjectMember",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/publications/derive",
@@ -914,248 +938,248 @@
   {
     "operation": "POST /api/v1/projects/{project}/publications/info",
     "function": "postProjectsProjectPublicationsInfo",
-    "request": "explicitly-untyped",
+    "request": "schema",
     "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/publications/share",
     "function": "postProjectsProjectPublicationsShare",
-    "request": "explicitly-untyped",
+    "request": "schema",
     "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/read/Catalog",
     "function": "postProjectsProjectReadCatalog",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/read/GetAsset",
     "function": "postProjectsProjectReadGetAsset",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/read/GetCurveAsset",
     "function": "postProjectsProjectReadGetCurveAsset",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/read/GetExternalSnapshot",
     "function": "postProjectsProjectReadGetExternalSnapshot",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/read/GetOriginalChunk",
     "function": "postProjectsProjectReadGetOriginalChunk",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/read/GetReviewScene",
     "function": "postProjectsProjectReadGetReviewScene",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/read/GetRun",
     "function": "postProjectsProjectReadGetRun",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/read/ListAssetRevisions",
     "function": "postProjectsProjectReadListAssetRevisions",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/read/ListAssets",
     "function": "postProjectsProjectReadListAssets",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/read/ListOperators",
     "function": "postProjectsProjectReadListOperators",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/read/ListProjectMembers",
     "function": "postProjectsProjectReadListProjectMembers",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/read/ListReviewComments",
     "function": "postProjectsProjectReadListReviewComments",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/read/ListReviewScenes",
     "function": "postProjectsProjectReadListReviewScenes",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/read/ListRuns",
     "function": "postProjectsProjectReadListRuns",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/releases/approve",
     "function": "postProjectsProjectReleasesApprove",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/releases/capture",
     "function": "postProjectsProjectReleasesCapture",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/releases/compare",
     "function": "postProjectsProjectReleasesCompare",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/releases/download",
     "function": "postProjectsProjectReleasesDownload",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/releases/download-snapshot",
     "function": "postProjectsProjectReleasesDownloadSnapshot",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/releases/get",
     "function": "postProjectsProjectReleasesGet",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/releases/list",
     "function": "postProjectsProjectReleasesList",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/releases/options",
     "function": "postProjectsProjectReleasesOptions",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/releases/preview",
     "function": "postProjectsProjectReleasesPreview",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/releases/request-review",
     "function": "postProjectsProjectReleasesRequestReview",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/releases/withdraw",
     "function": "postProjectsProjectReleasesWithdraw",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/result-groups/delete",
     "function": "postProjectsProjectResultGroupsDelete",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/result-groups/diff",
     "function": "postProjectsProjectResultGroupsDiff",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/result-groups/list",
     "function": "postProjectsProjectResultGroupsList",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/result-groups/recommend",
     "function": "postProjectsProjectResultGroupsRecommend",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/result-groups/save",
     "function": "postProjectsProjectResultGroupsSave",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/reviews/comment-add",
     "function": "postProjectsProjectReviewsCommentAdd",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/reviews/comment-list",
     "function": "postProjectsProjectReviewsCommentList",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/reviews/scene-get",
     "function": "postProjectsProjectReviewsSceneGet",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/reviews/scene-list",
     "function": "postProjectsProjectReviewsSceneList",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/reviews/scene-save",
     "function": "postProjectsProjectReviewsSceneSave",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/runners/cancel",
     "function": "postProjectsProjectRunnersCancel",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/runners/job",
     "function": "postProjectsProjectRunnersJob",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/runners/list",
     "function": "postProjectsProjectRunnersList",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/runners/submit",
     "function": "postProjectsProjectRunnersSubmit",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "GET /api/v1/projects/{project}/scientific-assets",
@@ -1179,336 +1203,336 @@
     "operation": "GET /api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/slices/{axis}/{label}",
     "function": "getProjectsProjectScientificAssetsAssetRevisionsRevisionSlicesAxisLabel",
     "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/search/query",
     "function": "postProjectsProjectSearchQuery",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/advance",
     "function": "postProjectsProjectSourcesAdvance",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/bind",
     "function": "postProjectsProjectSourcesBind",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/connections",
     "function": "postProjectsProjectSourcesConnections",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/discover",
     "function": "postProjectsProjectSourcesDiscover",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/draft-create",
     "function": "postProjectsProjectSourcesDraftCreate",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/draft-discard",
     "function": "postProjectsProjectSourcesDraftDiscard",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/draft-get",
     "function": "postProjectsProjectSourcesDraftGet",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/draft-list",
     "function": "postProjectsProjectSourcesDraftList",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/draft-offset",
     "function": "postProjectsProjectSourcesDraftOffset",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/draft-preview",
     "function": "postProjectsProjectSourcesDraftPreview",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/draft-publish",
     "function": "postProjectsProjectSourcesDraftPublish",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/draft-save",
     "function": "postProjectsProjectSourcesDraftSave",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/export",
     "function": "postProjectsProjectSourcesExport",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/head",
     "function": "postProjectsProjectSourcesHead",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/list",
     "function": "postProjectsProjectSourcesList",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/map-describe",
     "function": "postProjectsProjectSourcesMapDescribe",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/map-snapshot",
     "function": "postProjectsProjectSourcesMapSnapshot",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/mapping-report",
     "function": "postProjectsProjectSourcesMappingReport",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/mapping-save",
     "function": "postProjectsProjectSourcesMappingSave",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/mapping-validate",
     "function": "postProjectsProjectSourcesMappingValidate",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/pause",
     "function": "postProjectsProjectSourcesPause",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/preview",
     "function": "postProjectsProjectSourcesPreview",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/records",
     "function": "postProjectsProjectSourcesRecords",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/refresh",
     "function": "postProjectsProjectSourcesRefresh",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/remove",
     "function": "postProjectsProjectSourcesRemove",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/result",
     "function": "postProjectsProjectSourcesResult",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/result-preview",
     "function": "postProjectsProjectSourcesResultPreview",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/resume",
     "function": "postProjectsProjectSourcesResume",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/review",
     "function": "postProjectsProjectSourcesReview",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/sources/schema",
     "function": "postProjectsProjectSourcesSchema",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/stages/board",
     "function": "postProjectsProjectStagesBoard",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/stages/get",
     "function": "postProjectsProjectStagesGet",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/stages/names",
     "function": "postProjectsProjectStagesNames",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/stages/names-save",
     "function": "postProjectsProjectStagesNamesSave",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/stages/transition",
     "function": "postProjectsProjectStagesTransition",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/subscriptions/acknowledge",
     "function": "postProjectsProjectSubscriptionsAcknowledge",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/subscriptions/apply",
     "function": "postProjectsProjectSubscriptionsApply",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/subscriptions/configure",
     "function": "postProjectsProjectSubscriptionsConfigure",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/subscriptions/create",
     "function": "postProjectsProjectSubscriptionsCreate",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/subscriptions/discard",
     "function": "postProjectsProjectSubscriptionsDiscard",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/subscriptions/edit-save",
     "function": "postProjectsProjectSubscriptionsEditSave",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/subscriptions/fetch",
     "function": "postProjectsProjectSubscriptionsFetch",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/subscriptions/get",
     "function": "postProjectsProjectSubscriptionsGet",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/subscriptions/list",
     "function": "postProjectsProjectSubscriptionsList",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/subscriptions/offer",
     "function": "postProjectsProjectSubscriptionsOffer",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/subscriptions/offer-preview",
     "function": "postProjectsProjectSubscriptionsOfferPreview",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/subscriptions/subscribe",
     "function": "postProjectsProjectSubscriptionsSubscribe",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/subscriptions/unsubscribe",
     "function": "postProjectsProjectSubscriptionsUnsubscribe",
     "request": "schema",
-    "response": "explicitly-untyped"
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/webhooks/create",
     "function": "postProjectsProjectWebhooksCreate",
-    "request": "explicitly-untyped",
+    "request": "schema",
     "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/webhooks/delete",
     "function": "postProjectsProjectWebhooksDelete",
-    "request": "explicitly-untyped",
+    "request": "schema",
     "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/webhooks/deliveries",
     "function": "postProjectsProjectWebhooksDeliveries",
-    "request": "explicitly-untyped",
+    "request": "schema",
     "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/webhooks/list",
     "function": "postProjectsProjectWebhooksList",
-    "request": "explicitly-untyped",
+    "request": "schema",
     "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/webhooks/replay",
     "function": "postProjectsProjectWebhooksReplay",
-    "request": "explicitly-untyped",
+    "request": "schema",
     "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/webhooks/update",
     "function": "postProjectsProjectWebhooksUpdate",
-    "request": "explicitly-untyped",
+    "request": "schema",
     "response": "schema"
   }
 ]

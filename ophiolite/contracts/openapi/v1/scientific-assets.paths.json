@@ -89,6 +89,13 @@
                   "type": "string"
                 }
               }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
             }
           }
         }
@@ -164,6 +171,13 @@
               "Retry-After": {
                 "schema": {
                   "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
@@ -252,6 +266,13 @@
                   "type": "string"
                 }
               }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
             }
           }
         }
@@ -319,7 +340,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "./seismic-slice-schema.json"
                 }
               }
             }
@@ -342,6 +363,13 @@
                   "type": "string"
                 }
               }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
             }
           }
         }
@@ -360,14 +388,36 @@
         "type": "object",
         "required": [
           "error",
-          "code"
+          "code",
+          "message",
+          "remedy",
+          "docs",
+          "request_id"
         ],
+        "description": "Every refusal (E31): error is kept for existing clients and equals message; request_id equals the X-Request-Id header.",
         "properties": {
           "error": {
             "type": "string"
           },
           "code": {
+            "type": "string",
+            "description": "The stable machine-readable code; see docs"
+          },
+          "message": {
             "type": "string"
+          },
+          "remedy": {
+            "type": "string",
+            "minLength": 1,
+            "description": "What the caller can do next"
+          },
+          "docs": {
+            "type": "string",
+            "description": "The code's anchor on the errors reference page, /docs/reference/errors/#<code>"
+          },
+          "request_id": {
+            "type": "string",
+            "description": "Equals the X-Request-Id response header; quote it when reporting a failure"
           }
         }
       }

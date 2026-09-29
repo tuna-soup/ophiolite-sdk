@@ -10,6 +10,15 @@ from urllib.parse import quote
 import httpx
 from ._core import origin
 from .errors import AuthenticationRequired, PermissionRefused, Refused, Unavailable
+from .models.api import OrganizationsPage, ProjectsPage
+
+
+def checked(model, page, message):
+    """E31: a discovery answer as documented (Unavailable otherwise, as before), handed on unchanged."""
+    from pydantic import ValidationError
+    try: model.model_validate(page)
+    except (ValidationError, ValueError, TypeError): raise Unavailable(message) from None
+    return page
 
 
 class Account:
@@ -44,8 +53,8 @@ class Account:
         out, cursor, seen = [], None, set()
         while True:
             page = self._discover('list', {'limit': limit, **({'cursor': cursor} if cursor else {})})
+            checked(ProjectsPage, page, 'Invalid project discovery response.')  # E31: the documented page, then the same rows
             rows = page.get('projects')
-            if not isinstance(rows, list): raise Unavailable('Invalid project discovery response.')
             for row in rows:
                 if row.get('id') in seen: raise Unavailable('Project discovery repeated a project across pages.')
                 seen.add(row.get('id')); out.append(row)
@@ -54,9 +63,9 @@ class Account:
 
     def organizations(self):
         """Organisations holding at least one project this credential reaches."""
-        rows = self._discover('organizations', {}).get('organizations')
-        if not isinstance(rows, list): raise Unavailable('Invalid organisation discovery response.')
-        return rows
+        page = self._discover('organizations', {})
+        checked(OrganizationsPage, page, 'Invalid organisation discovery response.')
+        return page['organizations']
 
     def client(self, project):
         """The ordinary project client (its own project check applies)."""

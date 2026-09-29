@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.20.0",
+  "version": "1.21.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -21,7 +21,7 @@
   "schemas": [
     {
       "id": "ophiolite.contracts-registry/1",
-      "version": "1.2.0",
+      "version": "1.3.0",
       "lifecycle": "preview",
       "path": "registry-schema.json",
       "title": "ContractsRegistry",
@@ -843,6 +843,12 @@
       "kind": "relationships",
       "path": "relationships/v1/registry.json",
       "title": "Relationship predicate registry (E20): the only predicates Ophiolite accepts"
+    },
+    {
+      "id": "ophiolite.policy/api-versioning/1",
+      "kind": "policy",
+      "path": "docs/api-versioning.md",
+      "title": "API versions and deprecation: what the version numbers mean, additive changes, and the transition every breaking change needs"
     }
   ]
 }

@@ -248,3 +248,66 @@ class PublicationReceipt(Contract):
     derived_from: list[Reference] = Field(min_length=1,max_length=32)
     method: MethodRecord
     command_id: str
+
+
+# E31 S2: the journey routes' answers, validated before a client method hands them on (the method's return shape
+# is unchanged). tests/test_journey_models.py holds each to the synced OpenAPI component it mirrors.
+class ProjectEntry(Contract):
+    id: str
+    name: str | None
+    role: str | None
+    can_administer: bool
+    organization_id: str | None
+
+
+class ProjectsPage(Contract):
+    projects: list[ProjectEntry]
+    next_cursor: str | None
+
+
+class OrganizationEntry(Contract):
+    id: str
+    name: str
+
+
+class OrganizationsPage(Contract):
+    organizations: list[OrganizationEntry]
+
+
+class ChangeEvent(Contract):
+    project: str
+    cursor: int
+    epoch: str
+    kind: str
+    subject_kind: str | None
+    subject_id: str | None
+    generation: int | None
+    revision: str | None
+    actor_kind: str | None
+    actor: str | None
+    at: float
+
+
+class ChangesHead(Contract):
+    epoch: str
+    cursor: int
+
+
+class ChangesPage(Contract):
+    epoch: str
+    changes: list[ChangeEvent]
+    cursor: int
+    has_more: bool
+
+
+class EntityExtent(Contract):
+    crs: str
+    bbox: list[float] | None = Field(min_length=4, max_length=4)
+    count: int = Field(ge=0)
+    untransformed: int = Field(ge=0)
+
+
+class EntityPage(Contract):
+    entities: list[dict]
+    next_cursor: str | None = None
+    untransformed: int | None = None

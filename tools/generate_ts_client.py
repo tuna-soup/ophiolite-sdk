@@ -11,7 +11,8 @@ KEYWORDS = {'$defs', '$id', '$ref', '$schema', 'additionalProperties', 'anyOf',
             'const', 'default', 'description', 'discriminator', 'enum', 'format',
             'items', 'maxItems', 'maxLength', 'maximum', 'minItems', 'minLength',
             'minimum', 'exclusiveMinimum', 'oneOf', 'pattern', 'properties',
-            'required', 'title', 'type', 'x-ophiolite'}
+            'required', 'title', 'type', 'x-ophiolite',
+            'propertyNames', 'x-ophiolite-no-fields', 'x-ophiolite-body-of'}  # E31: typed map keys, bodies with no fields, the connector proxy
 METHODS = {'get', 'post', 'put', 'patch', 'delete', 'head', 'options'}
 
 
@@ -43,6 +44,7 @@ def expression(schema):
     if isinstance(kind, list): return ' | '.join(expression({**schema, 'type': x}) for x in kind)
     if kind == 'object' or 'properties' in schema:
         props = schema.get('properties', {})
+        if not props and schema.get('x-ophiolite-no-fields') is True: return 'Record<string, never>'
         if not props: return 'Record<string, unknown>'
         fields = [json.dumps(k) + ('' if k in schema.get('required', []) else '?') + ': ' + expression(v)
                   for k, v in props.items()]
@@ -53,6 +55,7 @@ def expression(schema):
 
 
 def meaningful(schema):
+    if schema.get('x-ophiolite-no-fields') is True: return True  # E31: an operation that takes (or answers) no fields, said so
     return bool(schema) and not (schema.get('type') == 'object' and not schema.get('properties'))
 
 

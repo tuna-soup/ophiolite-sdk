@@ -90,6 +90,15 @@ class Sync:
         return self._answer(response)
 
     @staticmethod
+    def _checked(model, page):
+        """E31: the answer as documented, handed on unchanged."""
+        from pydantic import ValidationError
+        from .errors import VerificationFailed
+        try: model.model_validate(page)
+        except (ValidationError, ValueError, TypeError): raise VerificationFailed('The project event log answered outside its documented shape.') from None
+        return page
+
+    @staticmethod
     def _answer(response):
         if response.status_code == 200: return response.json()
         from .application_transport import envelope, carried
@@ -102,12 +111,14 @@ class Sync:
     # -- the log ----------------------------------------------------------------------------------
 
     def head(self):
-        return self._call('changes', 'head')
+        from .models.api import ChangesHead
+        return self._checked(ChangesHead, self._call('changes', 'head'))
 
     def changes(self, epoch, after, *, limit=100):
         """Pages of events after `after` (each page: epoch, changes, cursor, has_more), until the head."""
         while True:
-            page = self._call('changes', 'list', {'epoch': epoch, 'after': after, 'limit': limit})
+            from .models.api import ChangesPage
+            page = self._checked(ChangesPage, self._call('changes', 'list', {'epoch': epoch, 'after': after, 'limit': limit}))
             yield page
             after = page['cursor']
             if not page['has_more']: return

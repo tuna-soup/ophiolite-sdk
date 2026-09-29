@@ -1,7 +1,7 @@
 {
-  "platform_commit": "86a03eb55d5a147eeb25f9ab7c6dacd35b0c3853",
-  "contracts_tree": "326a46d4392b746230adaf19510b667a454d5146",
-  "registry_version": "1.20.0",
+  "platform_commit": "ace377ddb5d40c75cd89e7700677ae066d5fbf42",
+  "contracts_tree": "31efa1438e6cb341eb30b36b94e5fd3d16462bee",
+  "registry_version": "1.21.0",
   "files": {
     "README.md": "668c32afad894ec0a0167e307013f87eefca4ede323c17408bac12cac3fcdfdb",
     "assets/v1/README.md": "ddf0bdb37597d47e1b2a3371a2be9a6a082c930aded1dc0cb004b5d13043d496",
@@ -83,13 +83,14 @@
     "connectors/v1/capabilities/sqlite-wells.json": "cc4a9799b17ec8cfa5cd3f49e9cdfea4347d90029c81bc9c845cc1c9d4c7ba5c",
     "connectors/v1/capabilities/typed-upload.json": "ea734562a05b9775b7322785e3408a367a78d0131c6532c95572f81f7b5e946d",
     "connectors/v1/contract.json": "67b4945f4486d199038d5e1624b76e0be988c8b561a1ea5b904428db4ede716a",
+    "docs/api-versioning.md": "5bbb5e993c866533f5f80876289fa186965db515955e503aa6e8460c37840cfb",
     "entities/v1/entity-assets-schema.json": "edccdcbd0d7fae50a25bb4762f8deb255fb7964713a266a3b601171f8d86f9f4",
     "entities/v1/entity-schema.json": "5888db3fe6dc7acdf17ae8792e82c91fca8385fa9ec146fbe8e096bf46febf89",
-    "generated/v1/ophiolite-contracts.ts": "6fd6b4d0667621e582f3cfac9950f94a0380249c05631b5003106342931d25d8",
+    "generated/v1/ophiolite-contracts.ts": "01aa57be750502efa8c5bd00ceaa9520e812420441d89c0d0a203c1ccb2886f3",
     "mappings/v1/application-curve-to-well-curve.json": "aa2e1c1925f68aede0b3c5e7d8d7e7921ad69ea35733bc2e7d936a21c233c0dc",
     "mappings/v1/typed-standards.json": "fd2b1e9adc3b10ba383ee0a1f0f9fd01276895623403ce42c8d1c8a44a6b6046",
-    "openapi/v1/openapi.json": "93035289f68d534301b34378a101a6bc1eab484575b6414711bdc5a0cea10dd2",
-    "openapi/v1/scientific-assets.paths.json": "8ffc164c9434f668c857614826457556e46bcbdf345af01a2f2a8528897b0adb",
+    "openapi/v1/openapi.json": "f9d4fcafe49ef744dbaa66c7d3980342c733d39493dc56178ec3fca39ad0bb55",
+    "openapi/v1/scientific-assets.paths.json": "0f414e5b768f406eee18af26493d1a15a6404726b0b581989959b98ca4cb6249",
     "profile-schema.json": "7bf3c916757a5715a7dd9c56d09537d2108716d017e63443ed2f8e6ea74c2ab1",
     "profiles/v1/application-curve.json": "f2783cc80d26fb8a40e2d1e5f4ef24ddbf77b6f9adf217436904b160b6b5ce87",
     "profiles/v1/deviation-csv.json": "d9fc8bcdcaa667fd3facdbc8a9efbc1280fcc188fae12709646580d431693665",
@@ -121,8 +122,8 @@
     "profiles/v1/well-location.json": "54106719fa760dda069e940306bb221c00a16286b7dc39b7ecf846e1c560a669",
     "profiles/v1/well-tops-csv.json": "ebb0cfa95a7f062c0c2b802f53d8efa3466e55c4cdaceff5d061ae7b00b473be",
     "profiles/v1/well-tops.json": "7c7d636d50460a3733268fad808ba47f81234a2b8feb619f07c3d1212d73dd88",
-    "registry-schema.json": "ffb1cb2f10c510c5f4d4f653accd509a9fa2f04c6c73ba9b6a88d837cbe40448",
-    "registry.json": "0a49d5205514a0ca3ee08346bec6517b65940f1adf8a28a38ef8aa45429276db",
+    "registry-schema.json": "85b2ed7333f471c3e202690feb681de40032728cf868d08b68eb8b8bb841cf0e",
+    "registry.json": "a8b58a676b204bab2bc16697d6217345000c8adf8f9b564ed40d8a839ab0702e",
     "relationships/v1/README.md": "3e62aa1343832024127b199acba11cc1bdfdc87361137d4ac33984f905605609",
     "relationships/v1/lineage-schema.json": "8cc2d5a05b49dc3df96a7b495d3952c55d6f3bbbb8530f9bbc032b770797b431",
     "relationships/v1/registry-schema.json": "b1d7fd76574a11e7ba74ff1fa4f877bde6c0ee8a287dfaf8083d9cda67f3fa91",
@@ -132,7 +133,7 @@
     "scientific/v1/fixtures/well-curve.json": "30be2d326017262b4eb5c4a3a3ad95e8a74f63d7aa931210110d98e3f94eaa7d",
     "scientific/v1/scalar-map-schema.json": "94df8c9470557d2ac9de4145eb6465945ea04a7c8b6efdfae24985627e27332d",
     "scientific/v1/well-curve-schema.json": "0e87a51188f5a59b9c8b841001fd0167b82966f33d8214ea2f68cf444411571f",
-    "tools/generate.py": "06c3c9f57f6921df23ff83ddcb467218fb7454403e36cf9f26dd561a68db5a08",
+    "tools/generate.py": "53c3ef7f27ddeef10bbc4d9692f02c1b7d866566b8b25619a32555dc11bdb36b",
     "vocabulary/v1/vocabulary.json": "6deb7e13f3e7a45fe9b57e70909a62d037f7d90fd826985a724fda457716eb2e"
   }
 }

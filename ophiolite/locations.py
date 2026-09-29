@@ -4,6 +4,15 @@ location is in the CRS you asked the server for, or as stored when you asked for
 fetch in OGC:CRS84 (GeoJSON's CRS) rather than converting locally.
 """
 from .errors import Refused, VerificationFailed
+from .models.api import EntityExtent, EntityPage
+
+
+def checked(model, answer):
+    """E31: the answer as documented (VerificationFailed otherwise), handed on unchanged."""
+    from pydantic import ValidationError
+    try: model.model_validate(answer)
+    except (ValidationError, ValueError, TypeError): raise VerificationFailed('The well listing answered outside its documented shape.') from None
+    return answer
 
 CRSS = ('OGC:CRS84', 'EPSG:4326', 'EPSG:3857', 'EPSG:28992', 'EPSG:32631')
 
@@ -65,7 +74,7 @@ class LocationClient:
         body = {'kind': 'well', **({'bbox': list(bbox), 'bbox_crs': bbox_crs} if bbox is not None else {}), **({'crs': crs} if crs else {})}
         found, untransformed, cursor, seen = [], 0, None, set()
         while True:
-            page = self._post('entities', 'list', {**body, 'limit': 100, **({'cursor': cursor} if cursor else {})})
+            page = checked(EntityPage, self._post('entities', 'list', {**body, 'limit': 100, **({'cursor': cursor} if cursor else {})}))
             for document in page['entities']:
                 location = document.get('location')
                 if location is not None and crs is not None and location['crs'] != crs:
@@ -82,6 +91,6 @@ class LocationClient:
         """The extent of the wells you may see located: {'crs', 'bbox' ([minx, miny, maxx, maxy] or None), 'count',
         'untransformed'}; wells whose stored CRS cannot be converted to `crs` are left out and counted."""
         if crs not in CRSS: raise Refused('Choose crs from: ' + ', '.join(CRSS))
-        answer = self._post('entities', 'extent', {'crs': crs})
+        answer = checked(EntityExtent, self._post('entities', 'extent', {'crs': crs}))
         if answer.get('crs') != crs: raise VerificationFailed('The extent came back in another CRS.')
         return answer

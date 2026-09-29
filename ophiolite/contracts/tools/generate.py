@@ -372,11 +372,23 @@ def openapi():
     write(OPENAPI_PATH, document())
 
 
-STEPS = {'--schemas': schemas, '--fixtures': fixtures, '--types': types, '--openapi': openapi}
+def check_complete():
+    """E31 P2: refuse an OpenAPI document with a placeholder or missing schema for any operation, media type or
+    response status, or one that omits a route the application serves."""
+    from project_gateway.openapi import document, incomplete
+    from project_gateway.app import create_app
+    app = create_app(lambda method, body, token: {}, 'http://127.0.0.1:55991')
+    gaps = incomplete(document(), app)
+    for path, method, what in gaps: print('%s %s: %s' % (method.upper(), path, what))
+    if gaps: raise SystemExit('OpenAPI document incomplete: %d gap(s)' % len(gaps))
+    print('OpenAPI document complete')
+
+
+STEPS = {'--schemas': schemas, '--fixtures': fixtures, '--types': types, '--openapi': openapi, '--check-complete': check_complete}
 
 
 def main(argv):
-    chosen = [STEPS[a] for a in argv] if argv else list(STEPS.values())
+    chosen = [STEPS[a] for a in argv] if argv else [step for flag, step in STEPS.items() if flag != '--check-complete']
     for step in chosen:
         step()
 
