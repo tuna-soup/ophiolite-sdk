@@ -81,6 +81,9 @@ def test_the_projects_and_orgs_commands(tmp_path, monkeypatch, capsys):
     cli.main(['orgs', '--url', URL, '--credential', str(credential), '--json'])
     assert json.loads(capsys.readouterr().out) == {'organizations': [{'id': 'o', 'name': 'Operator'}]}
     broken = tmp_path / 'private' / 'broken.json'; broken.write_text('{not json'); broken.chmod(0o600)
-    with pytest.raises(SystemExit) as refused: cli.main(['projects', '--url', URL, '--credential', str(broken)])
-    assert 'Cannot read private SDK credentials' in str(refused.value) and 'Traceback' not in str(refused.value)
-    with pytest.raises(SystemExit, match='--limit is 1 to 100'): cli.main(['projects', '--url', URL, '--credential', str(credential), '--limit', '0'])
+    capsys.readouterr()
+    with pytest.raises(SystemExit) as refused: cli.entrypoint(['projects', '--url', URL, '--credential', str(broken)])  # E31: main raises, entrypoint exits
+    err = capsys.readouterr().err
+    assert refused.value.code == 1 and 'Cannot read private SDK credentials' in err and 'Traceback' not in err
+    with pytest.raises(SystemExit) as refused: cli.entrypoint(['projects', '--url', URL, '--credential', str(credential), '--limit', '0'])
+    assert refused.value.code == 1 and '--limit is 1 to 100' in capsys.readouterr().err

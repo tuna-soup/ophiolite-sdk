@@ -27,6 +27,34 @@ def __getattr__(name):
     raise AttributeError(name)
 
 
+# E31 S3: documented exit codes (docs/cli.md). argparse answers 2 for usage errors itself.
+EXIT = {'ok': 0, 'refused': 1, 'usage': 2, 'access': 3, 'conflict': 4, 'busy': 5}
+
+
+def exit_code(error):
+    """The documented exit code of an error the command raised."""
+    from .errors import (AuthenticationRequired, PermissionRefused, Unavailable, IntegrityConflict, Busy, ShareOutcomeUnknown,
+                         ResyncRequired)
+    if isinstance(error, (AuthenticationRequired, PermissionRefused)): return EXIT['access']
+    if isinstance(error, (Busy, ShareOutcomeUnknown)) or getattr(error, 'code', None) in ('unreachable', 'outcome-unknown', 'busy', 'UNAVAILABLE'): return EXIT['busy']
+    if isinstance(error, (Unavailable, IntegrityConflict, ResyncRequired)): return EXIT['conflict']
+    return EXIT['refused']
+
+
+def error_document(error):
+    """{"error": {...}}: what --json prints for a refusal (the server's code, remedy, docs and request id when it sent them)."""
+    fields = {'code': getattr(error, 'code', None) or 'error', 'message': str(error), 'status': getattr(error, 'status', None),
+              'remedy': getattr(error, 'remedy', None), 'docs': getattr(error, 'docs', None), 'request_id': getattr(error, 'request_id', None)}
+    return {'error': {k: v for k, v in fields.items() if v is not None}}
+
+
+def done(args, text, payload):
+    """One result: its documented JSON shape with --json, otherwise the words for people."""
+    if getattr(args, 'json', False): print(json.dumps(payload, indent=2, default=str))
+    elif text: print(text)
+    return payload
+
+
 def configuration(path):
     try:value=json.loads(Path(path).read_text())
     except (OSError,ValueError):raise Refused('Cannot read configuration. Download configuration.json from Connect → Use Python.') from None
@@ -45,7 +73,11 @@ def credentials_path(config):return auth.default_path(config['url'],config['proj
 
 def parser():
     parser=argparse.ArgumentParser(description=__doc__)
+    common=argparse.ArgumentParser(add_help=False)  # E31: every verb prints its documented JSON shape with --json
+    common.add_argument('--json',action='store_true',help='Print the documented JSON result (errors as {"error": {...}})')
     sub=parser.add_subparsers(dest='command',required=True)
+    _add=sub.add_parser
+    sub.add_parser=lambda *a,**k:_add(*a,parents=[common],**k)
     for name,help in [('list','List permitted scientific assets without a run'),('fetch','Read an exact revision into a new local folder'),('doctor','Check local setup without running code or contacting the server'),('login','Approve this project in your browser'),('status','Check application access'),('logout','Revoke application access'),('prepare','Fetch exact input; no computation or publication'),('run','Execute your prepared Python script on this computer'),('publish','Publish the prepared result; does not share it'),('correct','Run and explicitly publish the bounded offset example'),('share','Give colleagues read or reuse access to a result or original you own')]:
         p=sub.add_parser(name,help=help)
         p.add_argument('--configuration',type=Path,default=Path('configuration.json'))
@@ -71,6 +103,7 @@ def parser():
             p.add_argument('--release');p.add_argument('--asset-index',type=int);p.add_argument('--runner',action='append')
         if name=='share':
             p.add_argument('--asset',required=True);p.add_argument('--read',action='append');p.add_argument('--reuse',action='append')
+            p.add_argument('--dry-run',action='store_true',help='Print the change without sending it or writing anything')
     bundle=sub.add_parser('bundle',help='Check or summarize a portable bundle offline (no server or account needed)')
     bundle.add_argument('action',choices=['check','show','pack']);bundle.add_argument('path',type=Path);bundle.add_argument('archive',type=Path,nargs='?',help='pack: the .zip to write')
     export=sub.add_parser('export',help='Export exact revisions into a new portable bundle')
@@ -91,6 +124,7 @@ def parser():
     derived.add_argument('--method',required=True,help='What you did, for example scipy.spatial.Delaunay');derived.add_argument('--library',default='');derived.add_argument('--library-version',default='')
     derived.add_argument('--parameters',type=Path,help='A JSON file of the parameters you used (up to 4096 bytes)');derived.add_argument('--declare',action='append',default=[],metavar='KEY=VALUE',help='A declaration such as crs=EPSG:28992 (repeat)')
     derived.add_argument('--new-version-of');derived.add_argument('--expected-parent')
+    derived.add_argument('--dry-run',action='store_true',help='Print the publication request without sending it or writing anything')
     once=derived.add_mutually_exclusive_group(required=True)
     once.add_argument('--command-id',help='Keep it: retrying with the same id is safe, a new id can publish twice');once.add_argument('--work',type=Path,help='A private work folder that keeps the command id for you')
     recover=sub.add_parser('recover',help='Recover a saved exact request from its private work folder')
@@ -101,8 +135,22 @@ def parser():
         p=sub.add_parser(name,help=help)  # E27
         p.add_argument('--url',required=True,help='The gateway address, for example https://ophiolite.example')
         p.add_argument('--credential',type=Path,help='A saved credential file (from ophiolite login); otherwise OPHIOLITE_ACCESS_KEY')
-        p.add_argument('--json',action='store_true',help='Print the raw response')
         if name=='projects':p.add_argument('--limit',type=int,default=50,help='Page size while fetching (1 to 100)')
+    # E31: journey verbs over the project's configuration and credential
+    def project(p):
+        p.add_argument('--configuration',type=Path,default=Path('configuration.json'));p.add_argument('--credentials',type=Path)
+        return p
+    entities=project(sub.add_parser('entities',help='List the wells and wellbores you may read'))
+    entities.add_argument('--kind',choices=['well','wellbore'])
+    wells=project(sub.add_parser('wells',help='The wells you may read, located (list), or their extent'))
+    wells.add_argument('action',choices=['list','extent'])
+    wells.add_argument('--bbox',help='minx,miny,maxx,maxy in --bbox-crs');wells.add_argument('--bbox-crs');wells.add_argument('--crs',help='Convert locations to this CRS on the server')
+    wells.add_argument('--limit',type=int)
+    changes=project(sub.add_parser('changes',help='The project event log: its head, pages after a cursor, or follow it live'))
+    changes.add_argument('action',choices=['head','list','follow'])
+    changes.add_argument('--epoch');changes.add_argument('--after',type=int);changes.add_argument('--seconds',type=int,default=300,help='follow: stop after this long')
+    sources=project(sub.add_parser('sources',help='Your upstream source selections in this project'))
+    sources.add_argument('action',choices=['list'])
     skills=sub.add_parser('skills',help='Locate packaged SDK guidance')
     skills.add_subparsers(dest='action',required=True).add_parser('path')
     return parser
@@ -120,13 +168,66 @@ def _discover(args):
         if args.command=='projects' and not 1<=args.limit<=100:raise Refused('--limit is 1 to 100.')
         with Account(args.url,credential) as account:
             rows=account.projects(limit=args.limit) if args.command=='projects' else account.organizations()
-    except OphioliteError as error:
-        raise SystemExit(str(error)) from None
-    if args.json:print(json.dumps({'projects' if args.command=='projects' else 'organizations':rows},indent=2));return
+    except OphioliteError:
+        raise
+    if args.json:return done(args,None,{'projects' if args.command=='projects' else 'organizations':rows})
     if not rows:print('This credential reaches no project.' if args.command=='projects' else 'No organisation holds a project this credential reaches.');return
     for row in rows:
         if args.command=='projects':print((row.get('name') or 'Unnamed project')+' - '+{'member':'can edit','viewer':'can view'}.get(row.get('role'),'access')+(' and administer' if row.get('can_administer') else ''))
         else:print(row.get('name') or 'Unnamed organisation')
+
+
+def _dry_run(args,config):
+    """E31: what a write would send, printed; no credential is read, nothing is sent and no file is written."""
+    if args.command=='share':
+        plan={'dry_run':True,'operation':'share','project':config['project'],'asset_id':args.asset,'read':args.read or [],'reuse':args.reuse or [],
+              'note':'A real share first reads the current recipients (for expected_generation), then replaces them with these.'}
+        return done(args,'Would share %s: readers %s; reuse %s. Nothing was sent.' % (args.asset,', '.join(args.read or []) or 'none',', '.join(args.reuse or []) or 'none'),plan)
+    from .writers import WrittenOriginal
+    from . import publish as planning
+    parents=[tuple(p.split(':',1)) for p in args.parents]
+    if any(len(p)!=2 or not all(p) for p in parents):raise Refused('Name each parent as ASSET:REVISION.')
+    declared=dict(d.split('=',1) for d in args.declare if '=' in d)
+    if len(declared)!=len(args.declare):raise Refused('Give each declaration as KEY=VALUE.')
+    method={'name':args.method,'library':args.library,'version':args.library_version,'parameters':json.loads(args.parameters.read_text()) if args.parameters else {}}
+    if not (args.library or args.library_version):method['declared']=False
+    written=WrittenOriginal(args.file.read_bytes(),args.profile,declared,args.file.name)
+    body,_=planning.derive_request(config['project'],written,name=args.name,from_=parents,method=method,command_id=args.command_id or 'chosen-by-the-work-folder',
+                                    new_version_of=args.new_version_of,expected_parent=args.expected_parent)
+    plan={'dry_run':True,'operation':'publications/derive','project':config['project'],'header':body,'bytes':len(written.bytes),'sha256':hashlib.sha256(written.bytes).hexdigest()}
+    return done(args,'Would publish %s (%d bytes, %s) from %d parent(s). Nothing was sent.' % (args.name,len(written.bytes),args.profile,len(parents)),plan)
+
+
+def _journey(args,client):
+    """E31: entities, wells, changes and sources, each with its documented --json shape."""
+    if args.command=='entities':
+        rows=[{'entity_id':e.entity_id,'kind':e.kind,'name':e.name} for e in client.entities(kind=args.kind)]
+        return done(args,'\n'.join('%s %s' % (r['kind'],r['name']) for r in rows) or 'No well or wellbore you may read.',{'entities':rows})
+    if args.command=='wells':
+        if args.action=='extent':
+            extent=client.extent(**({'crs':args.crs} if args.crs else {}))
+            return done(args,('%d wells in %s: %s' % (extent['count'],extent['crs'],extent['bbox'])) if extent['bbox'] else 'No well you may read is located.',{'extent':extent})
+        bbox=[float(v) for v in args.bbox.split(',')] if args.bbox else None
+        if bbox is not None and len(bbox)!=4:raise Refused('Give --bbox as minx,miny,maxx,maxy.')
+        wells=client.wells(bbox=bbox,bbox_crs=args.bbox_crs,crs=args.crs,limit=args.limit)
+        rows=[{'entity_id':w.entity_id,'name':w.name,'location':w.location} for w in wells]
+        return done(args,'\n'.join(repr(w) for w in wells) or 'No well you may read.',{'wells':rows,'crs':wells.crs,'untransformed':wells.untransformed})
+    if args.command=='sources':
+        answer=client._post('sources','list',{})
+        rows=answer.get('selections',[])
+        return done(args,'\n'.join('%s (%s): %s' % (r.get('name'),r.get('profile'),r.get('state')) for r in rows) or 'No source selection.',{'selections':rows})
+    sync=client.sync()
+    if args.action=='head':
+        head=sync.head()
+        return done(args,'Epoch %s, cursor %d' % (head['epoch'],head['cursor']),{'head':head})
+    if (args.epoch is None)!=(args.after is None):raise Refused('Give --epoch and --after together (or neither, to start from the head).')
+    if args.action=='list':
+        epoch,after=(args.epoch,args.after) if args.epoch is not None else (lambda h:(h['epoch'],h['cursor']))(sync.head())
+        events=[e for page in sync.changes(epoch,after) for e in page['changes']]
+        return done(args,'\n'.join('%s %s %s' % (e['cursor'],e['kind'],e.get('subject_id') or '') for e in events) or 'No change after this cursor.',{'changes':events})
+    for event in sync.follow(epoch=args.epoch,after=args.after,seconds=args.seconds,reconnect=False):  # follow: one line per event
+        print(json.dumps(event) if args.json else '%s %s %s' % (event['cursor'],event['kind'],event.get('subject_id') or ''),flush=True)
+    return None
 
 
 def _binding(client,work,config,args,profile):
@@ -161,7 +262,7 @@ def main(argv=None):
     args=parser().parse_args(argv)
     if args.command in ('projects','orgs'):return _discover(args)
     if args.command=='skills':
-        print(files('ophiolite').joinpath('skills'));return
+        return done(args,str(files('ophiolite').joinpath('skills')),{'path':str(files('ophiolite').joinpath('skills'))})
     if args.command=='bundle':
         # Offline: no configuration, credentials or network are read.
         from .bundle import open_bundle,pack
@@ -169,22 +270,24 @@ def main(argv=None):
             if args.archive is None:raise SystemExit('Name the .zip to write: ophiolite bundle pack FOLDER ARCHIVE.zip')
             print('Packed',pack(args.path,args.archive),'- check it with: ophiolite bundle check',args.archive);return
         opened=open_bundle(args.path)
-        if args.action=='check':print('Bundle verified:',len(opened.assets),'exact revisions,',sum(len(a.curves) for a in opened.assets),'curves,',sum(a.data is not None for a in opened.assets),'other data. Checksums show integrity, not authorship.');return
+        if args.action=='check':
+            return done(args,'Bundle verified: %d exact revisions, %d curves, %d other data. Checksums show integrity, not authorship.' % (len(opened.assets),sum(len(a.curves) for a in opened.assets),sum(a.data is not None for a in opened.assets)),
+                        {'verified':True,'revisions':len(opened.assets),'curves':sum(len(a.curves) for a in opened.assets),'other_data':sum(a.data is not None for a in opened.assets)})
         print(json.dumps({**opened.summary(),'items':[{'asset_id':a.asset_id,'revision':a.revision,'name':a.name,'type':a.type,'curves':sorted(a.curves),'history':a.history,'parent_visibility':a.parent_visibility} for a in opened.assets]},indent=2));return
     _load()
     config=configuration(args.configuration)
     path=args.credentials or credentials_path(config)
     if args.command=='doctor':
-        print('Configuration valid. Execution, if you choose it, stays on your computer.')
-        print('Python:',sys.version.split()[0])
         registry=json.loads(files('ophiolite').joinpath('contracts/registry.json').read_text())
-        print('Local contracts:',registry['version'])
-        print('Run ophiolite status to check current grant/scopes. Use login --write only for advanced publication.')
+        report={'configuration':'valid','python':sys.version.split()[0],'local_contracts':registry['version']}
         if args.online:
             remote=auth.request(config['url']+'/api/v1/contracts')
-            print('Server contracts:',remote.get('version','unreported'))
-        return
+            report['server_contracts']=remote.get('version','unreported')
+        text='\n'.join(['Configuration valid. Execution, if you choose it, stays on your computer.','Python: '+report['python'],'Local contracts: '+report['local_contracts'],
+                        'Run ophiolite status to check current grant/scopes. Use login --write only for advanced publication.']+(['Server contracts: '+report['server_contracts']] if args.online else []))
+        return done(args,text,report)
     if args.command=='run':return _local_run(config,args.work.resolve())
+    if getattr(args,'dry_run',False):return _dry_run(args,config)  # E31: before any credential, network or file write
     key=getattr(args,'key',None) or os.environ.get('OPHIOLITE_ACCESS_KEY')
     if args.command=='login' and key:
         # E25a: saved for later processes; nothing is sent now and the key is never printed.
@@ -212,10 +315,13 @@ def main(argv=None):
     with Client(config['url'],config['project'],credential) as client:
         if args.command=='status':
             with credential.snapshot(client.url,client.project) as headers:result=client._grant_status(headers)
-            print(result['state'],result['project_id'],','.join(result['scopes']));return
+            return done(args,' '.join([result['state'],result['project_id'],','.join(result['scopes'])]),{'state':result['state'],'project_id':result['project_id'],'scopes':list(result['scopes'])})
         if args.command=='list':
-            for item in client.assets():print(json.dumps(item))
+            items=list(client.assets())
+            if args.json:return done(args,None,{'assets':items})
+            for item in items:print(json.dumps(item))
             return
+        if args.command in ('entities','wells','changes','sources'):return _journey(args,client)
         if args.command=='publish-derived':  # E30b
             from .writers import WrittenOriginal
             parents=[tuple(p.split(':',1)) for p in args.parents]
@@ -228,22 +334,25 @@ def main(argv=None):
             options=dict(name=args.name,from_=parents,method=method,new_version_of=args.new_version_of,expected_parent=args.expected_parent)
             from .publish import WorkFolder
             receipt=WorkFolder(client,args.work).publish_derived(written,**options) if args.work else client.publish_derived(written,command_id=args.command_id,**options)
-            print('Published',args.name,'as version',receipt.revision_number,'of',receipt.asset_id,'- it is private until you share it.');return
+            return done(args,'Published %s as version %d of %s - it is private until you share it.' % (args.name,receipt.revision_number,receipt.asset_id),
+                        {'published':receipt.model_dump(mode='json',by_alias=True)})
         if args.command=='read-data':
             data=client.read_data(args.asset,args.revision)
             if args.output.exists():raise Refused('The output folder already exists; choose a new folder.')
             args.output.mkdir(parents=True)
             (args.output/'original').write_bytes(data.original);(args.output/'data.json').write_bytes(data._wire_data_bytes)
             (args.output/'descriptor.json').write_text(json.dumps(data._wire_descriptor,indent=2)+'\n')
-            print('Saved the exact original, data.json and descriptor.json for',data.type,'- units and references are as declared; unknown stays unknown.');return
+            return done(args,'Saved the exact original, data.json and descriptor.json for %s - units and references are as declared; unknown stays unknown.' % data.type,
+                        {'saved':str(args.output),'type':data.type,'files':['original','data.json','descriptor.json']})
         if args.command=='export':
             if len(args.asset)!=len(args.revision):raise Refused('Give one --revision for each --asset, in the same order.')
             opened=client.export([(a,r,args.curve or None) for a,r in zip(args.asset,args.revision)],args.output,groups=not args.no_groups)
-            print('Exported',len(opened.assets),'exact revision(s) to',args.output,'- check it offline with: ophiolite bundle check',args.output);return
+            return done(args,'Exported %d exact revision(s) to %s - check it offline with: ophiolite bundle check %s' % (len(opened.assets),args.output,args.output),
+                        {'exported':str(args.output),'revisions':len(opened.assets)})
         if args.command=='fetch':
             asset,revision,curve=[getattr(args,k) or config.get(k) for k in ('asset','revision','curve')]
             client.read(asset,revision,[curve]).save(args.output,legacy_order=True)
-            print('Saved exact LAS, curve.json and descriptor.json. No run or publication was created.');return
+            return done(args,'Saved exact LAS, curve.json and descriptor.json. No run or publication was created.',{'saved':str(args.output),'files':['LAS','curve.json','descriptor.json']})
         if args.command=='share':
             item=next((item for item in client.assets() if item['asset_id']==args.asset),None)
             if item is None:raise Refused('Asset unavailable to this credential; check the asset ID and your project access')
@@ -251,7 +360,9 @@ def main(argv=None):
             snapshot=client.grants(item)
             if snapshot.generation is None:raise Refused('This server does not support conditional sharing; upgrade it before changing recipients.')
             result=client.share(item,read=args.read or [],reuse=args.reuse or [],expected_generation=snapshot.generation)
-            print('Uploaded original' if item.get('authority')=='ophiolite:uploaded' else 'Published result',args.asset,'readers:',', '.join(result.recipients) or 'none','reuse:',', '.join(result.reuse_recipients) or 'none');return result
+            done(args,' '.join(['Uploaded original' if item.get('authority')=='ophiolite:uploaded' else 'Published result',args.asset,'readers:',', '.join(result.recipients) or 'none','reuse:',', '.join(result.reuse_recipients) or 'none']),
+                 {'shared':args.asset,'recipients':list(result.recipients),'reuse_recipients':list(result.reuse_recipients)})
+            return result
         if args.command=='recover':return client.recover(args.work)
         if config.get('schema')!='ophiolite.local-configuration/1':
             raise Refused('This command needs an advanced calculation configuration. For local analysis use list/fetch.')
@@ -279,11 +390,16 @@ def main(argv=None):
         return receipt
 
 
-def entrypoint():
-    try:main()
+def entrypoint(argv=None):
+    """Run the CLI and exit with the documented code: 0 done, 1 refused or invalid, 2 usage, 3 sign-in or permission,
+    4 not found or conflict, 5 busy or unavailable. With --json a refusal prints {"error": {...}} on stdout."""
+    wants_json='--json' in (sys.argv[1:] if argv is None else argv)
+    try:main(argv)
     except (ValueError,OSError,KeyError,TypeError,subprocess.CalledProcessError) as error:
-        print(str(error) if isinstance(error,ValueError) else 'Operation failed. Check configuration, local files and access; retain the run folder to retry.',file=sys.stderr)
-        raise SystemExit(1)
+        code=exit_code(error) if isinstance(error,ValueError) else EXIT['refused']
+        if wants_json:print(json.dumps(error_document(error) if isinstance(error,ValueError) else {'error':{'code':'local-failure','message':'Operation failed. Check configuration, local files and access; retain the run folder to retry.'}}))
+        else:print(str(error) if isinstance(error,ValueError) else 'Operation failed. Check configuration, local files and access; retain the run folder to retry.',file=sys.stderr)
+        raise SystemExit(code)
 
 
 if __name__=='__main__':entrypoint()
