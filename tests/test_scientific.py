@@ -22,12 +22,14 @@ def test_full_values_axis_and_metadata(name,method):
     actual=result.to_numpy() if method=='to_frame' else result
     np.testing.assert_array_equal(actual,expected,strict=True)
     assert actual.shape==(5,2)
-    assert meta.model_dump()==oracle['expected_descriptor']
+    expected_meta=oracle['expected_descriptor']
+    expected_meta={**expected_meta,'contracts':{**expected_meta['contracts'],'registry_version':json.loads((Path(__file__).parents[1]/'ophiolite/contracts/registry.json').read_text())['version']}}  # the bundled registry
+    assert meta.model_dump()==expected_meta
     assert np.isnan(actual).sum(axis=0).tolist()==[1,1]
     if method=='to_frame':
         assert list(result.index)==oracle['expected_descriptor']['axis']['values']
         assert list(result.columns)==['GR','RHOB'] and result.attrs=={}
-        assert meta.attach(result) is result and result.attrs=={'ophiolite':oracle['expected_descriptor']}
+        assert meta.attach(result) is result and result.attrs=={'ophiolite':expected_meta}
 
 @pytest.mark.parametrize('method',['to_numpy','to_frame'])
 @pytest.mark.parametrize('case,reason',[(v,'values') for v in ('coordinate','length','reorder')]+[
