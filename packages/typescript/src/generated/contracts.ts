@@ -259,6 +259,7 @@ export type MeshContext = {
 
 export type MethodRecord = {
   name: string;
+  declared?: boolean;
   library?: string;
   version?: string;
   parameters?: Record<string, unknown>;
@@ -1184,4 +1185,5 @@ export type Lineage = {
   derivation_visibility: "complete" | "restricted";
   supersedes: ManagedReference[];
   superseded_by: ManagedReference[];
+  method?: MethodRecord | null;
 };

@@ -107,7 +107,7 @@ from .models.generated import ApplicationCurve
 READ_OPERATIONS={'list','get','read','original','download','options','inspect','result-list','result-preview','result-download','result-history','info','members'}
 WRITE_OPERATIONS={'configure','start','publish','upload','share'}
 GROUP_OPERATIONS={'list','diff'}  # E8: result groups and diffs are read operations
-AI_OPERATIONS={'ai-use':{'get','grant','corpus'},'search':{'query'}}  # E14
+AI_OPERATIONS={'ai-use':{'get','grant','corpus'},'search':{'query'},'publications':{'derive','info','share'}}  # E14; E30b publications
 ENTITY_OPERATIONS={'entities':{'list','get','assets','lineage','create','identify','share','associate','dissociate'}}  # E20
 
 
@@ -583,6 +583,80 @@ def _work_upload(self,source,*,name,attribution,audience,rights_confirmed,filena
         return self._step('upload',body,headers,area='las-uploads',payload=raw,extra_headers=extra)
 
 WorkFolder.upload_las=_work_upload
+
+
+def _parent(value):
+    if isinstance(value,(tuple,list)) and len(value)==2:return {'asset_id':value[0],'revision':value[1]}
+    if hasattr(value,'model_dump'):value=value.model_dump(by_alias=True)
+    elif not isinstance(value,dict):value={'asset_id':getattr(value,'asset_id',None),'revision':getattr(value,'revision',None)}
+    parent={'asset_id':value.get('asset_id') or value.get('key'),'revision':value.get('revision')}
+    if not all(isinstance(v,str) and v for v in parent.values()):raise ValidationFailed(['Name each parent by its exact asset and revision.'])
+    return parent
+
+
+def derive_request(project,written,*,name,from_,method,command_id,of_entity=None,new_version_of=None,expected_parent=None):
+    """The X-Ophiolite-Upload header of publications/derive, validated before anything is sent."""
+    import hashlib
+    from .writers import WrittenOriginal
+    if not isinstance(written,WrittenOriginal):raise ValidationFailed(['Publish a file made by ophiolite.writers (a WrittenOriginal).'])
+    if not isinstance(command_id,str) or not 0<len(command_id)<=64:raise ValidationFailed(['Give a command id (1-64 characters) that you keep for retries.'])
+    if not written.bytes or len(written.bytes)>MAX_UPLOAD:raise ValidationFailed(['A derived file holds between one byte and 32 MiB; a deployment may set a lower limit.'])
+    parents=[_parent(p) for p in (from_ if isinstance(from_,(list,tuple)) and not (len(from_)==2 and isinstance(from_[0],str)) else [from_])]
+    method=method.model_dump() if hasattr(method,'model_dump') else dict(method)
+    body={'project_id':project,'command_id':command_id,'profile':written.profile,'name':name,'derived_from':parents,'method':method,
+          'output_sha256':hashlib.sha256(written.bytes).hexdigest(),'output_bytes':len(written.bytes)}
+    if written.declared:body['declared']=dict(written.declared)
+    if of_entity is not None:body['of_entity']=dict(of_entity)
+    if (new_version_of is None)!=(expected_parent is None):raise ValidationFailed(['A new version names both your earlier result and the version it replaces.'])
+    if new_version_of is not None:body.update(new_version_of=new_version_of,expected_parent=expected_parent)
+    if not 1<=len(parents)<=32 or len({(p['asset_id'],p['revision']) for p in parents})!=len(parents):raise ValidationFailed(['Name 1-32 distinct parents.'])
+    if not isinstance(name,str) or not name.strip() or len(name)>160:raise ValidationFailed(['Give the result a name (up to 160 characters).'])
+    try:api.MethodRecord.model_validate(method)
+    except ValidationError:raise ValidationFailed(['Declare the method: a name (1-80 characters), and library, version and script digest only when declared.']) from None
+    if method.get('declared') is False and (method.get('library') or method.get('version') or method.get('script_sha256')):
+        raise ValidationFailed(['An undeclared method names no library, version or script; nothing is invented.'])
+    if len(json_bytes(method.get('parameters') or {}))>4096:raise ValidationFailed(['Method parameters are limited to 4096 bytes.'])
+    encoded=base64.b64encode(json_bytes(body)).decode()
+    if len(encoded)>16384:raise ValidationFailed(['The publication details exceed the supported header size.'])
+    return body,{'Content-Type':'application/octet-stream','X-Ophiolite-Upload':encoded}
+
+
+def verify_derived(body,receipt):
+    """The receipt names this file, these parents (in order) and this method."""
+    if receipt.revision!=body['output_sha256'] or receipt.command_id!=body['command_id'] or receipt.profile!=body['profile']:
+        raise VerificationFailed('The publication receipt names a different file or command.')
+    if [(r.key,r.revision) for r in receipt.derived_from]!=[(p['asset_id'],p['revision']) for p in body['derived_from']]:
+        raise VerificationFailed('The publication receipt names different parents.')
+    if body.get('new_version_of') and receipt.asset_id!=body['new_version_of']:raise VerificationFailed('The new version was published to a different result.')
+    return receipt
+
+
+def _work_derive(self,written,*,name,from_,method,of_entity=None,new_version_of=None,expected_parent=None):
+    """Recoverable publish_derived: the command id and the file's digest are saved in the folder before sending,
+    so a crash or a lost response retries the identical command (and a different file under it is refused)."""
+    import hashlib
+    derive_request(self.client.project,written,name=name,from_=from_,method=method,command_id='validation',of_entity=of_entity,
+                   new_version_of=new_version_of,expected_parent=expected_parent)
+    digest=hashlib.sha256(written.bytes).hexdigest()
+    with self._locked(),self._identity() as headers:
+        state=self._state() if (self.path/'run.json').exists() else {'config':{'url':self.client.url,'project':self.client.project,'binding':None,'parameters':{},'input':None},'command_id':uuid.uuid4().hex}
+        pending=state.get('derive')
+        if pending is None or pending.get('done'):
+            pending={'command_id':uuid.uuid4().hex,'output_sha256':digest,'done':False}
+        elif pending['output_sha256']!=digest:
+            raise RecoveryUnavailable('This folder has an unfinished publication of another file; finish it first (publish the same file again).')
+        state['derive']=pending
+        _checkpoint(self.path/'run.json',state,replace=True)
+        body,extra=derive_request(self.client.project,written,name=name,from_=from_,method=method,command_id=pending['command_id'],of_entity=of_entity,
+                                  new_version_of=new_version_of,expected_parent=expected_parent)
+        from .models.api import PublicationReceipt
+        receipt=verify_derived(body,parse(PublicationReceipt,self.client._post_bytes('publications','derive',written.bytes,extra_headers=extra,headers=headers,retry=True,
+                                                                                    expected_context=(self.client.url,self.client.project))))
+        state['derive']={**pending,'done':True,'receipt':receipt.model_dump(by_alias=True)}
+        _checkpoint(self.path/'run.json',state,replace=True)
+        return receipt
+
+WorkFolder.publish_derived=_work_derive
 
 
 def verify_application_reply(operation,body,data,project,client=None):

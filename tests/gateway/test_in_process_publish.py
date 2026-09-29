@@ -312,3 +312,45 @@ def test_sdk_reads_and_exports_meshes_and_points(web,kind,tmp_path):
     assert isinstance(p,PointSet) and p.points[1]==[4.0,5.0,None] and list(p.to_frame()['phi'])==[0.0,0.2]
     opened=alice.export([(mesh['asset_id'],mesh['revision'],None),(points['asset_id'],points['revision'],None)],tmp_path/'b')
     assert opened.manifest['bundle_version']=='2.2.0' and opened.assets[0].data.triangles==[[0,1,2]]
+
+
+# --- E30b: publish a derived file -------------------------------------------------------------------------------
+LAS_TEXT='~Version\nVERS. 2.0 : LAS\nWRAP. NO : rows\n~Well\nSTRT.M 100 : start\nSTOP.M 102 : stop\nSTEP.M 1 : step\nNULL. -999.25 : missing\nWELL. SDK : fixture\n~Curve\nDEPT.M : depth\nGR.gAPI : gamma\n~ASCII\n100 0\n101 -999.25\n102 30\n'
+UNKNOWN=dict(crs='unknown',xy_unit='unknown',z_unit='unknown',z_meaning='unknown',positive='unknown',vertical_datum='unknown')
+
+
+def test_sdk_publishes_a_derived_point_set_and_a_curve_and_reads_them_back(web):
+    from ophiolite.bundle import Curve
+    from ophiolite.typed import PointSet
+    alice=client(web,'alice','delegate')
+    source=alice.upload_data(LAS_TEXT.encode(),profile='las2/1',name='SDK source',attribution='Synthetic',audience=[],rights_confirmed=True,command_id='sdk-src')
+    points=PointSet.write([(0,0,3),(10,5,None)],attributes={'phi':[0.1,None]},**UNKNOWN)
+    receipt=alice.publish_derived(points,name='SDK points',from_=[source],method={'name':'scipy.spatial.Delaunay','library':'scipy','version':'1.14.1'},command_id='sdk-derive-1')
+    assert receipt.revision_number==1 and receipt.derived_from[0].key==source.asset_id and receipt.method.library=='scipy'
+    assert alice.publish_derived(points,name='SDK points',from_=[source],method={'name':'scipy.spatial.Delaunay','library':'scipy','version':'1.14.1'},command_id='sdk-derive-1')==receipt  # a retry
+    history=alice.history({'asset_id':receipt.asset_id,'revision':receipt.revision,'authority':'ophiolite:derived'})
+    assert [r.calculation for r in history.revisions]==['Delaunay triangulation (SciPy)']
+    curve=Curve.write([100,101,102],{'GR2':('gAPI',[1,None,60])},depth_unit='m')
+    las=alice.publish_derived(curve,name='SDK curve',from_=[(source.asset_id,source.revision)],method={'name':'Doubled','declared':False},command_id='sdk-derive-2')
+    result=alice.read(las.asset_id,las.revision,['GR2'])
+    assert result.curves[0].values==[1,None,60] and result.artifact==curve.bytes
+
+
+def test_sdk_work_folder_recovers_a_publication_after_a_lost_response(web,tmp_path,monkeypatch):
+    from ophiolite import Client as C
+    from ophiolite.publish import WorkFolder
+    from ophiolite.typed import PointSet
+    alice=client(web,'alice','delegate')
+    source=alice.upload_data(LAS_TEXT.encode(),profile='las2/1',name='SDK source',attribution='Synthetic',audience=[],rights_confirmed=True,command_id='sdk-src-2')
+    points=PointSet.write([(1,1),(2,2)],**UNKNOWN)
+    folder=WorkFolder(alice,tmp_path/'work')
+    real=C._post_bytes
+    def lost(self,*a,**k):
+        real(self,*a,**k);raise ConnectionError('the response was lost')
+    monkeypatch.setattr(C,'_post_bytes',lost)
+    with pytest.raises(ConnectionError):folder.publish_derived(points,name='Recovered',from_=[source],method={'name':'m'})
+    monkeypatch.setattr(C,'_post_bytes',real)  # (not undo(): the web fixture's own patches stay)
+    again=folder.publish_derived(points,name='Recovered',from_=[source],method={'name':'m'})
+    listed=[r for r in web.a.journal.db.execute("SELECT id FROM retained_assets WHERE kind='derived'").fetchall()]
+    assert len(listed)==1 and again.asset_id==listed[0][0]  # one publication, not two
+    with pytest.raises(ValidationFailed):alice.publish_derived(points,name='x',from_=[source],method={'name':'m'},command_id='')

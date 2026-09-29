@@ -236,3 +236,15 @@ class RestrictedResultPreview(RestrictedResultSummary):
     context: dict
     total_rows: int = Field(ge=0)
     truncated: bool
+
+# E30b: publications/derive
+from .generated import MethodRecord
+
+class PublicationReceipt(Contract):
+    asset_id: str
+    revision: str = Field(pattern='^[0-9a-f]{64}$')
+    revision_number: int = Field(ge=1)
+    profile: str
+    derived_from: list[Reference] = Field(min_length=1,max_length=32)
+    method: MethodRecord
+    command_id: str

@@ -44,7 +44,7 @@ def test_a_manifest_verifies_and_every_change_is_refused(fixture):
     refused(lambda c: c['manifest']['representations'].pop(0))  # the served curve is not in the manifest
 
 
-METHOD = {'name': 'Gamma-ray offset', 'library': 'ophiolite-science', 'version': '0.4.0', 'parameters': {'offset': 2}, 'script_sha256': None}
+METHOD = {'name': 'Gamma-ray offset', 'declared': True, 'library': 'ophiolite-science', 'version': '0.4.0', 'parameters': {'offset': 2}, 'script_sha256': None}
 
 
 def with_method(d, method=METHOD):

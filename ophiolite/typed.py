@@ -298,3 +298,14 @@ def minimum_curvature(stations):
                     'dnorth': p['dnorth'] + dmd / 2 * (math.sin(i1) * math.cos(a1) + math.sin(i2) * math.cos(a2)) * rf,
                     'deast': p['deast'] + dmd / 2 * (math.sin(i1) * math.sin(a1) + math.sin(i2) * math.sin(a2)) * rf})
     return out
+
+
+# E30b: each type writes the exact file an upload of that type would be (ophiolite.writers); publish it with
+# Client.publish_derived. The writers need every declaration (write "unknown" when it is unknown).
+from . import writers as _writers
+WellTops.write = staticmethod(_writers.write_tops)
+Trajectory.write = staticmethod(_writers.write_survey)
+GridSurface.write = staticmethod(_writers.write_grid)
+TriangulatedSurface.write = staticmethod(_writers.write_mesh)
+PointSet.write = staticmethod(_writers.write_points)
+PolylineSet.write = staticmethod(_writers.write_sticks)

@@ -8,8 +8,12 @@ type WireContractsRegistry = { "schema": "ophiolite.contracts-registry/1"; "vers
 type WireDraftRef = { "id": string; "generation": number };
 type WireError = { "error": string; "code": string; [key: string]: unknown };
 type WireInventoryItem = { "asset_id": string; "kind": (string) | (null); "authority": string; "revision": string; "name": (string) | (null); "can_reuse": (boolean) | (null); [key: string]: unknown };
+type WireMethodRecord = { "name": string; "declared"?: boolean; "library"?: string; "version"?: string; "parameters"?: Record<string, unknown>; "script_sha256"?: (string) | (null) };
+type WireOfEntity = { "entity_id": string; "kind": "well" | "wellbore" };
 type WireOrganizationEntry = { "id": string; "name": string; [key: string]: unknown };
 type WirePackageMember = { "name": string; "role": "primary" | "crs-metadata" | "readme" | "companion"; "bytes": number; "sha256": string };
+type WireParent = { "asset_id": string; "revision": string };
+type WireParentReference = { "authority": string; "key": string; "revision": string; "profile": string };
 type WireProjectEntry = { "id": string; "name": (string) | (null); "role": (string) | (null); "can_administer": boolean; "organization_id": (string) | (null); [key: string]: unknown };
 type WireRecipeReference = { "asset_id": string; "revision": string };
 type WireRef = { "project_id": string; "asset_id": string; "revision": string };
@@ -553,6 +557,18 @@ export function postProjectsProjectNativeSaveReviewScene(transport: Transport, i
 export type postProjectsProjectNativeSetProjectMemberInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
 export function postProjectsProjectNativeSetProjectMember(transport: Transport, input: postProjectsProjectNativeSetProjectMemberInput): Promise<unknown> {
   return transport.request<unknown>("POST", "/api/v1/projects/{project}/native/SetProjectMember", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectPublicationsDeriveInput = { path: { "project": string }; body: Uint8Array; options?: OperationOptions };
+export function postProjectsProjectPublicationsDerive(transport: Transport, input: postProjectsProjectPublicationsDeriveInput): Promise<{ "asset_id": string; "revision": string; "revision_number": number; "profile": "points-csv/1" | "mesh-text/1" | "esri-ascii-grid/1" | "well-tops-csv/1" | "deviation-csv/1" | "opendtect-faultsticks/1" | "las2/1"; "derived_from": Array<WireParentReference>; "method": WireMethodRecord; "command_id": string }> {
+  return transport.request<{ "asset_id": string; "revision": string; "revision_number": number; "profile": "points-csv/1" | "mesh-text/1" | "esri-ascii-grid/1" | "well-tops-csv/1" | "deviation-csv/1" | "opendtect-faultsticks/1" | "las2/1"; "derived_from": Array<WireParentReference>; "method": WireMethodRecord; "command_id": string }>("POST", "/api/v1/projects/{project}/publications/derive", input.path, undefined, input.body, input.options, null, true);
+}
+export type postProjectsProjectPublicationsInfoInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectPublicationsInfo(transport: Transport, input: postProjectsProjectPublicationsInfoInput): Promise<{ "asset_id": string; "revision": string; "name": string; "owner": string; "can_share": boolean; "permitted_audience": Array<string>; "recipients": Array<string>; "reuse_recipients": Array<string>; "grants_generation": (number) | (null); "display"?: Record<string, unknown> }> {
+  return transport.request<{ "asset_id": string; "revision": string; "name": string; "owner": string; "can_share": boolean; "permitted_audience": Array<string>; "recipients": Array<string>; "reuse_recipients": Array<string>; "grants_generation": (number) | (null); "display"?: Record<string, unknown> }>("POST", "/api/v1/projects/{project}/publications/info", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectPublicationsShareInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectPublicationsShare(transport: Transport, input: postProjectsProjectPublicationsShareInput): Promise<{ "asset_id": string; "revision": string; "name": string; "owner": string; "can_share": boolean; "permitted_audience": Array<string>; "recipients": Array<string>; "reuse_recipients": Array<string>; "grants_generation": (number) | (null); "display"?: Record<string, unknown> }> {
+  return transport.request<{ "asset_id": string; "revision": string; "name": string; "owner": string; "can_share": boolean; "permitted_audience": Array<string>; "recipients": Array<string>; "reuse_recipients": Array<string>; "grants_generation": (number) | (null); "display"?: Record<string, unknown> }>("POST", "/api/v1/projects/{project}/publications/share", input.path, undefined, input.body, input.options, null, false);
 }
 export type postProjectsProjectReadCatalogInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
 export function postProjectsProjectReadCatalog(transport: Transport, input: postProjectsProjectReadCatalogInput): Promise<unknown> {

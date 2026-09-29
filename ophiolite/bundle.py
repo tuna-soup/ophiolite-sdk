@@ -569,3 +569,8 @@ def import_plan(bundle, well_logs):
         steps.append({**step, 'state': 'ready', 'original': asset.original, 'profile': profile, 'declared': declared, 'well_log': well_log,
                       'filename': PurePosixPath(original['path']).name, 'name': name[:160]})
     return steps
+
+
+# E30b: Curve.write(depth, {mnemonic: (unit, values)}, depth_unit=...) writes LAS 2.0 for Client.publish_derived.
+from .writers import write_curves as _write_curves
+Curve.write = staticmethod(_write_curves)

@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/schema.json",
   "x-ophiolite": {
     "id": "ophiolite.scientific-asset/1",
-    "version": "1.11.0",
+    "version": "1.12.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -1148,6 +1148,11 @@
           "minLength": 1,
           "title": "Name",
           "type": "string"
+        },
+        "declared": {
+          "default": true,
+          "title": "Declared",
+          "type": "boolean"
         },
         "library": {
           "default": "",

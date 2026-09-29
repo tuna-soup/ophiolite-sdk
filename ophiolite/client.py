@@ -509,6 +509,19 @@ class Client(Navigation, EntityClient):
         if result.revision!=hashlib.sha256(raw).hexdigest():raise VerificationFailed('The uploaded original has a different checksum revision.')
         return result
 
+    def publish_derived(self,written,*,name,from_,method,command_id,of_entity=None,new_version_of=None,expected_parent=None):
+        """E30b: publish a file you derived (a `WrittenOriginal` from ophiolite.writers) from exact revisions you
+        may reuse, with the method you declare. `command_id` is required: a network retry with the same id is
+        safe (the same receipt comes back); a fresh id on retry can create a second asset. Use
+        WorkFolder.publish_derived for automatic recovery (it saves a stable command id and the file's digest
+        before sending). `from_` names 1-32 parents (objects with asset_id and revision, or (asset_id, revision));
+        `new_version_of`/`expected_parent` add a version to your own earlier publication of the same lineage."""
+        from . import publish as planning
+        from .models.api import PublicationReceipt
+        body,extra=planning.derive_request(self.project,written,name=name,from_=from_,method=method,command_id=command_id,of_entity=of_entity,
+                                           new_version_of=new_version_of,expected_parent=expected_parent)
+        return planning.verify_derived(body,planning.parse(PublicationReceipt,self._post_bytes('publications','derive',written.bytes,extra_headers=extra,retry=True)))
+
     def import_bundle(self,bundle,*,audience,attribution,rights_confirmed,well_logs=None):
         """E18: upload every original a portable bundle carries as your own new, private upload, with
         the context the bundle declares and its origin recorded as provenance (not authority). History,

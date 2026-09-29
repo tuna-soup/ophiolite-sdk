@@ -22,7 +22,7 @@ def test_doctor_is_local_and_does_not_open_credentials(tmp_path,monkeypatch,caps
     monkeypatch.setattr(httpx.Client,'send',forbidden)
     monkeypatch.setattr(Credential,'from_file',forbidden);monkeypatch.setattr(cli.auth,'request',forbidden)
     cli.main(['doctor','--configuration',str(config),'--credentials',str(tmp_path/'missing')])
-    assert 'Local contracts: 1.18.0' in capsys.readouterr().out
+    assert 'Local contracts: 1.19.0' in capsys.readouterr().out
     assert not (tmp_path/'missing').exists()
 
 

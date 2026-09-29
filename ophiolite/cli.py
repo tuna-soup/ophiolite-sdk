@@ -83,6 +83,16 @@ def parser():
     typed.add_argument('--configuration',type=Path,default=Path('configuration.json'))
     typed.add_argument('--credentials',type=Path)
     typed.add_argument('--asset',required=True);typed.add_argument('--revision',required=True);typed.add_argument('--output',type=Path,required=True)
+    derived=sub.add_parser('publish-derived',help='Publish a file you derived from exact revisions, with its declared method (a command id or a work folder is required)')
+    derived.add_argument('--configuration',type=Path,default=Path('configuration.json'));derived.add_argument('--credentials',type=Path)
+    derived.add_argument('file',type=Path,help='The derived file (LAS 2.0 or one of the typed formats)')
+    derived.add_argument('--profile',required=True,choices=['las2/1','points-csv/1','mesh-text/1','esri-ascii-grid/1','well-tops-csv/1','deviation-csv/1','opendtect-faultsticks/1'])
+    derived.add_argument('--name',required=True);derived.add_argument('--from',dest='parents',action='append',required=True,metavar='ASSET:REVISION',help='Repeat once per exact parent (1-32)')
+    derived.add_argument('--method',required=True,help='What you did, for example scipy.spatial.Delaunay');derived.add_argument('--library',default='');derived.add_argument('--library-version',default='')
+    derived.add_argument('--parameters',type=Path,help='A JSON file of the parameters you used (up to 4096 bytes)');derived.add_argument('--declare',action='append',default=[],metavar='KEY=VALUE',help='A declaration such as crs=EPSG:28992 (repeat)')
+    derived.add_argument('--new-version-of');derived.add_argument('--expected-parent')
+    once=derived.add_mutually_exclusive_group(required=True)
+    once.add_argument('--command-id',help='Keep it: retrying with the same id is safe, a new id can publish twice');once.add_argument('--work',type=Path,help='A private work folder that keeps the command id for you')
     recover=sub.add_parser('recover',help='Recover a saved exact request from its private work folder')
     recover.add_argument('--configuration',type=Path,default=Path('configuration.json'))
     recover.add_argument('--credentials',type=Path)
@@ -206,6 +216,19 @@ def main(argv=None):
         if args.command=='list':
             for item in client.assets():print(json.dumps(item))
             return
+        if args.command=='publish-derived':  # E30b
+            from .writers import WrittenOriginal
+            parents=[tuple(p.split(':',1)) for p in args.parents]
+            if any(len(p)!=2 or not all(p) for p in parents):raise Refused('Name each parent as ASSET:REVISION.')
+            declared=dict(d.split('=',1) for d in args.declare if '=' in d)
+            if len(declared)!=len(args.declare):raise Refused('Give each declaration as KEY=VALUE.')
+            method={'name':args.method,'library':args.library,'version':args.library_version,'parameters':json.loads(args.parameters.read_text()) if args.parameters else {}}
+            if not (args.library or args.library_version):method['declared']=False
+            written=WrittenOriginal(args.file.read_bytes(),args.profile,declared,args.file.name)
+            options=dict(name=args.name,from_=parents,method=method,new_version_of=args.new_version_of,expected_parent=args.expected_parent)
+            from .publish import WorkFolder
+            receipt=WorkFolder(client,args.work).publish_derived(written,**options) if args.work else client.publish_derived(written,command_id=args.command_id,**options)
+            print('Published',args.name,'as version',receipt.revision_number,'of',receipt.asset_id,'- it is private until you share it.');return
         if args.command=='read-data':
             data=client.read_data(args.asset,args.revision)
             if args.output.exists():raise Refused('The output folder already exists; choose a new folder.')

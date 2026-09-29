@@ -5,6 +5,16 @@
 Supported 0.x client over preview contracts, installable from reviewed source.
 No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
 
+- Derived publication (E30b): `ophiolite.writers` (also `WellTops.write`, `Trajectory.write`, `GridSurface.write`,
+  `TriangulatedSurface.write`, `PointSet.write`, `PolylineSet.write` and `Curve.write` for LAS 2.0) write a result
+  made in Python as the exact file an upload of its type would be, with every declaration required ("unknown" is
+  an answer) and values the format cannot carry refused. `Client.publish_derived(written, name=, from_=, method=,
+  command_id=)` publishes it from 1-32 exact parents with the declared method (a required command id; a retry
+  with the same id returns the same receipt); `WorkFolder.publish_derived` saves the command id and the file's
+  digest first and recovers after a crash or a lost reply. CLI `ophiolite publish-derived` (`--command-id` or
+  `--work`); skill `derive-and-publish`. `Client.history` names a publication's method in words. Free-form JSON
+  objects in contracts are generated as `dict[str, Any]`.
+
 - Revision manifests /2 (E30a, asset contract 1.11.0): the reader accepts `ophiolite.revision-manifest/2`,
   whose digest also covers the declared `method` (`MethodRecord`: name, library, version, parameters,
   script digest), and requires it to be the descriptor's `derivation.method`; a `/1` manifest verifies

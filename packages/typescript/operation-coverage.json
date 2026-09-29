@@ -864,6 +864,24 @@
     "response": "explicitly-untyped"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/publications/derive",
+    "function": "postProjectsProjectPublicationsDerive",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/publications/info",
+    "function": "postProjectsProjectPublicationsInfo",
+    "request": "explicitly-untyped",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/publications/share",
+    "function": "postProjectsProjectPublicationsShare",
+    "request": "explicitly-untyped",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/read/Catalog",
     "function": "postProjectsProjectReadCatalog",
     "request": "explicitly-untyped",

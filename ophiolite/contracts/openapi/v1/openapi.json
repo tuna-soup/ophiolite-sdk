@@ -5,7 +5,7 @@
     "version": "1.0.0-pilot",
     "description": "One public API for every project operation. Three credential kinds reach it: the browser session (opaque HttpOnly cookie plus the X-CSRF-Token proof and, on non-GET requests, the exact Origin), a project-scoped delegate lasting at most five minutes (Bearer oph_api_..., parent session and current native permissions remain mandatory), and a browser-approved provider grant (Bearer provider token plus X-Ophiolite-Application-Grant; capability 1: the scientific read resources and the applications route within its read/write scopes; capability 3 adds reading wells, wellbores and lineage and the LAS upload routes). A request that carries an Authorization header is a machine request and is refused with MACHINE_AUTH_REQUIRED when a cookie or Origin travels with it. Scope and capability are ceilings; every operation runs the same native permission checks whoever calls it. Not a stable SDK or unattended service-account contract.",
     "x-ophiolite-contracts": {
-      "registry_version": "1.18.0",
+      "registry_version": "1.19.0",
       "index": "/api/v1/contracts",
       "served_profiles": [
         "las2/1",
@@ -36,6 +36,7 @@
         "entities",
         "las-uploads",
         "projects",
+        "publications",
         "read",
         "result-groups",
         "scientific-assets",
@@ -12925,6 +12926,462 @@
             "description": "Service unavailable or capacity reached"
           }
         },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Operation-specific JSON object; project_id must match the path where the row names a project."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/publications/derive": {
+      "post": {
+        "summary": "Publish a file derived from exact revisions you may reuse, with its declared method (application/octet-stream, X-Ophiolite-Upload with command_id)",
+        "description": "Scope write; accepted principals: session, delegate, grant; project extractor hdr.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "grant",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "What publications/derive answers, and answers again for the same command.",
+                  "properties": {
+                    "asset_id": {
+                      "title": "Asset Id",
+                      "type": "string"
+                    },
+                    "revision": {
+                      "pattern": "^[0-9a-f]{64}$",
+                      "title": "Revision",
+                      "type": "string"
+                    },
+                    "revision_number": {
+                      "minimum": 1,
+                      "title": "Revision Number",
+                      "type": "integer"
+                    },
+                    "profile": {
+                      "enum": [
+                        "points-csv/1",
+                        "mesh-text/1",
+                        "esri-ascii-grid/1",
+                        "well-tops-csv/1",
+                        "deviation-csv/1",
+                        "opendtect-faultsticks/1",
+                        "las2/1"
+                      ],
+                      "title": "Profile",
+                      "type": "string"
+                    },
+                    "derived_from": {
+                      "items": {
+                        "$ref": "#/components/schemas/ParentReference"
+                      },
+                      "maxItems": 32,
+                      "minItems": 1,
+                      "title": "Derived From",
+                      "type": "array"
+                    },
+                    "method": {
+                      "$ref": "#/components/schemas/MethodRecord"
+                    },
+                    "command_id": {
+                      "title": "Command Id",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "asset_id",
+                    "revision",
+                    "revision_number",
+                    "profile",
+                    "derived_from",
+                    "method",
+                    "command_id"
+                  ],
+                  "title": "PublicationReceipt",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Ophiolite-Upload",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "base64 of a UTF-8 JSON object with this shape: {\"additionalProperties\": false, \"description\": \"The X-Ophiolite-Upload header of publications/derive. command_id is required: the server never makes one up.\", \"properties\": {\"command_id\": {\"maxLength\": 64, \"minLength\": 1, \"title\": \"Command Id\", \"type\": \"string\"}, \"declared\": {\"additionalProperties\": {\"type\": \"string\"}, \"maxProperties\": 12, \"title\": \"Declared\", \"type\": \"object\"}, \"derived_from\": {\"items\": {\"$ref\": \"#/components/schemas/Parent\"}, \"maxItems\": 32, \"minItems\": 1, \"title\": \"Derived From\", \"type\": \"array\"}, \"expected_parent\": {\"anyOf\": [{\"pattern\": \"^[0-9a-f]{64}$\", \"type\": \"string\"}, {\"type\": \"null\"}], \"default\": null, \"title\": \"Expected Parent\"}, \"method\": {\"$ref\": \"#/components/schemas/MethodRecord\"}, \"name\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Name\", \"type\": \"string\"}, \"new_version_of\": {\"anyOf\": [{\"maxLength\": 160, \"minLength\": 1, \"type\": \"string\"}, {\"type\": \"null\"}], \"default\": null, \"title\": \"New Version Of\"}, \"of_entity\": {\"anyOf\": [{\"$ref\": \"#/components/schemas/OfEntity\"}, {\"type\": \"null\"}], \"default\": null}, \"output_bytes\": {\"maximum\": 33554432, \"minimum\": 1, \"title\": \"Output Bytes\", \"type\": \"integer\"}, \"output_sha256\": {\"pattern\": \"^[0-9a-f]{64}$\", \"title\": \"Output Sha256\", \"type\": \"string\"}, \"profile\": {\"enum\": [\"points-csv/1\", \"mesh-text/1\", \"esri-ascii-grid/1\", \"well-tops-csv/1\", \"deviation-csv/1\", \"opendtect-faultsticks/1\", \"las2/1\"], \"title\": \"Profile\", \"type\": \"string\"}, \"project_id\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Project Id\", \"type\": \"string\"}}, \"required\": [\"project_id\", \"command_id\", \"profile\", \"name\", \"derived_from\", \"method\", \"output_sha256\", \"output_bytes\"], \"title\": \"Derive\", \"type\": \"object\"}"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary",
+                "description": "The derived file's exact bytes, of the declared length and SHA-256 (at most 32 MiB and the deployment's upload limit), exact Content-Length"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/publications/info": {
+      "post": {
+        "summary": "A derived publication: its name, author and, for its author, who it is shared with and may be",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "grant",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "publications/info: who a derived publication is shared with (grants for its author only).",
+                  "properties": {
+                    "asset_id": {
+                      "title": "Asset Id",
+                      "type": "string"
+                    },
+                    "revision": {
+                      "title": "Revision",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "owner": {
+                      "title": "Owner",
+                      "type": "string"
+                    },
+                    "can_share": {
+                      "title": "Can Share",
+                      "type": "boolean"
+                    },
+                    "permitted_audience": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Permitted Audience",
+                      "type": "array"
+                    },
+                    "recipients": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Recipients",
+                      "type": "array"
+                    },
+                    "reuse_recipients": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Reuse Recipients",
+                      "type": "array"
+                    },
+                    "grants_generation": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Grants Generation"
+                    },
+                    "display": {
+                      "additionalProperties": {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "description": "member_names: the display name of each permitted recipient (author only)",
+                      "title": "Display",
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "asset_id",
+                    "revision",
+                    "name",
+                    "owner",
+                    "can_share",
+                    "permitted_audience",
+                    "recipients",
+                    "reuse_recipients",
+                    "grants_generation"
+                  ],
+                  "title": "PublicationInfo",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Operation-specific JSON object; project_id must match the path where the row names a project."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/publications/share": {
+      "post": {
+        "summary": "Set who may read and reuse your derived publication, within its roots' ceiling (expected_generation)",
+        "description": "Scope write; accepted principals: session, delegate, grant; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "grant",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "publications/info: who a derived publication is shared with (grants for its author only).",
+                  "properties": {
+                    "asset_id": {
+                      "title": "Asset Id",
+                      "type": "string"
+                    },
+                    "revision": {
+                      "title": "Revision",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "owner": {
+                      "title": "Owner",
+                      "type": "string"
+                    },
+                    "can_share": {
+                      "title": "Can Share",
+                      "type": "boolean"
+                    },
+                    "permitted_audience": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Permitted Audience",
+                      "type": "array"
+                    },
+                    "recipients": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Recipients",
+                      "type": "array"
+                    },
+                    "reuse_recipients": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Reuse Recipients",
+                      "type": "array"
+                    },
+                    "grants_generation": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Grants Generation"
+                    },
+                    "display": {
+                      "additionalProperties": {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "description": "member_names: the display name of each permitted recipient (author only)",
+                      "title": "Display",
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "asset_id",
+                    "revision",
+                    "name",
+                    "owner",
+                    "can_share",
+                    "permitted_audience",
+                    "recipients",
+                    "reuse_recipients",
+                    "grants_generation"
+                  ],
+                  "title": "PublicationInfo",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -28714,7 +29171,7 @@
                 "schema": {
                   "x-ophiolite": {
                     "id": "ophiolite.scientific-asset/1",
-                    "version": "1.11.0",
+                    "version": "1.12.0",
                     "lifecycle": "preview"
                   },
                   "additionalProperties": false,
@@ -29234,6 +29691,11 @@
                                       "title": "Name",
                                       "type": "string"
                                     },
+                                    "declared": {
+                                      "default": true,
+                                      "title": "Declared",
+                                      "type": "boolean"
+                                    },
                                     "library": {
                                       "default": "",
                                       "maxLength": 80,
@@ -29307,6 +29769,11 @@
                                   "minLength": 1,
                                   "title": "Name",
                                   "type": "string"
+                                },
+                                "declared": {
+                                  "default": true,
+                                  "title": "Declared",
+                                  "type": "boolean"
                                 },
                                 "library": {
                                   "default": "",
@@ -33222,6 +33689,83 @@
         "title": "InventoryItem",
         "type": "object"
       },
+      "MethodRecord": {
+        "additionalProperties": false,
+        "description": "1.11.0 (E30a): how a derived revision was made, as its publishing request declared it \u2014 the projection of\nits interpretation record (E23a's decision family: selected by declaration).",
+        "properties": {
+          "name": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "declared": {
+            "default": true,
+            "title": "Declared",
+            "type": "boolean"
+          },
+          "library": {
+            "default": "",
+            "maxLength": 80,
+            "title": "Library",
+            "type": "string"
+          },
+          "version": {
+            "default": "",
+            "maxLength": 40,
+            "title": "Version",
+            "type": "string"
+          },
+          "parameters": {
+            "additionalProperties": true,
+            "title": "Parameters",
+            "type": "object"
+          },
+          "script_sha256": {
+            "anyOf": [
+              {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Script Sha256"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "MethodRecord",
+        "type": "object"
+      },
+      "OfEntity": {
+        "additionalProperties": false,
+        "properties": {
+          "entity_id": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "well",
+              "wellbore"
+            ],
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "entity_id",
+          "kind"
+        ],
+        "title": "OfEntity",
+        "type": "object"
+      },
       "OrganizationEntry": {
         "properties": {
           "id": {
@@ -33279,6 +33823,57 @@
           "sha256"
         ],
         "title": "PackageMember",
+        "type": "object"
+      },
+      "Parent": {
+        "additionalProperties": false,
+        "properties": {
+          "asset_id": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "revision": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Revision",
+            "type": "string"
+          }
+        },
+        "required": [
+          "asset_id",
+          "revision"
+        ],
+        "title": "Parent",
+        "type": "object"
+      },
+      "ParentReference": {
+        "additionalProperties": false,
+        "properties": {
+          "authority": {
+            "title": "Authority",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "revision": {
+            "title": "Revision",
+            "type": "string"
+          },
+          "profile": {
+            "title": "Profile",
+            "type": "string"
+          }
+        },
+        "required": [
+          "authority",
+          "key",
+          "revision",
+          "profile"
+        ],
+        "title": "ParentReference",
         "type": "object"
       },
       "ProjectEntry": {
