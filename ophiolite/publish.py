@@ -108,7 +108,7 @@ READ_OPERATIONS={'list','get','read','original','download','options','inspect','
 WRITE_OPERATIONS={'configure','start','publish','upload','share'}
 GROUP_OPERATIONS={'list','diff'}  # E8: result groups and diffs are read operations
 AI_OPERATIONS={'ai-use':{'get','grant','corpus'},'search':{'query'},'publications':{'derive','info','share'}}  # E14; E30b publications
-ENTITY_OPERATIONS={'entities':{'list','get','assets','lineage','create','identify','share','associate','dissociate'}}  # E20
+ENTITY_OPERATIONS={'entities':{'list','get','assets','lineage','create','identify','share','associate','dissociate','extent'}}  # E20; E29 extent
 
 
 def operation_path(project,area,operation):

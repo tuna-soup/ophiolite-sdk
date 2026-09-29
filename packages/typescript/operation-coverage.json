@@ -630,6 +630,12 @@
     "response": "explicitly-untyped"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/entities/extent",
+    "function": "postProjectsProjectEntitiesExtent",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/entities/get",
     "function": "postProjectsProjectEntitiesGet",
     "request": "explicitly-untyped",
@@ -650,14 +656,50 @@
   {
     "operation": "POST /api/v1/projects/{project}/entities/list",
     "function": "postProjectsProjectEntitiesList",
-    "request": "explicitly-untyped",
-    "response": "explicitly-untyped"
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/entities/share",
     "function": "postProjectsProjectEntitiesShare",
     "request": "explicitly-untyped",
     "response": "explicitly-untyped"
+  },
+  {
+    "operation": "GET /api/v1/projects/{project}/features",
+    "function": "getProjectsProjectFeatures",
+    "request": "explicitly-untyped",
+    "response": "schema"
+  },
+  {
+    "operation": "GET /api/v1/projects/{project}/features/collections",
+    "function": "getProjectsProjectFeaturesCollections",
+    "request": "explicitly-untyped",
+    "response": "schema"
+  },
+  {
+    "operation": "GET /api/v1/projects/{project}/features/collections/{collection}",
+    "function": "getProjectsProjectFeaturesCollectionsCollection",
+    "request": "explicitly-untyped",
+    "response": "schema"
+  },
+  {
+    "operation": "GET /api/v1/projects/{project}/features/collections/{collection}/items",
+    "function": "getProjectsProjectFeaturesCollectionsCollectionItems",
+    "request": "explicitly-untyped",
+    "response": "schema"
+  },
+  {
+    "operation": "GET /api/v1/projects/{project}/features/collections/{collection}/items/{feature}",
+    "function": "getProjectsProjectFeaturesCollectionsCollectionItemsFeature",
+    "request": "explicitly-untyped",
+    "response": "schema"
+  },
+  {
+    "operation": "GET /api/v1/projects/{project}/features/conformance",
+    "function": "getProjectsProjectFeaturesConformance",
+    "request": "explicitly-untyped",
+    "response": "schema"
   },
   {
     "operation": "POST /api/v1/projects/{project}/imports/original-chunk",

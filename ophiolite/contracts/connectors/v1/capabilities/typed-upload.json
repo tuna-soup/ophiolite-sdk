@@ -206,6 +206,26 @@
         "date": null,
         "evidence": null
       }
+    },
+    {
+      "profile": "well-location/1",
+      "data": "Well surface location",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "JSON formatting is kept only in the exact original"
+      ],
+      "unsupported": [
+        "CRS transformation at upload",
+        "more than one well per file"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
     }
   ],
   "redistribution": "Ophiolite source in this repository; no third-party runtime needed.",

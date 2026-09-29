@@ -91,7 +91,7 @@ class GridContext(Contract):
 
 class TypedInterpretation(Contract):
     reader: Literal['asset_connectors.typed_reader/1'] = Field(...)
-    mapping: Literal['well-tops/1', 'trajectory/1', 'regular-grid-surface/1', 'triangulated-surface/1', 'point-set/1', 'polyline-set/1', 'seismic-volume/1'] = Field(...)
+    mapping: Literal['well-tops/1', 'trajectory/1', 'regular-grid-surface/1', 'triangulated-surface/1', 'point-set/1', 'polyline-set/1', 'seismic-volume/1', 'well-location/1'] = Field(...)
     parsing_policy: Literal['typed-strict/1'] = Field(...)
     null_policy: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
 
@@ -314,7 +314,7 @@ class ScientificAsset(Contract):
     custodian: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(...)
     source_reference: Reference | None = Field(...)
     profile: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] = Field(...)
-    scientific: ScientificContext | TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext | RecipePointContext = Field(...)
+    scientific: ScientificContext | TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext | RecipePointContext | WellLocationContext = Field(...)
     interpretation: Interpretation | TypedInterpretation | RecipeInterpretation = Field(...)
     interpretation_evidence: Literal['live', 'recorded', 'recorded-differs', 'not-recorded'] = Field('live')
     recorded_interpretation: RecordedInterpretation | None = Field(None)
@@ -549,6 +549,12 @@ class Version(Contract):
     of: Annotated[int, Field(ge=1)] | None = Field(None)
     source_version: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(None)
 
+class WellLocationContext(Contract):
+    type: Literal['well-location'] = Field(...)
+    crs: Annotated[str, Field(pattern='^(EPSG:[0-9]{4,6}|OGC:CRS84|unknown)$')] = Field(...)
+    elevation_reference: Literal['unknown', 'GL', 'KB', 'MSL'] = Field(...)
+    fidelity: Fidelity = Field(...)
+
 class WellLogLink(Contract):
     asset_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
@@ -646,7 +652,53 @@ class TriangulatedSurface(Contract):
     attributes: Annotated[list[Attribute], Field(max_length=16)] = Field(...)
 
 class TypedContext(Contract):
-    context: Annotated[TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext, Field(discriminator='type')] = Field(...)
+    context: Annotated[TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext | WellLocationContext, Field(discriminator='type')] = Field(...)
+
+class WellLocation(Contract):
+    schema_: Literal['ophiolite.well-location/1'] = Field(..., alias='schema')
+    x: float | None = Field(...)
+    y: float | None = Field(...)
+    crs: Annotated[str, Field(pattern='^(EPSG:[0-9]{4,6}|OGC:CRS84|unknown)$')] = Field(...)
+    elevation_reference: Literal['unknown', 'GL', 'KB', 'MSL'] = Field(...)
+    source: LocationSource = Field(...)
+    provenance: LocationProvenance = Field(...)
+    transformation: Transformation | Literal['unavailable'] | None = Field(None)
+    stored: StoredPoint | None = Field(None)
+    ambiguous: bool = Field(False)
+
+class LocationProvenance(Contract):
+    assertion_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    predicate: Literal['of-entity'] = Field(...)
+    asserted_by: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    asserted_at: Annotated[str, Field(pattern='^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$')] = Field(...)
+
+class LocationSource(Contract):
+    asset_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    profile: Literal['well-location/1', 'sql-wells/1'] = Field(...)
+    row: Annotated[str, Field(min_length=1, max_length=160)] | None = Field(None)
+
+class StoredPoint(Contract):
+    x: float = Field(...)
+    y: float = Field(...)
+    crs: Annotated[str, Field(pattern='^(EPSG:[0-9]{4,6}|OGC:CRS84|unknown)$')] = Field(...)
+
+class Transformation(Contract):
+    method: Literal['pyproj.Transformer'] = Field(...)
+    pyproj_version: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    proj_version: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    source_crs: Annotated[str, Field(pattern='^(EPSG:[0-9]{4,6}|OGC:CRS84|unknown)$')] = Field(...)
+    target_crs: Annotated[str, Field(pattern='^(EPSG:[0-9]{4,6}|OGC:CRS84|unknown)$')] = Field(...)
+
+class WellLocationUpload(Contract):
+    representation: Literal['normalized'] = Field(...)
+    source: Reference = Field(...)
+    source_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    interpretation: TypedInterpretation = Field(...)
+    schema_: Literal['ophiolite.well-location-upload/1'] = Field(..., alias='schema')
+    context: WellLocationContext = Field(...)
+    x: float = Field(...)
+    y: float = Field(...)
 
 class WellTops(Contract):
     representation: Literal['normalized'] = Field(...)
@@ -837,6 +889,7 @@ class Entity(Contract):
     owner: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     generation: Annotated[int, Field(ge=1)] = Field(...)
     history: Annotated[list[IdentityChange], Field(max_length=64)] = Field(None)
+    location: WellLocation | None = Field(None)
 
 class Identity(Contract):
     authority: Annotated[str, Field(pattern='^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$')] | None = Field(None)
@@ -1160,6 +1213,7 @@ SeismicContext.model_rebuild()
 TopsContext.model_rebuild()
 TrajectoryContext.model_rebuild()
 Version.model_rebuild()
+WellLocationContext.model_rebuild()
 WellLogLink.model_rebuild()
 XY.model_rebuild()
 SeismicSlice.model_rebuild()
@@ -1173,6 +1227,12 @@ Trajectory.model_rebuild()
 Station.model_rebuild()
 TriangulatedSurface.model_rebuild()
 TypedContext.model_rebuild()
+WellLocation.model_rebuild()
+LocationProvenance.model_rebuild()
+LocationSource.model_rebuild()
+StoredPoint.model_rebuild()
+Transformation.model_rebuild()
+WellLocationUpload.model_rebuild()
 WellTops.model_rebuild()
 Top.model_rebuild()
 PortableBundleManifest.model_rebuild()

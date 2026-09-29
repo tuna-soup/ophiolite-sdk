@@ -1,0 +1,32 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "well-location/1",
+  "kind": "source",
+  "lifecycle": "preview",
+  "display_name": "Well location (JSON)",
+  "description": "One well's surface point as a JSON object (x, y, the CRS it is stated in and the elevation reference), kept byte for byte as the uploader provided it.",
+  "serves": [
+    "ophiolite.scientific-asset/1"
+  ],
+  "connector": {
+    "scientific_profile": "well-location/1",
+    "source_schema": "JSON/{x,y,crs,elevation_reference}",
+    "mapping_version": "well-location/1",
+    "history": "retained-exact-read"
+  },
+  "role": "artifact",
+  "media_types": [
+    "application/json"
+  ],
+  "normalized_profile": "ophiolite.well-location-upload/1",
+  "context_schema": "ophiolite.typed-context/1",
+  "representation_rules": {
+    "artifact_kind_by_origin": {
+      "source-reference": "original",
+      "retained-capture": "original",
+      "managed-derived": "derived-artifact"
+    },
+    "normalized": 1,
+    "total": 2
+  }
+}

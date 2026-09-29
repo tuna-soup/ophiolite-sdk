@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ophiolite.dev/contracts/assets/v1/trajectory-schema.json",
+  "$id": "https://ophiolite.dev/contracts/assets/v1/well-location-upload-schema.json",
   "x-ophiolite": {
-    "id": "ophiolite.trajectory/1",
+    "id": "ophiolite.well-location-upload/1",
     "version": "1.0.0",
     "lifecycle": "preview"
   },
@@ -110,138 +110,6 @@
       "title": "Reference",
       "type": "object"
     },
-    "Station": {
-      "additionalProperties": false,
-      "properties": {
-        "md": {
-          "title": "Md",
-          "type": "number"
-        },
-        "inclination": {
-          "anyOf": [
-            {
-              "maximum": 180,
-              "minimum": 0,
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "title": "Inclination"
-        },
-        "azimuth": {
-          "anyOf": [
-            {
-              "maximum": 360,
-              "minimum": 0,
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "title": "Azimuth"
-        },
-        "tvd": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "title": "Tvd"
-        }
-      },
-      "required": [
-        "md",
-        "inclination",
-        "azimuth",
-        "tvd"
-      ],
-      "title": "Station",
-      "type": "object"
-    },
-    "TrajectoryContext": {
-      "additionalProperties": false,
-      "properties": {
-        "type": {
-          "const": "trajectory",
-          "title": "Type",
-          "type": "string"
-        },
-        "depth_unit": {
-          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
-          "title": "Depth Unit",
-          "type": "string"
-        },
-        "angle_unit": {
-          "const": "deg",
-          "title": "Angle Unit",
-          "type": "string"
-        },
-        "azimuth_reference": {
-          "enum": [
-            "true-north",
-            "grid-north",
-            "magnetic-north",
-            "unknown"
-          ],
-          "title": "Azimuth Reference",
-          "type": "string"
-        },
-        "depth_datum": {
-          "maxLength": 128,
-          "minLength": 1,
-          "title": "Depth Datum",
-          "type": "string"
-        },
-        "count": {
-          "maximum": 10000,
-          "minimum": 1,
-          "title": "Count",
-          "type": "integer"
-        },
-        "missing_angle_count": {
-          "maximum": 10000,
-          "minimum": 0,
-          "title": "Missing Angle Count",
-          "type": "integer"
-        },
-        "tvd_provided": {
-          "title": "Tvd Provided",
-          "type": "boolean"
-        },
-        "md_range": {
-          "items": {
-            "type": "number"
-          },
-          "maxItems": 2,
-          "minItems": 2,
-          "title": "Md Range",
-          "type": "array"
-        },
-        "fidelity": {
-          "$ref": "#/$defs/Fidelity"
-        }
-      },
-      "required": [
-        "type",
-        "depth_unit",
-        "angle_unit",
-        "azimuth_reference",
-        "depth_datum",
-        "count",
-        "missing_angle_count",
-        "tvd_provided",
-        "md_range",
-        "fidelity"
-      ],
-      "title": "TrajectoryContext",
-      "type": "object"
-    },
     "TypedInterpretation": {
       "additionalProperties": false,
       "description": "The executable identity of the typed reader (Connectors typed_reader).",
@@ -285,9 +153,47 @@
       ],
       "title": "TypedInterpretation",
       "type": "object"
+    },
+    "WellLocationContext": {
+      "additionalProperties": false,
+      "description": "E29: one well's surface point as its file states it (typed-context 1.3.0).",
+      "properties": {
+        "type": {
+          "const": "well-location",
+          "title": "Type",
+          "type": "string"
+        },
+        "crs": {
+          "pattern": "^(EPSG:[0-9]{4,6}|OGC:CRS84|unknown)$",
+          "title": "Crs",
+          "type": "string"
+        },
+        "elevation_reference": {
+          "enum": [
+            "unknown",
+            "GL",
+            "KB",
+            "MSL"
+          ],
+          "title": "Elevation Reference",
+          "type": "string"
+        },
+        "fidelity": {
+          "$ref": "#/$defs/Fidelity"
+        }
+      },
+      "required": [
+        "type",
+        "crs",
+        "elevation_reference",
+        "fidelity"
+      ],
+      "title": "WellLocationContext",
+      "type": "object"
     }
   },
   "additionalProperties": false,
+  "description": "E29: the immutable normalized content of a well-location/1 file \u2014 one surface point in the CRS it states.\nNothing about where it came from or which well it locates: that is an of-entity association (WellLocation).",
   "properties": {
     "representation": {
       "const": "normalized",
@@ -306,21 +212,20 @@
       "$ref": "#/$defs/TypedInterpretation"
     },
     "schema": {
-      "const": "ophiolite.trajectory/1",
+      "const": "ophiolite.well-location-upload/1",
       "title": "Schema",
       "type": "string"
     },
     "context": {
-      "$ref": "#/$defs/TrajectoryContext"
+      "$ref": "#/$defs/WellLocationContext"
     },
-    "stations": {
-      "items": {
-        "$ref": "#/$defs/Station"
-      },
-      "maxItems": 10000,
-      "minItems": 1,
-      "title": "Stations",
-      "type": "array"
+    "x": {
+      "title": "X",
+      "type": "number"
+    },
+    "y": {
+      "title": "Y",
+      "type": "number"
     }
   },
   "required": [
@@ -330,8 +235,9 @@
     "interpretation",
     "schema",
     "context",
-    "stations"
+    "x",
+    "y"
   ],
-  "title": "Trajectory",
+  "title": "WellLocationUpload",
   "type": "object"
 }

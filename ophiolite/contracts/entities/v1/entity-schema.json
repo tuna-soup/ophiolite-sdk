@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/entities/v1/entity-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.entity/1",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -109,6 +109,251 @@
       ],
       "title": "IdentityChange",
       "type": "object"
+    },
+    "LocationProvenance": {
+      "additionalProperties": false,
+      "properties": {
+        "assertion_id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Assertion Id",
+          "type": "string"
+        },
+        "predicate": {
+          "const": "of-entity",
+          "title": "Predicate",
+          "type": "string"
+        },
+        "asserted_by": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Asserted By",
+          "type": "string"
+        },
+        "asserted_at": {
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+          "title": "Asserted At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "assertion_id",
+        "predicate",
+        "asserted_by",
+        "asserted_at"
+      ],
+      "title": "LocationProvenance",
+      "type": "object"
+    },
+    "LocationSource": {
+      "additionalProperties": false,
+      "properties": {
+        "asset_id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "profile": {
+          "enum": [
+            "well-location/1",
+            "sql-wells/1"
+          ],
+          "title": "Profile",
+          "type": "string"
+        },
+        "row": {
+          "anyOf": [
+            {
+              "maxLength": 160,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Row"
+        }
+      },
+      "required": [
+        "asset_id",
+        "revision",
+        "profile"
+      ],
+      "title": "LocationSource",
+      "type": "object"
+    },
+    "StoredPoint": {
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "title": "Y",
+          "type": "number"
+        },
+        "crs": {
+          "pattern": "^(EPSG:[0-9]{4,6}|OGC:CRS84|unknown)$",
+          "title": "Crs",
+          "type": "string"
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "crs"
+      ],
+      "title": "StoredPoint",
+      "type": "object"
+    },
+    "Transformation": {
+      "additionalProperties": false,
+      "description": "The conversion a read performed, as the installed library reports it at request time.",
+      "properties": {
+        "method": {
+          "const": "pyproj.Transformer",
+          "title": "Method",
+          "type": "string"
+        },
+        "pyproj_version": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Pyproj Version",
+          "type": "string"
+        },
+        "proj_version": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Proj Version",
+          "type": "string"
+        },
+        "source_crs": {
+          "pattern": "^(EPSG:[0-9]{4,6}|OGC:CRS84|unknown)$",
+          "title": "Source Crs",
+          "type": "string"
+        },
+        "target_crs": {
+          "pattern": "^(EPSG:[0-9]{4,6}|OGC:CRS84|unknown)$",
+          "title": "Target Crs",
+          "type": "string"
+        }
+      },
+      "required": [
+        "method",
+        "pyproj_version",
+        "proj_version",
+        "source_crs",
+        "target_crs"
+      ],
+      "title": "Transformation",
+      "type": "object"
+    },
+    "WellLocation": {
+      "additionalProperties": false,
+      "description": "E29: a well's location as read: the point (in the requested CRS, else as stored), the exact revision (and row)\nit came from and the association that ties it to the well. Built at read time from the location index. When\nanother CRS was requested, `stored` keeps the stored point and `transformation` names the conversion \u2014 or is\n'unavailable', with x and y null, when the stored CRS cannot be converted (never an unconverted point\nlabelled with the requested CRS).",
+      "properties": {
+        "schema": {
+          "const": "ophiolite.well-location/1",
+          "title": "Schema",
+          "type": "string"
+        },
+        "x": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "X"
+        },
+        "y": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Y"
+        },
+        "crs": {
+          "pattern": "^(EPSG:[0-9]{4,6}|OGC:CRS84|unknown)$",
+          "title": "Crs",
+          "type": "string"
+        },
+        "elevation_reference": {
+          "enum": [
+            "unknown",
+            "GL",
+            "KB",
+            "MSL"
+          ],
+          "title": "Elevation Reference",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/LocationSource"
+        },
+        "provenance": {
+          "$ref": "#/$defs/LocationProvenance"
+        },
+        "transformation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Transformation"
+            },
+            {
+              "const": "unavailable",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transformation"
+        },
+        "stored": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StoredPoint"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "ambiguous": {
+          "default": false,
+          "title": "Ambiguous",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "schema",
+        "x",
+        "y",
+        "crs",
+        "elevation_reference",
+        "source",
+        "provenance"
+      ],
+      "title": "WellLocation",
+      "type": "object"
     }
   },
   "additionalProperties": false,
@@ -183,6 +428,17 @@
       "maxItems": 64,
       "title": "History",
       "type": "array"
+    },
+    "location": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/WellLocation"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
     }
   },
   "required": [

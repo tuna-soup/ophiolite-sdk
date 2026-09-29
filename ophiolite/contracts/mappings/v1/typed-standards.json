@@ -89,6 +89,16 @@
         "Every header interpretation is recorded as a decision in the fidelity report; nothing else from the textual header is interpreted.",
         "Slices are the published representation of samples; the full volume is available only as the exact original."
       ]
+    },
+    {
+      "profile": "ophiolite.well-location-upload/1",
+      "osdu": "master-data--Well (SpatialLocation.Wgs84Coordinates / AsIngestedCoordinates with its CRS)",
+      "energistics": "WITSML 2.1 Well / WellLocation (Easting, Northing or Latitude, Longitude with a CRS)",
+      "differences": [
+        "One surface point per file; no location history, survey or wellbore path.",
+        "The CRS is the one the file states; nothing is transformed at upload.",
+        "Which well it locates is an explicit of-entity association, never inferred from the file."
+      ]
     }
   ],
   "licences": "The standards are referenced by name only; no schema text is copied."

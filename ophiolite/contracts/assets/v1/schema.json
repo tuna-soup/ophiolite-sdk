@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/schema.json",
   "x-ophiolite": {
     "id": "ophiolite.scientific-asset/1",
-    "version": "1.12.0",
+    "version": "1.13.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -2764,7 +2764,8 @@
             "triangulated-surface/1",
             "point-set/1",
             "polyline-set/1",
-            "seismic-volume/1"
+            "seismic-volume/1",
+            "well-location/1"
           ],
           "title": "Mapping",
           "type": "string"
@@ -2861,6 +2862,43 @@
         }
       },
       "title": "Version",
+      "type": "object"
+    },
+    "WellLocationContext": {
+      "additionalProperties": false,
+      "description": "E29: one well's surface point as its file states it (typed-context 1.3.0).",
+      "properties": {
+        "type": {
+          "const": "well-location",
+          "title": "Type",
+          "type": "string"
+        },
+        "crs": {
+          "pattern": "^(EPSG:[0-9]{4,6}|OGC:CRS84|unknown)$",
+          "title": "Crs",
+          "type": "string"
+        },
+        "elevation_reference": {
+          "enum": [
+            "unknown",
+            "GL",
+            "KB",
+            "MSL"
+          ],
+          "title": "Elevation Reference",
+          "type": "string"
+        },
+        "fidelity": {
+          "$ref": "#/$defs/Fidelity"
+        }
+      },
+      "required": [
+        "type",
+        "crs",
+        "elevation_reference",
+        "fidelity"
+      ],
+      "title": "WellLocationContext",
       "type": "object"
     },
     "WellLogLink": {
@@ -3095,6 +3133,9 @@
         },
         {
           "$ref": "#/$defs/RecipePointContext"
+        },
+        {
+          "$ref": "#/$defs/WellLocationContext"
         }
       ],
       "title": "Scientific"

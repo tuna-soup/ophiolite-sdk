@@ -17,7 +17,8 @@
         "petrel-points-attributes/1",
         "opendtect-horizon-ascii/1",
         "opendtect-faultsticks/1",
-        "segy/1"
+        "segy/1",
+        "well-location/1"
       ]
     },
     "x-ophiolite-capabilities": {
@@ -34,6 +35,7 @@
         "collections",
         "context",
         "entities",
+        "features",
         "las-uploads",
         "projects",
         "publications",
@@ -9070,6 +9072,172 @@
         }
       }
     },
+    "/api/v1/projects/{project}/entities/extent": {
+      "post": {
+        "summary": "The extent of the wells you may see located, in one CRS (default OGC:CRS84)",
+        "description": "Scope read; accepted principals: session, delegate, grant, agent; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "grant",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "The extent of the wells a caller may see located, in one CRS; none located: bbox null and count 0.",
+                  "properties": {
+                    "crs": {
+                      "maxLength": 512,
+                      "minLength": 1,
+                      "title": "Crs",
+                      "type": "string"
+                    },
+                    "bbox": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 4,
+                          "minItems": 4,
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Bbox"
+                    },
+                    "count": {
+                      "minimum": 0,
+                      "title": "Count",
+                      "type": "integer"
+                    },
+                    "untransformed": {
+                      "minimum": 0,
+                      "title": "Untransformed",
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "crs",
+                    "bbox",
+                    "count",
+                    "untransformed"
+                  ],
+                  "title": "EntityExtent",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 512,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "well",
+                          "wellbore"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Kind"
+                  },
+                  "crs": {
+                    "anyOf": [
+                      {
+                        "maxLength": 32,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "The extent's CRS; default OGC:CRS84",
+                    "title": "Crs"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "EntityExtentRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/entities/get": {
       "post": {
         "summary": "One well or wellbore with its identity, parts and identity history",
@@ -9286,7 +9454,7 @@
     },
     "/api/v1/projects/{project}/entities/list": {
       "post": {
-        "summary": "Wells and wellbores you may read",
+        "summary": "Wells and wellbores you may read; with bbox (and bbox_crs) only those located inside it, with crs their locations in that CRS",
         "description": "Scope read; accepted principals: session, delegate, grant, agent; project extractor top.",
         "security": [
           {
@@ -9311,7 +9479,57 @@
         ],
         "responses": {
           "200": {
-            "description": "Operation result"
+            "description": "Operation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "entities": {
+                      "items": {
+                        "$ref": "#/components/schemas/Entity"
+                      },
+                      "maxItems": 100,
+                      "title": "Entities",
+                      "type": "array"
+                    },
+                    "next_cursor": {
+                      "anyOf": [
+                        {
+                          "maxLength": 512,
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Next Cursor"
+                    },
+                    "untransformed": {
+                      "anyOf": [
+                        {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "With crs or bbox: wells whose stored CRS could not be converted (listed without coordinates, or left out of a bbox)",
+                      "title": "Untransformed"
+                    }
+                  },
+                  "required": [
+                    "entities"
+                  ],
+                  "title": "EntityPage",
+                  "type": "object"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid request"
@@ -9350,8 +9568,110 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "description": "Operation-specific JSON object; project_id must match the path where the row names a project."
+                "additionalProperties": false,
+                "description": "entities/list (E29: bbox, bbox_crs and crs).",
+                "properties": {
+                  "project_id": {
+                    "maxLength": 512,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "well",
+                          "wellbore"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Kind"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 160,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
+                  "limit": {
+                    "anyOf": [
+                      {
+                        "maximum": 100,
+                        "minimum": 1,
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Limit"
+                  },
+                  "bbox": {
+                    "anyOf": [
+                      {
+                        "items": {
+                          "type": "number"
+                        },
+                        "maxItems": 4,
+                        "minItems": 4,
+                        "type": "array"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "[minx, miny, maxx, maxy] in bbox_crs; in OGC:CRS84 or EPSG:4326 minx > maxx crosses the antimeridian",
+                    "title": "Bbox"
+                  },
+                  "bbox_crs": {
+                    "anyOf": [
+                      {
+                        "maxLength": 32,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Required with bbox: OGC:CRS84, EPSG:4326, EPSG:3857, EPSG:28992 or EPSG:32631",
+                    "title": "Bbox Crs"
+                  },
+                  "crs": {
+                    "anyOf": [
+                      {
+                        "maxLength": 32,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "The CRS of each location; omitted: as stored, unconverted",
+                    "title": "Crs"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "EntityListRequest",
+                "type": "object"
               }
             }
           }
@@ -9953,7 +10273,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "base64 of a UTF-8 JSON object with this shape: {\"additionalProperties\": false, \"properties\": {\"declared\": {\"additionalProperties\": {\"type\": \"string\"}, \"maxProperties\": 12, \"title\": \"Declared\", \"type\": \"object\"}, \"package\": {\"anyOf\": [{\"items\": {\"$ref\": \"#/components/schemas/PackageMember\"}, \"maxItems\": 8, \"minItems\": 1, \"type\": \"array\"}, {\"type\": \"null\"}], \"default\": null, \"title\": \"Package\"}, \"profile\": {\"default\": \"las2/1\", \"enum\": [\"las2/1\", \"well-tops-csv/1\", \"deviation-csv/1\", \"esri-ascii-grid/1\", \"mesh-text/1\", \"points-csv/1\", \"opendtect-faultsticks/1\", \"segy/1\", \"petrel-points-attributes/1\", \"opendtect-horizon-ascii/1\"], \"title\": \"Profile\", \"type\": \"string\"}, \"project_id\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Project Id\", \"type\": \"string\"}, \"recipe\": {\"anyOf\": [{\"$ref\": \"#/components/schemas/RecipeReference\"}, {\"type\": \"null\"}], \"default\": null}}, \"required\": [\"project_id\"], \"title\": \"Inspection\", \"type\": \"object\"}"
+            "description": "base64 of a UTF-8 JSON object with this shape: {\"additionalProperties\": false, \"properties\": {\"declared\": {\"additionalProperties\": {\"type\": \"string\"}, \"maxProperties\": 12, \"title\": \"Declared\", \"type\": \"object\"}, \"package\": {\"anyOf\": [{\"items\": {\"$ref\": \"#/components/schemas/PackageMember\"}, \"maxItems\": 8, \"minItems\": 1, \"type\": \"array\"}, {\"type\": \"null\"}], \"default\": null, \"title\": \"Package\"}, \"profile\": {\"default\": \"las2/1\", \"enum\": [\"las2/1\", \"well-tops-csv/1\", \"deviation-csv/1\", \"esri-ascii-grid/1\", \"mesh-text/1\", \"points-csv/1\", \"opendtect-faultsticks/1\", \"segy/1\", \"petrel-points-attributes/1\", \"opendtect-horizon-ascii/1\", \"well-location/1\"], \"title\": \"Profile\", \"type\": \"string\"}, \"project_id\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Project Id\", \"type\": \"string\"}, \"recipe\": {\"anyOf\": [{\"$ref\": \"#/components/schemas/RecipeReference\"}, {\"type\": \"null\"}], \"default\": null}}, \"required\": [\"project_id\"], \"title\": \"Inspection\", \"type\": \"object\"}"
           }
         ],
         "requestBody": {
@@ -10495,7 +10815,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "base64 of a UTF-8 JSON object with this shape: {\"additionalProperties\": false, \"properties\": {\"attribution\": {\"maxLength\": 500, \"minLength\": 1, \"title\": \"Attribution\", \"type\": \"string\"}, \"audience\": {\"items\": {\"type\": \"string\"}, \"maxItems\": 100, \"title\": \"Audience\", \"type\": \"array\"}, \"command_id\": {\"maxLength\": 64, \"minLength\": 1, \"title\": \"Command Id\", \"type\": \"string\"}, \"declared\": {\"additionalProperties\": {\"type\": \"string\"}, \"maxProperties\": 12, \"title\": \"Declared\", \"type\": \"object\"}, \"filename\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Filename\", \"type\": \"string\"}, \"name\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Name\", \"type\": \"string\"}, \"origin\": {\"anyOf\": [{\"$ref\": \"#/components/schemas/BundleOrigin\"}, {\"type\": \"null\"}], \"default\": null}, \"package\": {\"anyOf\": [{\"items\": {\"$ref\": \"#/components/schemas/PackageMember\"}, \"maxItems\": 8, \"minItems\": 1, \"type\": \"array\"}, {\"type\": \"null\"}], \"default\": null, \"title\": \"Package\"}, \"profile\": {\"default\": \"las2/1\", \"enum\": [\"las2/1\", \"well-tops-csv/1\", \"deviation-csv/1\", \"esri-ascii-grid/1\", \"mesh-text/1\", \"points-csv/1\", \"opendtect-faultsticks/1\", \"segy/1\", \"petrel-points-attributes/1\", \"opendtect-horizon-ascii/1\"], \"title\": \"Profile\", \"type\": \"string\"}, \"project_id\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Project Id\", \"type\": \"string\"}, \"recipe\": {\"anyOf\": [{\"$ref\": \"#/components/schemas/RecipeReference\"}, {\"type\": \"null\"}], \"default\": null}, \"rights_confirmed\": {\"const\": true, \"title\": \"Rights Confirmed\", \"type\": \"boolean\"}, \"well_log\": {\"anyOf\": [{\"$ref\": \"#/components/schemas/WellLog\"}, {\"type\": \"null\"}], \"default\": null}, \"well_notes\": {\"default\": \"\", \"maxLength\": 1000, \"title\": \"Well Notes\", \"type\": \"string\"}}, \"required\": [\"project_id\", \"command_id\", \"filename\", \"name\", \"attribution\", \"audience\", \"rights_confirmed\"], \"title\": \"Upload\", \"type\": \"object\"}"
+            "description": "base64 of a UTF-8 JSON object with this shape: {\"additionalProperties\": false, \"properties\": {\"attribution\": {\"maxLength\": 500, \"minLength\": 1, \"title\": \"Attribution\", \"type\": \"string\"}, \"audience\": {\"items\": {\"type\": \"string\"}, \"maxItems\": 100, \"title\": \"Audience\", \"type\": \"array\"}, \"command_id\": {\"maxLength\": 64, \"minLength\": 1, \"title\": \"Command Id\", \"type\": \"string\"}, \"declared\": {\"additionalProperties\": {\"type\": \"string\"}, \"maxProperties\": 12, \"title\": \"Declared\", \"type\": \"object\"}, \"filename\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Filename\", \"type\": \"string\"}, \"name\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Name\", \"type\": \"string\"}, \"origin\": {\"anyOf\": [{\"$ref\": \"#/components/schemas/BundleOrigin\"}, {\"type\": \"null\"}], \"default\": null}, \"package\": {\"anyOf\": [{\"items\": {\"$ref\": \"#/components/schemas/PackageMember\"}, \"maxItems\": 8, \"minItems\": 1, \"type\": \"array\"}, {\"type\": \"null\"}], \"default\": null, \"title\": \"Package\"}, \"profile\": {\"default\": \"las2/1\", \"enum\": [\"las2/1\", \"well-tops-csv/1\", \"deviation-csv/1\", \"esri-ascii-grid/1\", \"mesh-text/1\", \"points-csv/1\", \"opendtect-faultsticks/1\", \"segy/1\", \"petrel-points-attributes/1\", \"opendtect-horizon-ascii/1\", \"well-location/1\"], \"title\": \"Profile\", \"type\": \"string\"}, \"project_id\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Project Id\", \"type\": \"string\"}, \"recipe\": {\"anyOf\": [{\"$ref\": \"#/components/schemas/RecipeReference\"}, {\"type\": \"null\"}], \"default\": null}, \"rights_confirmed\": {\"const\": true, \"title\": \"Rights Confirmed\", \"type\": \"boolean\"}, \"well_log\": {\"anyOf\": [{\"$ref\": \"#/components/schemas/WellLog\"}, {\"type\": \"null\"}], \"default\": null}, \"well_notes\": {\"default\": \"\", \"maxLength\": 1000, \"title\": \"Well Notes\", \"type\": \"string\"}}, \"required\": [\"project_id\", \"command_id\", \"filename\", \"name\", \"attribution\", \"audience\", \"rights_confirmed\"], \"title\": \"Upload\", \"type\": \"object\"}"
           }
         ],
         "requestBody": {
@@ -12991,7 +13311,8 @@
                         "well-tops-csv/1",
                         "deviation-csv/1",
                         "opendtect-faultsticks/1",
-                        "las2/1"
+                        "las2/1",
+                        "well-location/1"
                       ],
                       "title": "Profile",
                       "type": "string"
@@ -13066,7 +13387,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "base64 of a UTF-8 JSON object with this shape: {\"additionalProperties\": false, \"description\": \"The X-Ophiolite-Upload header of publications/derive. command_id is required: the server never makes one up.\", \"properties\": {\"command_id\": {\"maxLength\": 64, \"minLength\": 1, \"title\": \"Command Id\", \"type\": \"string\"}, \"declared\": {\"additionalProperties\": {\"type\": \"string\"}, \"maxProperties\": 12, \"title\": \"Declared\", \"type\": \"object\"}, \"derived_from\": {\"items\": {\"$ref\": \"#/components/schemas/Parent\"}, \"maxItems\": 32, \"minItems\": 1, \"title\": \"Derived From\", \"type\": \"array\"}, \"expected_parent\": {\"anyOf\": [{\"pattern\": \"^[0-9a-f]{64}$\", \"type\": \"string\"}, {\"type\": \"null\"}], \"default\": null, \"title\": \"Expected Parent\"}, \"method\": {\"$ref\": \"#/components/schemas/MethodRecord\"}, \"name\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Name\", \"type\": \"string\"}, \"new_version_of\": {\"anyOf\": [{\"maxLength\": 160, \"minLength\": 1, \"type\": \"string\"}, {\"type\": \"null\"}], \"default\": null, \"title\": \"New Version Of\"}, \"of_entity\": {\"anyOf\": [{\"$ref\": \"#/components/schemas/OfEntity\"}, {\"type\": \"null\"}], \"default\": null}, \"output_bytes\": {\"maximum\": 33554432, \"minimum\": 1, \"title\": \"Output Bytes\", \"type\": \"integer\"}, \"output_sha256\": {\"pattern\": \"^[0-9a-f]{64}$\", \"title\": \"Output Sha256\", \"type\": \"string\"}, \"profile\": {\"enum\": [\"points-csv/1\", \"mesh-text/1\", \"esri-ascii-grid/1\", \"well-tops-csv/1\", \"deviation-csv/1\", \"opendtect-faultsticks/1\", \"las2/1\"], \"title\": \"Profile\", \"type\": \"string\"}, \"project_id\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Project Id\", \"type\": \"string\"}}, \"required\": [\"project_id\", \"command_id\", \"profile\", \"name\", \"derived_from\", \"method\", \"output_sha256\", \"output_bytes\"], \"title\": \"Derive\", \"type\": \"object\"}"
+            "description": "base64 of a UTF-8 JSON object with this shape: {\"additionalProperties\": false, \"description\": \"The X-Ophiolite-Upload header of publications/derive. command_id is required: the server never makes one up.\", \"properties\": {\"command_id\": {\"maxLength\": 64, \"minLength\": 1, \"title\": \"Command Id\", \"type\": \"string\"}, \"declared\": {\"additionalProperties\": {\"type\": \"string\"}, \"maxProperties\": 12, \"title\": \"Declared\", \"type\": \"object\"}, \"derived_from\": {\"items\": {\"$ref\": \"#/components/schemas/Parent\"}, \"maxItems\": 32, \"minItems\": 1, \"title\": \"Derived From\", \"type\": \"array\"}, \"expected_parent\": {\"anyOf\": [{\"pattern\": \"^[0-9a-f]{64}$\", \"type\": \"string\"}, {\"type\": \"null\"}], \"default\": null, \"title\": \"Expected Parent\"}, \"method\": {\"$ref\": \"#/components/schemas/MethodRecord\"}, \"name\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Name\", \"type\": \"string\"}, \"new_version_of\": {\"anyOf\": [{\"maxLength\": 160, \"minLength\": 1, \"type\": \"string\"}, {\"type\": \"null\"}], \"default\": null, \"title\": \"New Version Of\"}, \"of_entity\": {\"anyOf\": [{\"$ref\": \"#/components/schemas/OfEntity\"}, {\"type\": \"null\"}], \"default\": null}, \"output_bytes\": {\"maximum\": 33554432, \"minimum\": 1, \"title\": \"Output Bytes\", \"type\": \"integer\"}, \"output_sha256\": {\"pattern\": \"^[0-9a-f]{64}$\", \"title\": \"Output Sha256\", \"type\": \"string\"}, \"profile\": {\"enum\": [\"points-csv/1\", \"mesh-text/1\", \"esri-ascii-grid/1\", \"well-tops-csv/1\", \"deviation-csv/1\", \"opendtect-faultsticks/1\", \"las2/1\", \"well-location/1\"], \"title\": \"Profile\", \"type\": \"string\"}, \"project_id\": {\"maxLength\": 160, \"minLength\": 1, \"title\": \"Project Id\", \"type\": \"string\"}}, \"required\": [\"project_id\", \"command_id\", \"profile\", \"name\", \"derived_from\", \"method\", \"output_sha256\", \"output_bytes\"], \"title\": \"Derive\", \"type\": \"object\"}"
           }
         ],
         "requestBody": {
@@ -29171,7 +29492,7 @@
                 "schema": {
                   "x-ophiolite": {
                     "id": "ophiolite.scientific-asset/1",
-                    "version": "1.12.0",
+                    "version": "1.13.0",
                     "lifecycle": "preview"
                   },
                   "additionalProperties": false,
@@ -32326,6 +32647,106 @@
                           ],
                           "title": "RecipePointContext",
                           "type": "object"
+                        },
+                        {
+                          "additionalProperties": false,
+                          "description": "E29: one well's surface point as its file states it (typed-context 1.3.0).",
+                          "properties": {
+                            "type": {
+                              "const": "well-location",
+                              "title": "Type",
+                              "type": "string"
+                            },
+                            "crs": {
+                              "pattern": "^(EPSG:[0-9]{4,6}|OGC:CRS84|unknown)$",
+                              "title": "Crs",
+                              "type": "string"
+                            },
+                            "elevation_reference": {
+                              "enum": [
+                                "unknown",
+                                "GL",
+                                "KB",
+                                "MSL"
+                              ],
+                              "title": "Elevation Reference",
+                              "type": "string"
+                            },
+                            "fidelity": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "status": {
+                                  "const": "assessed",
+                                  "title": "Status",
+                                  "type": "string"
+                                },
+                                "preserved": {
+                                  "items": {
+                                    "maxLength": 512,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Preserved",
+                                  "type": "array"
+                                },
+                                "losses": {
+                                  "items": {
+                                    "maxLength": 512,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Losses",
+                                  "type": "array"
+                                },
+                                "unknown_context": {
+                                  "items": {
+                                    "maxLength": 128,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Unknown Context",
+                                  "type": "array"
+                                },
+                                "decisions": {
+                                  "anyOf": [
+                                    {
+                                      "items": {
+                                        "maxLength": 512,
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      "maxItems": 64,
+                                      "type": "array"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "default": null,
+                                  "title": "Decisions"
+                                }
+                              },
+                              "required": [
+                                "status",
+                                "preserved",
+                                "losses",
+                                "unknown_context"
+                              ],
+                              "title": "Fidelity",
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "crs",
+                            "elevation_reference",
+                            "fidelity"
+                          ],
+                          "title": "WellLocationContext",
+                          "type": "object"
                         }
                       ],
                       "title": "Scientific"
@@ -32391,7 +32812,8 @@
                                 "triangulated-surface/1",
                                 "point-set/1",
                                 "polyline-set/1",
-                                "seismic-volume/1"
+                                "seismic-volume/1",
+                                "well-location/1"
                               ],
                               "title": "Mapping",
                               "type": "string"
@@ -33140,6 +33562,1001 @@
         ]
       }
     },
+    "/api/v1/projects/{project}/features": {
+      "get": {
+        "summary": "Landing page of the wells as OGC API - Features",
+        "description": "OGC API - Features (E29); scope read; accepted principals: session, delegate, agent, grant (capability 3).",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "grant",
+          "session"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Landing page of the wells as OGC API - Features",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "links"
+                  ],
+                  "properties": {
+                    "title": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "links": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "href",
+                          "rel"
+                        ],
+                        "properties": {
+                          "href": {
+                            "type": "string"
+                          },
+                          "rel": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unsupported crs or bbox-crs, or a malformed bbox"
+          },
+          "403": {
+            "description": "Not a member, or the credential does not reach this area"
+          },
+          "404": {
+            "description": "No such collection or feature"
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/features/conformance": {
+      "get": {
+        "summary": "Conformance classes (Part 1 core and GeoJSON, Part 2 CRS)",
+        "description": "OGC API - Features (E29); scope read; accepted principals: session, delegate, agent, grant (capability 3).",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "grant",
+          "session"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Conformance classes (Part 1 core and GeoJSON, Part 2 CRS)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "conformsTo"
+                  ],
+                  "properties": {
+                    "conformsTo": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unsupported crs or bbox-crs, or a malformed bbox"
+          },
+          "403": {
+            "description": "Not a member, or the credential does not reach this area"
+          },
+          "404": {
+            "description": "No such collection or feature"
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/features/collections": {
+      "get": {
+        "summary": "The one collection: wells",
+        "description": "OGC API - Features (E29); scope read; accepted principals: session, delegate, agent, grant (capability 3).",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "grant",
+          "session"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The one collection: wells",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "collections",
+                    "links"
+                  ],
+                  "properties": {
+                    "collections": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "links"
+                        ],
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "const": "wells"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "itemType": {
+                            "type": "string",
+                            "const": "feature"
+                          },
+                          "crs": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "enum": [
+                                "http://www.opengis.net/def/crs/OGC/1.3/CRS84",
+                                "http://www.opengis.net/def/crs/EPSG/0/4326",
+                                "http://www.opengis.net/def/crs/EPSG/0/3857",
+                                "http://www.opengis.net/def/crs/EPSG/0/28992",
+                                "http://www.opengis.net/def/crs/EPSG/0/32631"
+                              ]
+                            }
+                          },
+                          "storageCrs": {
+                            "type": "string",
+                            "enum": [
+                              "http://www.opengis.net/def/crs/OGC/1.3/CRS84",
+                              "http://www.opengis.net/def/crs/EPSG/0/4326",
+                              "http://www.opengis.net/def/crs/EPSG/0/3857",
+                              "http://www.opengis.net/def/crs/EPSG/0/28992",
+                              "http://www.opengis.net/def/crs/EPSG/0/32631"
+                            ]
+                          },
+                          "links": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "required": [
+                                "href",
+                                "rel"
+                              ],
+                              "properties": {
+                                "href": {
+                                  "type": "string"
+                                },
+                                "rel": {
+                                  "type": "string"
+                                },
+                                "type": {
+                                  "type": "string"
+                                },
+                                "title": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          },
+                          "extent": {
+                            "type": "object",
+                            "properties": {
+                              "spatial": {
+                                "type": "object",
+                                "properties": {
+                                  "bbox": {
+                                    "type": "array",
+                                    "maxItems": 1,
+                                    "items": {
+                                      "type": "array",
+                                      "minItems": 4,
+                                      "maxItems": 4,
+                                      "items": {
+                                        "type": "number"
+                                      }
+                                    }
+                                  },
+                                  "crs": {
+                                    "type": "string",
+                                    "enum": [
+                                      "http://www.opengis.net/def/crs/OGC/1.3/CRS84",
+                                      "http://www.opengis.net/def/crs/EPSG/0/4326",
+                                      "http://www.opengis.net/def/crs/EPSG/0/3857",
+                                      "http://www.opengis.net/def/crs/EPSG/0/28992",
+                                      "http://www.opengis.net/def/crs/EPSG/0/32631"
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "links": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "href",
+                          "rel"
+                        ],
+                        "properties": {
+                          "href": {
+                            "type": "string"
+                          },
+                          "rel": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unsupported crs or bbox-crs, or a malformed bbox"
+          },
+          "403": {
+            "description": "Not a member, or the credential does not reach this area"
+          },
+          "404": {
+            "description": "No such collection or feature"
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/features/collections/{collection}": {
+      "get": {
+        "summary": "The wells collection: extent (CRS84), CRSs offered and storage CRS when single",
+        "description": "OGC API - Features (E29); scope read; accepted principals: session, delegate, agent, grant (capability 3).",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "grant",
+          "session"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "collection",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "const": "wells"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The wells collection: extent (CRS84), CRSs offered and storage CRS when single",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "links"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "const": "wells"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "itemType": {
+                      "type": "string",
+                      "const": "feature"
+                    },
+                    "crs": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "http://www.opengis.net/def/crs/OGC/1.3/CRS84",
+                          "http://www.opengis.net/def/crs/EPSG/0/4326",
+                          "http://www.opengis.net/def/crs/EPSG/0/3857",
+                          "http://www.opengis.net/def/crs/EPSG/0/28992",
+                          "http://www.opengis.net/def/crs/EPSG/0/32631"
+                        ]
+                      }
+                    },
+                    "storageCrs": {
+                      "type": "string",
+                      "enum": [
+                        "http://www.opengis.net/def/crs/OGC/1.3/CRS84",
+                        "http://www.opengis.net/def/crs/EPSG/0/4326",
+                        "http://www.opengis.net/def/crs/EPSG/0/3857",
+                        "http://www.opengis.net/def/crs/EPSG/0/28992",
+                        "http://www.opengis.net/def/crs/EPSG/0/32631"
+                      ]
+                    },
+                    "links": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "href",
+                          "rel"
+                        ],
+                        "properties": {
+                          "href": {
+                            "type": "string"
+                          },
+                          "rel": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "extent": {
+                      "type": "object",
+                      "properties": {
+                        "spatial": {
+                          "type": "object",
+                          "properties": {
+                            "bbox": {
+                              "type": "array",
+                              "maxItems": 1,
+                              "items": {
+                                "type": "array",
+                                "minItems": 4,
+                                "maxItems": 4,
+                                "items": {
+                                  "type": "number"
+                                }
+                              }
+                            },
+                            "crs": {
+                              "type": "string",
+                              "enum": [
+                                "http://www.opengis.net/def/crs/OGC/1.3/CRS84",
+                                "http://www.opengis.net/def/crs/EPSG/0/4326",
+                                "http://www.opengis.net/def/crs/EPSG/0/3857",
+                                "http://www.opengis.net/def/crs/EPSG/0/28992",
+                                "http://www.opengis.net/def/crs/EPSG/0/32631"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unsupported crs or bbox-crs, or a malformed bbox"
+          },
+          "403": {
+            "description": "Not a member, or the credential does not reach this area"
+          },
+          "404": {
+            "description": "No such collection or feature"
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/features/collections/{collection}/items": {
+      "get": {
+        "summary": "Wells you may see located, as GeoJSON features",
+        "description": "OGC API - Features (E29); scope read; accepted principals: session, delegate, agent, grant (capability 3).",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "grant",
+          "session"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "collection",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "const": "wells"
+            }
+          },
+          {
+            "in": "query",
+            "name": "crs",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "http://www.opengis.net/def/crs/OGC/1.3/CRS84",
+                "http://www.opengis.net/def/crs/EPSG/0/4326",
+                "http://www.opengis.net/def/crs/EPSG/0/3857",
+                "http://www.opengis.net/def/crs/EPSG/0/28992",
+                "http://www.opengis.net/def/crs/EPSG/0/32631"
+              ]
+            },
+            "description": "The coordinates' CRS (default CRS84), in that CRS's axis order"
+          },
+          {
+            "in": "query",
+            "name": "bbox",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "minx,miny,maxx,maxy in bbox-crs axis order (CRS84: a box whose minx exceeds maxx crosses the antimeridian)"
+          },
+          {
+            "in": "query",
+            "name": "bbox-crs",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "http://www.opengis.net/def/crs/OGC/1.3/CRS84",
+                "http://www.opengis.net/def/crs/EPSG/0/4326",
+                "http://www.opengis.net/def/crs/EPSG/0/3857",
+                "http://www.opengis.net/def/crs/EPSG/0/28992",
+                "http://www.opengis.net/def/crs/EPSG/0/32631"
+              ]
+            },
+            "description": "default CRS84"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "From the next link"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Wells you may see located, as GeoJSON features",
+            "content": {
+              "application/geo+json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "type",
+                    "features",
+                    "links"
+                  ],
+                  "properties": {
+                    "type": {
+                      "const": "FeatureCollection"
+                    },
+                    "features": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "type",
+                          "id",
+                          "geometry",
+                          "properties"
+                        ],
+                        "properties": {
+                          "type": {
+                            "const": "Feature"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "geometry": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "required": [
+                                  "type",
+                                  "coordinates"
+                                ],
+                                "properties": {
+                                  "type": {
+                                    "const": "Point"
+                                  },
+                                  "coordinates": {
+                                    "type": "array",
+                                    "minItems": 2,
+                                    "maxItems": 2,
+                                    "items": {
+                                      "type": "number"
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "links": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "required": [
+                                "href",
+                                "rel"
+                              ],
+                              "properties": {
+                                "href": {
+                                  "type": "string"
+                                },
+                                "rel": {
+                                  "type": "string"
+                                },
+                                "type": {
+                                  "type": "string"
+                                },
+                                "title": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          },
+                          "properties": {
+                            "type": "object",
+                            "required": [
+                              "name",
+                              "kind",
+                              "entity_id"
+                            ],
+                            "description": "The well name first; source revision and row, elevation reference, ambiguity and the transformation performed; for a well whose stored CRS cannot be converted, stored_x, stored_y, stored_crs and transformation \"unavailable\" with a null geometry.",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "kind": {
+                                "const": "well"
+                              },
+                              "entity_id": {
+                                "type": "string"
+                              },
+                              "source_asset_id": {
+                                "type": "string"
+                              },
+                              "source_revision": {
+                                "type": "string"
+                              },
+                              "source_profile": {
+                                "type": "string"
+                              },
+                              "source_row": {
+                                "type": "string"
+                              },
+                              "elevation_reference": {
+                                "type": "string"
+                              },
+                              "ambiguous": {
+                                "type": "boolean"
+                              },
+                              "stored_x": {
+                                "type": "number"
+                              },
+                              "stored_y": {
+                                "type": "number"
+                              },
+                              "stored_crs": {
+                                "type": "string"
+                              },
+                              "transformation": {}
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "numberReturned": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "links": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "href",
+                          "rel"
+                        ],
+                        "properties": {
+                          "href": {
+                            "type": "string"
+                          },
+                          "rel": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "untransformed": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Wells whose stored CRS could not be converted (null geometry, or left out of the bbox)"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Content-Crs": {
+                "description": "The coordinates' CRS URI in angle brackets",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unsupported crs or bbox-crs, or a malformed bbox"
+          },
+          "403": {
+            "description": "Not a member, or the credential does not reach this area"
+          },
+          "404": {
+            "description": "No such collection or feature"
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/features/collections/{collection}/items/{feature}": {
+      "get": {
+        "summary": "One well as a GeoJSON feature",
+        "description": "OGC API - Features (E29); scope read; accepted principals: session, delegate, agent, grant (capability 3).",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "grant",
+          "session"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "collection",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "const": "wells"
+            }
+          },
+          {
+            "in": "path",
+            "name": "feature",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "crs",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "http://www.opengis.net/def/crs/OGC/1.3/CRS84",
+                "http://www.opengis.net/def/crs/EPSG/0/4326",
+                "http://www.opengis.net/def/crs/EPSG/0/3857",
+                "http://www.opengis.net/def/crs/EPSG/0/28992",
+                "http://www.opengis.net/def/crs/EPSG/0/32631"
+              ]
+            },
+            "description": "The coordinates' CRS (default CRS84), in that CRS's axis order"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One well as a GeoJSON feature",
+            "content": {
+              "application/geo+json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "type",
+                    "id",
+                    "geometry",
+                    "properties"
+                  ],
+                  "properties": {
+                    "type": {
+                      "const": "Feature"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "geometry": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "type",
+                            "coordinates"
+                          ],
+                          "properties": {
+                            "type": {
+                              "const": "Point"
+                            },
+                            "coordinates": {
+                              "type": "array",
+                              "minItems": 2,
+                              "maxItems": 2,
+                              "items": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "links": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "href",
+                          "rel"
+                        ],
+                        "properties": {
+                          "href": {
+                            "type": "string"
+                          },
+                          "rel": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "properties": {
+                      "type": "object",
+                      "required": [
+                        "name",
+                        "kind",
+                        "entity_id"
+                      ],
+                      "description": "The well name first; source revision and row, elevation reference, ambiguity and the transformation performed; for a well whose stored CRS cannot be converted, stored_x, stored_y, stored_crs and transformation \"unavailable\" with a null geometry.",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "kind": {
+                          "const": "well"
+                        },
+                        "entity_id": {
+                          "type": "string"
+                        },
+                        "source_asset_id": {
+                          "type": "string"
+                        },
+                        "source_revision": {
+                          "type": "string"
+                        },
+                        "source_profile": {
+                          "type": "string"
+                        },
+                        "source_row": {
+                          "type": "string"
+                        },
+                        "elevation_reference": {
+                          "type": "string"
+                        },
+                        "ambiguous": {
+                          "type": "boolean"
+                        },
+                        "stored_x": {
+                          "type": "number"
+                        },
+                        "stored_y": {
+                          "type": "number"
+                        },
+                        "stored_crs": {
+                          "type": "string"
+                        },
+                        "transformation": {}
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Content-Crs": {
+                "description": "The coordinates' CRS URI in angle brackets",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unsupported crs or bbox-crs, or a malformed bbox"
+          },
+          "403": {
+            "description": "Not a member, or the credential does not reach this area"
+          },
+          "404": {
+            "description": "No such collection or feature"
+          }
+        }
+      }
+    },
     "/api/v1/contracts": {
       "get": {
         "summary": "Contracts registry index",
@@ -33614,6 +35031,136 @@
         "title": "DraftRef",
         "type": "object"
       },
+      "Entity": {
+        "additionalProperties": false,
+        "properties": {
+          "schema": {
+            "const": "ophiolite.entity/1",
+            "title": "Schema",
+            "type": "string"
+          },
+          "entity_id": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$",
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "project_id": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Project Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "well",
+              "wellbore"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "identity": {
+            "$ref": "#/components/schemas/Identity"
+          },
+          "part_of": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EntityRef"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "parts": {
+            "items": {
+              "$ref": "#/components/schemas/EntityRef"
+            },
+            "maxItems": 500,
+            "title": "Parts",
+            "type": "array"
+          },
+          "owner": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Owner",
+            "type": "string"
+          },
+          "generation": {
+            "minimum": 1,
+            "title": "Generation",
+            "type": "integer"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/IdentityChange"
+            },
+            "maxItems": 64,
+            "title": "History",
+            "type": "array"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WellLocation"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "schema",
+          "entity_id",
+          "project_id",
+          "kind",
+          "name",
+          "identity",
+          "owner",
+          "generation"
+        ],
+        "title": "Entity",
+        "type": "object"
+      },
+      "EntityRef": {
+        "additionalProperties": false,
+        "properties": {
+          "entity_id": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$",
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "well",
+              "wellbore"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "entity_id",
+          "kind",
+          "name"
+        ],
+        "title": "EntityRef",
+        "type": "object"
+      },
       "Error": {
         "type": "object",
         "required": [
@@ -33628,6 +35175,78 @@
             "type": "string"
           }
         }
+      },
+      "Identity": {
+        "additionalProperties": false,
+        "description": "External (authority, key) declared by a person, or provisional (both null).",
+        "properties": {
+          "authority": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Authority"
+          },
+          "key": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Key"
+          },
+          "provisional": {
+            "title": "Provisional",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "provisional"
+        ],
+        "title": "Identity",
+        "type": "object"
+      },
+      "IdentityChange": {
+        "additionalProperties": false,
+        "properties": {
+          "actor": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Actor",
+            "type": "string"
+          },
+          "at": {
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+            "title": "At",
+            "type": "string"
+          },
+          "before": {
+            "$ref": "#/components/schemas/Identity"
+          },
+          "after": {
+            "$ref": "#/components/schemas/Identity"
+          }
+        },
+        "required": [
+          "actor",
+          "at",
+          "before",
+          "after"
+        ],
+        "title": "IdentityChange",
+        "type": "object"
       },
       "InventoryItem": {
         "description": "E28: one logical asset at its current head; `authority` says where it lives (managed, native, retained).",
@@ -33687,6 +35306,87 @@
           "can_reuse"
         ],
         "title": "InventoryItem",
+        "type": "object"
+      },
+      "LocationProvenance": {
+        "additionalProperties": false,
+        "properties": {
+          "assertion_id": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Assertion Id",
+            "type": "string"
+          },
+          "predicate": {
+            "const": "of-entity",
+            "title": "Predicate",
+            "type": "string"
+          },
+          "asserted_by": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Asserted By",
+            "type": "string"
+          },
+          "asserted_at": {
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$",
+            "title": "Asserted At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "assertion_id",
+          "predicate",
+          "asserted_by",
+          "asserted_at"
+        ],
+        "title": "LocationProvenance",
+        "type": "object"
+      },
+      "LocationSource": {
+        "additionalProperties": false,
+        "properties": {
+          "asset_id": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "revision": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Revision",
+            "type": "string"
+          },
+          "profile": {
+            "enum": [
+              "well-location/1",
+              "sql-wells/1"
+            ],
+            "title": "Profile",
+            "type": "string"
+          },
+          "row": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Row"
+          }
+        },
+        "required": [
+          "asset_id",
+          "revision",
+          "profile"
+        ],
+        "title": "LocationSource",
         "type": "object"
       },
       "MethodRecord": {
@@ -34012,6 +35712,73 @@
         "title": "SourceParent",
         "type": "object"
       },
+      "StoredPoint": {
+        "additionalProperties": false,
+        "properties": {
+          "x": {
+            "title": "X",
+            "type": "number"
+          },
+          "y": {
+            "title": "Y",
+            "type": "number"
+          },
+          "crs": {
+            "pattern": "^(EPSG:[0-9]{4,6}|OGC:CRS84|unknown)$",
+            "title": "Crs",
+            "type": "string"
+          }
+        },
+        "required": [
+          "x",
+          "y",
+          "crs"
+        ],
+        "title": "StoredPoint",
+        "type": "object"
+      },
+      "Transformation": {
+        "additionalProperties": false,
+        "description": "The conversion a read performed, as the installed library reports it at request time.",
+        "properties": {
+          "method": {
+            "const": "pyproj.Transformer",
+            "title": "Method",
+            "type": "string"
+          },
+          "pyproj_version": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Pyproj Version",
+            "type": "string"
+          },
+          "proj_version": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Proj Version",
+            "type": "string"
+          },
+          "source_crs": {
+            "pattern": "^(EPSG:[0-9]{4,6}|OGC:CRS84|unknown)$",
+            "title": "Source Crs",
+            "type": "string"
+          },
+          "target_crs": {
+            "pattern": "^(EPSG:[0-9]{4,6}|OGC:CRS84|unknown)$",
+            "title": "Target Crs",
+            "type": "string"
+          }
+        },
+        "required": [
+          "method",
+          "pyproj_version",
+          "proj_version",
+          "source_crs",
+          "target_crs"
+        ],
+        "title": "Transformation",
+        "type": "object"
+      },
       "Webhook": {
         "description": "E28b: a webhook as its project's administrators see it (never its secret or pinned address).",
         "properties": {
@@ -34159,6 +35926,103 @@
           "responded_at"
         ],
         "title": "WebhookDelivery",
+        "type": "object"
+      },
+      "WellLocation": {
+        "additionalProperties": false,
+        "description": "E29: a well's location as read: the point (in the requested CRS, else as stored), the exact revision (and row)\nit came from and the association that ties it to the well. Built at read time from the location index. When\nanother CRS was requested, `stored` keeps the stored point and `transformation` names the conversion \u2014 or is\n'unavailable', with x and y null, when the stored CRS cannot be converted (never an unconverted point\nlabelled with the requested CRS).",
+        "properties": {
+          "schema": {
+            "const": "ophiolite.well-location/1",
+            "title": "Schema",
+            "type": "string"
+          },
+          "x": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "X"
+          },
+          "y": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Y"
+          },
+          "crs": {
+            "pattern": "^(EPSG:[0-9]{4,6}|OGC:CRS84|unknown)$",
+            "title": "Crs",
+            "type": "string"
+          },
+          "elevation_reference": {
+            "enum": [
+              "unknown",
+              "GL",
+              "KB",
+              "MSL"
+            ],
+            "title": "Elevation Reference",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/LocationSource"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/LocationProvenance"
+          },
+          "transformation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Transformation"
+              },
+              {
+                "const": "unavailable",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Transformation"
+          },
+          "stored": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StoredPoint"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "ambiguous": {
+            "default": false,
+            "title": "Ambiguous",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "schema",
+          "x",
+          "y",
+          "crs",
+          "elevation_reference",
+          "source",
+          "provenance"
+        ],
+        "title": "WellLocation",
         "type": "object"
       },
       "WellLog": {

@@ -37,10 +37,11 @@ def digest(raw):
 def schemas():
     """Publish the Pydantic-generated schemas listed in the registry."""
     from project_gateway.scientific_assets import (Asset, AssetSummary, Curve, ScientificContext, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface,
-                                                   PointSet, PolylineSet, SeismicVolume, SeismicSlice, ImportRecipe, PointSet2)
+                                                   PointSet, PolylineSet, SeismicVolume, SeismicSlice, ImportRecipe, PointSet2,
+                                                   WellLocationUpload, WellLocation)
     from project_gateway.domain import RelationshipRegistry, Entity, EntityAssets, Lineage
     for model in (Asset, Curve, ScientificContext, AssetSummary, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface, PointSet, PolylineSet, SeismicVolume, SeismicSlice,
-                  RelationshipRegistry, Entity, EntityAssets, Lineage, ImportRecipe, PointSet2):
+                  RelationshipRegistry, Entity, EntityAssets, Lineage, ImportRecipe, PointSet2, WellLocationUpload, WellLocation):
         write(CONTRACTS / model.CONTRACT['path'], model.model_json_schema())
 
 

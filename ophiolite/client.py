@@ -66,7 +66,10 @@ class CurveSet:
             write('descriptor'+suffix+'.json',encode(self._wire_descriptors[index] if legacy_order and self._wire_descriptors is not None else descriptor.model_dump(by_alias=True,exclude_unset=True)))
 
 
-class Client(Navigation, EntityClient):
+from .locations import LocationClient  # noqa: E402
+
+
+class Client(Navigation, EntityClient, LocationClient):  # E29: wells() and extent()
     def __init__(self,url,project,credential=None,http=None):
         self.url=origin(url)
         if not isinstance(project,str) or not project:raise Refused('Choose a project.')
