@@ -15,6 +15,9 @@ def __getattr__(name):
         return {'registry_version': index['version'], 'entries': [
             {'id': row['id'], 'lifecycle': row['lifecycle']}
             for group in ('schemas', 'profiles') for row in index[group]]}
+    if name in ('connect', 'Account'):  # E27
+        from . import account
+        return getattr(account, name)
     if name in ('Client', 'CurveSet', 'Credential'):
         from . import client
         return getattr(client, name)

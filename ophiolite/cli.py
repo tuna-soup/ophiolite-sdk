@@ -87,9 +87,36 @@ def parser():
     recover.add_argument('--configuration',type=Path,default=Path('configuration.json'))
     recover.add_argument('--credentials',type=Path)
     recover.add_argument('--work',type=Path,required=True)
+    for name,help in (('projects','List the projects a credential reaches (no configuration or project needed)'),('orgs','List the organisations holding a project the credential reaches')):
+        p=sub.add_parser(name,help=help)  # E27
+        p.add_argument('--url',required=True,help='The gateway address, for example https://ophiolite.example')
+        p.add_argument('--credential',type=Path,help='A saved credential file (from ophiolite login); otherwise OPHIOLITE_ACCESS_KEY')
+        p.add_argument('--json',action='store_true',help='Print the raw response')
+        if name=='projects':p.add_argument('--limit',type=int,default=50,help='Page size while fetching (1 to 100)')
     skills=sub.add_parser('skills',help='Locate packaged SDK guidance')
     skills.add_subparsers(dest='action',required=True).add_parser('path')
     return parser
+
+
+def _discover(args):
+    """E27: projects/orgs for a credential file or OPHIOLITE_ACCESS_KEY; plain words unless --json."""
+    from .account import Account
+    from .errors import OphioliteError
+    _load()
+    try:
+        if args.credential is not None:credential=Credential.from_file(args.credential)
+        elif os.environ.get('OPHIOLITE_ACCESS_KEY'):credential=Credential.bearer(os.environ['OPHIOLITE_ACCESS_KEY'])
+        else:raise Refused('Give --credential FILE or set OPHIOLITE_ACCESS_KEY.')
+        if args.command=='projects' and not 1<=args.limit<=100:raise Refused('--limit is 1 to 100.')
+        with Account(args.url,credential) as account:
+            rows=account.projects(limit=args.limit) if args.command=='projects' else account.organizations()
+    except OphioliteError as error:
+        raise SystemExit(str(error)) from None
+    if args.json:print(json.dumps({'projects' if args.command=='projects' else 'organizations':rows},indent=2));return
+    if not rows:print('This credential reaches no project.' if args.command=='projects' else 'No organisation holds a project this credential reaches.');return
+    for row in rows:
+        if args.command=='projects':print((row.get('name') or 'Unnamed project')+' - '+{'member':'can edit','viewer':'can view'}.get(row.get('role'),'access')+(' and administer' if row.get('can_administer') else ''))
+        else:print(row.get('name') or 'Unnamed organisation')
 
 
 def _binding(client,work,config,args,profile):
@@ -122,6 +149,7 @@ def _local_run(config,work):
 
 def main(argv=None):
     args=parser().parse_args(argv)
+    if args.command in ('projects','orgs'):return _discover(args)
     if args.command=='skills':
         print(files('ophiolite').joinpath('skills'));return
     if args.command=='bundle':

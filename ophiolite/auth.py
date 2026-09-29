@@ -264,8 +264,14 @@ class Credential:
         with self.snapshot(url,project,cancel=cancel) as headers:
             return dict(headers)
 
+    def discovery_headers(self, url, *, cancel=None):
+        """E27: headers for the two discovery routes only (projects/list, projects/organizations): the saved
+        gateway is still checked, refresh and replacement work as for headers(), but no project is named."""
+        with self.snapshot(url,None,cancel=cancel,discovery=True) as headers:
+            return dict(headers)
+
     @contextmanager
-    def snapshot(self, url=None, project=None, *, cancel=None):
+    def snapshot(self, url=None, project=None, *, cancel=None, discovery=False):
         if self.path is None:
             result = {'Authorization':'Bearer '+self.token}
             if self.grant is not None: result['X-Ophiolite-Application-Grant'] = self.grant
@@ -274,7 +280,7 @@ class Credential:
         with _lock(self.path,cancel=cancel):
             value = self._current()
             data = value['credential']
-            if url is None or origin(url) != data['url'] or project != data['project']:
+            if url is None or origin(url) != data['url'] or (not discovery and project != data['project']):
                 _fail('Saved authorization belongs to another gateway or project; log in for this project.')
             if data.get('kind') == 'access_key':  # E25a: the key itself is the bearer; the server rechecks it
                 self._envelope = value
