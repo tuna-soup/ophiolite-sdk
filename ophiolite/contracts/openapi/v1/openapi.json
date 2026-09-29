@@ -193,6 +193,162 @@
         }
       }
     },
+    "/api/v1/access-keys/create": {
+      "post": {
+        "summary": "Create an access key for one project; the key is shown once",
+        "description": "Scope write; accepted principals: session; project extractor none.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Operation-specific JSON object; project_id must match the path where the row names a project."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/access-keys/list": {
+      "post": {
+        "summary": "Your access keys (never the key itself)",
+        "description": "Scope read; accepted principals: session; project extractor none.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Operation-specific JSON object; project_id must match the path where the row names a project."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/access-keys/remove": {
+      "post": {
+        "summary": "Remove one of your access keys; it stops working everywhere",
+        "description": "Scope write; accepted principals: session; project extractor none.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Missing credential"
+          },
+          "403": {
+            "description": "Scope, capability, kind or access denied"
+          },
+          "404": {
+            "description": "Unknown operation or asset"
+          },
+          "409": {
+            "description": "Publication conflict"
+          },
+          "413": {
+            "description": "Capacity exceeded"
+          },
+          "503": {
+            "description": "Service unavailable or capacity reached"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Operation-specific JSON object; project_id must match the path where the row names a project."
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/account/revoke": {
       "post": {
         "summary": "Revoke an account session",

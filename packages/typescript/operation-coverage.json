@@ -1,5 +1,23 @@
 [
   {
+    "operation": "POST /api/v1/access-keys/create",
+    "function": "postAccessKeysCreate",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/access-keys/list",
+    "function": "postAccessKeysList",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/access-keys/remove",
+    "function": "postAccessKeysRemove",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
     "operation": "POST /api/v1/account/revoke",
     "function": "postAccountRevoke",
     "request": "explicitly-untyped",

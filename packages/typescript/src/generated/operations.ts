@@ -11,6 +11,18 @@ type WireRecipeReference = { "asset_id": string; "revision": string };
 type WireRef = { "project_id": string; "asset_id": string; "revision": string };
 type WireSourceParent = { "project_id": string; "asset_id": string; "revision": string };
 type WireWellLog = { "asset_id": string; "revision": string };
+export type postAccessKeysCreateInput = { body: Record<string, unknown>; options?: OperationOptions };
+export function postAccessKeysCreate(transport: Transport, input: postAccessKeysCreateInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/access-keys/create", {}, undefined, input.body, input.options, null, false);
+}
+export type postAccessKeysListInput = { body: Record<string, unknown>; options?: OperationOptions };
+export function postAccessKeysList(transport: Transport, input: postAccessKeysListInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/access-keys/list", {}, undefined, input.body, input.options, null, false);
+}
+export type postAccessKeysRemoveInput = { body: Record<string, unknown>; options?: OperationOptions };
+export function postAccessKeysRemove(transport: Transport, input: postAccessKeysRemoveInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/access-keys/remove", {}, undefined, input.body, input.options, null, false);
+}
 export type postAccountRevokeInput = { body: Record<string, unknown>; options?: OperationOptions };
 export function postAccountRevoke(transport: Transport, input: postAccountRevokeInput): Promise<unknown> {
   return transport.request<unknown>("POST", "/api/v1/account/revoke", {}, undefined, input.body, input.options, null, false);
