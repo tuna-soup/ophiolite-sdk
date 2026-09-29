@@ -37,11 +37,12 @@ def python(registry):
         name = snake(p['id']); inverse = snake(p['inverse'])
         if p['subject'] == ['revision']:
             scoped = p.get('row_scoped', False)  # E29: the subject may name one row of the revision
+            row_part = ", **({'row': row} if row else {})" if scoped else ''  # outside the f-string: Python 3.10 allows no backslash there
             lines += [f'    def {name}(self, asset, revision, entity, *, {"row=None, " if scoped else ""}source=None, statement=None, command_id=None):',
                       f'        """Assert {p["id"]} ({p["class"]}) from this exact revision{" (or one row of it)" if scoped else ""} to an entity; evidence: {p["evidence"]} (default: the revision itself)."""',
                       '        source = source or {\'asset_id\': asset, \'revision\': revision}',
                       '        evidence = {\'source\': dict(source), **({\'statement\': statement} if statement else {})}',
-                      f'        return self._associate({p["id"]!r}, {{\'kind\': \'revision\', \'asset_id\': asset, \'revision\': revision{", **({\'row\': row} if row else {})" if scoped else ""}}}, entity, evidence, command_id)', '']
+                      f'        return self._associate({p["id"]!r}, {{\'kind\': \'revision\', \'asset_id\': asset, \'revision\': revision{row_part}}}, entity, evidence, command_id)', '']
         else:
             lines += [f'    def {name}(self, subject, entity, *, statement, command_id=None):',
                       f'        """Assert {p["id"]} ({p["class"]}) between two entities; evidence: a statement by you."""',
