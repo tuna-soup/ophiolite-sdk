@@ -22,7 +22,8 @@
       "change_detection": "polling",
       "losses": [
         "Only mapped columns are read",
-        "Coordinates are as stored; the declared CRS is not transformed"
+        "Coordinates are as stored; the declared CRS is not transformed",
+        "Tables are read in pages of 1,000 rows inside one read-only snapshot, up to 100,000 rows and 64 MiB"
       ],
       "unsupported": [
         "change data capture",

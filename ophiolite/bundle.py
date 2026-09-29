@@ -309,6 +309,8 @@ def _check_graph(manifest, entries):
             raise VerificationFailed('A relationship joins kinds its predicate does not join.')
         if subject['kind'] == 'revision':
             if (subject.get('asset_id'), subject.get('revision')) not in exported: raise VerificationFailed('A relationship names a revision that is not in this bundle.')
+            if 'row' in subject and (not p.get('row_scoped') or not isinstance(subject['row'], str) or not 0 < len(subject['row']) <= 160):  # E29
+                raise VerificationFailed('A relationship names a row its predicate does not scope.')
         elif listed.get(subject.get('entity_id'), {}).get('kind') != subject['kind']: raise VerificationFailed('A relationship names an entity that is not listed.')
         if listed.get(obj.get('entity_id'), {}).get('kind') != obj['kind']: raise VerificationFailed('A relationship names an entity that is not listed.')
         key = json.dumps([r['predicate'], subject, obj], sort_keys=True)
@@ -329,6 +331,11 @@ class BundleEntity:
     def revisions(self):
         """[(asset_id, revision)] associated with this entity in the bundle."""
         return [(r['subject']['asset_id'], r['subject']['revision']) for r in self._relationships
+                if r['predicate'] == 'of-entity' and r['object']['entity_id'] == self.entity_id]
+
+    def rows(self):
+        """E29: [(asset_id, revision, row)] associated with this entity; row is None for a whole revision."""
+        return [(r['subject']['asset_id'], r['subject']['revision'], r['subject'].get('row')) for r in self._relationships
                 if r['predicate'] == 'of-entity' and r['object']['entity_id'] == self.entity_id]
 
     def well_id(self):

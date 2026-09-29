@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.relationship-registry/1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "kinds": [
     {"id": "revision", "title": "An exact revision of an asset"},
     {"id": "well", "title": "Well"},
@@ -11,7 +11,8 @@
     {"id": "part-of", "class": "structural", "title": "A wellbore is part of one well", "subject": ["wellbore"], "object": ["well"],
      "per_subject_and_object_kind": 1, "exact_revisions": false, "asserted_by": "people", "evidence": "declaration", "status": "active", "inverse": "parts"},
     {"id": "of-entity", "class": "data-association", "title": "An exact revision holds data of a well or wellbore", "subject": ["revision"], "object": ["well", "wellbore"],
-     "per_subject_and_object_kind": 1, "exact_revisions": true, "asserted_by": "people", "evidence": "source-revision", "status": "active", "inverse": "data"},
+     "per_subject_and_object_kind": 1, "exact_revisions": true, "asserted_by": "people", "evidence": "source-revision", "status": "active", "inverse": "data",
+     "row_scoped": true},
     {"id": "member-of", "class": "structural", "title": "A result belongs to a result group (read-only projection of result groups)", "subject": ["revision"], "object": ["result-group"],
      "per_subject_and_object_kind": null, "exact_revisions": true, "asserted_by": "system", "evidence": "system", "status": "projection", "inverse": "members"},
     {"id": "derived-from", "class": "derivation", "title": "An exact revision was calculated from another exact revision", "subject": ["revision"], "object": ["revision"],

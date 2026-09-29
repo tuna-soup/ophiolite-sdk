@@ -799,6 +799,7 @@ class EntityAssets(Contract):
 class AssociatedRevision(Contract):
     asset_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    row: Annotated[str, Field(min_length=1, max_length=160)] | None = Field(None)
     profile: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     name: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     association: Association = Field(...)
@@ -806,6 +807,7 @@ class AssociatedRevision(Contract):
 class Association(Contract):
     assertion_id: Annotated[str, Field(pattern='^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$')] = Field(...)
     predicate: Literal['of-entity'] = Field(...)
+    row: Annotated[str, Field(min_length=1, max_length=160)] | None = Field(None)
     evidence: Evidence = Field(...)
     asserted_by: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     asserted_at: Annotated[str, Field(pattern='^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$')] = Field(...)
@@ -963,6 +965,7 @@ class Predicate(Contract):
     evidence: Literal['source-revision', 'declaration', 'run', 'command', 'system'] = Field(...)
     status: Literal['active', 'projection'] = Field(...)
     inverse: Annotated[str, Field(pattern='^[a-z][a-z-]{1,40}$')] = Field(...)
+    row_scoped: bool = Field(False)
 
 class RegistryKind(Contract):
     id: Literal['revision', 'well', 'wellbore', 'result-group'] = Field(...)

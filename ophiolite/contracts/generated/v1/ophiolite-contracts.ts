@@ -1088,6 +1088,7 @@ export type Predicate = {
   evidence: "source-revision" | "declaration" | "run" | "command" | "system";
   status: "active" | "projection";
   inverse: string;
+  row_scoped?: boolean;
 };
 
 export type RegistryKind = {
@@ -1138,6 +1139,7 @@ export type Entity = {
 export type AssociatedRevision = {
   asset_id: string;
   revision: string;
+  row?: string | null;
   profile: string;
   name: string;
   association: Association;
@@ -1146,6 +1148,7 @@ export type AssociatedRevision = {
 export type Association = {
   assertion_id: string;
   predicate: "of-entity";
+  row?: string | null;
   evidence: Evidence;
   asserted_by: string;
   asserted_at: string;

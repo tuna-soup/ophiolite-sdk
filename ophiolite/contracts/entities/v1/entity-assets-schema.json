@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/entities/v1/entity-assets-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.entity-assets/1",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -21,6 +21,20 @@
           "minLength": 1,
           "title": "Revision",
           "type": "string"
+        },
+        "row": {
+          "anyOf": [
+            {
+              "maxLength": 160,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Row"
         },
         "profile": {
           "maxLength": 512,
@@ -60,6 +74,20 @@
           "const": "of-entity",
           "title": "Predicate",
           "type": "string"
+        },
+        "row": {
+          "anyOf": [
+            {
+              "maxLength": 160,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Row"
         },
         "evidence": {
           "$ref": "#/$defs/Evidence"

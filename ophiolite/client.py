@@ -257,7 +257,7 @@ class Client(Navigation, EntityClient):
             for item in self.data(e):
                 if (item['asset_id'],item['revision']) in selected:
                     included[e.entity_id]=e
-                    edges.append({'predicate':'of-entity','subject':{'kind':'revision','asset_id':item['asset_id'],'revision':item['revision']},
+                    edges.append({'predicate':'of-entity','subject':{'kind':'revision','asset_id':item['asset_id'],'revision':item['revision'],**({'row':item['row']} if item.get('row') else {})},  # E29: the row of a table of wells
                                   'object':{'kind':e.kind,'entity_id':e.entity_id},'evidence':item['association']['evidence']})
         for e in list(included.values()):
             link=e.document.get('part_of')
