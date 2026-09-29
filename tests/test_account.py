@@ -84,6 +84,6 @@ def test_the_projects_and_orgs_commands(tmp_path, monkeypatch, capsys):
     capsys.readouterr()
     with pytest.raises(SystemExit) as refused: cli.entrypoint(['projects', '--url', URL, '--credential', str(broken)])  # E31: main raises, entrypoint exits
     err = capsys.readouterr().err
-    assert refused.value.code == 1 and 'Cannot read private SDK credentials' in err and 'Traceback' not in err
+    assert refused.value.code == 3 and 'Cannot read private SDK credentials' in err and 'Traceback' not in err  # a sign-in problem
     with pytest.raises(SystemExit) as refused: cli.entrypoint(['projects', '--url', URL, '--credential', str(credential), '--limit', '0'])
     assert refused.value.code == 1 and '--limit is 1 to 100' in capsys.readouterr().err
