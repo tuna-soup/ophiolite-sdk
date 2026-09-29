@@ -57,6 +57,7 @@ def parser():
         if name=='login':
             p.add_argument('--write',action='store_true',help='Request permission to publish results')
             p.add_argument('--no-browser',action='store_true')
+            p.add_argument('--key',help='Save an access key from your account page instead of signing in (or set OPHIOLITE_ACCESS_KEY)')
         if name in ('prepare','run','publish'):p.add_argument('--work',type=Path,default=Path('run'))
         if name=='correct':
             for field in ('start','stop','offset'):p.add_argument('--'+field,type=float,required=True)
@@ -146,6 +147,11 @@ def main(argv=None):
             print('Server contracts:',remote.get('version','unreported'))
         return
     if args.command=='run':return _local_run(config,args.work.resolve())
+    key=getattr(args,'key',None) or os.environ.get('OPHIOLITE_ACCESS_KEY')
+    if args.command=='login' and key:
+        # E25a: saved for later processes; nothing is sent now and the key is never printed.
+        auth.key_login(config['url'],config['project'],key,path=path)
+        print('Access key saved for',config['project'],'- ophiolite status shows what it is for; remove it on the account page to stop it everywhere.');return
     if args.command=='login':
         def notify(url,message):
             print(message,url,flush=True)
@@ -153,9 +159,18 @@ def main(argv=None):
                 import webbrowser
                 webbrowser.open(url)
         return auth.device_login(config['url'],config['project'],path=path,write=args.write,notify=notify)
-    credential=Credential.from_file(path)
+    if os.environ.get('OPHIOLITE_ACCESS_KEY') and not (path.exists() or path.is_symlink()):
+        credential=Credential.bearer(os.environ['OPHIOLITE_ACCESS_KEY'])  # this process only; nothing is saved
+    else:credential=Credential.from_file(path)
     if args.command=='logout':
+        if credential.kind=='bearer':print('Nothing saved to remove: the access key came from OPHIOLITE_ACCESS_KEY.');return
+        if credential.kind=='access_key':
+            credential.delete();print('Local access key removed. Remove it from the account page to stop it working everywhere.');return
         credential.revoke();print('Local authorization removed.');return
+    if args.command=='status' and credential.kind!='application':
+        summary=credential.summary()
+        if summary['kind']=='bearer':print('Access key from OPHIOLITE_ACCESS_KEY for',config['project'],'(not saved)');return
+        print('Access key',repr(summary['label'] or 'unnamed'),'for',summary['project'],'-',summary['scope'] or 'scope not recorded','- expires',summary['expires_at'] or 'date not recorded');return
     with Client(config['url'],config['project'],credential) as client:
         if args.command=='status':
             with credential.snapshot(client.url,client.project) as headers:result=client._grant_status(headers)

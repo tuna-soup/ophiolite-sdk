@@ -144,6 +144,15 @@ def _read(path):
     if type(value.get('generation')) is not int or value['generation'] < 1 or not isinstance(value.get('family'),str) or not value['family']:
         _fail('Invalid credential envelope. Run browser login again.')
     data = value.get('credential')
+    if isinstance(data,dict) and data.get('kind') == 'access_key':  # E25a: a saved access key, nothing to refresh
+        try:
+            origin(data['url'])
+            if not isinstance(data['project'],str) or not data['project']: raise ValueError()
+            _token(data['access_key'])
+            if not data['access_key'].startswith(KEY_PREFIX): raise ValueError()
+        except (KeyError, TypeError, ValueError):
+            _fail('Invalid saved access key. Run ophiolite login --key again.')
+        return value
     try:
         origin(data['url'])
         same_origin(data['issuer'],data['issuer'])
@@ -267,6 +276,10 @@ class Credential:
             data = value['credential']
             if url is None or origin(url) != data['url'] or project != data['project']:
                 _fail('Saved authorization belongs to another gateway or project; log in for this project.')
+            if data.get('kind') == 'access_key':  # E25a: the key itself is the bearer; the server rechecks it
+                self._envelope = value
+                yield {'Authorization':'Bearer '+data['access_key']}
+                return
             if time.time() >= data['expires_at']-20:
                 tokens = request(data['token_endpoint'], {'client_id':data['client_id'],
                     'grant_type':'refresh_token','refresh_token':data['refresh_token']}, form=True,http=self.http)
@@ -301,8 +314,22 @@ class Credential:
                 self._current()
                 self.path.unlink()
 
+    @property
+    def kind(self):
+        """'access_key' for a saved access key, 'application' for a saved sign-in, 'bearer' otherwise."""
+        if self._envelope is None: return 'bearer'
+        return 'access_key' if self._envelope['credential'].get('kind') == 'access_key' else 'application'
+
+    def summary(self):
+        """What a saved credential is for, without any secret: gateway, project and, for a key, its scope and expiry."""
+        if self._envelope is None: return {'kind': 'bearer'}
+        data = self._envelope['credential']
+        keep = ('url','project','label','scope','expires_at') if self.kind == 'access_key' else ('url','project')
+        return {'kind': self.kind, **{k: data.get(k) for k in keep}}
+
     def revoke(self):
         if self.path is None: _fail('Open an SDK credential store before revoking it.')
+        if self.kind == 'access_key': _fail('An access key is removed from the account page; ophiolite logout removes only this copy.')
         failures = []
         with _lock(self.path):
             value = self._current()
@@ -320,6 +347,27 @@ class Credential:
                 failures.append('Provider revocation unconfirmed; end the application session at your provider.')
             self.path.unlink()
         if failures: _fail(' '.join(failures))
+
+
+KEY_PREFIX = 'oph_key_'
+
+
+def key_login(url, project, key, *, path=None, label=None, scope=None, expires_at=None, http=None):
+    """E25a: save an access key (created on the account page) for this gateway and project, so later
+    processes can use it. Nothing is sent: the server checks the key on each call."""
+    url = origin(url)
+    if not isinstance(project,str) or not project: raise Refused('Choose a project.')
+    try:
+        _token(key)
+        if not key.startswith(KEY_PREFIX): raise ValueError()
+    except (AuthenticationRequired, ValueError, TypeError):
+        raise Refused('That is not an access key; copy it from the account page.') from None
+    path = _path(path) if path is not None else default_path(url,project)
+    data = {'kind':'access_key','url':url,'project':project,'access_key':key,'label':label,'scope':scope,'expires_at':expires_at}
+    with _lock(path):
+        if path.exists() or path.is_symlink(): _read(path)
+        _write(path,{'schema':SCHEMA,'family':uuid.uuid4().hex,'generation':1,'credential':data})
+    return Credential.from_file(path,http=http)
 
 
 def device_login(url, project, *, path=None, write=False, label='Local Python curve application',
