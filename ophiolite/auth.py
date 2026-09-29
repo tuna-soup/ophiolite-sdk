@@ -151,7 +151,7 @@ def _read(path):
             _token(data['access_key'])
             if not data['access_key'].startswith(KEY_PREFIX): raise ValueError()
         except (KeyError, TypeError, ValueError):
-            _fail('Invalid saved access key. Run ophiolite login --key again.')
+            _fail('Invalid saved project access key. Run ophiolite login --key again.')
         return value
     try:
         origin(data['url'])
@@ -335,7 +335,7 @@ class Credential:
 
     def revoke(self):
         if self.path is None: _fail('Open an SDK credential store before revoking it.')
-        if self.kind == 'access_key': _fail('An access key is removed from the account page; ophiolite logout removes only this copy.')
+        if self.kind == 'access_key': _fail('A project access key is removed from the account page; ophiolite logout removes only this copy.')
         failures = []
         with _lock(self.path):
             value = self._current()
@@ -367,7 +367,7 @@ def key_login(url, project, key, *, path=None, label=None, scope=None, expires_a
         _token(key)
         if not key.startswith(KEY_PREFIX): raise ValueError()
     except (AuthenticationRequired, ValueError, TypeError):
-        raise Refused('That is not an access key; copy it from the account page.') from None
+        raise Refused('That is not a project access key; copy it from the account page.') from None
     path = _path(path) if path is not None else default_path(url,project)
     data = {'kind':'access_key','url':url,'project':project,'access_key':key,'label':label,'scope':scope,'expires_at':expires_at}
     with _lock(path):

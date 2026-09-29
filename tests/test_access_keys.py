@@ -49,7 +49,7 @@ def test_a_tampered_saved_key_is_refused(tmp_path):
     auth.key_login('http://localhost', 'p', KEY, path=path)
     value = json.loads(path.read_text()); value['credential']['access_key'] = 'oph_api_other'
     path.write_text(json.dumps(value))
-    with pytest.raises(AuthenticationRequired, match='Invalid saved access key'): Credential.from_file(path)
+    with pytest.raises(AuthenticationRequired, match='Invalid saved project access key'): Credential.from_file(path)
 
 
 def test_login_key_saves_for_a_second_process_without_a_browser(tmp_path, monkeypatch, capsys):
@@ -63,7 +63,7 @@ def test_login_key_saves_for_a_second_process_without_a_browser(tmp_path, monkey
     cli.main(['logout', '--configuration', str(config), '--credentials', str(path)])
     assert not path.exists()
     out = capsys.readouterr()
-    assert 'Access key saved' in out.out and 'Local access key removed' in out.out and 'MARKER' not in out.out + out.err
+    assert 'Project access key saved' in out.out and 'Local project access key removed' in out.out and 'MARKER' not in out.out + out.err
 
 
 def test_the_environment_key_stays_in_one_process(tmp_path, monkeypatch, capsys):

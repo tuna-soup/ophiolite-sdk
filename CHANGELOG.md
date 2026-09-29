@@ -5,6 +5,9 @@
 Supported 0.x client over preview contracts, installable from reviewed source.
 No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
 
+- Wording (owner decision #19): the command line and its errors call the account page's keys **project access
+  keys**; nothing else changes (the `--key` option, `OPHIOLITE_ACCESS_KEY`, the saved credential kind and the wire
+  format are as before).
 - Derived publication (E30b): `ophiolite.writers` (also `WellTops.write`, `Trajectory.write`, `GridSurface.write`,
   `TriangulatedSurface.write`, `PointSet.write`, `PolylineSet.write` and `Curve.write` for LAS 2.0) write a result
   made in Python as the exact file an upload of its type would be, with every declaration required ("unknown" is

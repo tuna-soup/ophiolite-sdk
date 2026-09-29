@@ -24,7 +24,7 @@ def checked(model, page, message):
 class Account:
     def __init__(self, url, credential, http=None):
         self.url, self.credential = origin(url), credential
-        if credential is None: raise Refused('Choose a credential (an access key or a saved sign-in).')
+        if credential is None: raise Refused('Choose a credential (a project access key or a saved sign-in).')
         self._owns_http = http is None
         self.http = http or httpx.Client(timeout=60, follow_redirects=False, trust_env=False)
 
@@ -40,7 +40,7 @@ class Account:
         if response.status_code != 200:
             from .application_transport import envelope, carried
             meta = envelope(response); more = {'code': meta.get('code'), **carried(meta)}  # E31
-            if response.status_code == 401: raise AuthenticationRequired('Sign in again, or check the access key.', status=401, **more)
+            if response.status_code == 401: raise AuthenticationRequired('Sign in again, or check the project access key.', status=401, **more)
             if response.status_code == 403: raise PermissionRefused('This credential no longer reaches its project.', status=403, **more)
             raise Unavailable('Project discovery failed; check the service and retry.', meta.get('remedy', ''), status=response.status_code, **more)
         try: value = response.json()
