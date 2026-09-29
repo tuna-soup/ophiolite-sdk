@@ -5,6 +5,14 @@
 Supported 0.x client over preview contracts, installable from reviewed source.
 No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
 
+- Project events (E28): `client.sync(path)` returns a `Sync` that keeps a local copy of a project current
+  from its event log — `run()` resynchronises the first time (entities, `catalog/inventory`, result
+  groups, stamped with the head captured first) and catches up afterwards; `changes(epoch, after)` pages
+  the log; `follow()` streams it as server-sent events and resumes with Last-Event-ID; a durable
+  `Checkpoint` advances only after a batch's reads landed. `ResyncRequired` (`resync-required`) is the
+  server's CURSOR_EXPIRED. `ophiolite.sync_cache.Cache` implements the fencing rules. Skill
+  `sync-a-project`.
+
 - Application reach (E27): `ophiolite.connect(url, credential)` returns an `Account` whose
   `projects()` and `organizations()` list what the credential reaches before a project is chosen
   (one project for an access key or an approved application; every project for a browser sign-in),
