@@ -73,9 +73,11 @@ class AsyncClient(Client):
                         if attempt<2:
                             await anyio.sleep(delay);continue
                     if response.status_code!=200:
+                        from . import application_transport as policy
+                        meta=policy.envelope(response,await policy.bounded(response))  # E31: the server's metadata, bounded
                         kind,message=categories.get(response.status_code,(Unavailable,'Scientific read failed. Check service access and retry.'))
-                        if kind is Busy:raise Busy(message,status=response.status_code,retry_after=delay)
-                        raise kind(message,status=response.status_code)
+                        if kind is Busy:raise Busy(message,meta.get('remedy',''),status=response.status_code,retry_after=delay,code=meta.get('code'),**policy.carried(meta))
+                        raise kind(message,meta.get('remedy',''),status=response.status_code,code=meta.get('code'),**policy.carried(meta))
                     content=bytearray()
                     async for chunk in response.aiter_bytes():
                         content.extend(chunk)
@@ -182,7 +184,7 @@ class AsyncClient(Client):
                 async with self.http.stream('POST',url+path,content=raw,headers=captured,follow_redirects=False) as response:
                     if response.status_code in (429,503) and attempt+1<attempts:
                         await anyio.sleep(policy.delay(response));continue
-                    policy.status(response,operation)
+                    policy.status(response,operation,None if response.is_success else await policy.bounded(response))
                     content=bytearray()
                     async for chunk in response.aiter_bytes():
                         content.extend(chunk)
@@ -204,7 +206,7 @@ class AsyncClient(Client):
             async with self.http.stream('POST',self.url+'/api/v1/application-access/status',
                  content=json_bytes({'id':headers['X-Ophiolite-Application-Grant']}),
                  headers={**headers,'Content-Type':'application/json'},follow_redirects=False) as response:
-                policy.status(response,'status');raw=bytearray()
+                policy.status(response,'status',None if response.is_success else await policy.bounded(response));raw=bytearray()
                 async for chunk in response.aiter_bytes():
                     raw.extend(chunk)
                     if len(raw)>2_100_000:raise CapacityExceeded('Authorization response exceeds its supported size.')

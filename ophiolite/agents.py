@@ -50,14 +50,14 @@ class AgentClient:
         except httpx.HTTPError:
             raise Unavailable('Cannot reach the service. Check its address and network connection.', code='unreachable') from None
         if response.status_code == 200: return response.json()
-        try: payload = response.json()
-        except ValueError: payload = {}
-        code, message = payload.get('code', ''), payload.get('error') or 'The request was refused.'
+        from .application_transport import envelope, carried
+        meta = envelope(response)  # E31: bounded, and the server's remedy, docs and request id travel on
+        code, message = meta.get('code', ''), meta.get('message') or 'The request was refused.'
         kind = {'budget-exhausted': BudgetExhausted, 'command-owned': CommandOwned}.get(code)
         if kind is None:
             kind = {401: AuthenticationRequired, 403: PermissionRefused, 404: Unavailable, 409: IntegrityConflict,
                     429: BudgetExhausted, 503: Busy}.get(response.status_code, Refused)
-        raise kind(message, status=response.status_code, code=code or None)
+        raise kind(message, meta.get('remedy', ''), status=response.status_code, code=code or None, **carried(meta))
 
     def read(self, operation, body=None):
         """A read operation such as 'applications/result-list'; reads need no plan."""

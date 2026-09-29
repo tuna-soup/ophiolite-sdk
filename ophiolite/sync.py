@@ -92,12 +92,12 @@ class Sync:
     @staticmethod
     def _answer(response):
         if response.status_code == 200: return response.json()
-        try: code = response.json().get('code')
-        except ValueError: code = None
-        if response.status_code == 409 and code == 'CURSOR_EXPIRED': raise ResyncRequired('This copy is behind what the server keeps; resynchronise.', status=409)
-        if response.status_code == 401: raise AuthenticationRequired('Sign in again.', status=401)
-        if response.status_code == 403: raise PermissionRefused('This credential no longer reaches the project.', status=403)
-        raise Unavailable('The project event log answered %d.' % response.status_code, status=response.status_code)
+        from .application_transport import envelope, carried
+        meta = envelope(response); code = meta.get('code'); more = {'code': code, **carried(meta)}  # E31
+        if response.status_code == 409 and code == 'CURSOR_EXPIRED': raise ResyncRequired('This copy is behind what the server keeps; resynchronise.', status=409, **more)
+        if response.status_code == 401: raise AuthenticationRequired('Sign in again.', status=401, **more)
+        if response.status_code == 403: raise PermissionRefused('This credential no longer reaches the project.', status=403, **more)
+        raise Unavailable('The project event log answered %d.' % response.status_code, meta.get('remedy', ''), status=response.status_code, **more)
 
     # -- the log ----------------------------------------------------------------------------------
 
@@ -120,7 +120,7 @@ class Sync:
         while True:
             with self.client.http.stream('POST', self._path('changes', 'stream'), json={'project_id': self.client.project, 'seconds': seconds},
                                          headers={**self.client._headers(), 'Last-Event-ID': last, 'Accept': 'text/event-stream'}, follow_redirects=False) as response:
-                if response.status_code != 200: response.read(); self._answer(response)
+                if response.status_code != 200: self._answer(response)  # E31: the envelope is read with a bound
                 frame = {}
                 for line in response.iter_lines():
                     if line:

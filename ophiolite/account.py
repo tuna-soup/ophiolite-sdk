@@ -28,9 +28,12 @@ class Account:
         headers = self.credential.discovery_headers(self.url)
         try: response = self.http.post(self.url + '/api/v1/projects/' + quote(operation, safe=''), json=body, headers=headers, follow_redirects=False)
         except httpx.HTTPError: raise Unavailable('Cannot reach the service. Check its address and network connection.', code='unreachable') from None
-        if response.status_code == 401: raise AuthenticationRequired('Sign in again, or check the access key.', status=401)
-        if response.status_code == 403: raise PermissionRefused('This credential no longer reaches its project.', status=403)
-        if response.status_code != 200: raise Unavailable('Project discovery failed; check the service and retry.', status=response.status_code)
+        if response.status_code != 200:
+            from .application_transport import envelope, carried
+            meta = envelope(response); more = {'code': meta.get('code'), **carried(meta)}  # E31
+            if response.status_code == 401: raise AuthenticationRequired('Sign in again, or check the access key.', status=401, **more)
+            if response.status_code == 403: raise PermissionRefused('This credential no longer reaches its project.', status=403, **more)
+            raise Unavailable('Project discovery failed; check the service and retry.', meta.get('remedy', ''), status=response.status_code, **more)
         try: value = response.json()
         except (ValueError, UnicodeError): raise Unavailable('Project discovery answered with something that is not JSON.') from None
         if not isinstance(value, dict): raise Unavailable('Invalid project discovery response.')

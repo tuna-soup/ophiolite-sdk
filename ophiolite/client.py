@@ -116,9 +116,11 @@ class Client(Navigation, EntityClient, LocationClient):  # E29: wells() and exte
                         if attempt<2:
                             time.sleep(delay);continue
                     if response.status_code!=200:
+                        from . import application_transport as policy
+                        meta=policy.envelope(response)  # E31: the server's code, remedy, docs and request id, read with a bound
                         kind,message=categories.get(response.status_code,(Unavailable,'Scientific read failed. Check service access and retry.'))
-                        if kind is Busy:raise Busy(message,status=response.status_code,retry_after=delay)
-                        raise kind(message,status=response.status_code)
+                        if kind is Busy:raise Busy(message,meta.get('remedy',''),status=response.status_code,retry_after=delay,code=meta.get('code'),**policy.carried(meta))
+                        raise kind(message,meta.get('remedy',''),status=response.status_code,code=meta.get('code'),**policy.carried(meta))
                     content=bytearray()
                     for chunk in response.iter_bytes():
                         content.extend(chunk)

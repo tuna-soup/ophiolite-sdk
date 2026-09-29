@@ -3,11 +3,13 @@ class OphioliteError(ValueError):
     code='sdk-error'
     retryable=False
 
-    def __init__(self,message,recovery='',*,status=None,code=None,details=None,command_id=None,work_folder=None):
+    def __init__(self,message,recovery='',*,status=None,code=None,details=None,command_id=None,work_folder=None,remedy=None,docs=None,request_id=None):
         if message=='evidence-inconsistent':
             code=message;message='The reported reader history disagrees with its records.'
         self.code=code or type(self).code
         self.message,self.recovery,self.status=message,recovery,status
+        # E31: the server's own words for what to do, where its code is explained, and the request to quote
+        self.remedy,self.docs,self.request_id=remedy,docs,request_id
         self.details=details or {}
         self.command_id,self.work_folder=command_id,work_folder
         super().__init__(message+(' '+recovery if recovery else ''))
