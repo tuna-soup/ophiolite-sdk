@@ -15,7 +15,7 @@ jsonschema-specifications==2025.9.1
 numpy==2.2.6 ; python_full_version < '3.11'
 numpy==2.4.6 ; python_full_version == '3.11.*'
 numpy==2.5.3 ; python_full_version >= '3.12'
-ophiolite[numpy,validation] @ git+https://github.com/tuna-soup/ophiolite-sdk@e051a349a235bf8645bf783745780a83ed9191a7
+ophiolite[numpy,validation] @ git+https://github.com/tuna-soup/ophiolite-sdk@622b528bb70318d322b52bf090ed0395515c1f76
 packaging==26.3
 pluggy==1.6.0
 pydantic==2.13.5

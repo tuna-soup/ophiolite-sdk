@@ -1,4 +1,4 @@
-ophiolite[pandas,numpy,validation] @ git+https://github.com/tuna-soup/ophiolite-sdk@e051a349a235bf8645bf783745780a83ed9191a7
+ophiolite[pandas,numpy,validation] @ git+https://github.com/tuna-soup/ophiolite-sdk@622b528bb70318d322b52bf090ed0395515c1f76
 pytest>=8
 matplotlib
 nbclient

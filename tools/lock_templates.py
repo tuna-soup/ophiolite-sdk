@@ -17,7 +17,7 @@ def main():
     parser=argparse.ArgumentParser();parser.add_argument('--template',action='append');args=parser.parse_args()
     wheel=ROOT/'dist/ophiolite-0.1.0-py3-none-any.whl'
     if not wheel.is_file():raise SystemExit('Build the SDK wheel first.')
-    accepted='e051a349a235bf8645bf783745780a83ed9191a7'
+    accepted='622b528bb70318d322b52bf090ed0395515c1f76'  # E31: the SDK with publish_derived, init and the packaged templates
     accepted_metadata=subprocess.check_output(['git','show',accepted+':pyproject.toml'],cwd=ROOT)
     if accepted_metadata!=(ROOT/'pyproject.toml').read_bytes():raise ValueError('SDK metadata changed; qualify a new source pin before locking templates.')
     with zipfile.ZipFile(wheel) as archive:
