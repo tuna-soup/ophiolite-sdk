@@ -20,6 +20,7 @@ class IntegrityConflict(OphioliteError): code='integrity-conflict'
 class CapacityExceeded(VerificationFailed): code='capacity-exceeded'
 class Incompatible(OphioliteError): code='incompatible-context'
 class Refused(OphioliteError): code='INVALID_ARGUMENT'
+class ResyncRequired(OphioliteError): code='resync-required'  # E28: the server no longer holds this cursor (CURSOR_EXPIRED)
 class AxisMismatch(OphioliteError):
     code='axis-mismatch'
 

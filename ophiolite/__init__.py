@@ -18,6 +18,9 @@ def __getattr__(name):
     if name in ('connect', 'Account'):  # E27
         from . import account
         return getattr(account, name)
+    if name in ('Sync', 'Checkpoint', 'ResyncRequired'):  # E28
+        from . import sync
+        return getattr(sync, name)
     if name in ('Client', 'CurveSet', 'Credential'):
         from . import client
         return getattr(client, name)

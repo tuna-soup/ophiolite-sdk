@@ -86,6 +86,11 @@ class Client(Navigation, EntityClient):
             if key in value and (not isinstance(value[key],str) or not value[key]):raise Refused('Invalid exact-read selection.')
         return cls(value.get('url'),value.get('project'),credential,http)
 
+    def sync(self,checkpoint=None):
+        """E28: a local copy of this project kept current from its event log (ophiolite.sync.Sync)."""
+        from .sync import Sync
+        return Sync(self,checkpoint=checkpoint)
+
     def close(self):
         if self._owns_http:self.http.close()
     def __enter__(self):return self
