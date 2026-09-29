@@ -294,6 +294,8 @@ def ts_type(schema, path='$', indent=0):
         return _wrap(ts_type(schema['items'], f'{path}/items', indent)) + '[]'
     if kind == 'object':
         if 'properties' not in schema:
+            if schema.get('additionalProperties') is True:  # a free-form JSON object (declared method parameters)
+                return 'Record<string, unknown>'
             raise Unsupported(f'{path}: object without properties')
         extra = schema.get('additionalProperties', None)
         if extra not in (None, False):

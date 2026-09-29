@@ -121,6 +121,10 @@ export type Decision = {
   status: "decided" | "needs-decision";
 };
 
+export type DerivationInfo = {
+  method: MethodRecord;
+};
+
 export type Display = {
   type?: string | null;
   type_help?: string | null;
@@ -251,6 +255,14 @@ export type MeshContext = {
   vertex_count: number;
   triangle_count: number;
   missing_z_count: number;
+};
+
+export type MethodRecord = {
+  name: string;
+  library?: string;
+  version?: string;
+  parameters?: Record<string, unknown>;
+  script_sha256?: string | null;
 };
 
 export type NotEvaluated = {
@@ -421,6 +433,15 @@ export type RevisionManifest = {
   lineage: LineageEntry[];
 };
 
+export type RevisionManifestV2 = {
+  schema: "ophiolite.revision-manifest/2";
+  digest: string;
+  artifact: ManifestArtifact;
+  representations: ManifestRepresentation[];
+  lineage: LineageEntry[];
+  method: MethodRecord;
+};
+
 export type ScientificContext = {
   curve: string;
   unit: string;
@@ -506,7 +527,8 @@ export type XY = {
 
 export type ScientificAsset = {
   package?: PackageRecord | null;
-  manifest?: RevisionManifest | null;
+  manifest?: RevisionManifest | RevisionManifestV2 | null;
+  derivation?: DerivationInfo | null;
   acquisition?: Acquisition | null;
   relationships?: Relationships | null;
   display?: Display | null;

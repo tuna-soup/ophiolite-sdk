@@ -163,7 +163,8 @@ def manifest(value, raw, normalized):
     was served: the artifact, the normalized representation, every disclosed lineage entry and the
     parents. Hidden entries stay bare commitments; the digest covers them all."""
     m = value['manifest']
-    require(m['schema'] == 'ophiolite.revision-manifest/1', 'Unknown revision manifest')
+    require(m['schema'] in ('ophiolite.revision-manifest/1', 'ophiolite.revision-manifest/2'), 'Unknown revision manifest')
+    require((m['schema'] == 'ophiolite.revision-manifest/2') == ('method' in m), 'The revision manifest schema does not match its method')  # 1.11.0 (E30a)
     require((m['artifact']['sha256'], m['artifact']['bytes']) == (raw['sha256'], raw['bytes']), 'The revision manifest names another artifact')
     listed = {r['id']: (r['sha256'], r['bytes']) for r in m['representations']}
     require(len(listed) == len(m['representations']) and listed.get(normalized['id']) == (normalized['sha256'], normalized['bytes']),
@@ -177,10 +178,11 @@ def manifest(value, raw, normalized):
             require(_sha(entry['salt'] + _canonical([entry['predicate'], reference])) == entry['commitment'], 'A disclosed lineage entry does not match its commitment')
             if entry['predicate'] == 'derived-from': disclosed.add(known(reference, REFERENCE[:3]))
     require({known(p, REFERENCE[:3]) for p in value['parents']} <= disclosed, 'A parent is not a disclosed lineage entry')
-    body = {'schema': 'ophiolite.revision-manifest/1', 'asset_id': value['asset_id'], 'revision': value['revision'],
+    body = {'schema': m['schema'], 'asset_id': value['asset_id'], 'revision': value['revision'],
             'artifact': {'sha256': m['artifact']['sha256'], 'bytes': m['artifact']['bytes']},
             'representations': sorted(({'id': r['id'], 'sha256': r['sha256'], 'bytes': r['bytes']} for r in m['representations']), key=lambda r: r['id']),
             'lineage': sorted(e['commitment'] for e in m['lineage'])}
+    if 'method' in m: body['method'] = m['method']  # /2: the declared method, as served, is digested too
     require(_sha(_canonical(body)) == m['digest'], 'The revision manifest digest does not match its contents')
 
 

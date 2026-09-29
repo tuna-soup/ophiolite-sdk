@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/schema.json",
   "x-ophiolite": {
     "id": "ophiolite.scientific-asset/1",
-    "version": "1.10.0",
+    "version": "1.11.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -179,6 +179,20 @@
         "status"
       ],
       "title": "Decision",
+      "type": "object"
+    },
+    "DerivationInfo": {
+      "additionalProperties": false,
+      "description": "1.11.0 (E30a): the declared method of a derived revision (its parents are `parents`/the lineage, not here).",
+      "properties": {
+        "method": {
+          "$ref": "#/$defs/MethodRecord"
+        }
+      },
+      "required": [
+        "method"
+      ],
+      "title": "DerivationInfo",
       "type": "object"
     },
     "Display": {
@@ -1123,6 +1137,53 @@
         "missing_z_count"
       ],
       "title": "MeshContext",
+      "type": "object"
+    },
+    "MethodRecord": {
+      "additionalProperties": false,
+      "description": "1.11.0 (E30a): how a derived revision was made, as its publishing request declared it \u2014 the projection of\nits interpretation record (E23a's decision family: selected by declaration).",
+      "properties": {
+        "name": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "library": {
+          "default": "",
+          "maxLength": 80,
+          "title": "Library",
+          "type": "string"
+        },
+        "version": {
+          "default": "",
+          "maxLength": 40,
+          "title": "Version",
+          "type": "string"
+        },
+        "parameters": {
+          "additionalProperties": true,
+          "title": "Parameters",
+          "type": "object"
+        },
+        "script_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Script Sha256"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "MethodRecord",
       "type": "object"
     },
     "NotEvaluated": {
@@ -2289,6 +2350,54 @@
       "title": "RevisionManifest",
       "type": "object"
     },
+    "RevisionManifestV2": {
+      "additionalProperties": false,
+      "description": "1.11.0 (E30a): a /1 manifest plus the declared method, which the digest covers.",
+      "properties": {
+        "schema": {
+          "const": "ophiolite.revision-manifest/2",
+          "title": "Schema",
+          "type": "string"
+        },
+        "digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        },
+        "artifact": {
+          "$ref": "#/$defs/ManifestArtifact"
+        },
+        "representations": {
+          "items": {
+            "$ref": "#/$defs/ManifestRepresentation"
+          },
+          "maxItems": 512,
+          "title": "Representations",
+          "type": "array"
+        },
+        "lineage": {
+          "items": {
+            "$ref": "#/$defs/LineageEntry"
+          },
+          "maxItems": 64,
+          "title": "Lineage",
+          "type": "array"
+        },
+        "method": {
+          "$ref": "#/$defs/MethodRecord"
+        }
+      },
+      "required": [
+        "schema",
+        "digest",
+        "artifact",
+        "representations",
+        "lineage",
+        "method"
+      ],
+      "title": "RevisionManifestV2",
+      "type": "object"
+    },
     "ScientificContext": {
       "additionalProperties": false,
       "properties": {
@@ -2808,7 +2917,33 @@
     "manifest": {
       "anyOf": [
         {
-          "$ref": "#/$defs/RevisionManifest"
+          "discriminator": {
+            "mapping": {
+              "ophiolite.revision-manifest/1": "#/$defs/RevisionManifest",
+              "ophiolite.revision-manifest/2": "#/$defs/RevisionManifestV2"
+            },
+            "propertyName": "schema"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/RevisionManifest"
+            },
+            {
+              "$ref": "#/$defs/RevisionManifestV2"
+            }
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Manifest"
+    },
+    "derivation": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DerivationInfo"
         },
         {
           "type": "null"
@@ -3011,7 +3146,7 @@
       "items": {
         "$ref": "#/$defs/Reference"
       },
-      "maxItems": 8,
+      "maxItems": 32,
       "title": "Parents",
       "type": "array"
     },

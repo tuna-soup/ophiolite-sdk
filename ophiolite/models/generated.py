@@ -299,7 +299,8 @@ class XYZ(Contract):
 
 class ScientificAsset(Contract):
     package: PackageRecord | None = Field(None)
-    manifest: RevisionManifest | None = Field(None)
+    manifest: Annotated[RevisionManifest | RevisionManifestV2, Field(discriminator='schema_')] | None = Field(None)
+    derivation: DerivationInfo | None = Field(None)
     acquisition: Acquisition | None = Field(None)
     relationships: Relationships | None = Field(None)
     display: Display | None = Field(None)
@@ -319,7 +320,7 @@ class ScientificAsset(Contract):
     recorded_interpretation: RecordedInterpretation | None = Field(None)
     representations: Annotated[list[Representation], Field(min_length=2, max_length=8)] = Field(...)
     retention: Retention = Field(...)
-    parents: Annotated[list[Reference], Field(max_length=8)] = Field(...)
+    parents: Annotated[list[Reference], Field(max_length=32)] = Field(...)
     parent_visibility: Literal['complete', 'restricted'] = Field('complete')
     provenance: Provenance = Field(...)
     supported_operations: Annotated[list[Literal['read', 'export', 'use-as-input']], Field(max_length=3)] = Field(...)
@@ -334,6 +335,9 @@ class Acquisition(Contract):
     uploaded_at: float = Field(...)
     rights: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     origin: ImportOrigin | None = Field(None)
+
+class DerivationInfo(Contract):
+    method: MethodRecord = Field(...)
 
 class Display(Contract):
     type: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(None)
@@ -414,6 +418,13 @@ class MeshContext(Contract):
     triangle_count: Annotated[int, Field(ge=1, le=400000)] = Field(...)
     missing_z_count: Annotated[int, Field(ge=0, le=200000)] = Field(...)
 
+class MethodRecord(Contract):
+    name: Annotated[str, Field(min_length=1, max_length=80)] = Field(...)
+    library: Annotated[str, Field(max_length=80)] = Field('')
+    version: Annotated[str, Field(max_length=40)] = Field('')
+    parameters: MethodRecordParameters = Field(None)
+    script_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] | None = Field(None)
+
 class NotEvaluated(Contract):
     status: Literal['not-evaluated'] = Field(...)
 
@@ -480,6 +491,14 @@ class RevisionManifest(Contract):
     artifact: ManifestArtifact = Field(...)
     representations: Annotated[list[ManifestRepresentation], Field(max_length=512)] = Field(...)
     lineage: Annotated[list[LineageEntry], Field(max_length=64)] = Field(...)
+
+class RevisionManifestV2(Contract):
+    schema_: Literal['ophiolite.revision-manifest/2'] = Field(..., alias='schema')
+    digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    artifact: ManifestArtifact = Field(...)
+    representations: Annotated[list[ManifestRepresentation], Field(max_length=512)] = Field(...)
+    lineage: Annotated[list[LineageEntry], Field(max_length=64)] = Field(...)
+    method: MethodRecord = Field(...)
 
 class SeismicContext(Contract):
     type: Literal['seismic-volume'] = Field(...)
@@ -976,6 +995,9 @@ class WellCurve(Contract):
     original_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(None)
     source_revision: str = Field(None)
 
+class MethodRecordParameters(Contract):
+    pass
+
 class PortableBundleManifestExporter(Contract):
     name: Annotated[str, Field(max_length=64)] = Field(...)
     version: Annotated[str, Field(max_length=64)] = Field(...)
@@ -1107,6 +1129,7 @@ Stick.model_rebuild()
 XYZ.model_rebuild()
 ScientificAsset.model_rebuild()
 Acquisition.model_rebuild()
+DerivationInfo.model_rebuild()
 Display.model_rebuild()
 Evaluated.model_rebuild()
 History.model_rebuild()
@@ -1117,6 +1140,7 @@ LineageReference.model_rebuild()
 ManifestArtifact.model_rebuild()
 ManifestRepresentation.model_rebuild()
 MeshContext.model_rebuild()
+MethodRecord.model_rebuild()
 NotEvaluated.model_rebuild()
 PackageMemberRecord.model_rebuild()
 PackageRecord.model_rebuild()
@@ -1129,6 +1153,7 @@ Relationships.model_rebuild()
 Representation.model_rebuild()
 Retention.model_rebuild()
 RevisionManifest.model_rebuild()
+RevisionManifestV2.model_rebuild()
 SeismicContext.model_rebuild()
 TopsContext.model_rebuild()
 TrajectoryContext.model_rebuild()
@@ -1189,6 +1214,7 @@ RegistryKind.model_rebuild()
 ScalarMap.model_rebuild()
 ScalarGrid.model_rebuild()
 WellCurve.model_rebuild()
+MethodRecordParameters.model_rebuild()
 PortableBundleManifestExporter.model_rebuild()
 PortableBundleManifestLimits.model_rebuild()
 PortableBundleManifestObservations.model_rebuild()

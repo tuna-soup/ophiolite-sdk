@@ -14,6 +14,9 @@ type WireProjectEntry = { "id": string; "name": (string) | (null); "role": (stri
 type WireRecipeReference = { "asset_id": string; "revision": string };
 type WireRef = { "project_id": string; "asset_id": string; "revision": string };
 type WireSourceParent = { "project_id": string; "asset_id": string; "revision": string };
+type WireWebhook = { "id": string; "url": string; "active": boolean; "paused_reason": (string) | (null); "generation": number; "created_by": string; "created_at": number; "failures": number; "delivered": WireWebhookDelivered; [key: string]: unknown };
+type WireWebhookDelivered = { "epoch": (string) | (null); "cursor": number; [key: string]: unknown };
+type WireWebhookDelivery = { "epoch": string; "cursor": number; "attempt": number; "status": string; "detail": (string) | (null); "next_attempt_at": (number) | (null); "responded_at": (number) | (null); [key: string]: unknown };
 type WireWellLog = { "asset_id": string; "revision": string };
 export type postAccessKeysCreateInput = { body: Record<string, unknown>; options?: OperationOptions };
 export function postAccessKeysCreate(transport: Transport, input: postAccessKeysCreateInput): Promise<unknown> {
@@ -918,4 +921,28 @@ export function postProjectsProjectSubscriptionsSubscribe(transport: Transport, 
 export type postProjectsProjectSubscriptionsUnsubscribeInput = { path: { "project": string }; body: { "project_id": string; "stream_id"?: (string) | (null); "release_id"?: (string) | (null); "command_id"?: (string) | (null); "name"?: string; "kind"?: "dataset" | "collection"; "generation"?: number; "mode"?: "review" | "follow" | "pin"; "approved_only"?: boolean; "acknowledge_exclusions"?: boolean; "version"?: number; "manifest_digest"?: (string) | (null); "patches"?: Array<Record<string, unknown>>; "automatic"?: boolean }; options?: OperationOptions };
 export function postProjectsProjectSubscriptionsUnsubscribe(transport: Transport, input: postProjectsProjectSubscriptionsUnsubscribeInput): Promise<unknown> {
   return transport.request<unknown>("POST", "/api/v1/projects/{project}/subscriptions/unsubscribe", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectWebhooksCreateInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectWebhooksCreate(transport: Transport, input: postProjectsProjectWebhooksCreateInput): Promise<{ "id": string; "url": string; "active": boolean; "paused_reason": (string) | (null); "generation": number; "created_by": string; "created_at": number; "failures": number; "delivered": WireWebhookDelivered; "secret": (string) | (null); "replayed": boolean; [key: string]: unknown }> {
+  return transport.request<{ "id": string; "url": string; "active": boolean; "paused_reason": (string) | (null); "generation": number; "created_by": string; "created_at": number; "failures": number; "delivered": WireWebhookDelivered; "secret": (string) | (null); "replayed": boolean; [key: string]: unknown }>("POST", "/api/v1/projects/{project}/webhooks/create", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectWebhooksDeleteInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectWebhooksDelete(transport: Transport, input: postProjectsProjectWebhooksDeleteInput): Promise<{ "deleted": string; [key: string]: unknown }> {
+  return transport.request<{ "deleted": string; [key: string]: unknown }>("POST", "/api/v1/projects/{project}/webhooks/delete", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectWebhooksDeliveriesInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectWebhooksDeliveries(transport: Transport, input: postProjectsProjectWebhooksDeliveriesInput): Promise<{ "deliveries": Array<WireWebhookDelivery>; [key: string]: unknown }> {
+  return transport.request<{ "deliveries": Array<WireWebhookDelivery>; [key: string]: unknown }>("POST", "/api/v1/projects/{project}/webhooks/deliveries", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectWebhooksListInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectWebhooksList(transport: Transport, input: postProjectsProjectWebhooksListInput): Promise<{ "webhooks": Array<WireWebhook>; [key: string]: unknown }> {
+  return transport.request<{ "webhooks": Array<WireWebhook>; [key: string]: unknown }>("POST", "/api/v1/projects/{project}/webhooks/list", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectWebhooksReplayInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectWebhooksReplay(transport: Transport, input: postProjectsProjectWebhooksReplayInput): Promise<{ "id": string; "url": string; "active": boolean; "paused_reason": (string) | (null); "generation": number; "created_by": string; "created_at": number; "failures": number; "delivered": WireWebhookDelivered; [key: string]: unknown }> {
+  return transport.request<{ "id": string; "url": string; "active": boolean; "paused_reason": (string) | (null); "generation": number; "created_by": string; "created_at": number; "failures": number; "delivered": WireWebhookDelivered; [key: string]: unknown }>("POST", "/api/v1/projects/{project}/webhooks/replay", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectWebhooksUpdateInput = { path: { "project": string }; body: Record<string, unknown>; options?: OperationOptions };
+export function postProjectsProjectWebhooksUpdate(transport: Transport, input: postProjectsProjectWebhooksUpdateInput): Promise<{ "id": string; "url": string; "active": boolean; "paused_reason": (string) | (null); "generation": number; "created_by": string; "created_at": number; "failures": number; "delivered": WireWebhookDelivered; [key: string]: unknown }> {
+  return transport.request<{ "id": string; "url": string; "active": boolean; "paused_reason": (string) | (null); "generation": number; "created_by": string; "created_at": number; "failures": number; "delivered": WireWebhookDelivered; [key: string]: unknown }>("POST", "/api/v1/projects/{project}/webhooks/update", input.path, undefined, input.body, input.options, null, false);
 }

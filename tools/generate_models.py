@@ -18,6 +18,11 @@ def name(value):
     if not result or not result[0].isalpha(): raise ValueError('Invalid model name: '+value)
     return RENAMES.get(result, result)
 
+
+def python_field(field):
+    python_name = re.sub('[^A-Za-z0-9_]', '_', field)
+    return python_name + '_' if keyword.iskeyword(python_name) or python_name in ('schema','model_config') else python_name
+
 class Generator:
     def __init__(self):
         self.classes = {}; self.documents = {}; self.origins = {}
@@ -73,7 +78,7 @@ class Generator:
                             ('maximum','le'),('exclusiveMinimum','gt')]:
             if key in schema: fields.append(target+'='+repr(schema[key]))
         if 'discriminator' in schema:
-            fields.append('discriminator='+repr(schema['discriminator']['propertyName']))
+            fields.append('discriminator='+repr(python_field(schema['discriminator']['propertyName'])))  # the Python name ('schema' is aliased)
         return 'Annotated['+expression+', Field('+', '.join(fields)+')]' if fields else expression
 
     def generate(self, documents):
@@ -91,8 +96,7 @@ class Generator:
             if not properties: lines.append('    pass')
             used = set()
             for field, value in properties.items():
-                python_name = re.sub('[^A-Za-z0-9_]', '_', field)
-                if keyword.iskeyword(python_name) or python_name in ('schema','model_config'): python_name += '_'
+                python_name = python_field(field)
                 if python_name in used: raise ValueError('Colliding Python field alias: '+field)
                 used.add(python_name)
                 if not python_name.isidentifier(): raise ValueError('Unsupported field name: '+field)
