@@ -5,6 +5,11 @@
 Supported 0.x client over preview contracts, installable from reviewed source.
 No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
 
+- Revision manifests /2 (E30a, asset contract 1.11.0): the reader accepts `ophiolite.revision-manifest/2`,
+  whose digest also covers the declared `method` (`MethodRecord`: name, library, version, parameters,
+  script digest), and requires it to be the descriptor's `derivation.method`; a `/1` manifest verifies
+  exactly as before. `Asset.parents` holds up to 32 parents.
+
 - Project events (E28): `client.sync(path)` returns a `Sync` that keeps a local copy of a project current
   from its event log — `run()` resynchronises the first time (entities, `catalog/inventory`, result
   groups, stamped with the head captured first) and catches up afterwards; `changes(epoch, after)` pages
