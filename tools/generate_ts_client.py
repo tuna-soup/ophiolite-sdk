@@ -76,7 +76,7 @@ def outputs(document=None, overrides=None):
             if method not in METHODS: continue
             key = method.upper() + ' ' + path
             override = overrides.get(key, {}); used.add(key)
-            name = method + ''.join(x[:1].upper() + x[1:] for x in re.findall('[A-Za-z0-9]+', path[8:]))
+            name = method + ''.join(x[:1].upper() + x[1:] for x in re.findall('[A-Za-z0-9]+', path[8:])) + ('Root' if path.endswith('/') else '')  # E46: {root}/
             if name in names: raise ValueError('Duplicate operation name ' + name)
             names.add(name)
             content = operation.get('requestBody', {}).get('content', {})

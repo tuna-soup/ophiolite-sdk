@@ -20,7 +20,7 @@ def test_every_route_has_one_generated_operation_and_truthful_coverage():
     document=json.loads((generator.CONTRACTS/'openapi/v1/openapi.json').read_text())
     generated=generator.outputs();coverage=json.loads(generated['operation-coverage.json'])
     expected={method.upper()+' '+path for path,ops in document['paths'].items() if path.startswith('/api/v1/') for method in ops if method in generator.METHODS}
-    assert len(coverage)==len(expected)==247
+    assert len(coverage)==len(expected)==248
     assert {row['operation'] for row in coverage}==expected
     assert len({row['function'] for row in coverage})==len(coverage)
     for row in coverage:
