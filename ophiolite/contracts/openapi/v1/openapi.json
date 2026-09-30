@@ -58382,10 +58382,17 @@
             "in": "query",
             "name": "bbox",
             "required": false,
+            "style": "form",
+            "explode": false,
             "schema": {
-              "type": "string"
+              "type": "array",
+              "minItems": 4,
+              "maxItems": 6,
+              "items": {
+                "type": "number"
+              }
             },
-            "description": "minx,miny,maxx,maxy in bbox-crs axis order (CRS84: a box whose minx exceeds maxx crosses the antimeridian)"
+            "description": "minx,miny,maxx,maxy in bbox-crs axis order (CRS84: a box whose minx exceeds maxx crosses the antimeridian); six numbers are read as a box with heights, which are ignored"
           },
           {
             "in": "query",
@@ -58402,6 +58409,17 @@
               ]
             },
             "description": "default CRS84"
+          },
+          {
+            "in": "query",
+            "name": "datetime",
+            "required": false,
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "An instant or interval (RFC 3339; an open end is ..). Wells carry no time, so every well is returned; a malformed value is refused"
           },
           {
             "in": "query",
@@ -58615,7 +58633,7 @@
             }
           },
           "400": {
-            "description": "Unsupported crs or bbox-crs, a malformed bbox, or a limit that is not a whole number from 1",
+            "description": "Unsupported crs or bbox-crs, a malformed bbox or datetime, a limit that is not a whole number from 1, or an unknown query parameter",
             "headers": {
               "X-Request-Id": {
                 "description": "This request's id; every response carries it, and an error body repeats it as request_id",
