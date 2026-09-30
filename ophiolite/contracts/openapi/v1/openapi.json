@@ -58854,6 +58854,12 @@
                 "schema": {
                   "type": "string"
                 }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before retrying, when the service is briefly unavailable (for example its database)",
+                "schema": {
+                  "type": "string"
+                }
               }
             },
             "content": {
@@ -58926,6 +58932,12 @@
             "headers": {
               "X-Request-Id": {
                 "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before retrying, when the service is briefly unavailable (for example its database)",
                 "schema": {
                   "type": "string"
                 }
@@ -59206,6 +59218,12 @@
         "headers": {
           "X-Request-Id": {
             "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "Retry-After": {
+            "description": "Seconds to wait before retrying, when the service is briefly unavailable (for example its database)",
             "schema": {
               "type": "string"
             }
