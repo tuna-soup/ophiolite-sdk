@@ -3838,6 +3838,20 @@
                       "default": null,
                       "description": "result-download: the run that produced it.",
                       "title": "Run"
+                    },
+                    "runner": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E13: the sandboxed runner that produced it (engine, image digest and job; the plan and assistant when an assistant ran it).",
+                      "title": "Runner"
                     }
                   },
                   "required": [
@@ -7075,6 +7089,20 @@
                       "default": null,
                       "description": "result-download: the run that produced it.",
                       "title": "Run"
+                    },
+                    "runner": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E13: the sandboxed runner that produced it (engine, image digest and job; the plan and assistant when an assistant ran it).",
+                      "title": "Runner"
                     }
                   },
                   "required": [

@@ -1,6 +1,6 @@
 {
-  "platform_commit": "ace377ddb5d40c75cd89e7700677ae066d5fbf42",
-  "contracts_tree": "31efa1438e6cb341eb30b36b94e5fd3d16462bee",
+  "platform_commit": "4d459c134c8c924bd2123ee402100c8e635c46bb",
+  "contracts_tree": "b16ad670a064f112b8785030ffd661b402b72059",
   "registry_version": "1.21.0",
   "files": {
     "README.md": "668c32afad894ec0a0167e307013f87eefca4ede323c17408bac12cac3fcdfdb",
@@ -89,7 +89,7 @@
     "generated/v1/ophiolite-contracts.ts": "01aa57be750502efa8c5bd00ceaa9520e812420441d89c0d0a203c1ccb2886f3",
     "mappings/v1/application-curve-to-well-curve.json": "aa2e1c1925f68aede0b3c5e7d8d7e7921ad69ea35733bc2e7d936a21c233c0dc",
     "mappings/v1/typed-standards.json": "fd2b1e9adc3b10ba383ee0a1f0f9fd01276895623403ce42c8d1c8a44a6b6046",
-    "openapi/v1/openapi.json": "f9d4fcafe49ef744dbaa66c7d3980342c733d39493dc56178ec3fca39ad0bb55",
+    "openapi/v1/openapi.json": "2b386d4f8a1108908a313e9e8e590d82830296f2c991c6f12b7ea98e7f36322b",
     "openapi/v1/scientific-assets.paths.json": "0f414e5b768f406eee18af26493d1a15a6404726b0b581989959b98ca4cb6249",
     "profile-schema.json": "7bf3c916757a5715a7dd9c56d09537d2108716d017e63443ed2f8e6ea74c2ab1",
     "profiles/v1/application-curve.json": "f2783cc80d26fb8a40e2d1e5f4ef24ddbf77b6f9adf217436904b160b6b5ce87",
