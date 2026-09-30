@@ -57486,6 +57486,136 @@
         }
       }
     },
+    "/api/v1/projects/{project}/features/api": {
+      "get": {
+        "summary": "This project's description of these resources (OpenAPI 3.0; servers names this landing address)",
+        "description": "OGC API - Features (E29); scope read; accepted principals: session, delegate, agent, grant (capability 3).",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "grant",
+          "session"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "This project's description of these resources (OpenAPI 3.0; servers names this landing address)",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/vnd.oai.openapi+json;version=3.0": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "openapi",
+                    "info",
+                    "paths"
+                  ],
+                  "properties": {
+                    "openapi": {
+                      "type": "string"
+                    },
+                    "info": {
+                      "type": "object"
+                    },
+                    "servers": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "paths": {
+                      "type": "object"
+                    },
+                    "components": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unsupported crs or bbox-crs, or a malformed bbox",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not a member, or the credential does not reach this area",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such collection or feature",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/features/conformance": {
       "get": {
         "summary": "Conformance classes (Part 1 core and GeoJSON, Part 2 CRS)",
@@ -58137,12 +58267,15 @@
             "in": "query",
             "name": "limit",
             "required": false,
+            "style": "form",
+            "explode": false,
             "schema": {
               "type": "integer",
               "minimum": 1,
               "maximum": 100,
               "default": 10
-            }
+            },
+            "description": "Page size; larger values are answered with the maximum and a next link"
           },
           {
             "in": "query",
@@ -58342,7 +58475,7 @@
             }
           },
           "400": {
-            "description": "Unsupported crs or bbox-crs, or a malformed bbox",
+            "description": "Unsupported crs or bbox-crs, a malformed bbox, or a limit that is not a whole number from 1",
             "headers": {
               "X-Request-Id": {
                 "description": "This request's id; every response carries it, and an error body repeats it as request_id",

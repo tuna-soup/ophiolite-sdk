@@ -696,6 +696,12 @@
     "response": "schema"
   },
   {
+    "operation": "GET /api/v1/projects/{project}/features/api",
+    "function": "getProjectsProjectFeaturesApi",
+    "request": "explicitly-untyped",
+    "response": "schema"
+  },
+  {
     "operation": "GET /api/v1/projects/{project}/features/collections",
     "function": "getProjectsProjectFeaturesCollections",
     "request": "explicitly-untyped",
