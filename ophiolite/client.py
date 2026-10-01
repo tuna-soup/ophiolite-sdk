@@ -423,17 +423,33 @@ class Client(Navigation, EntityClient, LocationClient):  # E29: wells() and exte
                           'Read the exact revision you were given, or ask its uploader.')
         return planning.parse(History,self._post('applications','result-history',{'asset_id':target['asset_id']}))
 
-    def grants(self,asset):
+    def _sharing_target(self,asset):
+        """H5b: one classification for grants and share. A derived item (a catalogue entry or a descriptor carries
+        `ophiolite:derived`) that is not an application result is a derived publication when publications/info names
+        the same asset; its recipients are set on its current version."""
         from . import publish as planning
         asset=planning.selection(asset)
-        result=(self._post('las-uploads','info',{'asset_id':asset['asset_id']}) if asset['authority']=='ophiolite:uploaded'
-                else self._post('publications','info',{'asset_id':asset['asset_id']}) if asset['authority']=='ophiolite:publication'  # E31
-                else self._post('applications','result-list',{}))
+        if asset['authority']=='ophiolite:uploaded':return asset,self._post('las-uploads','info',{'asset_id':asset['asset_id']})
+        if asset['authority']=='ophiolite:publication':return asset,self._post('publications','info',{'asset_id':asset['asset_id']})  # E31
+        results=self._post('applications','result-list',{})
+        items=results.get('results') if isinstance(results,dict) else None
+        if not isinstance(items,list) or any(i.get('asset_id')==asset['asset_id'] for i in items if isinstance(i,dict)):return asset,results
+        try:info=self._post('publications','info',{'asset_id':asset['asset_id']})
+        except (PermissionRefused,Unavailable):return asset,results  # neither: the result refusal below explains it
+        if not isinstance(info,dict) or info.get('asset_id')!=asset['asset_id']:raise VerificationFailed('Sharing returned a different publication.')
+        if info.get('revision')!=asset['revision']:raise Refused('Recipients are set on the publication as a whole and share every version; select its current version to review them.')
+        return {**asset,'authority':'ophiolite:publication'},info
+
+    def grants(self,asset):
+        from . import publish as planning
+        asset,result=self._sharing_target(asset)
         return planning.grants(asset,result)
 
     def share(self,asset,*,read,expected_generation,reuse=None,command_id=None):
         """Replace recipients, conditionally.
 
+        Recipients belong to the result or derived publication as a whole: sharing
+        shares every version of it, earlier and later; an uploaded original has one.
         Pass ``expected_generation`` from the ``client.grants(asset)`` snapshot you
         reviewed. The request carries a command id; after an unknown outcome it is
         replayed once, which returns the applied result or refuses with
@@ -445,19 +461,21 @@ class Client(Navigation, EntityClient, LocationClient):  # E29: wells() and exte
         from .errors import ShareOutcomeUnknown
         from .models.api import UploadResult
         reuse=[] if reuse is None else reuse
-        planning.validate_recipients(read,reuse);asset=planning.selection(asset)
+        planning.validate_recipients(read,reuse)
+        if type(expected_generation) is not int or expected_generation<0:raise Refused('expected_generation must be a non-negative integer from client.grants(asset).')
+        if command_id is not None and (not isinstance(command_id,str) or not 0<len(command_id)<=64):raise Refused('command_id must be 1-64 characters.')
+        asset,_=self._sharing_target(asset)  # H5b: the same target as grants; validated input first, nothing sent before
         uploaded=asset['authority']=='ophiolite:uploaded';publication=asset['authority']=='ophiolite:publication'
         body={'asset_id' if uploaded or publication else 'id':asset['asset_id'],'audience':read,'reuse_audience':reuse}
         area='las-uploads' if uploaded else 'publications' if publication else 'applications'
-        if type(expected_generation) is not int or expected_generation<0:raise Refused('expected_generation must be a non-negative integer from client.grants(asset).')
-        if command_id is not None and (not isinstance(command_id,str) or not 0<len(command_id)<=64):raise Refused('command_id must be 1-64 characters.')
         # Never infer support: an older server would apply the request unconditionally.
         if self.grants(asset).generation is None:raise Refused('This server does not support conditional sharing.')
         body.update(expected_generation=expected_generation,command_id=command_id or uuid.uuid4().hex)
         try:result=self._post(area,'share',body)
         except ShareOutcomeUnknown:result=self._post(area,'share',body)  # identical replay: idempotent or refused
         if publication:  # E31: a derived publication answers its sharing view; its grants are the result
-            parsed=planning.grants(asset,{k:v for k,v in result.items() if k!='sharing_contract'})
+            # H5b: recipients belong to the publication as a whole; a version appended meanwhile is the same publication
+            parsed=planning.grants({**asset,'revision':result.get('revision')},{k:v for k,v in result.items() if k!='sharing_contract'})
             if parsed.asset_id!=asset['asset_id']:raise VerificationFailed('Sharing returned a different publication.')
             return parsed
         parsed=planning.parse(UploadResult,result) if uploaded else planning.parse_result(result)

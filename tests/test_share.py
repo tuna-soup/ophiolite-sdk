@@ -104,3 +104,82 @@ def test_invalid_generation_sends_nothing(bad):
             client.share({'asset_id':'r','revision':'v','authority':'ophiolite:derived'},read=['bob'],expected_generation=bad)
     assert requests==[]
 
+
+
+def routed(answers, calls):
+    """A transport that answers per route and records (route, body): a wrong route cannot pass unnoticed."""
+    def handle(request):
+        route = request.url.path.split('/projects/p/', 1)[1]
+        calls.append((route, json.loads(request.content or b'{}')))
+        answer = answers.get(route)
+        if answer is None: return httpx.Response(404, json={'error': 'not found', 'code': 'not-found'})
+        return httpx.Response(answer[0], json=answer[1]) if isinstance(answer, tuple) else httpx.Response(200, json=answer)
+    return httpx.MockTransport(handle)
+
+
+INFO = {'asset_id': 'pub', 'revision': 'r2', 'name': 'Surface', 'owner': 'alice', 'can_share': True, 'permitted_audience': ['bob'],
+        'recipients': ['bob'], 'reuse_recipients': [], 'grants_generation': 3, 'display': {}, 'via': None}
+
+
+@pytest.mark.parametrize('shape', ['catalogue', 'descriptor'])
+def test_a_derived_publication_from_the_catalogue_reads_and_shares_through_publications(shape):
+    """H5b (G2-5): an item carrying `ophiolite:derived` that is not an application result is a derived publication:
+    grants() reads publications/info and share() writes publications/share, with the same target."""
+    asset = {'asset_id': 'pub', 'revision': 'r2', 'authority': 'ophiolite:derived'}
+    if shape == 'descriptor': asset = {**asset, 'name': 'Surface', 'profile': 'triangulated-surface/1'}
+    calls = []
+    shared = {**INFO, 'recipients': [], 'grants_generation': 4, 'sharing_contract': 'conditional'}
+    answers = {'applications/result-list': {'results': []}, 'publications/info': INFO, 'publications/share': shared}
+    with httpx.Client(transport=routed(answers, calls)) as http:
+        client = Client('http://localhost', 'p', http=http)
+        got = client.grants(asset)
+        assert (got.recipients, got.generation) == (['bob'], 3) and [c[0] for c in calls] == ['applications/result-list', 'publications/info']
+        assert calls[1][1] == {'project_id': 'p', 'asset_id': 'pub'}
+        calls.clear()
+        after = client.share(asset, read=[], expected_generation=3, command_id='c1')
+        assert after.recipients == [] and calls[-1][0] == 'publications/share'
+        assert {k: calls[-1][1][k] for k in ('asset_id', 'audience', 'expected_generation')} == {'asset_id': 'pub', 'audience': [], 'expected_generation': 3}
+
+
+def test_an_earlier_version_or_another_owner_is_refused_and_application_results_keep_their_route():
+    from ophiolite.errors import Refused
+    calls = []
+    answers = {'applications/result-list': {'results': []}, 'publications/info': INFO}
+    with httpx.Client(transport=routed(answers, calls)) as http:
+        client = Client('http://localhost', 'p', http=http)
+        with pytest.raises(Refused, match='current version'): client.grants({'asset_id': 'pub', 'revision': 'r1', 'authority': 'ophiolite:derived'})
+    calls = []
+    answers = {'applications/result-list': {'results': []}, 'publications/info': {**INFO, 'can_share': False}}
+    with httpx.Client(transport=routed(answers, calls)) as http:
+        with pytest.raises(PermissionRefused): Client('http://localhost', 'p', http=http).grants({'asset_id': 'pub', 'revision': 'r2', 'authority': 'ophiolite:derived'})
+    calls = []
+    entry = {'asset_id': 'run', 'revision': 'x', 'can_share': True, 'recipients': [], 'reuse_recipients': []}
+    with httpx.Client(transport=routed({'applications/result-list': {'results': [entry]}}, calls)) as http:
+        assert Client('http://localhost', 'p', http=http).grants({'asset_id': 'run', 'revision': 'x', 'authority': 'ophiolite:derived'}).recipients == []
+    assert [c[0] for c in calls] == ['applications/result-list']  # an application result never touches publications
+    calls = []
+    with httpx.Client(transport=routed({'applications/result-list': {'results': []}, 'publications/info': {**INFO, 'asset_id': 'other'}}, calls)) as http:
+        with pytest.raises(VerificationFailed): Client('http://localhost', 'p', http=http).grants({'asset_id': 'pub', 'revision': 'r2', 'authority': 'ophiolite:derived'})
+
+
+def test_a_publication_share_survives_a_lost_answer_and_a_version_appended_meanwhile():
+    """H5b: sharing a derived publication shares every version; a version appended between lookup and share is the same
+    publication (no false refusal after the change was applied); a lost answer is replayed with the same command."""
+    from ophiolite.errors import Refused
+    asset = {'asset_id': 'pub', 'revision': 'r2', 'authority': 'ophiolite:derived'}
+    calls, state = [], {'lost': True}
+    def handle(request):
+        route = request.url.path.split('/projects/p/', 1)[1]; body = json.loads(request.content or b'{}'); calls.append((route, body))
+        if route == 'applications/result-list': return httpx.Response(200, json={'results': []})
+        if route == 'publications/info': return httpx.Response(200, json=INFO)
+        if route == 'publications/share':
+            if state['lost']: state['lost'] = False; return httpx.Response(502, json={'error': 'lost'})
+            return httpx.Response(200, json={**INFO, 'revision': 'r3', 'recipients': [], 'grants_generation': 4, 'sharing_contract': 'conditional'})
+        return httpx.Response(404, json={})
+    with httpx.Client(transport=httpx.MockTransport(handle)) as http:
+        after = Client('http://localhost', 'p', http=http).share(asset, read=[], expected_generation=3, command_id='same')
+    shares = [b for r, b in calls if r == 'publications/share']
+    assert len(shares) == 2 and shares[0] == shares[1] and after.recipients == [] and after.revision == 'r3'
+    assert 'every version' in Client.share.__doc__
+    with httpx.Client(transport=routed({'applications/result-list': {'results': []}, 'publications/info': INFO}, [])) as http:
+        with pytest.raises(Refused, match='every version'): Client('http://localhost', 'p', http=http).grants({**asset, 'revision': 'r1'})
