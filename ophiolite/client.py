@@ -418,6 +418,9 @@ class Client(Navigation, EntityClient, LocationClient):  # E29: wells() and exte
         from . import publish as planning
         from .models.api import History
         target=planning.selection(asset)
+        if target.get('authority')=='ophiolite:uploaded':  # H4 (E32 F4): the server would answer with a misleading refusal
+            raise Refused('history lists the versions of results and derived publications; the versions of an uploaded original are not listed. '
+                          'Read the exact revision you were given, or ask its uploader.')
         return planning.parse(History,self._post('applications','result-history',{'asset_id':target['asset_id']}))
 
     def grants(self,asset):

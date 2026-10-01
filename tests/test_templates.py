@@ -32,3 +32,26 @@ def test_template_command(name):
     directory=ROOT/'ophiolite/templates'/name;command=json.loads((directory/'template.json').read_text())['test_command']
     result=subprocess.run([sys.executable,*command[1:]],cwd=directory,env=dict(os.environ,OPHIOLITE_PYTHON=sys.executable),capture_output=True,text=True,timeout=240)
     assert result.returncode==0,result.stdout+result.stderr
+
+
+def test_the_template_client_uses_the_access_key_the_readme_names(tmp_path, monkeypatch):
+    """H4 (E32 F8): with OPHIOLITE_ACCESS_KEY set and no credential file named or saved, support.client_for uses the
+    key, as the sync-worker and map-application READMEs and the command line say; a saved or named file still wins."""
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'ophiolite/templates'))
+    import support
+    monkeypatch.setenv('XDG_CONFIG_HOME', str(tmp_path)); monkeypatch.setenv('HOME', str(tmp_path))
+    monkeypatch.delenv('OPHIOLITE_CREDENTIAL', raising=False)
+    monkeypatch.setenv('OPHIOLITE_ACCESS_KEY', 'oph_key_' + 'k' * 40)
+    with support.client_for('https://ophiolite.example', 'p') as client:
+        assert client.credential.kind == 'bearer'
+    monkeypatch.setenv('OPHIOLITE_CREDENTIAL', str(tmp_path / 'named.json'))
+    with pytest.raises(Exception): support.client_for('https://ophiolite.example', 'p')  # a named file is used, not the key
+
+
+def test_history_explains_that_uploaded_originals_have_no_listed_versions():
+    """H4 (E32 F4): refused in plain words before any request, instead of the server's misleading refusal."""
+    from ophiolite import Client, Credential
+    from ophiolite.errors import Refused
+    client = Client('https://ophiolite.example', 'p', Credential.bearer('oph_key_' + 'k' * 40))
+    with pytest.raises(Refused, match='uploaded original'):
+        client.history({'asset_id': 'a', 'revision': 'r', 'authority': 'ophiolite:uploaded'})
