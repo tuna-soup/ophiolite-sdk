@@ -26,3 +26,11 @@ def test_a_version_reads_with_and_without_the_access_key_that_made_it():
     assert made.via.label == '<b>Surface publisher app</b>' and made.via.key_id == 'k1'  # text, as written
     assert generated.Version.model_validate({'at': '2026-09-01T08:00:00Z', 'by': {'id': 'alice'}}).via is None
     with pytest.raises(Exception): generated.Via.model_validate({**via, 'label': 'x' * 81})
+
+
+def test_a_result_s_versions_name_the_key_each_was_published_through():
+    from ophiolite.models.api import History
+    h = History.model_validate({'asset_id': 'd1', 'head_revision': 'r2', 'count': 2, 'revisions': [
+        {'number': 1, 'revision': 'r1', 'by': 'alice', 'stage': 'draft', 'via': {'kind': 'access-key', 'key_id': 'k1', 'label': 'Surface publisher app'}},
+        {'number': 2, 'revision': 'r2', 'by': 'alice', 'stage': 'draft', 'via': None}]})
+    assert h.revisions[0].via.label == 'Surface publisher app' and h.revisions[1].via is None

@@ -1,6 +1,6 @@
 """Typed preview catalogue and browser-application grant responses."""
 from pydantic import Field
-from .generated import Contract, AssetSummary
+from .generated import Contract, AssetSummary, Via
 
 class ListPage(Contract):
     items: list[AssetSummary]
@@ -125,6 +125,7 @@ class HistoryEntry(Contract):
     input: Reference | None = None
     run_id: str | None = None
     stage: str
+    via: Via | None = None  # B1(a): the project access key this version was published through, as named then
 
 class History(Contract):
     asset_id: str
