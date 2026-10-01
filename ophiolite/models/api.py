@@ -312,3 +312,45 @@ class EntityPage(Contract):
     entities: list[dict]
     next_cursor: str | None = None
     untransformed: int | None = None
+
+
+class SourceReferenceDoc(Contract):
+    """E50a: the exact identity of one upstream read (sources/list, sources/export)."""
+    authority: str
+    key: str
+    revision: str
+    profile: str
+
+
+class SourceSelectionDoc(Contract):
+    """E50a: one source selection as sources/list answers it (only the fields the SDK reads are named)."""
+    id: str
+    name: str
+    profile: str
+    state: str
+    mode: str
+    authority: str
+    key: str
+    connection_id: str
+    reference: SourceReferenceDoc
+
+
+class SourceSelectionsPage(Contract):
+    selections: list[SourceSelectionDoc]
+    scope: str
+
+
+class SourceExportManifestDoc(Contract):
+    schema_: str = Field(alias='schema', pattern='^ophiolite\\.source-snapshot/1$')
+    reference: SourceReferenceDoc
+    metadata: dict
+    sha256: str = Field(pattern='^[0-9a-f]{64}$')
+    bytes: int = Field(ge=0)
+    media_type: str
+    reviewed_meaning_digest: str | None
+    interpretation: dict | None
+
+
+class SourceExportAnswer(Contract):
+    manifest: SourceExportManifestDoc
+    payload_base64: str
