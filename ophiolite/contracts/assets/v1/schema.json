@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/schema.json",
   "x-ophiolite": {
     "id": "ophiolite.scientific-asset/1",
-    "version": "1.13.0",
+    "version": "1.14.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -52,6 +52,17 @@
           "anyOf": [
             {
               "$ref": "#/$defs/ImportOrigin"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "via": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Via"
             },
             {
               "type": "null"
@@ -2820,6 +2831,17 @@
           ],
           "default": null
         },
+        "via": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Via"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "ordinal": {
           "anyOf": [
             {
@@ -2862,6 +2884,35 @@
         }
       },
       "title": "Version",
+      "type": "object"
+    },
+    "Via": {
+      "additionalProperties": false,
+      "description": "B1(a): the project access key a change was made through, as it was named then (the person stays the author;\nthis is the route, not a verified application identity). `key_id` belongs under Technical details.",
+      "properties": {
+        "kind": {
+          "const": "access-key",
+          "title": "Kind",
+          "type": "string"
+        },
+        "key_id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Key Id",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 80,
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "key_id",
+        "label"
+      ],
+      "title": "Via",
       "type": "object"
     },
     "WellLocationContext": {

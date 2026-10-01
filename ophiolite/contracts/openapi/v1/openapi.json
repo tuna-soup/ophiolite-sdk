@@ -1031,6 +1031,18 @@
                       ],
                       "default": null,
                       "title": "Run Id"
+                    },
+                    "via": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/Via"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "B1(a): the project access key a publication was made through, as named then; only on the reader's own events."
                     }
                   },
                   "required": [
@@ -4343,6 +4355,18 @@
                       ],
                       "default": null,
                       "title": "Publication Agent"
+                    },
+                    "published_via": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/Via"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "B1(a): the project access key this result was published through, as it was named then."
                     }
                   },
                   "required": [
@@ -6293,6 +6317,18 @@
                       ],
                       "default": null,
                       "title": "Publication Agent"
+                    },
+                    "published_via": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/Via"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "B1(a): the project access key this result was published through, as it was named then."
                     }
                   },
                   "required": [
@@ -9498,6 +9534,18 @@
                       ],
                       "default": null,
                       "title": "Publication Agent"
+                    },
+                    "published_via": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/Via"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "B1(a): the project access key this result was published through, as it was named then."
                     }
                   },
                   "required": [
@@ -26731,6 +26779,18 @@
                       "description": "member_names: the display name of each permitted recipient (author only)",
                       "title": "Display",
                       "type": "object"
+                    },
+                    "via": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/Via"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "B1(a): the project access key this version was published through, as it was named then; null when published otherwise"
                     }
                   },
                   "required": [
@@ -26924,6 +26984,18 @@
                       "description": "member_names: the display name of each permitted recipient (author only)",
                       "title": "Display",
                       "type": "object"
+                    },
+                    "via": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/Via"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "B1(a): the project access key this version was published through, as it was named then; null when published otherwise"
                     },
                     "sharing_contract": {
                       "const": "conditional",
@@ -52445,7 +52517,7 @@
                       "items": {
                         "x-ophiolite": {
                           "id": "ophiolite.asset-summary/1",
-                          "version": "1.2.0",
+                          "version": "1.3.0",
                           "lifecycle": "preview"
                         },
                         "additionalProperties": false,
@@ -52679,6 +52751,43 @@
                                                   "id"
                                                 ],
                                                 "title": "Person",
+                                                "type": "object"
+                                              },
+                                              {
+                                                "type": "null"
+                                              }
+                                            ],
+                                            "default": null
+                                          },
+                                          "via": {
+                                            "anyOf": [
+                                              {
+                                                "additionalProperties": false,
+                                                "description": "B1(a): the project access key a change was made through, as it was named then (the person stays the author;\nthis is the route, not a verified application identity). `key_id` belongs under Technical details.",
+                                                "properties": {
+                                                  "kind": {
+                                                    "const": "access-key",
+                                                    "title": "Kind",
+                                                    "type": "string"
+                                                  },
+                                                  "key_id": {
+                                                    "maxLength": 512,
+                                                    "minLength": 1,
+                                                    "title": "Key Id",
+                                                    "type": "string"
+                                                  },
+                                                  "label": {
+                                                    "maxLength": 80,
+                                                    "title": "Label",
+                                                    "type": "string"
+                                                  }
+                                                },
+                                                "required": [
+                                                  "kind",
+                                                  "key_id",
+                                                  "label"
+                                                ],
+                                                "title": "Via",
                                                 "type": "object"
                                               },
                                               {
@@ -53035,7 +53144,7 @@
                 "schema": {
                   "x-ophiolite": {
                     "id": "ophiolite.scientific-asset/1",
-                    "version": "1.13.0",
+                    "version": "1.14.0",
                     "lifecycle": "preview"
                   },
                   "additionalProperties": false,
@@ -53782,6 +53891,43 @@
                                 }
                               ],
                               "default": null
+                            },
+                            "via": {
+                              "anyOf": [
+                                {
+                                  "additionalProperties": false,
+                                  "description": "B1(a): the project access key a change was made through, as it was named then (the person stays the author;\nthis is the route, not a verified application identity). `key_id` belongs under Technical details.",
+                                  "properties": {
+                                    "kind": {
+                                      "const": "access-key",
+                                      "title": "Kind",
+                                      "type": "string"
+                                    },
+                                    "key_id": {
+                                      "maxLength": 512,
+                                      "minLength": 1,
+                                      "title": "Key Id",
+                                      "type": "string"
+                                    },
+                                    "label": {
+                                      "maxLength": 80,
+                                      "title": "Label",
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "kind",
+                                    "key_id",
+                                    "label"
+                                  ],
+                                  "title": "Via",
+                                  "type": "object"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "default": null
                             }
                           },
                           "required": [
@@ -53995,6 +54141,43 @@
                                             "id"
                                           ],
                                           "title": "Person",
+                                          "type": "object"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ],
+                                      "default": null
+                                    },
+                                    "via": {
+                                      "anyOf": [
+                                        {
+                                          "additionalProperties": false,
+                                          "description": "B1(a): the project access key a change was made through, as it was named then (the person stays the author;\nthis is the route, not a verified application identity). `key_id` belongs under Technical details.",
+                                          "properties": {
+                                            "kind": {
+                                              "const": "access-key",
+                                              "title": "Kind",
+                                              "type": "string"
+                                            },
+                                            "key_id": {
+                                              "maxLength": 512,
+                                              "minLength": 1,
+                                              "title": "Key Id",
+                                              "type": "string"
+                                            },
+                                            "label": {
+                                              "maxLength": 80,
+                                              "title": "Label",
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "kind",
+                                            "key_id",
+                                            "label"
+                                          ],
+                                          "title": "Via",
                                           "type": "object"
                                         },
                                         {
@@ -60685,6 +60868,18 @@
           "at": {
             "title": "At",
             "type": "number"
+          },
+          "via": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Via"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "B1(a): on a new revision of an uploaded or derived asset, the project access key it was published through, as named then."
           }
         },
         "required": [
@@ -68013,6 +68208,35 @@
           "changed_at"
         ],
         "title": "UploadPolicy",
+        "type": "object"
+      },
+      "Via": {
+        "additionalProperties": false,
+        "description": "B1(a): the project access key a change was made through, as it was named then (the person stays the author;\nthis is the route, not a verified application identity). `key_id` belongs under Technical details.",
+        "properties": {
+          "kind": {
+            "const": "access-key",
+            "title": "Kind",
+            "type": "string"
+          },
+          "key_id": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Key Id",
+            "type": "string"
+          },
+          "label": {
+            "maxLength": 80,
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "key_id",
+          "label"
+        ],
+        "title": "Via",
         "type": "object"
       },
       "Webhook": {

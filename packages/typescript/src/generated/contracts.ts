@@ -104,6 +104,7 @@ export type Acquisition = {
   uploaded_at: number;
   rights: string;
   origin?: ImportOrigin | null;
+  via?: Via | null;
 };
 
 export type AttributeSpec = {
@@ -511,9 +512,16 @@ export type TypedInterpretation = {
 export type Version = {
   at?: string | null;
   by?: Person | null;
+  via?: Via | null;
   ordinal?: number | null;
   of?: number | null;
   source_version?: string | null;
+};
+
+export type Via = {
+  kind: "access-key";
+  key_id: string;
+  label: string;
 };
 
 export type WellLocationContext = {

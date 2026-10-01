@@ -335,6 +335,7 @@ class Acquisition(Contract):
     uploaded_at: float = Field(...)
     rights: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     origin: ImportOrigin | None = Field(None)
+    via: Via | None = Field(None)
 
 class DerivationInfo(Contract):
     method: MethodRecord = Field(...)
@@ -545,9 +546,15 @@ class TrajectoryContext(Contract):
 class Version(Contract):
     at: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(None)
     by: Person | None = Field(None)
+    via: Via | None = Field(None)
     ordinal: Annotated[int, Field(ge=1)] | None = Field(None)
     of: Annotated[int, Field(ge=1)] | None = Field(None)
     source_version: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(None)
+
+class Via(Contract):
+    kind: Literal['access-key'] = Field(...)
+    key_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    label: Annotated[str, Field(max_length=80)] = Field(...)
 
 class WellLocationContext(Contract):
     type: Literal['well-location'] = Field(...)
@@ -1213,6 +1220,7 @@ SeismicContext.model_rebuild()
 TopsContext.model_rebuild()
 TrajectoryContext.model_rebuild()
 Version.model_rebuild()
+Via.model_rebuild()
 WellLocationContext.model_rebuild()
 WellLogLink.model_rebuild()
 XY.model_rebuild()
