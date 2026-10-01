@@ -39907,10 +39907,8 @@
                   "additionalProperties": false,
                   "properties": {
                     "manifest": {
-                      "additionalProperties": true,
-                      "description": "The exact source snapshot manifest (ophiolite.source-snapshot/1) with the reviewed meaning.",
-                      "title": "Manifest",
-                      "type": "object"
+                      "$ref": "#/components/schemas/SourceExportManifest",
+                      "description": "The exact source snapshot manifest (ophiolite.source-snapshot/1) with the reviewed meaning."
                     },
                     "payload_base64": {
                       "title": "Payload Base64",
@@ -43118,8 +43116,7 @@
                     },
                     "columns": {
                       "items": {
-                        "additionalProperties": true,
-                        "type": "object"
+                        "$ref": "#/components/schemas/SourceColumn"
                       },
                       "title": "Columns",
                       "type": "array"
@@ -43138,9 +43135,7 @@
                       "type": "integer"
                     },
                     "reference": {
-                      "additionalProperties": true,
-                      "title": "Reference",
-                      "type": "object"
+                      "$ref": "#/components/schemas/SourceReference"
                     }
                   },
                   "required": [
@@ -43472,23 +43467,19 @@
                       "type": "string"
                     },
                     "reference": {
-                      "additionalProperties": true,
-                      "title": "Reference",
-                      "type": "object"
+                      "$ref": "#/components/schemas/SourceReference"
                     },
                     "manifest": {
                       "anyOf": [
                         {
-                          "additionalProperties": true,
-                          "type": "object"
+                          "$ref": "#/components/schemas/SourceManifest"
                         },
                         {
                           "type": "null"
                         }
                       ],
                       "default": null,
-                      "description": "The exact snapshot manifest of the reference (refresh answers it; a listing omits it).",
-                      "title": "Manifest"
+                      "description": "The exact snapshot manifest of the reference (refresh answers it; a listing omits it)."
                     },
                     "name": {
                       "title": "Name",
@@ -67502,6 +67493,193 @@
         "title": "SignalDisplay",
         "type": "object"
       },
+      "SourceColumn": {
+        "additionalProperties": false,
+        "description": "E50a: one column of a source's table view.",
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          },
+          "editable": {
+            "title": "Editable",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "type",
+          "editable"
+        ],
+        "title": "SourceColumn",
+        "type": "object"
+      },
+      "SourceExportManifest": {
+        "additionalProperties": false,
+        "description": "E50a: the manifest an export answers: the stored manifest plus the reviewed meaning.",
+        "properties": {
+          "schema": {
+            "const": "ophiolite.source-snapshot/1",
+            "title": "Schema",
+            "type": "string"
+          },
+          "reference": {
+            "$ref": "#/components/schemas/SourceReference"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "description": "Profile-specific metadata. sql-wells/1: kind, name, mapping, columns (original names), samples, null_counts, preview_rows, unresolved.",
+            "title": "Metadata",
+            "type": "object"
+          },
+          "sha256": {
+            "description": "sha256 of the exact payload bytes.",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Sha256",
+            "type": "string"
+          },
+          "bytes": {
+            "description": "Length of the exact payload in bytes.",
+            "minimum": 0,
+            "title": "Bytes",
+            "type": "integer"
+          },
+          "media_type": {
+            "title": "Media Type",
+            "type": "string"
+          },
+          "contract": {
+            "additionalProperties": true,
+            "description": "The connector semantics report (ophiolite.connector-semantics/1): identity, representation, mapping, fidelity, history, distribution, capabilities.",
+            "title": "Contract",
+            "type": "object"
+          },
+          "losses": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Losses",
+            "type": "array"
+          },
+          "scientific_validation": {
+            "title": "Scientific Validation",
+            "type": "string"
+          },
+          "reviewed_meaning_digest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed Meaning Digest"
+          },
+          "interpretation": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Interpretation"
+          }
+        },
+        "required": [
+          "schema",
+          "reference",
+          "metadata",
+          "sha256",
+          "bytes",
+          "media_type",
+          "contract",
+          "losses",
+          "scientific_validation",
+          "reviewed_meaning_digest",
+          "interpretation"
+        ],
+        "title": "SourceExportManifest",
+        "type": "object"
+      },
+      "SourceManifest": {
+        "additionalProperties": false,
+        "description": "E50a: an exact source snapshot manifest (ophiolite.source-snapshot/1), as a selection stores it.",
+        "properties": {
+          "schema": {
+            "const": "ophiolite.source-snapshot/1",
+            "title": "Schema",
+            "type": "string"
+          },
+          "reference": {
+            "$ref": "#/components/schemas/SourceReference"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "description": "Profile-specific metadata. sql-wells/1: kind, name, mapping, columns (original names), samples, null_counts, preview_rows, unresolved.",
+            "title": "Metadata",
+            "type": "object"
+          },
+          "sha256": {
+            "description": "sha256 of the exact payload bytes.",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Sha256",
+            "type": "string"
+          },
+          "bytes": {
+            "description": "Length of the exact payload in bytes.",
+            "minimum": 0,
+            "title": "Bytes",
+            "type": "integer"
+          },
+          "media_type": {
+            "title": "Media Type",
+            "type": "string"
+          },
+          "contract": {
+            "additionalProperties": true,
+            "description": "The connector semantics report (ophiolite.connector-semantics/1): identity, representation, mapping, fidelity, history, distribution, capabilities.",
+            "title": "Contract",
+            "type": "object"
+          },
+          "losses": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Losses",
+            "type": "array"
+          },
+          "scientific_validation": {
+            "title": "Scientific Validation",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema",
+          "reference",
+          "metadata",
+          "sha256",
+          "bytes",
+          "media_type",
+          "contract",
+          "losses",
+          "scientific_validation"
+        ],
+        "title": "SourceManifest",
+        "type": "object"
+      },
       "SourceParent": {
         "additionalProperties": false,
         "properties": {
@@ -67529,6 +67707,40 @@
           "revision"
         ],
         "title": "SourceParent",
+        "type": "object"
+      },
+      "SourceReference": {
+        "additionalProperties": false,
+        "description": "E50a: the exact identity of one upstream read. For sql-wells/1 the revision is the payload's sha256.",
+        "properties": {
+          "authority": {
+            "description": "The connection's stable namespace.",
+            "title": "Authority",
+            "type": "string"
+          },
+          "key": {
+            "description": "The upstream item's key within that namespace (a table, file or record).",
+            "title": "Key",
+            "type": "string"
+          },
+          "revision": {
+            "description": "The exact upstream revision read.",
+            "title": "Revision",
+            "type": "string"
+          },
+          "profile": {
+            "description": "The representation profile, e.g. sql-wells/1, geotiff/1, las2/1, osdu-record/1, osdu-welllog-parquet/1.",
+            "title": "Profile",
+            "type": "string"
+          }
+        },
+        "required": [
+          "authority",
+          "key",
+          "revision",
+          "profile"
+        ],
+        "title": "SourceReference",
         "type": "object"
       },
       "SourceRevision": {
@@ -67599,23 +67811,19 @@
             "type": "string"
           },
           "reference": {
-            "additionalProperties": true,
-            "title": "Reference",
-            "type": "object"
+            "$ref": "#/components/schemas/SourceReference"
           },
           "manifest": {
             "anyOf": [
               {
-                "additionalProperties": true,
-                "type": "object"
+                "$ref": "#/components/schemas/SourceManifest"
               },
               {
                 "type": "null"
               }
             ],
             "default": null,
-            "description": "The exact snapshot manifest of the reference (refresh answers it; a listing omits it).",
-            "title": "Manifest"
+            "description": "The exact snapshot manifest of the reference (refresh answers it; a listing omits it)."
           },
           "name": {
             "title": "Name",
