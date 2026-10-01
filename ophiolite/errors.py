@@ -54,3 +54,25 @@ class ValidationFailed(Refused):
 class RecoveryUnavailable(Refused):code='recovery-unavailable'
 class ShareOutcomeUnknown(Unavailable):code='share-outcome-unknown'
 class ImportIncomplete(OphioliteError):code='import-incomplete'
+
+
+# E50a: reading a connected source. Server-sent ones keep the server's code, message, remedy, docs and request id;
+# SDK-raised ones carry their own remedy and an anchor in the "Source rows and project wells" guide.
+SOURCE_GUIDE='/docs/guides/source-rows-and-project-wells/'
+
+class SourceNotFound(Unavailable):code='source-not-found'
+class SourceNeedsReview(IntegrityConflict):code='SOURCE_NEEDS_REVIEW'
+class SourceRevisionUnavailable(Unavailable):code='SOURCE_REVISION_UNAVAILABLE'
+class SourceDetached(Unavailable):code='SOURCE_DETACHED'  # never retried: a detached selection stays detached until selected again
+class SourceChecksumMismatch(VerificationFailed):code='source-checksum-mismatch'
+class SourceNotSupported(Refused):code='source-not-supported'
+
+class SourceRevisionDiffers(IntegrityConflict):
+    code='source-revision-differs'
+
+    def __init__(self,expected,actual):
+        self.expected,self.actual=expected,actual
+        super().__init__('The source is at a different revision than expected; no rows were returned.',
+                         'Read it again without --expect-revision (or with the revision you now expect), or compare the two revisions first.',
+                         details={'expected':expected,'actual':actual},remedy='Read the source again and decide whether the new revision is the one you want.',
+                         docs=SOURCE_GUIDE+'#source-revision-differs')

@@ -312,13 +312,14 @@ class Client(Navigation, EntityClient, LocationClient):  # E29: wells() and exte
             if (self.url,self.project)!=(url,project):raise RecoveryUnavailable('The gateway or project changed during this operation.')
             try:
                 with self.http.stream('POST',url+path,content=raw,headers=captured,follow_redirects=False) as response:
-                    if response.status_code in (429,503) and attempt+1<attempts:
+                    refusal=None if response.is_success else policy.head_bytes(response)
+                    if response.status_code in (429,503) and attempt+1<attempts and policy.retried(response,refusal):
                         time.sleep(policy.delay(response));continue
-                    policy.status(response,operation)
+                    policy.status(response,operation,refusal)
                     content=bytearray()
                     for chunk in response.iter_bytes():
                         content.extend(chunk)
-                        if len(content)>policy.MAX_RESPONSE:raise CapacityExceeded('Application response exceeds its supported size.')
+                        if len(content)>policy.MAX_RESPONSE:raise policy.too_large()
                     return policy.decode(bytes(content))
             except httpx.HTTPError:
                 if attempt+1<attempts:continue

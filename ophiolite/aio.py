@@ -182,13 +182,14 @@ class AsyncClient(Client):
             if (self.url,self.project)!=(url,project):raise RecoveryUnavailable('The gateway or project changed during this operation.')
             try:
                 async with self.http.stream('POST',url+path,content=raw,headers=captured,follow_redirects=False) as response:
-                    if response.status_code in (429,503) and attempt+1<attempts:
+                    refusal=None if response.is_success else await policy.bounded(response)
+                    if response.status_code in (429,503) and attempt+1<attempts and policy.retried(response,refusal):
                         await anyio.sleep(policy.delay(response));continue
-                    policy.status(response,operation,None if response.is_success else await policy.bounded(response))
+                    policy.status(response,operation,refusal)
                     content=bytearray()
                     async for chunk in response.aiter_bytes():
                         content.extend(chunk)
-                        if len(content)>policy.MAX_RESPONSE:raise CapacityExceeded('Application response exceeds its supported size.')
+                        if len(content)>policy.MAX_RESPONSE:raise policy.too_large()
                     return policy.decode(bytes(content))
             except httpx.HTTPError:
                 if attempt+1<attempts:continue

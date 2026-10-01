@@ -3,10 +3,43 @@ import json
 import math
 import re
 from .errors import (AuthenticationRequired,PermissionRefused,Unavailable,IntegrityConflict,
-                     CapacityExceeded,Refused,Busy,ShareOutcomeUnknown,VerificationFailed)
+                     CapacityExceeded,Refused,Busy,ShareOutcomeUnknown,VerificationFailed,
+                     SourceNeedsReview,SourceRevisionUnavailable,SourceDetached,SOURCE_GUIDE)
 
 MAX_RESPONSE=48*1024*1024  # bounded JSON envelope including a 32 MiB base64 artifact
 SHARE_RECOVERY='Read the current recipients first with client.grants(asset), then decide and call share again with the full intended audience and expected_generation from that snapshot.'
+
+
+# E50a: the source refusals, selected by the server's code before its HTTP status (one table). The server's message
+# is passed on verbatim (it states the bound when a table is over it); its remedy, docs and request id are kept.
+SOURCE_CODES={'SOURCE_NEEDS_REVIEW':SourceNeedsReview,'SOURCE_REVISION_UNAVAILABLE':SourceRevisionUnavailable,
+              'SOURCE_DETACHED':SourceDetached,'SOURCE_ACCESS_DENIED':PermissionRefused,'SOURCE_MISSING':Unavailable,
+              'SOURCE_DELETED':Unavailable,'SOURCE_OFFLINE':Busy,'SOURCE_PENDING':Busy}
+SOURCE_REMEDIES={'SOURCE_DETACHED':'This source was removed from the project. Ask a project administrator to resume it; selecting it again does not bring it back.'}
+FINAL_CODES={code for code,kind in SOURCE_CODES.items() if not getattr(kind,'retryable',False)}  # a 429/503 naming one is never retried
+
+
+def too_large():
+    """E50a: the SDK's own response bound, stated in bytes with what to do (shared by the sync and async drivers)."""
+    return CapacityExceeded('The response exceeds the SDK bound of %s bytes (%d MiB).' % (format(MAX_RESPONSE,','),MAX_RESPONSE//(1024*1024)),
+                            'Read a smaller table: ask for an approved view with fewer rows or columns.',
+                            remedy='Read a smaller table: ask for an approved view with fewer rows or columns.',docs=SOURCE_GUIDE+'#capacity-exceeded')
+
+
+def retried(response,raw):
+    """A 429/503 is retried unless its envelope names a final state (R4: a detached source is not busy)."""
+    return envelope(response,raw).get('code') not in FINAL_CODES
+
+
+def head_bytes(response):
+    """The first bytes of a synchronous refusal's body, at most one past the bound."""
+    raw=bytearray()
+    try:
+        for chunk in response.iter_bytes():
+            raw.extend(chunk)
+            if len(raw)>ENVELOPE_LIMIT:break
+    except Exception:return b''
+    return bytes(raw)
 
 
 def delay(response):
@@ -65,6 +98,15 @@ def status(response,operation,raw=None):
     code=response.status_code
     if 200<=code<300:return
     meta=envelope(response,raw)  # E31: first, so every category below keeps the server's metadata
+    source=SOURCE_CODES.get(meta.get('code'))
+    if source is not None:
+        message=meta.get('message') or 'The source refused this read.'
+        extra=carried(meta)
+        if meta['code'] in SOURCE_REMEDIES:  # the server has no remedy of its own for these (its envelope falls back to "retry once")
+            extra.update(remedy=SOURCE_REMEDIES[meta['code']],docs=SOURCE_GUIDE+'#'+meta['code'].lower().replace('_','-'))
+        recovery=extra.get('remedy') or ''
+        if source is Busy:raise Busy(message,recovery,status=code,retry_after=delay(response),code=meta['code'],**extra)
+        raise source(message,recovery,status=code,code=meta['code'],**extra)
     if operation=='share' and code>=500:
         raise ShareOutcomeUnknown('The sharing outcome is unknown.',SHARE_RECOVERY,status=code,**carried(meta))
     if operation=='share' and code==409:

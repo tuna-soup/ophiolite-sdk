@@ -212,3 +212,15 @@ def test_doctor_online_checks_reach_and_expiry(tmp_path,monkeypatch,capsys):
     Reach.projects=lambda self:[{'id':'other'}]
     cli.main(['doctor','--configuration',str(config),'--credentials',str(tmp_path/'none.json'),'--online'])
     assert 'Reach: no - this credential does not reach p' in capsys.readouterr().out
+
+
+def test_sources_list_runs(tmp_path):
+    """E50a S2: the merged E31 verb raised Refused('Unsupported application operation.') before it sent anything."""
+    import json
+    from tests.test_cli_subprocess import gateway, run
+    selection = {'id': 's1', 'name': 'Groningen wells', 'profile': 'sql-wells/1', 'state': 'current'}
+    with gateway({'/sources/list': (200, {'selections': [selection], 'scope': 'your upstream-authorized selections; not shared credentials'})}) as server:
+        done = run(tmp_path, 'sources', 'list', '--json', url=server.url)
+        human = run(tmp_path, 'sources', 'list', url=server.url)
+    assert done.returncode == 0, done.stderr
+    assert json.loads(done.stdout) == {'selections': [selection]} and 'Groningen wells (sql-wells/1): current' in human.stdout
