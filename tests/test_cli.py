@@ -217,10 +217,111 @@ def test_doctor_online_checks_reach_and_expiry(tmp_path,monkeypatch,capsys):
 def test_sources_list_runs(tmp_path):
     """E50a S2: the merged E31 verb raised Refused('Unsupported application operation.') before it sent anything."""
     import json
-    from tests.test_cli_subprocess import gateway, run
-    selection = {'id': 's1', 'name': 'Groningen wells', 'profile': 'sql-wells/1', 'state': 'current'}
+    from test_cli_subprocess import gateway, run
+    from test_sources import exported, payload, selection as documented
+    selection = documented(exported(payload()))
     with gateway({'/sources/list': (200, {'selections': [selection], 'scope': 'your upstream-authorized selections; not shared credentials'})}) as server:
         done = run(tmp_path, 'sources', 'list', '--json', url=server.url)
         human = run(tmp_path, 'sources', 'list', url=server.url)
     assert done.returncode == 0, done.stderr
-    assert json.loads(done.stdout) == {'selections': [selection]} and 'Groningen wells (sql-wells/1): current' in human.stdout
+    assert json.loads(done.stdout) == {'selections': [selection]} and 's1  Groningen wells (sql-wells/1): current' in human.stdout
+
+
+# --- E50a S5: sources describe and read on the command line ---------------------------------------------------------
+
+def _source_gateway(export=None):
+    import json as _json
+    from test_cli_subprocess import gateway
+    from test_sources import exported, payload, selection
+    answer = exported(payload())
+    return gateway({'/sources/list': (200, {'selections': [selection(answer)], 'scope': 's'}), '/sources/export': export or (200, answer)}), answer
+
+
+def test_sources_describe_and_read_print_their_documented_json(tmp_path):
+    import json
+    from test_cli_subprocess import run
+    server, answer = _source_gateway()
+    revision = answer['manifest']['reference']['revision']
+    with server:
+        described = run(tmp_path, 'sources', 'describe', 's1', '--json', url=server.url)
+        read = run(tmp_path, 'sources', 'read', 's1', '--json', '--expect-revision', revision, url=server.url)
+        original = run(tmp_path, 'sources', 'read', 's1', '--json', '--original', url=server.url)
+        human = run(tmp_path, 'sources', 'read', 's1', url=server.url)
+    assert described.returncode == read.returncode == original.returncode == human.returncode == 0, (described.stderr, read.stderr)
+    source = json.loads(described.stdout)['source']
+    assert set(source) == {'id', 'name', 'profile', 'revision', 'sha256', 'bytes', 'crs', 'row_count', 'columns', 'mapped_columns', 'mapping', 'null_counts', 'unresolved'}
+    assert source['row_count'] == 2 and source['revision'] == revision
+    document = json.loads(read.stdout)
+    assert set(document) == {'source', 'rows'} and set(document['source']) == {'id', 'name', 'profile', 'revision', 'sha256', 'crs', 'original', 'columns', 'row_count'}
+    assert document['rows'] == [{'well_id': 'a', 'name': 'Alpha', 'operator': 'NAM', 'x': 4.3, 'y': 52.0}, {'well_id': 'b', 'name': 'Beta', 'operator': None, 'x': 4.5, 'y': 52.1}]
+    assert json.loads(original.stdout)['rows'][0] == {'id': 'a', 'name': 'Alpha', 'x': 4.3, 'y': 52.0, 'operator': 'NAM'}
+    assert human.stdout == 'well_id,name,operator,x,y\na,Alpha,NAM,4.3,52.0\nb,Beta,,4.5,52.1\n'
+
+
+def test_sources_read_out_writes_once_atomically_and_matches_the_frame(tmp_path):
+    import csv
+    from test_cli_subprocess import run
+    from test_sources import exported, payload
+    from ophiolite.sources import SourceSnapshot
+    server, answer = _source_gateway()
+    with server:
+        first = run(tmp_path, 'sources', 'read', 's1', '--out', 'rows.csv', url=server.url)
+        again = run(tmp_path, 'sources', 'read', 's1', '--out', 'rows.csv', url=server.url)
+        forced = run(tmp_path, 'sources', 'read', 's1', '--out', 'rows.csv', '--force', '--original', url=server.url)
+    assert first.returncode == 0 and 'This copy is yours' in first.stdout
+    assert again.returncode == 1 and 'add --force' in again.stderr
+    assert forced.returncode == 0
+    written = list(csv.DictReader((tmp_path / 'rows.csv').open()))
+    assert written == [{'id': 'a', 'name': 'Alpha', 'x': '4.3', 'y': '52.0', 'operator': 'NAM'}, {'id': 'b', 'name': 'Beta', 'x': '4.5', 'y': '52.1', 'operator': ''}]
+    import json as _json
+    frame = SourceSnapshot(type('S', (), {'id': 's1', 'name': 'w'})(), answer['manifest'], _json.loads(payload()), answer['manifest']['sha256']).to_frame(original=True)
+    assert [[str(v) if v is not None else '' for v in row] for row in frame.itertuples(index=False)] == [list(r.values()) for r in written]
+    assert sorted(p.name for p in tmp_path.iterdir() if p.name.startswith('.rows')) == []  # no temporary file left
+
+
+@pytest.mark.parametrize('export,code', [
+    ((409, {'code': 'SOURCE_NEEDS_REVIEW', 'message': 'SQL snapshot exceeds 64 MiB', 'error': 'x'}), 4),
+    ((503, {'code': 'SOURCE_DETACHED', 'message': 'Source selection is not ready', 'error': 'x'}), 4),
+    ((403, {'code': 'SOURCE_ACCESS_DENIED', 'message': 'Connection access denied', 'error': 'x'}), 3),
+    ((503, {'code': 'SOURCE_OFFLINE', 'message': 'SQL source unavailable', 'error': 'x'}), 5),
+])
+def test_sources_read_refusals_exit_by_class_and_write_nothing(tmp_path, export, code):
+    import json
+    from test_cli_subprocess import run
+    server, _ = _source_gateway(export)
+    with server:
+        done = run(tmp_path, 'sources', 'read', 's1', '--out', 'rows.csv', '--json', url=server.url)
+    assert done.returncode == code, done.stdout
+    assert json.loads(done.stdout)['error']['code'] == export[1]['code'] and not (tmp_path / 'rows.csv').exists()
+    assert not [p for p in tmp_path.iterdir() if p.name.startswith('.rows')]
+
+
+def test_sources_read_revision_and_checksum_exit_codes(tmp_path):
+    import base64, json
+    from test_cli_subprocess import run
+    from test_sources import exported, payload
+    good = exported(payload())
+    tampered = {**good, 'payload_base64': base64.b64encode(payload().replace(b'"x":4.3', b'"x":4.4')).decode()}
+    server, _ = _source_gateway((200, tampered))
+    with server:
+        checksum = run(tmp_path, 'sources', 'read', 's1', '--json', url=server.url)
+    server, _ = _source_gateway()
+    with server:
+        differs = run(tmp_path, 'sources', 'read', 's1', '--json', '--expect-revision', '0' * 64, url=server.url)
+    assert checksum.returncode == 1 and json.loads(checksum.stdout)['error']['code'] == 'source-checksum-mismatch'
+    assert differs.returncode == 4 and json.loads(differs.stdout)['error']['code'] == 'source-revision-differs' and 'rows' not in json.loads(differs.stdout)
+
+
+def test_sources_read_json_needs_no_pandas(tmp_path):
+    import json, os, subprocess, sys
+    from test_cli_subprocess import SDK
+    blocked = tmp_path / 'blocked' / 'pandas'; blocked.mkdir(parents=True)
+    (blocked / '__init__.py').write_text("raise ImportError('pandas is not installed here')\n")
+    server, _ = _source_gateway()
+    (tmp_path / 'configuration.json').write_text(json.dumps({'schema': 'ophiolite.read-configuration/1', 'url': server.url, 'project': 'p'}))
+    env = {**{k: v for k, v in os.environ.items() if not k.startswith('OPHIOLITE_')}, 'PYTHONPATH': str(tmp_path / 'blocked') + os.pathsep + SDK,
+           'HOME': str(tmp_path), 'OPHIOLITE_ACCESS_KEY': 'oph_key_alice', 'PYTHONDONTWRITEBYTECODE': '1'}
+    with server:
+        done = subprocess.run([sys.executable, '-m', 'ophiolite', 'sources', 'read', 's1', '--json'], cwd=tmp_path, env=env, capture_output=True, text=True, timeout=60)
+    assert done.returncode == 0, done.stderr
+    assert len(json.loads(done.stdout)['rows']) == 2

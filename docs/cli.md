@@ -27,7 +27,9 @@ Every verb accepts `--json`. The result is one JSON object on standard output:
 | `changes head` | `{"head": {epoch, cursor}}` |
 | `changes list` | `{"changes": [event]}` |
 | `changes follow` | one event object per line, as they happen |
-| `sources list` | `{"selections": [selection]}` |
+| `sources list` | `{"selections": [selection]}` (the selections you bound; every profile) |
+| `sources describe ID` | `{"source": {id, name, profile, revision, sha256, bytes, crs, row_count, columns, mapped_columns, mapping, null_counts, unresolved}}` |
+| `sources read ID` | `{"source": {id, name, profile, revision, sha256, crs, original, columns, row_count}, "rows": [row]}`; with `--out`: `{"source": {…}, "out": path}` |
 | `publish-derived` | `{"published": receipt}` |
 | `share` | `{"shared", "recipients", "reuse_recipients"}` |
 | `status` | `{"state", "project_id", "scopes"}` |
@@ -37,6 +39,19 @@ Every verb accepts `--json`. The result is one JSON object on standard output:
 A refusal with `--json` prints `{"error": {"code", "message", "status", "remedy", "docs", "request_id"}}` on standard
 output (the server's own code, remedy, documentation anchor and request id when it sent them) and exits with the code
 above. Without `--json`, the message goes to standard error.
+
+## `sources`
+
+`sources list` shows the source selections you bound in this project. `sources describe ID` and `sources read ID` are
+for SQL well-location tables (`sql-wells/1`); other kinds are refused before anything is sent (exit 1). Both make one
+full, verified read (`describe` keeps only the shape): the returned source must be the one selected and its sha256 must
+equal its revision, otherwise exit 1 (`source-checksum-mismatch`). `--expect-revision R` exits 4
+(`source-revision-differs`) with no rows when the server returns another revision. `read` prints CSV, or with `--json`
+the documented object (no pandas needed); `--original` gives every source column as given instead of the mapped view.
+`--out FILE` (`.csv` or `.json`) writes the rows to a file of your own — not shared, not kept up to date — atomically,
+and refuses to replace an existing file without `--force`. A refused or failed read writes nothing. Source refusals:
+`SOURCE_NEEDS_REVIEW` and `SOURCE_DETACHED` exit 4, `SOURCE_ACCESS_DENIED` exits 3, `SOURCE_OFFLINE` and `SOURCE_PENDING`
+exit 5 after the retries.
 
 ## `--dry-run`
 

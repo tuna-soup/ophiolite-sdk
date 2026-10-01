@@ -149,8 +149,13 @@ def parser():
     changes=project(sub.add_parser('changes',help='The project event log: its head, pages after a cursor, or follow it live'))
     changes.add_argument('action',choices=['head','list','follow'])
     changes.add_argument('--epoch');changes.add_argument('--after',type=int);changes.add_argument('--seconds',type=int,default=300,help='follow: stop after this long')
-    sources=project(sub.add_parser('sources',help='Your upstream source selections in this project'))
-    sources.add_argument('action',choices=['list'])
+    sources=project(sub.add_parser('sources',help='Your upstream source selections: list them, describe one (costs one full read), or read its rows'))
+    sources.add_argument('action',choices=['list','describe','read'])
+    sources.add_argument('id',nargs='?',help='describe/read: the selection id from `sources list`')
+    sources.add_argument('--original',action='store_true',help='read: every source column as given, not the mapped view')
+    sources.add_argument('--expect-revision',help='describe/read: refuse (exit 4, nothing written) unless this is the revision returned')
+    sources.add_argument('--out',type=Path,help='read: write the rows to this .csv or .json file instead of standard output. The file is your own copy: it is not shared, kept up to date or checked again')
+    sources.add_argument('--force',action='store_true',help='read --out: replace an existing file')
     init=sub.add_parser('init',help='Start an application from a packaged template (map-application, derive-and-publish, sync-worker, notebook, agent-workflow)')
     init.add_argument('template',nargs='?',help='The template name; omit with --list');init.add_argument('--output',type=Path,help='An empty or new folder (default: ./TEMPLATE)')
     init.add_argument('--list',action='store_true',help='List the packaged templates')
@@ -230,9 +235,7 @@ def _journey(args,client):
         rows=[{'entity_id':w.entity_id,'name':w.name,'location':w.location} for w in wells]
         return done(args,'\n'.join(repr(w) for w in wells) or 'No well you may read.',{'wells':rows,'crs':wells.crs,'untransformed':wells.untransformed})
     if args.command=='sources':
-        answer=client._post('sources','list',{})
-        rows=answer.get('selections',[])
-        return done(args,'\n'.join('%s (%s): %s' % (r.get('name'),r.get('profile'),r.get('state')) for r in rows) or 'No source selection.',{'selections':rows})
+        return _sources(args,client)
     sync=client.sync()
     if args.action=='head':
         head=sync.head()
@@ -245,6 +248,64 @@ def _journey(args,client):
     for event in sync.follow(epoch=args.epoch,after=args.after,seconds=args.seconds,reconnect=False):  # follow: one line per event
         print(json.dumps(event) if args.json else '%s %s %s' % (event['cursor'],event['kind'],event.get('subject_id') or ''),flush=True)
     return None
+
+
+def _sources(args,client):
+    """E50a: sources list | describe ID | read ID (--original, --expect-revision, --out FILE [--force])."""
+    if args.action=='list':
+        if args.id or args.original or args.expect_revision or args.out or args.force:raise Refused('sources list takes no id or read options.')
+        from .models.api import SourceSelectionsPage
+        from .sources import _checked
+        rows=_checked(SourceSelectionsPage,client._post('sources','list',{}),'source listing')['selections']
+        return done(args,'\n'.join('%s  %s (%s): %s' % (r['id'],r['name'],r['profile'],r['state']) for r in rows) or 'No source selection of yours in this project.',{'selections':rows})
+    if not args.id:raise Refused('Give the selection id: ophiolite sources %s ID (see `ophiolite sources list`).' % args.action)
+    if args.action=='describe':
+        if args.original or args.out or args.force:raise Refused('describe takes only --expect-revision.')
+        described=client.source(args.id).describe(args.expect_revision).to_dict()
+        text='%s: %d rows, %d columns (%s), %s, revision %s' % (described['name'],described['row_count'],len(described['columns']),
+              ', '.join(c['name'] for c in described['columns']),described['crs'],described['revision'])
+        return done(args,text,{'source':described})
+    out=args.out
+    if out is not None:
+        if out.suffix.lower() not in ('.csv','.json'):raise Refused('Write --out to a .csv or .json file.')
+        if out.exists() and not args.force:raise Refused('%s exists; add --force to replace it.' % out)
+    elif args.force:raise Refused('--force is for --out.')
+    snapshot=client.source(args.id).read(args.expect_revision)
+    columns=snapshot.columns if args.original else snapshot.mapped_columns()
+    rows=snapshot.records(original=args.original)
+    about={'id':snapshot.id,'name':snapshot.name,'profile':snapshot.profile,'revision':snapshot.revision,'sha256':snapshot.sha256,'crs':snapshot.crs,
+           'original':bool(args.original),'columns':columns,'row_count':len(rows)}
+    if out is None:
+        if args.json:return done(args,None,{'source':about,'rows':rows})
+        sys.stdout.write(_csv(columns,rows));return {'source':about,'rows':rows}
+    _write_atomic(out,_csv(columns,rows) if out.suffix.lower()=='.csv' else json.dumps({'source':about,'rows':rows},indent=2,default=str)+'\n',args.force)
+    return done(args,'Wrote %d rows of %s (revision %s, %s) to %s. This copy is yours; it is not shared or kept up to date.' % (len(rows),snapshot.name,snapshot.revision,snapshot.crs,out),
+                {'source':about,'out':str(out)})
+
+
+def _csv(columns,rows):
+    import csv,io
+    stream=io.StringIO();writer=csv.writer(stream,lineterminator='\n');writer.writerow(columns)
+    for row in rows:writer.writerow(['' if row.get(c) is None else row.get(c) for c in columns])
+    return stream.getvalue()
+
+
+def _write_atomic(path,text,force):
+    """Write beside the target and move it into place; never a half-written file, never an overwrite without --force."""
+    import os,tempfile
+    path=Path(path);handle,temporary=tempfile.mkstemp(prefix='.'+path.name+'.',dir=str(path.parent or Path('.')))
+    try:
+        with os.fdopen(handle,'w',encoding='utf-8',newline='') as stream:
+            stream.write(text);stream.flush();os.fsync(stream.fileno())
+        if force:os.replace(temporary,path)
+        else:
+            try:os.link(temporary,path)
+            except FileExistsError:raise Refused('%s exists; add --force to replace it.' % path) from None
+            os.unlink(temporary)
+    except BaseException:
+        try:os.unlink(temporary)
+        except FileNotFoundError:pass
+        raise
 
 
 SKIP=('node_modules','dist','__pycache__','.venv')

@@ -9,7 +9,7 @@ import re
 import pytest
 from ophiolite import errors
 ROOT=Path(__file__).resolve().parents[1]
-NAMES={'authenticate','read-exact-data','validate-locally','publish-derived-curves','share-result','recover-publication','sync-a-project','derive-and-publish','wells-on-a-map'}
+NAMES={'authenticate','read-exact-data','validate-locally','publish-derived-curves','share-result','recover-publication','sync-a-project','derive-and-publish','wells-on-a-map','read-a-source'}
 
 
 def resolve(symbol):

@@ -224,6 +224,35 @@ class AsyncClient(Client):
 
     def work_folder(self,path,**options):return AsyncWorkFolder(self,path,**options)
 
+    async def sources(self):
+        """E50a: the source selections you bound in this project (every profile); see Client.sources()."""
+        return [AsyncSource(self,source.document) for source in await self._application('sources')]
+
+    async def source(self,id):
+        """E50a: the selection with this stable id (SourceNotFound when you have none); see Client.source()."""
+        return AsyncSource(self,(await self._application('source',id)).document)
+
+
+class AsyncSource:
+    """E50a: one source selection for the asynchronous client. describe() and read() run the synchronous, verified
+    read in a worker (HTTP stays on this loop) and return the same SourceDescription / SourceSnapshot. A cancelled
+    read finishes or fails as a whole before the cancellation is raised; no partial result is returned."""
+    def __init__(self,client,document):
+        self._client,self.document=client,document
+        self.id,self.name,self.profile,self.state,self.mode=document['id'],document['name'],document['profile'],document['state'],document['mode']
+        self.authority,self.key,self.revision=document['authority'],document['key'],document['reference']['revision']
+
+    def __repr__(self):return 'AsyncSource(%r, %s, %s, revision %s)' % (self.name,self.profile,self.state,self.revision[:12])
+
+    async def _run(self,name,expect_revision):
+        from .sources import Source
+        def operation():return getattr(Source(_ApplicationDriver(self._client),self.document),name)(expect_revision)
+        return await _complete(anyio.to_thread.run_sync(operation,abandon_on_cancel=False))
+
+    async def read(self,expect_revision=None):return await self._run('read',expect_revision)
+
+    async def describe(self,expect_revision=None):return await self._run('describe',expect_revision)
+
 
 class _ApplicationDriver(Client):
     """Run shared application planning/files in a worker; HTTP stays on its loop."""

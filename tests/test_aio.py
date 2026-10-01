@@ -204,3 +204,77 @@ async def test_cancel_with_failed_refresh_preserves_cancellation_and_old_cache(t
                 with pytest.raises(AuthenticationRequired):await client._headers()
             finally:
                 release.set();await asyncio.gather(task,return_exceptions=True)
+
+
+# --- E50a S4: the same source read for the asynchronous client ------------------------------------------------------
+
+def _source_gateway(export, calls=None):
+    from test_sources import exported, payload, selection
+    selected = selection(export if isinstance(export, dict) else exported(payload()))  # the answers below are of this table
+    def handle(request):
+        operation = request.url.path.rsplit('/', 1)[-1]
+        if calls is not None: calls.append(operation)
+        if operation == 'list': return httpx.Response(200, json={'selections': [selected], 'scope': 's'})
+        return export(request) if callable(export) else httpx.Response(200, json=export)
+    return handle
+
+
+@pytest.mark.anyio
+async def test_async_source_read_matches_the_synchronous_one():
+    from test_sources import exported, payload
+    from ophiolite.aio import AsyncSource
+    answer = exported(payload())
+    with Client('http://localhost', 'p', http=httpx.Client(transport=httpx.MockTransport(_source_gateway(answer)))) as sync:
+        expected = sync.source('s1').read(); described = sync.source('s1').describe().to_dict()
+    async with httpx.AsyncClient(transport=httpx.MockTransport(_source_gateway(answer))) as http:
+        async with AsyncClient('http://localhost', 'p', http=http) as client:
+            listed = await client.sources()
+            source = await client.source('s1')
+            snapshot = await source.read(expect_revision=source.revision)
+            description = await source.describe()
+    assert [type(s) for s in listed] == [AsyncSource] and source.revision == expected.revision
+    assert (snapshot.rows, snapshot.original, snapshot.revision, snapshot.crs) == (expected.rows, expected.original, expected.revision, expected.crs)
+    assert description.to_dict() == described
+
+
+@pytest.mark.anyio
+async def test_async_source_errors_match_the_synchronous_ones():
+    from test_sources import exported, payload
+    from ophiolite.errors import SourceChecksumMismatch, SourceDetached, SourceNotFound, SourceNotSupported, SourceRevisionDiffers
+    good = exported(payload())
+    tampered = {**good, 'payload_base64': __import__('base64').b64encode(payload().replace(b'"x":4.3', b'"x":4.4')).decode()}
+    detached = lambda request: httpx.Response(503, json={'code': 'SOURCE_DETACHED', 'message': 'Source selection is not ready', 'error': 'x'})
+    for export, call, expected in ((good, lambda s: s.read(expect_revision='0' * 64), SourceRevisionDiffers), (tampered, lambda s: s.read(), SourceChecksumMismatch),
+                                   (detached, lambda s: s.read(), SourceDetached)):
+        calls = []
+        async with httpx.AsyncClient(transport=httpx.MockTransport(_source_gateway(export, calls))) as http:
+            async with AsyncClient('http://localhost', 'p', http=http) as client:
+                source = await client.source('s1')
+                with pytest.raises(expected): await call(source)
+                with pytest.raises(SourceNotFound): await client.source('nope')
+        assert calls.count('export') == 1, (expected, calls)
+    from test_sources import selection
+    async with httpx.AsyncClient(transport=httpx.MockTransport(lambda r: httpx.Response(200, json={'selections': [selection(None, profile='las2/1')], 'scope': 's'}))) as http:
+        async with AsyncClient('http://localhost', 'p', http=http) as client:
+            with pytest.raises(SourceNotSupported): await (await client.source('s1')).read()
+
+
+@pytest.mark.anyio
+async def test_cancel_mid_source_read_completes_the_request_and_returns_nothing():
+    from test_sources import exported, payload
+    answer = json.dumps(exported(payload())).encode(); entered = asyncio.Event(); release = threading.Event(); closed = []; results = []
+    class SlowStream(httpx.AsyncByteStream):
+        async def __aiter__(self):
+            yield answer[:10]; entered.set()
+            while not release.is_set(): await asyncio.sleep(0.01)
+            yield answer[10:]
+        async def aclose(self): closed.append(True)
+    def export(request): return httpx.Response(200, stream=SlowStream(), headers={'Content-Type': 'application/json'})
+    async with httpx.AsyncClient(transport=httpx.MockTransport(_source_gateway(export))) as http:
+        async with AsyncClient('http://localhost', 'p', http=http) as client:
+            source = await client.source('s1')
+            async def read(): results.append(await source.read())
+            task = asyncio.create_task(read()); await asyncio.wait_for(entered.wait(), 5); task.cancel(); release.set()
+            with pytest.raises(asyncio.CancelledError): await task
+            assert task.done() and task.cancelled()
+    assert closed == [True] and results == []  # the response was read to its end and closed; no partial or late result
