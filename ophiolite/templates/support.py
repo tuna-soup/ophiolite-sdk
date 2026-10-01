@@ -89,7 +89,7 @@ def client_for(url, project='p', *, fixture=False):
         # The SDK owns discovery, private storage, locking and refresh.
         from ophiolite.auth import default_path
         path = os.environ.get('OPHIOLITE_CREDENTIAL') or default_path(url, project)
-        if os.environ.get('OPHIOLITE_ACCESS_KEY') and not os.environ.get('OPHIOLITE_CREDENTIAL') and not os.path.exists(path):
+        if os.environ.get('OPHIOLITE_ACCESS_KEY') and not os.environ.get('OPHIOLITE_CREDENTIAL') and not (os.path.exists(path) or os.path.islink(path)):
             credential = Credential.bearer(os.environ['OPHIOLITE_ACCESS_KEY'])  # H4 (E32 F8): as the README and the command line say
         else:
             credential = Credential.from_file(path)
