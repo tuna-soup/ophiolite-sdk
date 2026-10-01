@@ -45,6 +45,20 @@ class EntityClient:
             if cursor in seen: raise VerificationFailed('Repeated entity cursor.')
             seen.add(cursor)
 
+    def associations(self, assets=None, kind=None, profile=None):
+        """Every association you may read across your wells and wellbores, each item with its `entity`, in pages
+        (H3): one read instead of `entity(id).assets()` for every well. `assets`: up to 100 asset ids."""
+        body = {**({'asset_ids': [getattr(a, 'asset_id', a) for a in assets]} if assets is not None else {}),
+                **({'kind': kind} if kind else {}), **({'profile': profile} if profile else {}), 'limit': 100}
+        cursor, seen = None, set()
+        while True:
+            page = self._entities('associations', {**body, **({'cursor': cursor} if cursor else {})})
+            yield from page['items']
+            cursor = page.get('next_cursor')
+            if not cursor: return
+            if cursor in seen: raise VerificationFailed('Repeated association cursor.')
+            seen.add(cursor)
+
     def entity(self, entity):
         if isinstance(entity, Entity): return entity
         return Entity(self, self._entities('get', {'entity_id': entity}))

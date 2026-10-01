@@ -642,6 +642,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/entities/associations",
+    "function": "postProjectsProjectEntitiesAssociations",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/entities/create",
     "function": "postProjectsProjectEntitiesCreate",
     "request": "schema",

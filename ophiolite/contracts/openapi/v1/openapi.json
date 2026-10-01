@@ -15604,6 +15604,224 @@
         }
       }
     },
+    "/api/v1/projects/{project}/entities/associations": {
+      "post": {
+        "summary": "Every association you may read across your wells and wellbores, each with its entity, in pages (one read instead of one call per well)",
+        "description": "Scope read; accepted principals: session, delegate, grant, agent; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "grant",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "schema": {
+                      "const": "ophiolite.entity-associations/1",
+                      "title": "Schema",
+                      "type": "string"
+                    },
+                    "items": {
+                      "items": {
+                        "$ref": "#/components/schemas/AssociatedEntityRevision"
+                      },
+                      "maxItems": 100,
+                      "title": "Items",
+                      "type": "array"
+                    },
+                    "next_cursor": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Next Cursor"
+                    }
+                  },
+                  "required": [
+                    "schema",
+                    "items"
+                  ],
+                  "title": "EntityAssociations",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "H3: every association you may see, optionally only of these assets, of wells or wellbores, of one profile.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "asset_ids": {
+                    "anyOf": [
+                      {
+                        "items": {
+                          "type": "string"
+                        },
+                        "maxItems": 100,
+                        "minItems": 1,
+                        "type": "array"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Asset Ids"
+                  },
+                  "kind": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "well",
+                          "wellbore"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Kind"
+                  },
+                  "profile": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Profile"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
+                  "limit": {
+                    "anyOf": [
+                      {
+                        "maximum": 200,
+                        "minimum": 1,
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Limit"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "EntityAssociationsRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/entities/create": {
       "post": {
         "summary": "Create a well or wellbore with a declared external identity or as provisional",
@@ -60002,6 +60220,65 @@
           "capability"
         ],
         "title": "ApplicationGrant",
+        "type": "object"
+      },
+      "AssociatedEntityRevision": {
+        "additionalProperties": false,
+        "properties": {
+          "asset_id": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "revision": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Revision",
+            "type": "string"
+          },
+          "row": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Row"
+          },
+          "profile": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Profile",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "association": {
+            "$ref": "#/components/schemas/Association"
+          },
+          "entity": {
+            "$ref": "#/components/schemas/EntityRef"
+          }
+        },
+        "required": [
+          "asset_id",
+          "revision",
+          "profile",
+          "name",
+          "association",
+          "entity"
+        ],
+        "title": "AssociatedEntityRevision",
         "type": "object"
       },
       "AssociatedRevision": {
