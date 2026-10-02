@@ -30,3 +30,5 @@ prune templates/react-application/.pytest_cache
 
 recursive-include ophiolite/skills *.md
 include AGENTS.md
+
+prune notebooks

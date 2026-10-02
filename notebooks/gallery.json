@@ -1,0 +1,19 @@
+{
+  "schema": "ophiolite.notebook-gallery/1",
+  "notebooks": [
+    {
+      "slug": "read-a-well-log",
+      "title": "Read a well log",
+      "sentence": "Read one gamma-ray curve exactly as it was uploaded, with its units and depth reference, and plot it.",
+      "modes": ["synthetic", "live"],
+      "data": "A synthetic five-sample gamma-ray log, or a log in your project."
+    },
+    {
+      "slug": "shale-volume-from-gamma-ray",
+      "title": "Shale volume from gamma ray",
+      "sentence": "Pick clean and shale values, compare the five methods, publish one result and add a second version with a changed pick.",
+      "modes": ["synthetic", "live"],
+      "data": "A synthetic five-sample gamma-ray log, or a log in your project; publishing creates a result only you can see until you share it."
+    }
+  ]
+}
