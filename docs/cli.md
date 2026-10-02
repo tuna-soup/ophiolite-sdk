@@ -53,6 +53,16 @@ and refuses to replace an existing file without `--force`. A refused or failed r
 `SOURCE_NEEDS_REVIEW` and `SOURCE_DETACHED` exit 4, `SOURCE_ACCESS_DENIED` exits 3, `SOURCE_OFFLINE` and `SOURCE_PENDING`
 exit 5 after the retries.
 
+## Giving a project access key
+
+`login`, `projects` and `orgs` take a key with `--key KEY`, `--key-file FILE` or `--key-stdin` (at most 4 KiB), in that
+order, else `OPHIOLITE_ACCESS_KEY`; every other command uses `OPHIOLITE_ACCESS_KEY` when no credential is saved. Each
+goes through one reader: a line break or spaces around the key and a leading `Bearer ` are removed and the command
+says so on standard error (and as `normalised` in `--json`), because another application's field — QGIS's
+authentication setting — still needs the corrected value. A key that is empty, has a space or line break inside it,
+or contains a control character is refused (exit 1); an explicitly empty `OPHIOLITE_ACCESS_KEY` is refused, not
+ignored. A credential is never refused for its prefix. Saved credentials are read as they were saved.
+
 ## `--dry-run`
 
 `publish-derived` and `share` accept `--dry-run`: the command prints what it would send (`publications/derive` with its

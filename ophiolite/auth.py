@@ -234,18 +234,23 @@ class Credential:
     """Explicit bearer or an explicitly opened SDK store; secrets never appear in repr."""
     def __init__(self, token=None, grant=None, *, path=None, envelope=None, http=None):
         self.token, self.grant = token, grant
+        self.normalised = ()  # E51a: what the reader removed from a supplied bearer (never the value)
         self.path, self._envelope, self.http = path, envelope, http
 
     def __repr__(self): return 'Credential(<private>)'
 
     @classmethod
-    def bearer(cls, token, *, grant=None):
+    def bearer(cls, token, *, grant=None, source='argument'):
+        # E51a: the token through the one reader (trims, removes a stray "Bearer ", reports it in .normalised); the grant is untouched
+        from . import credential_input
+        token, notes = credential_input.read_credential(token, source=source)
         try:
-            _token(token)
             if grant is not None: _token(grant)
         except AuthenticationRequired:
             raise Refused('Supply a bearer credential and application grant without whitespace.') from None
-        return cls(token,grant)
+        made = cls(token,grant)
+        made.normalised = notes
+        return made
 
     @classmethod
     def from_file(cls, path, *, http=None):
@@ -358,11 +363,13 @@ class Credential:
 KEY_PREFIX = 'oph_key_'
 
 
-def key_login(url, project, key, *, path=None, label=None, scope=None, expires_at=None, http=None):
+def key_login(url, project, key, *, path=None, label=None, scope=None, expires_at=None, http=None, source='argument'):
     """E25a: save an access key (created on the account page) for this gateway and project, so later
     processes can use it. Nothing is sent: the server checks the key on each call."""
     url = origin(url)
     if not isinstance(project,str) or not project: raise Refused('Choose a project.')
+    from . import credential_input
+    key, _ = credential_input.read_credential(key, source=source)  # E51a: the one reader; its prefix rule below stays
     try:
         _token(key)
         if not key.startswith(KEY_PREFIX): raise ValueError()

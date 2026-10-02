@@ -2,6 +2,7 @@
 import argparse
 import hashlib
 import json
+from types import SimpleNamespace
 import math
 import os
 from pathlib import Path
@@ -55,6 +56,38 @@ def done(args, text, payload):
     return payload
 
 
+def keyed(p,key_help):
+    """E51a: the ways a key is supplied on the command line; every one goes through credential_input.read_credential."""
+    if key_help:p.add_argument('--key',help=key_help)
+    p.add_argument('--key-file',type=Path,help='Read the project access key from this file (a trailing line break is removed and reported)')
+    p.add_argument('--key-stdin',action='store_true',help='Read the project access key from standard input (at most 4 KiB)')
+
+
+def supplied_key(args):
+    """(key, notes, source) from --key, --key-file, --key-stdin or OPHIOLITE_ACCESS_KEY, in that order, through the one
+    reader; None when none is given. An explicitly empty OPHIOLITE_ACCESS_KEY is refused, not ignored."""
+    from . import credential_input
+    if getattr(args,'key',None) is not None:raw,source=args.key,'argument'
+    elif getattr(args,'key_file',None) is not None:
+        try:
+            with open(args.key_file,'rb') as handle:raw=handle.read(credential_input.MAX_BYTES+1)
+        except OSError:raise Refused('Cannot read the key file.') from None
+        source='file'
+    elif getattr(args,'key_stdin',False):raw,source=sys.stdin.read(credential_input.MAX_BYTES+1),'stdin'
+    elif 'OPHIOLITE_ACCESS_KEY' in os.environ:
+        raw,source=os.environ['OPHIOLITE_ACCESS_KEY'],'environment'
+        if not raw.strip():raise Refused('OPHIOLITE_ACCESS_KEY is empty; unset it or give the key.')
+    else:return None
+    value,notes=credential_input.read_credential(raw,source=source)
+    return value,notes,source
+
+
+def tell(notes):
+    """The reader's notice on stderr (never the key)."""
+    from .credential_input import notice
+    if notice(notes):print(notice(notes),file=sys.stderr)
+
+
 def configuration(path):
     try:value=json.loads(Path(path).read_text())
     except (OSError,ValueError):raise Refused('Cannot read configuration. Download configuration.json from Connect → Use Python.') from None
@@ -89,7 +122,7 @@ def parser():
         if name=='login':
             p.add_argument('--write',action='store_true',help='Request permission to publish results')
             p.add_argument('--no-browser',action='store_true')
-            p.add_argument('--key',help='Save a project access key from your account page instead of signing in (or set OPHIOLITE_ACCESS_KEY)')
+            keyed(p,'Save a project access key from your account page instead of signing in (or set OPHIOLITE_ACCESS_KEY)')
         if name in ('prepare','run','publish'):p.add_argument('--work',type=Path,default=Path('run'))
         if name=='correct':
             for field in ('start','stop','offset'):p.add_argument('--'+field,type=float,required=True)
@@ -134,7 +167,8 @@ def parser():
     for name,help in (('projects','List the projects a credential reaches (no configuration or project needed)'),('orgs','List the organisations holding a project the credential reaches')):
         p=sub.add_parser(name,help=help)  # E27
         p.add_argument('--url',required=True,help='The gateway address, for example https://ophiolite.example')
-        p.add_argument('--credential',type=Path,help='A saved credential file (from ophiolite login); otherwise OPHIOLITE_ACCESS_KEY')
+        p.add_argument('--credential',type=Path,help='A saved credential file (from ophiolite login); otherwise a key below or OPHIOLITE_ACCESS_KEY')
+        keyed(p,None)
         if name=='projects':p.add_argument('--limit',type=int,default=50,help='Page size while fetching (1 to 100)')
     # E31: journey verbs over the project's configuration and credential
     def project(p):
@@ -170,15 +204,17 @@ def _discover(args):
     from .errors import OphioliteError
     _load()
     try:
+        notes=()
         if args.credential is not None:credential=Credential.from_file(args.credential)
-        elif os.environ.get('OPHIOLITE_ACCESS_KEY'):credential=Credential.bearer(os.environ['OPHIOLITE_ACCESS_KEY'])
-        else:raise Refused('Give --credential FILE or set OPHIOLITE_ACCESS_KEY.')
+        elif (given:=supplied_key(args)) is not None:
+            credential,notes=Credential.bearer(given[0]),given[1];tell(notes)
+        else:raise Refused('Give --credential FILE, --key-file FILE, --key-stdin or set OPHIOLITE_ACCESS_KEY.')
         if args.command=='projects' and not 1<=args.limit<=100:raise Refused('--limit is 1 to 100.')
         with Account(args.url,credential) as account:
             rows=account.projects(limit=args.limit) if args.command=='projects' else account.organizations()
     except OphioliteError:
         raise
-    if args.json:return done(args,None,{'projects' if args.command=='projects' else 'organizations':rows})
+    if args.json:return done(args,None,{'projects' if args.command=='projects' else 'organizations':rows,**({'normalised':list(notes)} if notes else {})})
     if not rows:print('This credential reaches no project.' if args.command=='projects' else 'No organisation holds a project this credential reaches.');return
     for row in rows:
         if args.command=='projects':print((row.get('name') or 'Unnamed project')+' - '+{'member':'can edit','viewer':'can view'}.get(row.get('role'),'access')+(' and administer' if row.get('can_administer') else ''))
@@ -190,7 +226,8 @@ def _reach(config,path):
     from .account import Account
     from .errors import OphioliteError
     try:
-        credential=Credential.bearer(os.environ['OPHIOLITE_ACCESS_KEY']) if os.environ.get('OPHIOLITE_ACCESS_KEY') and not path.exists() else Credential.from_file(path)
+        given=None if path.exists() else supplied_key(SimpleNamespace())
+        credential=Credential.bearer(given[0]) if given else Credential.from_file(path)
         expires=credential.summary().get('expires_at')
         with Account(config['url'],credential) as account:projects=[p['id'] for p in account.projects()]
     except OphioliteError as error:
@@ -403,10 +440,10 @@ def main(argv=None):
         return done(args,text,report)
     if args.command=='run':return _local_run(config,args.work.resolve())
     if getattr(args,'dry_run',False):return _dry_run(args,config)  # E31: before any credential, network or file write
-    key=getattr(args,'key',None) or os.environ.get('OPHIOLITE_ACCESS_KEY')
-    if args.command=='login' and key:
+    given=supplied_key(args) if args.command=='login' else None
+    if given:
         # E25a: saved for later processes; nothing is sent now and the key is never printed.
-        auth.key_login(config['url'],config['project'],key,path=path)
+        auth.key_login(config['url'],config['project'],given[0],path=path,source=given[2]);tell(given[1])
         print('Project access key saved for',config['project'],'- ophiolite status shows what it is for; remove it on the account page to stop it everywhere.');return
     if args.command=='login':
         def notify(url,message):
@@ -415,8 +452,9 @@ def main(argv=None):
                 import webbrowser
                 webbrowser.open(url)
         return auth.device_login(config['url'],config['project'],path=path,write=args.write,notify=notify)
-    if os.environ.get('OPHIOLITE_ACCESS_KEY') and not (path.exists() or path.is_symlink()):
-        credential=Credential.bearer(os.environ['OPHIOLITE_ACCESS_KEY'])  # this process only; nothing is saved
+    given=None if (path.exists() or path.is_symlink()) else supplied_key(SimpleNamespace())
+    if given:
+        credential=Credential.bearer(given[0]);tell(given[1])  # this process only; nothing is saved
     else:credential=Credential.from_file(path)
     if args.command=='logout':
         if credential.kind=='bearer':print('Nothing saved to remove: the project access key came from OPHIOLITE_ACCESS_KEY.');return
