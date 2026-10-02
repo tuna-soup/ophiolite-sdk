@@ -5,6 +5,14 @@
 Supported 0.x client over preview contracts, installable from reviewed source.
 No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
 
+- A connection that works or says which step failed (E51a): one reader (`ophiolite.credential_input`) for every key
+  you supply (`--key`, `--key-file`, `--key-stdin`, `OPHIOLITE_ACCESS_KEY`, `Credential.bearer`, `key_login`) trims a
+  line break, spaces and a stray `Bearer `, says what it removed (never the value) and refuses only an empty value, a
+  space or line break inside, or a control character. `ophiolite doctor --online [--url U --project P]` reports six
+  stages — address, tls, credential-arrived, credential-accepted, project-readable, features — stopping at the first
+  failure with the server's sentence, stage and remedy, and exits with that stage's code. SDK errors carry the
+  server's `stage` and sentence (`error.stage`, `error.server_message`); categories for 401 and 403 are unchanged.
+
 - Wording (owner decision #19): the command line and its errors call the account page's keys **project access
   keys**; nothing else changes (the `--key` option, `OPHIOLITE_ACCESS_KEY`, the saved credential kind and the wire
   format are as before).

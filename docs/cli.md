@@ -63,6 +63,19 @@ authentication setting — still needs the corrected value. A key that is empty,
 or contains a control character is refused (exit 1); an explicitly empty `OPHIOLITE_ACCESS_KEY` is refused, not
 ignored. A credential is never refused for its prefix. Saved credentials are read as they were saved.
 
+## `doctor --online`
+
+`ophiolite doctor --online` (with `configuration.json`, or `--url U --project P` and a key from `--key-file`,
+`--key-stdin`, `--key` or `OPHIOLITE_ACCESS_KEY`) checks, in order, and stops at the first failure: **address** (the
+name resolves), **tls** (the server answers its contracts index; https with a trusted certificate), **credential-arrived**
+(the server received a bearer credential), **credential-accepted** (it was accepted), **project-readable** (it reaches the
+project's wells description) and **features** (one collections request and one first page: `numberMatched`, otherwise
+"at least N"; zero wells is a warning). A refusal is reported with the server's own sentence, its `stage` and remedy.
+No redirect is followed and no `next` link requested, so the key goes nowhere but the given address. An unreachable
+private deployment says "cannot reach the server: check Tailscale". A key given directly has no expiry the server can
+report. Exit codes: 5 address or tls, 3 a credential or project stage, 4 features. `--json` prints `stages`,
+`normalised` and the earlier `server_contracts`, `reach` and `reach_ok`.
+
 ## `--dry-run`
 
 `publish-derived` and `share` accept `--dry-run`: the command prints what it would send (`publications/derive` with its

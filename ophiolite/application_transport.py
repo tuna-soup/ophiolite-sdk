@@ -50,6 +50,7 @@ def delay(response):
 
 ENVELOPE_LIMIT=16*1024  # an error body is small; never read more of a refusal than this
 CODE=re.compile(r'^[A-Za-z0-9_.-]{1,64}$')
+STAGE=re.compile(r'^[a-z][a-z-]{0,39}$')
 
 
 async def bounded(response):
@@ -86,12 +87,13 @@ def envelope(response,raw=None):
         if isinstance(value,str) and 0<len(value)<=limit:meta[key]=value
     if 'message' not in meta and isinstance(body.get('error'),str) and 0<len(body['error'])<=1000:meta['message']=body['error']
     if isinstance(body.get('code'),str) and CODE.match(body['code']):meta['code']=body['code']
+    if isinstance(body.get('stage'),str) and STAGE.match(body['stage']):meta['stage']=body['stage']  # E51a
     return meta
 
 
 def carried(meta):
-    """The error keyword arguments a parsed envelope supplies."""
-    return {'remedy':meta.get('remedy'),'docs':meta.get('docs'),'request_id':meta.get('request_id')}
+    """The error keyword arguments a parsed envelope supplies (E51a: also the server's own sentence and a credential's stage)."""
+    return {'remedy':meta.get('remedy'),'docs':meta.get('docs'),'request_id':meta.get('request_id'),'stage':meta.get('stage'),'server_message':meta.get('message')}
 
 
 def status(response,operation,raw=None):

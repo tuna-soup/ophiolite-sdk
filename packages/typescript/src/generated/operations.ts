@@ -4,7 +4,8 @@ import type * as API from "../api-types.js";
 import type { Transport, OperationOptions } from "../client.js";
 type WireAIUseOwner = { "asset_id": string; "can_grant": true; "generation": number; "grants": Record<string, unknown>; "eligible": Array<string>; "purposes": Array<"embedding" | "training" | "evaluation"> };
 type WireAIUseReader = { "asset_id": string; "can_grant": false; "generation": number; "mine": Array<"embedding" | "training" | "evaluation">; "purposes": Array<"embedding" | "training" | "evaluation"> };
-type WireAccessKeyRow = { "id": string; "label": string; "project_id": string; "scope": "read" | "write"; "created_at": string; "expires_at": string; "last_used_at": (string) | (null); "last_used_origin": (string) | (null) };
+type WireAccessKeyRefusal = { "reason": "expired" | "native" | "scope" | "project" | "access"; "at": string; "client": "qgis" | "python-sdk" | "browser" | "other" };
+type WireAccessKeyRow = { "id": string; "label": string; "project_id": string; "scope": "read" | "write"; "created_at": string; "expires_at": string; "last_used_at": (string) | (null); "last_used_origin": (string) | (null); "expired"?: boolean; "last_refused"?: (WireAccessKeyRefusal) | (null) };
 type WireAccountProject = { "id": string; "name"?: (string) | (null); "role"?: (string) | (null); "can_compute"?: (boolean) | (null); "can_administer"?: (boolean) | (null); "archived": boolean };
 type WireAccountSession = { "id": string; "expires_at": string; "current": boolean };
 type WireAgentView = { "id": string; "name": string; "scopes": Array<string>; "budgets": Record<string, unknown>; "policy": Array<string>; "created_at": number; "expires_at": number; "project_id": string; "mode"?: ("assistant") | (null); "grant"?: (string) | (null); "delegator": string; "revoked": boolean; "expired": boolean; "used_today": Record<string, unknown> };
@@ -30,7 +31,7 @@ type WireEligibility = { "area": string; "operation": string; "scope": string; "
 type WireEntity = { "schema": "ophiolite.entity/1"; "entity_id": string; "project_id": string; "kind": "well" | "wellbore"; "name": string; "identity": WireIdentity; "part_of"?: (WireEntityRef) | (null); "parts"?: Array<WireEntityRef>; "owner": string; "generation": number; "history"?: Array<WireIdentityChange>; "location"?: (WireWellLocation) | (null) };
 type WireEntityIdentityIn = { "authority"?: (string) | (null); "key"?: (string) | (null); "provisional"?: (boolean) | (null) };
 type WireEntityRef = { "entity_id": string; "kind": "well" | "wellbore"; "name": string };
-type WireError = { "error": string; "code": string; "message": string; "remedy": string; "docs": string; "request_id": string; [key: string]: unknown };
+type WireError = { "error": string; "code": string; "message": string; "remedy": string; "docs": string; "request_id": string; "stage"?: "no-credential" | "malformed-credential" | "credential-refused" | "access-denied"; [key: string]: unknown };
 type WireEvidence = { "source"?: (WireSourceRevision) | (null); "statement"?: (string) | (null) };
 type WireExactRevision = { "asset_id": string; "revision": string };
 type WireExecution = { "plan": string; "agent": string; "delegator": string; "operation": string; "command_id": (string) | (null); "run_id": (string) | (null); "state": string; "response_sha256": (string) | (null); "reserved_at": number; "completed_at": (number) | (null); "approved_by": (string) | (null) };

@@ -57847,6 +57847,12 @@
                 "schema": {
                   "type": "string"
                 }
+              },
+              "WWW-Authenticate": {
+                "description": "E51a: Bearer when no credential arrived (401, stage no-credential); Bearer error=\"insufficient_scope\" when a key was accepted but does not reach this project or scope (403, stage access-denied); absent otherwise",
+                "schema": {
+                  "type": "string"
+                }
               }
             },
             "content": {
@@ -57987,6 +57993,12 @@
                 "schema": {
                   "type": "string"
                 }
+              },
+              "WWW-Authenticate": {
+                "description": "E51a: Bearer when no credential arrived (401, stage no-credential); Bearer error=\"insufficient_scope\" when a key was accepted but does not reach this project or scope (403, stage access-denied); absent otherwise",
+                "schema": {
+                  "type": "string"
+                }
               }
             },
             "content": {
@@ -58117,6 +58129,12 @@
                 "schema": {
                   "type": "string"
                 }
+              },
+              "WWW-Authenticate": {
+                "description": "E51a: Bearer when no credential arrived (401, stage no-credential); Bearer error=\"insufficient_scope\" when a key was accepted but does not reach this project or scope (403, stage access-denied); absent otherwise",
+                "schema": {
+                  "type": "string"
+                }
               }
             },
             "content": {
@@ -58230,6 +58248,12 @@
             "headers": {
               "X-Request-Id": {
                 "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "E51a: Bearer when no credential arrived (401, stage no-credential); Bearer error=\"insufficient_scope\" when a key was accepted but does not reach this project or scope (403, stage access-denied); absent otherwise",
                 "schema": {
                   "type": "string"
                 }
@@ -58473,6 +58497,12 @@
                 "schema": {
                   "type": "string"
                 }
+              },
+              "WWW-Authenticate": {
+                "description": "E51a: Bearer when no credential arrived (401, stage no-credential); Bearer error=\"insufficient_scope\" when a key was accepted but does not reach this project or scope (403, stage access-denied); absent otherwise",
+                "schema": {
+                  "type": "string"
+                }
               }
             },
             "content": {
@@ -58683,6 +58713,12 @@
             "headers": {
               "X-Request-Id": {
                 "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "E51a: Bearer when no credential arrived (401, stage no-credential); Bearer error=\"insufficient_scope\" when a key was accepted but does not reach this project or scope (403, stage access-denied); absent otherwise",
                 "schema": {
                   "type": "string"
                 }
@@ -59050,6 +59086,12 @@
                 "schema": {
                   "type": "string"
                 }
+              },
+              "WWW-Authenticate": {
+                "description": "E51a: Bearer when no credential arrived (401, stage no-credential); Bearer error=\"insufficient_scope\" when a key was accepted but does not reach this project or scope (403, stage access-denied); absent otherwise",
+                "schema": {
+                  "type": "string"
+                }
               }
             },
             "content": {
@@ -59304,6 +59346,12 @@
             "headers": {
               "X-Request-Id": {
                 "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "E51a: Bearer when no credential arrived (401, stage no-credential); Bearer error=\"insufficient_scope\" when a key was accepted but does not reach this project or scope (403, stage access-denied); absent otherwise",
                 "schema": {
                   "type": "string"
                 }
@@ -59724,6 +59772,12 @@
             "schema": {
               "type": "string"
             }
+          },
+          "WWW-Authenticate": {
+            "description": "E51a: Bearer when no credential arrived (401, stage no-credential); Bearer error=\"insufficient_scope\" when a key was accepted but does not reach this project or scope (403, stage access-denied); absent otherwise",
+            "schema": {
+              "type": "string"
+            }
           }
         },
         "content": {
@@ -59739,6 +59793,12 @@
         "headers": {
           "X-Request-Id": {
             "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "WWW-Authenticate": {
+            "description": "E51a: Bearer when no credential arrived (401, stage no-credential); Bearer error=\"insufficient_scope\" when a key was accepted but does not reach this project or scope (403, stage access-denied); absent otherwise",
             "schema": {
               "type": "string"
             }
@@ -60050,6 +60110,45 @@
         "title": "AIUseReader",
         "type": "object"
       },
+      "AccessKeyRefusal": {
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "description": "E51a: why the key was last refused: expired, refused by native sign-in, another project, beyond its scope, or its owner no longer has that access",
+            "enum": [
+              "expired",
+              "native",
+              "scope",
+              "project",
+              "access"
+            ],
+            "title": "Reason",
+            "type": "string"
+          },
+          "at": {
+            "title": "At",
+            "type": "string"
+          },
+          "client": {
+            "description": "The client family, from its User-Agent (the raw value is never kept)",
+            "enum": [
+              "qgis",
+              "python-sdk",
+              "browser",
+              "other"
+            ],
+            "title": "Client",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason",
+          "at",
+          "client"
+        ],
+        "title": "AccessKeyRefusal",
+        "type": "object"
+      },
       "AccessKeyRow": {
         "additionalProperties": false,
         "properties": {
@@ -60102,6 +60201,24 @@
               }
             ],
             "title": "Last Used Origin"
+          },
+          "expired": {
+            "default": false,
+            "description": "E51a: expired within the last 14 days; listed so its last refusal can be read (removed keys are never listed)",
+            "title": "Expired",
+            "type": "boolean"
+          },
+          "last_refused": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AccessKeyRefusal"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E51a: the most recent recorded refusal, or null"
           }
         },
         "required": [
@@ -61582,6 +61699,16 @@
           "request_id": {
             "type": "string",
             "description": "Equals the X-Request-Id response header; quote it when reporting a failure"
+          },
+          "stage": {
+            "type": "string",
+            "enum": [
+              "no-credential",
+              "malformed-credential",
+              "credential-refused",
+              "access-denied"
+            ],
+            "description": "Only on a refused machine credential: no-credential (nothing arrived), malformed-credential (not a bearer credential of a kind Ophiolite accepts), credential-refused (the key is unknown, expired or removed: one answer for all three), access-denied (the key does not reach this project or scope). With a stage, remedy and docs are the stage's own (/docs/reference/errors/#stage-<stage>)"
           }
         }
       },

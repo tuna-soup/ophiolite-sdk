@@ -115,7 +115,10 @@ def parser():
         p=sub.add_parser(name,help=help)
         p.add_argument('--configuration',type=Path,default=Path('configuration.json'))
         p.add_argument('--credentials',type=Path,help='Optional separate private credential file')
-        if name=='doctor':p.add_argument('--online',action='store_true',help='Explicitly compare the server contract version')
+        if name=='doctor':
+            p.add_argument('--online',action='store_true',help='Check the server, the credential, the project and its wells, stopping at the first failure (E51a)')
+            p.add_argument('--url',help='With --online: the server address, instead of configuration.json');p.add_argument('--project',help='With --online and --url: the project id')
+            keyed(p,'With --online: check this project access key (or use --key-file, --key-stdin or OPHIOLITE_ACCESS_KEY)')
         if name=='fetch':
             p.add_argument('--asset');p.add_argument('--revision');p.add_argument('--curve')
             p.add_argument('--output',type=Path,required=True)
@@ -221,19 +224,38 @@ def _discover(args):
         else:print(row.get('name') or 'Unnamed organisation')
 
 
-def _reach(config,path):
-    """doctor --online: whether the saved credential (or OPHIOLITE_ACCESS_KEY) reaches the configured project, and its expiry."""
-    from .account import Account
+def _doctor(args):
+    """Offline: configuration, Python and the local contracts. --online (E51a): the six stages of doctor.run, stopping
+    at the first failure; the report keeps E31's server_contracts, reach, reach_ok and credential_expires."""
+    from . import doctor
     from .errors import OphioliteError
-    try:
-        given=None if path.exists() else supplied_key(SimpleNamespace())
-        credential=Credential.bearer(given[0]) if given else Credential.from_file(path)
-        expires=credential.summary().get('expires_at')
-        with Account(config['url'],credential) as account:projects=[p['id'] for p in account.projects()]
-    except OphioliteError as error:
-        return {'reach':'no - '+str(error),'reach_ok':False}
-    reached=config['project'] in projects
-    return {'reach':('yes' if reached else 'no - this credential does not reach '+config['project']),'reach_ok':reached,'credential_expires':expires}
+    if args.url:
+        if not args.online or not args.project:raise Refused('--url needs --online and --project.')
+        config={'url':args.url,'project':args.project}
+    else:config=configuration(args.configuration)
+    path=args.credentials or credentials_path(config)
+    registry=json.loads(files('ophiolite').joinpath('contracts/registry.json').read_text())
+    report={'configuration':'valid' if not args.url else 'not used (--url)','python':sys.version.split()[0],'local_contracts':registry['version']}
+    lines=['Configuration valid. Execution, if you choose it, stays on your computer.' if not args.url else 'Checking '+config['url']+' for project '+config['project']+'.',
+           'Python: '+report['python'],'Local contracts: '+report['local_contracts'],
+           'Run ophiolite status to check current grant/scopes. Use login --write only for advanced publication.']
+    if not args.online:return done(args,'\n'.join(lines),report)
+    named=getattr(args,'key',None) is not None or getattr(args,'key_file',None) is not None or getattr(args,'key_stdin',False)
+    given=supplied_key(args) if named or not (path.exists() or path.is_symlink()) else None
+    credential,notes=None,()
+    if given:credential,notes=Credential.bearer(given[0]),given[1]
+    elif path.exists() or path.is_symlink():credential=Credential.from_file(path)
+    result=doctor.run(config['url'],config['project'],credential,notes=notes)
+    result.update({k:v for k,v in report.items()})
+    result.setdefault('reach','no - not checked');result.setdefault('reach_ok',False)
+    from .credential_input import notice
+    lines+=(['Server contracts: '+result['server_contracts']] if 'server_contracts' in result else [])
+    for stage in result['stages']:
+        lines.append('Stage %s: %s - %s' % (stage['stage'],'ok' if stage['ok'] else 'FAILED',stage['detail'])+(' (warning: %s)' % stage['warning'] if stage.get('warning') else ''))
+        if not stage['ok'] and stage.get('remedy'):lines.append('  What to do: '+stage['remedy'])
+    lines+=['Reach: '+result['reach'],'Credential expires: '+str(result.get('expires') or result.get('credential_expires') or 'not recorded')]
+    if notice(notes):lines.append(notice(notes))
+    return done(args,'\n'.join(lines),result)
 
 
 def _dry_run(args,config):
@@ -425,19 +447,9 @@ def main(argv=None):
                         {'verified':True,'revisions':len(opened.assets),'curves':sum(len(a.curves) for a in opened.assets),'other_data':sum(a.data is not None for a in opened.assets)})
         print(json.dumps({**opened.summary(),'items':[{'asset_id':a.asset_id,'revision':a.revision,'name':a.name,'type':a.type,'curves':sorted(a.curves),'history':a.history,'parent_visibility':a.parent_visibility} for a in opened.assets]},indent=2));return
     _load()
+    if args.command=='doctor':return _doctor(args)
     config=configuration(args.configuration)
     path=args.credentials or credentials_path(config)
-    if args.command=='doctor':
-        registry=json.loads(files('ophiolite').joinpath('contracts/registry.json').read_text())
-        report={'configuration':'valid','python':sys.version.split()[0],'local_contracts':registry['version']}
-        if args.online:
-            remote=auth.request(config['url']+'/api/v1/contracts')
-            report['server_contracts']=remote.get('version','unreported')
-            report.update(_reach(config,path))  # E31: can this credential reach its project, and until when
-        text='\n'.join(['Configuration valid. Execution, if you choose it, stays on your computer.','Python: '+report['python'],'Local contracts: '+report['local_contracts'],
-                        'Run ophiolite status to check current grant/scopes. Use login --write only for advanced publication.']+
-                       (['Server contracts: '+report['server_contracts'],'Reach: '+report['reach'],'Credential expires: '+str(report.get('credential_expires') or 'not recorded')] if args.online else []))
-        return done(args,text,report)
     if args.command=='run':return _local_run(config,args.work.resolve())
     if getattr(args,'dry_run',False):return _dry_run(args,config)  # E31: before any credential, network or file write
     given=supplied_key(args) if args.command=='login' else None
@@ -547,12 +559,13 @@ def entrypoint(argv=None):
     """Run the CLI and exit with the documented code: 0 done, 1 refused or invalid, 2 usage, 3 sign-in or permission,
     4 not found or conflict, 5 busy or unavailable. With --json a refusal prints {"error": {...}} on stdout."""
     wants_json='--json' in (sys.argv[1:] if argv is None else argv)
-    try:main(argv)
+    try:result=main(argv)
     except (ValueError,OSError,KeyError,TypeError,subprocess.CalledProcessError) as error:
         code=exit_code(error) if isinstance(error,ValueError) else EXIT['refused']
         if wants_json:print(json.dumps(error_document(error) if isinstance(error,ValueError) else {'error':{'code':'local-failure','message':'Operation failed. Check configuration, local files and access; retain the run folder to retry.'}}))
         else:print(str(error) if isinstance(error,ValueError) else 'Operation failed. Check configuration, local files and access; retain the run folder to retry.',file=sys.stderr)
         raise SystemExit(code)
+    if getattr(result,'exit_code',0):raise SystemExit(result.exit_code)  # E51a: doctor --online exits with its failed stage's code
 
 
 if __name__=='__main__':entrypoint()
