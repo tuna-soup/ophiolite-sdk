@@ -1,0 +1,266 @@
+{
+ "schema": "ophiolite.shale-volume-methods/1",
+ "id": "ophiolite.shale-volume-methods/1",
+ "title": "Shale volume from gamma ray: the formulas, their constants and the values both runtimes are held to",
+ "index": {
+  "name": "gamma-ray index (IGR)",
+  "formula": "(GR/2 - clean/2) / (shale/2 - clean/2), then clipped to 0..1",
+  "why_halved": "Halving is exact in binary floating point, so ordinary values equal the plain (GR - clean)/(shale - clean); the difference of two finite halves cannot overflow."
+ },
+ "input": {
+  "quantity": "Gamma Ray",
+  "units": [
+   "gAPI",
+   "API"
+  ]
+ },
+ "output": {
+  "curve": "VSH",
+  "unit": "V/V",
+  "quantity": "Shale Volume Fraction",
+  "null": -999.25
+ },
+ "percentile": {
+  "definition": "linear interpolation between closest ranks (Hyndman and Fan type 7): h = (n - 1) p / 100, value = x[floor h] + (h - floor h)(x[floor h + 1] - x[floor h]) over the sorted non-missing samples in the half-open depth range [top, base)",
+  "default_low": 5,
+  "default_high": 95
+ },
+ "max_samples": 100000,
+ "method_record": {
+  "name": "ophiolite.shale-volume",
+  "library": "ophiolite-platform",
+  "parameter_keys": [
+   "method",
+   "picks",
+   "clip",
+   "table",
+   "inputs",
+   "outputs"
+  ]
+ },
+ "record_sentence": {
+  "typed": "Shale volume from gamma ray: {label}; clean {clean} {unit} and shale {shale} {unit}, typed; clipped to 0-1; method table {table}.",
+  "percentile": "Shale volume from gamma ray: {label}; clean {clean} {unit} and shale {shale} {unit}, the {low}th and {high}th percentile between {top} and {base} {depth_unit}; clipped to 0-1; method table {table}."
+ },
+ "methods": [
+  {
+   "id": "linear",
+   "label": "Linear (simple)",
+   "formula": "IGR",
+   "constants": {},
+   "source": "Asquith and Krygowski (2004), Basic Well Log Analysis, 2nd edition, AAPG Methods in Exploration 16",
+   "reference": [
+    [
+     0,
+     0
+    ],
+    [
+     0.25,
+     0.25
+    ],
+    [
+     0.5,
+     0.5
+    ],
+    [
+     0.75,
+     0.75
+    ],
+    [
+     1,
+     1
+    ]
+   ]
+  },
+  {
+   "id": "larionov-tertiary",
+   "label": "Larionov, Tertiary rocks",
+   "formula": "a * (2^(b * IGR) - 1)",
+   "constants": {
+    "a": 0.083,
+    "b": 3.7
+   },
+   "source": "Larionov (1969), Borehole Radiometry, Nedra",
+   "reference": [
+    [
+     0,
+     0
+    ],
+    [
+     0.25,
+     0.074590792078
+    ],
+    [
+     0.5,
+     0.216215153587
+    ],
+    [
+     0.75,
+     0.485115097053
+    ],
+    [
+     1,
+     0.995671182361
+    ]
+   ]
+  },
+  {
+   "id": "larionov-older",
+   "label": "Larionov, older rocks",
+   "formula": "a * (2^(b * IGR) - 1)",
+   "constants": {
+    "a": 0.33,
+    "b": 2
+   },
+   "source": "Larionov (1969), Borehole Radiometry, Nedra",
+   "reference": [
+    [
+     0,
+     0
+    ],
+    [
+     0.25,
+     0.136690475583
+    ],
+    [
+     0.5,
+     0.33
+    ],
+    [
+     0.75,
+     0.603380951166
+    ],
+    [
+     1,
+     0.99
+    ]
+   ]
+  },
+  {
+   "id": "clavier",
+   "label": "Clavier",
+   "formula": "a - sqrt(b - (IGR + c)^2)",
+   "constants": {
+    "a": 1.7,
+    "b": 3.38,
+    "c": 0.7
+   },
+   "source": "Clavier, Hoyle and Meunier (1971), Journal of Petroleum Technology 23(6)",
+   "reference": [
+    [
+     0,
+     0
+    ],
+    [
+     0.25,
+     0.12599237613
+    ],
+    [
+     0.5,
+     0.307161172282
+    ],
+    [
+     0.75,
+     0.569734544454
+    ],
+    [
+     1,
+     1
+    ]
+   ]
+  },
+  {
+   "id": "steiber",
+   "label": "Steiber",
+   "formula": "IGR / (a - b * IGR)",
+   "constants": {
+    "a": 3,
+    "b": 2
+   },
+   "source": "Steiber (1970), SPE 2961; Steiber (1973), Journal of Petroleum Technology 25(9)",
+   "reference": [
+    [
+     0,
+     0
+    ],
+    [
+     0.25,
+     0.1
+    ],
+    [
+     0.5,
+     0.25
+    ],
+    [
+     0.75,
+     0.5
+    ],
+    [
+     1,
+     1
+    ]
+   ]
+  }
+ ],
+ "hon_cases": {
+  "fixture": "scientific/v1/fixtures/hon-gt-01-gamma-ray-excerpt.las",
+  "sha256": "8f7dce3351e8dba04479cb0b0714c49cb3a210f2b2b6e7279f07f37d7c222515",
+  "rows": 1551,
+  "depth_rounding": 3,
+  "intervals": [
+   {
+    "name": "Rodenrijs Claystone",
+    "top": 2466.86,
+    "base": 2557.9,
+    "n": 910,
+    "picks": [
+     30,
+     150
+    ],
+    "means": {
+     "linear": 0.735249,
+     "larionov-tertiary": 0.540937,
+     "larionov-older": 0.623165,
+     "clavier": 0.602,
+     "steiber": 0.554632
+    }
+   },
+   {
+    "name": "Delft Sandstone",
+    "top": 2557.9,
+    "base": 2620.22,
+    "n": 624,
+    "picks": [
+     30,
+     150
+    ],
+    "means": {
+     "linear": 0.150488,
+     "larionov-tertiary": 0.051497,
+     "larionov-older": 0.087255,
+     "clavier": 0.080636,
+     "steiber": 0.06512
+    }
+   }
+  ],
+  "percentile_case": {
+   "top": 2466.86,
+   "base": 2620.22,
+   "n": 1534,
+   "low": 5,
+   "high": 95,
+   "clean": 30.936205,
+   "shale": 150.84451,
+   "means": {
+    "Rodenrijs Claystone": {
+     "linear": 0.72863,
+     "larionov-older": 0.614838
+    },
+    "Delft Sandstone": {
+     "linear": 0.143649,
+     "larionov-older": 0.083235
+    }
+   }
+  }
+ }
+}

@@ -17,7 +17,7 @@ ophiolite = "ophiolite.cli:entrypoint"
 numpy = ["numpy>=1.24"]
 pandas = ["pandas>=2"]
 validation = ["jsonschema>=4.26"]
-dev = ["pytest>=8", "build>=1", "jsonschema>=4.26"]
+dev = ["pytest>=8", "build>=1", "jsonschema>=4.26", "lasio>=0.32"]
 
 [tool.setuptools.packages.find]
 include = ["ophiolite*"]

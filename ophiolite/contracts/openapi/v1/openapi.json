@@ -5,7 +5,7 @@
     "version": "1.0.0-pilot",
     "description": "One public API for every project operation. Three credential kinds reach it: the browser session (opaque HttpOnly cookie plus the X-CSRF-Token proof and, on non-GET requests, the exact Origin), a project-scoped delegate lasting at most five minutes (Bearer oph_api_..., parent session and current native permissions remain mandatory), and a browser-approved provider grant (Bearer provider token plus X-Ophiolite-Application-Grant; capability 1: the scientific read resources and the applications route within its read/write scopes; capability 3 adds reading wells, wellbores and lineage and the LAS upload routes). A request that carries an Authorization header is a machine request and is refused with MACHINE_AUTH_REQUIRED when a cookie or Origin travels with it. Scope and capability are ceilings; every operation runs the same native permission checks whoever calls it. Not a stable SDK or unattended service-account contract.",
     "x-ophiolite-contracts": {
-      "registry_version": "1.21.0",
+      "registry_version": "1.22.0",
       "index": "/api/v1/contracts",
       "served_profiles": [
         "las2/1",
@@ -9852,6 +9852,248 @@
                   "project_id"
                 ],
                 "title": "Request",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/calculations/shale-volume": {
+      "post": {
+        "summary": "Shale volume from a gamma-ray curve of a log you may build on: preview (stores nothing) or publish a derived well log (command_id); agents are refused",
+        "description": "Scope compute; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "compute",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ShaleVolumePreview"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PublicationReceipt"
+                    }
+                  ],
+                  "title": "RootModel[Union[ShaleVolumePreview, PublicationReceipt]]"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "description": "calculations/shale-volume: a gamma-ray curve of one exact revision, the person's confirmation that it is a gamma\nray, a method and the clean and shale values (typed, or percentiles of the curve between two depths).",
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "description": "The well log to calculate from",
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Asset Id",
+                    "type": "string"
+                  },
+                  "revision": {
+                    "description": "Its exact revision",
+                    "pattern": "^[0-9a-f]{64}$",
+                    "title": "Revision",
+                    "type": "string"
+                  },
+                  "curve": {
+                    "description": "The gamma-ray curve mnemonic",
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Curve",
+                    "type": "string"
+                  },
+                  "quantity": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "What the person confirms the curve is: Gamma Ray (ophiolite.quantities/1)",
+                    "title": "Quantity"
+                  },
+                  "method": {
+                    "enum": [
+                      "linear",
+                      "larionov-tertiary",
+                      "larionov-older",
+                      "clavier",
+                      "steiber"
+                    ],
+                    "title": "Method",
+                    "type": "string"
+                  },
+                  "picks": {
+                    "discriminator": {
+                      "mapping": {
+                        "percentile": "#/components/schemas/Percentile",
+                        "typed": "#/components/schemas/Typed"
+                      },
+                      "propertyName": "how"
+                    },
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/Typed"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Percentile"
+                      }
+                    ],
+                    "title": "Picks"
+                  },
+                  "preview": {
+                    "default": false,
+                    "description": "True: compute and answer, store nothing",
+                    "title": "Preview",
+                    "type": "boolean"
+                  },
+                  "name": {
+                    "default": "",
+                    "description": "The new result's name (publish)",
+                    "maxLength": 160,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Required to publish; the same command answers the same receipt",
+                    "title": "Command Id"
+                  },
+                  "new_version_of": {
+                    "anyOf": [
+                      {
+                        "maxLength": 160,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Your earlier result this adds a version to",
+                    "title": "New Version Of"
+                  },
+                  "expected_parent": {
+                    "anyOf": [
+                      {
+                        "pattern": "^[0-9a-f]{64}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "The version of that result you saw",
+                    "title": "Expected Parent"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "asset_id",
+                  "revision",
+                  "curve",
+                  "method",
+                  "picks"
+                ],
+                "title": "ShaleVolume",
                 "type": "object"
               }
             }
@@ -54565,6 +54807,36 @@
                               "minLength": 1,
                               "title": "Missing Value Marker",
                               "type": "string"
+                            },
+                            "quantity": {
+                              "anyOf": [
+                                {
+                                  "maxLength": 512,
+                                  "minLength": 1,
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "default": null,
+                              "title": "Quantity"
+                            },
+                            "quantity_status": {
+                              "anyOf": [
+                                {
+                                  "enum": [
+                                    "suggested",
+                                    "declared"
+                                  ],
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "default": null,
+                              "title": "Quantity Status"
                             }
                           },
                           "required": [
@@ -61009,7 +61281,7 @@
       "ContractsRegistry": {
         "x-ophiolite": {
           "id": "ophiolite.contracts-registry/1",
-          "version": "1.3.0",
+          "version": "1.4.0",
           "lifecycle": "preview"
         },
         "title": "ContractsRegistry",
@@ -61216,7 +61488,8 @@
                     "fixture",
                     "capability",
                     "relationships",
-                    "policy"
+                    "policy",
+                    "calculation"
                   ]
                 },
                 "path": {
@@ -61709,6 +61982,11 @@
               "access-denied"
             ],
             "description": "Only on a refused machine credential: no-credential (nothing arrived), malformed-credential (not a bearer credential of a kind Ophiolite accepts), credential-refused (the key is unknown, expired or removed: one answer for all three), access-denied (the key does not reach this project or scope). With a stage, remedy and docs are the stage's own (/docs/reference/errors/#stage-<stage>)"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "E52: only with code already-a-version: the version of the result whose content these settings reproduce"
           }
         }
       },
@@ -66599,6 +66877,130 @@
         "title": "PartOf",
         "type": "object"
       },
+      "Percentile": {
+        "additionalProperties": false,
+        "properties": {
+          "how": {
+            "const": "percentile",
+            "title": "How",
+            "type": "string"
+          },
+          "top": {
+            "title": "Top",
+            "type": "number"
+          },
+          "base": {
+            "title": "Base",
+            "type": "number"
+          },
+          "low": {
+            "default": 5,
+            "title": "Low",
+            "type": "number"
+          },
+          "high": {
+            "default": 95,
+            "title": "High",
+            "type": "number"
+          }
+        },
+        "required": [
+          "how",
+          "top",
+          "base"
+        ],
+        "title": "Percentile",
+        "type": "object"
+      },
+      "Picks": {
+        "additionalProperties": false,
+        "properties": {
+          "how": {
+            "enum": [
+              "typed",
+              "percentile"
+            ],
+            "title": "How",
+            "type": "string"
+          },
+          "clean": {
+            "title": "Clean",
+            "type": "number"
+          },
+          "shale": {
+            "title": "Shale",
+            "type": "number"
+          },
+          "top": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Top"
+          },
+          "base": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Base"
+          },
+          "low": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Low"
+          },
+          "high": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "High"
+          },
+          "samples": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Samples the percentiles were taken over",
+            "title": "Samples"
+          }
+        },
+        "required": [
+          "how",
+          "clean",
+          "shale"
+        ],
+        "title": "Picks",
+        "type": "object"
+      },
       "Plan": {
         "additionalProperties": false,
         "properties": {
@@ -67033,6 +67435,67 @@
         "title": "ProjectEntry",
         "type": "object"
       },
+      "PublicationReceipt": {
+        "additionalProperties": false,
+        "description": "What publications/derive answers, and answers again for the same command.",
+        "properties": {
+          "asset_id": {
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "revision": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Revision",
+            "type": "string"
+          },
+          "revision_number": {
+            "minimum": 1,
+            "title": "Revision Number",
+            "type": "integer"
+          },
+          "profile": {
+            "enum": [
+              "points-csv/1",
+              "mesh-text/1",
+              "esri-ascii-grid/1",
+              "well-tops-csv/1",
+              "deviation-csv/1",
+              "opendtect-faultsticks/1",
+              "las2/1",
+              "well-location/1"
+            ],
+            "title": "Profile",
+            "type": "string"
+          },
+          "derived_from": {
+            "items": {
+              "$ref": "#/components/schemas/ParentReference"
+            },
+            "maxItems": 32,
+            "minItems": 1,
+            "title": "Derived From",
+            "type": "array"
+          },
+          "method": {
+            "$ref": "#/components/schemas/MethodRecord"
+          },
+          "command_id": {
+            "title": "Command Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "asset_id",
+          "revision",
+          "revision_number",
+          "profile",
+          "derived_from",
+          "method",
+          "command_id"
+        ],
+        "title": "PublicationReceipt",
+        "type": "object"
+      },
       "RecipeReference": {
         "additionalProperties": false,
         "description": "E23a: a recipe is a project-scoped asset at an exact revision.",
@@ -67446,6 +67909,81 @@
           "score"
         ],
         "title": "SearchResult",
+        "type": "object"
+      },
+      "ShaleVolumePreview": {
+        "additionalProperties": false,
+        "description": "What the preview answers: the values publishing would store, the picks used and the counts.",
+        "properties": {
+          "curve": {
+            "title": "Curve",
+            "type": "string"
+          },
+          "unit": {
+            "title": "Unit",
+            "type": "string"
+          },
+          "axis": {
+            "items": {
+              "type": "number"
+            },
+            "title": "Axis",
+            "type": "array"
+          },
+          "values": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "title": "Values",
+            "type": "array"
+          },
+          "picks": {
+            "$ref": "#/components/schemas/Picks"
+          },
+          "samples": {
+            "title": "Samples",
+            "type": "integer"
+          },
+          "missing": {
+            "title": "Missing",
+            "type": "integer"
+          },
+          "at_one": {
+            "description": "Samples whose index was clipped to 1",
+            "title": "At One",
+            "type": "integer"
+          },
+          "at_zero": {
+            "description": "Samples whose index was clipped to 0 or is 0",
+            "title": "At Zero",
+            "type": "integer"
+          },
+          "record": {
+            "description": "The calculation record the file carries",
+            "title": "Record",
+            "type": "string"
+          }
+        },
+        "required": [
+          "curve",
+          "unit",
+          "axis",
+          "values",
+          "picks",
+          "samples",
+          "missing",
+          "at_one",
+          "at_zero",
+          "record"
+        ],
+        "title": "ShaleVolumePreview",
         "type": "object"
       },
       "Signal": {
@@ -68412,6 +68950,31 @@
           "target_crs"
         ],
         "title": "Transformation",
+        "type": "object"
+      },
+      "Typed": {
+        "additionalProperties": false,
+        "properties": {
+          "how": {
+            "const": "typed",
+            "title": "How",
+            "type": "string"
+          },
+          "clean": {
+            "title": "Clean",
+            "type": "number"
+          },
+          "shale": {
+            "title": "Shale",
+            "type": "number"
+          }
+        },
+        "required": [
+          "how",
+          "clean",
+          "shale"
+        ],
+        "title": "Typed",
         "type": "object"
       },
       "TypedInspection": {

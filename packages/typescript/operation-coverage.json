@@ -456,6 +456,12 @@
     }
   },
   {
+    "operation": "POST /api/v1/projects/{project}/calculations/shale-volume",
+    "function": "postProjectsProjectCalculationsShaleVolume",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/capabilities/describe",
     "function": "postProjectsProjectCapabilitiesDescribe",
     "request": "schema",

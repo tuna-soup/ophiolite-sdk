@@ -20,6 +20,8 @@ class ScientificContext(Contract):
     axis_duplicates: bool = Field(...)
     missing_count: Annotated[int, Field(ge=0, le=100000)] = Field(...)
     missing_value_marker: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    quantity: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(None)
+    quantity_status: Literal['suggested', 'declared'] | None = Field(None)
 
 class ApplicationCurve(Contract):
     schema_: Literal['ophiolite.application-curve/1'] = Field(..., alias='schema')
@@ -984,7 +986,7 @@ class ProfileEntry(Contract):
 
 class DocumentEntry(Contract):
     id: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] = Field(...)
-    kind: Literal['mapping', 'vocabulary', 'generated', 'openapi', 'fixture', 'capability', 'relationships', 'policy'] = Field(...)
+    kind: Literal['mapping', 'vocabulary', 'generated', 'openapi', 'fixture', 'capability', 'relationships', 'policy', 'calculation'] = Field(...)
     path: Annotated[str, Field(min_length=1)] = Field(...)
     title: Annotated[str, Field(min_length=1)] = Field(None)
     schema_: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$')] = Field(None, alias='schema')

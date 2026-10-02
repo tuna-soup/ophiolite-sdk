@@ -1,0 +1,65 @@
+{
+ "schema": "ophiolite.quantities/1",
+ "id": "ophiolite.quantities/1",
+ "title": "Curve quantities: what a curve measures, each with its OSDU LogCurveFamily name",
+ "osdu": {
+  "repository": "https://community.opengroup.org/osdu/data/data-definitions",
+  "commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+  "committed": "2026-07-17",
+  "list": "ReferenceValues/Manifests/reference-data/LOCAL/LogCurveFamily.1.json"
+ },
+ "quantities": [
+  {
+   "name": "Gamma Ray",
+   "osdu_log_curve_family": "Gamma Ray",
+   "units": [
+    "gAPI",
+    "API"
+   ],
+   "suggest_from": {
+    "mnemonics": [
+     "GR",
+     "GRC",
+     "SGR",
+     "CGR",
+     "GRD",
+     "GR_EDTC",
+     "HGR"
+    ],
+    "units": [
+     "gAPI",
+     "API"
+    ]
+   }
+  },
+  {
+   "name": "Shale Volume Fraction",
+   "osdu_log_curve_family": "Shale Volume Fraction",
+   "units": [
+    "V/V"
+   ]
+  },
+  {
+   "name": "Bulk Density",
+   "osdu_log_curve_family": "Bulk Density",
+   "units": [
+    "g/cm3"
+   ]
+  },
+  {
+   "name": "Compressional Slowness",
+   "osdu_log_curve_family": "Compressional Slowness",
+   "units": [
+    "us/ft",
+    "us/m"
+   ]
+  },
+  {
+   "name": "Resistivity",
+   "osdu_log_curve_family": "Resistivity",
+   "units": [
+    "ohm.m"
+   ]
+  }
+ ]
+}

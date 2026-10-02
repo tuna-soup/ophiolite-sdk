@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.21.0",
+  "version": "1.22.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -21,7 +21,7 @@
   "schemas": [
     {
       "id": "ophiolite.contracts-registry/1",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "lifecycle": "preview",
       "path": "registry-schema.json",
       "title": "ContractsRegistry",
@@ -53,7 +53,7 @@
     },
     {
       "id": "ophiolite.curve-context/1",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "lifecycle": "preview",
       "path": "assets/v1/curve-context-schema.json",
       "title": "ScientificContext",
@@ -849,6 +849,24 @@
       "kind": "policy",
       "path": "docs/api-versioning.md",
       "title": "API versions and deprecation: what the version numbers mean, additive changes, and the transition every breaking change needs"
+    },
+    {
+      "id": "ophiolite.quantities/1",
+      "kind": "vocabulary",
+      "path": "vocabulary/v1/quantities.json",
+      "title": "Curve quantities with their OSDU LogCurveFamily names (E52)"
+    },
+    {
+      "id": "ophiolite.shale-volume-methods/1",
+      "kind": "calculation",
+      "path": "scientific/v1/shale-volume-methods.json",
+      "title": "Shale volume from gamma ray: formulas, constants and reference values (E52)"
+    },
+    {
+      "id": "ophiolite.fixture/scientific/hon-gt-01-gamma-ray-excerpt.las/1",
+      "kind": "fixture",
+      "path": "scientific/v1/fixtures/hon-gt-01-gamma-ray-excerpt.las",
+      "title": "HON-GT-01 gamma-ray excerpt, NLOG, cropped (E52)"
     }
   ]
 }

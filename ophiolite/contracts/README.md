@@ -10,7 +10,8 @@ itself, so it can move to a public Contracts repository without renaming.
 | `registry.json`, `registry-schema.json` | the index and its own structural schema |
 | `profiles/v1/*.json`, `profile-schema.json` | one document per profile: display name, description, role, media types, rules |
 | `assets/v1/` | the scientific asset envelope, the normalized LAS curve, the curve context, the discovery summary, synthetic fixtures |
-| `scientific/v1/` | the two native protobuf exchange profiles and their structural schemas |
+| `scientific/v1/` | the two native protobuf exchange profiles and their structural schemas; `shale-volume-methods.json` (E52), the one table of shale-volume formulas, constants and reference values both runtimes are held to, with the HON-GT-01 excerpt it is checked against |
+| `vocabulary/v1/` | shared terms; `quantities.json` (E52), the closed list of curve quantities with their OSDU LogCurveFamily names |
 | `relationships/v1/` | the relationship predicate registry (E20) and the lineage document schema |
 | `entities/v1/` | the entity (well, wellbore) and entity-assets schemas (E20) |
 | `connectors/v1/` | the connector semantics vocabulary, copied byte for byte into Connectors and pinned by digest there |

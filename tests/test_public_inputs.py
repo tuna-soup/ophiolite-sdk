@@ -7,9 +7,9 @@ ROOT=Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('public_inputs',ROOT/'tools/check_public_inputs.py')
 audit=importlib.util.module_from_spec(spec);spec.loader.exec_module(audit)
 
-def test_current_inputs():assert audit.verify()==158  # E31: the API versioning policy document
+def test_current_inputs():assert audit.verify()==163  # E52: the shale-volume table, the quantity list, the HON-GT-01 excerpt and its README, the frozen server answers
 
-@pytest.mark.parametrize('case',['missing','duplicate','hash','rights','evidence','source','canary','notice'])
+@pytest.mark.parametrize('case',['missing','duplicate','hash','rights','evidence','source','canary','notice','third-party-licence','third-party-notice','third-party-register'])
 def test_unqualified_input_refusal(tmp_path,case):
     for name in ('LICENSE','NOTICE','THIRD_PARTY.md'):shutil.copyfile(ROOT/name,tmp_path/name)
     shutil.copytree(ROOT/'ophiolite/contracts',tmp_path/'ophiolite/contracts')
@@ -34,6 +34,10 @@ def test_unqualified_input_refusal(tmp_path,case):
         src=tmp_path/'ophiolite/contracts/SOURCE.json';value=json.loads(src.read_text())
         value['files'][row['path'].removeprefix('ophiolite/contracts/')]=row['sha256'];src.write_text(json.dumps(value))
     if case=='notice':(tmp_path/'NOTICE').unlink()
+    excerpt=next(row for row in manifest['inputs'] if row['disposition']=='third-party-attribution')  # E52
+    if case=='third-party-licence':excerpt['license']='Apache-2.0'
+    if case=='third-party-register':excerpt['evidence']='Reviewed.'
+    if case=='third-party-notice':(tmp_path/'THIRD_PARTY.md').write_text((ROOT/'THIRD_PARTY.md').read_text().replace(excerpt['attribution'],''))
     path.write_text(json.dumps(manifest))
     with pytest.raises(ValueError):audit.verify(tmp_path)
 

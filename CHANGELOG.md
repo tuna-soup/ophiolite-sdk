@@ -5,6 +5,20 @@
 Supported 0.x client over preview contracts, installable from reviewed source.
 No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
 
+- Shale volume from gamma ray (E52, preview API): `ophiolite.petrophysics` reads the five methods (linear,
+  Larionov Tertiary and older rocks, Clavier, Steiber), their constants and the percentile rule from the packaged
+  table `ophiolite.shale-volume-methods/1`, the same table the server's calculation uses. `shale_volume(values,
+  method=, clean=, shale=)` keeps missing samples missing; `picks_from_percentiles(depth, values, top, base, low=5,
+  high=95)` uses type 7 percentiles over [top, base); `shale_volume_method(...)` is the method record the server
+  records for the same calculation (library `ophiolite`), refusing an unlisted quantity or an output that is not a
+  curve; `calculation_record(...)` is the file's sentence. `write_curves(..., notes=[...])` writes an `~Other`
+  section. `ophiolite.gallery.connect()` gives a notebook its client: the packaged synthetic server when
+  `OPHIOLITE_URL` is unset, the client a harness bound with `gallery.use(client)`, else the saved sign-in or
+  `OPHIOLITE_ACCESS_KEY`. The synthetic server (`ophiolite.testing.synthetic_server`, moved from the templates'
+  `support.py`, which imports it) now adds versions to a derived publication with the server's rules and serves
+  its read-back and version history. The contract snapshot carries one third-party file, an attributed excerpt of
+  NLOG's HONSELERSDIJK-GT-01 log (THIRD_PARTY.md); the public-input check accepts it only with that attribution.
+
 - A connection that works or says which step failed (E51a): one reader (`ophiolite.credential_input`) for every key
   you supply (`--key`, `--key-file`, `--key-stdin`, `OPHIOLITE_ACCESS_KEY`, `Credential.bearer`, `key_login`) trims a
   line break, spaces and a stray `Bearer `, says what it removed (never the value) and refuses only an empty value, a

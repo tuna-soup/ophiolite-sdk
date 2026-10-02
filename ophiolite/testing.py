@@ -1,7 +1,10 @@
 """Explicit fixture transport; never installed as a production fallback."""
 import base64
+from contextlib import contextmanager
+from importlib.resources import files
 import json
 from pathlib import Path
+from urllib.parse import parse_qs, unquote, urlsplit
 import httpx
 
 class FixtureTransport(httpx.MockTransport):
@@ -91,6 +94,7 @@ class _MemoryApplications:
         if path=='/api/v1/application-access/status':return 200,{'state':'approved','project_id':'p','user_id':owner}
         try:
             if '/publications/' in path:return self._publication(operation,path,raw,headers,owner)  # E31: derived publications
+            if operation=='result-history' and json.loads(raw).get('asset_id') in getattr(self,'publications',{}):return self.history(json.loads(raw)['asset_id'],owner)  # E52
             upload='/las-uploads/' in path
             if upload and operation in ('upload','inspect'):
                 extra=next(v for k,v in headers.items() if k.lower()=='x-ophiolite-upload')
@@ -174,7 +178,7 @@ class _MemoryApplications:
         except (KeyError,ValueError,TypeError,StopIteration):return 400,{'error':'Invalid synthetic fixture request'}
     def _publication(self,operation,path,raw,headers,owner):
         """E31: publications/derive (an exact file with its declared method, idempotent per command id), info and share."""
-        import copy,hashlib
+        import copy,hashlib,time
         if operation=='derive':
             extra=next(v for k,v in headers.items() if k.lower()=='x-ophiolite-upload')
             body=json.loads(base64.b64decode(extra,validate=True))
@@ -184,12 +188,30 @@ class _MemoryApplications:
             if key in self.commands:
                 prior,answer=self.commands[key]
                 return (200,copy.deepcopy(answer)) if prior==fingerprint else (409,{'error':'This command id was already used for a different publication','code':'command-owned'})
-            ident='pub-'+hashlib.sha256(json.dumps(list(key)).encode()).hexdigest()[:24]
-            answer={'asset_id':ident,'revision':body['output_sha256'],'revision_number':1,'profile':body['profile'],
-                    'derived_from':[{'authority':'ophiolite:derived','key':p['asset_id'],'revision':p['revision'],'profile':'las2/1'} for p in body['derived_from']],
-                    'method':body['method'],'command_id':body['command_id']}
-            self.commands[key]=(fingerprint,copy.deepcopy(answer));self.publications=getattr(self,'publications',{})
-            self.publications[ident]={'receipt':answer,'name':body['name'],'owner':owner,'bytes':raw}
+            self.publications=getattr(self,'publications',{})
+            parents=[{'authority':'ophiolite:derived','key':p['asset_id'],'revision':p['revision'],'profile':'las2/1'} for p in body['derived_from']]
+            method={'script_sha256':None,**body['method']}
+            head=None
+            if body.get('new_version_of') is not None:  # E52: the server's append rules, in its order and words
+                head=self.publications.get(body['new_version_of'])
+                if head is None or head['owner']!=owner or head['receipt']['profile']!=body['profile']:
+                    return 403,_envelope('Only the author can add a version to this result, of the same type','PERMISSION_DENIED')
+                if {p['key'] for p in parents}!={p['key'] for p in head['versions'][0]['parents']}:
+                    return 403,_envelope('A new version must derive from the same lineage as the existing result','PERMISSION_DENIED')
+                if body['output_sha256'] in [v['revision'] for v in head['versions']]:
+                    return 409,_envelope('This content is already a version of the result','revision-conflict')
+                if body.get('expected_parent')!=head['versions'][-1]['revision']:
+                    return 409,_envelope('The result has a newer version; review it before adding another','revision-conflict')
+            ident=body['new_version_of'] if head else hashlib.sha256(json.dumps(list(key)).encode()).hexdigest()  # 64 hex, as the server's
+            number=len(head['versions'])+1 if head else 1
+            answer={'asset_id':ident,'revision':body['output_sha256'],'revision_number':number,'profile':body['profile'],
+                    'derived_from':parents,'method':method,'command_id':body['command_id']}
+            version={'number':number,'revision':body['output_sha256'],'parent_revision':head['versions'][-1]['revision'] if head else None,'bytes':raw,
+                     'method':method,'parents':parents,'by':owner,'published_at':time.time(),
+                     'run_id':ident if not head else hashlib.sha256(json.dumps(list(key)+['version']).encode()).hexdigest()}
+            self.commands[key]=(fingerprint,copy.deepcopy(answer))
+            if head:head['versions'].append(version);head['receipt']=answer;head['bytes']=raw
+            else:self.publications[ident]={'receipt':answer,'name':body['name'],'owner':owner,'bytes':raw,'versions':[version]}
             self.mutations['derive']=self.mutations.get('derive',0)+1
             return 200,copy.deepcopy(answer)
         body=json.loads(raw);ident=body.get('asset_id');item=getattr(self,'publications',{}).get(ident)
@@ -212,6 +234,38 @@ class _MemoryApplications:
         if operation=='share':answer['sharing_contract']='conditional'
         return 200,answer
 
+    def readable(self,ident,owner):
+        item=getattr(self,'publications',{}).get(ident)
+        return item if item and (owner==item['owner'] or owner in self.audiences.get(ident,([],[]))[0]) else None
+
+    def history(self,ident,owner):
+        """E52: applications/result-history for a derived publication, as the server answers it."""
+        item=self.readable(ident,owner)
+        if item is None:return 404,_envelope('Result unavailable','not-found')
+        rows=[{'number':v['number'],'revision':v['revision'],'parent_revision':v['parent_revision'],'published_at':v['published_at'],'by':v['by'],'via':None,
+               'calculation':METHOD_WORDS.get(v['method'].get('name'),'Method declared by its publisher'),'application_version':None,'input':None,
+               'run_id':v['run_id'],'stage':'draft'} for v in item['versions']]
+        return 200,{'asset_id':ident,'head_revision':item['versions'][-1]['revision'],'count':len(rows),'revisions':rows,
+                    'display':{'member_names':{v['by']:v['by'].capitalize() for v in item['versions']}}}
+
+    def scientific(self,route,query,owner):
+        """E52: the read-back of a derived publication: its descriptor (with `derivation`, `parents` and `history`), the
+        exact file and the `curve:<mnemonic>` representation, as the server serves them. None when not a publication."""
+        parts=route.split('/')
+        if len(parts) not in (3,5) or parts[1]!='revisions':return None
+        ident,revision=parts[0],parts[2]
+        if ident not in getattr(self,'publications',{}):return None
+        item=self.readable(ident,owner)
+        version=next((v for v in item['versions'] if v['revision']==revision),None) if item else None
+        if version is None:return 404,_envelope('No such revision.','not-found')
+        las=read_las(version['bytes']);curve=(query.get('curve') or [''])[0]
+        if len(parts)==5 and parts[3]=='representations' and parts[4]=='artifact':return 200,version['bytes']
+        if curve not in las['curves'] or curve==las['index']:return 404,_envelope('Select the available curve.','not-found')
+        normalized=_normalized(ident,version,las,curve)
+        if len(parts)==5 and parts[3]=='representations' and parts[4]=='curve:'+curve:return 200,normalized
+        if len(parts)!=3:return 404,_envelope('No such representation.','not-found')
+        return 200,_descriptor(ident,item,version,las,curve,normalized,owner)
+
     def summary(self,ident):
         if ident in self.uploads:
             answer=dict(self.uploads[ident]);read,reuse=self.audiences.get(ident,(answer['recipients'],answer['reuse_recipients']))
@@ -223,6 +277,152 @@ class _MemoryApplications:
 
     def generation(self,ident):
         return {'grants_generation':self.generations.get(ident,1)} if self.conditional else {}
+
+
+# --- E52: the synthetic server of the templates and the gallery, and the read-back of a derived publication ---------
+
+METHOD_WORDS={'scipy.spatial.Delaunay':'Delaunay triangulation (SciPy)','scipy.interpolate.griddata':'Gridding by interpolation (SciPy)',
+              'ophiolite.shale-volume':'Shale volume from gamma ray'}  # the server's words for documented method names
+INTERPRETATION={'reader':'asset_connectors.las_reader/1','lasio_version':'0.32','mapping':'application-curve/1',
+                'null_policy':'strict declared NULL; nonfinite samples mapped to null; wrapped rows use declared curve count','parsing_policy':'las2-strict-null/1'}
+
+
+def _envelope(message,code):
+    return {'error':message,'code':code,'message':message}
+
+
+def read_las(raw):
+    """The few facts of a LAS 2.0 file written by ophiolite.writers (or the synthetic original) the fixture serves:
+    the NULL text, the curves with their units (the first is the depth index) and the rows. Not a general reader."""
+    section='';null='-999.25';curves={};order=[];rows=[]
+    for line in raw.decode('ascii').splitlines():
+        if not line.strip() or line.lstrip().startswith('#'):continue
+        if line.startswith('~'):section=line[1].upper();continue
+        if section=='W' and line.split('.',1)[0].strip()=='NULL':null=line.split('.',1)[1].split(':',1)[0].strip()
+        elif section=='C':
+            name,rest=line.split('.',1);name=name.strip();curves[name]=rest.split(' ',1)[0].split(':',1)[0].strip();order.append(name)
+        elif section=='A':rows.append([float(v) for v in line.split()])
+    marker=float(null)
+    columns={name:[None if r[i]==marker else r[i] for r in rows] for i,name in enumerate(order)}
+    return {'null':null,'index':order[0],'curves':curves,'columns':columns}
+
+
+def _normalized(ident,version,las,curve):
+    value={'schema':'ophiolite.application-curve/1','representation':'normalized','axis':las['columns'][las['index']],'values':las['columns'][curve],
+           'curve':curve,'unit':las['curves'][curve],
+           'context':{'depth_index':las['index'],'depth_unit':las['curves'][las['index']],'depth_reference':'source declared; not inferred',
+                      'missing_value_marker':las['null'],'missing_value_policy':'Declared LAS NULL marker; missing samples are not zero'},
+           'source':{'authority':'ophiolite:derived','key':ident,'revision':version['revision'],'profile':'las2/1'},'source_sha256':version['revision'],
+           'interpretation':dict(INTERPRETATION)}
+    return json.dumps(value,sort_keys=True,separators=(',',':'),allow_nan=False).encode()
+
+
+def _descriptor(ident,item,version,las,curve,normalized,owner):
+    """The server's descriptor of one revision of a derived publication, without its revision manifest and display words."""
+    import hashlib,time
+    axis=las['columns'][las['index']];values=las['columns'][curve]
+    order='insufficient' if len(axis)<2 else 'increasing' if all(a<b for a,b in zip(axis,axis[1:])) else 'decreasing' if all(a>b for a,b in zip(axis,axis[1:])) else 'unordered'
+    scientific={'curve':curve,'unit':las['curves'][curve],'unit_status':'declared','axis_unit':las['curves'][las['index']],'axis_unit_status':'declared',
+                'depth_reference':'source declared; not inferred','sample_count':len(axis),'axis_order':order,'axis_duplicates':len(set(axis))!=len(axis),
+                'missing_count':sum(v is None for v in values),'missing_value_marker':las['null']}
+    output=((version['method'].get('parameters') or {}).get('outputs') or {}).get(curve)
+    if output and output.get('quantity') in _quantities():scientific.update(quantity=output['quantity'],quantity_status='declared')
+    allowed=['read','export','use-as-input']
+    return {'schema':'ophiolite.scientific-asset/1','asset_id':ident,'revision':version['revision'],'project_id':'p','authority':'ophiolite:derived',
+            'origin':'managed-derived','custodian':'ophiolite:managed','source_reference':None,'profile':'las2/1','scientific':scientific,
+            'interpretation':dict(INTERPRETATION),'interpretation_evidence':'recorded','recorded_interpretation':dict(INTERPRETATION),
+            'representations':[{'id':'artifact','kind':'derived-artifact','media_type':'application/x-las','profile':'las2/1','bytes':len(version['bytes']),
+                                'sha256':version['revision'],'available':True,'losses':[]},
+                               {'id':'curve:'+curve,'kind':'normalized','media_type':'application/json','profile':'ophiolite.application-curve/1',
+                                'bytes':len(normalized),'sha256':hashlib.sha256(normalized).hexdigest(),'available':True,
+                                'losses':['LAS formatting is represented by the exact artifact, not normalized JSON']}],
+            'retention':{'mode':'retained','policy':'No automatic eviction; current distribution rights required','historical_reads':'while-retained-and-authorized'},
+            'parents':[dict(p) for p in version['parents']],'parent_visibility':'complete',
+            'provenance':{'evidence':'script-declared','method':version['method'].get('name'),'code_reference':None,'environment_reference':None,
+                          'omissions':['Code and execution environment were not captured']},
+            'supported_operations':allowed,
+            'authorization':{'status':'evaluated','evaluated_for':owner,'evaluated_at':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'allowed_operations':allowed},
+            'history':{'number':version['number'],'count':len(item['versions']),'head_revision':item['versions'][-1]['revision'],'parent_revision':version['parent_revision']},
+            'derivation':{'method':dict(version['method'])}}
+
+
+def _quantities():
+    import importlib.resources
+    return {q['name'] for q in json.loads(importlib.resources.files('ophiolite').joinpath('contracts/vocabulary/v1/quantities.json').read_bytes())['quantities']}
+
+
+# Synthetic wells (E31 map-application): two located by a source you may read, one without a location.
+WELLS = [{'entity_id':'well-synthetic-1','kind':'well','name':'Synthetic well 1','owner':'alice','generation':1,
+          'location':{'x':5.1,'y':52.1,'crs':'OGC:CRS84','source':{'asset_id':'wells-table','revision':'r1','profile':'ophiolite/sql-table/1','row':'1'},'elevation_reference':'unknown'}},
+         {'entity_id':'well-synthetic-2','kind':'well','name':'Synthetic well 2','owner':'alice','generation':1,
+          'location':{'x':6.2,'y':52.9,'crs':'OGC:CRS84','source':{'asset_id':'wells-table','revision':'r1','profile':'ophiolite/sql-table/1','row':'2'},'elevation_reference':'unknown'}},
+         {'entity_id':'well-synthetic-3','kind':'well','name':'Synthetic well 3','owner':'alice','generation':1,'location':None}]
+
+
+@contextmanager
+def synthetic_server():
+    """The templates' and the gallery's synthetic server: one synthetic gamma-ray log (curve-a), the application journal,
+    derived publications with versions, and their read-back. Loopback only; never a production fallback."""
+    from . import validate
+    root = files('ophiolite').joinpath('contracts/assets/v1/fixtures')
+    descriptor = json.loads(root.joinpath('source.json').read_bytes())
+    descriptor['project_id'] = 'p'
+    raw = root.joinpath('curve.json').read_bytes()
+    original = root.joinpath('original.las').read_bytes()
+    validate.pair(descriptor, raw)
+    server = fixture_server()
+    applications = server.handler
+    faults = {}
+    prefix = '/api/v1/projects/p/scientific-assets'
+    exact = prefix + '/' + descriptor['asset_id'] + '/revisions/' + descriptor['revision']
+    summary = {key: descriptor[key] for key in ('asset_id','revision','origin','authority','profile','custodian')}
+    summary.update(name='Synthetic gamma ray', curves=['GR'], sample_count=5, allowed_operations=['read','export','use-as-input'])
+
+    def handler(method, path, body, headers):
+        token = next((v for k,v in headers.items() if k.lower() == 'authorization'), '')
+        if token == 'Bearer expired' or faults.get('expired'): return 401, {'error':'Sign in again.'}
+        if faults.get('revoked'): return 403, {'error':'Access has been revoked.'}
+        if faults.get('busy'): return 503, {'error':'Service is busy.'}
+        if faults.get('capacity'): return 413, {'error':'Supported size exceeded.'}
+        if path.endswith('/share') and faults.pop('recipients_changed', None):
+            # Someone else changed the recipients after this client read them.
+            ident = json.loads(body).get('id') or json.loads(body).get('asset_id')
+            applications.generations[ident] = applications.generations.get(ident, 1) + 1
+        parsed = urlsplit(path)
+        route = unquote(parsed.path)
+        if method == 'GET':
+            if not token: return 401, {'error':'Sign in again.'}
+            if route == prefix: return 200, {'items':[summary], 'next_cursor':None}
+            if route == exact:
+                if parse_qs(parsed.query).get('curve') != ['GR']: return 404, {'error':'Select the available curve.'}
+                changed = json.loads(json.dumps(descriptor))
+                if faults.get('changed_input'): changed['revision'] = 'changed'
+                return 200, changed
+            if route == exact + '/representations/las': return 200, original
+            if route == exact + '/representations/curve': return 200, raw
+            if route.startswith(prefix + '/'):  # E52: a derived publication made against this server
+                found = applications.scientific(route[len(prefix) + 1:], parse_qs(parsed.query), _owner(token))
+                if found is not None: return found
+            return 404, {'error':'No such synthetic revision.'}
+        if method == 'POST' and route.endswith(('/entities/list', '/entities/extent')):  # E31: the synthetic wells a map shows
+            if not token: return 401, {'error':'Sign in again.'}
+            request = json.loads(body or b'{}')
+            if route.endswith('/entities/extent'): return 200, {'crs':request.get('crs','OGC:CRS84'),'bbox':[5.1,52.1,6.2,52.9],'count':2,'untransformed':0}
+            return 200, {'entities':[dict(well, location=dict(well['location'], crs=request.get('crs') or 'OGC:CRS84') if well['location'] else None) for well in WELLS],
+                         'next_cursor':None,'untransformed':0}
+        return applications(method,path,body,headers)
+
+    server.handler = handler
+    # Public fixture controls are intentionally separate from all product responses.
+    server.template_faults = faults
+    server.template_mutations = applications.mutations
+    server.template_descriptor = descriptor
+    with server:
+        yield server
+
+
+def _owner(token):
+    return token.removeprefix('Bearer ').removeprefix('oph_api_').removeprefix('provider-').split(':')[0]
 
 
 if __name__=='__main__':

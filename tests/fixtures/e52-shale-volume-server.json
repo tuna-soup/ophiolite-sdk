@@ -1,0 +1,828 @@
+{
+ "duplicate": [
+  409,
+  {
+   "code": "revision-conflict",
+   "docs": "/docs/reference/errors/#revision-conflict",
+   "error": "This content is already a version of the result",
+   "message": "This content is already a version of the result",
+   "remedy": "A newer revision exists: read the current revision and repeat the change against it.",
+   "request_id": "req_fb47006196fe8333a4251727"
+  }
+ ],
+ "files": [
+  "flZlcnNpb24KVkVSUy4gMi4wIDogTEFTCldSQVAuIE5PIDogcm93cwp+V2VsbApTVFJULk0gMTAwIDogc3RhcnQKU1RPUC5NIDEwNCA6IHN0b3AKU1RFUC5NIDEgOiBzdGVwCk5VTEwuIC05OTkuMjUgOiBtaXNzaW5nCldFTEwuIFNZTlRIRVRJQy1NMSA6IHdlbGwKfkN1cnZlCkRFUFQuTSA6IGRlcHRoClZTSC5WL1YgOiBWU0gKfk90aGVyCiBTaGFsZSB2b2x1bWUgZnJvbSBnYW1tYSByYXk6IExpbmVhciAoc2ltcGxlKTsgY2xlYW4gMS41IGdBUEkgYW5kIHNoYWxlIDM4LjUgZ0FQSSwgdGhlIDV0aCBhbmQgOTV0aCBwZXJjZW50aWxlIGJldHdlZW4gMTAwIGFuZCAxMDUgTTsgY2xpcHBlZCB0byAwLTE7IG1ldGhvZCB0YWJsZSBmODk4NDU3MWNmZjMuCn5BU0NJSQoxMDAgMAoxMDEgMC4yMjk3Mjk3Mjk3Mjk3Mjk3NAoxMDIgLTk5OS4yNQoxMDMgMC43NzAyNzAyNzAyNzAyNzAzCjEwNCAxCg==",
+  "flZlcnNpb24KVkVSUy4gMi4wIDogTEFTCldSQVAuIE5PIDogcm93cwp+V2VsbApTVFJULk0gMTAwIDogc3RhcnQKU1RPUC5NIDEwNCA6IHN0b3AKU1RFUC5NIDEgOiBzdGVwCk5VTEwuIC05OTkuMjUgOiBtaXNzaW5nCldFTEwuIFNZTlRIRVRJQy1NMSA6IHdlbGwKfkN1cnZlCkRFUFQuTSA6IGRlcHRoClZTSC5WL1YgOiBWU0gKfk90aGVyCiBTaGFsZSB2b2x1bWUgZnJvbSBnYW1tYSByYXk6IExpbmVhciAoc2ltcGxlKTsgY2xlYW4gNSBnQVBJIGFuZCBzaGFsZSAzNSBnQVBJLCB0eXBlZDsgY2xpcHBlZCB0byAwLTE7IG1ldGhvZCB0YWJsZSBmODk4NDU3MWNmZjMuCn5BU0NJSQoxMDAgMAoxMDEgMC4xNjY2NjY2NjY2NjY2NjY2NgoxMDIgLTk5OS4yNQoxMDMgMC44MzMzMzMzMzMzMzMzMzM0CjEwNCAxCg=="
+ ],
+ "history": {
+  "asset_id": "b07674afac50384265bd30a6777a974e41d640e749a25b8ea1bbdac727157701",
+  "count": 2,
+  "display": {
+   "member_names": {
+    "alice": "Alice"
+   }
+  },
+  "head_revision": "d7b47087fc5f8bea015820f4404c80cd51a71938932fae46379de88047fd6f84",
+  "revisions": [
+   {
+    "application_version": null,
+    "by": "alice",
+    "calculation": "Shale volume from gamma ray",
+    "input": null,
+    "number": 1,
+    "parent_revision": null,
+    "published_at": 1790943597.6977131,
+    "revision": "eabee3b94cf5fe80122e8d9242ce413262d1adaa3270e20279c0c466e7774bbd",
+    "run_id": "b07674afac50384265bd30a6777a974e41d640e749a25b8ea1bbdac727157701",
+    "stage": "draft",
+    "via": null
+   },
+   {
+    "application_version": null,
+    "by": "alice",
+    "calculation": "Shale volume from gamma ray",
+    "input": null,
+    "number": 2,
+    "parent_revision": "eabee3b94cf5fe80122e8d9242ce413262d1adaa3270e20279c0c466e7774bbd",
+    "published_at": 1790943597.7098355,
+    "revision": "d7b47087fc5f8bea015820f4404c80cd51a71938932fae46379de88047fd6f84",
+    "run_id": "f015b7e72f73270d2f7f1910e213b6f8fdb4e5eb42ac75375b60daadc3e181b2",
+    "stage": "draft",
+    "via": null
+   }
+  ]
+ },
+ "info": {
+  "asset_id": "b07674afac50384265bd30a6777a974e41d640e749a25b8ea1bbdac727157701",
+  "can_share": true,
+  "display": {
+   "member_names": {
+    "alice": "Alice",
+    "bob": "Bob",
+    "viewer": "Viewer"
+   }
+  },
+  "grants_generation": 1,
+  "name": "Synthetic shale volume",
+  "owner": "alice",
+  "permitted_audience": [
+   "alice",
+   "bob",
+   "viewer"
+  ],
+  "recipients": [
+   "alice"
+  ],
+  "reuse_recipients": [
+   "alice"
+  ],
+  "revision": "d7b47087fc5f8bea015820f4404c80cd51a71938932fae46379de88047fd6f84",
+  "via": null
+ },
+ "not_author": [
+  403,
+  {
+   "code": "PERMISSION_DENIED",
+   "docs": "/docs/reference/errors/#permission_denied",
+   "error": "Only the author can add a version to this result, of the same type",
+   "message": "Only the author can add a version to this result, of the same type",
+   "remedy": "Use a credential whose scope, kind and project reach this operation, or ask a project administrator for access.",
+   "request_id": "req_95abf78e81002983868b4fdf"
+  }
+ ],
+ "parent": {
+  "acquisition": {
+   "attribution": "Synthetic",
+   "filename": "x.las",
+   "identity": "alice",
+   "kind": "user-upload",
+   "rights": "User declares retention, derivation and sharing within the selected audience are permitted",
+   "uploaded_at": 1790943597.44585,
+   "well_notes": ""
+  },
+  "asset_id": "aaac110e295725d033bf56ac48a11cbe7527de73d055401ce66be3bf9e3b335c",
+  "can_share": true,
+  "grants_generation": 1,
+  "name": "Source synthetic",
+  "permitted_audience": [
+   "alice",
+   "bob",
+   "viewer"
+  ],
+  "policy": {
+   "changed_at": null,
+   "changed_by": null,
+   "generation": 0,
+   "reason": null
+  },
+  "recipients": [
+   "alice"
+  ],
+  "reuse_recipients": [
+   "alice"
+  ],
+  "revision": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
+  "stage": "draft"
+ },
+ "parent_curve": {
+  "axis": [
+   100.0,
+   101.0,
+   102.0,
+   103.0,
+   104.0
+  ],
+  "context": {
+   "depth_index": "DEPT",
+   "depth_reference": "source declared; not inferred",
+   "depth_unit": "M",
+   "missing_value_marker": "-999.25",
+   "missing_value_policy": "Declared LAS NULL marker; missing samples are not zero"
+  },
+  "curve": "GR",
+  "interpretation": {
+   "lasio_version": "0.32",
+   "mapping": "application-curve/1",
+   "null_policy": "strict declared NULL; nonfinite samples mapped to null; wrapped rows use declared curve count",
+   "parsing_policy": "las2-strict-null/1",
+   "reader": "asset_connectors.las_reader/1"
+  },
+  "representation": "normalized",
+  "schema": "ophiolite.application-curve/1",
+  "source": {
+   "authority": "ophiolite:uploaded",
+   "key": "aaac110e295725d033bf56ac48a11cbe7527de73d055401ce66be3bf9e3b335c",
+   "profile": "las2/1",
+   "revision": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b"
+  },
+  "source_sha256": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
+  "unit": "gAPI",
+  "values": [
+   0.0,
+   10.0,
+   null,
+   30.0,
+   40.0
+  ]
+ },
+ "reads": {
+  "d7b47087fc5f8bea015820f4404c80cd51a71938932fae46379de88047fd6f84": {
+   "curve_base64": "eyJheGlzIjpbMTAwLjAsMTAxLjAsMTAyLjAsMTAzLjAsMTA0LjBdLCJjb250ZXh0Ijp7ImRlcHRoX2luZGV4IjoiREVQVCIsImRlcHRoX3JlZmVyZW5jZSI6InNvdXJjZSBkZWNsYXJlZDsgbm90IGluZmVycmVkIiwiZGVwdGhfdW5pdCI6Ik0iLCJtaXNzaW5nX3ZhbHVlX21hcmtlciI6Ii05OTkuMjUiLCJtaXNzaW5nX3ZhbHVlX3BvbGljeSI6IkRlY2xhcmVkIExBUyBOVUxMIG1hcmtlcjsgbWlzc2luZyBzYW1wbGVzIGFyZSBub3QgemVybyJ9LCJjdXJ2ZSI6IlZTSCIsImludGVycHJldGF0aW9uIjp7Imxhc2lvX3ZlcnNpb24iOiIwLjMyIiwibWFwcGluZyI6ImFwcGxpY2F0aW9uLWN1cnZlLzEiLCJudWxsX3BvbGljeSI6InN0cmljdCBkZWNsYXJlZCBOVUxMOyBub25maW5pdGUgc2FtcGxlcyBtYXBwZWQgdG8gbnVsbDsgd3JhcHBlZCByb3dzIHVzZSBkZWNsYXJlZCBjdXJ2ZSBjb3VudCIsInBhcnNpbmdfcG9saWN5IjoibGFzMi1zdHJpY3QtbnVsbC8xIiwicmVhZGVyIjoiYXNzZXRfY29ubmVjdG9ycy5sYXNfcmVhZGVyLzEifSwicmVwcmVzZW50YXRpb24iOiJub3JtYWxpemVkIiwic2NoZW1hIjoib3BoaW9saXRlLmFwcGxpY2F0aW9uLWN1cnZlLzEiLCJzb3VyY2UiOnsiYXV0aG9yaXR5Ijoib3BoaW9saXRlOmRlcml2ZWQiLCJrZXkiOiJiMDc2NzRhZmFjNTAzODQyNjViZDMwYTY3NzdhOTc0ZTQxZDY0MGU3NDlhMjViOGVhMWJiZGFjNzI3MTU3NzAxIiwicHJvZmlsZSI6ImxhczIvMSIsInJldmlzaW9uIjoiZDdiNDcwODdmYzVmOGJlYTAxNTgyMGY0NDA0YzgwY2Q1MWE3MTkzODkzMmZhZTQ2Mzc5ZGU4ODA0N2ZkNmY4NCJ9LCJzb3VyY2Vfc2hhMjU2IjoiZDdiNDcwODdmYzVmOGJlYTAxNTgyMGY0NDA0YzgwY2Q1MWE3MTkzODkzMmZhZTQ2Mzc5ZGU4ODA0N2ZkNmY4NCIsInVuaXQiOiJWL1YiLCJ2YWx1ZXMiOlswLjAsMC4xNjY2NjY2NjY2NjY2NjY2NixudWxsLDAuODMzMzMzMzMzMzMzMzMzNCwxLjBdfQ==",
+   "descriptor": {
+    "asset_id": "b07674afac50384265bd30a6777a974e41d640e749a25b8ea1bbdac727157701",
+    "authority": "ophiolite:derived",
+    "authorization": {
+     "allowed_operations": [
+      "read",
+      "export",
+      "use-as-input"
+     ],
+     "evaluated_at": "2026-10-02T12:19:58Z",
+     "evaluated_for": "alice",
+     "status": "evaluated"
+    },
+    "custodian": "ophiolite:managed",
+    "derivation": {
+     "method": {
+      "declared": true,
+      "library": "ophiolite",
+      "name": "ophiolite.shale-volume",
+      "parameters": {
+       "clip": [
+        0,
+        1
+       ],
+       "inputs": {
+        "GR": {
+         "basis": "confirmed",
+         "quantity": "Gamma Ray",
+         "unit": "gAPI"
+        }
+       },
+       "method": "linear",
+       "outputs": {
+        "VSH": {
+         "quantity": "Shale Volume Fraction",
+         "unit": "V/V"
+        }
+       },
+       "picks": {
+        "clean": 5.0,
+        "how": "typed",
+        "shale": 35.0
+       },
+       "table": "f8984571cff3e1a55b0ccb0ba5ee532fd4537b73d66fdfa04612379f4f158042"
+      },
+      "script_sha256": null,
+      "version": "ophiolite.shale-volume-methods/1"
+     }
+    },
+    "display": {
+     "available_as": [
+      "result file",
+      "curve table"
+     ],
+     "built_on": "an uploaded file",
+     "evidence": "Declared by the script",
+     "held_as": "Result",
+     "method": "Shale volume from gamma ray",
+     "settings": null,
+     "source": "Result of a calculation",
+     "type": "LAS 2.0 well log file",
+     "type_help": "A LAS 2.0 text file of depth-indexed well log curves, kept byte for byte as the source stored it.",
+     "updates": "Locked to this version",
+     "version": {
+      "at": null,
+      "by": {
+       "id": "alice",
+       "label": null
+      },
+      "of": null,
+      "ordinal": null,
+      "source_version": null
+     }
+    },
+    "history": {
+     "count": 2,
+     "head_revision": "d7b47087fc5f8bea015820f4404c80cd51a71938932fae46379de88047fd6f84",
+     "number": 2,
+     "parent_revision": "eabee3b94cf5fe80122e8d9242ce413262d1adaa3270e20279c0c466e7774bbd"
+    },
+    "interpretation": {
+     "lasio_version": "0.32",
+     "mapping": "application-curve/1",
+     "null_policy": "strict declared NULL; nonfinite samples mapped to null; wrapped rows use declared curve count",
+     "parsing_policy": "las2-strict-null/1",
+     "reader": "asset_connectors.las_reader/1"
+    },
+    "interpretation_evidence": "recorded",
+    "manifest": {
+     "artifact": {
+      "bytes": 400,
+      "sha256": "d7b47087fc5f8bea015820f4404c80cd51a71938932fae46379de88047fd6f84"
+     },
+     "digest": "e3dc11dcb24d37e2f994693852903ad537c7e794062fce1385c95fded5724d09",
+     "lineage": [
+      {
+       "commitment": "c8ccf413dfdc79245037c8e1b93741d313898d078a6388ae3341e5bca65786ec",
+       "predicate": "derived-from",
+       "reference": {
+        "authority": "ophiolite:uploaded",
+        "key": "aaac110e295725d033bf56ac48a11cbe7527de73d055401ce66be3bf9e3b335c",
+        "profile": "las2/1",
+        "revision": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b"
+       },
+       "salt": "44fc095e72d3a900aac7d5a2a6f205f8"
+      },
+      {
+       "commitment": "f043d53dec874a873890863702596fa31801eab9a0daa0b4c5731cc47ed73785",
+       "predicate": "supersedes",
+       "reference": {
+        "authority": "ophiolite:managed",
+        "key": "b07674afac50384265bd30a6777a974e41d640e749a25b8ea1bbdac727157701",
+        "revision": "eabee3b94cf5fe80122e8d9242ce413262d1adaa3270e20279c0c466e7774bbd"
+       },
+       "salt": "c6b158fa7e46f3514a2cb053a3f59a05"
+      }
+     ],
+     "method": {
+      "declared": true,
+      "library": "ophiolite",
+      "name": "ophiolite.shale-volume",
+      "parameters": {
+       "clip": [
+        0,
+        1
+       ],
+       "inputs": {
+        "GR": {
+         "basis": "confirmed",
+         "quantity": "Gamma Ray",
+         "unit": "gAPI"
+        }
+       },
+       "method": "linear",
+       "outputs": {
+        "VSH": {
+         "quantity": "Shale Volume Fraction",
+         "unit": "V/V"
+        }
+       },
+       "picks": {
+        "clean": 5.0,
+        "how": "typed",
+        "shale": 35.0
+       },
+       "table": "f8984571cff3e1a55b0ccb0ba5ee532fd4537b73d66fdfa04612379f4f158042"
+      },
+      "script_sha256": null,
+      "version": "ophiolite.shale-volume-methods/1"
+     },
+     "representations": [
+      {
+       "bytes": 973,
+       "id": "curve:VSH",
+       "sha256": "5ca120e3d56620b53da5976b9eb95767c7a4a9954c6fb3ff13052059e2fc9939"
+      }
+     ],
+     "schema": "ophiolite.revision-manifest/2"
+    },
+    "origin": "managed-derived",
+    "parent_visibility": "complete",
+    "parents": [
+     {
+      "authority": "ophiolite:uploaded",
+      "key": "aaac110e295725d033bf56ac48a11cbe7527de73d055401ce66be3bf9e3b335c",
+      "profile": "las2/1",
+      "revision": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b"
+     }
+    ],
+    "profile": "las2/1",
+    "project_id": "p",
+    "provenance": {
+     "code_reference": null,
+     "environment_reference": null,
+     "evidence": "script-declared",
+     "method": "ophiolite.shale-volume",
+     "omissions": [
+      "Code and execution environment were not captured"
+     ]
+    },
+    "recorded_interpretation": {
+     "lasio_version": "0.32",
+     "mapping": "application-curve/1",
+     "null_policy": "strict declared NULL; nonfinite samples mapped to null; wrapped rows use declared curve count",
+     "parsing_policy": "las2-strict-null/1",
+     "reader": "asset_connectors.las_reader/1"
+    },
+    "representations": [
+     {
+      "available": true,
+      "bytes": 400,
+      "id": "artifact",
+      "kind": "derived-artifact",
+      "losses": [],
+      "media_type": "application/x-las",
+      "profile": "las2/1",
+      "sha256": "d7b47087fc5f8bea015820f4404c80cd51a71938932fae46379de88047fd6f84"
+     },
+     {
+      "available": true,
+      "bytes": 973,
+      "id": "curve:VSH",
+      "kind": "normalized",
+      "losses": [
+       "LAS formatting is represented by the exact artifact, not normalized JSON"
+      ],
+      "media_type": "application/json",
+      "profile": "ophiolite.application-curve/1",
+      "sha256": "5ca120e3d56620b53da5976b9eb95767c7a4a9954c6fb3ff13052059e2fc9939"
+     }
+    ],
+    "retention": {
+     "historical_reads": "while-retained-and-authorized",
+     "mode": "retained",
+     "policy": "No automatic eviction; current distribution rights required"
+    },
+    "revision": "d7b47087fc5f8bea015820f4404c80cd51a71938932fae46379de88047fd6f84",
+    "schema": "ophiolite.scientific-asset/1",
+    "scientific": {
+     "axis_duplicates": false,
+     "axis_order": "increasing",
+     "axis_unit": "M",
+     "axis_unit_status": "declared",
+     "curve": "VSH",
+     "depth_reference": "source declared; not inferred",
+     "missing_count": 1,
+     "missing_value_marker": "-999.25",
+     "quantity": "Shale Volume Fraction",
+     "quantity_status": "declared",
+     "sample_count": 5,
+     "unit": "V/V",
+     "unit_status": "declared"
+    },
+    "source_reference": null,
+    "supported_operations": [
+     "read",
+     "export",
+     "use-as-input"
+    ]
+   },
+   "las_sha256": "d7b47087fc5f8bea015820f4404c80cd51a71938932fae46379de88047fd6f84",
+   "las_status": 200
+  },
+  "eabee3b94cf5fe80122e8d9242ce413262d1adaa3270e20279c0c466e7774bbd": {
+   "curve_base64": "eyJheGlzIjpbMTAwLjAsMTAxLjAsMTAyLjAsMTAzLjAsMTA0LjBdLCJjb250ZXh0Ijp7ImRlcHRoX2luZGV4IjoiREVQVCIsImRlcHRoX3JlZmVyZW5jZSI6InNvdXJjZSBkZWNsYXJlZDsgbm90IGluZmVycmVkIiwiZGVwdGhfdW5pdCI6Ik0iLCJtaXNzaW5nX3ZhbHVlX21hcmtlciI6Ii05OTkuMjUiLCJtaXNzaW5nX3ZhbHVlX3BvbGljeSI6IkRlY2xhcmVkIExBUyBOVUxMIG1hcmtlcjsgbWlzc2luZyBzYW1wbGVzIGFyZSBub3QgemVybyJ9LCJjdXJ2ZSI6IlZTSCIsImludGVycHJldGF0aW9uIjp7Imxhc2lvX3ZlcnNpb24iOiIwLjMyIiwibWFwcGluZyI6ImFwcGxpY2F0aW9uLWN1cnZlLzEiLCJudWxsX3BvbGljeSI6InN0cmljdCBkZWNsYXJlZCBOVUxMOyBub25maW5pdGUgc2FtcGxlcyBtYXBwZWQgdG8gbnVsbDsgd3JhcHBlZCByb3dzIHVzZSBkZWNsYXJlZCBjdXJ2ZSBjb3VudCIsInBhcnNpbmdfcG9saWN5IjoibGFzMi1zdHJpY3QtbnVsbC8xIiwicmVhZGVyIjoiYXNzZXRfY29ubmVjdG9ycy5sYXNfcmVhZGVyLzEifSwicmVwcmVzZW50YXRpb24iOiJub3JtYWxpemVkIiwic2NoZW1hIjoib3BoaW9saXRlLmFwcGxpY2F0aW9uLWN1cnZlLzEiLCJzb3VyY2UiOnsiYXV0aG9yaXR5Ijoib3BoaW9saXRlOmRlcml2ZWQiLCJrZXkiOiJiMDc2NzRhZmFjNTAzODQyNjViZDMwYTY3NzdhOTc0ZTQxZDY0MGU3NDlhMjViOGVhMWJiZGFjNzI3MTU3NzAxIiwicHJvZmlsZSI6ImxhczIvMSIsInJldmlzaW9uIjoiZWFiZWUzYjk0Y2Y1ZmU4MDEyMmU4ZDkyNDJjZTQxMzI2MmQxYWRhYTMyNzBlMjAyNzljMGM0NjZlNzc3NGJiZCJ9LCJzb3VyY2Vfc2hhMjU2IjoiZWFiZWUzYjk0Y2Y1ZmU4MDEyMmU4ZDkyNDJjZTQxMzI2MmQxYWRhYTMyNzBlMjAyNzljMGM0NjZlNzc3NGJiZCIsInVuaXQiOiJWL1YiLCJ2YWx1ZXMiOlswLjAsMC4yMjk3Mjk3Mjk3Mjk3Mjk3NCxudWxsLDAuNzcwMjcwMjcwMjcwMjcwMywxLjBdfQ==",
+   "descriptor": {
+    "asset_id": "b07674afac50384265bd30a6777a974e41d640e749a25b8ea1bbdac727157701",
+    "authority": "ophiolite:derived",
+    "authorization": {
+     "allowed_operations": [
+      "read",
+      "export",
+      "use-as-input"
+     ],
+     "evaluated_at": "2026-10-02T12:19:57Z",
+     "evaluated_for": "alice",
+     "status": "evaluated"
+    },
+    "custodian": "ophiolite:managed",
+    "derivation": {
+     "method": {
+      "declared": true,
+      "library": "ophiolite",
+      "name": "ophiolite.shale-volume",
+      "parameters": {
+       "clip": [
+        0,
+        1
+       ],
+       "inputs": {
+        "GR": {
+         "basis": "confirmed",
+         "quantity": "Gamma Ray",
+         "unit": "gAPI"
+        }
+       },
+       "method": "linear",
+       "outputs": {
+        "VSH": {
+         "quantity": "Shale Volume Fraction",
+         "unit": "V/V"
+        }
+       },
+       "picks": {
+        "base": 105.0,
+        "clean": 1.5,
+        "high": 95.0,
+        "how": "percentile",
+        "low": 5.0,
+        "samples": 4,
+        "shale": 38.5,
+        "top": 100.0
+       },
+       "table": "f8984571cff3e1a55b0ccb0ba5ee532fd4537b73d66fdfa04612379f4f158042"
+      },
+      "script_sha256": null,
+      "version": "ophiolite.shale-volume-methods/1"
+     }
+    },
+    "display": {
+     "available_as": [
+      "result file",
+      "curve table"
+     ],
+     "built_on": "an uploaded file",
+     "evidence": "Declared by the script",
+     "held_as": "Result",
+     "method": "Shale volume from gamma ray",
+     "settings": null,
+     "source": "Result of a calculation",
+     "type": "LAS 2.0 well log file",
+     "type_help": "A LAS 2.0 text file of depth-indexed well log curves, kept byte for byte as the source stored it.",
+     "updates": "Locked to this version",
+     "version": {
+      "at": null,
+      "by": {
+       "id": "alice",
+       "label": null
+      },
+      "of": null,
+      "ordinal": null,
+      "source_version": null
+     }
+    },
+    "history": {
+     "count": 2,
+     "head_revision": "d7b47087fc5f8bea015820f4404c80cd51a71938932fae46379de88047fd6f84",
+     "number": 1,
+     "parent_revision": null
+    },
+    "interpretation": {
+     "lasio_version": "0.32",
+     "mapping": "application-curve/1",
+     "null_policy": "strict declared NULL; nonfinite samples mapped to null; wrapped rows use declared curve count",
+     "parsing_policy": "las2-strict-null/1",
+     "reader": "asset_connectors.las_reader/1"
+    },
+    "interpretation_evidence": "recorded",
+    "manifest": {
+     "artifact": {
+      "bytes": 448,
+      "sha256": "eabee3b94cf5fe80122e8d9242ce413262d1adaa3270e20279c0c466e7774bbd"
+     },
+     "digest": "354180b2b200cbf733eb52310df63f62efbae51649d23f8898ce050862816b5a",
+     "lineage": [
+      {
+       "commitment": "2d3626c8a9c3df1d59f0e8540aea2723e2a9733aa88af8f0a135af32b272f539",
+       "predicate": "derived-from",
+       "reference": {
+        "authority": "ophiolite:uploaded",
+        "key": "aaac110e295725d033bf56ac48a11cbe7527de73d055401ce66be3bf9e3b335c",
+        "profile": "las2/1",
+        "revision": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b"
+       },
+       "salt": "f86b2d84023eafadf4e4b80f5cdfca9e"
+      }
+     ],
+     "method": {
+      "declared": true,
+      "library": "ophiolite",
+      "name": "ophiolite.shale-volume",
+      "parameters": {
+       "clip": [
+        0,
+        1
+       ],
+       "inputs": {
+        "GR": {
+         "basis": "confirmed",
+         "quantity": "Gamma Ray",
+         "unit": "gAPI"
+        }
+       },
+       "method": "linear",
+       "outputs": {
+        "VSH": {
+         "quantity": "Shale Volume Fraction",
+         "unit": "V/V"
+        }
+       },
+       "picks": {
+        "base": 105.0,
+        "clean": 1.5,
+        "high": 95.0,
+        "how": "percentile",
+        "low": 5.0,
+        "samples": 4,
+        "shale": 38.5,
+        "top": 100.0
+       },
+       "table": "f8984571cff3e1a55b0ccb0ba5ee532fd4537b73d66fdfa04612379f4f158042"
+      },
+      "script_sha256": null,
+      "version": "ophiolite.shale-volume-methods/1"
+     },
+     "representations": [
+      {
+       "bytes": 973,
+       "id": "curve:VSH",
+       "sha256": "5b5b425eec254f6ef3aa21beb466155f5d8ab1e233ecd2557f4958a42719eada"
+      }
+     ],
+     "schema": "ophiolite.revision-manifest/2"
+    },
+    "origin": "managed-derived",
+    "parent_visibility": "complete",
+    "parents": [
+     {
+      "authority": "ophiolite:uploaded",
+      "key": "aaac110e295725d033bf56ac48a11cbe7527de73d055401ce66be3bf9e3b335c",
+      "profile": "las2/1",
+      "revision": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b"
+     }
+    ],
+    "profile": "las2/1",
+    "project_id": "p",
+    "provenance": {
+     "code_reference": null,
+     "environment_reference": null,
+     "evidence": "script-declared",
+     "method": "ophiolite.shale-volume",
+     "omissions": [
+      "Code and execution environment were not captured"
+     ]
+    },
+    "recorded_interpretation": {
+     "lasio_version": "0.32",
+     "mapping": "application-curve/1",
+     "null_policy": "strict declared NULL; nonfinite samples mapped to null; wrapped rows use declared curve count",
+     "parsing_policy": "las2-strict-null/1",
+     "reader": "asset_connectors.las_reader/1"
+    },
+    "representations": [
+     {
+      "available": true,
+      "bytes": 448,
+      "id": "artifact",
+      "kind": "derived-artifact",
+      "losses": [],
+      "media_type": "application/x-las",
+      "profile": "las2/1",
+      "sha256": "eabee3b94cf5fe80122e8d9242ce413262d1adaa3270e20279c0c466e7774bbd"
+     },
+     {
+      "available": true,
+      "bytes": 973,
+      "id": "curve:VSH",
+      "kind": "normalized",
+      "losses": [
+       "LAS formatting is represented by the exact artifact, not normalized JSON"
+      ],
+      "media_type": "application/json",
+      "profile": "ophiolite.application-curve/1",
+      "sha256": "5b5b425eec254f6ef3aa21beb466155f5d8ab1e233ecd2557f4958a42719eada"
+     }
+    ],
+    "retention": {
+     "historical_reads": "while-retained-and-authorized",
+     "mode": "retained",
+     "policy": "No automatic eviction; current distribution rights required"
+    },
+    "revision": "eabee3b94cf5fe80122e8d9242ce413262d1adaa3270e20279c0c466e7774bbd",
+    "schema": "ophiolite.scientific-asset/1",
+    "scientific": {
+     "axis_duplicates": false,
+     "axis_order": "increasing",
+     "axis_unit": "M",
+     "axis_unit_status": "declared",
+     "curve": "VSH",
+     "depth_reference": "source declared; not inferred",
+     "missing_count": 1,
+     "missing_value_marker": "-999.25",
+     "quantity": "Shale Volume Fraction",
+     "quantity_status": "declared",
+     "sample_count": 5,
+     "unit": "V/V",
+     "unit_status": "declared"
+    },
+    "source_reference": null,
+    "supported_operations": [
+     "read",
+     "export",
+     "use-as-input"
+    ]
+   },
+   "las_sha256": "eabee3b94cf5fe80122e8d9242ce413262d1adaa3270e20279c0c466e7774bbd",
+   "las_status": 200
+  }
+ },
+ "receipts": [
+  {
+   "asset_id": "b07674afac50384265bd30a6777a974e41d640e749a25b8ea1bbdac727157701",
+   "command_id": "v1",
+   "derived_from": [
+    {
+     "authority": "ophiolite:uploaded",
+     "key": "aaac110e295725d033bf56ac48a11cbe7527de73d055401ce66be3bf9e3b335c",
+     "profile": "las2/1",
+     "revision": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b"
+    }
+   ],
+   "method": {
+    "declared": true,
+    "library": "ophiolite",
+    "name": "ophiolite.shale-volume",
+    "parameters": {
+     "clip": [
+      0,
+      1
+     ],
+     "inputs": {
+      "GR": {
+       "basis": "confirmed",
+       "quantity": "Gamma Ray",
+       "unit": "gAPI"
+      }
+     },
+     "method": "linear",
+     "outputs": {
+      "VSH": {
+       "quantity": "Shale Volume Fraction",
+       "unit": "V/V"
+      }
+     },
+     "picks": {
+      "base": 105.0,
+      "clean": 1.5,
+      "high": 95.0,
+      "how": "percentile",
+      "low": 5.0,
+      "samples": 4,
+      "shale": 38.5,
+      "top": 100.0
+     },
+     "table": "f8984571cff3e1a55b0ccb0ba5ee532fd4537b73d66fdfa04612379f4f158042"
+    },
+    "script_sha256": null,
+    "version": "ophiolite.shale-volume-methods/1"
+   },
+   "profile": "las2/1",
+   "revision": "eabee3b94cf5fe80122e8d9242ce413262d1adaa3270e20279c0c466e7774bbd",
+   "revision_number": 1
+  },
+  {
+   "asset_id": "b07674afac50384265bd30a6777a974e41d640e749a25b8ea1bbdac727157701",
+   "command_id": "v2",
+   "derived_from": [
+    {
+     "authority": "ophiolite:uploaded",
+     "key": "aaac110e295725d033bf56ac48a11cbe7527de73d055401ce66be3bf9e3b335c",
+     "profile": "las2/1",
+     "revision": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b"
+    }
+   ],
+   "method": {
+    "declared": true,
+    "library": "ophiolite",
+    "name": "ophiolite.shale-volume",
+    "parameters": {
+     "clip": [
+      0,
+      1
+     ],
+     "inputs": {
+      "GR": {
+       "basis": "confirmed",
+       "quantity": "Gamma Ray",
+       "unit": "gAPI"
+      }
+     },
+     "method": "linear",
+     "outputs": {
+      "VSH": {
+       "quantity": "Shale Volume Fraction",
+       "unit": "V/V"
+      }
+     },
+     "picks": {
+      "clean": 5.0,
+      "how": "typed",
+      "shale": 35.0
+     },
+     "table": "f8984571cff3e1a55b0ccb0ba5ee532fd4537b73d66fdfa04612379f4f158042"
+    },
+    "script_sha256": null,
+    "version": "ophiolite.shale-volume-methods/1"
+   },
+   "profile": "las2/1",
+   "revision": "d7b47087fc5f8bea015820f4404c80cd51a71938932fae46379de88047fd6f84",
+   "revision_number": 2
+  }
+ ],
+ "recorded": "Platform fbcb593 (E52 C3), in-process gateway: alice uploads the synthetic original.las, publishes the SDK-written VSH file through publications/derive (version 1, percentile picks), then version 2 (typed 5/35); a stale parent, a duplicate content and a non-author version are refused; read back as alice.",
+ "replay": {
+  "asset_id": "b07674afac50384265bd30a6777a974e41d640e749a25b8ea1bbdac727157701",
+  "command_id": "v1",
+  "derived_from": [
+   {
+    "authority": "ophiolite:uploaded",
+    "key": "aaac110e295725d033bf56ac48a11cbe7527de73d055401ce66be3bf9e3b335c",
+    "profile": "las2/1",
+    "revision": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b"
+   }
+  ],
+  "method": {
+   "declared": true,
+   "library": "ophiolite",
+   "name": "ophiolite.shale-volume",
+   "parameters": {
+    "clip": [
+     0,
+     1
+    ],
+    "inputs": {
+     "GR": {
+      "basis": "confirmed",
+      "quantity": "Gamma Ray",
+      "unit": "gAPI"
+     }
+    },
+    "method": "linear",
+    "outputs": {
+     "VSH": {
+      "quantity": "Shale Volume Fraction",
+      "unit": "V/V"
+     }
+    },
+    "picks": {
+     "base": 105.0,
+     "clean": 1.5,
+     "high": 95.0,
+     "how": "percentile",
+     "low": 5.0,
+     "samples": 4,
+     "shale": 38.5,
+     "top": 100.0
+    },
+    "table": "f8984571cff3e1a55b0ccb0ba5ee532fd4537b73d66fdfa04612379f4f158042"
+   },
+   "script_sha256": null,
+   "version": "ophiolite.shale-volume-methods/1"
+  },
+  "profile": "las2/1",
+  "revision": "eabee3b94cf5fe80122e8d9242ce413262d1adaa3270e20279c0c466e7774bbd",
+  "revision_number": 1
+ },
+ "stale": [
+  409,
+  {
+   "code": "revision-conflict",
+   "docs": "/docs/reference/errors/#revision-conflict",
+   "error": "The result has a newer version; review it before adding another",
+   "message": "The result has a newer version; review it before adding another",
+   "remedy": "A newer revision exists: read the current revision and repeat the change against it.",
+   "request_id": "req_e8fd6c91f182190508a7a266"
+  }
+ ]
+}

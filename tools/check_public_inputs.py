@@ -21,6 +21,18 @@ def inspect_bytes(path,raw):
         raise ValueError('Credential/private-key material in '+path)
 
 
+THIRD_PARTY_LICENCES=('LicenseRef-NLOG-Disclaimer-2016-08-09',)
+
+
+def third_party(root,path,row):
+    """A third-party input ships only under a recorded licence that allows redistribution with attribution, with
+    evidence naming the Integration rights register, and with THIRD_PARTY.md carrying its path, digest and attribution."""
+    if row.get('license') not in THIRD_PARTY_LICENCES or not row.get('attribution') or 'docs/release/rights/' not in row.get('evidence',''):
+        raise ValueError('Redistribution evidence missing for '+path)
+    notice=(root/'THIRD_PARTY.md').read_text()
+    if not all(text in notice for text in (path,row['sha256'],row['attribution'])):raise ValueError('THIRD_PARTY.md does not attribute '+path)
+
+
 def verify(root=ROOT):
     manifest=json.loads((root/'tests/fixtures/PROVENANCE.json').read_text())
     if manifest.get('schema')!='ophiolite.sdk-public-inputs/1':raise ValueError('Unrecognized provenance schema')
@@ -35,10 +47,11 @@ def verify(root=ROOT):
     if set(by_path)!=expected:raise ValueError('Copied input provenance coverage differs')
     for path,row in by_path.items():
         if Path(path).is_absolute() or '..' in Path(path).parts:raise ValueError('Unsafe provenance path')
-        if row.get('disposition')!='reviewed-for-sdk' or row.get('license')!='Apache-2.0' or not row.get('evidence'):
-            raise ValueError('Redistribution evidence missing for '+path)
         raw=(root/path).read_bytes()
         if hashlib.sha256(raw).hexdigest()!=row['sha256']:raise ValueError('Provenance hash mismatch: '+path)
+        if row.get('disposition')=='third-party-attribution':third_party(root,path,row)  # E52: an attributed excerpt of public data
+        elif row.get('disposition')!='reviewed-for-sdk' or row.get('license')!='Apache-2.0' or not row.get('evidence'):
+            raise ValueError('Redistribution evidence missing for '+path)
         if path.startswith('ophiolite/contracts/'):
             name=path.removeprefix('ophiolite/contracts/')
             if row.get('source_commit')!=source['platform_commit'] or row['sha256']!=source['files'][name]:

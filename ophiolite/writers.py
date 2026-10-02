@@ -145,9 +145,13 @@ def write_sticks(sticks, *, crs=None, xy_unit=None, z_unit=None, z_meaning=None,
     return WrittenOriginal(write(sticks).encode(), 'opendtect-faultsticks/1', declared, filename)
 
 
-def write_curves(depth, curves, *, depth_unit=None, well='DERIVED', null_marker=-999.25, filename='derived.las'):
+def write_curves(depth, curves, *, depth_unit=None, well='DERIVED', null_marker=-999.25, filename='derived.las', notes=()):
     """LAS 2.0 text: one depth axis (never missing) and 1-63 curves {mnemonic: (unit, values)}; None is missing.
-    A real sample equal to `null_marker` would read back as missing, so it is refused."""
+    A real sample equal to `null_marker` would read back as missing, so it is refused. `notes` (E52) are lines of an
+    ~Other section, such as `petrophysics.calculation_record(...)`: one printable ASCII line each, written as the server writes them."""
+    notes = list(notes)
+    if any(not isinstance(n, str) or not n.strip() or not n.isascii() or not n.isprintable() or n.lstrip().startswith(('~', '#')) for n in notes):
+        raise ValidationFailed(['Each note is one line of printable ASCII text that does not start with ~ or #.'])
     if depth_unit is None: raise ValidationFailed(['Declare the depth unit; nothing is inferred.'])
     depth = list(depth); names = list(curves)
     if not depth: raise ValidationFailed(['Write at least one depth sample.'])
@@ -167,6 +171,7 @@ def write_curves(depth, curves, *, depth_unit=None, well='DERIVED', null_marker=
              f'STEP.{unit_text(depth_unit)} {_number(step if regular else 0, "Step")} : step', f'NULL. {_number(marker, "The null marker")} : missing',
              f'WELL. {_cell(well, "The well name")} : well', '~Curve', f'DEPT.{unit_text(depth_unit)} : depth']
     lines += [f'{n}.{unit_text(curves[n][0])} : {n}' for n in names]
+    if notes: lines += ['~Other', *[' ' + n for n in notes]]
     lines.append('~ASCII')
     for i, d in enumerate(depth):
         lines.append(' '.join([_number(d, 'Depth')] + [_number(marker, '') if curves[n][1][i] is None else _number(curves[n][1][i], 'A sample') for n in names]))

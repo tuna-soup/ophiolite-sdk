@@ -33,7 +33,7 @@ export type ProfileEntry = {
 
 export type DocumentEntry = {
   id: string;
-  kind: "mapping" | "vocabulary" | "generated" | "openapi" | "fixture" | "capability" | "relationships" | "policy";
+  kind: "mapping" | "vocabulary" | "generated" | "openapi" | "fixture" | "capability" | "relationships" | "policy" | "calculation";
   path: string;
   title?: string;
   schema?: string;
@@ -456,6 +456,8 @@ export type ScientificContext = {
   axis_duplicates: boolean;
   missing_count: number;
   missing_value_marker: string;
+  quantity?: string | null;
+  quantity_status?: "suggested" | "declared" | null;
 };
 
 export type SeismicContext = {

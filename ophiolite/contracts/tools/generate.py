@@ -93,7 +93,7 @@ def fixtures(target=FIX):
         descriptor = {'schema':'ophiolite.scientific-asset/1','asset_id':ref['key'] if name != 'capture' else 'capture-a',
           'revision':digest(data), 'project_id':'synthetic-project', 'authority':ref['authority'], 'origin':origin,
           'custodian':'ophiolite:managed' if retained else None, 'source_reference':None if name=='derived' else source,
-          'profile':'las2/1','scientific':Curve.model_validate(curve).facts().model_dump(),
+          'profile':'las2/1','scientific':Curve.model_validate(curve).facts().model_dump(exclude_none=True),
           'interpretation':curve['interpretation'],
           # Retained fixtures carry a synthetic retention record equal to the live identity.
           'interpretation_evidence':'recorded' if retained else 'live','recorded_interpretation':dict(curve['interpretation']) if retained else None,

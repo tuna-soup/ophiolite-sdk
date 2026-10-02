@@ -3,84 +3,19 @@
 Keep this file when copying a template. It is educational support, never a gateway
 or authentication substitute. Real credentials are loaded only in explicit live mode.
 """
-from contextlib import contextmanager
-from importlib.resources import files
 import json
 import os
 from pathlib import Path
 import re
 import tempfile
-from urllib.parse import parse_qs, unquote, urlsplit
 
 from ophiolite import Client, Credential
 from ophiolite.errors import ShareOutcomeUnknown, IntegrityConflict, Refused, ValidationFailed
 from ophiolite.writers import write_curves
-from ophiolite.testing import fixture_server
 from ophiolite import validate
+from ophiolite.testing import WELLS, synthetic_server  # noqa: F401 (E52: moved into the SDK; a downloaded notebook needs no template)
 
 TEMPLATE_VERSION = '0.1.0'
-# Synthetic wells (E31 map-application): two located by a source you may read, one without a location.
-WELLS = [{'entity_id':'well-synthetic-1','kind':'well','name':'Synthetic well 1','owner':'alice','generation':1,
-          'location':{'x':5.1,'y':52.1,'crs':'OGC:CRS84','source':{'asset_id':'wells-table','revision':'r1','profile':'ophiolite/sql-table/1','row':'1'},'elevation_reference':'unknown'}},
-         {'entity_id':'well-synthetic-2','kind':'well','name':'Synthetic well 2','owner':'alice','generation':1,
-          'location':{'x':6.2,'y':52.9,'crs':'OGC:CRS84','source':{'asset_id':'wells-table','revision':'r1','profile':'ophiolite/sql-table/1','row':'2'},'elevation_reference':'unknown'}},
-         {'entity_id':'well-synthetic-3','kind':'well','name':'Synthetic well 3','owner':'alice','generation':1,'location':None}]
-
-
-@contextmanager
-def synthetic_server():
-    root = files('ophiolite').joinpath('contracts/assets/v1/fixtures')
-    descriptor = json.loads(root.joinpath('source.json').read_bytes())
-    descriptor['project_id'] = 'p'
-    raw = root.joinpath('curve.json').read_bytes()
-    original = root.joinpath('original.las').read_bytes()
-    validate.pair(descriptor, raw)
-    server = fixture_server()
-    applications = server.handler
-    faults = {}
-    prefix = '/api/v1/projects/p/scientific-assets'
-    exact = prefix + '/' + descriptor['asset_id'] + '/revisions/' + descriptor['revision']
-    summary = {key: descriptor[key] for key in ('asset_id','revision','origin','authority','profile','custodian')}
-    summary.update(name='Synthetic gamma ray', curves=['GR'], sample_count=5, allowed_operations=['read','export','use-as-input'])
-
-    def handler(method, path, body, headers):
-        token = next((v for k,v in headers.items() if k.lower() == 'authorization'), '')
-        if token == 'Bearer expired' or faults.get('expired'): return 401, {'error':'Sign in again.'}
-        if faults.get('revoked'): return 403, {'error':'Access has been revoked.'}
-        if faults.get('busy'): return 503, {'error':'Service is busy.'}
-        if faults.get('capacity'): return 413, {'error':'Supported size exceeded.'}
-        if path.endswith('/share') and faults.pop('recipients_changed', None):
-            # Someone else changed the recipients after this client read them.
-            ident = json.loads(body).get('id') or json.loads(body).get('asset_id')
-            applications.generations[ident] = applications.generations.get(ident, 1) + 1
-        parsed = urlsplit(path)
-        route = unquote(parsed.path)
-        if method == 'GET':
-            if not token: return 401, {'error':'Sign in again.'}
-            if route == prefix: return 200, {'items':[summary], 'next_cursor':None}
-            if route == exact:
-                if parse_qs(parsed.query).get('curve') != ['GR']: return 404, {'error':'Select the available curve.'}
-                changed = json.loads(json.dumps(descriptor))
-                if faults.get('changed_input'): changed['revision'] = 'changed'
-                return 200, changed
-            if route == exact + '/representations/las': return 200, original
-            if route == exact + '/representations/curve': return 200, raw
-            return 404, {'error':'No such synthetic revision.'}
-        if method == 'POST' and route.endswith(('/entities/list', '/entities/extent')):  # E31: the synthetic wells a map shows
-            if not token: return 401, {'error':'Sign in again.'}
-            request = json.loads(body or b'{}')
-            if route.endswith('/entities/extent'): return 200, {'crs':request.get('crs','OGC:CRS84'),'bbox':[5.1,52.1,6.2,52.9],'count':2,'untransformed':0}
-            return 200, {'entities':[dict(well, location=dict(well['location'], crs=request.get('crs') or 'OGC:CRS84') if well['location'] else None) for well in WELLS],
-                         'next_cursor':None,'untransformed':0}
-        return applications(method,path,body,headers)
-
-    server.handler = handler
-    # Public fixture controls are intentionally separate from all product responses.
-    server.template_faults = faults
-    server.template_mutations = applications.mutations
-    server.template_descriptor = descriptor
-    with server:
-        yield server
 
 
 def client_for(url, project='p', *, fixture=False):
