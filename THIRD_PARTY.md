@@ -34,3 +34,10 @@ The source file is NLOG's composite log `5682_hongt01_2012_comp.las`, used under
 (<https://www.nlog.nl/disclaimer>, `LicenseRef-NLOG-Disclaimer-2016-08-09`; the Dutch text prevails), which permits
 copying, distribution and editing with source attribution. The rights review is recorded in Ophiolite Integration
 `docs/release/rights/`.
+
+## Values measured on HON-GT-01 (E53)
+
+`notebooks/make-a-wedge-model` states four numbers measured on the same NLOG composite log of HONSELERSDIJK-GT-01: the
+median P-wave velocity (304800 / DT) and density (RHOB) of 2480-2557.9 m (4073 m/s, 2629 kg/m3; 779 rows) and of
+2557.9-2620.22 m (4024 m/s, 2379 kg/m3; 624 rows), rounded. Source: NLOG.NL (www.nlog.nl), used under the same
+disclaimer with source attribution; the notebooks are not in the wheel or the sdist.

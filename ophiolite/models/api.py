@@ -20,7 +20,7 @@ class Grant(Contract):
 
 # Hand-written application responses are kept separate from generated contracts.
 from typing import Literal
-from pydantic import ConfigDict, PrivateAttr
+from pydantic import ConfigDict, PrivateAttr, model_validator
 from .generated import Reference
 
 class OutputReference(Contract):
@@ -223,6 +223,14 @@ class UploadRequest(Contract):
     declared: dict[str, str] | None = Field(default=None, max_length=12)
     well_log: dict | None = None
     origin: dict | None = None
+    # E53: a new version of your own uploaded wavelet, model or section (both or neither; sent only when used).
+    append_to: str | None = Field(default=None, min_length=1, max_length=160)
+    expected_parent: str | None = Field(default=None, pattern='^[0-9a-f]{64}$')
+
+    @model_validator(mode='after')
+    def appended(self):
+        if (self.append_to is None) != (self.expected_parent is None): raise ValueError('A new version names both the result and the version it replaces')
+        return self
 
 class ResultPreview(ResultSummary):
     rows: list[dict]

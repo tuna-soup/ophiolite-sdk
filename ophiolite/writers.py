@@ -176,3 +176,102 @@ def write_curves(depth, curves, *, depth_unit=None, well='DERIVED', null_marker=
     for i, d in enumerate(depth):
         lines.append(' '.join([_number(d, 'Depth')] + [_number(marker, '') if curves[n][1][i] is None else _number(curves[n][1][i], 'A sample') for n in names]))
     return WrittenOriginal(('\n'.join(lines) + '\n').encode(), 'las2/1', {}, filename)
+
+
+# --- E53: a wavelet, a rock model section and a seismic section, in the Connectors' text formats ------------------
+# Each file states its own context in its header, so nothing is declared beside it. Pass the SDK's own object (from
+# ophiolite.synthetics or read_data) and its context is used; any keyword you give replaces that field.
+POLARITY = 'Declare the polarity as impedance-increase-positive, impedance-increase-negative or unknown.'
+
+
+def _given(source, key, value):
+    return value if value is not None else (getattr(source, 'context', None) or {}).get(key)
+
+
+def _declared(value, sentence):
+    if value is None: raise ValidationFailed([sentence])
+    return value
+
+
+def _axes(source, grid, domain, first_sample, sample_interval, horizontal, horizontal_first, horizontal_step):
+    domain = _declared(_given(source, 'domain', domain), 'Declare whether the vertical axis is time or depth; nothing is inferred.')
+    if domain not in ('time', 'depth'): raise ValidationFailed(['Declare whether the vertical axis is time or depth; nothing is inferred.'])
+    interval = _number(_declared(_given(source, 'sample_interval', sample_interval), 'Declare the sample interval; nothing is inferred.'), 'The sample interval')
+    if float(interval) <= 0: raise ValidationFailed(['The sample interval must be positive.'])
+    first = _number(_declared(_given(source, 'first_sample', first_sample), 'Declare the first sample (first_sample); nothing is inferred.'), 'The first sample')
+    horizontal = _declared(_given(source, 'horizontal', horizontal), 'Declare the horizontal axis as distance or trace-number.')
+    if horizontal not in ('distance', 'trace-number'): raise ValidationFailed(['Declare the horizontal axis as distance or trace-number.'])
+    h_first, h_step = _given(source, 'horizontal_first', horizontal_first), _given(source, 'horizontal_step', horizontal_step)
+    if h_first is None or h_step is None: raise ValidationFailed(['Declare horizontal_first and horizontal_step.'])
+    h_first, h_step = _number(h_first, 'The first horizontal position'), _number(h_step, 'The horizontal step')
+    if float(h_step) <= 0: raise ValidationFailed(['The horizontal step must be positive.'])
+    grid = [list(row) for row in grid]
+    if not grid or not grid[0] or any(len(row) != len(grid[0]) for row in grid): raise ValidationFailed(['Every grid row needs one value per trace.'])
+    samples, traces = len(grid), len(grid[0])
+    if samples > 8192 or traces > 4096: raise ValidationFailed(['A section has at most 8192 samples per trace and 4096 traces.'])
+    if samples * traces > 1_000_000: raise ValidationFailed(['A section holds at most 1,000,000 samples.'])
+    return grid, [f'domain {domain}', f'first_sample {first}', f'sample_interval {interval}', f'samples {samples}', f'traces {traces}',
+                  f'horizontal {horizontal}', f'horizontal_first {h_first}', f'horizontal_step {h_step}']
+
+
+def write_wavelet(wavelet, *, kind=None, dt=None, t0=None, polarity=None, frequency_hz=None, corners_hz=None, filename='wavelet.txt'):
+    """`# ophiolite-wavelet 1`: the samples every `dt` seconds from `t0`, the kind (ricker with `frequency_hz`, ormsby
+    with four `corners_hz`, or other) and the polarity. 3-4095 samples, an odd count, sampled every 0.0005-0.01 s."""
+    kind = _declared(_given(wavelet, 'kind', kind), 'Declare the wavelet kind as ricker, ormsby or other.')
+    if kind not in ('ricker', 'ormsby', 'other'): raise ValidationFailed(['Declare the wavelet kind as ricker, ormsby or other.'])
+    dt = _declared(_given(wavelet, 'dt', dt), 'Declare the sample interval; nothing is inferred.')
+    t0 = _declared(_given(wavelet, 't0', t0), 'Declare the time of the first sample (t0); nothing is inferred.')
+    polarity = _declared(_given(wavelet, 'polarity', polarity), POLARITY)
+    if polarity not in ('impedance-increase-positive', 'impedance-increase-negative', 'unknown'): raise ValidationFailed([POLARITY])
+    dt_text = _number(dt, 'The sample interval')
+    if not 0.0005 <= float(dt_text) <= 0.01: raise ValidationFailed(['A wavelet must be sampled every 0.0005 to 0.01 s.'])
+    samples = list(getattr(wavelet, 'samples', wavelet))
+    if not 3 <= len(samples) <= 4095: raise ValidationFailed(['A wavelet has 3 to 4095 samples.'])
+    if len(samples) % 2 == 0: raise ValidationFailed(['A wavelet has an odd number of samples, so one sample is its centre.'])
+    lines = ['# ophiolite-wavelet 1', f'kind {kind}']
+    frequency, corners = _given(wavelet, 'frequency_hz', frequency_hz), _given(wavelet, 'corners_hz', corners_hz)
+    if (kind == 'ricker') != (frequency is not None) or (kind == 'ormsby') != (corners is not None):
+        raise ValidationFailed(['A Ricker wavelet declares frequency_hz, an Ormsby wavelet four corners_hz, and no other kind either.'])
+    if frequency is not None: lines.append(f'frequency_hz {_number(frequency, "The frequency")}')
+    if corners is not None:
+        if len(corners) != 4: raise ValidationFailed(['An Ormsby wavelet declares corners_hz as four frequencies.'])
+        lines.append('corners_hz ' + ' '.join(_number(f, 'A corner frequency') for f in corners))
+    lines += [f'dt {dt_text}', f't0 {_number(t0, "The first time")}', f'polarity {polarity}', 'samples']
+    lines += [_number(v, 'A sample') for v in samples]
+    return WrittenOriginal(('\n'.join(lines) + '\n').encode(), 'wavelet-text/1', {}, filename)
+
+
+def write_model_section(model, grid=None, *, domain=None, first_sample=None, sample_interval=None, horizontal=None, horizontal_first=None,
+                        horizontal_step=None, filename='model.txt'):
+    """`# ophiolite-model-section 1`: rocks (index, P-wave velocity m/s, density kg/m3, name) and a grid of rock indices,
+    one row per vertical sample. `model` is a ModelSection, or the rocks list with `grid` beside it."""
+    rocks = list(getattr(model, 'rocks', model)); grid = getattr(model, 'grid', None) if grid is None else grid
+    if grid is None: raise ValidationFailed(['Give the grid of rock indices.'])
+    grid, header = _axes(model, grid, domain, first_sample, sample_interval, horizontal, horizontal_first, horizontal_step)
+    if not 1 <= len(rocks) <= 256: raise ValidationFailed(['A model lists 1 to 256 rocks.'])
+    lines, indices = ['# ophiolite-model-section 1', *header, 'rocks'], set()
+    for rock in rocks:
+        index, name = rock.get('index'), rock.get('name')
+        if isinstance(index, bool) or not isinstance(index, int) or index < 0 or index in indices: raise ValidationFailed(['Give every rock its own whole-number index.'])
+        if not isinstance(name, str) or not name.strip() or len(name) > 128 or any(c in name for c in '\r\n') or name != ' '.join(name.split()):
+            raise ValidationFailed(['Give every rock a name (up to 128 characters, one line, single spaces).'])
+        vp, density = _number(rock.get('vp'), 'A P-wave velocity'), _number(rock.get('density'), 'A density')
+        if float(vp) <= 0 or float(density) <= 0: raise ValidationFailed([f'Rock {index}: the P-wave velocity and density must be positive.'])
+        indices.add(index); lines.append(f'{index} {vp} {density} {name}')
+    if any(isinstance(v, bool) or v not in indices for row in grid for v in row): raise ValidationFailed(['Every grid cell names a listed rock.'])
+    lines += ['grid', *(' '.join(str(v) for v in row) for row in grid)]
+    return WrittenOriginal(('\n'.join(lines) + '\n').encode(), 'model-section-text/1', {}, filename)
+
+
+def write_seismic_section(section, *, domain=None, first_sample=None, sample_interval=None, horizontal=None, horizontal_first=None,
+                          horizontal_step=None, polarity=None, origin=None, filename='section.txt'):
+    """`# ophiolite-seismic-section 1`: every sample, one row per vertical sample and one value per trace. `origin` is
+    'synthetic' for a section computed from a rock model and a wavelet (published with both as parents), else left out."""
+    grid, header = _axes(section, getattr(section, 'grid', section), domain, first_sample, sample_interval, horizontal, horizontal_first, horizontal_step)
+    polarity = _declared(_given(section, 'polarity', polarity), POLARITY)
+    if polarity not in ('impedance-increase-positive', 'impedance-increase-negative', 'unknown'): raise ValidationFailed([POLARITY])
+    origin = _given(section, 'origin', origin)
+    if origin not in (None, 'not-stated', 'synthetic'): raise ValidationFailed(['Declare the origin as synthetic, or leave it out.'])
+    lines = ['# ophiolite-seismic-section 1', *header, *(['origin synthetic'] if origin == 'synthetic' else []), f'polarity {polarity}', 'grid']
+    lines += [' '.join(_number(v, 'A sample') for v in row) for row in grid]
+    return WrittenOriginal(('\n'.join(lines) + '\n').encode(), 'seismic-section-text/1', {}, filename)

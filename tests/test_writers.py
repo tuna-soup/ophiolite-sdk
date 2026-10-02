@@ -84,3 +84,62 @@ def test_the_request_names_the_file_parents_and_method_exactly():
     with pytest.raises(ValidationFailed): derive_request('p', written, name='R', from_=[('a', '0' * 64)] * 2, method={'name': 'm'}, command_id='c')
     with pytest.raises(ValidationFailed): derive_request('p', written, name='R', from_=[('a', '0' * 64)], method={'name': 'm', 'declared': False, 'library': 'x'}, command_id='c')
     with pytest.raises(ValidationFailed): derive_request('p', written, name='R', from_=[('a', '0' * 64)], method={'name': 'm'}, command_id='c', new_version_of='x')
+
+
+# --- E53: wavelet, model section and seismic section ----------------------------------------------------------------
+
+def read_back(written):
+    """The pinned Connectors reader, as the server runs it on an upload."""
+    from asset_connectors.typed_reader import read_typed
+    return read_typed(written.profile, written.bytes, written.declared)
+
+
+def test_the_three_writers_write_what_the_connectors_reader_reads_back_exactly():
+    from ophiolite import synthetics as syn
+    from ophiolite.typed import ModelSection, SeismicSection, Wavelet
+    w = syn.ricker(30, 0.001, duration=0.128)
+    model = syn.wedge([{'name': 'Rodenrijs Claystone', 'vp': 4073, 'density': 2629}, {'name': 'Delft Sandstone', 'vp': 4024, 'density': 2379}])
+    section = syn.synthetic(model, w)
+    written = Wavelet.write(w)
+    assert written.profile == 'wavelet-text/1' and written.declared == {}
+    assert lines(written)[:7] == ['# ophiolite-wavelet 1', 'kind ricker', 'frequency_hz 30', 'dt 0.001', 't0 -0.064', 'polarity impedance-increase-positive', 'samples']
+    context, data, _ = read_back(written)
+    assert data['samples'] == w.samples and context['sample_count'] == 129 and context['t0'] == w.context['t0']
+    context, data, _ = read_back(ModelSection.write(model))
+    assert data['grid'] == model.grid and data['rocks'] == model.rocks and context['horizontal_step'] == 25.0
+    written = SeismicSection.write(section)
+    assert 'origin synthetic' in lines(written) and written.profile == 'seismic-section-text/1'
+    context, data, _ = read_back(written)
+    assert data['grid'] == section.grid and (context['origin'], context['polarity'], context['minimum']) == ('synthetic', 'impedance-increase-positive', section.context['minimum'])
+    ormsby = Wavelet.write(syn.ormsby([5, 10, 40, 50], 0.002, 101))
+    assert 'corners_hz 5 10 40 50' in lines(ormsby) and read_back(ormsby)[1]['samples'] == syn.ormsby([5, 10, 40, 50], 0.002, 101).samples
+    plain = SeismicSection.write([[0.0, 1.5], [2.0, -1.0]], domain='depth', first_sample=1000, sample_interval=4, horizontal='trace-number',
+                                 horizontal_first=1, horizontal_step=1, polarity='unknown')
+    assert lines(plain) == ['# ophiolite-seismic-section 1', 'domain depth', 'first_sample 1000', 'sample_interval 4', 'samples 2', 'traces 2',
+                            'horizontal trace-number', 'horizontal_first 1', 'horizontal_step 1', 'polarity unknown', 'grid', '0 1.5', '2 -1']
+    assert read_back(plain)[0]['origin'] == 'not-stated'
+
+
+SECTION = dict(domain='time', first_sample=0, sample_interval=0.001, horizontal='distance', horizontal_first=0, horizontal_step=25, polarity='unknown')
+
+
+@pytest.mark.parametrize('call,sentence', [
+    (lambda: writers.write_wavelet([0.0, 1.0, 0.0], kind='other', t0=-0.001, polarity='unknown'), 'Declare the sample interval; nothing is inferred.'),
+    (lambda: writers.write_wavelet([0.0, 1.0, 0.0], kind='other', dt=0.001, t0=-0.001), 'Declare the polarity as impedance-increase-positive, impedance-increase-negative or unknown.'),
+    (lambda: writers.write_wavelet([0.0, float('nan'), 0.0], kind='other', dt=0.001, t0=-0.001, polarity='unknown'), 'A sample must be finite.'),
+    (lambda: writers.write_wavelet([0.0, 1.0, 0.0], kind='other', dt=0.02, t0=-0.02, polarity='unknown'), 'A wavelet must be sampled every 0.0005 to 0.01 s.'),
+    (lambda: writers.write_wavelet([0.0, 1.0, 0.0, 0.0], kind='other', dt=0.001, t0=-0.001, polarity='unknown'), 'A wavelet has an odd number of samples, so one sample is its centre.'),
+    (lambda: writers.write_seismic_section([[0.0]], **{**SECTION, 'domain': None}), 'Declare whether the vertical axis is time or depth; nothing is inferred.'),
+    (lambda: writers.write_seismic_section([[0.0]], **{**SECTION, 'sample_interval': None}), 'Declare the sample interval; nothing is inferred.'),
+    (lambda: writers.write_seismic_section([[0.0]], **{**SECTION, 'polarity': None}), 'Declare the polarity as impedance-increase-positive, impedance-increase-negative or unknown.'),
+    (lambda: writers.write_seismic_section([[0.0, float('nan')]], **SECTION), 'A sample must be finite.'),
+    (lambda: writers.write_seismic_section([[0.0, 1.0], [2.0]], **SECTION), 'Every grid row needs one value per trace.'),
+    (lambda: writers.write_seismic_section([[0.0] * 1000] * 1001, **SECTION), 'A section holds at most 1,000,000 samples.'),
+    (lambda: writers.write_model_section([{'index': 1, 'name': 'Shale', 'vp': 3000, 'density': 2400}], [[1, 2]], **{k: v for k, v in SECTION.items() if k != 'polarity'}),
+     'Every grid cell names a listed rock.'),
+    (lambda: writers.write_model_section([{'index': 1, 'name': 'Shale', 'vp': 3000, 'density': 2400}], [[1]], **{k: v for k, v in SECTION.items() if k not in ('polarity', 'domain')}),
+     'Declare whether the vertical axis is time or depth; nothing is inferred.'),
+])
+def test_each_missing_declaration_is_refused_with_its_sentence(call, sentence):
+    with pytest.raises(ValidationFailed) as error: call()
+    assert error.value.violations == (sentence,)

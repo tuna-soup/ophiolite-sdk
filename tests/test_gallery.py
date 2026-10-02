@@ -53,8 +53,20 @@ def test_shale_volume_runs_publishes_two_versions_and_prints_the_hand_worked_mea
     assert "version 1: " in text and "version 2: " in text and "'low': 10.0, 'high': 90.0" in text
 
 
+def test_make_a_wavelet_reads_its_strongest_frequency_and_publishes_nothing_synthetic(tmp_path, monkeypatch):
+    text = run('make-a-wavelet', tmp_path, monkeypatch)
+    assert '129 samples every 1 ms, from -64 to 64 ms' in text and 'Strongest at 30 Hz (read to the nearest 1 Hz); declared 30 Hz' in text
+    assert 'The same samples every 2 ms: strongest at 15 Hz' in text and 'Synthetic mode: nothing is published.' in text
+
+
+def test_make_a_wedge_model_reads_the_tuning_thickness_from_the_excerpt_values(tmp_path, monkeypatch):
+    text = run('make-a-wedge-model', tmp_path, monkeypatch)
+    assert 'Rodenrijs Claystone    4073 m/s 2629 kg/m3' in text and 'Delft Sandstone        4024 m/s 2379 kg/m3' in text
+    assert 'Tuning thickness: 13 ms two-way time (trace 13, 26.2 m at 4024 m/s)' in text and 'Synthetic mode: nothing is published.' in text
+
+
 def test_every_entry_is_listed_built_and_described():
-    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray']
+    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model']
     for entry in GALLERY['notebooks']:
         assert set(entry) == {'slug', 'title', 'sentence', 'modes', 'data'} and entry['modes'] == ['synthetic', 'live']
         script = (ROOT / 'notebooks' / entry['slug'] / 'notebook.py').read_text()

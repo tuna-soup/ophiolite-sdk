@@ -528,16 +528,20 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
         if result.revision!=hashlib.sha256(raw).hexdigest():raise VerificationFailed('The uploaded original has a different checksum revision.')
         return result
 
-    def upload_data(self,source,*,profile,name,attribution,audience,rights_confirmed,declared=None,filename=None,well_log=None,well_notes='',command_id=None,origin=None):
+    def upload_data(self,source,*,profile,name,attribution,audience,rights_confirmed,declared=None,filename=None,well_log=None,well_notes='',command_id=None,origin=None,
+                    append_to=None,expected_parent=None):
         """E11/E18: upload an original of any supported type with the context you declare (units, CRS,
-        meanings; nothing is inferred). Starts private. A repeated command id returns the same asset."""
+        meanings; nothing is inferred). Starts private. A repeated command id returns the same asset.
+        E53: `append_to` (your uploaded wavelet, model or section) with `expected_parent` (its current revision)
+        adds the file as that result's next version; its audience stays the result's."""
         import uuid,hashlib
         from . import publish as planning
         from .models.api import UploadResult
         raw=planning.upload_bytes(source)
         filename=filename or (Path(source).name if not isinstance(source,bytes) else 'upload')
         _,extra=planning.upload_metadata(self.project,command_id or uuid.uuid4().hex,filename=filename,name=name,attribution=attribution,audience=audience,
-                                         rights_confirmed=rights_confirmed,well_notes=well_notes,profile=profile,declared=declared,well_log=well_log,origin=origin)
+                                         rights_confirmed=rights_confirmed,well_notes=well_notes,profile=profile,declared=declared,well_log=well_log,origin=origin,
+                                         append_to=append_to,expected_parent=expected_parent)
         result=planning.parse(UploadResult,self._post_bytes('las-uploads','upload',raw,extra_headers=extra))
         if result.revision!=hashlib.sha256(raw).hexdigest():raise VerificationFailed('The uploaded original has a different checksum revision.')
         return result

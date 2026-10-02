@@ -553,7 +553,8 @@ def upload_bytes(source):
     return raw
 
 
-def upload_metadata(project,command_id,*,filename,name,attribution,audience,rights_confirmed,well_notes='',profile=None,declared=None,well_log=None,origin=None):
+def upload_metadata(project,command_id,*,filename,name,attribution,audience,rights_confirmed,well_notes='',profile=None,declared=None,well_log=None,origin=None,
+                    append_to=None,expected_parent=None):
     value={'project_id':project,'command_id':command_id,'filename':filename,'name':name,'attribution':attribution,
            'audience':audience,'rights_confirmed':rights_confirmed,'well_notes':well_notes}
     # Fields are sent only when used, so existing LAS uploads keep their exact request (and retry fingerprint).
@@ -561,6 +562,8 @@ def upload_metadata(project,command_id,*,filename,name,attribution,audience,righ
     if declared:value['declared']=declared
     if well_log is not None:value['well_log']=well_log
     if origin is not None:value['origin']=origin
+    if (append_to is None)!=(expected_parent is None):raise ValidationFailed(['Name the result and the version it replaces.'])
+    if append_to is not None:value.update(append_to=append_to,expected_parent=expected_parent)  # E53: a new version of your own upload
     try:api.UploadRequest.model_validate(value)
     except ValidationError:raise ValidationFailed(['Confirm rights, project, name, attribution and bounded upload details.']) from None
     validate_recipients(audience,[])

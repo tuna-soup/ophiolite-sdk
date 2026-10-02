@@ -74,3 +74,20 @@ def test_valid_changes_null_and_zero():
 def test_changes_count_limit_independent_of_indices():
     with pytest.raises(ValidationFailed):
         validate_changes([{'index':i,'value':1} for i in range(1001)],values=[0]*1001,null_marker=-999.25)
+
+
+def test_an_upload_names_both_or_neither_of_append_to_and_expected_parent():
+    """E53: the fields travel only when given (an old request is unchanged), and one without the other is refused here."""
+    from ophiolite.models.api import UploadRequest
+    from ophiolite.publish import upload_metadata
+    common = dict(filename='w.txt', name='Ricker', attribution='Synthetic', audience=[], rights_confirmed=True, profile='wavelet-text/1')
+    plain, _ = upload_metadata('p', 'c1', **common)
+    assert 'append_to' not in plain and 'expected_parent' not in plain
+    old = {'project_id': 'p', 'command_id': 'c1', 'filename': 'a.las', 'name': 'Log', 'attribution': 'Synthetic', 'audience': [], 'rights_confirmed': True, 'well_notes': ''}
+    assert UploadRequest.model_validate(old).model_dump(exclude_none=True) == old
+    both, _ = upload_metadata('p', 'c1', append_to='asset-1', expected_parent='a' * 64, **common)
+    assert (both['append_to'], both['expected_parent']) == ('asset-1', 'a' * 64)
+    for one in ({'append_to': 'asset-1'}, {'expected_parent': 'a' * 64}):
+        with pytest.raises(ValidationFailed) as error: upload_metadata('p', 'c1', **one, **common)
+        assert error.value.violations == ('Name the result and the version it replaces.',)
+    with pytest.raises(ValueError): UploadRequest.model_validate({**old, 'append_to': 'asset-1'})

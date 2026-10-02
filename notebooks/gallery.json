@@ -14,6 +14,20 @@
       "sentence": "Pick clean and shale values, compare the five methods, publish one result and add a second version with a changed pick.",
       "modes": ["synthetic", "live"],
       "data": "A synthetic five-sample gamma-ray log, or a log in your project; publishing creates a result only you can see until you share it."
+    },
+    {
+      "slug": "make-a-wavelet",
+      "title": "Make a wavelet",
+      "sentence": "Compute a 30 Hz Ricker wavelet, check its strongest frequency against the declared one, upload it and add a second version.",
+      "modes": ["synthetic", "live"],
+      "data": "Computed on your computer; uploading creates a wavelet only you can see until you share it."
+    },
+    {
+      "slug": "make-a-wedge-model",
+      "title": "Make a wedge model",
+      "sentence": "Take two rocks from a well log, build a wedge model, compute its synthetic with a Ricker wavelet and read the tuning thickness.",
+      "modes": ["synthetic", "live"],
+      "data": "Rock values measured on the HON-GT-01 excerpt, or recomputed from the HON-GT-01 log in your project; publishing creates results only you can see until you share them."
     }
   ]
 }

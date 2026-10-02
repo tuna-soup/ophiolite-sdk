@@ -270,6 +270,12 @@ class Wavelet(TypedData):
     @property
     def samples(self): return self.data['samples']
 
+    def __len__(self): return len(self.samples)
+
+    def __getitem__(self, index): return self.samples[index]
+
+    def __iter__(self): return iter(self.samples)
+
     @property
     def times(self):
         c = self.context; return [c['t0'] + k * c['dt'] for k in range(len(self.samples))]
@@ -401,3 +407,6 @@ GridSurface.write = staticmethod(_writers.write_grid)
 TriangulatedSurface.write = staticmethod(_writers.write_mesh)
 PointSet.write = staticmethod(_writers.write_points)
 PolylineSet.write = staticmethod(_writers.write_sticks)
+Wavelet.write = staticmethod(_writers.write_wavelet)  # E53
+ModelSection.write = staticmethod(_writers.write_model_section)
+SeismicSection.write = staticmethod(_writers.write_seismic_section)
