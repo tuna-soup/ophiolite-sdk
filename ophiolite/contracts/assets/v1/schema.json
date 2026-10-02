@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/schema.json",
   "x-ophiolite": {
     "id": "ophiolite.scientific-asset/1",
-    "version": "1.14.0",
+    "version": "1.15.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -1200,6 +1200,120 @@
         "name"
       ],
       "title": "MethodRecord",
+      "type": "object"
+    },
+    "ModelSectionContext": {
+      "additionalProperties": false,
+      "properties": {
+        "domain": {
+          "enum": [
+            "time",
+            "depth"
+          ],
+          "title": "Domain",
+          "type": "string"
+        },
+        "first_sample": {
+          "title": "First Sample",
+          "type": "number"
+        },
+        "sample_interval": {
+          "exclusiveMinimum": 0,
+          "title": "Sample Interval",
+          "type": "number"
+        },
+        "sample_unit": {
+          "enum": [
+            "s",
+            "m"
+          ],
+          "title": "Sample Unit",
+          "type": "string"
+        },
+        "samples": {
+          "maximum": 8192,
+          "minimum": 1,
+          "title": "Samples",
+          "type": "integer"
+        },
+        "traces": {
+          "maximum": 4096,
+          "minimum": 1,
+          "title": "Traces",
+          "type": "integer"
+        },
+        "horizontal": {
+          "enum": [
+            "distance",
+            "trace-number"
+          ],
+          "title": "Horizontal",
+          "type": "string"
+        },
+        "horizontal_first": {
+          "title": "Horizontal First",
+          "type": "number"
+        },
+        "horizontal_step": {
+          "exclusiveMinimum": 0,
+          "title": "Horizontal Step",
+          "type": "number"
+        },
+        "horizontal_unit": {
+          "anyOf": [
+            {
+              "const": "m",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Horizontal Unit"
+        },
+        "fidelity": {
+          "$ref": "#/$defs/Fidelity"
+        },
+        "type": {
+          "const": "model-section",
+          "title": "Type",
+          "type": "string"
+        },
+        "rock_count": {
+          "maximum": 256,
+          "minimum": 1,
+          "title": "Rock Count",
+          "type": "integer"
+        },
+        "velocity_unit": {
+          "const": "m/s",
+          "title": "Velocity Unit",
+          "type": "string"
+        },
+        "density_unit": {
+          "const": "kg/m3",
+          "title": "Density Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "domain",
+        "first_sample",
+        "sample_interval",
+        "sample_unit",
+        "samples",
+        "traces",
+        "horizontal",
+        "horizontal_first",
+        "horizontal_step",
+        "horizontal_unit",
+        "fidelity",
+        "type",
+        "rock_count",
+        "velocity_unit",
+        "density_unit"
+      ],
+      "title": "ModelSectionContext",
       "type": "object"
     },
     "NotEvaluated": {
@@ -2653,6 +2767,130 @@
       "title": "SeismicContext",
       "type": "object"
     },
+    "SeismicSectionContext": {
+      "additionalProperties": false,
+      "properties": {
+        "domain": {
+          "enum": [
+            "time",
+            "depth"
+          ],
+          "title": "Domain",
+          "type": "string"
+        },
+        "first_sample": {
+          "title": "First Sample",
+          "type": "number"
+        },
+        "sample_interval": {
+          "exclusiveMinimum": 0,
+          "title": "Sample Interval",
+          "type": "number"
+        },
+        "sample_unit": {
+          "enum": [
+            "s",
+            "m"
+          ],
+          "title": "Sample Unit",
+          "type": "string"
+        },
+        "samples": {
+          "maximum": 8192,
+          "minimum": 1,
+          "title": "Samples",
+          "type": "integer"
+        },
+        "traces": {
+          "maximum": 4096,
+          "minimum": 1,
+          "title": "Traces",
+          "type": "integer"
+        },
+        "horizontal": {
+          "enum": [
+            "distance",
+            "trace-number"
+          ],
+          "title": "Horizontal",
+          "type": "string"
+        },
+        "horizontal_first": {
+          "title": "Horizontal First",
+          "type": "number"
+        },
+        "horizontal_step": {
+          "exclusiveMinimum": 0,
+          "title": "Horizontal Step",
+          "type": "number"
+        },
+        "horizontal_unit": {
+          "anyOf": [
+            {
+              "const": "m",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Horizontal Unit"
+        },
+        "fidelity": {
+          "$ref": "#/$defs/Fidelity"
+        },
+        "type": {
+          "const": "seismic-section",
+          "title": "Type",
+          "type": "string"
+        },
+        "origin": {
+          "enum": [
+            "synthetic",
+            "not-stated"
+          ],
+          "title": "Origin",
+          "type": "string"
+        },
+        "polarity": {
+          "enum": [
+            "impedance-increase-positive",
+            "impedance-increase-negative",
+            "unknown"
+          ],
+          "title": "Polarity",
+          "type": "string"
+        },
+        "minimum": {
+          "title": "Minimum",
+          "type": "number"
+        },
+        "maximum": {
+          "title": "Maximum",
+          "type": "number"
+        }
+      },
+      "required": [
+        "domain",
+        "first_sample",
+        "sample_interval",
+        "sample_unit",
+        "samples",
+        "traces",
+        "horizontal",
+        "horizontal_first",
+        "horizontal_step",
+        "horizontal_unit",
+        "fidelity",
+        "type",
+        "origin",
+        "polarity",
+        "minimum",
+        "maximum"
+      ],
+      "title": "SeismicSectionContext",
+      "type": "object"
+    },
     "TopsContext": {
       "additionalProperties": false,
       "properties": {
@@ -2806,7 +3044,10 @@
             "point-set/1",
             "polyline-set/1",
             "seismic-volume/1",
-            "well-location/1"
+            "well-location/1",
+            "wavelet/1",
+            "model-section/1",
+            "seismic-section/1"
           ],
           "title": "Mapping",
           "type": "string"
@@ -2943,6 +3184,110 @@
         "label"
       ],
       "title": "Via",
+      "type": "object"
+    },
+    "WaveletContext": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "wavelet",
+          "title": "Type",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "ricker",
+            "ormsby",
+            "other"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "frequency_hz": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Frequency Hz"
+        },
+        "corners_hz": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "number"
+              },
+              "maxItems": 4,
+              "minItems": 4,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Corners Hz"
+        },
+        "dt": {
+          "maximum": 0.01,
+          "minimum": 0.0005,
+          "title": "Dt",
+          "type": "number"
+        },
+        "t0": {
+          "title": "T0",
+          "type": "number"
+        },
+        "time_unit": {
+          "const": "s",
+          "title": "Time Unit",
+          "type": "string"
+        },
+        "polarity": {
+          "enum": [
+            "impedance-increase-positive",
+            "impedance-increase-negative",
+            "unknown"
+          ],
+          "title": "Polarity",
+          "type": "string"
+        },
+        "sample_count": {
+          "maximum": 4095,
+          "minimum": 3,
+          "title": "Sample Count",
+          "type": "integer"
+        },
+        "minimum": {
+          "title": "Minimum",
+          "type": "number"
+        },
+        "maximum": {
+          "title": "Maximum",
+          "type": "number"
+        },
+        "fidelity": {
+          "$ref": "#/$defs/Fidelity"
+        }
+      },
+      "required": [
+        "type",
+        "kind",
+        "frequency_hz",
+        "corners_hz",
+        "dt",
+        "t0",
+        "time_unit",
+        "polarity",
+        "sample_count",
+        "minimum",
+        "maximum",
+        "fidelity"
+      ],
+      "title": "WaveletContext",
       "type": "object"
     },
     "WellLocationContext": {
@@ -3217,6 +3562,15 @@
         },
         {
           "$ref": "#/$defs/WellLocationContext"
+        },
+        {
+          "$ref": "#/$defs/WaveletContext"
+        },
+        {
+          "$ref": "#/$defs/ModelSectionContext"
+        },
+        {
+          "$ref": "#/$defs/SeismicSectionContext"
         }
       ],
       "title": "Scientific"

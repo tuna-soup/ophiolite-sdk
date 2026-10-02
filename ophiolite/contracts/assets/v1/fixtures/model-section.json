@@ -1,0 +1,100 @@
+{
+  "schema": "ophiolite.scientific-asset/1",
+  "asset_id": "synthetic-model-section",
+  "revision": "b10305e98dfd9febeaa6f0a85d7df9faec556912ca5c6f65758e9583e4558a2d",
+  "project_id": "synthetic-project",
+  "authority": "ophiolite:uploaded",
+  "origin": "retained-capture",
+  "custodian": "ophiolite:managed",
+  "source_reference": {
+    "authority": "ophiolite:uploaded",
+    "key": "synthetic-model-section",
+    "revision": "b10305e98dfd9febeaa6f0a85d7df9faec556912ca5c6f65758e9583e4558a2d",
+    "profile": "model-section-text/1"
+  },
+  "profile": "model-section-text/1",
+  "scientific": {
+    "type": "model-section",
+    "domain": "time",
+    "first_sample": 0.0,
+    "sample_interval": 0.002,
+    "sample_unit": "s",
+    "samples": 3,
+    "traces": 2,
+    "horizontal": "distance",
+    "horizontal_first": 0.0,
+    "horizontal_step": 25.0,
+    "horizontal_unit": "m",
+    "rock_count": 2,
+    "velocity_unit": "m/s",
+    "density_unit": "kg/m3",
+    "fidelity": {
+      "status": "assessed",
+      "preserved": [
+        "every rock with its index, name, velocity and density as written",
+        "every grid cell as its rock index, one row per vertical sample"
+      ],
+      "losses": [
+        "Text formatting (whitespace, quoting, line endings, number spelling) is kept only in the exact original"
+      ],
+      "unknown_context": []
+    }
+  },
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "mapping": "model-section/1",
+    "parsing_policy": "typed-strict/1",
+    "null_policy": "empty cell or declared NODATA value is missing; never zero-filled"
+  },
+  "interpretation_evidence": "live",
+  "recorded_interpretation": null,
+  "representations": [
+    {
+      "id": "artifact",
+      "kind": "original",
+      "media_type": "text/plain",
+      "profile": "model-section-text/1",
+      "bytes": 221,
+      "sha256": "b10305e98dfd9febeaa6f0a85d7df9faec556912ca5c6f65758e9583e4558a2d",
+      "available": true,
+      "losses": []
+    },
+    {
+      "id": "data",
+      "kind": "normalized",
+      "media_type": "application/json",
+      "profile": "ophiolite.model-section/1",
+      "bytes": 1726,
+      "sha256": "d93bae33c73aeb84e44b73cc1ac063ca9b9f55c3da4de4d9fbe5c53d7a1238ab",
+      "available": true,
+      "losses": [
+        "Text formatting (whitespace, quoting, line endings, number spelling) is kept only in the exact original"
+      ]
+    }
+  ],
+  "retention": {
+    "mode": "retained",
+    "policy": "until authorized lifecycle operation",
+    "historical_reads": "while-retained-and-authorized"
+  },
+  "relationships": {
+    "well_log": null
+  },
+  "parents": [],
+  "provenance": {
+    "evidence": "source-declared",
+    "method": null,
+    "code_reference": null,
+    "environment_reference": null,
+    "omissions": [
+      "Synthetic offline fixture, not a server publication"
+    ]
+  },
+  "supported_operations": [
+    "read",
+    "export"
+  ],
+  "authorization": {
+    "status": "not-evaluated"
+  }
+}

@@ -99,6 +99,54 @@
         "The CRS is the one the file states; nothing is transformed at upload.",
         "Which well it locates is an explicit of-entity association, never inferred from the file."
       ]
+    },
+    {
+      "profile": "ophiolite.wavelet/1",
+      "osdu": "work-product-component--WellLog with LogCurveFamily Waveform (as the SeismicWellTie example WellLog.Ricker40.json)",
+      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "energistics": "not declared: no Energistics object holds a standalone wavelet",
+      "differences": [
+        "Samples, interval, first time and polarity are the file's own statements; the declared kind and frequency are recorded as written, not checked against the samples.",
+        "No well or depth reference is carried: a wavelet is not attached to a wellbore."
+      ]
+    },
+    {
+      "profile": "ophiolite.model-section/1",
+      "osdu": "none: no OSDU kind holds a rock-index grid of P-wave velocity and density on 2D section axes",
+      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "energistics": "not declared",
+      "differences": [
+        "Rocks carry one P-wave velocity and one density each; property grids are not represented.",
+        "No map position or coordinate system: the horizontal axis is distance or trace number."
+      ]
+    },
+    {
+      "profile": "ophiolite.seismic-section/1",
+      "osdu": "work-product-component--SeismicTraceData (a 2D line; no SeismicLineGeometry is carried)",
+      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "energistics": "not declared",
+      "differences": [
+        "No trace headers or map position: the axes are the file's declared vertical and horizontal axes.",
+        "A synthetic section names its rock model and wavelet as parents; that lineage is Ophiolite's, not an OSDU relationship."
+      ]
+    },
+    {
+      "profile": "wavelet-text/1",
+      "osdu": "none: a text format; its normalized profile is ophiolite.wavelet/1",
+      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "normalized_profile": "ophiolite.wavelet/1"
+    },
+    {
+      "profile": "model-section-text/1",
+      "osdu": "none: a text format; its normalized profile is ophiolite.model-section/1",
+      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "normalized_profile": "ophiolite.model-section/1"
+    },
+    {
+      "profile": "seismic-section-text/1",
+      "osdu": "none: a text format; its normalized profile is ophiolite.seismic-section/1",
+      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "normalized_profile": "ophiolite.seismic-section/1"
     }
   ],
   "licences": "The standards are referenced by name only; no schema text is copied."

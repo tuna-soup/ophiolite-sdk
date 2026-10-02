@@ -38,10 +38,11 @@ def schemas():
     """Publish the Pydantic-generated schemas listed in the registry."""
     from project_gateway.scientific_assets import (Asset, AssetSummary, Curve, ScientificContext, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface,
                                                    PointSet, PolylineSet, SeismicVolume, SeismicSlice, ImportRecipe, PointSet2,
-                                                   WellLocationUpload, WellLocation)
+                                                   WellLocationUpload, WellLocation, Wavelet, ModelSection, SeismicSection)
     from project_gateway.domain import RelationshipRegistry, Entity, EntityAssets, Lineage
     for model in (Asset, Curve, ScientificContext, AssetSummary, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface, PointSet, PolylineSet, SeismicVolume, SeismicSlice,
-                  RelationshipRegistry, Entity, EntityAssets, Lineage, ImportRecipe, PointSet2, WellLocationUpload, WellLocation):
+                  RelationshipRegistry, Entity, EntityAssets, Lineage, ImportRecipe, PointSet2, WellLocationUpload, WellLocation,
+                  Wavelet, ModelSection, SeismicSection):  # E53
         write(CONTRACTS / model.CONTRACT['path'], model.model_json_schema())
 
 
@@ -118,6 +119,13 @@ TYPED = {
     'faults': ('opendtect-faultsticks/1', 'text/plain', b'# synthetic FaultStickSet\n500100.5 5800200.25 1200 3 0\n500110 5800210 1350 3 1\n500300 5800400 1100 1 0\n500310 5800410 1250.125 1 1\n',
                {'crs': 'EPSG:23031', 'xy_unit': 'm', 'z_unit': 'm', 'z_meaning': 'depth', 'positive': 'down'}),
     'seismic': ('segy/1', 'application/octet-stream', None, {'crs': 'EPSG:23031', 'z_domain': 'time'}),
+    # E53: each file states its own context, so nothing is declared beside it.
+    'wavelet': ('wavelet-text/1', 'text/plain', b'# ophiolite-wavelet 1\nkind ricker\nfrequency_hz 30\ndt 0.002\nt0 -0.004\npolarity impedance-increase-positive\n'
+                b'samples\n-0.25\n0.5\n1.0\n0.5\n-0.25\n', {}),
+    'model-section': ('model-section-text/1', 'text/plain', b'# ophiolite-model-section 1\ndomain time\nfirst_sample 0\nsample_interval 0.002\nsamples 3\ntraces 2\n'
+                      b'horizontal distance\nhorizontal_first 0\nhorizontal_step 25\nrocks\n1 4073 2629 Claystone\n2 4024 2379 Sandstone\ngrid\n1 1\n1 2\n2 2\n', {}),
+    'seismic-section': ('seismic-section-text/1', 'text/plain', b'# ophiolite-seismic-section 1\ndomain time\nfirst_sample 0\nsample_interval 0.002\nsamples 3\ntraces 2\n'
+                        b'horizontal trace-number\nhorizontal_first 1\nhorizontal_step 1\npolarity unknown\ngrid\n0.0 0.0\n-0.05 0.0\n0.05 -0.05\n', {}),
 }
 
 

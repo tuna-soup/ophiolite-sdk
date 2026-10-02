@@ -20,7 +20,10 @@
     "segy/1": {"scientific_profile": "seismic-volume-source/1", "source_schema": "SEG-Y/rev1-2,formats-1-5,big-endian,fixed", "mapping_version": "seismic-volume/1", "history": "retained-exact-read"},
     "petrel-points-attributes/1": {"scientific_profile": "point-set-source/2", "source_schema": "Petrel/points-with-attributes/VERSION-1", "mapping_version": "point-set/2", "history": "retained-exact-read"},
     "opendtect-horizon-ascii/1": {"scientific_profile": "point-set-source/2", "source_schema": "OpendTect/horizon-ascii/x-y-z", "mapping_version": "point-set/2", "history": "retained-exact-read"},
-    "well-location/1": {"scientific_profile": "well-location/1", "source_schema": "JSON/{x,y,crs,elevation_reference}", "mapping_version": "well-location/1", "history": "retained-exact-read"}
+    "well-location/1": {"scientific_profile": "well-location/1", "source_schema": "JSON/{x,y,crs,elevation_reference}", "mapping_version": "well-location/1", "history": "retained-exact-read"},
+    "wavelet-text/1": {"scientific_profile": "wavelet-source/1", "source_schema": "ophiolite-wavelet/1", "mapping_version": "wavelet/1", "history": "retained-exact-read"},
+    "model-section-text/1": {"scientific_profile": "model-section-source/1", "source_schema": "ophiolite-model-section/1", "mapping_version": "model-section/1", "history": "retained-exact-read"},
+    "seismic-section-text/1": {"scientific_profile": "seismic-section-source/1", "source_schema": "ophiolite-seismic-section/1", "mapping_version": "seismic-section/1", "history": "retained-exact-read"}
   },
   "policy_defaults": {"retained": false, "retention_permitted": false, "redistribution_permitted": false, "audience": []},
   "identity": {"entity": "source namespace plus explicit stable entity key; never name or coordinate inference", "revision": "exact source revision; opaque string", "representation": "profile plus payload SHA-256; does not create a new authority"},

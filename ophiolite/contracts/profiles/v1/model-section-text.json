@@ -1,0 +1,32 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "model-section-text/1",
+  "kind": "source",
+  "lifecycle": "preview",
+  "display_name": "Rock model section (text)",
+  "description": "A 2D rock model in the documented ophiolite-model-section text format (axes, rocks with P-wave velocity and density, a rock-index grid), kept byte for byte.",
+  "serves": [
+    "ophiolite.scientific-asset/1"
+  ],
+  "connector": {
+    "scientific_profile": "model-section-source/1",
+    "source_schema": "ophiolite-model-section/1",
+    "mapping_version": "model-section/1",
+    "history": "retained-exact-read"
+  },
+  "role": "artifact",
+  "media_types": [
+    "text/plain"
+  ],
+  "normalized_profile": "ophiolite.model-section/1",
+  "context_schema": "ophiolite.typed-context/1",
+  "representation_rules": {
+    "artifact_kind_by_origin": {
+      "source-reference": "original",
+      "retained-capture": "original",
+      "managed-derived": "derived-artifact"
+    },
+    "normalized": 1,
+    "total": 2
+  }
+}

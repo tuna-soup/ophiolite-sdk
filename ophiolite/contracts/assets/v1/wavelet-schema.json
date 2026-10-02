@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ophiolite.dev/contracts/assets/v1/well-tops-schema.json",
+  "$id": "https://ophiolite.dev/contracts/assets/v1/wavelet-schema.json",
   "x-ophiolite": {
-    "id": "ophiolite.well-tops/1",
+    "id": "ophiolite.wavelet/1",
     "version": "1.0.0",
     "lifecycle": "preview"
   },
@@ -110,110 +110,6 @@
       "title": "Reference",
       "type": "object"
     },
-    "Top": {
-      "additionalProperties": false,
-      "properties": {
-        "name": {
-          "maxLength": 128,
-          "minLength": 1,
-          "title": "Name",
-          "type": "string"
-        },
-        "md": {
-          "title": "Md",
-          "type": "number"
-        },
-        "tvd": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "title": "Tvd"
-        },
-        "source": {
-          "anyOf": [
-            {
-              "maxLength": 128,
-              "minLength": 1,
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "title": "Source"
-        }
-      },
-      "required": [
-        "name",
-        "md",
-        "tvd",
-        "source"
-      ],
-      "title": "Top",
-      "type": "object"
-    },
-    "TopsContext": {
-      "additionalProperties": false,
-      "properties": {
-        "type": {
-          "const": "well-tops",
-          "title": "Type",
-          "type": "string"
-        },
-        "depth_unit": {
-          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
-          "title": "Depth Unit",
-          "type": "string"
-        },
-        "depth_basis": {
-          "enum": [
-            "same-as-log",
-            "other",
-            "unknown"
-          ],
-          "title": "Depth Basis",
-          "type": "string"
-        },
-        "count": {
-          "maximum": 10000,
-          "minimum": 1,
-          "title": "Count",
-          "type": "integer"
-        },
-        "tvd_provided": {
-          "title": "Tvd Provided",
-          "type": "boolean"
-        },
-        "md_range": {
-          "items": {
-            "type": "number"
-          },
-          "maxItems": 2,
-          "minItems": 2,
-          "title": "Md Range",
-          "type": "array"
-        },
-        "fidelity": {
-          "$ref": "#/$defs/Fidelity"
-        }
-      },
-      "required": [
-        "type",
-        "depth_unit",
-        "depth_basis",
-        "count",
-        "tvd_provided",
-        "md_range",
-        "fidelity"
-      ],
-      "title": "TopsContext",
-      "type": "object"
-    },
     "TypedInterpretation": {
       "additionalProperties": false,
       "description": "The executable identity of the typed reader (Connectors typed_reader).",
@@ -260,9 +156,114 @@
       ],
       "title": "TypedInterpretation",
       "type": "object"
+    },
+    "WaveletContext": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "wavelet",
+          "title": "Type",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "ricker",
+            "ormsby",
+            "other"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "frequency_hz": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Frequency Hz"
+        },
+        "corners_hz": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "number"
+              },
+              "maxItems": 4,
+              "minItems": 4,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Corners Hz"
+        },
+        "dt": {
+          "maximum": 0.01,
+          "minimum": 0.0005,
+          "title": "Dt",
+          "type": "number"
+        },
+        "t0": {
+          "title": "T0",
+          "type": "number"
+        },
+        "time_unit": {
+          "const": "s",
+          "title": "Time Unit",
+          "type": "string"
+        },
+        "polarity": {
+          "enum": [
+            "impedance-increase-positive",
+            "impedance-increase-negative",
+            "unknown"
+          ],
+          "title": "Polarity",
+          "type": "string"
+        },
+        "sample_count": {
+          "maximum": 4095,
+          "minimum": 3,
+          "title": "Sample Count",
+          "type": "integer"
+        },
+        "minimum": {
+          "title": "Minimum",
+          "type": "number"
+        },
+        "maximum": {
+          "title": "Maximum",
+          "type": "number"
+        },
+        "fidelity": {
+          "$ref": "#/$defs/Fidelity"
+        }
+      },
+      "required": [
+        "type",
+        "kind",
+        "frequency_hz",
+        "corners_hz",
+        "dt",
+        "t0",
+        "time_unit",
+        "polarity",
+        "sample_count",
+        "minimum",
+        "maximum",
+        "fidelity"
+      ],
+      "title": "WaveletContext",
+      "type": "object"
     }
   },
   "additionalProperties": false,
+  "description": "E53: every sample in file order with the declared kind, frequencies, interval, first time and polarity.",
   "properties": {
     "representation": {
       "const": "normalized",
@@ -281,20 +282,20 @@
       "$ref": "#/$defs/TypedInterpretation"
     },
     "schema": {
-      "const": "ophiolite.well-tops/1",
+      "const": "ophiolite.wavelet/1",
       "title": "Schema",
       "type": "string"
     },
     "context": {
-      "$ref": "#/$defs/TopsContext"
+      "$ref": "#/$defs/WaveletContext"
     },
-    "tops": {
+    "samples": {
       "items": {
-        "$ref": "#/$defs/Top"
+        "type": "number"
       },
-      "maxItems": 10000,
-      "minItems": 1,
-      "title": "Tops",
+      "maxItems": 4095,
+      "minItems": 3,
+      "title": "Samples",
       "type": "array"
     }
   },
@@ -305,8 +306,8 @@
     "interpretation",
     "schema",
     "context",
-    "tops"
+    "samples"
   ],
-  "title": "WellTops",
+  "title": "Wavelet",
   "type": "object"
 }

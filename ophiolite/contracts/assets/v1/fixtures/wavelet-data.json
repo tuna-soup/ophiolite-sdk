@@ -1,0 +1,50 @@
+{
+  "schema": "ophiolite.wavelet/1",
+  "representation": "normalized",
+  "source": {
+    "authority": "ophiolite:uploaded",
+    "key": "synthetic-wavelet",
+    "revision": "a3b2d7369010aa033155be3335b85382312cc498b5859ebd74289824d2eacb65",
+    "profile": "wavelet-text/1"
+  },
+  "source_sha256": "a3b2d7369010aa033155be3335b85382312cc498b5859ebd74289824d2eacb65",
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "mapping": "wavelet/1",
+    "parsing_policy": "typed-strict/1",
+    "null_policy": "empty cell or declared NODATA value is missing; never zero-filled"
+  },
+  "context": {
+    "type": "wavelet",
+    "kind": "ricker",
+    "frequency_hz": 30.0,
+    "corners_hz": null,
+    "dt": 0.002,
+    "t0": -0.004,
+    "time_unit": "s",
+    "polarity": "impedance-increase-positive",
+    "sample_count": 5,
+    "minimum": -0.25,
+    "maximum": 1.0,
+    "fidelity": {
+      "status": "assessed",
+      "preserved": [
+        "every sample in file order",
+        "the declared kind, frequencies, interval, first time and polarity",
+        "the declared frequency as written (not checked against the samples)"
+      ],
+      "losses": [
+        "Text formatting (whitespace, quoting, line endings, number spelling) is kept only in the exact original",
+        "The declared frequency is recorded as written; it is not checked against the samples"
+      ],
+      "unknown_context": []
+    }
+  },
+  "samples": [
+    -0.25,
+    0.5,
+    1.0,
+    0.5,
+    -0.25
+  ]
+}

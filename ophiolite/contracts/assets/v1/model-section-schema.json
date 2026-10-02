@@ -1,43 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ophiolite.dev/contracts/assets/v1/triangulated-surface-schema.json",
+  "$id": "https://ophiolite.dev/contracts/assets/v1/model-section-schema.json",
   "x-ophiolite": {
-    "id": "ophiolite.triangulated-surface/1",
+    "id": "ophiolite.model-section/1",
     "version": "1.0.0",
     "lifecycle": "preview"
   },
   "$defs": {
-    "Attribute": {
-      "additionalProperties": false,
-      "properties": {
-        "name": {
-          "pattern": "^[A-Za-z][A-Za-z0-9_]{0,31}$",
-          "title": "Name",
-          "type": "string"
-        },
-        "values": {
-          "items": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "maxItems": 200000,
-          "title": "Values",
-          "type": "array"
-        }
-      },
-      "required": [
-        "name",
-        "values"
-      ],
-      "title": "Attribute",
-      "type": "object"
-    },
     "Fidelity": {
       "additionalProperties": false,
       "properties": {
@@ -104,137 +73,118 @@
       "title": "Fidelity",
       "type": "object"
     },
-    "MeshContext": {
+    "ModelSectionContext": {
       "additionalProperties": false,
       "properties": {
-        "crs": {
-          "pattern": "^(EPSG:[0-9]{4,6}|unknown)$",
-          "title": "Crs",
-          "type": "string"
-        },
-        "xy_unit": {
-          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
-          "title": "Xy Unit",
-          "type": "string"
-        },
-        "z_unit": {
-          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
-          "title": "Z Unit",
-          "type": "string"
-        },
-        "z_meaning": {
+        "domain": {
           "enum": [
-            "depth",
-            "elevation",
             "time",
-            "unknown"
+            "depth"
           ],
-          "title": "Z Meaning",
+          "title": "Domain",
           "type": "string"
         },
-        "positive": {
+        "first_sample": {
+          "title": "First Sample",
+          "type": "number"
+        },
+        "sample_interval": {
+          "exclusiveMinimum": 0,
+          "title": "Sample Interval",
+          "type": "number"
+        },
+        "sample_unit": {
           "enum": [
-            "up",
-            "down",
-            "unknown"
+            "s",
+            "m"
           ],
-          "title": "Positive",
+          "title": "Sample Unit",
           "type": "string"
         },
-        "vertical_datum": {
-          "maxLength": 128,
-          "minLength": 1,
-          "title": "Vertical Datum",
+        "samples": {
+          "maximum": 8192,
+          "minimum": 1,
+          "title": "Samples",
+          "type": "integer"
+        },
+        "traces": {
+          "maximum": 4096,
+          "minimum": 1,
+          "title": "Traces",
+          "type": "integer"
+        },
+        "horizontal": {
+          "enum": [
+            "distance",
+            "trace-number"
+          ],
+          "title": "Horizontal",
           "type": "string"
         },
-        "x_range": {
-          "items": {
-            "type": "number"
-          },
-          "maxItems": 2,
-          "minItems": 2,
-          "title": "X Range",
-          "type": "array"
+        "horizontal_first": {
+          "title": "Horizontal First",
+          "type": "number"
         },
-        "y_range": {
-          "items": {
-            "type": "number"
-          },
-          "maxItems": 2,
-          "minItems": 2,
-          "title": "Y Range",
-          "type": "array"
+        "horizontal_step": {
+          "exclusiveMinimum": 0,
+          "title": "Horizontal Step",
+          "type": "number"
         },
-        "z_range": {
+        "horizontal_unit": {
           "anyOf": [
             {
-              "items": {
-                "type": "number"
-              },
-              "maxItems": 2,
-              "minItems": 2,
-              "type": "array"
+              "const": "m",
+              "type": "string"
             },
             {
               "type": "null"
             }
           ],
-          "title": "Z Range"
-        },
-        "attributes": {
-          "items": {
-            "pattern": "^[A-Za-z][A-Za-z0-9_]{0,31}$",
-            "type": "string"
-          },
-          "maxItems": 16,
-          "title": "Attributes",
-          "type": "array"
+          "title": "Horizontal Unit"
         },
         "fidelity": {
           "$ref": "#/$defs/Fidelity"
         },
         "type": {
-          "const": "triangulated-surface",
+          "const": "model-section",
           "title": "Type",
           "type": "string"
         },
-        "vertex_count": {
-          "maximum": 200000,
-          "minimum": 3,
-          "title": "Vertex Count",
-          "type": "integer"
-        },
-        "triangle_count": {
-          "maximum": 400000,
+        "rock_count": {
+          "maximum": 256,
           "minimum": 1,
-          "title": "Triangle Count",
+          "title": "Rock Count",
           "type": "integer"
         },
-        "missing_z_count": {
-          "maximum": 200000,
-          "minimum": 0,
-          "title": "Missing Z Count",
-          "type": "integer"
+        "velocity_unit": {
+          "const": "m/s",
+          "title": "Velocity Unit",
+          "type": "string"
+        },
+        "density_unit": {
+          "const": "kg/m3",
+          "title": "Density Unit",
+          "type": "string"
         }
       },
       "required": [
-        "crs",
-        "xy_unit",
-        "z_unit",
-        "z_meaning",
-        "positive",
-        "vertical_datum",
-        "x_range",
-        "y_range",
-        "z_range",
-        "attributes",
+        "domain",
+        "first_sample",
+        "sample_interval",
+        "sample_unit",
+        "samples",
+        "traces",
+        "horizontal",
+        "horizontal_first",
+        "horizontal_step",
+        "horizontal_unit",
         "fidelity",
         "type",
-        "vertex_count",
-        "triangle_count",
-        "missing_z_count"
+        "rock_count",
+        "velocity_unit",
+        "density_unit"
       ],
-      "title": "MeshContext",
+      "title": "ModelSectionContext",
       "type": "object"
     },
     "Reference": {
@@ -272,6 +222,40 @@
         "profile"
       ],
       "title": "Reference",
+      "type": "object"
+    },
+    "Rock": {
+      "additionalProperties": false,
+      "properties": {
+        "index": {
+          "minimum": 0,
+          "title": "Index",
+          "type": "integer"
+        },
+        "name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "vp": {
+          "exclusiveMinimum": 0,
+          "title": "Vp",
+          "type": "number"
+        },
+        "density": {
+          "exclusiveMinimum": 0,
+          "title": "Density",
+          "type": "number"
+        }
+      },
+      "required": [
+        "index",
+        "name",
+        "vp",
+        "density"
+      ],
+      "title": "Rock",
       "type": "object"
     },
     "TypedInterpretation": {
@@ -323,6 +307,7 @@
     }
   },
   "additionalProperties": false,
+  "description": "E53: rocks (index, name, P-wave velocity m/s, density kg/m3) and a rock-index grid, one row per vertical sample.",
   "properties": {
     "representation": {
       "const": "normalized",
@@ -341,55 +326,33 @@
       "$ref": "#/$defs/TypedInterpretation"
     },
     "schema": {
-      "const": "ophiolite.triangulated-surface/1",
+      "const": "ophiolite.model-section/1",
       "title": "Schema",
       "type": "string"
     },
     "context": {
-      "$ref": "#/$defs/MeshContext"
+      "$ref": "#/$defs/ModelSectionContext"
     },
-    "vertices": {
+    "rocks": {
       "items": {
-        "items": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "maxItems": 3,
-        "minItems": 3,
-        "type": "array"
+        "$ref": "#/$defs/Rock"
       },
-      "maxItems": 200000,
-      "minItems": 3,
-      "title": "Vertices",
+      "maxItems": 256,
+      "minItems": 1,
+      "title": "Rocks",
       "type": "array"
     },
-    "triangles": {
+    "grid": {
       "items": {
         "items": {
           "minimum": 0,
           "type": "integer"
         },
-        "maxItems": 3,
-        "minItems": 3,
         "type": "array"
       },
-      "maxItems": 400000,
+      "maxItems": 8192,
       "minItems": 1,
-      "title": "Triangles",
-      "type": "array"
-    },
-    "attributes": {
-      "items": {
-        "$ref": "#/$defs/Attribute"
-      },
-      "maxItems": 16,
-      "title": "Attributes",
+      "title": "Grid",
       "type": "array"
     }
   },
@@ -400,10 +363,9 @@
     "interpretation",
     "schema",
     "context",
-    "vertices",
-    "triangles",
-    "attributes"
+    "rocks",
+    "grid"
   ],
-  "title": "TriangulatedSurface",
+  "title": "ModelSection",
   "type": "object"
 }

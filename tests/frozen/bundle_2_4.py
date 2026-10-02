@@ -26,12 +26,9 @@ VERSION = '1.0.0'
 SCHEMA_2 = 'ophiolite.portable-bundle/2'
 VERSION_2 = '2.0.0'
 TYPED_ORIGINALS = {'well-tops-csv/1': 'original.csv', 'deviation-csv/1': 'original.csv', 'esri-ascii-grid/1': 'original.asc', 'mesh-text/1': 'original.txt', 'points-csv/1': 'original.csv',
-                   'opendtect-faultsticks/1': 'original.txt', 'wavelet-text/1': 'original.txt', 'model-section-text/1': 'original.txt', 'seismic-section-text/1': 'original.txt'}
-NEWER_TYPES = {'triangulated-surface': 2, 'point-set': 2, 'polyline-set': 3, 'seismic-slice': 3, 'wavelet': 5, 'model-section': 5, 'seismic-section': 5}  # the 2.x minor that introduced them
-TYPES_2 = ('well-log', 'well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-slice',
-           'wavelet', 'model-section', 'seismic-section')  # 2.5 (E53)
-NOT_IMPORTED_SYNTHETIC = ('A synthetic section is not imported: its model and wavelet are not part of the project it would join. '
-                          'Import them and compute it again.')
+                   'opendtect-faultsticks/1': 'original.txt'}
+NEWER_TYPES = {'triangulated-surface': 2, 'point-set': 2, 'polyline-set': 3, 'seismic-slice': 3}  # the 2.x minor that introduced them
+TYPES_2 = ('well-log', 'well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-slice')
 SLICE_NAME = re.compile(r'^slice-(inline|crossline|sample)-(-?[0-9]{1,9})\.json$')
 MAX_ASSETS = 128
 MAX_FILE_BYTES = 32 * 1024 * 1024
@@ -558,8 +555,6 @@ def import_plan(bundle, well_logs):
         def refuse(reason): steps.append({**step, 'state': 'refused', 'reason': reason})
         if asset.original is None:
             refuse('This bundle carries no original for it (a seismic slice is not the volume)'); continue
-        if asset.type == 'seismic-section' and asset.data.context['origin'] == 'synthetic':
-            refuse(NOT_IMPORTED_SYNTHETIC); continue  # E53: a synthetic exists only with its parents
         original = next(f for f in entry['files'] if f['role'] == 'original')
         wire = asset.data._wire_descriptor if asset.data is not None else next(iter(asset.curves.values())).wire_descriptor
         name = entry.get('name') or ((wire.get('display') or {}).get('name') if isinstance(wire.get('display'), dict) else None) or 'Imported ' + asset.type.replace('-', ' ')

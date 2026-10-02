@@ -1,0 +1,21 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "ophiolite.seismic-section/1",
+  "kind": "normalized",
+  "lifecycle": "preview",
+  "display_name": "Normalized seismic section",
+  "description": "Every sample, one row per vertical sample and one value per trace, with the declared axes, origin and polarity.",
+  "payload_schema": "ophiolite.seismic-section/1",
+  "role": "normalized",
+  "media_types": [
+    "application/json"
+  ],
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "parsing_policy": "typed-strict/1",
+    "mapping": "seismic-section/1"
+  },
+  "mappings": [
+    "ophiolite.mapping/typed-standards/1"
+  ]
+}

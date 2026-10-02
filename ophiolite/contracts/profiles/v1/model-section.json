@@ -1,0 +1,21 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "ophiolite.model-section/1",
+  "kind": "normalized",
+  "lifecycle": "preview",
+  "display_name": "Normalized rock model section",
+  "description": "Every rock with its velocity and density and every grid cell as its rock index, with the declared vertical and horizontal axes.",
+  "payload_schema": "ophiolite.model-section/1",
+  "role": "normalized",
+  "media_types": [
+    "application/json"
+  ],
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "parsing_policy": "typed-strict/1",
+    "mapping": "model-section/1"
+  },
+  "mappings": [
+    "ophiolite.mapping/typed-standards/1"
+  ]
+}

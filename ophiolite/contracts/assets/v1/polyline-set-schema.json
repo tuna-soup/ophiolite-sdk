@@ -278,7 +278,10 @@
             "point-set/1",
             "polyline-set/1",
             "seismic-volume/1",
-            "well-location/1"
+            "well-location/1",
+            "wavelet/1",
+            "model-section/1",
+            "seismic-section/1"
           ],
           "title": "Mapping",
           "type": "string"

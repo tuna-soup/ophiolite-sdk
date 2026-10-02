@@ -316,3 +316,39 @@ def test_an_unsupported_major_is_refused_for_its_major(tmp_path, schema, version
     root = written(tmp_path).path
     rewrite(root, lambda m: m.update(schema=schema, bundle_version=version))
     with pytest.raises(Refused, match='major versions 1 and 2'): bundle.open_bundle(root)
+
+
+# --- E53: bundle 2.5 carries wavelets and sections; a synthetic is not imported ----------
+
+def section_items():
+    return typed_items() + [({'asset_id': r._wire_descriptor['asset_id'], 'revision': r._wire_descriptor['revision'], 'curves': None}, r)
+                            for r in (typed_read('wavelet'), typed_read('model-section'), typed_read('seismic-section'))]
+
+
+def test_bundle_two_five_round_trips_wavelets_and_sections(tmp_path):
+    opened = bundle.write_bundle(tmp_path / 'b', section_items())
+    assert opened.manifest['bundle_version'] == '2.5.0' and [a.type for a in opened.assets][-3:] == ['wavelet', 'model-section', 'seismic-section']
+    wavelet, model, section = opened.assets[-3:]
+    assert wavelet.data.samples == [-0.25, 0.5, 1.0, 0.5, -0.25] and model.data.grid == [[1, 1], [1, 2], [2, 2]] and section.data.grid[2] == [0.05, -0.05]
+    for asset, name in zip((wavelet, model, section), ('wavelet', 'model-section', 'seismic-section')):
+        assert asset.original == FIXTURES.joinpath(f'{name}.original').read_bytes() and asset.data.data == json.loads(FIXTURES.joinpath(f'{name}-data.json').read_bytes())
+    assert bundle.write_bundle(tmp_path / 'old', typed_items()).manifest['bundle_version'] == '2.0.0'  # the minor rises only for the new types
+
+
+def test_the_released_two_four_reader_refuses_two_five_and_still_reads_older(tmp_path):
+    import importlib.util
+    frozen_path = Path(__file__).parent / 'frozen/bundle_2_4.py'
+    spec = importlib.util.spec_from_file_location('ophiolite._frozen_bundle_24', frozen_path); frozen = importlib.util.module_from_spec(spec); spec.loader.exec_module(frozen)
+    with pytest.raises(VerificationFailed, match='An asset has an unknown type.'): frozen.open_bundle(bundle.write_bundle(tmp_path / 'new', section_items()).path)
+    assert [a.type for a in frozen.open_bundle(bundle.write_bundle(tmp_path / 'old', typed_items()).path).assets][1] == 'well-tops'
+
+
+def test_a_synthetic_is_planned_as_not_imported_with_its_reason(tmp_path):
+    opened = bundle.write_bundle(tmp_path / 'b', section_items()[-3:])
+    plain = bundle.import_plan(opened, {})
+    assert [(s['type'], s['state'], s.get('profile')) for s in plain] == [('wavelet', 'ready', 'wavelet-text/1'), ('model-section', 'ready', 'model-section-text/1'),
+                                                                           ('seismic-section', 'ready', 'seismic-section-text/1')]
+    opened.assets[2].data.context['origin'] = 'synthetic'  # as a derived synthetic reads; only the origin decides
+    plan = bundle.import_plan(opened, {})
+    assert [s['state'] for s in plan] == ['ready', 'ready', 'refused'] and plan[2]['reason'] == bundle.NOT_IMPORTED_SYNTHETIC == (
+        'A synthetic section is not imported: its model and wavelet are not part of the project it would join. Import them and compute it again.')

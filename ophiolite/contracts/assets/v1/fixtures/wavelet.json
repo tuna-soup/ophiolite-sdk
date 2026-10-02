@@ -1,0 +1,100 @@
+{
+  "schema": "ophiolite.scientific-asset/1",
+  "asset_id": "synthetic-wavelet",
+  "revision": "a3b2d7369010aa033155be3335b85382312cc498b5859ebd74289824d2eacb65",
+  "project_id": "synthetic-project",
+  "authority": "ophiolite:uploaded",
+  "origin": "retained-capture",
+  "custodian": "ophiolite:managed",
+  "source_reference": {
+    "authority": "ophiolite:uploaded",
+    "key": "synthetic-wavelet",
+    "revision": "a3b2d7369010aa033155be3335b85382312cc498b5859ebd74289824d2eacb65",
+    "profile": "wavelet-text/1"
+  },
+  "profile": "wavelet-text/1",
+  "scientific": {
+    "type": "wavelet",
+    "kind": "ricker",
+    "frequency_hz": 30.0,
+    "corners_hz": null,
+    "dt": 0.002,
+    "t0": -0.004,
+    "time_unit": "s",
+    "polarity": "impedance-increase-positive",
+    "sample_count": 5,
+    "minimum": -0.25,
+    "maximum": 1.0,
+    "fidelity": {
+      "status": "assessed",
+      "preserved": [
+        "every sample in file order",
+        "the declared kind, frequencies, interval, first time and polarity",
+        "the declared frequency as written (not checked against the samples)"
+      ],
+      "losses": [
+        "Text formatting (whitespace, quoting, line endings, number spelling) is kept only in the exact original",
+        "The declared frequency is recorded as written; it is not checked against the samples"
+      ],
+      "unknown_context": []
+    }
+  },
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "mapping": "wavelet/1",
+    "parsing_policy": "typed-strict/1",
+    "null_policy": "empty cell or declared NODATA value is missing; never zero-filled"
+  },
+  "interpretation_evidence": "live",
+  "recorded_interpretation": null,
+  "representations": [
+    {
+      "id": "artifact",
+      "kind": "original",
+      "media_type": "text/plain",
+      "profile": "wavelet-text/1",
+      "bytes": 138,
+      "sha256": "a3b2d7369010aa033155be3335b85382312cc498b5859ebd74289824d2eacb65",
+      "available": true,
+      "losses": []
+    },
+    {
+      "id": "data",
+      "kind": "normalized",
+      "media_type": "application/json",
+      "profile": "ophiolite.wavelet/1",
+      "bytes": 1488,
+      "sha256": "675f4ed50f7c0ab849b2a4eadd297069d52c420e330e2ac9fed924d3abeb2134",
+      "available": true,
+      "losses": [
+        "Text formatting (whitespace, quoting, line endings, number spelling) is kept only in the exact original",
+        "The declared frequency is recorded as written; it is not checked against the samples"
+      ]
+    }
+  ],
+  "retention": {
+    "mode": "retained",
+    "policy": "until authorized lifecycle operation",
+    "historical_reads": "while-retained-and-authorized"
+  },
+  "relationships": {
+    "well_log": null
+  },
+  "parents": [],
+  "provenance": {
+    "evidence": "source-declared",
+    "method": null,
+    "code_reference": null,
+    "environment_reference": null,
+    "omissions": [
+      "Synthetic offline fixture, not a server publication"
+    ]
+  },
+  "supported_operations": [
+    "read",
+    "export"
+  ],
+  "authorization": {
+    "status": "not-evaluated"
+  }
+}

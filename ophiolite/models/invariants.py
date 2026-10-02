@@ -95,7 +95,8 @@ def asset(value):
         require(value['interpretation'].get('mapping') == profiles[value['profile']]['connector']['mapping_version'], 'Scientific context and interpretation disagree')
     elif typed:
         mapping = {'well-tops': 'well-tops/1', 'trajectory': 'trajectory/1', 'regular-grid-surface': 'regular-grid-surface/1',
-                   'triangulated-surface': 'triangulated-surface/1', 'point-set': 'point-set/1', 'polyline-set': 'polyline-set/1', 'seismic-volume': 'seismic-volume/1'}
+                   'triangulated-surface': 'triangulated-surface/1', 'point-set': 'point-set/1', 'polyline-set': 'polyline-set/1', 'seismic-volume': 'seismic-volume/1',
+                   'wavelet': 'wavelet/1', 'model-section': 'model-section/1', 'seismic-section': 'seismic-section/1'}  # E53
         require(value['interpretation'].get('mapping') == mapping.get(value['scientific']['type']), 'Scientific context and interpretation disagree')
     else:
         context(value['scientific'])
@@ -234,6 +235,33 @@ def typed_payload(value):
         require([k['inline'] for k in value['chunks']] == line_numbers(il), 'Chunks do not follow the inline numbers')
         require(all(k['bytes'] == c['crossline']['count'] * c['samples'] * 4 for k in value['chunks']), 'A chunk has the wrong size')
         require(value['decisions'] == c['fidelity']['decisions'], 'Decisions disagree with the fidelity report')
+    elif kind == 'wavelet':  # E53: as the server's payload model states them
+        require((c['kind'] == 'ricker') == (c['frequency_hz'] is not None) and (c['kind'] == 'ormsby') == (c['corners_hz'] is not None), 'The wavelet kind and its declared frequencies disagree')
+        corners = c['corners_hz']
+        require(not corners or 0 <= corners[0] < corners[1] < corners[2] < corners[3], 'The Ormsby corner frequencies must increase')
+        require(c['sample_count'] % 2 == 1, 'A wavelet has an odd number of samples')
+        samples = value['samples']
+        require(len(samples) == c['sample_count'] and [c['minimum'], c['maximum']] == [min(samples), max(samples)], 'Samples and their context disagree')
+    elif kind == 'model-section':
+        section_axes(c)
+        indices = [r['index'] for r in value['rocks']]
+        require(len(set(indices)) == len(indices) and len(indices) == c['rock_count'], 'Rocks and their context disagree')
+        grid_shape(c, value['grid'])
+        require({i for row in value['grid'] for i in row} <= set(indices), 'A grid cell names a rock that is not listed')
+    elif kind == 'seismic-section':
+        grid = value['grid']; section_axes(c); grid_shape(c, grid)
+        require([c['minimum'], c['maximum']] == [min(min(r) for r in grid), max(max(r) for r in grid)], 'Samples and their context disagree')
+
+
+def section_axes(c):
+    """E53: a section's axes agree with their units and its size bound."""
+    require(c['sample_unit'] == {'time': 's', 'depth': 'm'}[c['domain']] and (c['horizontal_unit'] == 'm') == (c['horizontal'] == 'distance'), 'An axis and its unit disagree')
+    require(c['samples'] * c['traces'] <= 1_000_000, 'A section holds at most 1,000,000 samples')
+
+
+def grid_shape(c, grid):
+    """E53: one grid row per vertical sample, one value per trace."""
+    require(len(grid) == c['samples'] and all(len(row) == c['traces'] for row in grid), 'The grid and its axes disagree')
 
 
 RECIPE_FIELDS = ('crs', 'xy_unit', 'z_unit', 'z_meaning', 'positive', 'vertical_datum')

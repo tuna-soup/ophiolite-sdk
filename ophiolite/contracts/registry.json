@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.22.0",
+  "version": "1.23.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -37,7 +37,7 @@
     },
     {
       "id": "ophiolite.scientific-asset/1",
-      "version": "1.14.0",
+      "version": "1.15.0",
       "lifecycle": "preview",
       "path": "assets/v1/schema.json",
       "title": "ScientificAsset",
@@ -69,11 +69,11 @@
     },
     {
       "id": "ophiolite.typed-context/1",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "lifecycle": "preview",
       "path": "assets/v1/typed-context-schema.json",
       "title": "TypedContext",
-      "description": "Observed and declared context of a typed asset (tops, trajectory, grid, triangulated surface, point set, fault sticks, seismic volume) with its fidelity report."
+      "description": "Observed and declared context of a typed asset (tops, trajectory, grid, triangulated surface, point set, fault sticks, seismic volume, wavelet, rock model section, seismic section) with its fidelity report."
     },
     {
       "id": "ophiolite.well-tops/1",
@@ -157,11 +157,11 @@
     },
     {
       "id": "ophiolite.portable-bundle/2",
-      "version": "2.4.0",
+      "version": "2.5.0",
       "lifecycle": "preview",
       "path": "bundles/v2/manifest-schema.json",
       "title": "PortableBundleManifestV2",
-      "description": "Portable bundle 2: exact selected revisions of well logs, well tops, trajectories, regular-grid surfaces, meshes, point sets, fault sticks and seismic slices with files, digests, served context, permitted lineage and relationships."
+      "description": "Portable bundle 2: exact selected revisions of well logs, well tops, trajectories, regular-grid surfaces, meshes, point sets, fault sticks, seismic slices, wavelets, rock model sections and seismic sections with files, digests, served context, permitted lineage and relationships."
     },
     {
       "id": "ophiolite.polyline-set/1",
@@ -186,6 +186,30 @@
       "path": "assets/v1/well-location-schema.json",
       "title": "WellLocation",
       "description": "A well's location as read: the stored point and CRS, the exact revision (and row) it came from and the association tying it to the well (E29)."
+    },
+    {
+      "id": "ophiolite.wavelet/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/wavelet-schema.json",
+      "title": "Wavelet",
+      "description": "A normalized wavelet: every sample in file order with the declared kind, frequencies, sample interval, first time and polarity, source reference, digest and reader identity (E53)."
+    },
+    {
+      "id": "ophiolite.model-section/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/model-section-schema.json",
+      "title": "ModelSection",
+      "description": "A normalized 2D rock model: rocks with P-wave velocity and density and a rock-index grid on declared vertical and horizontal axes, with source reference, digest and reader identity (E53)."
+    },
+    {
+      "id": "ophiolite.seismic-section/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/seismic-section-schema.json",
+      "title": "SeismicSection",
+      "description": "A normalized 2D seismic section: every sample, one row per vertical sample, on declared axes with origin and polarity, source reference, digest and reader identity (E53)."
     },
     {
       "id": "ophiolite.seismic-volume/1",
@@ -476,6 +500,54 @@
       "description": "One surface point with the CRS it is stated in and the elevation reference, exactly as the file states them; nothing is transformed.",
       "lifecycle": "preview",
       "path": "profiles/v1/well-location-upload.json"
+    },
+    {
+      "id": "wavelet-text/1",
+      "kind": "source",
+      "display_name": "Wavelet (text)",
+      "description": "A wavelet in the documented ophiolite-wavelet text format (kind, sample interval, first time, polarity and every sample), kept byte for byte.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/wavelet-text.json"
+    },
+    {
+      "id": "ophiolite.wavelet/1",
+      "kind": "normalized",
+      "display_name": "Normalized wavelet",
+      "description": "Every sample in file order with the declared kind and frequencies, sample interval, first time and polarity.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/wavelet.json"
+    },
+    {
+      "id": "model-section-text/1",
+      "kind": "source",
+      "display_name": "Rock model section (text)",
+      "description": "A 2D rock model in the documented ophiolite-model-section text format (axes, rocks with P-wave velocity and density, a rock-index grid), kept byte for byte.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/model-section-text.json"
+    },
+    {
+      "id": "ophiolite.model-section/1",
+      "kind": "normalized",
+      "display_name": "Normalized rock model section",
+      "description": "Every rock with its velocity and density and every grid cell as its rock index, with the declared vertical and horizontal axes.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/model-section.json"
+    },
+    {
+      "id": "seismic-section-text/1",
+      "kind": "source",
+      "display_name": "Seismic section (text)",
+      "description": "A 2D seismic section in the documented ophiolite-seismic-section text format (axes, origin, polarity, one row per sample), kept byte for byte.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/seismic-section-text.json"
+    },
+    {
+      "id": "ophiolite.seismic-section/1",
+      "kind": "normalized",
+      "display_name": "Normalized seismic section",
+      "description": "Every sample, one row per vertical sample and one value per trace, with the declared axes, origin and polarity.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/seismic-section.json"
     }
   ],
   "documents": [
@@ -640,6 +712,13 @@
       "schema": "ophiolite.portable-bundle/2"
     },
     {
+      "id": "ophiolite.fixture/bundles/manifest-sections.json/2",
+      "kind": "fixture",
+      "path": "bundles/v2/fixtures/manifest-sections.json",
+      "title": "Portable bundle 2.5 manifest fixture: a wavelet, a rock model section and a synthetic section naming both (E53)",
+      "schema": "ophiolite.portable-bundle/2"
+    },
+    {
       "id": "ophiolite.fixture/assets/tops.original/1",
       "kind": "fixture",
       "path": "assets/v1/fixtures/tops.original",
@@ -760,6 +839,12 @@
       "title": "Tops, survey and grid upload: types, directions, change detection, losses and qualification"
     },
     {
+      "id": "ophiolite.connector-capability/section-upload/1",
+      "kind": "capability",
+      "path": "connectors/v1/capabilities/section-upload.json",
+      "title": "Wavelet, rock model and seismic section upload: types, directions, losses and qualification"
+    },
+    {
       "id": "ophiolite.fixture/assets/mesh.original/1",
       "kind": "fixture",
       "path": "assets/v1/fixtures/mesh.original",
@@ -797,6 +882,66 @@
       "kind": "fixture",
       "path": "assets/v1/fixtures/points.json",
       "title": "Synthetic retained points descriptor (E11)",
+      "schema": "ophiolite.scientific-asset/1"
+    },
+    {
+      "id": "ophiolite.fixture/assets/wavelet.original/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/wavelet.original",
+      "title": "Synthetic wavelet original bytes (E53)"
+    },
+    {
+      "id": "ophiolite.fixture/assets/wavelet-data.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/wavelet-data.json",
+      "title": "Synthetic normalized wavelet data (E53)",
+      "schema": "ophiolite.wavelet/1"
+    },
+    {
+      "id": "ophiolite.fixture/assets/wavelet.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/wavelet.json",
+      "title": "Synthetic retained wavelet descriptor (E53)",
+      "schema": "ophiolite.scientific-asset/1"
+    },
+    {
+      "id": "ophiolite.fixture/assets/model-section.original/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/model-section.original",
+      "title": "Synthetic rock model section original bytes (E53)"
+    },
+    {
+      "id": "ophiolite.fixture/assets/model-section-data.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/model-section-data.json",
+      "title": "Synthetic normalized rock model section data (E53)",
+      "schema": "ophiolite.model-section/1"
+    },
+    {
+      "id": "ophiolite.fixture/assets/model-section.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/model-section.json",
+      "title": "Synthetic retained rock model section descriptor (E53)",
+      "schema": "ophiolite.scientific-asset/1"
+    },
+    {
+      "id": "ophiolite.fixture/assets/seismic-section.original/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/seismic-section.original",
+      "title": "Synthetic seismic section original bytes (E53)"
+    },
+    {
+      "id": "ophiolite.fixture/assets/seismic-section-data.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/seismic-section-data.json",
+      "title": "Synthetic normalized seismic section data (E53)",
+      "schema": "ophiolite.seismic-section/1"
+    },
+    {
+      "id": "ophiolite.fixture/assets/seismic-section.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/seismic-section.json",
+      "title": "Synthetic retained seismic section descriptor (E53)",
       "schema": "ophiolite.scientific-asset/1"
     },
     {

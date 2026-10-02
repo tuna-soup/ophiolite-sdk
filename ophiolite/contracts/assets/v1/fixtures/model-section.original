@@ -1,0 +1,16 @@
+# ophiolite-model-section 1
+domain time
+first_sample 0
+sample_interval 0.002
+samples 3
+traces 2
+horizontal distance
+horizontal_first 0
+horizontal_step 25
+rocks
+1 4073 2629 Claystone
+2 4024 2379 Sandstone
+grid
+1 1
+1 2
+2 2

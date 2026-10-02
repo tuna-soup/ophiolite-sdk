@@ -93,7 +93,7 @@ class GridContext(Contract):
 
 class TypedInterpretation(Contract):
     reader: Literal['asset_connectors.typed_reader/1'] = Field(...)
-    mapping: Literal['well-tops/1', 'trajectory/1', 'regular-grid-surface/1', 'triangulated-surface/1', 'point-set/1', 'polyline-set/1', 'seismic-volume/1', 'well-location/1'] = Field(...)
+    mapping: Literal['well-tops/1', 'trajectory/1', 'regular-grid-surface/1', 'triangulated-surface/1', 'point-set/1', 'polyline-set/1', 'seismic-volume/1', 'well-location/1', 'wavelet/1', 'model-section/1', 'seismic-section/1'] = Field(...)
     parsing_policy: Literal['typed-strict/1'] = Field(...)
     null_policy: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
 
@@ -155,6 +155,39 @@ class SelectColumn(Contract):
     op: Literal['select-column'] = Field(...)
     source: Annotated[str, Field(min_length=1, max_length=256)] = Field(...)
     as_: Literal['x', 'y', 'z', 'attribute'] = Field(..., alias='as')
+
+class ModelSection(Contract):
+    representation: Literal['normalized'] = Field(...)
+    source: Reference = Field(...)
+    source_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    interpretation: TypedInterpretation = Field(...)
+    schema_: Literal['ophiolite.model-section/1'] = Field(..., alias='schema')
+    context: ModelSectionContext = Field(...)
+    rocks: Annotated[list[Rock], Field(min_length=1, max_length=256)] = Field(...)
+    grid: Annotated[list[list[Annotated[int, Field(ge=0)]]], Field(min_length=1, max_length=8192)] = Field(...)
+
+class ModelSectionContext(Contract):
+    domain: Literal['time', 'depth'] = Field(...)
+    first_sample: float = Field(...)
+    sample_interval: Annotated[float, Field(gt=0)] = Field(...)
+    sample_unit: Literal['s', 'm'] = Field(...)
+    samples: Annotated[int, Field(ge=1, le=8192)] = Field(...)
+    traces: Annotated[int, Field(ge=1, le=4096)] = Field(...)
+    horizontal: Literal['distance', 'trace-number'] = Field(...)
+    horizontal_first: float = Field(...)
+    horizontal_step: Annotated[float, Field(gt=0)] = Field(...)
+    horizontal_unit: Literal['m'] | None = Field(...)
+    fidelity: Fidelity = Field(...)
+    type: Literal['model-section'] = Field(...)
+    rock_count: Annotated[int, Field(ge=1, le=256)] = Field(...)
+    velocity_unit: Literal['m/s'] = Field(...)
+    density_unit: Literal['kg/m3'] = Field(...)
+
+class Rock(Contract):
+    index: Annotated[int, Field(ge=0)] = Field(...)
+    name: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+    vp: Annotated[float, Field(gt=0)] = Field(...)
+    density: Annotated[float, Field(gt=0)] = Field(...)
 
 class PointSet2(Contract):
     representation: Literal['normalized'] = Field(...)
@@ -316,7 +349,7 @@ class ScientificAsset(Contract):
     custodian: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(...)
     source_reference: Reference | None = Field(...)
     profile: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] = Field(...)
-    scientific: ScientificContext | TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext | RecipePointContext | WellLocationContext = Field(...)
+    scientific: ScientificContext | TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext | RecipePointContext | WellLocationContext | WaveletContext | ModelSectionContext | SeismicSectionContext = Field(...)
     interpretation: Interpretation | TypedInterpretation | RecipeInterpretation = Field(...)
     interpretation_evidence: Literal['live', 'recorded', 'recorded-differs', 'not-recorded'] = Field('live')
     recorded_interpretation: RecordedInterpretation | None = Field(None)
@@ -524,6 +557,24 @@ class SeismicContext(Contract):
     last_cdp: XY = Field(...)
     fidelity: Fidelity = Field(...)
 
+class SeismicSectionContext(Contract):
+    domain: Literal['time', 'depth'] = Field(...)
+    first_sample: float = Field(...)
+    sample_interval: Annotated[float, Field(gt=0)] = Field(...)
+    sample_unit: Literal['s', 'm'] = Field(...)
+    samples: Annotated[int, Field(ge=1, le=8192)] = Field(...)
+    traces: Annotated[int, Field(ge=1, le=4096)] = Field(...)
+    horizontal: Literal['distance', 'trace-number'] = Field(...)
+    horizontal_first: float = Field(...)
+    horizontal_step: Annotated[float, Field(gt=0)] = Field(...)
+    horizontal_unit: Literal['m'] | None = Field(...)
+    fidelity: Fidelity = Field(...)
+    type: Literal['seismic-section'] = Field(...)
+    origin: Literal['synthetic', 'not-stated'] = Field(...)
+    polarity: Literal['impedance-increase-positive', 'impedance-increase-negative', 'unknown'] = Field(...)
+    minimum: float = Field(...)
+    maximum: float = Field(...)
+
 class TopsContext(Contract):
     type: Literal['well-tops'] = Field(...)
     depth_unit: Annotated[str, Field(pattern='^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$')] = Field(...)
@@ -558,6 +609,20 @@ class Via(Contract):
     key_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     label: Annotated[str, Field(max_length=80)] = Field(...)
 
+class WaveletContext(Contract):
+    type: Literal['wavelet'] = Field(...)
+    kind: Literal['ricker', 'ormsby', 'other'] = Field(...)
+    frequency_hz: Annotated[float, Field(gt=0)] | None = Field(...)
+    corners_hz: Annotated[list[float], Field(min_length=4, max_length=4)] | None = Field(...)
+    dt: Annotated[float, Field(ge=0.0005, le=0.01)] = Field(...)
+    t0: float = Field(...)
+    time_unit: Literal['s'] = Field(...)
+    polarity: Literal['impedance-increase-positive', 'impedance-increase-negative', 'unknown'] = Field(...)
+    sample_count: Annotated[int, Field(ge=3, le=4095)] = Field(...)
+    minimum: float = Field(...)
+    maximum: float = Field(...)
+    fidelity: Fidelity = Field(...)
+
 class WellLocationContext(Contract):
     type: Literal['well-location'] = Field(...)
     crs: Annotated[str, Field(pattern='^(EPSG:[0-9]{4,6}|OGC:CRS84|unknown)$')] = Field(...)
@@ -571,6 +636,15 @@ class WellLogLink(Contract):
 class XY(Contract):
     x: float = Field(...)
     y: float = Field(...)
+
+class SeismicSection(Contract):
+    representation: Literal['normalized'] = Field(...)
+    source: Reference = Field(...)
+    source_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    interpretation: TypedInterpretation = Field(...)
+    schema_: Literal['ophiolite.seismic-section/1'] = Field(..., alias='schema')
+    context: SeismicSectionContext = Field(...)
+    grid: Annotated[list[list[float]], Field(min_length=1, max_length=8192)] = Field(...)
 
 class SeismicSlice(Contract):
     schema_: Literal['ophiolite.seismic-slice/1'] = Field(..., alias='schema')
@@ -661,7 +735,16 @@ class TriangulatedSurface(Contract):
     attributes: Annotated[list[Attribute], Field(max_length=16)] = Field(...)
 
 class TypedContext(Contract):
-    context: Annotated[TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext | WellLocationContext, Field(discriminator='type')] = Field(...)
+    context: Annotated[TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext | WellLocationContext | WaveletContext | ModelSectionContext | SeismicSectionContext, Field(discriminator='type')] = Field(...)
+
+class Wavelet(Contract):
+    representation: Literal['normalized'] = Field(...)
+    source: Reference = Field(...)
+    source_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    interpretation: TypedInterpretation = Field(...)
+    schema_: Literal['ophiolite.wavelet/1'] = Field(..., alias='schema')
+    context: WaveletContext = Field(...)
+    samples: Annotated[list[float], Field(min_length=3, max_length=4095)] = Field(...)
 
 class WellLocation(Contract):
     schema_: Literal['ophiolite.well-location/1'] = Field(..., alias='schema')
@@ -823,7 +906,7 @@ class BundleAssetV2(Contract):
     parent_visibility: Literal['complete', 'restricted'] = Field(...)
     omissions: list[str] = Field(...)
     losses: list[str] = Field(...)
-    type: Literal['well-log', 'well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-slice'] = Field(...)
+    type: Literal['well-log', 'well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-slice', 'wavelet', 'model-section', 'seismic-section'] = Field(...)
     relationships: BundleAssetV2Relationships = Field(None)
     original: BundleAssetV2Original = Field(None)
     slices: Annotated[list[BundleSliceV2], Field(min_length=1, max_length=64)] = Field(None)
@@ -1175,6 +1258,9 @@ RecipeFields.model_rebuild()
 RecipeParsing.model_rebuild()
 RecipeRule.model_rebuild()
 SelectColumn.model_rebuild()
+ModelSection.model_rebuild()
+ModelSectionContext.model_rebuild()
+Rock.model_rebuild()
 PointSet2.model_rebuild()
 AttributeSpec.model_rebuild()
 Decision.model_rebuild()
@@ -1219,13 +1305,16 @@ Retention.model_rebuild()
 RevisionManifest.model_rebuild()
 RevisionManifestV2.model_rebuild()
 SeismicContext.model_rebuild()
+SeismicSectionContext.model_rebuild()
 TopsContext.model_rebuild()
 TrajectoryContext.model_rebuild()
 Version.model_rebuild()
 Via.model_rebuild()
+WaveletContext.model_rebuild()
 WellLocationContext.model_rebuild()
 WellLogLink.model_rebuild()
 XY.model_rebuild()
+SeismicSection.model_rebuild()
 SeismicSlice.model_rebuild()
 SampleMeaning.model_rebuild()
 SliceAxis.model_rebuild()
@@ -1237,6 +1326,7 @@ Trajectory.model_rebuild()
 Station.model_rebuild()
 TriangulatedSurface.model_rebuild()
 TypedContext.model_rebuild()
+Wavelet.model_rebuild()
 WellLocation.model_rebuild()
 LocationProvenance.model_rebuild()
 LocationSource.model_rebuild()

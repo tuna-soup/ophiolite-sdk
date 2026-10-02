@@ -7,7 +7,7 @@ ROOT=Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('public_inputs',ROOT/'tools/check_public_inputs.py')
 audit=importlib.util.module_from_spec(spec);spec.loader.exec_module(audit)
 
-def test_current_inputs():assert audit.verify()==163  # E52: the shale-volume table, the quantity list, the HON-GT-01 excerpt and its README, the frozen server answers
+def test_current_inputs():assert audit.verify()==183  # E53: three section schemas, six profiles, nine fixtures, the section capability and the 2.5 manifest fixture
 
 @pytest.mark.parametrize('case',['missing','duplicate','hash','rights','evidence','source','canary','notice','third-party-licence','third-party-notice','third-party-register'])
 def test_unqualified_input_refusal(tmp_path,case):

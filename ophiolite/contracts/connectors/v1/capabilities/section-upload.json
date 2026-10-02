@@ -1,0 +1,84 @@
+{
+  "schema": "ophiolite.connector-capability/1",
+  "id": "section-upload",
+  "display_name": "Wavelet, rock model and seismic section upload",
+  "kind": "source",
+  "summary": "Upload a wavelet, a rock-model section or a seismic section in Ophiolite's documented text formats; each file states its own sample interval, axes and polarity, and nothing is inferred.",
+  "host": {
+    "name": "Web browser",
+    "versions": [],
+    "os": [
+      "browser"
+    ]
+  },
+  "routes": [
+    {
+      "profile": "wavelet-text/1",
+      "data": "Wavelet",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "Text formatting is kept only in the exact original",
+        "The declared frequency is recorded as written; it is not checked against the samples"
+      ],
+      "unsupported": [
+        "wavelet estimation from data",
+        "phase rotation",
+        "sample intervals outside 0.0005-0.01 s",
+        "more than 4095 samples"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    },
+    {
+      "profile": "model-section-text/1",
+      "data": "Rock model (2D section)",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "Text formatting is kept only in the exact original"
+      ],
+      "unsupported": [
+        "property grids (one rock index per cell only)",
+        "map position",
+        "more than 1,000,000 cells"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    },
+    {
+      "profile": "seismic-section-text/1",
+      "data": "Seismic section (2D)",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "Text formatting is kept only in the exact original"
+      ],
+      "unsupported": [
+        "2D SEG-Y lines",
+        "map position",
+        "depth-to-time conversion",
+        "more than 1,000,000 samples"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    }
+  ],
+  "redistribution": "Ophiolite source in this repository; no third-party runtime needed.",
+  "example": "ophiolite read-data --asset <id> --revision <rev> --output folder"
+}

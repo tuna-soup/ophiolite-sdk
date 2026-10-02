@@ -1,0 +1,61 @@
+{
+  "schema": "ophiolite.seismic-section/1",
+  "representation": "normalized",
+  "source": {
+    "authority": "ophiolite:uploaded",
+    "key": "synthetic-seismic-section",
+    "revision": "f42aea7c359c6e3ba696cc1a76c66b4084b6ff264ef4b11820650ad8c2aee6ba",
+    "profile": "seismic-section-text/1"
+  },
+  "source_sha256": "f42aea7c359c6e3ba696cc1a76c66b4084b6ff264ef4b11820650ad8c2aee6ba",
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "mapping": "seismic-section/1",
+    "parsing_policy": "typed-strict/1",
+    "null_policy": "empty cell or declared NODATA value is missing; never zero-filled"
+  },
+  "context": {
+    "type": "seismic-section",
+    "domain": "time",
+    "first_sample": 0.0,
+    "sample_interval": 0.002,
+    "sample_unit": "s",
+    "samples": 3,
+    "traces": 2,
+    "horizontal": "trace-number",
+    "horizontal_first": 1.0,
+    "horizontal_step": 1.0,
+    "horizontal_unit": null,
+    "origin": "not-stated",
+    "polarity": "unknown",
+    "minimum": -0.05,
+    "maximum": 0.05,
+    "fidelity": {
+      "status": "assessed",
+      "preserved": [
+        "every sample, one row per vertical sample and one value per trace",
+        "the declared axes, origin and polarity"
+      ],
+      "losses": [
+        "Text formatting (whitespace, quoting, line endings, number spelling) is kept only in the exact original"
+      ],
+      "unknown_context": [
+        "polarity"
+      ]
+    }
+  },
+  "grid": [
+    [
+      0.0,
+      0.0
+    ],
+    [
+      -0.05,
+      0.0
+    ],
+    [
+      0.05,
+      -0.05
+    ]
+  ]
+}

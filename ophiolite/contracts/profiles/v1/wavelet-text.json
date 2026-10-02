@@ -1,0 +1,32 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "wavelet-text/1",
+  "kind": "source",
+  "lifecycle": "preview",
+  "display_name": "Wavelet (text)",
+  "description": "A wavelet in the documented ophiolite-wavelet text format (kind, sample interval, first time, polarity and every sample), kept byte for byte.",
+  "serves": [
+    "ophiolite.scientific-asset/1"
+  ],
+  "connector": {
+    "scientific_profile": "wavelet-source/1",
+    "source_schema": "ophiolite-wavelet/1",
+    "mapping_version": "wavelet/1",
+    "history": "retained-exact-read"
+  },
+  "role": "artifact",
+  "media_types": [
+    "text/plain"
+  ],
+  "normalized_profile": "ophiolite.wavelet/1",
+  "context_schema": "ophiolite.typed-context/1",
+  "representation_rules": {
+    "artifact_kind_by_origin": {
+      "source-reference": "original",
+      "retained-capture": "original",
+      "managed-derived": "derived-artifact"
+    },
+    "normalized": 1,
+    "total": 2
+  }
+}

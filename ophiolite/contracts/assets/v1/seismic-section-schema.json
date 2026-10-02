@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ophiolite.dev/contracts/assets/v1/well-tops-schema.json",
+  "$id": "https://ophiolite.dev/contracts/assets/v1/seismic-section-schema.json",
   "x-ophiolite": {
-    "id": "ophiolite.well-tops/1",
+    "id": "ophiolite.seismic-section/1",
     "version": "1.0.0",
     "lifecycle": "preview"
   },
@@ -110,108 +110,128 @@
       "title": "Reference",
       "type": "object"
     },
-    "Top": {
+    "SeismicSectionContext": {
       "additionalProperties": false,
       "properties": {
-        "name": {
-          "maxLength": 128,
-          "minLength": 1,
-          "title": "Name",
+        "domain": {
+          "enum": [
+            "time",
+            "depth"
+          ],
+          "title": "Domain",
           "type": "string"
         },
-        "md": {
-          "title": "Md",
+        "first_sample": {
+          "title": "First Sample",
           "type": "number"
         },
-        "tvd": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "title": "Tvd"
+        "sample_interval": {
+          "exclusiveMinimum": 0,
+          "title": "Sample Interval",
+          "type": "number"
         },
-        "source": {
+        "sample_unit": {
+          "enum": [
+            "s",
+            "m"
+          ],
+          "title": "Sample Unit",
+          "type": "string"
+        },
+        "samples": {
+          "maximum": 8192,
+          "minimum": 1,
+          "title": "Samples",
+          "type": "integer"
+        },
+        "traces": {
+          "maximum": 4096,
+          "minimum": 1,
+          "title": "Traces",
+          "type": "integer"
+        },
+        "horizontal": {
+          "enum": [
+            "distance",
+            "trace-number"
+          ],
+          "title": "Horizontal",
+          "type": "string"
+        },
+        "horizontal_first": {
+          "title": "Horizontal First",
+          "type": "number"
+        },
+        "horizontal_step": {
+          "exclusiveMinimum": 0,
+          "title": "Horizontal Step",
+          "type": "number"
+        },
+        "horizontal_unit": {
           "anyOf": [
             {
-              "maxLength": 128,
-              "minLength": 1,
+              "const": "m",
               "type": "string"
             },
             {
               "type": "null"
             }
           ],
-          "title": "Source"
-        }
-      },
-      "required": [
-        "name",
-        "md",
-        "tvd",
-        "source"
-      ],
-      "title": "Top",
-      "type": "object"
-    },
-    "TopsContext": {
-      "additionalProperties": false,
-      "properties": {
-        "type": {
-          "const": "well-tops",
-          "title": "Type",
-          "type": "string"
-        },
-        "depth_unit": {
-          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
-          "title": "Depth Unit",
-          "type": "string"
-        },
-        "depth_basis": {
-          "enum": [
-            "same-as-log",
-            "other",
-            "unknown"
-          ],
-          "title": "Depth Basis",
-          "type": "string"
-        },
-        "count": {
-          "maximum": 10000,
-          "minimum": 1,
-          "title": "Count",
-          "type": "integer"
-        },
-        "tvd_provided": {
-          "title": "Tvd Provided",
-          "type": "boolean"
-        },
-        "md_range": {
-          "items": {
-            "type": "number"
-          },
-          "maxItems": 2,
-          "minItems": 2,
-          "title": "Md Range",
-          "type": "array"
+          "title": "Horizontal Unit"
         },
         "fidelity": {
           "$ref": "#/$defs/Fidelity"
+        },
+        "type": {
+          "const": "seismic-section",
+          "title": "Type",
+          "type": "string"
+        },
+        "origin": {
+          "enum": [
+            "synthetic",
+            "not-stated"
+          ],
+          "title": "Origin",
+          "type": "string"
+        },
+        "polarity": {
+          "enum": [
+            "impedance-increase-positive",
+            "impedance-increase-negative",
+            "unknown"
+          ],
+          "title": "Polarity",
+          "type": "string"
+        },
+        "minimum": {
+          "title": "Minimum",
+          "type": "number"
+        },
+        "maximum": {
+          "title": "Maximum",
+          "type": "number"
         }
       },
       "required": [
+        "domain",
+        "first_sample",
+        "sample_interval",
+        "sample_unit",
+        "samples",
+        "traces",
+        "horizontal",
+        "horizontal_first",
+        "horizontal_step",
+        "horizontal_unit",
+        "fidelity",
         "type",
-        "depth_unit",
-        "depth_basis",
-        "count",
-        "tvd_provided",
-        "md_range",
-        "fidelity"
+        "origin",
+        "polarity",
+        "minimum",
+        "maximum"
       ],
-      "title": "TopsContext",
+      "title": "SeismicSectionContext",
       "type": "object"
     },
     "TypedInterpretation": {
@@ -263,6 +283,7 @@
     }
   },
   "additionalProperties": false,
+  "description": "E53: every sample, one row per vertical sample and one value per trace, with the declared axes, origin and polarity.",
   "properties": {
     "representation": {
       "const": "normalized",
@@ -281,20 +302,23 @@
       "$ref": "#/$defs/TypedInterpretation"
     },
     "schema": {
-      "const": "ophiolite.well-tops/1",
+      "const": "ophiolite.seismic-section/1",
       "title": "Schema",
       "type": "string"
     },
     "context": {
-      "$ref": "#/$defs/TopsContext"
+      "$ref": "#/$defs/SeismicSectionContext"
     },
-    "tops": {
+    "grid": {
       "items": {
-        "$ref": "#/$defs/Top"
+        "items": {
+          "type": "number"
+        },
+        "type": "array"
       },
-      "maxItems": 10000,
+      "maxItems": 8192,
       "minItems": 1,
-      "title": "Tops",
+      "title": "Grid",
       "type": "array"
     }
   },
@@ -305,8 +329,8 @@
     "interpretation",
     "schema",
     "context",
-    "tops"
+    "grid"
   ],
-  "title": "WellTops",
+  "title": "SeismicSection",
   "type": "object"
 }

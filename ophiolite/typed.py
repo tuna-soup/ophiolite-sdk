@@ -1,4 +1,4 @@
-"""Typed scientific data (E11): well tops, trajectories and regular-grid surfaces.
+"""Typed scientific data (E11): well tops, trajectories and regular-grid surfaces; wavelets and sections (E53).
 
 Objects hold the exact original bytes, the verified descriptor and the served
 normalized data. Nothing is converted: units, references and coordinate systems
@@ -8,7 +8,10 @@ not contact a server.
 import math
 from .errors import Refused
 
-TYPES = ('well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-volume')
+TYPES = ('well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-volume',
+         'wavelet', 'model-section', 'seismic-section')
+WAVELET_DT = (0.0005, 0.01)  # E53 D7: a bounded spectrum (at most 1001 bins of 1 Hz)
+WAVELET_SAMPLES = (3, 4095)
 
 
 class TypedData:
@@ -253,6 +256,94 @@ class SeismicVolume(TypedData):
         return f'<SeismicVolume {c["inline"]["count"]}×{c["crossline"]["count"]}×{c["samples"]} {c["z_domain"]}>'
 
 
+def _numpy():
+    try: import numpy as np
+    except ImportError: raise Refused('Install ophiolite[numpy] for arrays.') from None
+    return np
+
+
+class Wavelet(TypedData):
+    """A wavelet (E53): the stored samples every `dt` seconds from `t0`, with the declared kind, frequencies and polarity.
+    Nothing is resampled; the declared frequency is what the file says, the spectrum is what the samples say."""
+    type = 'wavelet'
+
+    @property
+    def samples(self): return self.data['samples']
+
+    @property
+    def times(self):
+        c = self.context; return [c['t0'] + k * c['dt'] for k in range(len(self.samples))]
+
+    def to_numpy(self): return _numpy().array(self.samples, dtype=float)
+
+    def spectrum(self):
+        """Magnitude of the direct DFT of the stored samples on a 1 Hz grid from 0 Hz to Nyquist: (frequencies, magnitudes)."""
+        np = _numpy(); dt = self.context['dt']; n = len(self.samples)
+        if not WAVELET_DT[0] <= dt <= WAVELET_DT[1]: raise Refused('A wavelet must be sampled every 0.0005 to 0.01 s.')
+        if not WAVELET_SAMPLES[0] <= n <= WAVELET_SAMPLES[1]: raise Refused('A wavelet has 3 to 4095 samples.')
+        frequencies = np.arange(int(math.floor(0.5 / dt + 1e-9)) + 1, dtype=float)
+        phase = np.exp(-2j * math.pi * np.outer(frequencies, np.arange(n) * dt))
+        return frequencies, np.abs(phase @ np.asarray(self.samples, dtype=float))
+
+    def peak_frequency(self):
+        """The strongest frequency in Hz, read as the 1 Hz grid point (the first if two are equal)."""
+        frequencies, magnitudes = self.spectrum(); return float(frequencies[int(magnitudes.argmax())])
+
+    def frequency_note(self):
+        """The strongest frequency beside the declared one, e.g. 'strongest 40.0, declared 30'; None when nothing single is declared."""
+        declared = self.context['frequency_hz']
+        return None if declared is None else f'strongest {self.peak_frequency()}, declared {declared:g}'
+
+    def __repr__(self):
+        c = self.context; declared = f' {c["frequency_hz"]:g} Hz' if c['frequency_hz'] is not None else ''
+        return f'<Wavelet {c["kind"]}{declared}, {c["sample_count"]} samples every {c["dt"]:g} s>'
+
+
+class _Section(TypedData):
+    """A section's grid: one row per vertical sample, one value per trace, on the declared axes."""
+    @property
+    def grid(self): return self.data['grid']
+
+    @property
+    def sample_values(self):
+        c = self.context; return [c['first_sample'] + k * c['sample_interval'] for k in range(c['samples'])]
+
+    @property
+    def horizontal_values(self):
+        c = self.context; return [c['horizontal_first'] + k * c['horizontal_step'] for k in range(c['traces'])]
+
+    def __repr__(self):
+        c = self.context
+        return f'<{type(self).__name__} {c["samples"]}×{c["traces"]} {c["domain"]}>'
+
+
+class ModelSection(_Section):
+    """A rock model section (E53): rocks (P-wave velocity m/s, density kg/m3) and a grid of rock indices."""
+    type = 'model-section'
+
+    @property
+    def rocks(self): return self.data['rocks']
+
+    def rock(self, index):
+        try: return next(r for r in self.rocks if r['index'] == index)
+        except StopIteration: raise Refused('That rock is not in this model.') from None
+
+    def to_numpy(self): return _numpy().array(self.grid, dtype=int)
+
+
+class SeismicSection(_Section):
+    """A seismic section (E53): every sample exactly as stored, its origin ('synthetic' only when computed) and polarity."""
+    type = 'seismic-section'
+
+    @property
+    def origin(self): return self.context['origin']
+
+    @property
+    def polarity(self): return self.context['polarity']
+
+    def to_numpy(self): return _numpy().array(self.grid, dtype=float)
+
+
 class SeismicSlice:
     """One inline, crossline or sample slice (E16) at an exact revision, verified against its volume.
     Values are the exact decoded samples; a slice is not the complete volume (`scope`)."""
@@ -280,7 +371,8 @@ class SeismicSlice:
 
 
 CLASSES = {'well-tops': WellTops, 'trajectory': Trajectory, 'regular-grid-surface': GridSurface,
-           'triangulated-surface': TriangulatedSurface, 'point-set': PointSet, 'polyline-set': PolylineSet, 'seismic-volume': SeismicVolume}
+           'triangulated-surface': TriangulatedSurface, 'point-set': PointSet, 'polyline-set': PolylineSet, 'seismic-volume': SeismicVolume,
+           'wavelet': Wavelet, 'model-section': ModelSection, 'seismic-section': SeismicSection}
 
 
 def minimum_curvature(stations):

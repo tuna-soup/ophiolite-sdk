@@ -1,0 +1,14 @@
+# ophiolite-seismic-section 1
+domain time
+first_sample 0
+sample_interval 0.002
+samples 3
+traces 2
+horizontal trace-number
+horizontal_first 1
+horizontal_step 1
+polarity unknown
+grid
+0.0 0.0
+-0.05 0.0
+0.05 -0.05

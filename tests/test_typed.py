@@ -16,10 +16,11 @@ def load(name):
     return json.loads(FIX.joinpath(f'{name}.json').read_bytes()), FIX.joinpath(f'{name}-data.json').read_bytes(), FIX.joinpath(f'{name}.original').read_bytes()
 
 
-from ophiolite.typed import TriangulatedSurface, PointSet
+from ophiolite.typed import TriangulatedSurface, PointSet, Wavelet, ModelSection, SeismicSection
 
 
-@pytest.mark.parametrize('name,kind', [('tops', WellTops), ('trajectory', Trajectory), ('grid', GridSurface), ('mesh', TriangulatedSurface), ('points', PointSet)])
+@pytest.mark.parametrize('name,kind', [('tops', WellTops), ('trajectory', Trajectory), ('grid', GridSurface), ('mesh', TriangulatedSurface), ('points', PointSet),
+                                       ('wavelet', Wavelet), ('model-section', ModelSection), ('seismic-section', SeismicSection)])
 def test_fixtures_read_as_typed_objects(name, kind):
     descriptor, body, original = load(name)
     result = _core.typed_result(descriptor, body, original)
