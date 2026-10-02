@@ -56,7 +56,8 @@ def connect():
     if 'OPHIOLITE_ACCESS_KEY' in os.environ:
         return Client(url, project, Credential.bearer(os.environ['OPHIOLITE_ACCESS_KEY'], source='environment'))
     raise Refused(f'No saved sign-in for {project} at {url}.',
-                  f'Run: ophiolite login --url {url} --project {project}, or set OPHIOLITE_ACCESS_KEY; unset OPHIOLITE_URL to use the synthetic server.')
+                  'Put the configuration.json from Connect → Use Python in this folder and run: ophiolite login (or ophiolite login --key-stdin), '
+                  'or set OPHIOLITE_ACCESS_KEY; unset OPHIOLITE_URL to use the synthetic server.')
 
 
 def _stop():

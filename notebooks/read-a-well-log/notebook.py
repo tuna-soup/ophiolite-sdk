@@ -10,8 +10,9 @@
 #     python -m ipykernel install --user --name ophiolite-gallery
 #
 # Open the notebook with the `ophiolite-gallery` kernel. Without `OPHIOLITE_URL` it reads a synthetic log served on
-# your own computer; nothing real is read. To read your project, run `ophiolite login --url <address> --project <project>`
-# and set `OPHIOLITE_URL` and `OPHIOLITE_PROJECT` before you start Jupyter.
+# your own computer; nothing real is read. To read your project, put the `configuration.json` from Connect → Use Python
+# in this folder and run `ophiolite login` here (or `ophiolite login --key-stdin` to paste a project access key); then
+# set `OPHIOLITE_URL` and `OPHIOLITE_PROJECT` to the address and project it names before you start Jupyter.
 # %%
 import matplotlib
 matplotlib.use('Agg')
@@ -19,7 +20,8 @@ import matplotlib.pyplot as plt
 from ophiolite.gallery import connect
 
 client = connect()
-log = next(asset for asset in client.assets() if 'GR' in asset.get('curves', []))
+# The longest gamma-ray log you may read; to read another, set `log` to its entry in client.assets().
+log = max((asset for asset in client.assets() if 'GR' in asset.get('curves', [])), key=lambda asset: asset.get('sample_count') or 0)
 data = client.read(log['asset_id'], log['revision'], ['GR'])
 curve, descriptor = data.curves[0], data.descriptors[0]
 print(log['name'], '-', len(curve.values), 'samples of GR in', curve.unit, 'against depth in', curve.context.depth_unit)

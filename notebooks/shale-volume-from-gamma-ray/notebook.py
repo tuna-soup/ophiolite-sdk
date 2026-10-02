@@ -11,8 +11,9 @@
 #     python -m ipykernel install --user --name ophiolite-gallery
 #
 # Open the notebook with the `ophiolite-gallery` kernel. Without `OPHIOLITE_URL` it works on a synthetic log served on
-# your own computer; nothing real is read or published. To work in your project, run
-# `ophiolite login --url <address> --project <project>` and set `OPHIOLITE_URL` and `OPHIOLITE_PROJECT` before you
+# your own computer; nothing real is read or published. To work in your project, put the `configuration.json` from
+# Connect → Use Python in this folder and run `ophiolite login` here (or `ophiolite login --key-stdin` to paste a
+# project access key); then set `OPHIOLITE_URL` and `OPHIOLITE_PROJECT` to the address and project it names before you
 # start Jupyter. Publishing there creates a result that only you can see until you share it.
 # %%
 import math
@@ -25,7 +26,9 @@ from ophiolite.gallery import connect, synthetic
 from ophiolite.writers import write_curves
 
 client = connect()
-log = next(asset for asset in client.assets() if 'GR' in asset.get('curves', []))
+# The longest gamma-ray log you may build on; to use another, set `log` to its entry in client.assets().
+log = max((asset for asset in client.assets() if 'GR' in asset.get('curves', []) and 'use-as-input' in asset.get('allowed_operations', [])),
+          key=lambda asset: asset.get('sample_count') or 0)
 gr = client.read(log['asset_id'], log['revision'], ['GR']).curves[0]
 depth, values, depth_unit = gr.axis, gr.values, gr.context.depth_unit
 print(log['name'], '-', len(values), 'samples of GR in', gr.unit)

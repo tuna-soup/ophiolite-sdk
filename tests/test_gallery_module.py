@@ -41,7 +41,7 @@ def test_an_address_uses_the_access_key_or_the_saved_credential(monkeypatch, tmp
     with pytest.raises(Refused, match='Set OPHIOLITE_PROJECT'): gallery.connect()
     monkeypatch.setenv('OPHIOLITE_PROJECT', 'p1')
     with pytest.raises(Refused, match='No saved sign-in for p1 at https://ophiolite.example.') as refused: gallery.connect()
-    assert 'ophiolite login --url https://ophiolite.example --project p1' in refused.value.recovery
+    assert 'configuration.json from Connect → Use Python' in refused.value.recovery and 'ophiolite login --key-stdin' in refused.value.recovery
     monkeypatch.setenv('OPHIOLITE_ACCESS_KEY', 'oph_api_k\n')
     client = gallery.connect()
     assert (client.url, client.project) == ('https://ophiolite.example', 'p1')
