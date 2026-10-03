@@ -147,3 +147,24 @@ def test_the_command_line(tmp_path):
     assert 'also everyone in this project, including people who join later' in done.stdout
     assert [s.get('project_audience') for s in sent] == ['read', None]
     assert json.loads(quiet.stdout)['whole_project'] is False
+
+
+def test_the_command_line_shares_a_result_by_name(tmp_path, monkeypatch, capsys):
+    """A run result answers a ResultSummary, which carries no project field: the command line says nothing about
+    the whole project and reports `whole_project` as null (the hosted gateway lane found an AttributeError here)."""
+    from types import SimpleNamespace
+    from ophiolite import cli
+    class Stub:
+        def __init__(self, *a): pass
+        def __enter__(self): return self
+        def __exit__(self, *a): return False
+        def assets(self): return [{'asset_id': 'run', 'revision': 'x', 'authority': 'ophiolite:derived'}]
+        def grants(self, item): return SimpleNamespace(generation=1)
+        def share(self, item, **kw): return SimpleNamespace(recipients=kw['read'], reuse_recipients=[])
+    (tmp_path / 'configuration.json').write_text(json.dumps({'schema': 'ophiolite.read-configuration/1', 'url': 'http://127.0.0.1:9', 'project': 'p'}))
+    monkeypatch.setenv('HOME', str(tmp_path)); monkeypatch.chdir(tmp_path); monkeypatch.setenv('OPHIOLITE_ACCESS_KEY', 'oph_api_alice')
+    monkeypatch.setattr(cli, 'Client', Stub)
+    cli.main(['share', '--asset', 'run', '--read', 'bob', '--json'])
+    assert json.loads(capsys.readouterr().out)['whole_project'] is None
+    cli.main(['share', '--asset', 'run', '--read', 'bob'])
+    assert 'everyone in this project' not in capsys.readouterr().out

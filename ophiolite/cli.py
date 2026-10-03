@@ -529,8 +529,8 @@ def main(argv=None):
             snapshot=client.grants(item)
             if snapshot.generation is None:raise Refused('This server does not support conditional sharing; upgrade it before changing recipients.')
             result=client.share(item,read=args.read or [],reuse=args.reuse or [],expected_generation=snapshot.generation,project=args.project)
-            done(args,' '.join(['Uploaded original' if item.get('authority')=='ophiolite:uploaded' else 'Published result',args.asset,'readers:',', '.join(result.recipients) or 'none','reuse:',', '.join(result.reuse_recipients) or 'none'])+WHOLE.get(result.project,''),
-                 {'shared':args.asset,'recipients':list(result.recipients),'reuse_recipients':list(result.reuse_recipients),'whole_project':result.project})
+            done(args,' '.join(['Uploaded original' if item.get('authority')=='ophiolite:uploaded' else 'Published result',args.asset,'readers:',', '.join(result.recipients) or 'none','reuse:',', '.join(result.reuse_recipients) or 'none'])+WHOLE.get(getattr(result,'project',None),''),
+                 {'shared':args.asset,'recipients':list(result.recipients),'reuse_recipients':list(result.reuse_recipients),'whole_project':getattr(result,'project',None)})
             return result
         if args.command=='recover':return client.recover(args.work)
         if config.get('schema')!='ophiolite.local-configuration/1':
