@@ -81,6 +81,8 @@ class _MemoryApplications:
         self.bindings={};self.runs={};self.uploads={};self.commands={};self.results={};self.mutations={};self.audiences={}
         # Conditional sharing (E7). conditional=False simulates a pre-E7 server that ignores the fields.
         self.conditional=True;self.generations={};self.share_commands={}
+        # E78: who of the project sees a publication; project_capable=False simulates a server that predates it.
+        self.project_capable=True;self.project_audiences={}
     def __call__(self,method,path,raw,headers):
         with self._journal_lock:return self._call(method,path,raw,headers)
     def _call(self,method,path,raw,headers):
@@ -218,25 +220,30 @@ class _MemoryApplications:
         if item is None:return 404,{'error':'Publication unavailable','code':'not-found'}
         if operation=='share':
             if body.get('expected_generation') is None:return 428,{'error':'Reload who can see this and share again with the version you saw','code':'condition-required'}
-            command,digest=body.get('command_id'),json.dumps([sorted(body.get('audience',[])),sorted(body.get('reuse_audience',[]))])
+            whole=body.get('project_audience') if self.project_capable else None  # an older server ignores the field
+            if whole not in (None,'read','none'):return 400,{'error':'project_audience must be read or none','code':'invalid-request'}
+            command,digest=body.get('command_id'),json.dumps([sorted(body.get('audience',[])),sorted(body.get('reuse_audience',[])),whole])
             last=self.share_commands.get(ident)
             if not (command and last and last==(command,digest)):  # a replay of the applied command answers the current state
                 if command and last and last[0]==command:return 409,{'error':'This sharing request was already used for different recipients','code':'recipients-changed'}
                 if body['expected_generation']!=self.generations.get(ident,1):return 409,{'error':'Recipients changed; reload before saving','code':'recipients-changed'}
                 self.share_commands[ident]=(command,digest)
                 self.audiences[ident]=(body.get('audience',[]),body.get('reuse_audience',[]));self.generations[ident]=self.generations.get(ident,1)+1
+                if whole is not None:self.project_audiences[ident]=whole
                 self.mutations['publication-share']=self.mutations.get('publication-share',0)+1
         elif operation!='info':return 404,{'error':'Fixture operation unavailable'}
         read,reuse=self.audiences.get(ident,([],[]))
         read,reuse=sorted(set(read)|{item['owner']}),sorted(set(reuse)|{item['owner']})  # the author always keeps both, as the server answers
         answer={'asset_id':ident,'revision':item['receipt']['revision'],'name':item['name'],'owner':item['owner'],'can_share':item['owner']==owner,
                 'permitted_audience':['alice','bob'],'recipients':read,'reuse_recipients':reuse,'grants_generation':self.generations.get(ident,1)}
+        if self.project_capable:answer['project_audience']=self.project_audiences.get(ident,'none') if item['owner']==owner else None
         if operation=='share':answer['sharing_contract']='conditional'
         return 200,answer
 
     def readable(self,ident,owner):
         item=getattr(self,'publications',{}).get(ident)
-        return item if item and (owner==item['owner'] or owner in self.audiences.get(ident,([],[]))[0]) else None
+        whole=getattr(self,'project_audiences',{}).get(ident)=='read' and owner in ('alice','bob')  # E78: the fixture project's members
+        return item if item and (owner==item['owner'] or whole or owner in self.audiences.get(ident,([],[]))[0]) else None
 
     def history(self,ident,owner):
         """E52: applications/result-history for a derived publication, as the server answers it."""
@@ -416,6 +423,7 @@ def synthetic_server():
     # Public fixture controls are intentionally separate from all product responses.
     server.template_faults = faults
     server.template_mutations = applications.mutations
+    server.template_applications = applications  # E78: who may read a publication, for tests
     server.template_descriptor = descriptor
     with server:
         yield server

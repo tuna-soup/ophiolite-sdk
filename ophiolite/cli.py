@@ -30,6 +30,7 @@ def __getattr__(name):
 
 # E31 S3: documented exit codes (docs/cli.md). argparse answers 2 for usage errors itself.
 EXIT = {'ok': 0, 'refused': 1, 'usage': 2, 'access': 3, 'conflict': 4, 'busy': 5}
+WHOLE = {True: '; also everyone in this project, including people who join later', False: '; not everyone in this project'}  # E78
 
 
 def exit_code(error):
@@ -139,6 +140,9 @@ def parser():
             p.add_argument('--release');p.add_argument('--asset-index',type=int);p.add_argument('--runner',action='append')
         if name=='share':
             p.add_argument('--asset',required=True);p.add_argument('--read',action='append');p.add_argument('--reuse',action='append')
+            whole=p.add_mutually_exclusive_group()  # E78: omitted leaves it as it is
+            whole.add_argument('--project',dest='project',action='store_const',const=True,help='Also share with everyone in this project, including people who join later (derived publications)')
+            whole.add_argument('--no-project',dest='project',action='store_const',const=False,help='Stop sharing with everyone in this project; the people named still see it')
             p.add_argument('--dry-run',action='store_true',help='Print the change without sending it or writing anything')
     bundle=sub.add_parser('bundle',help='Check or summarize a portable bundle offline (no server or account needed)')
     bundle.add_argument('action',choices=['check','show','pack']);bundle.add_argument('path',type=Path);bundle.add_argument('archive',type=Path,nargs='?',help='pack: the .zip to write')
@@ -262,8 +266,8 @@ def _dry_run(args,config):
     """E31: what a write would send, printed; no credential is read, nothing is sent and no file is written."""
     if args.command=='share':
         plan={'dry_run':True,'operation':'share','project':config['project'],'asset_id':args.asset,'read':args.read or [],'reuse':args.reuse or [],
-              'note':'A real share first reads the current recipients (for expected_generation), then replaces them with these.'}
-        return done(args,'Would share %s: readers %s; reuse %s. Nothing was sent.' % (args.asset,', '.join(args.read or []) or 'none',', '.join(args.reuse or []) or 'none'),plan)
+              'whole_project':args.project,'note':'A real share first reads the current recipients (for expected_generation), then replaces them with these.'}
+        return done(args,'Would share %s: readers %s; reuse %s%s. Nothing was sent.' % (args.asset,', '.join(args.read or []) or 'none',', '.join(args.reuse or []) or 'none',WHOLE.get(args.project,'')),plan)
     from .writers import WrittenOriginal
     from . import publish as planning
     parents=[tuple(p.split(':',1)) for p in args.parents]
@@ -524,9 +528,9 @@ def main(argv=None):
             # Fetch-and-replace: guarded from this read onwards, and safe to retry after a lost response.
             snapshot=client.grants(item)
             if snapshot.generation is None:raise Refused('This server does not support conditional sharing; upgrade it before changing recipients.')
-            result=client.share(item,read=args.read or [],reuse=args.reuse or [],expected_generation=snapshot.generation)
-            done(args,' '.join(['Uploaded original' if item.get('authority')=='ophiolite:uploaded' else 'Published result',args.asset,'readers:',', '.join(result.recipients) or 'none','reuse:',', '.join(result.reuse_recipients) or 'none']),
-                 {'shared':args.asset,'recipients':list(result.recipients),'reuse_recipients':list(result.reuse_recipients)})
+            result=client.share(item,read=args.read or [],reuse=args.reuse or [],expected_generation=snapshot.generation,project=args.project)
+            done(args,' '.join(['Uploaded original' if item.get('authority')=='ophiolite:uploaded' else 'Published result',args.asset,'readers:',', '.join(result.recipients) or 'none','reuse:',', '.join(result.reuse_recipients) or 'none'])+WHOLE.get(result.project,''),
+                 {'shared':args.asset,'recipients':list(result.recipients),'reuse_recipients':list(result.reuse_recipients),'whole_project':result.project})
             return result
         if args.command=='recover':return client.recover(args.work)
         if config.get('schema')!='ophiolite.local-configuration/1':

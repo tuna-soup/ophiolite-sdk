@@ -2,7 +2,7 @@
 name: share-result
 description: Inspect grants and apply an explicitly authorized recipient change without retrying an uncertain write.
 ---
-<!-- sdk-contract: {"routes":["/api/v1/projects/{project}/applications/result-list","/api/v1/projects/{project}/applications/share","/api/v1/projects/{project}/las-uploads/info","/api/v1/projects/{project}/las-uploads/share"],"symbols":["ophiolite.Client.grants","ophiolite.Client.share"],"errors":["share-outcome-unknown","integrity-conflict","PERMISSION_DENIED","verification-failed"]} -->
+<!-- sdk-contract: {"routes":["/api/v1/projects/{project}/applications/result-list","/api/v1/projects/{project}/applications/share","/api/v1/projects/{project}/las-uploads/info","/api/v1/projects/{project}/las-uploads/share","/api/v1/projects/{project}/publications/info","/api/v1/projects/{project}/publications/share"],"symbols":["ophiolite.Client.grants","ophiolite.Client.share"],"errors":["share-outcome-unknown","integrity-conflict","PERMISSION_DENIED","verification-failed"]} -->
 
 Read grants first. Confirm the user's requested read and reuse recipients from
 the active task; existing authorization persists. Do not infer that a publication
@@ -29,6 +29,12 @@ recipients changed meanwhile, so it cannot undo a revocation. On
 state before choosing another action. Do not retry automatically beyond that one
 SDK replay, including from an agent recovery loop. If `before.generation` is None the server does not support
 conditional sharing; report that instead of sharing unconditionally.
+
+A derived publication can also be shared with everyone in the project, including
+people who join later: pass `project=True` only when the user asked for the whole
+project, and `project=False` to withdraw it; leave it `None` otherwise. If
+`before.project` is None the server cannot do this; report that and share by name
+only if the user chooses. Results and uploaded originals are shared by name.
 
 Restricted results deliberately omit inaccessible parent identifiers, hashes,
 arbitrary parameters and reports. Do not reconstruct or cache those fields from

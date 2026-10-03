@@ -447,7 +447,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
         asset,result=self._sharing_target(asset)
         return planning.grants(asset,result)
 
-    def share(self,asset,*,read,expected_generation,reuse=None,command_id=None):
+    def share(self,asset,*,read,expected_generation,reuse=None,command_id=None,project=None):
         """Replace recipients, conditionally.
 
         Recipients belong to the result or derived publication as a whole: sharing
@@ -457,7 +457,13 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
         replayed once, which returns the applied result or refuses with
         IntegrityConflict if anyone changed the recipients meanwhile (a revocation
         is never undone). Unconditional replacement ended with the E7 transition
-        release; servers refuse it (428)."""
+        release; servers refuse it (428).
+
+        ``project=True`` also shares a derived publication with everyone in the
+        project, including people who join later; ``False`` withdraws that.
+        ``None`` (the default) leaves it as it is. Either explicit value needs a
+        server that reports it, is refused before anything is sent otherwise, and
+        is verified in the answer."""
         import uuid
         from . import publish as planning
         from .errors import ShareOutcomeUnknown
@@ -466,12 +472,18 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
         planning.validate_recipients(read,reuse)
         if type(expected_generation) is not int or expected_generation<0:raise Refused('expected_generation must be a non-negative integer from client.grants(asset).')
         if command_id is not None and (not isinstance(command_id,str) or not 0<len(command_id)<=64):raise Refused('command_id must be 1-64 characters.')
+        if project is not None and type(project) is not bool:raise Refused('project must be True, False or None.')
         asset,_=self._sharing_target(asset)  # H5b: the same target as grants; validated input first, nothing sent before
         uploaded=asset['authority']=='ophiolite:uploaded';publication=asset['authority']=='ophiolite:publication'
         body={'asset_id' if uploaded or publication else 'id':asset['asset_id'],'audience':read,'reuse_audience':reuse}
         area='las-uploads' if uploaded else 'publications' if publication else 'applications'
         # Never infer support: an older server would apply the request unconditionally.
-        if self.grants(asset).generation is None:raise Refused('This server does not support conditional sharing.')
+        snapshot=self.grants(asset)
+        if snapshot.generation is None:raise Refused('This server does not support conditional sharing.')
+        if project is not None:  # E78: only a derived publication can be shared with the whole project; never sent unverified
+            if not publication:raise Refused('Only a derived publication can be shared with everyone in the project; share this by name.')
+            if snapshot.project is None:raise Refused('This server does not support sharing with everyone in the project.')
+            body['project_audience']='read' if project else 'none'
         body.update(expected_generation=expected_generation,command_id=command_id or uuid.uuid4().hex)
         try:result=self._post(area,'share',body)
         except ShareOutcomeUnknown:result=self._post(area,'share',body)  # identical replay: idempotent or refused
@@ -479,6 +491,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
             # H5b: recipients belong to the publication as a whole; a version appended meanwhile is the same publication
             parsed=planning.grants({**asset,'revision':result.get('revision')},{k:v for k,v in result.items() if k!='sharing_contract'})
             if parsed.asset_id!=asset['asset_id']:raise VerificationFailed('Sharing returned a different publication.')
+            if project is not None and parsed.project is not project:raise VerificationFailed('Sharing returned a different project audience.')
             return parsed
         parsed=planning.parse(UploadResult,result) if uploaded else planning.parse_result(result)
         # Recipients belong to a result as a whole (every version, E8); an upload has one revision.

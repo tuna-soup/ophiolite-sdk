@@ -165,7 +165,10 @@ def grants(asset,result):
         raise VerificationFailed('The recipient response is incomplete.')
     generation=item.get('grants_generation')
     if generation is not None and (type(generation) is not int or generation<0):raise VerificationFailed('The recipient generation is invalid.')
-    result=parse(api.Grants,{**{key:item[key] for key in ('asset_id','revision','recipients','reuse_recipients')},'generation':generation})
+    audience=item.get('project_audience')  # E78: the author's answer carries it where the server supports it
+    if audience not in (None,'read','none'):raise VerificationFailed('The project audience is invalid.')
+    result=parse(api.Grants,{**{key:item[key] for key in ('asset_id','revision','recipients','reuse_recipients')},'generation':generation,
+                             'project':None if audience is None else audience=='read'})
     validate_recipients(result.recipients,result.reuse_recipients)
     return result
 

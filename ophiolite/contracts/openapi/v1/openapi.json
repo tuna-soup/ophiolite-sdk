@@ -19067,6 +19067,23 @@
                         }
                       ],
                       "default": null
+                    },
+                    "project_audience": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "read",
+                            "none"
+                          ],
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E78 (uploader only): \"read\" when everyone in the project can see it, including people who join later; the named ceiling is then not consulted for reading",
+                      "title": "Project Audience"
                     }
                   },
                   "required": [
@@ -19597,6 +19614,23 @@
                       ],
                       "default": null
                     },
+                    "project_audience": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "read",
+                            "none"
+                          ],
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E78 (uploader only): \"read\" when everyone in the project can see it, including people who join later; the named ceiling is then not consulted for reading",
+                      "title": "Project Audience"
+                    },
                     "report": {
                       "$ref": "#/components/schemas/PolicyReport"
                     }
@@ -19701,6 +19735,23 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "project_audience": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "read",
+                          "none"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E78: \"read\" lets everyone in the project see it, including people who join later; \"none\" uses the named audience; absent leaves it as it is",
+                    "title": "Project Audience"
                   }
                 },
                 "required": [
@@ -20532,6 +20583,23 @@
                       ],
                       "default": null
                     },
+                    "project_audience": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "read",
+                            "none"
+                          ],
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E78 (uploader only): \"read\" when everyone in the project can see it, including people who join later; the named ceiling is then not consulted for reading",
+                      "title": "Project Audience"
+                    },
                     "sharing_contract": {
                       "const": "conditional",
                       "title": "Sharing Contract",
@@ -20793,6 +20861,23 @@
                         }
                       ],
                       "default": null
+                    },
+                    "project_audience": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "read",
+                            "none"
+                          ],
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E78 (uploader only): \"read\" when everyone in the project can see it, including people who join later; the named ceiling is then not consulted for reading",
+                      "title": "Project Audience"
                     }
                   },
                   "required": [
@@ -27075,6 +27160,36 @@
                       ],
                       "default": null,
                       "description": "B1(a): the project access key this version was published through, as it was named then; null when published otherwise"
+                    },
+                    "project_audience": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "read",
+                            "none"
+                          ],
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E78: \"read\" when everyone in the project may view and download it, including people who join later (author only; null otherwise)",
+                      "title": "Project Audience"
+                    },
+                    "project_members": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E78: how many people are in the project now (author only)",
+                      "title": "Project Members"
                     }
                   },
                   "required": [
@@ -27281,6 +27396,36 @@
                       "default": null,
                       "description": "B1(a): the project access key this version was published through, as it was named then; null when published otherwise"
                     },
+                    "project_audience": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "read",
+                            "none"
+                          ],
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E78: \"read\" when everyone in the project may view and download it, including people who join later (author only; null otherwise)",
+                      "title": "Project Audience"
+                    },
+                    "project_members": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E78: how many people are in the project now (author only)",
+                      "title": "Project Members"
+                    },
                     "sharing_contract": {
                       "const": "conditional",
                       "title": "Sharing Contract",
@@ -27408,6 +27553,23 @@
                     ],
                     "default": null,
                     "title": "Command Id"
+                  },
+                  "project_audience": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "read",
+                          "none"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E78: \"read\" lets everyone in the project view and download it, including people who join later (every input must be shared with the project too); \"none\" removes that; absent leaves it as it is",
+                    "title": "Project Audience"
                   }
                 },
                 "required": [
@@ -33641,6 +33803,17 @@
                     "can_recommend": {
                       "title": "Can Recommend",
                       "type": "boolean"
+                    },
+                    "display": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/Display"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
                     }
                   },
                   "required": [
@@ -33852,6 +34025,17 @@
                     "can_recommend": {
                       "title": "Can Recommend",
                       "type": "boolean"
+                    },
+                    "display": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/Display"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
                     }
                   },
                   "required": [
@@ -62566,6 +62750,23 @@
             "type": "integer",
             "minimum": 1,
             "description": "E52: only with code already-a-version: the version of the result whose content these settings reproduce"
+          },
+          "input": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "asset_id"
+            ],
+            "properties": {
+              "asset_id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string",
+                "description": "As its owner named it, when it has a name; display it as data"
+              }
+            },
+            "description": "E78: only with codes project-input-not-shared and project-input-fixed-audience: the input that is not shared with the whole project"
           }
         }
       },
@@ -68345,6 +68546,17 @@
           "can_recommend": {
             "title": "Can Recommend",
             "type": "boolean"
+          },
+          "display": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Display"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
           }
         },
         "required": [

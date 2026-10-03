@@ -207,6 +207,7 @@ class Grants(Contract):
     recipients: list[str]
     reuse_recipients: list[str]
     generation: int | None = None  # None: the server does not support conditional sharing
+    project: bool | None = None  # E78: shared with everyone in the project; None: the server does not report it
 
 class UploadRequest(Contract):
     model_config=ConfigDict(extra='forbid',strict=True)
