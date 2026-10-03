@@ -35,10 +35,37 @@ Every verb accepts `--json`. The result is one JSON object on standard output:
 | `status` | `{"state", "project_id", "scopes"}` |
 | `list` | `{"assets": [asset]}` |
 | `doctor` | `{"configuration", "python", "local_contracts", "server_contracts"?}` |
+| `check`, `get`, `send` | `{"outcome", "sentence", "facts", "technical"}` (see below) |
 
 A refusal with `--json` prints `{"error": {"code", "message", "status", "remedy", "docs", "request_id"}}` on standard
 output (the server's own code, remedy, documentation anchor and request id when it sent them) and exits with the code
-above. Without `--json`, the message goes to standard error.
+above. Without `--json`, the message goes to standard error. A refusal from `check`, `get` or `send` also carries
+`"outcome"`, `"sentence"`, `"facts"` and `"technical"` (the server's own words are only there).
+
+## `check`, `get` and `send`
+
+The same three actions as `Client.exchange()` in Python (guide: Exchange data between applications). A folder,
+`--work` (default `.ophiolite-held`), remembers what you hold; keep one per application or script.
+
+```sh
+ophiolite check
+ophiolite get --item ID --output surface            # a well log: add --curve GR (repeat)
+ophiolite send porosity.csv --profile points-csv/1 --name "Porosity points" --how kriging --based-on ID [--declare crs=EPSG:28992] [--of ID]
+```
+
+`send` builds only on items you hold (`--based-on`, and `--of` for the next version of an item you wrote); the version it
+replaces is the one you hold, so a newer version added by someone else is never overwritten. Running the same send again
+after an interrupted one never publishes twice.
+
+| Outcome | Exit | Sentence (start) |
+|---|---|---|
+| `nothing-new`, `updates`, `access-changed` | 0 | "Nothing is newer than what you hold." / "1 newer: …" / "You can no longer see …" |
+| `got`, `already-latest` | 0 | "Got {name}, version {k}. You now hold it; saved in …" / "You already hold the latest version of …" |
+| `sent-new`, `sent-version` | 0 | "Sent {name} as a new item; it is private until you share it." / "Sent {name} as version {k}. Version {k-1} is kept." |
+| `cannot-read-here`, `damaged`, `not-valid`, `not-held`, `too-large` | 1 | "This kind of item cannot be received by this script yet: …" / "The data did not match its fingerprint. Nothing was kept." / "The project refused this: …" / "You can only build on items you hold. …" / "The file is larger than this project accepts. …" |
+| `access-refused`, `sign-in-needed` | 3 | "The project did not allow this with this access key, so nothing was sent. …" / "Your access key is not accepted any more. Ask for a new one." |
+| `not-visible`, `map-unavailable`, `newer-version-exists`, `nothing-changed` | 4 | "You can no longer see …" / "That version of the map is not available …" / "Version {k} was added by {who}, {when}. Your change was not sent. …" / "This is the same as version {j}; nothing was sent." |
+| `outcome-unknown`, `folder-busy`, `rate-limited`, `could-not-reach` | 5 | "An earlier send of {name} may or may not have arrived. Run the same send again …" / "Another program is using this folder. …" / "The project is busy. …" / "Could not reach the project. …" |
 
 ## `sources`
 

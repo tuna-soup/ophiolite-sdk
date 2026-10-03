@@ -47,6 +47,7 @@ def error_document(error):
     """{"error": {...}}: what --json prints for a refusal (the server's code, remedy, docs and request id when it sent them)."""
     fields = {'code': getattr(error, 'code', None) or 'error', 'message': str(error), 'status': getattr(error, 'status', None),
               'remedy': getattr(error, 'remedy', None), 'docs': getattr(error, 'docs', None), 'request_id': getattr(error, 'request_id', None)}
+    if hasattr(error, 'outcome') and hasattr(error, 'to_dict'): fields.update(error.to_dict())  # E70a: outcome, sentence, facts and the server's own text
     return {'error': {k: v for k, v in fields.items() if v is not None}}
 
 
@@ -200,6 +201,21 @@ def parser():
     init=sub.add_parser('init',help='Start an application from a packaged template (map-application, derive-and-publish, sync-worker, notebook, agent-workflow)')
     init.add_argument('template',nargs='?',help='The template name; omit with --list');init.add_argument('--output',type=Path,help='An empty or new folder (default: ./TEMPLATE)')
     init.add_argument('--list',action='store_true',help='List the packaged templates')
+    # E70a: check, get and send from a folder that remembers what it holds (ophiolite.exchange)
+    def held(p):
+        project(p).add_argument('--work',type=Path,default=Path('.ophiolite-held'),help='The folder that remembers what you hold (default .ophiolite-held)')
+        return p
+    held(sub.add_parser('check',help='Say what is newer than what you hold, what is new and what you can no longer see'))
+    get=held(sub.add_parser('get',help='Get the latest version of an item into a new or held folder; you then hold it'))
+    get.add_argument('--item',required=True,help='The item id from ophiolite list');get.add_argument('--output',type=Path,required=True,help='Where to save it')
+    get.add_argument('--curve',action='append',help='A well log: a curve to receive (repeat)')
+    send=held(sub.add_parser('send',help='Send a file as a new item, or as the next version of one you hold; it is private until you share it'))
+    send.add_argument('file',type=Path,help='The file to send')
+    send.add_argument('--profile',required=True,choices=['las2/1','points-csv/1','mesh-text/1','esri-ascii-grid/1','well-tops-csv/1','deviation-csv/1','opendtect-faultsticks/1'])
+    send.add_argument('--name',required=True);send.add_argument('--how',required=True,help='How you made it, in up to 80 characters')
+    send.add_argument('--based-on',dest='based_on',action='append',required=True,metavar='ID',help='An item you hold that it is based on (repeat, 1-32)')
+    send.add_argument('--of',help='An item you hold and wrote: send this as its next version')
+    send.add_argument('--declare',action='append',default=[],metavar='KEY=VALUE',help='A declaration such as crs=EPSG:28992 (repeat)')
     skills=sub.add_parser('skills',help='Locate packaged SDK guidance')
     skills.add_subparsers(dest='action',required=True).add_parser('path')
     return parser
@@ -344,6 +360,20 @@ def _sources(args,client):
     _write_atomic(out,_csv(columns,rows) if out.suffix.lower()=='.csv' else json.dumps({'source':about,'rows':rows},indent=2,default=str)+'\n',args.force)
     return done(args,'Wrote %d rows of %s (revision %s, %s) to %s. This copy is yours; it is not shared or kept up to date.' % (len(rows),snapshot.name,snapshot.revision,snapshot.crs,out),
                 {'source':about,'out':str(out)})
+
+
+def _exchange(args,client):
+    """E70a: one closed outcome; its sentence for people, {outcome, sentence, facts, technical} with --json. A refusal
+    raises with its own sentence and exit code (cli.exit_code)."""
+    exchange=client.exchange(args.work)
+    if args.command=='check':result=exchange.check()
+    elif args.command=='get':result=exchange.get(args.item,output=args.output,**({'curves':args.curve} if args.curve else {}))
+    else:
+        declared=dict(d.split('=',1) for d in args.declare if '=' in d)
+        if len(declared)!=len(args.declare):exchange._raise('not-valid',{'reasons':'give each declaration as KEY=VALUE'})
+        result=exchange.send(args.file,name=args.name,profile=args.profile,how=args.how,based_on=args.based_on,of=args.of,declare=declared or None)
+    done(args,result.sentence,result.to_dict())
+    return result
 
 
 def _csv(columns,rows):
@@ -491,6 +521,7 @@ def main(argv=None):
             for item in items:print(json.dumps(item))
             return
         if args.command in ('entities','wells','changes','sources'):return _journey(args,client)
+        if args.command in ('check','get','send'):return _exchange(args,client)
         if args.command=='publish-derived':  # E30b
             from .writers import WrittenOriginal
             parents=[tuple(p.split(':',1)) for p in args.parents]
@@ -566,7 +597,7 @@ def entrypoint(argv=None):
     try:result=main(argv)
     except (ValueError,OSError,KeyError,TypeError,subprocess.CalledProcessError) as error:
         code=exit_code(error) if isinstance(error,ValueError) else EXIT['refused']
-        if wants_json:print(json.dumps(error_document(error) if isinstance(error,ValueError) else {'error':{'code':'local-failure','message':'Operation failed. Check configuration, local files and access; retain the run folder to retry.'}}))
+        if wants_json:print(json.dumps(error_document(error) if isinstance(error,ValueError) else {'error':{'code':'local-failure','message':'Operation failed. Check configuration, local files and access; retain the run folder to retry.'}},default=str))
         else:print(str(error) if isinstance(error,ValueError) else 'Operation failed. Check configuration, local files and access; retain the run folder to retry.',file=sys.stderr)
         raise SystemExit(code)
     if getattr(result,'exit_code',0):raise SystemExit(result.exit_code)  # E51a: doctor --online exits with its failed stage's code
