@@ -21,7 +21,7 @@ The transport's methods (frozen here; the SDK's is `ClientTransport`, QGIS suppl
   identity()                         who sends (a pending send is bound to it)
   inventory()                        [{asset_id, kind, authority, revision, name}] every item the reader may see, at its head
   history(item)                      [{number, revision, by, at}] oldest first; `by` a display name or None
-  fetch(item, revision, output, **how) -> {content, number?, facts?}; writes its files into `output` when given
+  fetch(item, revision, output, **how) -> {content, number?, facts?}; creates `output` (a new folder) and writes its files there when given
   publish(data, request, resolved, command_id) -> {asset_id, revision, number}
   same_content(held_entry, request)  whether a send would add nothing
 Errors a transport raises carry `status`, `code` and `stage` attributes (the SDK's errors do); the core classifies
@@ -413,12 +413,12 @@ class Exchange:
                 return Outcome('already-latest', self._say('already-latest', facts), facts, {'asset_id': item_id, 'revision': head})
             staging = output.with_name('.%s.partial-%s' % (output.name, uuid.uuid4().hex[:8])) if output is not None else None
             try:
-                if staging is not None: staging.mkdir(parents=True, mode=0o700)
                 try: got = self.transport.fetch(item, head, staging, **how)
                 except ExchangeRefused as refusal: self._raise(refusal.outcome, {**refusal.facts, 'name': name}, refusal.technical)
                 except Exception as error: self._transport_error(error, refused='not-visible', invalid='could-not-reach', facts={'name': name})
                 digest = None
                 if staging is not None:
+                    staging.mkdir(mode=0o700, exist_ok=True)  # the transport creates it when it writes files
                     digest = folder_digest(staging)
                     if output.exists():
                         aside = output.with_name('.%s.old-%s' % (output.name, uuid.uuid4().hex[:8]))
@@ -533,3 +533,82 @@ class Exchange:
             record['pending'] = None; self._save(record)
             facts = {'name': display(pending['request'].get('name'), 'an item')}
             return Outcome('abandoned', self._say('abandoned', facts), facts, {'command_id': pending['command_id']})
+
+
+# -- the SDK's transport (E70a C3) ------------------------------------------------------------------------
+# Everything below reaches the project through ophiolite.Client; its imports stay inside the methods so the core
+# above remains importable without httpx or pydantic.
+
+UPLOAD_SUCCESSOR = 'a newer version of an uploaded file cannot be received yet'
+
+
+class ClientTransport:
+    """check, get and send over an ophiolite.Client: the inventory, result history, exact reads and derived
+    publication routes that already exist. No route of its own."""
+    def __init__(self, client):
+        self.client, self.url, self.project = client, client.url, client.project
+        self._names = {}
+
+    def identity(self):
+        """Who sends. An access key cannot learn the person it belongs to without a new route (stop rule 8), so a
+        pending send is bound to the key itself (its SHA-256, as WorkFolder does) or, for an application grant, to the
+        grant's person; a send started with another key is never repeated."""
+        headers = self.client._headers()
+        if headers.get('X-Ophiolite-Application-Grant'):
+            status = self.client._grant_status(headers)
+            if status.get('state') == 'approved' and isinstance(status.get('user_id'), str) and status['user_id']:
+                return {'kind': 'grant', 'user_id': status['user_id']}
+        token = headers.get('Authorization', '')
+        if not token.startswith('Bearer ') or not token[7:]: raise AuthenticationRequired('Supply an access key.', status=401, stage='no-credential')
+        return {'kind': 'delegate', 'fingerprint': hashlib.sha256(token[7:].encode()).hexdigest()}
+
+    def inventory(self):
+        return self.client.sync().inventory()
+
+    def history(self, item):
+        if item.get('kind') != 'derived': raise Refused('Only derived results list their versions here.')
+        page = self.client._post('applications', 'result-history', {'asset_id': item['asset_id']})
+        names = (page.get('display') or {}).get('member_names') or {}
+        return [{'number': r.get('number'), 'revision': r.get('revision'), 'by': names.get(r.get('by')), 'at': r.get('published_at')}
+                for r in page.get('revisions', [])]
+
+    def fetch(self, item, revision, output, **how):
+        kind, asset = item.get('kind'), item['asset_id']
+        if kind not in ('derived', 'uploaded'): raise CannotReadHere('', {'reason': 'this kind of item is not one this script can receive'})
+        curves = how.get('curves')
+        if curves:
+            data = self.client.read(asset, revision, list(curves))
+            descriptor = data.wire_descriptors[0] if getattr(data, 'wire_descriptors', None) else {}
+            self._successor(kind, descriptor)
+            if output is not None: data.save(output)
+            return {'content': data, 'number': (descriptor.get('history') or {}).get('number')}
+        from .errors import Incompatible
+        try: data = self.client.read_data(asset, revision)
+        except (Incompatible, Refused) as error:
+            if getattr(error, 'status', None) in (400, 422) or error.code in ('INVALID_ARGUMENT', 'incompatible-context'):
+                raise CannotReadHere('', {'reason': 'name the curves to receive a well log'}) from None
+            raise
+        descriptor = data._wire_descriptor
+        self._successor(kind, descriptor)
+        if data.type == 'seismic-volume': raise CannotReadHere('', {'reason': 'a seismic volume is described here, not received; read its slices in Python'})
+        if output is not None:
+            output.mkdir(mode=0o700)
+            (output / 'original').write_bytes(data.original); (output / 'data.json').write_bytes(data._wire_data_bytes)
+            (output / 'descriptor.json').write_text(json.dumps(descriptor, indent=2) + '\n')
+        return {'content': data, 'number': (descriptor.get('history') or {}).get('number')}
+
+    @staticmethod
+    def _successor(kind, descriptor):
+        if kind == 'uploaded' and (descriptor.get('history') or {}).get('number', 1) > 1:
+            raise CannotReadHere('', {'reason': UPLOAD_SUCCESSOR})  # E53: until receiving one is supported (A2)
+
+    def publish(self, data, request, resolved, command_id):
+        from .writers import WrittenOriginal
+        written = WrittenOriginal(data, request['profile'], dict(request.get('declare') or {}), 'derived')
+        receipt = self.client.publish_derived(written, name=request['name'], from_=[(p['asset_id'], p['revision']) for p in resolved['parents']],
+                                              method={'name': request['how'], 'declared': False}, command_id=command_id,
+                                              new_version_of=request.get('of'), expected_parent=resolved.get('expected_parent'))
+        return {'asset_id': receipt.asset_id, 'revision': receipt.revision, 'number': receipt.revision_number}
+
+    def same_content(self, held, request):
+        return request['sha256'] == held.get('revision')

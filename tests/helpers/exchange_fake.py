@@ -45,6 +45,7 @@ class Fake:
         if self.slow: time.sleep(self.slow)
         ver = next(v for v in self.items[item['asset_id']]['versions'] if v['revision'] == revision)
         if output is not None:
+            output.mkdir()
             (output / 'data.bin').write_bytes(ver['data'] + (b'|' + ','.join(how.get('curves', [])).encode() if how.get('curves') else b''))
             self._maybe('after-write')
         return {'content': ver['data'], 'number': ver['number']}

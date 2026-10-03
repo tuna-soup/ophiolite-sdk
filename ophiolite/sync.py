@@ -154,6 +154,10 @@ class Sync:
         else: capabilities = _digest(sorted((o.get('area'), o.get('operation') or o.get('name'), bool(o.get('allowed'))) for o in described.get('operations', [])))
         return (self.client.url, self.client.project, principal_id(self.client.credential), capabilities, epoch)
 
+    def inventory(self):
+        """E70a: every item this credential may read, at its current version (catalog/inventory, every page)."""
+        return list(self._inventory().values())
+
     def _inventory(self):
         items, cursor = {}, None
         while True:

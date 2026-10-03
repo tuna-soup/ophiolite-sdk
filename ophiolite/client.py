@@ -95,6 +95,11 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
         from .sync import Sync
         return Sync(self,checkpoint=checkpoint)
 
+    def exchange(self,work,**options):
+        """E70a: check for updates, get latest and send to project from a work folder (ophiolite.exchange.Exchange)."""
+        from .exchange import Exchange,ClientTransport
+        return Exchange(ClientTransport(self),work,**options)
+
     def close(self):
         if self._owns_http:self.http.close()
     def __enter__(self):return self
