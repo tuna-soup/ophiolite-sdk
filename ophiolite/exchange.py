@@ -591,7 +591,7 @@ class ClientTransport:
             descriptor = data.wire_descriptors[0] if getattr(data, 'wire_descriptors', None) else {}
             self._successor(kind, descriptor)
             if output is not None: data.save(output)
-            return {'content': data, 'number': (descriptor.get('history') or {}).get('number')}
+            return {'content': data, 'number': self._number(kind, descriptor)}
         from .errors import Incompatible
         try: data = self.client.read_data(asset, revision)
         except (Incompatible, Refused) as error:
@@ -605,7 +605,7 @@ class ClientTransport:
             output.mkdir(mode=0o700)
             (output / 'original').write_bytes(data.original); (output / 'data.json').write_bytes(data._wire_data_bytes)
             (output / 'descriptor.json').write_text(json.dumps(descriptor, indent=2) + '\n')
-        return {'content': data, 'number': (descriptor.get('history') or {}).get('number')}
+        return {'content': data, 'number': self._number(kind, descriptor)}
 
     def _map(self, asset, revision, output):
         """E70a C4: a map through the existing export route: a GeoTIFF generated from the stored map (not the imported
@@ -629,6 +629,12 @@ class ClientTransport:
             (output / 'map.tif').write_bytes(raw); (output / 'source.txt').write_bytes(source)
             (output / 'manifest.json').write_text(json.dumps(reply['manifest'], indent=2, sort_keys=True) + '\n')
         return {'content': raw, 'number': int(revision) if str(revision).isdigit() else None, 'facts': {'map': True}}
+
+    @staticmethod
+    def _number(kind, descriptor):
+        """The version number a descriptor states; an upload without `history` is its only version (E53 adds it from 2)."""
+        number = (descriptor.get('history') or {}).get('number')
+        return number if number is not None or kind != 'uploaded' else 1
 
     @staticmethod
     def _successor(kind, descriptor):

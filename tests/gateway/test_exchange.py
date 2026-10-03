@@ -221,6 +221,7 @@ def test_a_well_log_needs_its_curves_and_reads_with_them(keyed, tmp_path):
     assert cannot.sentence == 'This kind of item cannot be received by this script yet: name the curves to receive a well log.'
     got = ex.get(log.asset_id, output=tmp_path / 'o', curves=['GR'])
     assert got.outcome == 'got' and (tmp_path / 'o/artifact.las').read_bytes() == LAS_TEXT.encode()
+    assert got.sentence == 'Got Gamma log, version 1. You now hold it; saved in %s.' % (tmp_path / 'o')  # a single upload has no `history`: it is version 1
 
 
 def test_a_newer_version_of_an_upload_is_detected_and_not_received(keyed, tmp_path):
