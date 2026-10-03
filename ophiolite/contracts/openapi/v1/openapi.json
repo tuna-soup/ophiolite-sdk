@@ -60471,7 +60471,7 @@
     "/api/v1/connector/{operation}": {
       "post": {
         "summary": "The GIS connector's session: a named operation (sources/*, activity/list and report, workspace, maps/*, context/*, rpc/*)",
-        "description": "A connector sign-in (Bearer from the connector client, no cookie or Origin) calls the named operation; the body and answer are that operation's, documented at its own path. Releases, collections and subscriptions are not reachable here.",
+        "description": "A connector sign-in (Bearer from the connector client, no cookie or Origin) calls the named operation; the body and answer are that operation's, documented at its own path, except that catalog/history adds three fields to each version of a map: published_at (UTC, ISO 8601), published_by_you (boolean) and published_by_name (the person's display name, or null). Releases, collections and subscriptions are not reachable here.",
         "security": [
           {
             "bearer": []

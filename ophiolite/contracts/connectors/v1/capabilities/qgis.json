@@ -3,7 +3,7 @@
   "id": "qgis",
   "display_name": "QGIS",
   "kind": "application",
-  "summary": "Open exact Ophiolite raster revisions in QGIS, follow or pin them, and reopen after reconnecting.",
+  "summary": "Check Ophiolite project maps for newer versions in QGIS, get one when you choose, go back one step, and send a QGIS result to the project.",
   "host": {
     "name": "QGIS",
     "versions": [
@@ -21,11 +21,12 @@
       "exact_old_revisions": "upstream",
       "change_detection": "polling",
       "losses": [
-        "Display styling is QGIS-side and not returned"
+        "Display styling is QGIS-side and not returned",
+        "A newer version is shown only when the person chooses Get latest; a check never changes the map"
       ],
       "unsupported": [
-        "editing",
-        "publication from QGIS"
+        "editing in place",
+        "following the newest version automatically"
       ],
       "qualification": {
         "status": "partly-qualified",
@@ -34,6 +35,27 @@
         ],
         "date": "2026-09-25",
         "evidence": "integration:web/docs/src/content/docs/availability.md (Mac QGIS 4.2.2 follow/pin)"
+      }
+    },
+    {
+      "profile": "geotiff/1",
+      "data": "Raster surface",
+      "direction": "publish",
+      "exact_old_revisions": "retained",
+      "change_detection": "explicit",
+      "losses": [
+        "Styling, layer order and QGIS processing history are not sent",
+        "A result from a managed source, or one that changes the meaning or grid, is sent as a separate map"
+      ],
+      "unsupported": [
+        "sending from a map opened through a connection file",
+        "merging two changes to one map"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
       }
     },
     {
@@ -47,7 +69,7 @@
       ],
       "unsupported": [
         "editing",
-        "publication from QGIS"
+        "sending a horizon grid from QGIS"
       ],
       "qualification": {
         "status": "unverified",

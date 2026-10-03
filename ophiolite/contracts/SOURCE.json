@@ -1,6 +1,6 @@
 {
-  "platform_commit": "742f47ddb34960719a36f78fcc63fbc39de76ab2",
-  "contracts_tree": "13ab4c6f6ec10d841947e0f13095f49125e59ba0",
+  "platform_commit": "cf91b0a93d1bcab7b90725dcaa90daf7a88e6607",
+  "contracts_tree": "ffda125a0676cd157b673bb1f1ef64760e19dd73",
   "registry_version": "1.23.0",
   "files": {
     "README.md": "22603a92067aff2e50da3839866c8daf497ec6bc46a182f23b3d5c7c7b6b88c6",
@@ -90,7 +90,7 @@
     "connectors/v1/capabilities/opendtect.json": "12b7c4292f4aeb5be2103b466caafb1994ed3f7bfdc6c95d024f6f54c90043e7",
     "connectors/v1/capabilities/osdu-record.json": "a08d32e14295f7745341e4c8c53b9366811e03e40e0905a6e0cd353134582693",
     "connectors/v1/capabilities/postgresql-wells.json": "52bbd6d4f3b924426c3b1a850e0e7df8d787de2a7a93ecec412e82df6c4d2e8e",
-    "connectors/v1/capabilities/qgis.json": "ba669258b6433fd8952b2aec2244b2436b2dfd145fd11f18ad9bcdc66b47eac4",
+    "connectors/v1/capabilities/qgis.json": "2eb9b13fa4b6e9076a45af91740da2cf45e2e078517f37507f8d4eb365e9cbdb",
     "connectors/v1/capabilities/resinsight.json": "3c4eac6d7d243343405a001b4cee45b9d210994cb336d1ff2f64a0e554149c0d",
     "connectors/v1/capabilities/schema.json": "8bc50e5130f381361e35caf46fe74900bc4c034484f7c6c6b113772c304518d6",
     "connectors/v1/capabilities/section-upload.json": "cda60ce02117d0e8101b69a38492474f22da8d750b07af18888d28d11d3554aa",
@@ -103,7 +103,7 @@
     "generated/v1/ophiolite-contracts.ts": "d43d741042c61a65c78ada417eda1bc975fcad8ec6b5aa840edf8f09d213c9b1",
     "mappings/v1/application-curve-to-well-curve.json": "aa2e1c1925f68aede0b3c5e7d8d7e7921ad69ea35733bc2e7d936a21c233c0dc",
     "mappings/v1/typed-standards.json": "7e5a72e2dd20bea29b7041a35b047093c1467274dcf801cc684538e8997f5c2d",
-    "openapi/v1/openapi.json": "2cf212985c4ccf2abb0a35a56aa119301aeba9fa8dac7b36465b319a579d074e",
+    "openapi/v1/openapi.json": "2d628873cd905d44e2d7ae6c6e86662e22268bb6cdeea4752546723cf6fa8f29",
     "openapi/v1/scientific-assets.paths.json": "0f414e5b768f406eee18af26493d1a15a6404726b0b581989959b98ca4cb6249",
     "profile-schema.json": "7bf3c916757a5715a7dd9c56d09537d2108716d017e63443ed2f8e6ea74c2ab1",
     "profiles/v1/application-curve.json": "f2783cc80d26fb8a40e2d1e5f4ef24ddbf77b6f9adf217436904b160b6b5ce87",
