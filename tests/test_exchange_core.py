@@ -394,3 +394,14 @@ def test_outcomes_are_the_closed_list():
                                       'map-unavailable', 'sent-new', 'sent-version', 'newer-version-exists', 'nothing-changed', 'access-refused', 'not-valid',
                                       'not-held', 'too-large', 'outcome-unknown', 'abandoned', 'folder-busy', 'rate-limited', 'sign-in-needed', 'could-not-reach'}
     assert isinstance(Outcome('got', 's'), Outcome)
+
+
+def test_only_the_map_reads_the_exchange_needs_are_allowed():
+    """E70a C4: before it, `get` of a map raised Refused('Unsupported application operation.') before sending."""
+    from ophiolite.errors import Refused
+    from ophiolite.publish import operation_path
+    assert operation_path('p', 'maps', 'export') == '/api/v1/projects/p/maps/export'
+    assert operation_path('p', 'catalog', 'history') == '/api/v1/projects/p/catalog/history'
+    for area, operation in (('maps', 'import'), ('maps', 'lifecycle'), ('maps', 'operate'), ('catalog', 'original')):
+        with pytest.raises(Refused, match='Unsupported application operation'):
+            operation_path('p', area, operation)

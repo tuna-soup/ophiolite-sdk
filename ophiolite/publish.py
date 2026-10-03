@@ -110,11 +110,12 @@ GROUP_OPERATIONS={'list','diff'}  # E8: result groups and diffs are read operati
 AI_OPERATIONS={'ai-use':{'get','grant','corpus'},'search':{'query'},'publications':{'derive','info','share'}}  # E14; E30b publications
 ENTITY_OPERATIONS={'entities':{'list','get','assets','associations','lineage','create','identify','share','associate','dissociate','extent'}}  # E20; E29 extent; H3 associations
 SOURCE_OPERATIONS={'sources':{'list','export'}}  # E50a: the source reads (not READ_OPERATIONS, which would also allow applications/export)
+MAP_OPERATIONS={'maps':{'export'},'catalog':{'history'}}  # E70a C4: `get` of a scalar map and its version numbers (existing read routes)
 
 
 def operation_path(project,area,operation):
     allowed=(GROUP_OPERATIONS if area=='result-groups' else READ_OPERATIONS|WRITE_OPERATIONS if area in ('applications','las-uploads')
-             else ENTITY_OPERATIONS.get(area) or SOURCE_OPERATIONS.get(area) or AI_OPERATIONS.get(area,set()))
+             else ENTITY_OPERATIONS.get(area) or SOURCE_OPERATIONS.get(area) or MAP_OPERATIONS.get(area) or AI_OPERATIONS.get(area,set()))
     if operation not in allowed:
         raise Refused('Unsupported application operation.')
     return '/api/v1/projects/'+quote(project,safe='')+'/'+area+'/'+operation

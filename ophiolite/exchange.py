@@ -565,7 +565,16 @@ class ClientTransport:
     def inventory(self):
         return self.client.sync().inventory()
 
+    def _exact(self, area, operation, body):
+        """A read whose request names the project inside its reference (the map routes refuse a top-level project_id)."""
+        from .publish import json_bytes
+        return self.client._post_bytes(area, operation, json_bytes(body))
+
     def history(self, item):
+        if item.get('kind') == 'external-scalar-map':  # numbers only: a map's history names no author or time (E71a C1)
+            page = self._exact('catalog', 'history', {'asset': {'project_id': self.project, 'asset_id': item['asset_id']}})
+            numbers = sorted(int(r['revision']) for r in page.get('revisions', []) if str(r.get('revision', '')).isdigit())
+            return [{'number': n, 'revision': str(n), 'by': None, 'at': None} for n in numbers]
         if item.get('kind') != 'derived': raise Refused('Only derived results list their versions here.')
         page = self.client._post('applications', 'result-history', {'asset_id': item['asset_id']})
         names = (page.get('display') or {}).get('member_names') or {}
@@ -574,6 +583,7 @@ class ClientTransport:
 
     def fetch(self, item, revision, output, **how):
         kind, asset = item.get('kind'), item['asset_id']
+        if kind == 'external-scalar-map': return self._map(asset, revision, output)
         if kind not in ('derived', 'uploaded'): raise CannotReadHere('', {'reason': 'this kind of item is not one this script can receive'})
         curves = how.get('curves')
         if curves:
@@ -596,6 +606,29 @@ class ClientTransport:
             (output / 'original').write_bytes(data.original); (output / 'data.json').write_bytes(data._wire_data_bytes)
             (output / 'descriptor.json').write_text(json.dumps(descriptor, indent=2) + '\n')
         return {'content': data, 'number': (descriptor.get('history') or {}).get('number')}
+
+    def _map(self, asset, revision, output):
+        """E70a C4: a map through the existing export route: a GeoTIFF generated from the stored map (not the imported
+        file), checked for project, asset, revision and representation before any digest, then against its manifest."""
+        import base64, binascii
+        try: reply = self._exact('maps', 'export', {'reference': {'project_id': self.project, 'asset_id': asset, 'revision': str(revision)}})
+        except Refused as error:
+            if getattr(error, 'status', None) in (400, 404, 422): raise MapUnavailable('', {}) from None
+            raise
+        reference = reply.get('reference') if isinstance(reply, dict) else None
+        if (not isinstance(reference, dict) or reply.get('asset') != asset or str(reply.get('revision')) != str(revision) or reference.get('asset_id') != asset
+                or reference.get('project_id') != self.project or str(reference.get('revision')) != str(revision) or reply.get('representation') != 'source'):
+            raise Damaged('', {})
+        try:
+            raw = base64.b64decode(reply['raster'], validate=True); source = reply['source_text'].encode()
+            files = reply['manifest']['files']
+        except (binascii.Error, KeyError, TypeError, AttributeError, ValueError): raise Damaged('', {}) from None
+        if hashlib.sha256(raw).hexdigest() != files.get('map.tif') or hashlib.sha256(source).hexdigest() != files.get('source.txt'): raise Damaged('', {})
+        if output is not None:
+            output.mkdir(mode=0o700)
+            (output / 'map.tif').write_bytes(raw); (output / 'source.txt').write_bytes(source)
+            (output / 'manifest.json').write_text(json.dumps(reply['manifest'], indent=2, sort_keys=True) + '\n')
+        return {'content': raw, 'number': int(revision) if str(revision).isdigit() else None, 'facts': {'map': True}}
 
     @staticmethod
     def _successor(kind, descriptor):
