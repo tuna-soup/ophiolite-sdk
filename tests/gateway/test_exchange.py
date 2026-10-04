@@ -252,3 +252,49 @@ def test_a_seismic_volume_is_described_not_received(keyed, tmp_path):
     cannot = refused('cannot-read-here', lambda: ex.get(volume.asset_id, output=tmp_path / 'o'))
     assert cannot.sentence == 'This kind of item cannot be received by this script yet: a seismic volume is described here, not received; read its slices in Python.'
     assert ex.held() == {} and not (tmp_path / 'o').exists()
+
+
+def test_a_named_colleague_sends_the_next_version_and_the_author_stays_the_author(two_keys, tmp_path):
+    """E70c against the gateway: Bob, sharing Alice's item, is refused with today's words until the project names them
+    both; then his send and his publish_derived are the next versions of her item, she stays its author, and she adds
+    after him."""
+    web, ka, kb, a, b, parent, item, v1 = two_keys
+    prior = web.a.sources.platform  # the native answer carries each member's role (the in-process stub leaves it out)
+    web.a.sources.platform = lambda m, body, t: ({'members': [{'user_id': u, 'role': web.permissions[u]['role']} for u in web.permissions]}
+                                                 if m == 'ListProjectMembers' else prior(m, body, t))
+    alice = client(web, ka)
+    info = alice._post('publications', 'info', {'asset_id': item})
+    alice._post('publications', 'share', {'asset_id': item, 'audience': ['bob'], 'reuse_audience': ['bob'], 'expected_generation': info['grants_generation']})
+    bob_key = key(web, 'bob'); bob_client = client(web, bob_key)
+    bob = bob_client.exchange(tmp_path / 'bob'); bob.get(parent); bob.get(item)
+    v2 = points(5)
+    attempt = lambda: bob.send(v2.bytes, name='Porosity points', profile=v2.profile, declare=v2.declared, how='x', based_on=[parent], of=item)
+    caught = refused('access-refused', attempt)
+    assert caught.technical['server_message'] == 'Only the author can add a version to this result, of the same type'
+    assert bob_client._post('publications', 'info', {'asset_id': item})['can_add_version'] is False
+    token, headers = session(web, 'alice')  # an administrator names them in the Workspace (a browser session)
+    setting = web.c.post('/api/v1/projects/p/publications/version-contributors', json={'project_id': 'p'}, headers=headers).json()
+    assert (setting['members'], setting['can_change'], sorted(setting['eligible'])) == ([], True, ['alice', 'bob', 'outsider'])
+    saved = web.c.post('/api/v1/projects/p/publications/version-contributors-save', headers=headers,
+                       json={'project_id': 'p', 'members': ['alice', 'bob'], 'expected_generation': setting['generation']})
+    assert saved.status_code == 200 and saved.json()['members'] == ['alice', 'bob'], saved.text
+    web.app.state.sessions.remove(token); web.c.cookies.clear()
+    theirs = bob_client._post('publications', 'info', {'asset_id': item})
+    assert (theirs['owner'], theirs['can_share'], theirs['can_add_version']) == ('alice', False, True)
+    sent = attempt()
+    assert (sent.outcome, sent.sentence) == ('sent-version', 'Sent Porosity points as version 2. Version 1 is kept.')
+    assert sent.technical['asset_id'] == item
+    mine = alice._post('publications', 'info', {'asset_id': item})
+    assert (mine['owner'], mine['can_share'], mine['revision']) == ('alice', True, sent.technical['revision'])
+    # publish_derived names the version it saw and adds the next one, still Alice's.
+    v3 = points(6)
+    receipt = bob_client.publish_derived(v3, name='Porosity points', from_=[(parent, bob.held()[parent]['revision'])], method={'name': 'kriging'},
+                                         command_id='e70c-bob-derived', new_version_of=item, expected_parent=sent.technical['revision'])
+    assert (receipt.asset_id, receipt.revision_number) == (item, 3)
+    assert alice._post('publications', 'info', {'asset_id': item})['owner'] == 'alice'
+    # Alice gets Bob's version and adds after it; nobody else may (sharing stays hers).
+    a.get(item, output=tmp_path / 'alice-latest')
+    v4 = points(7)
+    after = a.send(v4.bytes, name='Porosity points', profile=v4.profile, declare=v4.declared, how='kriging', based_on=[parent], of=item)
+    assert (after.outcome, after.sentence) == ('sent-version', 'Sent Porosity points as version 4. Version 3 is kept.')
+    with pytest.raises(Exception): bob_client._post('publications', 'share', {'asset_id': item, 'audience': ['bob'], 'reuse_audience': [], 'expected_generation': 0})
