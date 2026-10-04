@@ -18793,6 +18793,22 @@
                   "project_id": {
                     "title": "Project Id",
                     "type": "string"
+                  },
+                  "hide_kinds": {
+                    "anyOf": [
+                      {
+                        "items": {
+                          "type": "string"
+                        },
+                        "maxItems": 9,
+                        "type": "array"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Hide Kinds"
                   }
                 },
                 "required": [
@@ -18937,6 +18953,22 @@
                     "minItems": 1,
                     "title": "Ids",
                     "type": "array"
+                  },
+                  "hide_kinds": {
+                    "anyOf": [
+                      {
+                        "items": {
+                          "type": "string"
+                        },
+                        "maxItems": 9,
+                        "type": "array"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Hide Kinds"
                   }
                 },
                 "required": [
@@ -41423,14 +41455,18 @@
                     "previous": {
                       "anyOf": [
                         {
-                          "additionalProperties": true,
-                          "type": "object"
+                          "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                          },
+                          "type": "array"
                         },
                         {
                           "type": "null"
                         }
                       ],
                       "default": null,
+                      "description": "The exact references this selection moved from on Get (advance), oldest first, at most 20.",
                       "title": "Previous"
                     },
                     "access_health": {
@@ -44838,14 +44874,18 @@
                     "previous": {
                       "anyOf": [
                         {
-                          "additionalProperties": true,
-                          "type": "object"
+                          "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                          },
+                          "type": "array"
                         },
                         {
                           "type": "null"
                         }
                       ],
                       "default": null,
+                      "description": "The exact references this selection moved from on Get (advance), oldest first, at most 20.",
                       "title": "Previous"
                     },
                     "access_health": {
@@ -70221,14 +70261,18 @@
           "previous": {
             "anyOf": [
               {
-                "additionalProperties": true,
-                "type": "object"
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
               },
               {
                 "type": "null"
               }
             ],
             "default": null,
+            "description": "The exact references this selection moved from on Get (advance), oldest first, at most 20.",
             "title": "Previous"
           },
           "access_health": {
