@@ -1371,6 +1371,176 @@
         }
       }
     },
+    "/api/v1/projects/{project}/activity/report": {
+      "post": {
+        "summary": "E70b: an application received this exact version (exchange-consumer/1; the reference names the project)",
+        "description": "Scope read; accepted principals: session, delegate; project extractor ref.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "accepted": {
+                      "title": "Accepted",
+                      "type": "boolean"
+                    },
+                    "evidence": {
+                      "title": "Evidence",
+                      "type": "string"
+                    },
+                    "retained": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Retained"
+                    },
+                    "trace_id": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Trace Id"
+                    }
+                  },
+                  "required": [
+                    "accepted",
+                    "evidence"
+                  ],
+                  "title": "Reported",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "description": "E70b: a script or the command line received this exact version (a confirmed get). Reported on the project\nroute only; the QGIS profiles stay on the connector entry point.",
+                "properties": {
+                  "reference": {
+                    "$ref": "#/components/schemas/Ref"
+                  },
+                  "binding_id": {
+                    "pattern": "^[a-zA-Z0-9-]{16,80}$",
+                    "title": "Binding Id",
+                    "type": "string"
+                  },
+                  "event_id": {
+                    "pattern": "^[a-zA-Z0-9-]{16,80}$",
+                    "title": "Event Id",
+                    "type": "string"
+                  },
+                  "profile": {
+                    "pattern": "^exchange-consumer/1$",
+                    "title": "Profile",
+                    "type": "string"
+                  },
+                  "mode": {
+                    "pattern": "^get$",
+                    "title": "Mode",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "reference",
+                  "binding_id",
+                  "event_id",
+                  "profile",
+                  "mode"
+                ],
+                "title": "ExchangeObservation",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/agents/approve": {
       "post": {
         "summary": "Approve a pending plan",

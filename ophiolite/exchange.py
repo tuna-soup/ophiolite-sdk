@@ -24,6 +24,8 @@ The transport's methods (frozen here; the SDK's is `ClientTransport`, QGIS suppl
   fetch(item, revision, output, **how) -> {content, number?, facts?}; creates `output` (a new folder) and writes its files there when given
   publish(data, request, resolved, command_id) -> {asset_id, revision, number}
   same_content(held_entry, request)  whether a send would add nothing
+  report(reference, holder_id, event_id)   optional (E70b): tell the project this holder received that exact version;
+                                     called once by Receipt.confirm, after the record advanced; a failure changes nothing
 Errors a transport raises carry `status`, `code` and `stage` attributes (the SDK's errors do); the core classifies
 by code, then credential stage, then status, never by message text.
 """
@@ -42,6 +44,7 @@ from .errors import AuthenticationRequired, Busy, IntegrityConflict, OphioliteEr
 SCHEMA = 'ophiolite.held/1'
 MAX_SEND = 32 * 1024 * 1024
 CREDENTIAL_STAGES = ('no-credential', 'malformed-credential', 'credential-refused')
+REPORT_TIMEOUT = 10.0  # seconds; E70b: a delivery report never holds a confirmation for longer
 
 
 # -- sentences ------------------------------------------------------------------------------------
@@ -245,12 +248,23 @@ def folder_lock(path, timeout=3.0):
 
 # -- the core ---------------------------------------------------------------------------------------
 
+def delivery_event(holder_id, asset_id, revision):
+    """E70b: the id of "this holder received this exact version": the same in every process, so a repeated or retried
+    report is one event at the project."""
+    return 'got-' + hashlib.sha256(('%s\n%s\n%s' % (holder_id, asset_id, revision)).encode()).hexdigest()[:48]
+
+
 class Receipt:
     """A fetched version not yet applied. `confirm()` advances the record; anything else leaves it unchanged.
-    The folder stays locked until confirm() or release() (or the end of a `with` block)."""
+    The folder stays locked until confirm() or release() (or the end of a `with` block).
+
+    E70b: once the record has advanced, the receipt is reported to the project (when the transport can report).
+    `reported` is True after the project accepted it, False when the report failed (the confirmation stands; a later
+    confirm of the same version sends the same event id), None when nothing was reported."""
     def __init__(self, exchange, lock, entry, content, facts):
         self._exchange, self._lock, self.entry, self.content, self.facts = exchange, lock, entry, content, facts
         self.confirmed = False
+        self.reported = None
 
     def confirm(self, applied_to=None):
         if self._lock is None: raise NotValid(self._exchange._say('not-valid', {'reasons': 'this version was already confirmed or released'}))
@@ -262,8 +276,18 @@ class Receipt:
             record['items'][entry['asset_id']] = entry
             self._exchange._save(record)
             self.confirmed = True
-            return Outcome('got', self._exchange._say('got', self.facts), self.facts, {'asset_id': entry['asset_id'], 'revision': entry['revision']})
         finally: self.release()
+        self.reported = self._report(record.get('holder_id'), entry)
+        return Outcome('got', self._exchange._say('got', self.facts), self.facts,
+                       {'asset_id': entry['asset_id'], 'revision': entry['revision'], 'reported': self.reported})
+
+    def _report(self, holder_id, entry):
+        report = getattr(self._exchange.transport, 'report', None)
+        if report is None or not holder_id: return None
+        reference = {'project_id': self._exchange.transport.project, 'asset_id': entry['asset_id'], 'revision': str(entry['revision'])}
+        try: report(reference, holder_id, delivery_event(holder_id, entry['asset_id'], entry['revision']))
+        except Exception: return False  # never fails the confirmation: the version is applied and recorded
+        return True
 
     def release(self):
         lock, self._lock = self._lock, None
@@ -651,3 +675,10 @@ class ClientTransport:
 
     def same_content(self, held, request):
         return request['sha256'] == held.get('revision')
+
+    def report(self, reference, holder_id, event_id):
+        """E70b: one delivery observation on the project route (`exchange-consumer/1`); the reference names the
+        project. One attempt, a short timeout: a confirmation never waits long for it."""
+        from .publish import json_bytes
+        body = {'reference': reference, 'binding_id': holder_id, 'event_id': event_id, 'profile': 'exchange-consumer/1', 'mode': 'get'}
+        return self.client._post_bytes('activity', 'report', json_bytes(body), timeout=REPORT_TIMEOUT)

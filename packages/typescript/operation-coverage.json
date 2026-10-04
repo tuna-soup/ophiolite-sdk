@@ -240,6 +240,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/activity/report",
+    "function": "postProjectsProjectActivityReport",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/agents/approve",
     "function": "postProjectsProjectAgentsApprove",
     "request": "schema",

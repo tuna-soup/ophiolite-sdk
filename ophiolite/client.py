@@ -304,7 +304,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
     def _headers(self):
         return self.credential.headers(self.url,self.project) if self.credential else {}
 
-    def _post_bytes(self,area,operation,raw,*,extra_headers=None,headers=None,retry=False,expected_context=None):
+    def _post_bytes(self,area,operation,raw,*,extra_headers=None,headers=None,retry=False,expected_context=None,timeout=None):
         from . import publish as planning,application_transport as policy
         from .errors import RecoveryUnavailable
         url,project=self.url,self.project
@@ -317,7 +317,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
         for attempt in range(attempts):
             if (self.url,self.project)!=(url,project):raise RecoveryUnavailable('The gateway or project changed during this operation.')
             try:
-                with self.http.stream('POST',url+path,content=raw,headers=captured,follow_redirects=False) as response:
+                with self.http.stream('POST',url+path,content=raw,headers=captured,follow_redirects=False,**({'timeout':timeout} if timeout else {})) as response:
                     refusal=None if response.is_success else policy.head_bytes(response)
                     if response.status_code in (429,503) and attempt+1<attempts and policy.retried(response,refusal):
                         time.sleep(policy.delay(response));continue
