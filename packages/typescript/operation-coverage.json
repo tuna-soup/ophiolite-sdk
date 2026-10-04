@@ -1248,6 +1248,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/sources/check",
+    "function": "postProjectsProjectSourcesCheck",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/sources/connections",
     "function": "postProjectsProjectSourcesConnections",
     "request": "schema",
@@ -1316,6 +1322,12 @@
   {
     "operation": "POST /api/v1/projects/{project}/sources/head",
     "function": "postProjectsProjectSourcesHead",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/sources/hold",
+    "function": "postProjectsProjectSourcesHold",
     "request": "schema",
     "response": "schema"
   },

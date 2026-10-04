@@ -37025,6 +37025,322 @@
         }
       }
     },
+    "/api/v1/projects/{project}/sources/check": {
+      "post": {
+        "summary": "check upstream source (read scope)",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "grant",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "sources/check (E72a): your own check of your pinned selections in this project, with your own access. A pin records\nupdate_available and never moves. At most 16 selections are read per call and none is started after 8 seconds;\ncall again while remaining is above zero.",
+                  "properties": {
+                    "checked": {
+                      "description": "Selections read by this call.",
+                      "minimum": 0,
+                      "title": "Checked",
+                      "type": "integer"
+                    },
+                    "skipped": {
+                      "$ref": "#/components/schemas/SourceCheckSkipped"
+                    },
+                    "remaining": {
+                      "description": "Due selections this call did not reach; the next call reads them first.",
+                      "minimum": 0,
+                      "title": "Remaining",
+                      "type": "integer"
+                    },
+                    "selections": {
+                      "description": "Your selections in this project after the check, as sources/list answers them.",
+                      "items": {
+                        "$ref": "#/components/schemas/SourceSelection"
+                      },
+                      "title": "Selections",
+                      "type": "array"
+                    },
+                    "checked_at": {
+                      "description": "When the check finished (seconds since the epoch).",
+                      "title": "Checked At",
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "checked",
+                    "skipped",
+                    "remaining",
+                    "selections",
+                    "checked_at"
+                  ],
+                  "title": "SourceCheck",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "connection_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Connection Id"
+                  },
+                  "key": {
+                    "anyOf": [
+                      {
+                        "maxLength": 512,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Key"
+                  },
+                  "profile": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Profile"
+                  },
+                  "kind": {
+                    "anyOf": [
+                      {
+                        "maxLength": 256,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Kind"
+                  },
+                  "offset": {
+                    "default": 0,
+                    "maximum": 100000,
+                    "minimum": 0,
+                    "title": "Offset",
+                    "type": "integer"
+                  },
+                  "limit": {
+                    "default": 100,
+                    "maximum": 1000,
+                    "minimum": 1,
+                    "title": "Limit",
+                    "type": "integer"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "mode": {
+                    "default": "follow",
+                    "enum": [
+                      "follow",
+                      "pin"
+                    ],
+                    "title": "Mode",
+                    "type": "string"
+                  },
+                  "revision": {
+                    "anyOf": [
+                      {
+                        "maxLength": 128,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Revision"
+                  },
+                  "preview_digest": {
+                    "anyOf": [
+                      {
+                        "pattern": "^[a-f0-9]{64}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Preview Digest"
+                  },
+                  "acknowledge_unknowns": {
+                    "default": false,
+                    "title": "Acknowledge Unknowns",
+                    "type": "boolean"
+                  },
+                  "mapping": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Mapping"
+                  },
+                  "context": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Context"
+                  },
+                  "context_policy_revision": {
+                    "anyOf": [
+                      {
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Context Policy Revision"
+                  },
+                  "expected_generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Expected Generation",
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "Request",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/sources/connections": {
       "post": {
         "summary": "connections upstream source (read scope)",
@@ -40685,6 +41001,487 @@
                     "representation"
                   ],
                   "title": "SourceHead",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "connection_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Connection Id"
+                  },
+                  "key": {
+                    "anyOf": [
+                      {
+                        "maxLength": 512,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Key"
+                  },
+                  "profile": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Profile"
+                  },
+                  "kind": {
+                    "anyOf": [
+                      {
+                        "maxLength": 256,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Kind"
+                  },
+                  "offset": {
+                    "default": 0,
+                    "maximum": 100000,
+                    "minimum": 0,
+                    "title": "Offset",
+                    "type": "integer"
+                  },
+                  "limit": {
+                    "default": 100,
+                    "maximum": 1000,
+                    "minimum": 1,
+                    "title": "Limit",
+                    "type": "integer"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "mode": {
+                    "default": "follow",
+                    "enum": [
+                      "follow",
+                      "pin"
+                    ],
+                    "title": "Mode",
+                    "type": "string"
+                  },
+                  "revision": {
+                    "anyOf": [
+                      {
+                        "maxLength": 128,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Revision"
+                  },
+                  "preview_digest": {
+                    "anyOf": [
+                      {
+                        "pattern": "^[a-f0-9]{64}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Preview Digest"
+                  },
+                  "acknowledge_unknowns": {
+                    "default": false,
+                    "title": "Acknowledge Unknowns",
+                    "type": "boolean"
+                  },
+                  "mapping": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Mapping"
+                  },
+                  "context": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Context"
+                  },
+                  "context_policy_revision": {
+                    "anyOf": [
+                      {
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Context Policy Revision"
+                  },
+                  "expected_generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Expected Generation",
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "Request",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/sources/hold": {
+      "post": {
+        "summary": "hold upstream source (write scope)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "One source selection as stored: what it names, its exact reference and state, and how it is kept current.",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "project_id": {
+                      "title": "Project Id",
+                      "type": "string"
+                    },
+                    "owner": {
+                      "title": "Owner",
+                      "type": "string"
+                    },
+                    "connection_id": {
+                      "title": "Connection Id",
+                      "type": "string"
+                    },
+                    "key": {
+                      "title": "Key",
+                      "type": "string"
+                    },
+                    "profile": {
+                      "title": "Profile",
+                      "type": "string"
+                    },
+                    "authority": {
+                      "title": "Authority",
+                      "type": "string"
+                    },
+                    "connection_fingerprint": {
+                      "title": "Connection Fingerprint",
+                      "type": "string"
+                    },
+                    "asset_identity": {
+                      "title": "Asset Identity",
+                      "type": "string"
+                    },
+                    "mode": {
+                      "title": "Mode",
+                      "type": "string"
+                    },
+                    "reference": {
+                      "$ref": "#/components/schemas/SourceReference"
+                    },
+                    "manifest": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/SourceManifest"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "The exact snapshot manifest of the reference (refresh answers it; a listing omits it)."
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "meaning_digest": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Meaning Digest"
+                    },
+                    "interpretation": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Interpretation"
+                    },
+                    "state": {
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "last_checked": {
+                      "title": "Last Checked",
+                      "type": "number"
+                    },
+                    "failures": {
+                      "title": "Failures",
+                      "type": "integer"
+                    },
+                    "next_check": {
+                      "title": "Next Check",
+                      "type": "number"
+                    },
+                    "generation": {
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "publication_policy": {
+                      "title": "Publication Policy",
+                      "type": "string"
+                    },
+                    "message": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Message"
+                    },
+                    "update_available": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Update Available"
+                    },
+                    "pinned_available": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Pinned Available"
+                    },
+                    "previous": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Previous"
+                    },
+                    "access_health": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Access Health"
+                    },
+                    "display": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Display"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "project_id",
+                    "owner",
+                    "connection_id",
+                    "key",
+                    "profile",
+                    "authority",
+                    "connection_fingerprint",
+                    "asset_identity",
+                    "mode",
+                    "reference",
+                    "name",
+                    "interpretation",
+                    "state",
+                    "last_checked",
+                    "failures",
+                    "next_check",
+                    "generation",
+                    "publication_policy"
+                  ],
+                  "title": "SourceSelection",
                   "type": "object"
                 }
               }
@@ -49391,11 +50188,28 @@
                     "items": {
                       "description": "Streams in this project with your subscription (or an unavailable placeholder).",
                       "items": {
-                        "additionalProperties": true,
-                        "type": "object"
+                        "anyOf": [
+                          {
+                            "$ref": "#/components/schemas/SubscriptionStream"
+                          },
+                          {
+                            "$ref": "#/components/schemas/UnavailableStream"
+                          }
+                        ]
                       },
                       "title": "Items",
                       "type": "array"
+                    },
+                    "display": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/Display"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
                     }
                   },
                   "required": [
@@ -68952,6 +69766,37 @@
         "title": "SignalDisplay",
         "type": "object"
       },
+      "SourceCheckSkipped": {
+        "additionalProperties": false,
+        "description": "Selections a check did not read, by reason.",
+        "properties": {
+          "following": {
+            "description": "Followed selections: a check only observes pins; the worker and reads keep followed ones current.",
+            "minimum": 0,
+            "title": "Following",
+            "type": "integer"
+          },
+          "backoff": {
+            "description": "Selections waiting after failed reads (their next check is later).",
+            "minimum": 0,
+            "title": "Backoff",
+            "type": "integer"
+          },
+          "recent": {
+            "description": "Selections checked in the last few seconds, or being checked by another request now.",
+            "minimum": 0,
+            "title": "Recent",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "following",
+          "backoff",
+          "recent"
+        ],
+        "title": "SourceCheckSkipped",
+        "type": "object"
+      },
       "SourceColumn": {
         "additionalProperties": false,
         "description": "E50a: one column of a source's table view.",
@@ -69618,6 +70463,152 @@
         "title": "StoredPoint",
         "type": "object"
       },
+      "StreamHead": {
+        "additionalProperties": false,
+        "description": "E72a: who offered the stream's newest version and when.",
+        "properties": {
+          "offered_by": {
+            "description": "The person who offered it: the stream owner (display.member_names has their name when one is known).",
+            "title": "Offered By",
+            "type": "string"
+          },
+          "offered_at": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When it was offered (seconds since the epoch); null for a version offered before E72a.",
+            "title": "Offered At"
+          }
+        },
+        "required": [
+          "offered_by",
+          "offered_at"
+        ],
+        "title": "StreamHead",
+        "type": "object"
+      },
+      "SubscriptionStream": {
+        "additionalProperties": false,
+        "description": "A stream whose newest version you may read.",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "project_id": {
+            "title": "Project Id",
+            "type": "string"
+          },
+          "owner": {
+            "title": "Owner",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "dataset",
+              "collection"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "generation": {
+            "description": "The newest offered version.",
+            "title": "Generation",
+            "type": "integer"
+          },
+          "signature": {
+            "title": "Signature",
+            "type": "string"
+          },
+          "head_state": {
+            "title": "Head State",
+            "type": "string"
+          },
+          "head": {
+            "$ref": "#/components/schemas/StreamHead"
+          },
+          "subscription": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SubscriptionSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "owner",
+          "name",
+          "kind",
+          "generation",
+          "signature",
+          "head_state",
+          "head",
+          "subscription"
+        ],
+        "title": "SubscriptionStream",
+        "type": "object"
+      },
+      "SubscriptionSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "generation": {
+            "title": "Generation",
+            "type": "integer"
+          },
+          "mode": {
+            "enum": [
+              "review",
+              "follow",
+              "pin"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "approved_only": {
+            "title": "Approved Only",
+            "type": "boolean"
+          },
+          "applied": {
+            "title": "Applied",
+            "type": "integer"
+          },
+          "dirty": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Saved working edits exist (absent on an unavailable stream).",
+            "title": "Dirty"
+          }
+        },
+        "required": [
+          "generation",
+          "mode",
+          "approved_only",
+          "applied"
+        ],
+        "title": "SubscriptionSummary",
+        "type": "object"
+      },
       "TableSchema": {
         "additionalProperties": false,
         "description": "A SQL table: its inspected columns and sample, the suggested mapping, and the saved mappings.",
@@ -69850,6 +70841,37 @@
           "warnings"
         ],
         "title": "TypedInspection",
+        "type": "object"
+      },
+      "UnavailableStream": {
+        "additionalProperties": false,
+        "description": "A stream you subscribe to whose newest version you can no longer read: no name, owner or head.",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "const": "Unavailable stream",
+            "title": "Name",
+            "type": "string"
+          },
+          "unavailable": {
+            "const": true,
+            "title": "Unavailable",
+            "type": "boolean"
+          },
+          "subscription": {
+            "$ref": "#/components/schemas/SubscriptionSummary"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "unavailable",
+          "subscription"
+        ],
+        "title": "UnavailableStream",
         "type": "object"
       },
       "UploadPolicy": {
