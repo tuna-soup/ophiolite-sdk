@@ -369,8 +369,8 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
     def publish(self,run,*,derived_curves=None,changes=None,new_version_of=None):
         """Publish reviewed values. Without a WorkFolder this is not recoverable after restart.
 
-        ``new_version_of`` (a receipt or exact result you author) adds the values as the
-        next version of that result; its revision is the expected parent."""
+        ``new_version_of`` (a receipt or exact result you author, or one your project lets you add versions
+        to, E70c) adds the values as the next version of that result; its revision is the expected parent."""
         from . import publish as planning
         if run._original is None or run._view is None:raise Refused('Read the exact run input before validating and publishing values.')
         body=planning.publication_body(run,run._original,run._view,derived_curves=derived_curves,changes=changes,new_version_of=new_version_of)
@@ -570,7 +570,8 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
         safe (the same receipt comes back); a fresh id on retry can create a second asset. Use
         WorkFolder.publish_derived for automatic recovery (it saves a stable command id and the file's digest
         before sending). `from_` names 1-32 parents (objects with asset_id and revision, or (asset_id, revision));
-        `new_version_of`/`expected_parent` add a version to your own earlier publication of the same lineage."""
+        `new_version_of`/`expected_parent` add a version to an earlier publication of the same lineage: your own, or
+        (E70c) a colleague's when the project names you both; its author stays the author."""
         from . import publish as planning
         from .models.api import PublicationReceipt
         body,extra=planning.derive_request(self.project,written,name=name,from_=from_,method=method,command_id=command_id,of_entity=of_entity,

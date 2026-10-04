@@ -120,3 +120,27 @@ def test_the_fixture_serves_what_a_fresh_calculation_publishes():
                                         method=pp.shale_volume_method(method='clavier', picks=picks), command_id='fresh')
         back = alice.read(receipt.asset_id, receipt.revision, ['VSH'])
         assert back.curves[0].values == values and back.descriptors[0].model_dump(by_alias=True)['scientific']['quantity'] == 'Shale Volume Fraction'
+
+
+def test_a_named_colleague_adds_a_version_and_the_author_stays_the_author(published):
+    """E70c: the fixture applies the project's list as the server does (a mutual group; refusal words that stay true)."""
+    server, alice, parent, publish, r1, r2 = published
+    one, two = files()
+    third = one.replace(b'SYNTHETIC-M1', b'SYNTHETIC-M3')
+    server.template_applications.audiences[r1.asset_id] = (['bob'], ['bob'])  # alice shared the result with bob
+    from ophiolite.writers import WrittenOriginal
+    def bob_sends(command):
+        with Client(server.url, 'p', Credential.bearer('oph_api_bob')) as bob:
+            return bob.publish_derived(WrittenOriginal(third, 'las2/1', {}, 'derived.las'), name='Mine', from_=[parent], method={'name': 'mine'},
+                                       command_id=command, new_version_of=r1.asset_id, expected_parent=r2.revision)
+    server.template_applications.version_contributors = {'bob'}  # bob alone: alice keeps her result to herself
+    with pytest.raises(OphioliteError) as refused:
+        bob_sends('b1')
+    assert refused.value.status == 403 and refused.value.server_message.startswith("Only the author, or a member the project lets add versions to each other's results, can")
+    server.template_applications.version_contributors = {'alice', 'bob'}
+    receipt = bob_sends('b2')
+    assert (receipt.asset_id, receipt.revision_number) == (r1.asset_id, 3)
+    assert [row.by for row in alice.history(r1).revisions] == ['alice', 'alice', 'bob']
+    status, info = server.handler('POST', '/api/v1/projects/p/publications/info', json.dumps({'project_id': 'p', 'asset_id': r1.asset_id}).encode(),
+                                  {'Authorization': 'Bearer oph_api_bob'})
+    assert status == 200 and info['owner'] == 'alice' and info['can_share'] is False and info['can_add_version'] is True

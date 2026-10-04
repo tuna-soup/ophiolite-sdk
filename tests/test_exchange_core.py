@@ -136,6 +136,22 @@ def test_send_new_and_version_sentences(project, tmp_path):
     assert e.held()['poro']['revision'] == sha(V2) and e.held()['poro']['number'] == 2
 
 
+def test_a_named_colleague_sends_a_version_of_your_item_and_others_keep_the_refusal(project, tmp_path):
+    """E70c: bob holds alice's item; once the project names both, his send is its next version; carol's is refused."""
+    project.person = 'bob'
+    e = ex(project, tmp_path / 'w'); e.get('poro', output=tmp_path / 'o')
+    caught = refused('access-refused', lambda: e.send(V2, name='Porosity', profile='table/1', how='recomputed', based_on=['poro'], of='poro'))
+    assert caught.technical['server_message'].startswith('Only the author can add')  # nobody named: today's refusal
+    project.contributors = {'alice', 'bob'}
+    version = e.send(V2, name='Porosity', profile='table/1', how='recomputed', based_on=['poro'], of='poro')
+    assert (version.outcome, version.sentence) == ('sent-version', 'Sent Porosity as version 2. Version 1 is kept.')
+    assert project.items['poro']['owner'] == 'alice' and project.items['poro']['versions'][-1]['by'] == 'Bob'
+    project.person = 'carol'
+    other = ex(project, tmp_path / 'c'); other.get('poro', output=tmp_path / 'oc')
+    caught = refused('access-refused', lambda: other.send(V3, name='Porosity', profile='table/1', how='mine', based_on=['poro'], of='poro'))
+    assert "or ask the item's author" in caught.sentence and 'each other' in caught.technical['server_message']
+
+
 # -- the parent is the held version, never the head ---------------------------------------------------
 
 def test_send_submits_the_held_parent_and_a_newer_version_is_named(project, tmp_path):

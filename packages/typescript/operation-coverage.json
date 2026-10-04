@@ -972,6 +972,18 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/publications/version-contributors",
+    "function": "postProjectsProjectPublicationsVersionContributors",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/publications/version-contributors-save",
+    "function": "postProjectsProjectPublicationsVersionContributorsSave",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/read/Catalog",
     "function": "postProjectsProjectReadCatalog",
     "request": "schema",

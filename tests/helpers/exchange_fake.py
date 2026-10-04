@@ -1,5 +1,6 @@
 """E70a: an in-memory project for the exchange core's tests (standard library and ophiolite.errors only, so a
-separate process can import it). Items have versions; only the author may add one; the stale parent and the
+separate process can import it). Items have versions; only the author may add one, or (E70c) a person the project names
+together with the author (`contributors`); the stale parent and the
 duplicate content are both a 409 revision-conflict without author or time, as the gateway answers."""
 import hashlib
 import time
@@ -17,6 +18,7 @@ class Fake:
         self.person, self.key = person, key
         self.items, self.hidden, self.commands, self.calls = {}, set(), {}, []
         self.fail, self.slow, self.drop_after_commit, self.history_fails = {}, 0, False, False
+        self.contributors = set()  # E70c: the project's list; empty means only the author
 
     def add(self, ident, data, *, name, by='Alice Example', at=1000.0, kind='derived', owner='alice'):
         item = self.items.setdefault(ident, {'name': name, 'kind': kind, 'owner': owner, 'versions': []})
@@ -58,12 +60,15 @@ class Fake:
         of = request.get('of')
         if of is not None:
             item = self.items[of]
-            if item['owner'] != self.person: raise PermissionRefused('Only the author can add a version to this result, of the same type', status=403)
+            named = self.contributors
+            if item['owner'] != self.person and not (self.person in named and item['owner'] in named):
+                raise PermissionRefused(("Only the author, or a member the project lets add versions to each other's results, can" if named else 'Only the author can')
+                                        + ' add a version to this result, of the same type', status=403)
             if any(v['revision'] == sha(data) for v in item['versions']):
                 raise IntegrityConflict('This content is already a version of the result', status=409, code='revision-conflict')
             if item['versions'][-1]['revision'] != resolved['expected_parent']:
                 raise IntegrityConflict('The result has a newer version; review it before adding another', status=409, code='revision-conflict')
-            self.add(of, data, name=item['name'], by=self.person.title(), at=2000.0, owner=self.person)
+            self.add(of, data, name=item['name'], by=self.person.title(), at=2000.0, owner=item['owner'])  # the author stays the author
             receipt = {'asset_id': of, 'revision': sha(data), 'number': len(item['versions'])}
         else:
             ident = 'new-%d' % (len(self.items) + 1)

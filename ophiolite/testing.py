@@ -83,6 +83,8 @@ class _MemoryApplications:
         self.conditional=True;self.generations={};self.share_commands={}
         # E78: who of the project sees a publication; project_capable=False simulates a server that predates it.
         self.project_capable=True;self.project_audiences={}
+        # E70c: the members the project names to add versions to each other's results (empty: only the author, as before).
+        self.version_contributors=set()
     def __call__(self,method,path,raw,headers):
         with self._journal_lock:return self._call(method,path,raw,headers)
     def _call(self,method,path,raw,headers):
@@ -195,9 +197,12 @@ class _MemoryApplications:
             method={'script_sha256':None,**body['method']}
             head=None
             if body.get('new_version_of') is not None:  # E52: the server's append rules, in its order and words
-                head=self.publications.get(body['new_version_of'])
-                if head is None or head['owner']!=owner or head['receipt']['profile']!=body['profile']:
-                    return 403,_envelope('Only the author can add a version to this result, of the same type','PERMISSION_DENIED')
+                head=self.publications.get(body['new_version_of']);named=self.version_contributors
+                permitted=head is not None and (head['owner']==owner or owner in named and head['owner'] in named)  # E70c: a mutual group
+                if not permitted or head['receipt']['profile']!=body['profile']:
+                    return 403,_envelope(("Only the author, or a member the project lets add versions to each other's results, can" if named else 'Only the author can')
+                                         +' add a version to this result, of the same type','PERMISSION_DENIED')
+                if head['owner']!=owner and not self.readable(body['new_version_of'],owner):return 403,_envelope('Result unavailable','PERMISSION_DENIED')
                 if {p['key'] for p in parents}!={p['key'] for p in head['versions'][0]['parents']}:
                     return 403,_envelope('A new version must derive from the same lineage as the existing result','PERMISSION_DENIED')
                 if body['output_sha256'] in [v['revision'] for v in head['versions']]:
@@ -216,7 +221,10 @@ class _MemoryApplications:
             else:self.publications[ident]={'receipt':answer,'name':body['name'],'owner':owner,'bytes':raw,'versions':[version]}
             self.mutations['derive']=self.mutations.get('derive',0)+1
             return 200,copy.deepcopy(answer)
-        body=json.loads(raw);ident=body.get('asset_id');item=getattr(self,'publications',{}).get(ident)
+        body=json.loads(raw)
+        if operation=='version-contributors':  # E70c: read by any member; the fixture's administrator is alice
+            return 200,{'generation':0,'members':sorted(self.version_contributors),'can_change':owner=='alice',**({'eligible':['alice','bob']} if owner=='alice' else {})}
+        ident=body.get('asset_id');item=getattr(self,'publications',{}).get(ident)
         if item is None:return 404,{'error':'Publication unavailable','code':'not-found'}
         if operation=='share':
             if body.get('expected_generation') is None:return 428,{'error':'Reload who can see this and share again with the version you saw','code':'condition-required'}
@@ -235,7 +243,8 @@ class _MemoryApplications:
         read,reuse=self.audiences.get(ident,([],[]))
         read,reuse=sorted(set(read)|{item['owner']}),sorted(set(reuse)|{item['owner']})  # the author always keeps both, as the server answers
         answer={'asset_id':ident,'revision':item['receipt']['revision'],'name':item['name'],'owner':item['owner'],'can_share':item['owner']==owner,
-                'permitted_audience':['alice','bob'],'recipients':read,'reuse_recipients':reuse,'grants_generation':self.generations.get(ident,1)}
+                'permitted_audience':['alice','bob'],'recipients':read,'reuse_recipients':reuse,'grants_generation':self.generations.get(ident,1),
+                'can_add_version':item['owner']==owner or owner in self.version_contributors and item['owner'] in self.version_contributors}
         if self.project_capable:answer['project_audience']=self.project_audiences.get(ident,'none') if item['owner']==owner else None
         if operation=='share':answer['sharing_contract']='conditional'
         return 200,answer

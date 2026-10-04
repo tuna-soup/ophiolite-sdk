@@ -8301,6 +8301,19 @@
                       "title": "Can Share",
                       "type": "boolean"
                     },
+                    "can_add_version": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E70c (result-preview): a new version from this reader would be accepted now",
+                      "title": "Can Add Version"
+                    },
                     "recipients": {
                       "items": {
                         "type": "string"
@@ -8893,6 +8906,19 @@
                     "can_share": {
                       "title": "Can Share",
                       "type": "boolean"
+                    },
+                    "can_add_version": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E70c (result-preview): a new version from this reader would be accepted now",
+                      "title": "Can Add Version"
                     },
                     "recipients": {
                       "items": {
@@ -27138,6 +27164,12 @@
                       "title": "Can Share",
                       "type": "boolean"
                     },
+                    "can_add_version": {
+                      "default": false,
+                      "description": "E70c: a new version from this reader would be accepted now (the author, or a colleague the project names together with the author)",
+                      "title": "Can Add Version",
+                      "type": "boolean"
+                    },
                     "permitted_audience": {
                       "items": {
                         "type": "string"
@@ -27371,6 +27403,12 @@
                     },
                     "can_share": {
                       "title": "Can Share",
+                      "type": "boolean"
+                    },
+                    "can_add_version": {
+                      "default": false,
+                      "description": "E70c: a new version from this reader would be accepted now (the author, or a colleague the project names together with the author)",
+                      "title": "Can Add Version",
                       "type": "boolean"
                     },
                     "permitted_audience": {
@@ -27609,6 +27647,347 @@
                   "asset_id"
                 ],
                 "title": "PublicationShare",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/publications/version-contributors": {
+      "post": {
+        "summary": "E70c: the members this project lets add versions to each other's derived results",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "grant",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "publications/version-contributors: the members a project lets add versions to each other's derived results (E70c).",
+                  "properties": {
+                    "generation": {
+                      "description": "Compare-and-set generation; 0 before the first save",
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "members": {
+                      "description": "Account IDs named together; a member adds versions to the results of the others named (the author stays the author)",
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Members",
+                      "type": "array"
+                    },
+                    "can_change": {
+                      "description": "True for a project administrator",
+                      "title": "Can Change",
+                      "type": "boolean"
+                    },
+                    "eligible": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "Administrators only: the current members who may edit, the only ones that can be named",
+                      "title": "Eligible"
+                    },
+                    "display": {
+                      "additionalProperties": {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "description": "member_names: display names of the named and eligible members",
+                      "title": "Display",
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "generation",
+                    "members",
+                    "can_change"
+                  ],
+                  "title": "VersionContributors",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "ProjectOnly",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/publications/version-contributors-save": {
+      "post": {
+        "summary": "E70c: name the members who may add versions to each other's derived results (administrators; expected_generation)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "publications/version-contributors: the members a project lets add versions to each other's derived results (E70c).",
+                  "properties": {
+                    "generation": {
+                      "description": "Compare-and-set generation; 0 before the first save",
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "members": {
+                      "description": "Account IDs named together; a member adds versions to the results of the others named (the author stays the author)",
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Members",
+                      "type": "array"
+                    },
+                    "can_change": {
+                      "description": "True for a project administrator",
+                      "title": "Can Change",
+                      "type": "boolean"
+                    },
+                    "eligible": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "Administrators only: the current members who may edit, the only ones that can be named",
+                      "title": "Eligible"
+                    },
+                    "display": {
+                      "additionalProperties": {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "description": "member_names: display names of the named and eligible members",
+                      "title": "Display",
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "generation",
+                    "members",
+                    "can_change"
+                  ],
+                  "title": "VersionContributors",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "publications/version-contributors-save (administrators): the whole list, at the generation the caller saw.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "members": {
+                    "description": "Current project members who may edit, each once; an empty list restores \"only the author\"",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 100,
+                    "title": "Members",
+                    "type": "array"
+                  },
+                  "expected_generation": {
+                    "minimum": 0,
+                    "title": "Expected Generation",
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "members",
+                  "expected_generation"
+                ],
+                "title": "VersionContributorsSave",
                 "type": "object"
               }
             }
