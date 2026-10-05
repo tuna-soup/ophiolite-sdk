@@ -365,6 +365,22 @@ class SourceExportAnswer(Contract):
     payload_base64: str
 
 
+# E50c: the release routes Wells.with_source reads (releases/list, download-snapshot, download); other fields are kept.
+class ReleaseListItem(Contract):
+    id: str
+    state: str
+    manifest_digest: str
+    assets: int = Field(ge=0)
+
+
+class ReleasesListAnswer(Contract):
+    items: list[ReleaseListItem]
+
+
+class ReleasesDownloadAnswer(Contract):
+    filename: str
+    payload_base64: str
+
 # E42a: well imports (well-imports/*), the fields the SDK and the command line read; other fields are kept.
 WellImportState = Literal['importing', 'resumable', 'needs-review', 'complete', 'complete-with-skipped', 'cancelled']
 Number = float | int

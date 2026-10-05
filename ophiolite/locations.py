@@ -30,9 +30,10 @@ class Well:
 
 class Wells(list):
     """The wells of one fetch, with the CRS they were fetched in (None: as stored) and how many could not be converted."""
-    def __init__(self, wells, crs, untransformed):
+    def __init__(self, wells, crs, untransformed, client=None):
         super().__init__(wells)
         self.crs, self.untransformed = crs, untransformed
+        self._client = client  # E50c: with_source reads the kept copies with the client that fetched these wells
 
     def to_frame(self):
         """One row per well: its name and location (x, y and crs as fetched; missing when it has none)."""
@@ -48,6 +49,15 @@ class Wells(list):
         frame = pd.DataFrame(rows, columns=['name', 'entity_id', 'x', 'y', 'crs', 'source_asset_id', 'source_revision', 'source_row', 'ambiguous'])
         frame[['x', 'y']] = frame[['x', 'y']].astype('Float64')
         return frame
+
+    def with_source(self, columns=None):
+        """E50c: to_frame() plus, per well, the original columns of the source row it was located from, read from the
+        copy its import kept under that copy's own permission check. Every well stays, marked in source_state:
+        'joined', 'no origin' (no source row you may read locates it) or 'not readable' (source_reason says why).
+        `columns`: the original column names (None: all), as `source.<name>`. See ophiolite.well_sources."""
+        if self._client is None: raise Refused('Fetch these wells with client.wells() to read their source rows.')
+        from .well_sources import with_source
+        return with_source(self, self._client, columns)
 
     def to_geojson(self):
         """A GeoJSON FeatureCollection (well names in properties). GeoJSON is longitude, latitude in CRS84, so this
@@ -80,10 +90,10 @@ class LocationClient:
                 if location is not None and crs is not None and location['crs'] != crs:
                     raise VerificationFailed('A location came back in %s, not the %s asked for.' % (location['crs'], crs))
                 found.append(Well(document))
-                if limit is not None and len(found) >= limit: return Wells(found, crs, untransformed + page.get('untransformed', 0))
+                if limit is not None and len(found) >= limit: return Wells(found, crs, untransformed + page.get('untransformed', 0), self)
             untransformed += page.get('untransformed', 0)
             cursor = page.get('next_cursor')
-            if not cursor: return Wells(found, crs, untransformed)
+            if not cursor: return Wells(found, crs, untransformed, self)
             if cursor in seen: raise VerificationFailed('Repeated well cursor.')
             seen.add(cursor)
 

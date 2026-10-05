@@ -88,20 +88,27 @@ class Source:
         return SourceDescription(self.read(expect_revision))
 
 
+def verified_table(data):
+    """(source_schema, source_rows, wells, mapping) of a decoded sql-wells/1 document, after the table checks: the
+    documented schema, one mapped row per source row with the same identities, unique identities. E50c reads kept
+    copies of the same document through the same checks."""
+    if not isinstance(data, dict) or data.get('schema') != 'ophiolite.sql-wells/1':
+        raise VerificationFailed('The source payload is not the documented table.')
+    try:
+        schema, original, rows, mapping = data['source_schema'], data['source_rows'], data['wells'], data['mapping']
+        ident = mapping['fields']['id']
+        consistent = len(rows) == len(original) and all(r['well_id'] == str(o[ident]) for r, o in zip(rows, original))
+    except (KeyError, TypeError): consistent = False
+    if not consistent or len({r['well_id'] for r in rows}) != len(rows):
+        raise VerificationFailed('The source rows are inconsistent with their mapping; nothing was read.')
+    return schema, original, rows, mapping
+
 class SourceSnapshot:
     """One verified read of a source table. Never a Well: `rows` are the mapped rows (well_id, name, operator, x, y,
     depth, metadata) and `original` the source rows with every original column, as the server returned them."""
 
     def __init__(self, source, manifest, data, digest):
-        if not isinstance(data, dict) or data.get('schema') != 'ophiolite.sql-wells/1':
-            raise VerificationFailed('The source payload is not the documented table.')
-        try:
-            schema, original, rows, mapping = data['source_schema'], data['source_rows'], data['wells'], data['mapping']
-            ident = mapping['fields']['id']
-            consistent = len(rows) == len(original) and all(r['well_id'] == str(o[ident]) for r, o in zip(rows, original))
-        except (KeyError, TypeError): consistent = False
-        if not consistent or len({r['well_id'] for r in rows}) != len(rows):
-            raise VerificationFailed('The source rows are inconsistent with their mapping; nothing was read.')
+        schema, original, rows, mapping = verified_table(data)
         self.id, self.name, self.profile = source.id, source.name, manifest['reference']['profile']
         self.authority, self.key = manifest['reference']['authority'], manifest['reference']['key']
         self.revision, self.sha256, self.bytes = manifest['reference']['revision'], digest, manifest['bytes']
