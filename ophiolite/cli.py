@@ -188,6 +188,8 @@ def parser():
     wells.add_argument('action',choices=['list','extent'])
     wells.add_argument('--bbox',help='minx,miny,maxx,maxy in --bbox-crs');wells.add_argument('--bbox-crs');wells.add_argument('--crs',help='Convert locations to this CRS on the server')
     wells.add_argument('--limit',type=int)
+    wells.add_argument('--with-source',action='store_true',help='list: also read the source row each well is located from, from the copy its import kept (E50c)')
+    wells.add_argument('--column',action='append',metavar='NAME',help='with --with-source: an original column to include (repeat; default: all)')
     changes=project(sub.add_parser('changes',help='The project event log: its head, pages after a cursor, or follow it live'))
     changes.add_argument('action',choices=['head','list','follow'])
     changes.add_argument('--epoch');changes.add_argument('--after',type=int);changes.add_argument('--seconds',type=int,default=300,help='follow: stop after this long')
@@ -319,9 +321,20 @@ def _journey(args,client):
             return done(args,('%d wells in %s: %s' % (extent['count'],extent['crs'],extent['bbox'])) if extent['bbox'] else 'No well you may read is located.',{'extent':extent})
         bbox=[float(v) for v in args.bbox.split(',')] if args.bbox else None
         if bbox is not None and len(bbox)!=4:raise Refused('Give --bbox as minx,miny,maxx,maxy.')
+        if args.column and not args.with_source:raise Refused('Give --column with --with-source.')
         wells=client.wells(bbox=bbox,bbox_crs=args.bbox_crs,crs=args.crs,limit=args.limit)
         rows=[{'entity_id':w.entity_id,'name':w.name,'location':w.location} for w in wells]
-        return done(args,'\n'.join(repr(w) for w in wells) or 'No well you may read.',{'wells':rows,'crs':wells.crs,'untransformed':wells.untransformed})
+        if not args.with_source:
+            return done(args,'\n'.join(repr(w) for w in wells) or 'No well you may read.',{'wells':rows,'crs':wells.crs,'untransformed':wells.untransformed})
+        # E50c: one mark per well, in the order listed; `row` holds the original columns asked for (null unless joined)
+        frame=wells.with_source(columns=args.column);import pandas as pd
+        names=[c for c in frame.columns if c.startswith('source.')]
+        for row,(_,joined) in zip(rows,frame.iterrows()):
+            state,reason=joined['source_state'],joined['source_reason']
+            row['source']={'state':state,'reason':None if pd.isna(reason) else str(reason),
+                           'row':{n[len('source.'):]:joined[n] for n in names} if state=='joined' else None}
+        text='\n'.join('%r: %s%s' % (w,r['source']['state'],' ('+r['source']['reason']+')' if r['source']['reason'] else '') for w,r in zip(wells,rows))
+        return done(args,text or 'No well you may read.',{'wells':rows,'crs':wells.crs,'untransformed':wells.untransformed})
     if args.command=='sources':
         return _sources(args,client)
     if args.command=='well-imports':

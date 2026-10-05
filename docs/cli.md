@@ -23,6 +23,7 @@ Every verb accepts `--json`. The result is one JSON object on standard output:
 | `orgs` | `{"organizations": [{id, name}]}` |
 | `entities` | `{"entities": [{entity_id, kind, name}]}` |
 | `wells list` | `{"wells": [{entity_id, name, location}], "crs", "untransformed"}` |
+| `wells list --with-source` | the same, each well with `source: {state, reason, row}`: `state` is `joined`, `no origin` or `not readable`; `row` the original columns asked for with `--column NAME` (repeat; default all), null unless joined |
 | `wells extent` | `{"extent": {crs, bbox, count, untransformed}}` |
 | `changes head` | `{"head": {epoch, cursor}}` |
 | `changes list` | `{"changes": [event]}` |
