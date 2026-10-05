@@ -30,6 +30,9 @@ Every verb accepts `--json`. The result is one JSON object on standard output:
 | `sources list` | `{"selections": [selection]}` (the selections you bound; every profile) |
 | `sources describe ID` | `{"source": {id, name, profile, revision, sha256, bytes, crs, row_count, columns, mapped_columns, mapping, null_counts, unresolved}}` |
 | `sources read ID` | `{"source": {id, name, profile, revision, sha256, crs, original, columns, row_count}, "rows": [row]}`; with `--out`: `{"source": {…}, "out": path}` |
+| `well-imports list` | `{"imports": [import summary]}` |
+| `well-imports status`, `start`, `resume`, `cancel` | `{"import": import}` (the documented `WellImport`: state, words, reason, counts, skipped, superseded, …) |
+| `well-imports start --dry-run` | `{"preview": preview}` (counts, skipped rows, possible duplicates, wells already here) |
 | `publish-derived` | `{"published": receipt}` |
 | `share` | `{"shared", "recipients", "reuse_recipients"}` |
 | `status` | `{"state", "project_id", "scopes"}` |
@@ -80,6 +83,17 @@ and refuses to replace an existing file without `--force`. A refused or failed r
 `SOURCE_NEEDS_REVIEW` and `SOURCE_DETACHED` exit 4, `SOURCE_ACCESS_DENIED` exits 3, `SOURCE_OFFLINE` and `SOURCE_PENDING`
 exit 5 after the retries.
 
+## `well-imports`
+
+`well-imports start --connection ID --table KEY --mapping FILE [--audience PERSON]…` imports a copy of an approved
+database's well table as wells (project administrators; the database must allow copying and declare its identifiers).
+It previews the table, starts the import from that preview, prints `Import ID started. If it stops, continue with:
+ophiolite well-imports resume ID`, and steps it to the end. The result names what was added, already here and skipped,
+lists every skipped row with its reason in words, and every well whose location comes from other evidence. With
+`--dry-run` it prints the preview and keeps nothing. `resume ID` continues an interrupted import from any process, with
+no row run twice; `cancel ID` stops it (the wells already added stay); `status ID` and `list` read. An import that
+pauses (`Ready to resume`, `Needs review`) exits 4 with its reason.
+
 ## Giving a project access key
 
 `login`, `projects` and `orgs` take a key with `--key KEY`, `--key-file FILE` or `--key-stdin` (at most 4 KiB), in that
@@ -105,6 +119,6 @@ report. Exit codes: 5 address or tls, 3 a credential or project stage, 4 feature
 
 ## `--dry-run`
 
-`publish-derived` and `share` accept `--dry-run`: the command prints what it would send (`publications/derive` with its
+`publish-derived` and `share` accept `--dry-run` (`well-imports start --dry-run` is the server's preview, above): the command prints what it would send (`publications/derive` with its
 upload header, size and digest; or the recipients a share would set) and exits 0. It reads no credential, sends
 nothing and writes nothing — no work folder, no credential file.

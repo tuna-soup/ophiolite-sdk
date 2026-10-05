@@ -95,6 +95,11 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
         from .sync import Sync
         return Sync(self,checkpoint=checkpoint)
 
+    def well_imports(self):
+        """E42a: import a copy of an approved well table as wells (ophiolite.well_imports.WellImports)."""
+        from .well_imports import WellImports
+        return WellImports(self)
+
     def exchange(self,work,**options):
         """E70a: check for updates, get latest and send to project from a work folder (ophiolite.exchange.Exchange)."""
         from .exchange import Exchange,ClientTransport

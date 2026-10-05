@@ -198,6 +198,15 @@ def parser():
     sources.add_argument('--expect-revision',help='describe/read: refuse (exit 4, nothing written) unless this is the revision returned')
     sources.add_argument('--out',type=Path,help='read: write the rows to this .csv or .json file instead of standard output. The file is your own copy: it is not shared, kept up to date or checked again')
     sources.add_argument('--force',action='store_true',help='read --out: replace an existing file')
+    imports=project(sub.add_parser('well-imports',help='Import a copy of an approved well table as wells: list, status ID, start (--dry-run to preview), resume ID, cancel ID'))
+    imports.add_argument('action',choices=['list','status','start','resume','cancel'])
+    imports.add_argument('id',nargs='?',help='status/resume/cancel: the import id from `well-imports list`')
+    imports.add_argument('--connection',help='start: the approved database connection')
+    imports.add_argument('--table',help='start: the table on that connection')
+    imports.add_argument('--mapping',type=Path,help='start: a JSON file holding the mapping (fields, crs, schema_digest), as the workspace saves it')
+    imports.add_argument('--audience',action='append',default=[],metavar='PERSON',help='start: a project member who may read the copy and the wells it creates (repeat); you are always included')
+    imports.add_argument('--command-id',help='start: the same id returns the same import instead of starting another')
+    imports.add_argument('--dry-run',action='store_true',help='start: show what the import would do; nothing is kept')
     init=sub.add_parser('init',help='Start an application from a packaged template (map-application, derive-and-publish, sync-worker, notebook, agent-workflow)')
     init.add_argument('template',nargs='?',help='The template name; omit with --list');init.add_argument('--output',type=Path,help='An empty or new folder (default: ./TEMPLATE)')
     init.add_argument('--list',action='store_true',help='List the packaged templates')
@@ -315,6 +324,8 @@ def _journey(args,client):
         return done(args,'\n'.join(repr(w) for w in wells) or 'No well you may read.',{'wells':rows,'crs':wells.crs,'untransformed':wells.untransformed})
     if args.command=='sources':
         return _sources(args,client)
+    if args.command=='well-imports':
+        return _well_imports(args,client)
     sync=client.sync()
     if args.action=='head':
         head=sync.head()
@@ -360,6 +371,70 @@ def _sources(args,client):
     _write_atomic(out,_csv(columns,rows) if out.suffix.lower()=='.csv' else json.dumps({'source':about,'rows':rows},indent=2,default=str)+'\n',args.force)
     return done(args,'Wrote %d rows of %s (revision %s, %s) to %s. This copy is yours; it is not shared or kept up to date.' % (len(rows),snapshot.name,snapshot.revision,snapshot.crs,out),
                 {'source':about,'out':str(out)})
+
+
+def _counted(counts):
+    return '%d added, %d already here, %d skipped' % (counts['created'],counts['already_here'],counts['skipped'])
+
+
+def _rows(title,rows,total,said):
+    if not rows:return []
+    lines=[title]+['  %s: %s' % (r['row_key'] or 'row %d (no identifier)' % r['ordinal'],said(r)) for r in rows]
+    return lines+(['  and %d more' % (total-len(rows))] if total>len(rows) else [])
+
+
+def _reviewed(review):
+    """E42a: a dry run in words: what a start would do; nothing was kept."""
+    from .well_imports import words
+    c=review['counts']
+    lines=['Dry run, nothing was kept. %s (%s): %d rows; %d would be added, %d already here, %d skipped, %d possible duplicates.' % (
+        review['source_name'],review['key'],c['rows'],c['create'],c['already_here'],c['skipped'],c['possible_duplicates'])]
+    return '\n'.join(lines+_rows('Rows that would be skipped:',review['skipped'],c['skipped'],words))
+
+
+def _result(answer):
+    """E42a: an import in words: its state, what it did, every listed skipped row and every well located otherwise."""
+    from .well_imports import FINAL,words
+    lines=['%s: %s.' % (answer['words'],_counted(answer['counts']))]
+    if answer['reason'] and answer['state'] not in FINAL:lines.append(answer['reason'])
+    lines+=_rows('Skipped rows:',answer['skipped'],answer['counts']['skipped'],words)
+    lines+=_rows('Located by other evidence:',answer['superseded'],len(answer['superseded']),lambda r:r['reason'])
+    return '\n'.join(lines)
+
+
+def _well_imports(args,client):
+    """E42a: well-imports list | status ID | start [--dry-run] | resume ID | cancel ID. A start prints its id before the
+    first step, so an interrupted import is resumed from any process; a paused import exits 4 with its reason."""
+    from .errors import IntegrityConflict
+    from .well_imports import PAUSED
+    imports=client.well_imports()
+    if args.action!='start' and (args.connection or args.table or args.mapping or args.audience or args.command_id or args.dry_run):
+        raise Refused('Only start takes --connection, --table, --mapping, --audience, --command-id or --dry-run.')
+    if args.action=='list':
+        if args.id:raise Refused('well-imports list takes no id.')
+        rows=imports.list()
+        return done(args,'\n'.join('%s  %s: %s (%s)' % (r['id'],r['key'],r['words'],_counted(r['counts'])) for r in rows) or 'No well import in this project.',{'imports':rows})
+    if args.action=='start':
+        if args.id:raise Refused('start takes no id; continue an import with: ophiolite well-imports resume ID')
+        if not (args.connection and args.table and args.mapping):raise Refused('Give --connection, --table and --mapping FILE.')
+        try:mapping=json.loads(args.mapping.read_text())
+        except (OSError,ValueError):raise Refused('%s is not a readable JSON mapping.' % args.mapping) from None
+        review=imports.preview(args.connection,args.table,mapping)
+        if args.dry_run:return done(args,_reviewed(review),{'preview':review})
+        started=imports.start(args.connection,args.table,mapping,preview_digest=review['preview_digest'],audience=args.audience,command_id=args.command_id)
+        if not args.json:print('Import %s started. If it stops, continue with: ophiolite well-imports resume %s' % (started['id'],started['id']),flush=True)
+        ident=started['id']
+    else:
+        if not args.id:raise Refused('Give the import id: ophiolite well-imports %s ID (see `ophiolite well-imports list`).' % args.action)
+        ident=args.id
+        if args.action=='status':
+            answer=imports.status(ident);return done(args,_result(answer),{'import':answer})
+        if args.action=='cancel':
+            answer=imports.cancel(ident);return done(args,_result(answer),{'import':answer})
+    answer=imports.run(ident)
+    if answer['state'] in PAUSED:
+        raise IntegrityConflict('%s: %s Continue with: ophiolite well-imports resume %s' % (answer['words'],answer['reason'] or '',ident))
+    return done(args,_result(answer),{'import':answer})
 
 
 def _exchange(args,client):
@@ -485,7 +560,7 @@ def main(argv=None):
     config=configuration(args.configuration)
     path=args.credentials or credentials_path(config)
     if args.command=='run':return _local_run(config,args.work.resolve())
-    if getattr(args,'dry_run',False):return _dry_run(args,config)  # E31: before any credential, network or file write
+    if getattr(args,'dry_run',False) and args.command!='well-imports':return _dry_run(args,config)  # E31: before any credential, network or file write (E42a: an import's dry run is its server preview, which keeps nothing)
     given=supplied_key(args) if args.command=='login' else None
     if given:
         # E25a: saved for later processes; nothing is sent now and the key is never printed.
@@ -520,7 +595,7 @@ def main(argv=None):
             if args.json:return done(args,None,{'assets':items})
             for item in items:print(json.dumps(item))
             return
-        if args.command in ('entities','wells','changes','sources'):return _journey(args,client)
+        if args.command in ('entities','wells','changes','sources','well-imports'):return _journey(args,client)
         if args.command in ('check','get','send'):return _exchange(args,client)
         if args.command=='publish-derived':  # E30b
             from .writers import WrittenOriginal

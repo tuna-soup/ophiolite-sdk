@@ -53488,6 +53488,1895 @@
         }
       }
     },
+    "/api/v1/projects/{project}/well-imports/cancel": {
+      "post": {
+        "summary": "Stop an unfinished import; wells already created stay",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "well-imports/start, step, status, cancel: one import.",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "project_id": {
+                      "title": "Project Id",
+                      "type": "string"
+                    },
+                    "state": {
+                      "enum": [
+                        "importing",
+                        "resumable",
+                        "needs-review",
+                        "complete",
+                        "complete-with-skipped",
+                        "cancelled"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "words": {
+                      "title": "Words",
+                      "type": "string"
+                    },
+                    "reason": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Reason"
+                    },
+                    "initiator": {
+                      "title": "Initiator",
+                      "type": "string"
+                    },
+                    "connection_id": {
+                      "title": "Connection Id",
+                      "type": "string"
+                    },
+                    "key": {
+                      "title": "Key",
+                      "type": "string"
+                    },
+                    "release_id": {
+                      "description": "The release holding the kept rows.",
+                      "title": "Release Id",
+                      "type": "string"
+                    },
+                    "approved_by": {
+                      "title": "Approved By",
+                      "type": "string"
+                    },
+                    "approved_at": {
+                      "title": "Approved At",
+                      "type": "number"
+                    },
+                    "created_at": {
+                      "title": "Created At",
+                      "type": "number"
+                    },
+                    "updated_at": {
+                      "title": "Updated At",
+                      "type": "number"
+                    },
+                    "counts": {
+                      "$ref": "#/components/schemas/WellImportCounts"
+                    },
+                    "identity_authority": {
+                      "title": "Identity Authority",
+                      "type": "string"
+                    },
+                    "audience": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Audience",
+                      "type": "array"
+                    },
+                    "mapping": {
+                      "additionalProperties": true,
+                      "title": "Mapping",
+                      "type": "object"
+                    },
+                    "input_revision": {
+                      "title": "Input Revision",
+                      "type": "string"
+                    },
+                    "preview_digest": {
+                      "title": "Preview Digest",
+                      "type": "string"
+                    },
+                    "totals": {
+                      "$ref": "#/components/schemas/WellImportTotals"
+                    },
+                    "skipped": {
+                      "description": "At most 1,000, by ordinal.",
+                      "items": {
+                        "$ref": "#/components/schemas/WellImportSkipped"
+                      },
+                      "title": "Skipped",
+                      "type": "array"
+                    },
+                    "possible_duplicates": {
+                      "items": {
+                        "$ref": "#/components/schemas/WellImportDuplicate"
+                      },
+                      "title": "Possible Duplicates",
+                      "type": "array"
+                    },
+                    "already_here": {
+                      "items": {
+                        "$ref": "#/components/schemas/WellImportHere"
+                      },
+                      "title": "Already Here",
+                      "type": "array"
+                    },
+                    "superseded": {
+                      "description": "Finished wells located by other evidence than the import; at most 1,000.",
+                      "items": {
+                        "$ref": "#/components/schemas/WellImportSuperseded"
+                      },
+                      "title": "Superseded",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "project_id",
+                    "state",
+                    "words",
+                    "reason",
+                    "initiator",
+                    "connection_id",
+                    "key",
+                    "release_id",
+                    "approved_by",
+                    "approved_at",
+                    "created_at",
+                    "updated_at",
+                    "counts",
+                    "identity_authority",
+                    "audience",
+                    "mapping",
+                    "input_revision",
+                    "preview_digest",
+                    "totals",
+                    "skipped",
+                    "possible_duplicates",
+                    "already_here",
+                    "superseded"
+                  ],
+                  "title": "WellImport",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "well-imports/*: preview and start name the table and its mapping; start adds the reviewed preview digest, the\naudience and a command id; status and cancel name the import.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "step, status, cancel: the import.",
+                    "title": "Id"
+                  },
+                  "connection_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the approved connection.",
+                    "title": "Connection Id"
+                  },
+                  "key": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the table.",
+                    "title": "Key"
+                  },
+                  "mapping": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the mapping (sources/mapping-validate's shape); the import keeps its own copy.",
+                    "title": "Mapping"
+                  },
+                  "audience": {
+                    "description": "start: who may read the copy and the created wells (you are always included).",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Audience",
+                    "type": "array"
+                  },
+                  "preview_digest": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "start: the preview_digest of the review you confirmed.",
+                    "title": "Preview Digest"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "start: the same id returns the same import; another body with it is refused.",
+                    "title": "Command Id"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "WellImportsRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/well-imports/list": {
+      "post": {
+        "summary": "This project's imports, newest first",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "well-imports/list: at most 100, newest first.",
+                  "properties": {
+                    "imports": {
+                      "items": {
+                        "$ref": "#/components/schemas/WellImportSummary"
+                      },
+                      "title": "Imports",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "imports"
+                  ],
+                  "title": "WellImportsListAnswer",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "well-imports/*: preview and start name the table and its mapping; start adds the reviewed preview digest, the\naudience and a command id; status and cancel name the import.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "step, status, cancel: the import.",
+                    "title": "Id"
+                  },
+                  "connection_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the approved connection.",
+                    "title": "Connection Id"
+                  },
+                  "key": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the table.",
+                    "title": "Key"
+                  },
+                  "mapping": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the mapping (sources/mapping-validate's shape); the import keeps its own copy.",
+                    "title": "Mapping"
+                  },
+                  "audience": {
+                    "description": "start: who may read the copy and the created wells (you are always included).",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Audience",
+                    "type": "array"
+                  },
+                  "preview_digest": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "start: the preview_digest of the review you confirmed.",
+                    "title": "Preview Digest"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "start: the same id returns the same import; another body with it is refused.",
+                    "title": "Command Id"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "WellImportsRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/well-imports/preview": {
+      "post": {
+        "summary": "Read a table of wells and say which rows become wells, which are already here and which are skipped, with reasons; nothing is kept",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "well-imports/preview: what start would do; nothing is kept.",
+                  "properties": {
+                    "preview_digest": {
+                      "title": "Preview Digest",
+                      "type": "string"
+                    },
+                    "connection_id": {
+                      "title": "Connection Id",
+                      "type": "string"
+                    },
+                    "key": {
+                      "title": "Key",
+                      "type": "string"
+                    },
+                    "source_name": {
+                      "title": "Source Name",
+                      "type": "string"
+                    },
+                    "counts": {
+                      "$ref": "#/components/schemas/WellImportPreviewCounts"
+                    },
+                    "skipped": {
+                      "description": "At most 1,000, by ordinal.",
+                      "items": {
+                        "$ref": "#/components/schemas/WellImportPreviewSkipped"
+                      },
+                      "title": "Skipped",
+                      "type": "array"
+                    },
+                    "possible_duplicates": {
+                      "description": "At most 1,000.",
+                      "items": {
+                        "$ref": "#/components/schemas/WellImportDuplicate"
+                      },
+                      "title": "Possible Duplicates",
+                      "type": "array"
+                    },
+                    "already_here": {
+                      "description": "At most 1,000.",
+                      "items": {
+                        "$ref": "#/components/schemas/WellImportHere"
+                      },
+                      "title": "Already Here",
+                      "type": "array"
+                    },
+                    "identifiers": {
+                      "$ref": "#/components/schemas/WellImportIdentifiers"
+                    },
+                    "warnings": {
+                      "items": {
+                        "$ref": "#/components/schemas/ImportWarning"
+                      },
+                      "title": "Warnings",
+                      "type": "array"
+                    },
+                    "audience": {
+                      "$ref": "#/components/schemas/WellImportAudience"
+                    },
+                    "input_revision": {
+                      "description": "The digest of the rows a start keeps.",
+                      "title": "Input Revision",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "preview_digest",
+                    "connection_id",
+                    "key",
+                    "source_name",
+                    "counts",
+                    "skipped",
+                    "possible_duplicates",
+                    "already_here",
+                    "identifiers",
+                    "warnings",
+                    "audience",
+                    "input_revision"
+                  ],
+                  "title": "WellImportsPreviewAnswer",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "well-imports/*: preview and start name the table and its mapping; start adds the reviewed preview digest, the\naudience and a command id; status and cancel name the import.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "step, status, cancel: the import.",
+                    "title": "Id"
+                  },
+                  "connection_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the approved connection.",
+                    "title": "Connection Id"
+                  },
+                  "key": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the table.",
+                    "title": "Key"
+                  },
+                  "mapping": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the mapping (sources/mapping-validate's shape); the import keeps its own copy.",
+                    "title": "Mapping"
+                  },
+                  "audience": {
+                    "description": "start: who may read the copy and the created wells (you are always included).",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Audience",
+                    "type": "array"
+                  },
+                  "preview_digest": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "start: the preview_digest of the review you confirmed.",
+                    "title": "Preview Digest"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "start: the same id returns the same import; another body with it is refused.",
+                    "title": "Command Id"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "WellImportsRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/well-imports/start": {
+      "post": {
+        "summary": "Start the reviewed import: keep the accepted rows as a copy and plan every row, in one step (preview_digest, command_id)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "well-imports/start, step, status, cancel: one import.",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "project_id": {
+                      "title": "Project Id",
+                      "type": "string"
+                    },
+                    "state": {
+                      "enum": [
+                        "importing",
+                        "resumable",
+                        "needs-review",
+                        "complete",
+                        "complete-with-skipped",
+                        "cancelled"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "words": {
+                      "title": "Words",
+                      "type": "string"
+                    },
+                    "reason": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Reason"
+                    },
+                    "initiator": {
+                      "title": "Initiator",
+                      "type": "string"
+                    },
+                    "connection_id": {
+                      "title": "Connection Id",
+                      "type": "string"
+                    },
+                    "key": {
+                      "title": "Key",
+                      "type": "string"
+                    },
+                    "release_id": {
+                      "description": "The release holding the kept rows.",
+                      "title": "Release Id",
+                      "type": "string"
+                    },
+                    "approved_by": {
+                      "title": "Approved By",
+                      "type": "string"
+                    },
+                    "approved_at": {
+                      "title": "Approved At",
+                      "type": "number"
+                    },
+                    "created_at": {
+                      "title": "Created At",
+                      "type": "number"
+                    },
+                    "updated_at": {
+                      "title": "Updated At",
+                      "type": "number"
+                    },
+                    "counts": {
+                      "$ref": "#/components/schemas/WellImportCounts"
+                    },
+                    "identity_authority": {
+                      "title": "Identity Authority",
+                      "type": "string"
+                    },
+                    "audience": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Audience",
+                      "type": "array"
+                    },
+                    "mapping": {
+                      "additionalProperties": true,
+                      "title": "Mapping",
+                      "type": "object"
+                    },
+                    "input_revision": {
+                      "title": "Input Revision",
+                      "type": "string"
+                    },
+                    "preview_digest": {
+                      "title": "Preview Digest",
+                      "type": "string"
+                    },
+                    "totals": {
+                      "$ref": "#/components/schemas/WellImportTotals"
+                    },
+                    "skipped": {
+                      "description": "At most 1,000, by ordinal.",
+                      "items": {
+                        "$ref": "#/components/schemas/WellImportSkipped"
+                      },
+                      "title": "Skipped",
+                      "type": "array"
+                    },
+                    "possible_duplicates": {
+                      "items": {
+                        "$ref": "#/components/schemas/WellImportDuplicate"
+                      },
+                      "title": "Possible Duplicates",
+                      "type": "array"
+                    },
+                    "already_here": {
+                      "items": {
+                        "$ref": "#/components/schemas/WellImportHere"
+                      },
+                      "title": "Already Here",
+                      "type": "array"
+                    },
+                    "superseded": {
+                      "description": "Finished wells located by other evidence than the import; at most 1,000.",
+                      "items": {
+                        "$ref": "#/components/schemas/WellImportSuperseded"
+                      },
+                      "title": "Superseded",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "project_id",
+                    "state",
+                    "words",
+                    "reason",
+                    "initiator",
+                    "connection_id",
+                    "key",
+                    "release_id",
+                    "approved_by",
+                    "approved_at",
+                    "created_at",
+                    "updated_at",
+                    "counts",
+                    "identity_authority",
+                    "audience",
+                    "mapping",
+                    "input_revision",
+                    "preview_digest",
+                    "totals",
+                    "skipped",
+                    "possible_duplicates",
+                    "already_here",
+                    "superseded"
+                  ],
+                  "title": "WellImport",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "well-imports/*: preview and start name the table and its mapping; start adds the reviewed preview digest, the\naudience and a command id; status and cancel name the import.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "step, status, cancel: the import.",
+                    "title": "Id"
+                  },
+                  "connection_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the approved connection.",
+                    "title": "Connection Id"
+                  },
+                  "key": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the table.",
+                    "title": "Key"
+                  },
+                  "mapping": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the mapping (sources/mapping-validate's shape); the import keeps its own copy.",
+                    "title": "Mapping"
+                  },
+                  "audience": {
+                    "description": "start: who may read the copy and the created wells (you are always included).",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Audience",
+                    "type": "array"
+                  },
+                  "preview_digest": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "start: the preview_digest of the review you confirmed.",
+                    "title": "Preview Digest"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "start: the same id returns the same import; another body with it is refused.",
+                    "title": "Command Id"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "WellImportsRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/well-imports/status": {
+      "post": {
+        "summary": "One import: its state, counts, skipped rows and the wells already here",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "well-imports/start, step, status, cancel: one import.",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "project_id": {
+                      "title": "Project Id",
+                      "type": "string"
+                    },
+                    "state": {
+                      "enum": [
+                        "importing",
+                        "resumable",
+                        "needs-review",
+                        "complete",
+                        "complete-with-skipped",
+                        "cancelled"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "words": {
+                      "title": "Words",
+                      "type": "string"
+                    },
+                    "reason": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Reason"
+                    },
+                    "initiator": {
+                      "title": "Initiator",
+                      "type": "string"
+                    },
+                    "connection_id": {
+                      "title": "Connection Id",
+                      "type": "string"
+                    },
+                    "key": {
+                      "title": "Key",
+                      "type": "string"
+                    },
+                    "release_id": {
+                      "description": "The release holding the kept rows.",
+                      "title": "Release Id",
+                      "type": "string"
+                    },
+                    "approved_by": {
+                      "title": "Approved By",
+                      "type": "string"
+                    },
+                    "approved_at": {
+                      "title": "Approved At",
+                      "type": "number"
+                    },
+                    "created_at": {
+                      "title": "Created At",
+                      "type": "number"
+                    },
+                    "updated_at": {
+                      "title": "Updated At",
+                      "type": "number"
+                    },
+                    "counts": {
+                      "$ref": "#/components/schemas/WellImportCounts"
+                    },
+                    "identity_authority": {
+                      "title": "Identity Authority",
+                      "type": "string"
+                    },
+                    "audience": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Audience",
+                      "type": "array"
+                    },
+                    "mapping": {
+                      "additionalProperties": true,
+                      "title": "Mapping",
+                      "type": "object"
+                    },
+                    "input_revision": {
+                      "title": "Input Revision",
+                      "type": "string"
+                    },
+                    "preview_digest": {
+                      "title": "Preview Digest",
+                      "type": "string"
+                    },
+                    "totals": {
+                      "$ref": "#/components/schemas/WellImportTotals"
+                    },
+                    "skipped": {
+                      "description": "At most 1,000, by ordinal.",
+                      "items": {
+                        "$ref": "#/components/schemas/WellImportSkipped"
+                      },
+                      "title": "Skipped",
+                      "type": "array"
+                    },
+                    "possible_duplicates": {
+                      "items": {
+                        "$ref": "#/components/schemas/WellImportDuplicate"
+                      },
+                      "title": "Possible Duplicates",
+                      "type": "array"
+                    },
+                    "already_here": {
+                      "items": {
+                        "$ref": "#/components/schemas/WellImportHere"
+                      },
+                      "title": "Already Here",
+                      "type": "array"
+                    },
+                    "superseded": {
+                      "description": "Finished wells located by other evidence than the import; at most 1,000.",
+                      "items": {
+                        "$ref": "#/components/schemas/WellImportSuperseded"
+                      },
+                      "title": "Superseded",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "project_id",
+                    "state",
+                    "words",
+                    "reason",
+                    "initiator",
+                    "connection_id",
+                    "key",
+                    "release_id",
+                    "approved_by",
+                    "approved_at",
+                    "created_at",
+                    "updated_at",
+                    "counts",
+                    "identity_authority",
+                    "audience",
+                    "mapping",
+                    "input_revision",
+                    "preview_digest",
+                    "totals",
+                    "skipped",
+                    "possible_duplicates",
+                    "already_here",
+                    "superseded"
+                  ],
+                  "title": "WellImport",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "well-imports/*: preview and start name the table and its mapping; start adds the reviewed preview digest, the\naudience and a command id; status and cancel name the import.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "step, status, cancel: the import.",
+                    "title": "Id"
+                  },
+                  "connection_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the approved connection.",
+                    "title": "Connection Id"
+                  },
+                  "key": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the table.",
+                    "title": "Key"
+                  },
+                  "mapping": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the mapping (sources/mapping-validate's shape); the import keeps its own copy.",
+                    "title": "Mapping"
+                  },
+                  "audience": {
+                    "description": "start: who may read the copy and the created wells (you are always included).",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Audience",
+                    "type": "array"
+                  },
+                  "preview_digest": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "start: the preview_digest of the review you confirmed.",
+                    "title": "Preview Digest"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "start: the same id returns the same import; another body with it is refused.",
+                    "title": "Command Id"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "WellImportsRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/well-imports/step": {
+      "post": {
+        "summary": "Run the next rows as the person who started the import, each in its own transaction (id); a finished import answers its status",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "well-imports/start, step, status, cancel: one import.",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "project_id": {
+                      "title": "Project Id",
+                      "type": "string"
+                    },
+                    "state": {
+                      "enum": [
+                        "importing",
+                        "resumable",
+                        "needs-review",
+                        "complete",
+                        "complete-with-skipped",
+                        "cancelled"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "words": {
+                      "title": "Words",
+                      "type": "string"
+                    },
+                    "reason": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Reason"
+                    },
+                    "initiator": {
+                      "title": "Initiator",
+                      "type": "string"
+                    },
+                    "connection_id": {
+                      "title": "Connection Id",
+                      "type": "string"
+                    },
+                    "key": {
+                      "title": "Key",
+                      "type": "string"
+                    },
+                    "release_id": {
+                      "description": "The release holding the kept rows.",
+                      "title": "Release Id",
+                      "type": "string"
+                    },
+                    "approved_by": {
+                      "title": "Approved By",
+                      "type": "string"
+                    },
+                    "approved_at": {
+                      "title": "Approved At",
+                      "type": "number"
+                    },
+                    "created_at": {
+                      "title": "Created At",
+                      "type": "number"
+                    },
+                    "updated_at": {
+                      "title": "Updated At",
+                      "type": "number"
+                    },
+                    "counts": {
+                      "$ref": "#/components/schemas/WellImportCounts"
+                    },
+                    "identity_authority": {
+                      "title": "Identity Authority",
+                      "type": "string"
+                    },
+                    "audience": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Audience",
+                      "type": "array"
+                    },
+                    "mapping": {
+                      "additionalProperties": true,
+                      "title": "Mapping",
+                      "type": "object"
+                    },
+                    "input_revision": {
+                      "title": "Input Revision",
+                      "type": "string"
+                    },
+                    "preview_digest": {
+                      "title": "Preview Digest",
+                      "type": "string"
+                    },
+                    "totals": {
+                      "$ref": "#/components/schemas/WellImportTotals"
+                    },
+                    "skipped": {
+                      "description": "At most 1,000, by ordinal.",
+                      "items": {
+                        "$ref": "#/components/schemas/WellImportSkipped"
+                      },
+                      "title": "Skipped",
+                      "type": "array"
+                    },
+                    "possible_duplicates": {
+                      "items": {
+                        "$ref": "#/components/schemas/WellImportDuplicate"
+                      },
+                      "title": "Possible Duplicates",
+                      "type": "array"
+                    },
+                    "already_here": {
+                      "items": {
+                        "$ref": "#/components/schemas/WellImportHere"
+                      },
+                      "title": "Already Here",
+                      "type": "array"
+                    },
+                    "superseded": {
+                      "description": "Finished wells located by other evidence than the import; at most 1,000.",
+                      "items": {
+                        "$ref": "#/components/schemas/WellImportSuperseded"
+                      },
+                      "title": "Superseded",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "project_id",
+                    "state",
+                    "words",
+                    "reason",
+                    "initiator",
+                    "connection_id",
+                    "key",
+                    "release_id",
+                    "approved_by",
+                    "approved_at",
+                    "created_at",
+                    "updated_at",
+                    "counts",
+                    "identity_authority",
+                    "audience",
+                    "mapping",
+                    "input_revision",
+                    "preview_digest",
+                    "totals",
+                    "skipped",
+                    "possible_duplicates",
+                    "already_here",
+                    "superseded"
+                  ],
+                  "title": "WellImport",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "well-imports/*: preview and start name the table and its mapping; start adds the reviewed preview digest, the\naudience and a command id; status and cancel name the import.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "step, status, cancel: the import.",
+                    "title": "Id"
+                  },
+                  "connection_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the approved connection.",
+                    "title": "Connection Id"
+                  },
+                  "key": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the table.",
+                    "title": "Key"
+                  },
+                  "mapping": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the mapping (sources/mapping-validate's shape); the import keeps its own copy.",
+                    "title": "Mapping"
+                  },
+                  "audience": {
+                    "description": "start: who may read the copy and the created wells (you are always included).",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Audience",
+                    "type": "array"
+                  },
+                  "preview_digest": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "start: the preview_digest of the review you confirmed.",
+                    "title": "Preview Digest"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "start: the same id returns the same import; another body with it is refused.",
+                    "title": "Command Id"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "WellImportsRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/activity": {
       "post": {
         "summary": "Activity page (historical path of activity/list for existing workload clients)",
@@ -65126,7 +67015,8 @@
                   "target-in-use",
                   "source-collision",
                   "not-found",
-                  "test-limit"
+                  "test-limit",
+                  "copy-not-declared"
                 ],
                 "title": "Code",
                 "type": "string"
@@ -65416,6 +67306,68 @@
           "after"
         ],
         "title": "IdentityChange",
+        "type": "object"
+      },
+      "ImportWarning": {
+        "additionalProperties": false,
+        "description": "E42a, well-imports/preview: what does not stop an import but changes what it does.",
+        "properties": {
+          "sentence": {
+            "title": "Sentence",
+            "type": "string"
+          },
+          "actor": {
+            "enum": [
+              "deployment-administrator",
+              "organisation-owner",
+              "project-administrator",
+              "you"
+            ],
+            "title": "Actor",
+            "type": "string"
+          },
+          "remedy": {
+            "title": "Remedy",
+            "type": "string"
+          },
+          "docs": {
+            "title": "Docs",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "enum": [
+                  "missing",
+                  "not-a-file",
+                  "insecure-mode",
+                  "unreadable",
+                  "malformed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Only with key-unavailable: why the key cannot be used (Technical details)",
+            "title": "Reason"
+          },
+          "code": {
+            "const": "identifiers-not-declared",
+            "title": "Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sentence",
+          "actor",
+          "remedy",
+          "docs",
+          "code"
+        ],
+        "title": "ImportWarning",
         "type": "object"
       },
       "InventoryItem": {
@@ -72895,6 +74847,473 @@
           "responded_at"
         ],
         "title": "WebhookDelivery",
+        "type": "object"
+      },
+      "WellImportAudience": {
+        "additionalProperties": false,
+        "properties": {
+          "allowed": {
+            "description": "Members of this project the approved database allows a copy for.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Allowed",
+            "type": "array"
+          },
+          "initiator": {
+            "title": "Initiator",
+            "type": "string"
+          }
+        },
+        "required": [
+          "allowed",
+          "initiator"
+        ],
+        "title": "WellImportAudience",
+        "type": "object"
+      },
+      "WellImportCounts": {
+        "additionalProperties": false,
+        "properties": {
+          "accepted": {
+            "title": "Accepted",
+            "type": "integer"
+          },
+          "planned": {
+            "title": "Planned",
+            "type": "integer"
+          },
+          "created": {
+            "title": "Created",
+            "type": "integer"
+          },
+          "already_here": {
+            "title": "Already Here",
+            "type": "integer"
+          },
+          "skipped": {
+            "title": "Skipped",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "accepted",
+          "planned",
+          "created",
+          "already_here",
+          "skipped"
+        ],
+        "title": "WellImportCounts",
+        "type": "object"
+      },
+      "WellImportDuplicate": {
+        "additionalProperties": false,
+        "properties": {
+          "ordinal": {
+            "title": "Ordinal",
+            "type": "integer"
+          },
+          "row_key": {
+            "title": "Row Key",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Name"
+          },
+          "well": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WellImportWell"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The well with the same name you may read now; null once you may not."
+          }
+        },
+        "required": [
+          "ordinal",
+          "row_key",
+          "well"
+        ],
+        "title": "WellImportDuplicate",
+        "type": "object"
+      },
+      "WellImportHere": {
+        "additionalProperties": false,
+        "properties": {
+          "ordinal": {
+            "title": "Ordinal",
+            "type": "integer"
+          },
+          "row_key": {
+            "title": "Row Key",
+            "type": "string"
+          },
+          "well": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WellImportWell"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The well with this identity you may read now; null once you may not."
+          }
+        },
+        "required": [
+          "ordinal",
+          "row_key",
+          "well"
+        ],
+        "title": "WellImportHere",
+        "type": "object"
+      },
+      "WellImportIdentifiers": {
+        "additionalProperties": false,
+        "properties": {
+          "authority": {
+            "title": "Authority",
+            "type": "string"
+          },
+          "declared": {
+            "description": "False: the approved database names no authority and the connection's is used (a warning).",
+            "title": "Declared",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "authority",
+          "declared"
+        ],
+        "title": "WellImportIdentifiers",
+        "type": "object"
+      },
+      "WellImportPreviewCounts": {
+        "additionalProperties": false,
+        "properties": {
+          "rows": {
+            "title": "Rows",
+            "type": "integer"
+          },
+          "create": {
+            "title": "Create",
+            "type": "integer"
+          },
+          "already_here": {
+            "title": "Already Here",
+            "type": "integer"
+          },
+          "skipped": {
+            "description": "Rows that do not become wells, each counted once.",
+            "title": "Skipped",
+            "type": "integer"
+          },
+          "possible_duplicates": {
+            "title": "Possible Duplicates",
+            "type": "integer"
+          },
+          "names_from_numbers": {
+            "description": "Names read from a numeric column and used as text.",
+            "title": "Names From Numbers",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "rows",
+          "create",
+          "already_here",
+          "skipped",
+          "possible_duplicates",
+          "names_from_numbers"
+        ],
+        "title": "WellImportPreviewCounts",
+        "type": "object"
+      },
+      "WellImportPreviewSkipped": {
+        "additionalProperties": false,
+        "properties": {
+          "ordinal": {
+            "description": "The row's place in the table ordered by its content.",
+            "title": "Ordinal",
+            "type": "integer"
+          },
+          "row_key": {
+            "description": "The row's identifier as the table holds it; empty when it has none.",
+            "title": "Row Key",
+            "type": "string"
+          },
+          "codes": {
+            "items": {
+              "enum": [
+                "id-missing",
+                "id-repeated",
+                "name-missing",
+                "coordinate-missing",
+                "not-numeric",
+                "non-finite",
+                "longitude-out-of-range",
+                "latitude-out-of-range",
+                "name-too-long",
+                "name-not-text",
+                "identifier-not-accepted",
+                "identifier-in-use",
+                "no-longer-visible"
+              ],
+              "type": "string"
+            },
+            "title": "Codes",
+            "type": "array"
+          },
+          "fields": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Fields",
+            "type": "array"
+          }
+        },
+        "required": [
+          "ordinal",
+          "row_key",
+          "codes",
+          "fields"
+        ],
+        "title": "WellImportPreviewSkipped",
+        "type": "object"
+      },
+      "WellImportSkipped": {
+        "additionalProperties": false,
+        "properties": {
+          "ordinal": {
+            "title": "Ordinal",
+            "type": "integer"
+          },
+          "row_key": {
+            "title": "Row Key",
+            "type": "string"
+          },
+          "codes": {
+            "items": {
+              "enum": [
+                "id-missing",
+                "id-repeated",
+                "name-missing",
+                "coordinate-missing",
+                "not-numeric",
+                "non-finite",
+                "longitude-out-of-range",
+                "latitude-out-of-range",
+                "name-too-long",
+                "name-not-text",
+                "identifier-not-accepted",
+                "identifier-in-use",
+                "no-longer-visible"
+              ],
+              "type": "string"
+            },
+            "title": "Codes",
+            "type": "array"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "required": [
+          "ordinal",
+          "row_key",
+          "codes",
+          "reason"
+        ],
+        "title": "WellImportSkipped",
+        "type": "object"
+      },
+      "WellImportSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "project_id": {
+            "title": "Project Id",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "importing",
+              "resumable",
+              "needs-review",
+              "complete",
+              "complete-with-skipped",
+              "cancelled"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "words": {
+            "title": "Words",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "initiator": {
+            "title": "Initiator",
+            "type": "string"
+          },
+          "connection_id": {
+            "title": "Connection Id",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "release_id": {
+            "description": "The release holding the kept rows.",
+            "title": "Release Id",
+            "type": "string"
+          },
+          "approved_by": {
+            "title": "Approved By",
+            "type": "string"
+          },
+          "approved_at": {
+            "title": "Approved At",
+            "type": "number"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "number"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "number"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/WellImportCounts"
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "state",
+          "words",
+          "reason",
+          "initiator",
+          "connection_id",
+          "key",
+          "release_id",
+          "approved_by",
+          "approved_at",
+          "created_at",
+          "updated_at",
+          "counts"
+        ],
+        "title": "WellImportSummary",
+        "type": "object"
+      },
+      "WellImportSuperseded": {
+        "additionalProperties": false,
+        "properties": {
+          "ordinal": {
+            "title": "Ordinal",
+            "type": "integer"
+          },
+          "row_key": {
+            "title": "Row Key",
+            "type": "string"
+          },
+          "well": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WellImportWell"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The well you may read now; null once you may not."
+          },
+          "reason": {
+            "description": "Newer location evidence chose its position, or two locations were recorded at the same time; the import overwrote neither.",
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ordinal",
+          "row_key",
+          "well",
+          "reason"
+        ],
+        "title": "WellImportSuperseded",
+        "type": "object"
+      },
+      "WellImportTotals": {
+        "additionalProperties": false,
+        "properties": {
+          "rows": {
+            "title": "Rows",
+            "type": "integer"
+          },
+          "names_from_numbers": {
+            "title": "Names From Numbers",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "rows",
+          "names_from_numbers"
+        ],
+        "title": "WellImportTotals",
+        "type": "object"
+      },
+      "WellImportWell": {
+        "additionalProperties": false,
+        "properties": {
+          "entity_id": {
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "entity_id",
+          "name"
+        ],
+        "title": "WellImportWell",
         "type": "object"
       },
       "WellLocation": {

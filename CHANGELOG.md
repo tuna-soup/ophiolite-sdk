@@ -5,6 +5,9 @@
 Supported 0.x client over preview contracts, installable from reviewed source.
 No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
 
+- Well imports (E42a): `client.well_imports()` previews, starts, steps (`run`), reads, lists and cancels an import of an
+  approved well table as wells; `ophiolite well-imports list|status|start [--dry-run]|resume ID|cancel ID` does the same
+  and prints every skipped row with its reason. Answers are checked against the pinned contract.
 - Wavelets and sections you compute (E53, preview API): `client.read_data` returns `Wavelet` (samples, `spectrum()` and
   `peak_frequency()` on a 1 Hz grid to Nyquist, `frequency_note()` beside the declared frequency), `ModelSection`
   (rocks and a rock-index grid) and `SeismicSection` (every sample, `origin`, `polarity`), checked offline against the

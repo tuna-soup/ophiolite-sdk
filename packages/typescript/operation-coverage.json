@@ -1588,5 +1588,41 @@
     "function": "postProjectsProjectWebhooksUpdate",
     "request": "schema",
     "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/well-imports/cancel",
+    "function": "postProjectsProjectWellImportsCancel",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/well-imports/list",
+    "function": "postProjectsProjectWellImportsList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/well-imports/preview",
+    "function": "postProjectsProjectWellImportsPreview",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/well-imports/start",
+    "function": "postProjectsProjectWellImportsStart",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/well-imports/status",
+    "function": "postProjectsProjectWellImportsStatus",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/well-imports/step",
+    "function": "postProjectsProjectWellImportsStep",
+    "request": "schema",
+    "response": "schema"
   }
 ]

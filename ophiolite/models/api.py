@@ -363,3 +363,95 @@ class SourceExportManifestDoc(Contract):
 class SourceExportAnswer(Contract):
     manifest: SourceExportManifestDoc
     payload_base64: str
+
+
+# E42a: well imports (well-imports/*), the fields the SDK and the command line read; other fields are kept.
+WellImportState = Literal['importing', 'resumable', 'needs-review', 'complete', 'complete-with-skipped', 'cancelled']
+Number = float | int
+
+
+class WellImportWell(Contract):
+    entity_id: str
+    name: str
+
+
+class WellImportRowWell(Contract):
+    ordinal: int
+    row_key: str
+    well: WellImportWell | None = None
+
+
+class WellImportSkipped(Contract):
+    ordinal: int
+    row_key: str
+    codes: list[str]
+    reason: str | None = None
+    fields: list[str] | None = None
+
+
+class WellImportSuperseded(WellImportRowWell):
+    reason: str
+
+
+class WellImportCounts(Contract):
+    accepted: int
+    planned: int
+    created: int
+    already_here: int
+    skipped: int
+
+
+class WellImportSummary(Contract):
+    id: str
+    project_id: str
+    state: WellImportState
+    words: str
+    reason: str | None = None
+    initiator: str
+    connection_id: str
+    key: str
+    release_id: str
+    approved_by: str
+    approved_at: Number
+    created_at: Number
+    updated_at: Number
+    counts: WellImportCounts
+
+
+class WellImport(WellImportSummary):
+    identity_authority: str
+    audience: list[str]
+    mapping: dict
+    input_revision: str
+    preview_digest: str
+    skipped: list[WellImportSkipped]
+    possible_duplicates: list[WellImportRowWell]
+    already_here: list[WellImportRowWell]
+    superseded: list[WellImportSuperseded]
+
+
+class WellImportsListAnswer(Contract):
+    imports: list[WellImportSummary]
+
+
+class WellImportPreviewCounts(Contract):
+    rows: int
+    create: int
+    already_here: int
+    skipped: int
+    possible_duplicates: int
+    names_from_numbers: int
+
+
+class WellImportsPreviewAnswer(Contract):
+    preview_digest: str
+    connection_id: str
+    key: str
+    source_name: str
+    counts: WellImportPreviewCounts
+    skipped: list[WellImportSkipped]
+    possible_duplicates: list[WellImportRowWell]
+    already_here: list[WellImportRowWell]
+    warnings: list[dict]
+    audience: dict
+    input_revision: str
