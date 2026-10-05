@@ -13389,16 +13389,28 @@
                   "additionalProperties": false,
                   "description": "connection-admin/create.",
                   "properties": {
+                    "created_by": {
+                      "title": "Created By",
+                      "type": "string"
+                    },
+                    "enabled": {
+                      "title": "Enabled",
+                      "type": "boolean"
+                    },
+                    "generation": {
+                      "title": "Generation",
+                      "type": "integer"
+                    },
                     "id": {
                       "title": "Id",
                       "type": "string"
                     },
-                    "project_id": {
-                      "title": "Project Id",
-                      "type": "string"
-                    },
                     "name": {
                       "title": "Name",
+                      "type": "string"
+                    },
+                    "project_id": {
+                      "title": "Project Id",
                       "type": "string"
                     },
                     "target": {
@@ -13409,18 +13421,6 @@
                       "additionalProperties": true,
                       "title": "Target Identity",
                       "type": "object"
-                    },
-                    "enabled": {
-                      "title": "Enabled",
-                      "type": "boolean"
-                    },
-                    "generation": {
-                      "title": "Generation",
-                      "type": "integer"
-                    },
-                    "created_by": {
-                      "title": "Created By",
-                      "type": "string"
                     },
                     "username": {
                       "title": "Username",
@@ -13442,22 +13442,26 @@
                     "credential_available": {
                       "title": "Credential Available",
                       "type": "boolean"
+                    },
+                    "readiness": {
+                      "$ref": "#/components/schemas/ConnectionReadiness"
                     }
                   },
                   "required": [
-                    "id",
-                    "project_id",
-                    "name",
-                    "target",
-                    "target_identity",
+                    "created_by",
                     "enabled",
                     "generation",
-                    "created_by",
+                    "id",
+                    "name",
+                    "project_id",
+                    "target",
+                    "target_identity",
                     "username",
                     "status",
                     "capabilities",
                     "execution_location",
-                    "credential_available"
+                    "credential_available",
+                    "readiness"
                   ],
                   "title": "ConnectionAdminCreateAnswer",
                   "type": "object"
@@ -13672,6 +13676,9 @@
                     "credential_available": {
                       "title": "Credential Available",
                       "type": "boolean"
+                    },
+                    "readiness": {
+                      "$ref": "#/components/schemas/ConnectionReadiness"
                     }
                   },
                   "required": [
@@ -13687,7 +13694,8 @@
                     "status",
                     "capabilities",
                     "execution_location",
-                    "credential_available"
+                    "credential_available",
+                    "readiness"
                   ],
                   "title": "ConnectionAdminEnableAnswer",
                   "type": "object"
@@ -13859,8 +13867,7 @@
                     },
                     "connections": {
                       "items": {
-                        "additionalProperties": true,
-                        "type": "object"
+                        "$ref": "#/components/schemas/ConnectionAdminConnection"
                       },
                       "title": "Connections",
                       "type": "array"
@@ -13868,12 +13875,16 @@
                     "key_available": {
                       "title": "Key Available",
                       "type": "boolean"
+                    },
+                    "readiness": {
+                      "$ref": "#/components/schemas/AdministrationReadiness"
                     }
                   },
                   "required": [
                     "targets",
                     "connections",
-                    "key_available"
+                    "key_available",
+                    "readiness"
                   ],
                   "title": "ConnectionAdminListAnswer",
                   "type": "object"
@@ -14088,6 +14099,9 @@
                     "credential_available": {
                       "title": "Credential Available",
                       "type": "boolean"
+                    },
+                    "readiness": {
+                      "$ref": "#/components/schemas/ConnectionReadiness"
                     }
                   },
                   "required": [
@@ -14103,7 +14117,8 @@
                     "status",
                     "capabilities",
                     "execution_location",
-                    "credential_available"
+                    "credential_available",
+                    "readiness"
                   ],
                   "title": "ConnectionAdminRotateAnswer",
                   "type": "object"
@@ -14263,7 +14278,7 @@
               "application/json": {
                 "schema": {
                   "additionalProperties": false,
-                  "description": "connection-admin/test.",
+                  "description": "connection-admin/test. `state` is ready on success (E40), the source state otherwise; `rows` only on success.",
                   "properties": {
                     "ok": {
                       "title": "Ok",
@@ -14276,12 +14291,28 @@
                     "message": {
                       "title": "Message",
                       "type": "string"
+                    },
+                    "rows": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Rows"
+                    },
+                    "readiness": {
+                      "$ref": "#/components/schemas/AccessTestReadiness"
                     }
                   },
                   "required": [
                     "ok",
                     "state",
-                    "message"
+                    "message",
+                    "readiness"
                   ],
                   "title": "ConnectionAdminTestAnswer",
                   "type": "object"
@@ -62672,6 +62703,81 @@
         "title": "AccessKeyRow",
         "type": "object"
       },
+      "AccessTestReadiness": {
+        "additionalProperties": false,
+        "properties": {
+          "sentence": {
+            "title": "Sentence",
+            "type": "string"
+          },
+          "actor": {
+            "enum": [
+              "deployment-administrator",
+              "organisation-owner",
+              "project-administrator",
+              "you"
+            ],
+            "title": "Actor",
+            "type": "string"
+          },
+          "remedy": {
+            "title": "Remedy",
+            "type": "string"
+          },
+          "docs": {
+            "title": "Docs",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "enum": [
+                  "missing",
+                  "not-a-file",
+                  "insecure-mode",
+                  "unreadable",
+                  "malformed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Only with key-unavailable: why the key cannot be used (Technical details)",
+            "title": "Reason"
+          },
+          "code": {
+            "enum": [
+              "ready",
+              "credential-unreadable",
+              "credential-context-mismatch",
+              "connection-disabled",
+              "target-changed",
+              "key-unavailable",
+              "key-mismatch",
+              "unreachable",
+              "tls-refused",
+              "sign-in-refused",
+              "no-read-right",
+              "table-missing",
+              "undetermined"
+            ],
+            "title": "Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sentence",
+          "actor",
+          "remedy",
+          "docs",
+          "code"
+        ],
+        "title": "AccessTestReadiness",
+        "type": "object"
+      },
       "AccountProject": {
         "additionalProperties": false,
         "properties": {
@@ -62761,6 +62867,173 @@
           "current"
         ],
         "title": "AccountSession",
+        "type": "object"
+      },
+      "AdministrationBlocker": {
+        "additionalProperties": false,
+        "description": "What stops adding a connection; listed in this order.",
+        "properties": {
+          "sentence": {
+            "title": "Sentence",
+            "type": "string"
+          },
+          "actor": {
+            "enum": [
+              "deployment-administrator",
+              "organisation-owner",
+              "project-administrator",
+              "you"
+            ],
+            "title": "Actor",
+            "type": "string"
+          },
+          "remedy": {
+            "title": "Remedy",
+            "type": "string"
+          },
+          "docs": {
+            "title": "Docs",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "enum": [
+                  "missing",
+                  "not-a-file",
+                  "insecure-mode",
+                  "unreadable",
+                  "malformed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Only with key-unavailable: why the key cannot be used (Technical details)",
+            "title": "Reason"
+          },
+          "code": {
+            "enum": [
+              "not-configured",
+              "key-unavailable",
+              "key-mismatch",
+              "no-approved-database"
+            ],
+            "title": "Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sentence",
+          "actor",
+          "remedy",
+          "docs",
+          "code"
+        ],
+        "title": "AdministrationBlocker",
+        "type": "object"
+      },
+      "AdministrationReadiness": {
+        "additionalProperties": false,
+        "description": "connection-admin/list: `primary` is the first blocker, or ready.",
+        "properties": {
+          "primary": {
+            "enum": [
+              "ready",
+              "not-configured",
+              "key-unavailable",
+              "key-mismatch",
+              "no-approved-database"
+            ],
+            "title": "Primary",
+            "type": "string"
+          },
+          "blockers": {
+            "items": {
+              "$ref": "#/components/schemas/AdministrationBlocker"
+            },
+            "title": "Blockers",
+            "type": "array"
+          },
+          "warnings": {
+            "items": {
+              "$ref": "#/components/schemas/AdministrationWarning"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "primary",
+          "blockers",
+          "warnings"
+        ],
+        "title": "AdministrationReadiness",
+        "type": "object"
+      },
+      "AdministrationWarning": {
+        "additionalProperties": false,
+        "description": "A deployment condition that blocks nothing: some stored sign-ins were saved under another key.",
+        "properties": {
+          "sentence": {
+            "title": "Sentence",
+            "type": "string"
+          },
+          "actor": {
+            "enum": [
+              "deployment-administrator",
+              "organisation-owner",
+              "project-administrator",
+              "you"
+            ],
+            "title": "Actor",
+            "type": "string"
+          },
+          "remedy": {
+            "title": "Remedy",
+            "type": "string"
+          },
+          "docs": {
+            "title": "Docs",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "enum": [
+                  "missing",
+                  "not-a-file",
+                  "insecure-mode",
+                  "unreadable",
+                  "malformed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Only with key-unavailable: why the key cannot be used (Technical details)",
+            "title": "Reason"
+          },
+          "code": {
+            "const": "key-mismatch",
+            "title": "Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sentence",
+          "actor",
+          "remedy",
+          "docs",
+          "code"
+        ],
+        "title": "AdministrationWarning",
         "type": "object"
       },
       "AgentView": {
@@ -63442,6 +63715,156 @@
           "at"
         ],
         "title": "ChangeEvent",
+        "type": "object"
+      },
+      "ConnectionAdminConnection": {
+        "additionalProperties": false,
+        "description": "One connection in connection-admin/list, and the answer of create, enable and rotate.",
+        "properties": {
+          "created_by": {
+            "title": "Created By",
+            "type": "string"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "generation": {
+            "title": "Generation",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "project_id": {
+            "title": "Project Id",
+            "type": "string"
+          },
+          "target": {
+            "title": "Target",
+            "type": "string"
+          },
+          "target_identity": {
+            "additionalProperties": true,
+            "title": "Target Identity",
+            "type": "object"
+          },
+          "username": {
+            "title": "Username",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "capabilities": {
+            "additionalProperties": true,
+            "title": "Capabilities",
+            "type": "object"
+          },
+          "execution_location": {
+            "title": "Execution Location",
+            "type": "string"
+          },
+          "credential_available": {
+            "title": "Credential Available",
+            "type": "boolean"
+          },
+          "readiness": {
+            "$ref": "#/components/schemas/ConnectionReadiness"
+          }
+        },
+        "required": [
+          "created_by",
+          "enabled",
+          "generation",
+          "id",
+          "name",
+          "project_id",
+          "target",
+          "target_identity",
+          "username",
+          "status",
+          "capabilities",
+          "execution_location",
+          "credential_available",
+          "readiness"
+        ],
+        "title": "ConnectionAdminConnection",
+        "type": "object"
+      },
+      "ConnectionReadiness": {
+        "additionalProperties": false,
+        "properties": {
+          "sentence": {
+            "title": "Sentence",
+            "type": "string"
+          },
+          "actor": {
+            "enum": [
+              "deployment-administrator",
+              "organisation-owner",
+              "project-administrator",
+              "you"
+            ],
+            "title": "Actor",
+            "type": "string"
+          },
+          "remedy": {
+            "title": "Remedy",
+            "type": "string"
+          },
+          "docs": {
+            "title": "Docs",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "enum": [
+                  "missing",
+                  "not-a-file",
+                  "insecure-mode",
+                  "unreadable",
+                  "malformed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Only with key-unavailable: why the key cannot be used (Technical details)",
+            "title": "Reason"
+          },
+          "code": {
+            "enum": [
+              "ready",
+              "credential-unreadable",
+              "credential-context-mismatch",
+              "connection-disabled",
+              "target-changed",
+              "key-unavailable",
+              "key-mismatch"
+            ],
+            "title": "Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sentence",
+          "actor",
+          "remedy",
+          "docs",
+          "code"
+        ],
+        "title": "ConnectionReadiness",
         "type": "object"
       },
       "ContractsRegistry": {
@@ -64170,6 +64593,53 @@
               }
             },
             "description": "E78: only with codes project-input-not-shared and project-input-fixed-audience: the input that is not shared with the whole project"
+          },
+          "readiness": {
+            "additionalProperties": false,
+            "description": "E40: only on a connection-administration refusal: which readiness code it is, who can act and the guide anchor; status, code, remedy and docs are unchanged",
+            "properties": {
+              "code": {
+                "enum": [
+                  "not-configured",
+                  "key-unavailable",
+                  "changed-elsewhere",
+                  "invalid-input",
+                  "target-not-approved",
+                  "limit-reached",
+                  "target-in-use",
+                  "source-collision",
+                  "not-found",
+                  "test-limit"
+                ],
+                "title": "Code",
+                "type": "string"
+              },
+              "actor": {
+                "enum": [
+                  "deployment-administrator",
+                  "organisation-owner",
+                  "project-administrator",
+                  "you"
+                ],
+                "title": "Actor",
+                "type": "string"
+              },
+              "remedy": {
+                "title": "Remedy",
+                "type": "string"
+              },
+              "docs": {
+                "title": "Docs",
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "actor",
+              "remedy",
+              "docs"
+            ],
+            "type": "object"
           }
         }
       },
