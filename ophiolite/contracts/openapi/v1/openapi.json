@@ -37238,6 +37238,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -37624,6 +37640,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -37940,6 +37972,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -38237,6 +38285,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -38540,6 +38604,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -38884,6 +38964,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -39237,6 +39333,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -39597,6 +39709,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -39885,6 +40013,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -40238,6 +40382,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -40561,6 +40721,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -40899,6 +41075,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -41252,6 +41444,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -41544,6 +41752,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -41841,6 +42065,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -42326,6 +42566,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -42621,6 +42877,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -42958,6 +43230,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -43268,6 +43556,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -43593,6 +43897,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -43660,6 +43980,31 @@
                     "valid": {
                       "title": "Valid",
                       "type": "boolean"
+                    },
+                    "report": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/MappingCheckReport"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E43: present when the request gave a scope."
+                    },
+                    "saved": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E43, with a scope: whether the mapping was saved (only a ready report saves).",
+                      "title": "Saved"
                     }
                   },
                   "required": [
@@ -43897,6 +44242,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -43967,6 +44328,18 @@
                     "valid": {
                       "title": "Valid",
                       "type": "boolean"
+                    },
+                    "report": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/MappingCheckReport"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E43: present when the request gave a scope."
                     }
                   },
                   "required": [
@@ -44204,6 +44577,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -44615,6 +45004,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -44937,6 +45342,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -45256,6 +45677,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -45745,6 +46182,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -46156,6 +46609,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -47007,6 +47476,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -47413,6 +47898,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -47698,6 +48199,22 @@
                     "minimum": 0,
                     "title": "Expected Generation",
                     "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
                   }
                 },
                 "required": [
@@ -65414,6 +65931,221 @@
           "revision"
         ],
         "title": "ManagedReference",
+        "type": "object"
+      },
+      "MappingCheckExample": {
+        "additionalProperties": false,
+        "properties": {
+          "row_key": {
+            "description": "The row's identifier as the table holds it (\"row N\" when it has none), cut at 60 characters.",
+            "title": "Row Key",
+            "type": "string"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The value found, cut at 120 characters; NaN and infinities as the strings \"NaN\", \"Infinity\", \"-Infinity\".",
+            "title": "Value"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "row_key",
+          "value",
+          "truncated"
+        ],
+        "title": "MappingCheckExample",
+        "type": "object"
+      },
+      "MappingCheckGroup": {
+        "additionalProperties": false,
+        "properties": {
+          "field": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mapped field (id, name, x, y, depth, extras, crs); null for the mapping as a whole or the read.",
+            "title": "Field"
+          },
+          "code": {
+            "enum": [
+              "id-missing",
+              "id-repeated",
+              "name-missing",
+              "coordinate-missing",
+              "not-numeric",
+              "non-finite",
+              "longitude-out-of-range",
+              "latitude-out-of-range",
+              "mapping-invalid",
+              "column-unknown",
+              "field-not-mapped",
+              "crs-not-accepted",
+              "depth-options",
+              "source-limit",
+              "outside-usual-area"
+            ],
+            "title": "Code",
+            "type": "string"
+          },
+          "severity": {
+            "description": "invalid and not-supported block readiness and saving; unusual only warns.",
+            "enum": [
+              "invalid",
+              "not-supported",
+              "unusual"
+            ],
+            "title": "Severity",
+            "type": "string"
+          },
+          "rows": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Rows with this problem, each counted once; null when no row was read for it.",
+            "title": "Rows"
+          },
+          "examples": {
+            "description": "At most five, the smallest row keys.",
+            "items": {
+              "$ref": "#/components/schemas/MappingCheckExample"
+            },
+            "title": "Examples",
+            "type": "array"
+          }
+        },
+        "required": [
+          "field",
+          "code",
+          "severity",
+          "rows",
+          "examples"
+        ],
+        "title": "MappingCheckGroup",
+        "type": "object"
+      },
+      "MappingCheckReport": {
+        "additionalProperties": false,
+        "description": "E43: every problem of a mapping over the table's rows (scope all) or its first ten (scope sample).",
+        "properties": {
+          "schema": {
+            "const": "ophiolite.mapping-check/1",
+            "title": "Schema",
+            "type": "string"
+          },
+          "scope": {
+            "enum": [
+              "all",
+              "sample"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
+          "complete": {
+            "description": "Every row was read; false when the read stopped at a bound or the mapping failed before any read.",
+            "title": "Complete",
+            "type": "boolean"
+          },
+          "total_rows": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Rows"
+          },
+          "rows_checked": {
+            "title": "Rows Checked",
+            "type": "integer"
+          },
+          "rows_ready": {
+            "title": "Rows Ready",
+            "type": "integer"
+          },
+          "rows_with_problems": {
+            "title": "Rows With Problems",
+            "type": "integer"
+          },
+          "rows_with_warnings": {
+            "title": "Rows With Warnings",
+            "type": "integer"
+          },
+          "ready": {
+            "description": "Scope all, a complete read and no invalid or not-supported group.",
+            "title": "Ready",
+            "type": "boolean"
+          },
+          "groups": {
+            "description": "Most severe first, then most rows; at most 50.",
+            "items": {
+              "$ref": "#/components/schemas/MappingCheckGroup"
+            },
+            "title": "Groups",
+            "type": "array"
+          },
+          "more_groups": {
+            "title": "More Groups",
+            "type": "integer"
+          },
+          "examples_omitted": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Present and true when examples were dropped to keep the report under 64 KiB.",
+            "title": "Examples Omitted"
+          }
+        },
+        "required": [
+          "schema",
+          "scope",
+          "complete",
+          "total_rows",
+          "rows_checked",
+          "rows_ready",
+          "rows_with_problems",
+          "rows_with_warnings",
+          "ready",
+          "groups",
+          "more_groups"
+        ],
+        "title": "MappingCheckReport",
         "type": "object"
       },
       "MethodRecord": {
