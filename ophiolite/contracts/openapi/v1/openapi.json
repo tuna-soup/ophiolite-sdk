@@ -38763,8 +38763,30 @@
                       "type": "string"
                     },
                     "selection_id": {
-                      "title": "Selection Id",
-                      "type": "string"
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "The connected source the draft started from; null for a draft of a kept file or result (E74a)",
+                      "title": "Selection Id"
+                    },
+                    "retained_base": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E74a: the kept copy, upload or result version the draft started from: asset_id, revision, kind and the item it belongs to",
+                      "title": "Retained Base"
                     },
                     "base": {
                       "additionalProperties": true,
@@ -38880,10 +38902,9 @@
                     "title": "Project Id",
                     "type": "string"
                   },
-                  "connection_id": {
+                  "id": {
                     "anyOf": [
                       {
-                        "maxLength": 80,
                         "type": "string"
                       },
                       {
@@ -38891,12 +38912,11 @@
                       }
                     ],
                     "default": null,
-                    "title": "Connection Id"
+                    "title": "Id"
                   },
-                  "key": {
+                  "selection_id": {
                     "anyOf": [
                       {
-                        "maxLength": 512,
                         "type": "string"
                       },
                       {
@@ -38904,12 +38924,13 @@
                       }
                     ],
                     "default": null,
-                    "title": "Key"
+                    "title": "Selection Id"
                   },
-                  "profile": {
+                  "asset_id": {
                     "anyOf": [
                       {
-                        "maxLength": 80,
+                        "maxLength": 160,
+                        "minLength": 1,
                         "type": "string"
                       },
                       {
@@ -38917,12 +38938,12 @@
                       }
                     ],
                     "default": null,
-                    "title": "Profile"
+                    "title": "Asset Id"
                   },
-                  "kind": {
+                  "revision": {
                     "anyOf": [
                       {
-                        "maxLength": 256,
+                        "pattern": "^[0-9a-f]{64}$",
                         "type": "string"
                       },
                       {
@@ -38930,7 +38951,7 @@
                       }
                     ],
                     "default": null,
-                    "title": "Kind"
+                    "title": "Revision"
                   },
                   "offset": {
                     "default": 0,
@@ -38941,102 +38962,10 @@
                   },
                   "limit": {
                     "default": 100,
-                    "maximum": 1000,
+                    "maximum": 500,
                     "minimum": 1,
                     "title": "Limit",
                     "type": "integer"
-                  },
-                  "id": {
-                    "anyOf": [
-                      {
-                        "maxLength": 64,
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Id"
-                  },
-                  "mode": {
-                    "default": "follow",
-                    "enum": [
-                      "follow",
-                      "pin"
-                    ],
-                    "title": "Mode",
-                    "type": "string"
-                  },
-                  "revision": {
-                    "anyOf": [
-                      {
-                        "maxLength": 128,
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Revision"
-                  },
-                  "preview_digest": {
-                    "anyOf": [
-                      {
-                        "pattern": "^[a-f0-9]{64}$",
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Preview Digest"
-                  },
-                  "acknowledge_unknowns": {
-                    "default": false,
-                    "title": "Acknowledge Unknowns",
-                    "type": "boolean"
-                  },
-                  "mapping": {
-                    "anyOf": [
-                      {
-                        "additionalProperties": true,
-                        "type": "object"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Mapping"
-                  },
-                  "context": {
-                    "anyOf": [
-                      {
-                        "additionalProperties": true,
-                        "type": "object"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Context"
-                  },
-                  "context_policy_revision": {
-                    "anyOf": [
-                      {
-                        "minimum": 0,
-                        "type": "integer"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Context Policy Revision"
                   },
                   "expected_generation": {
                     "default": 0,
@@ -39044,12 +38973,26 @@
                     "title": "Expected Generation",
                     "type": "integer"
                   },
-                  "scope": {
+                  "patches": {
+                    "items": {
+                      "additionalProperties": true,
+                      "type": "object"
+                    },
+                    "maxItems": 1000,
+                    "title": "Patches",
+                    "type": "array"
+                  },
+                  "destination": {
+                    "default": "portable",
+                    "title": "Destination",
+                    "type": "string"
+                  },
+                  "mode": {
                     "anyOf": [
                       {
                         "enum": [
-                          "all",
-                          "sample"
+                          "append",
+                          "separate"
                         ],
                         "type": "string"
                       },
@@ -39058,24 +39001,49 @@
                       }
                     ],
                     "default": null,
-                    "title": "Scope"
+                    "title": "Mode"
                   },
-                  "crs_choice": {
+                  "review_digest": {
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/CrsChoice"
+                        "type": "string"
                       },
                       {
                         "type": "null"
                       }
                     ],
-                    "default": null
+                    "default": null,
+                    "title": "Review Digest"
+                  },
+                  "field": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Field"
+                  },
+                  "delta": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Delta"
                   }
                 },
                 "required": [
                   "project_id"
                 ],
-                "title": "Request",
+                "title": "EditRequest",
                 "type": "object"
               }
             }
@@ -39163,8 +39131,72 @@
                       "type": "string"
                     },
                     "selection_id": {
-                      "title": "Selection Id",
-                      "type": "string"
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "The connected source the draft started from; null for a draft of a kept file or result (E74a)",
+                      "title": "Selection Id"
+                    },
+                    "retained_base": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E74a: the kept copy, upload or result version the draft started from: asset_id, revision, kind and the item it belongs to",
+                      "title": "Retained Base"
+                    },
+                    "pending": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E74a: while state is 'sending', the recorded request to the project (command_id, mode, generation, request); a retry sends it again",
+                      "title": "Pending"
+                    },
+                    "refusal": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E74a: why the project last refused a version: kind 'newer-version' (version, by) or 'same-content' (version), or 'refused'",
+                      "title": "Refusal"
+                    },
+                    "receipt": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "The terminal receipt of a published draft",
+                      "title": "Receipt"
                     },
                     "state": {
                       "title": "State",
@@ -39260,10 +39292,9 @@
                     "title": "Project Id",
                     "type": "string"
                   },
-                  "connection_id": {
+                  "id": {
                     "anyOf": [
                       {
-                        "maxLength": 80,
                         "type": "string"
                       },
                       {
@@ -39271,12 +39302,11 @@
                       }
                     ],
                     "default": null,
-                    "title": "Connection Id"
+                    "title": "Id"
                   },
-                  "key": {
+                  "selection_id": {
                     "anyOf": [
                       {
-                        "maxLength": 512,
                         "type": "string"
                       },
                       {
@@ -39284,12 +39314,13 @@
                       }
                     ],
                     "default": null,
-                    "title": "Key"
+                    "title": "Selection Id"
                   },
-                  "profile": {
+                  "asset_id": {
                     "anyOf": [
                       {
-                        "maxLength": 80,
+                        "maxLength": 160,
+                        "minLength": 1,
                         "type": "string"
                       },
                       {
@@ -39297,12 +39328,12 @@
                       }
                     ],
                     "default": null,
-                    "title": "Profile"
+                    "title": "Asset Id"
                   },
-                  "kind": {
+                  "revision": {
                     "anyOf": [
                       {
-                        "maxLength": 256,
+                        "pattern": "^[0-9a-f]{64}$",
                         "type": "string"
                       },
                       {
@@ -39310,7 +39341,7 @@
                       }
                     ],
                     "default": null,
-                    "title": "Kind"
+                    "title": "Revision"
                   },
                   "offset": {
                     "default": 0,
@@ -39321,102 +39352,10 @@
                   },
                   "limit": {
                     "default": 100,
-                    "maximum": 1000,
+                    "maximum": 500,
                     "minimum": 1,
                     "title": "Limit",
                     "type": "integer"
-                  },
-                  "id": {
-                    "anyOf": [
-                      {
-                        "maxLength": 64,
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Id"
-                  },
-                  "mode": {
-                    "default": "follow",
-                    "enum": [
-                      "follow",
-                      "pin"
-                    ],
-                    "title": "Mode",
-                    "type": "string"
-                  },
-                  "revision": {
-                    "anyOf": [
-                      {
-                        "maxLength": 128,
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Revision"
-                  },
-                  "preview_digest": {
-                    "anyOf": [
-                      {
-                        "pattern": "^[a-f0-9]{64}$",
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Preview Digest"
-                  },
-                  "acknowledge_unknowns": {
-                    "default": false,
-                    "title": "Acknowledge Unknowns",
-                    "type": "boolean"
-                  },
-                  "mapping": {
-                    "anyOf": [
-                      {
-                        "additionalProperties": true,
-                        "type": "object"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Mapping"
-                  },
-                  "context": {
-                    "anyOf": [
-                      {
-                        "additionalProperties": true,
-                        "type": "object"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Context"
-                  },
-                  "context_policy_revision": {
-                    "anyOf": [
-                      {
-                        "minimum": 0,
-                        "type": "integer"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Context Policy Revision"
                   },
                   "expected_generation": {
                     "default": 0,
@@ -39424,12 +39363,26 @@
                     "title": "Expected Generation",
                     "type": "integer"
                   },
-                  "scope": {
+                  "patches": {
+                    "items": {
+                      "additionalProperties": true,
+                      "type": "object"
+                    },
+                    "maxItems": 1000,
+                    "title": "Patches",
+                    "type": "array"
+                  },
+                  "destination": {
+                    "default": "portable",
+                    "title": "Destination",
+                    "type": "string"
+                  },
+                  "mode": {
                     "anyOf": [
                       {
                         "enum": [
-                          "all",
-                          "sample"
+                          "append",
+                          "separate"
                         ],
                         "type": "string"
                       },
@@ -39438,24 +39391,49 @@
                       }
                     ],
                     "default": null,
-                    "title": "Scope"
+                    "title": "Mode"
                   },
-                  "crs_choice": {
+                  "review_digest": {
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/CrsChoice"
+                        "type": "string"
                       },
                       {
                         "type": "null"
                       }
                     ],
-                    "default": null
+                    "default": null,
+                    "title": "Review Digest"
+                  },
+                  "field": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Field"
+                  },
+                  "delta": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Delta"
                   }
                 },
                 "required": [
                   "project_id"
                 ],
-                "title": "Request",
+                "title": "EditRequest",
                 "type": "object"
               }
             }
@@ -39559,8 +39537,72 @@
                       "type": "string"
                     },
                     "selection_id": {
-                      "title": "Selection Id",
-                      "type": "string"
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "The connected source the draft started from; null for a draft of a kept file or result (E74a)",
+                      "title": "Selection Id"
+                    },
+                    "retained_base": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E74a: the kept copy, upload or result version the draft started from: asset_id, revision, kind and the item it belongs to",
+                      "title": "Retained Base"
+                    },
+                    "pending": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E74a: while state is 'sending', the recorded request to the project (command_id, mode, generation, request); a retry sends it again",
+                      "title": "Pending"
+                    },
+                    "refusal": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E74a: why the project last refused a version: kind 'newer-version' (version, by) or 'same-content' (version), or 'refused'",
+                      "title": "Refusal"
+                    },
+                    "receipt": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "The terminal receipt of a published draft",
+                      "title": "Receipt"
                     },
                     "state": {
                       "title": "State",
@@ -39647,10 +39689,9 @@
                     "title": "Project Id",
                     "type": "string"
                   },
-                  "connection_id": {
+                  "id": {
                     "anyOf": [
                       {
-                        "maxLength": 80,
                         "type": "string"
                       },
                       {
@@ -39658,12 +39699,11 @@
                       }
                     ],
                     "default": null,
-                    "title": "Connection Id"
+                    "title": "Id"
                   },
-                  "key": {
+                  "selection_id": {
                     "anyOf": [
                       {
-                        "maxLength": 512,
                         "type": "string"
                       },
                       {
@@ -39671,12 +39711,13 @@
                       }
                     ],
                     "default": null,
-                    "title": "Key"
+                    "title": "Selection Id"
                   },
-                  "profile": {
+                  "asset_id": {
                     "anyOf": [
                       {
-                        "maxLength": 80,
+                        "maxLength": 160,
+                        "minLength": 1,
                         "type": "string"
                       },
                       {
@@ -39684,12 +39725,12 @@
                       }
                     ],
                     "default": null,
-                    "title": "Profile"
+                    "title": "Asset Id"
                   },
-                  "kind": {
+                  "revision": {
                     "anyOf": [
                       {
-                        "maxLength": 256,
+                        "pattern": "^[0-9a-f]{64}$",
                         "type": "string"
                       },
                       {
@@ -39697,7 +39738,7 @@
                       }
                     ],
                     "default": null,
-                    "title": "Kind"
+                    "title": "Revision"
                   },
                   "offset": {
                     "default": 0,
@@ -39708,102 +39749,10 @@
                   },
                   "limit": {
                     "default": 100,
-                    "maximum": 1000,
+                    "maximum": 500,
                     "minimum": 1,
                     "title": "Limit",
                     "type": "integer"
-                  },
-                  "id": {
-                    "anyOf": [
-                      {
-                        "maxLength": 64,
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Id"
-                  },
-                  "mode": {
-                    "default": "follow",
-                    "enum": [
-                      "follow",
-                      "pin"
-                    ],
-                    "title": "Mode",
-                    "type": "string"
-                  },
-                  "revision": {
-                    "anyOf": [
-                      {
-                        "maxLength": 128,
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Revision"
-                  },
-                  "preview_digest": {
-                    "anyOf": [
-                      {
-                        "pattern": "^[a-f0-9]{64}$",
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Preview Digest"
-                  },
-                  "acknowledge_unknowns": {
-                    "default": false,
-                    "title": "Acknowledge Unknowns",
-                    "type": "boolean"
-                  },
-                  "mapping": {
-                    "anyOf": [
-                      {
-                        "additionalProperties": true,
-                        "type": "object"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Mapping"
-                  },
-                  "context": {
-                    "anyOf": [
-                      {
-                        "additionalProperties": true,
-                        "type": "object"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Context"
-                  },
-                  "context_policy_revision": {
-                    "anyOf": [
-                      {
-                        "minimum": 0,
-                        "type": "integer"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Context Policy Revision"
                   },
                   "expected_generation": {
                     "default": 0,
@@ -39811,12 +39760,26 @@
                     "title": "Expected Generation",
                     "type": "integer"
                   },
-                  "scope": {
+                  "patches": {
+                    "items": {
+                      "additionalProperties": true,
+                      "type": "object"
+                    },
+                    "maxItems": 1000,
+                    "title": "Patches",
+                    "type": "array"
+                  },
+                  "destination": {
+                    "default": "portable",
+                    "title": "Destination",
+                    "type": "string"
+                  },
+                  "mode": {
                     "anyOf": [
                       {
                         "enum": [
-                          "all",
-                          "sample"
+                          "append",
+                          "separate"
                         ],
                         "type": "string"
                       },
@@ -39825,24 +39788,49 @@
                       }
                     ],
                     "default": null,
-                    "title": "Scope"
+                    "title": "Mode"
                   },
-                  "crs_choice": {
+                  "review_digest": {
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/CrsChoice"
+                        "type": "string"
                       },
                       {
                         "type": "null"
                       }
                     ],
-                    "default": null
+                    "default": null,
+                    "title": "Review Digest"
+                  },
+                  "field": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Field"
+                  },
+                  "delta": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Delta"
                   }
                 },
                 "required": [
                   "project_id"
                 ],
-                "title": "Request",
+                "title": "EditRequest",
                 "type": "object"
               }
             }
@@ -39962,10 +39950,9 @@
                     "title": "Project Id",
                     "type": "string"
                   },
-                  "connection_id": {
+                  "id": {
                     "anyOf": [
                       {
-                        "maxLength": 80,
                         "type": "string"
                       },
                       {
@@ -39973,12 +39960,11 @@
                       }
                     ],
                     "default": null,
-                    "title": "Connection Id"
+                    "title": "Id"
                   },
-                  "key": {
+                  "selection_id": {
                     "anyOf": [
                       {
-                        "maxLength": 512,
                         "type": "string"
                       },
                       {
@@ -39986,12 +39972,13 @@
                       }
                     ],
                     "default": null,
-                    "title": "Key"
+                    "title": "Selection Id"
                   },
-                  "profile": {
+                  "asset_id": {
                     "anyOf": [
                       {
-                        "maxLength": 80,
+                        "maxLength": 160,
+                        "minLength": 1,
                         "type": "string"
                       },
                       {
@@ -39999,12 +39986,12 @@
                       }
                     ],
                     "default": null,
-                    "title": "Profile"
+                    "title": "Asset Id"
                   },
-                  "kind": {
+                  "revision": {
                     "anyOf": [
                       {
-                        "maxLength": 256,
+                        "pattern": "^[0-9a-f]{64}$",
                         "type": "string"
                       },
                       {
@@ -40012,7 +39999,7 @@
                       }
                     ],
                     "default": null,
-                    "title": "Kind"
+                    "title": "Revision"
                   },
                   "offset": {
                     "default": 0,
@@ -40023,102 +40010,10 @@
                   },
                   "limit": {
                     "default": 100,
-                    "maximum": 1000,
+                    "maximum": 500,
                     "minimum": 1,
                     "title": "Limit",
                     "type": "integer"
-                  },
-                  "id": {
-                    "anyOf": [
-                      {
-                        "maxLength": 64,
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Id"
-                  },
-                  "mode": {
-                    "default": "follow",
-                    "enum": [
-                      "follow",
-                      "pin"
-                    ],
-                    "title": "Mode",
-                    "type": "string"
-                  },
-                  "revision": {
-                    "anyOf": [
-                      {
-                        "maxLength": 128,
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Revision"
-                  },
-                  "preview_digest": {
-                    "anyOf": [
-                      {
-                        "pattern": "^[a-f0-9]{64}$",
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Preview Digest"
-                  },
-                  "acknowledge_unknowns": {
-                    "default": false,
-                    "title": "Acknowledge Unknowns",
-                    "type": "boolean"
-                  },
-                  "mapping": {
-                    "anyOf": [
-                      {
-                        "additionalProperties": true,
-                        "type": "object"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Mapping"
-                  },
-                  "context": {
-                    "anyOf": [
-                      {
-                        "additionalProperties": true,
-                        "type": "object"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Context"
-                  },
-                  "context_policy_revision": {
-                    "anyOf": [
-                      {
-                        "minimum": 0,
-                        "type": "integer"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Context Policy Revision"
                   },
                   "expected_generation": {
                     "default": 0,
@@ -40126,12 +40021,26 @@
                     "title": "Expected Generation",
                     "type": "integer"
                   },
-                  "scope": {
+                  "patches": {
+                    "items": {
+                      "additionalProperties": true,
+                      "type": "object"
+                    },
+                    "maxItems": 1000,
+                    "title": "Patches",
+                    "type": "array"
+                  },
+                  "destination": {
+                    "default": "portable",
+                    "title": "Destination",
+                    "type": "string"
+                  },
+                  "mode": {
                     "anyOf": [
                       {
                         "enum": [
-                          "all",
-                          "sample"
+                          "append",
+                          "separate"
                         ],
                         "type": "string"
                       },
@@ -40140,24 +40049,49 @@
                       }
                     ],
                     "default": null,
-                    "title": "Scope"
+                    "title": "Mode"
                   },
-                  "crs_choice": {
+                  "review_digest": {
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/CrsChoice"
+                        "type": "string"
                       },
                       {
                         "type": "null"
                       }
                     ],
-                    "default": null
+                    "default": null,
+                    "title": "Review Digest"
+                  },
+                  "field": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Field"
+                  },
+                  "delta": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Delta"
                   }
                 },
                 "required": [
                   "project_id"
                 ],
-                "title": "Request",
+                "title": "EditRequest",
                 "type": "object"
               }
             }
@@ -40245,8 +40179,72 @@
                       "type": "string"
                     },
                     "selection_id": {
-                      "title": "Selection Id",
-                      "type": "string"
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "The connected source the draft started from; null for a draft of a kept file or result (E74a)",
+                      "title": "Selection Id"
+                    },
+                    "retained_base": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E74a: the kept copy, upload or result version the draft started from: asset_id, revision, kind and the item it belongs to",
+                      "title": "Retained Base"
+                    },
+                    "pending": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E74a: while state is 'sending', the recorded request to the project (command_id, mode, generation, request); a retry sends it again",
+                      "title": "Pending"
+                    },
+                    "refusal": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E74a: why the project last refused a version: kind 'newer-version' (version, by) or 'same-content' (version), or 'refused'",
+                      "title": "Refusal"
+                    },
+                    "receipt": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "The terminal receipt of a published draft",
+                      "title": "Receipt"
                     },
                     "state": {
                       "title": "State",
@@ -40342,10 +40340,9 @@
                     "title": "Project Id",
                     "type": "string"
                   },
-                  "connection_id": {
+                  "id": {
                     "anyOf": [
                       {
-                        "maxLength": 80,
                         "type": "string"
                       },
                       {
@@ -40353,12 +40350,11 @@
                       }
                     ],
                     "default": null,
-                    "title": "Connection Id"
+                    "title": "Id"
                   },
-                  "key": {
+                  "selection_id": {
                     "anyOf": [
                       {
-                        "maxLength": 512,
                         "type": "string"
                       },
                       {
@@ -40366,12 +40362,13 @@
                       }
                     ],
                     "default": null,
-                    "title": "Key"
+                    "title": "Selection Id"
                   },
-                  "profile": {
+                  "asset_id": {
                     "anyOf": [
                       {
-                        "maxLength": 80,
+                        "maxLength": 160,
+                        "minLength": 1,
                         "type": "string"
                       },
                       {
@@ -40379,12 +40376,12 @@
                       }
                     ],
                     "default": null,
-                    "title": "Profile"
+                    "title": "Asset Id"
                   },
-                  "kind": {
+                  "revision": {
                     "anyOf": [
                       {
-                        "maxLength": 256,
+                        "pattern": "^[0-9a-f]{64}$",
                         "type": "string"
                       },
                       {
@@ -40392,7 +40389,7 @@
                       }
                     ],
                     "default": null,
-                    "title": "Kind"
+                    "title": "Revision"
                   },
                   "offset": {
                     "default": 0,
@@ -40403,102 +40400,10 @@
                   },
                   "limit": {
                     "default": 100,
-                    "maximum": 1000,
+                    "maximum": 500,
                     "minimum": 1,
                     "title": "Limit",
                     "type": "integer"
-                  },
-                  "id": {
-                    "anyOf": [
-                      {
-                        "maxLength": 64,
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Id"
-                  },
-                  "mode": {
-                    "default": "follow",
-                    "enum": [
-                      "follow",
-                      "pin"
-                    ],
-                    "title": "Mode",
-                    "type": "string"
-                  },
-                  "revision": {
-                    "anyOf": [
-                      {
-                        "maxLength": 128,
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Revision"
-                  },
-                  "preview_digest": {
-                    "anyOf": [
-                      {
-                        "pattern": "^[a-f0-9]{64}$",
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Preview Digest"
-                  },
-                  "acknowledge_unknowns": {
-                    "default": false,
-                    "title": "Acknowledge Unknowns",
-                    "type": "boolean"
-                  },
-                  "mapping": {
-                    "anyOf": [
-                      {
-                        "additionalProperties": true,
-                        "type": "object"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Mapping"
-                  },
-                  "context": {
-                    "anyOf": [
-                      {
-                        "additionalProperties": true,
-                        "type": "object"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Context"
-                  },
-                  "context_policy_revision": {
-                    "anyOf": [
-                      {
-                        "minimum": 0,
-                        "type": "integer"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Context Policy Revision"
                   },
                   "expected_generation": {
                     "default": 0,
@@ -40506,12 +40411,26 @@
                     "title": "Expected Generation",
                     "type": "integer"
                   },
-                  "scope": {
+                  "patches": {
+                    "items": {
+                      "additionalProperties": true,
+                      "type": "object"
+                    },
+                    "maxItems": 1000,
+                    "title": "Patches",
+                    "type": "array"
+                  },
+                  "destination": {
+                    "default": "portable",
+                    "title": "Destination",
+                    "type": "string"
+                  },
+                  "mode": {
                     "anyOf": [
                       {
                         "enum": [
-                          "all",
-                          "sample"
+                          "append",
+                          "separate"
                         ],
                         "type": "string"
                       },
@@ -40520,24 +40439,49 @@
                       }
                     ],
                     "default": null,
-                    "title": "Scope"
+                    "title": "Mode"
                   },
-                  "crs_choice": {
+                  "review_digest": {
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/CrsChoice"
+                        "type": "string"
                       },
                       {
                         "type": "null"
                       }
                     ],
-                    "default": null
+                    "default": null,
+                    "title": "Review Digest"
+                  },
+                  "field": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Field"
+                  },
+                  "delta": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Delta"
                   }
                 },
                 "required": [
                   "project_id"
                 ],
-                "title": "Request",
+                "title": "EditRequest",
                 "type": "object"
               }
             }
@@ -40612,6 +40556,61 @@
                       "title": "Destinations",
                       "type": "array"
                     },
+                    "destination": {
+                      "description": "E74a: the destination this review is for; publishing elsewhere needs its own review",
+                      "title": "Destination",
+                      "type": "string"
+                    },
+                    "modes": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "enum": [
+                              "append",
+                              "separate"
+                            ],
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E74a, destination project: 'append' (the next version of the result the draft started from) when the caller may add one, and 'separate' (a new item)",
+                      "title": "Modes"
+                    },
+                    "mode": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "append",
+                            "separate"
+                          ],
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E74a, destination project: the mode this review is for",
+                      "title": "Mode"
+                    },
+                    "name": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E74a, destination project: the name the item is kept under",
+                      "title": "Name"
+                    },
                     "review_digest": {
                       "title": "Review Digest",
                       "type": "string"
@@ -40624,6 +40623,7 @@
                     "sha256",
                     "media_type",
                     "destinations",
+                    "destination",
                     "review_digest"
                   ],
                   "title": "SourcesDraftPreviewAnswer",
@@ -40692,10 +40692,9 @@
                     "title": "Project Id",
                     "type": "string"
                   },
-                  "connection_id": {
+                  "id": {
                     "anyOf": [
                       {
-                        "maxLength": 80,
                         "type": "string"
                       },
                       {
@@ -40703,12 +40702,11 @@
                       }
                     ],
                     "default": null,
-                    "title": "Connection Id"
+                    "title": "Id"
                   },
-                  "key": {
+                  "selection_id": {
                     "anyOf": [
                       {
-                        "maxLength": 512,
                         "type": "string"
                       },
                       {
@@ -40716,12 +40714,13 @@
                       }
                     ],
                     "default": null,
-                    "title": "Key"
+                    "title": "Selection Id"
                   },
-                  "profile": {
+                  "asset_id": {
                     "anyOf": [
                       {
-                        "maxLength": 80,
+                        "maxLength": 160,
+                        "minLength": 1,
                         "type": "string"
                       },
                       {
@@ -40729,12 +40728,12 @@
                       }
                     ],
                     "default": null,
-                    "title": "Profile"
+                    "title": "Asset Id"
                   },
-                  "kind": {
+                  "revision": {
                     "anyOf": [
                       {
-                        "maxLength": 256,
+                        "pattern": "^[0-9a-f]{64}$",
                         "type": "string"
                       },
                       {
@@ -40742,7 +40741,7 @@
                       }
                     ],
                     "default": null,
-                    "title": "Kind"
+                    "title": "Revision"
                   },
                   "offset": {
                     "default": 0,
@@ -40753,102 +40752,10 @@
                   },
                   "limit": {
                     "default": 100,
-                    "maximum": 1000,
+                    "maximum": 500,
                     "minimum": 1,
                     "title": "Limit",
                     "type": "integer"
-                  },
-                  "id": {
-                    "anyOf": [
-                      {
-                        "maxLength": 64,
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Id"
-                  },
-                  "mode": {
-                    "default": "follow",
-                    "enum": [
-                      "follow",
-                      "pin"
-                    ],
-                    "title": "Mode",
-                    "type": "string"
-                  },
-                  "revision": {
-                    "anyOf": [
-                      {
-                        "maxLength": 128,
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Revision"
-                  },
-                  "preview_digest": {
-                    "anyOf": [
-                      {
-                        "pattern": "^[a-f0-9]{64}$",
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Preview Digest"
-                  },
-                  "acknowledge_unknowns": {
-                    "default": false,
-                    "title": "Acknowledge Unknowns",
-                    "type": "boolean"
-                  },
-                  "mapping": {
-                    "anyOf": [
-                      {
-                        "additionalProperties": true,
-                        "type": "object"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Mapping"
-                  },
-                  "context": {
-                    "anyOf": [
-                      {
-                        "additionalProperties": true,
-                        "type": "object"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Context"
-                  },
-                  "context_policy_revision": {
-                    "anyOf": [
-                      {
-                        "minimum": 0,
-                        "type": "integer"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Context Policy Revision"
                   },
                   "expected_generation": {
                     "default": 0,
@@ -40856,12 +40763,26 @@
                     "title": "Expected Generation",
                     "type": "integer"
                   },
-                  "scope": {
+                  "patches": {
+                    "items": {
+                      "additionalProperties": true,
+                      "type": "object"
+                    },
+                    "maxItems": 1000,
+                    "title": "Patches",
+                    "type": "array"
+                  },
+                  "destination": {
+                    "default": "portable",
+                    "title": "Destination",
+                    "type": "string"
+                  },
+                  "mode": {
                     "anyOf": [
                       {
                         "enum": [
-                          "all",
-                          "sample"
+                          "append",
+                          "separate"
                         ],
                         "type": "string"
                       },
@@ -40870,24 +40791,49 @@
                       }
                     ],
                     "default": null,
-                    "title": "Scope"
+                    "title": "Mode"
                   },
-                  "crs_choice": {
+                  "review_digest": {
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/CrsChoice"
+                        "type": "string"
                       },
                       {
                         "type": "null"
                       }
                     ],
-                    "default": null
+                    "default": null,
+                    "title": "Review Digest"
+                  },
+                  "field": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Field"
+                  },
+                  "delta": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Delta"
                   }
                 },
                 "required": [
                   "project_id"
                 ],
-                "title": "Request",
+                "title": "EditRequest",
                 "type": "object"
               }
             }
@@ -40985,6 +40931,37 @@
                       ],
                       "default": null,
                       "title": "Base Revision"
+                    },
+                    "mode": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "append",
+                            "separate"
+                          ],
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E74a, destination project: next version or separate item",
+                      "title": "Mode"
+                    },
+                    "publication": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E74a, destination project: the derive receipt (asset_id, revision, revision_number, command_id, ...)",
+                      "title": "Publication"
                     }
                   },
                   "required": [
@@ -41057,10 +41034,9 @@
                     "title": "Project Id",
                     "type": "string"
                   },
-                  "connection_id": {
+                  "id": {
                     "anyOf": [
                       {
-                        "maxLength": 80,
                         "type": "string"
                       },
                       {
@@ -41068,12 +41044,11 @@
                       }
                     ],
                     "default": null,
-                    "title": "Connection Id"
+                    "title": "Id"
                   },
-                  "key": {
+                  "selection_id": {
                     "anyOf": [
                       {
-                        "maxLength": 512,
                         "type": "string"
                       },
                       {
@@ -41081,12 +41056,13 @@
                       }
                     ],
                     "default": null,
-                    "title": "Key"
+                    "title": "Selection Id"
                   },
-                  "profile": {
+                  "asset_id": {
                     "anyOf": [
                       {
-                        "maxLength": 80,
+                        "maxLength": 160,
+                        "minLength": 1,
                         "type": "string"
                       },
                       {
@@ -41094,12 +41070,12 @@
                       }
                     ],
                     "default": null,
-                    "title": "Profile"
+                    "title": "Asset Id"
                   },
-                  "kind": {
+                  "revision": {
                     "anyOf": [
                       {
-                        "maxLength": 256,
+                        "pattern": "^[0-9a-f]{64}$",
                         "type": "string"
                       },
                       {
@@ -41107,7 +41083,7 @@
                       }
                     ],
                     "default": null,
-                    "title": "Kind"
+                    "title": "Revision"
                   },
                   "offset": {
                     "default": 0,
@@ -41118,15 +41094,237 @@
                   },
                   "limit": {
                     "default": 100,
-                    "maximum": 1000,
+                    "maximum": 500,
                     "minimum": 1,
                     "title": "Limit",
                     "type": "integer"
                   },
+                  "expected_generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Expected Generation",
+                    "type": "integer"
+                  },
+                  "patches": {
+                    "items": {
+                      "additionalProperties": true,
+                      "type": "object"
+                    },
+                    "maxItems": 1000,
+                    "title": "Patches",
+                    "type": "array"
+                  },
+                  "destination": {
+                    "default": "portable",
+                    "title": "Destination",
+                    "type": "string"
+                  },
+                  "mode": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "append",
+                          "separate"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Mode"
+                  },
+                  "review_digest": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Review Digest"
+                  },
+                  "field": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Field"
+                  },
+                  "delta": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Delta"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "EditRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/sources/draft-records": {
+      "post": {
+        "summary": "draft-records upstream source (write scope)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "rows": {
+                      "items": {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      "title": "Rows",
+                      "type": "array"
+                    },
+                    "columns": {
+                      "items": {
+                        "$ref": "#/components/schemas/SourceColumn"
+                      },
+                      "title": "Columns",
+                      "type": "array"
+                    },
+                    "kind": {
+                      "title": "Kind",
+                      "type": "string"
+                    },
+                    "context": {
+                      "additionalProperties": true,
+                      "title": "Context",
+                      "type": "object"
+                    },
+                    "total": {
+                      "title": "Total",
+                      "type": "integer"
+                    },
+                    "reference": {
+                      "$ref": "#/components/schemas/SourceReference"
+                    }
+                  },
+                  "required": [
+                    "rows",
+                    "columns",
+                    "kind",
+                    "context",
+                    "total",
+                    "reference"
+                  ],
+                  "title": "SourceRecords",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
                   "id": {
                     "anyOf": [
                       {
-                        "maxLength": 64,
                         "type": "string"
                       },
                       {
@@ -41136,19 +41334,36 @@
                     "default": null,
                     "title": "Id"
                   },
-                  "mode": {
-                    "default": "follow",
-                    "enum": [
-                      "follow",
-                      "pin"
+                  "selection_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
                     ],
-                    "title": "Mode",
-                    "type": "string"
+                    "default": null,
+                    "title": "Selection Id"
+                  },
+                  "asset_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 160,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Asset Id"
                   },
                   "revision": {
                     "anyOf": [
                       {
-                        "maxLength": 128,
+                        "pattern": "^[0-9a-f]{64}$",
                         "type": "string"
                       },
                       {
@@ -41158,62 +41373,19 @@
                     "default": null,
                     "title": "Revision"
                   },
-                  "preview_digest": {
-                    "anyOf": [
-                      {
-                        "pattern": "^[a-f0-9]{64}$",
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Preview Digest"
+                  "offset": {
+                    "default": 0,
+                    "maximum": 100000,
+                    "minimum": 0,
+                    "title": "Offset",
+                    "type": "integer"
                   },
-                  "acknowledge_unknowns": {
-                    "default": false,
-                    "title": "Acknowledge Unknowns",
-                    "type": "boolean"
-                  },
-                  "mapping": {
-                    "anyOf": [
-                      {
-                        "additionalProperties": true,
-                        "type": "object"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Mapping"
-                  },
-                  "context": {
-                    "anyOf": [
-                      {
-                        "additionalProperties": true,
-                        "type": "object"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Context"
-                  },
-                  "context_policy_revision": {
-                    "anyOf": [
-                      {
-                        "minimum": 0,
-                        "type": "integer"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Context Policy Revision"
+                  "limit": {
+                    "default": 100,
+                    "maximum": 500,
+                    "minimum": 1,
+                    "title": "Limit",
+                    "type": "integer"
                   },
                   "expected_generation": {
                     "default": 0,
@@ -41221,12 +41393,26 @@
                     "title": "Expected Generation",
                     "type": "integer"
                   },
-                  "scope": {
+                  "patches": {
+                    "items": {
+                      "additionalProperties": true,
+                      "type": "object"
+                    },
+                    "maxItems": 1000,
+                    "title": "Patches",
+                    "type": "array"
+                  },
+                  "destination": {
+                    "default": "portable",
+                    "title": "Destination",
+                    "type": "string"
+                  },
+                  "mode": {
                     "anyOf": [
                       {
                         "enum": [
-                          "all",
-                          "sample"
+                          "append",
+                          "separate"
                         ],
                         "type": "string"
                       },
@@ -41235,24 +41421,49 @@
                       }
                     ],
                     "default": null,
-                    "title": "Scope"
+                    "title": "Mode"
                   },
-                  "crs_choice": {
+                  "review_digest": {
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/CrsChoice"
+                        "type": "string"
                       },
                       {
                         "type": "null"
                       }
                     ],
-                    "default": null
+                    "default": null,
+                    "title": "Review Digest"
+                  },
+                  "field": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Field"
+                  },
+                  "delta": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Delta"
                   }
                 },
                 "required": [
                   "project_id"
                 ],
-                "title": "Request",
+                "title": "EditRequest",
                 "type": "object"
               }
             }
@@ -41340,8 +41551,72 @@
                       "type": "string"
                     },
                     "selection_id": {
-                      "title": "Selection Id",
-                      "type": "string"
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "The connected source the draft started from; null for a draft of a kept file or result (E74a)",
+                      "title": "Selection Id"
+                    },
+                    "retained_base": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E74a: the kept copy, upload or result version the draft started from: asset_id, revision, kind and the item it belongs to",
+                      "title": "Retained Base"
+                    },
+                    "pending": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E74a: while state is 'sending', the recorded request to the project (command_id, mode, generation, request); a retry sends it again",
+                      "title": "Pending"
+                    },
+                    "refusal": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E74a: why the project last refused a version: kind 'newer-version' (version, by) or 'same-content' (version), or 'refused'",
+                      "title": "Refusal"
+                    },
+                    "receipt": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "The terminal receipt of a published draft",
+                      "title": "Receipt"
                     },
                     "state": {
                       "title": "State",
@@ -41437,10 +41712,9 @@
                     "title": "Project Id",
                     "type": "string"
                   },
-                  "connection_id": {
+                  "id": {
                     "anyOf": [
                       {
-                        "maxLength": 80,
                         "type": "string"
                       },
                       {
@@ -41448,12 +41722,11 @@
                       }
                     ],
                     "default": null,
-                    "title": "Connection Id"
+                    "title": "Id"
                   },
-                  "key": {
+                  "selection_id": {
                     "anyOf": [
                       {
-                        "maxLength": 512,
                         "type": "string"
                       },
                       {
@@ -41461,12 +41734,13 @@
                       }
                     ],
                     "default": null,
-                    "title": "Key"
+                    "title": "Selection Id"
                   },
-                  "profile": {
+                  "asset_id": {
                     "anyOf": [
                       {
-                        "maxLength": 80,
+                        "maxLength": 160,
+                        "minLength": 1,
                         "type": "string"
                       },
                       {
@@ -41474,12 +41748,12 @@
                       }
                     ],
                     "default": null,
-                    "title": "Profile"
+                    "title": "Asset Id"
                   },
-                  "kind": {
+                  "revision": {
                     "anyOf": [
                       {
-                        "maxLength": 256,
+                        "pattern": "^[0-9a-f]{64}$",
                         "type": "string"
                       },
                       {
@@ -41487,7 +41761,7 @@
                       }
                     ],
                     "default": null,
-                    "title": "Kind"
+                    "title": "Revision"
                   },
                   "offset": {
                     "default": 0,
@@ -41498,102 +41772,10 @@
                   },
                   "limit": {
                     "default": 100,
-                    "maximum": 1000,
+                    "maximum": 500,
                     "minimum": 1,
                     "title": "Limit",
                     "type": "integer"
-                  },
-                  "id": {
-                    "anyOf": [
-                      {
-                        "maxLength": 64,
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Id"
-                  },
-                  "mode": {
-                    "default": "follow",
-                    "enum": [
-                      "follow",
-                      "pin"
-                    ],
-                    "title": "Mode",
-                    "type": "string"
-                  },
-                  "revision": {
-                    "anyOf": [
-                      {
-                        "maxLength": 128,
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Revision"
-                  },
-                  "preview_digest": {
-                    "anyOf": [
-                      {
-                        "pattern": "^[a-f0-9]{64}$",
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Preview Digest"
-                  },
-                  "acknowledge_unknowns": {
-                    "default": false,
-                    "title": "Acknowledge Unknowns",
-                    "type": "boolean"
-                  },
-                  "mapping": {
-                    "anyOf": [
-                      {
-                        "additionalProperties": true,
-                        "type": "object"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Mapping"
-                  },
-                  "context": {
-                    "anyOf": [
-                      {
-                        "additionalProperties": true,
-                        "type": "object"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Context"
-                  },
-                  "context_policy_revision": {
-                    "anyOf": [
-                      {
-                        "minimum": 0,
-                        "type": "integer"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Context Policy Revision"
                   },
                   "expected_generation": {
                     "default": 0,
@@ -41601,12 +41783,26 @@
                     "title": "Expected Generation",
                     "type": "integer"
                   },
-                  "scope": {
+                  "patches": {
+                    "items": {
+                      "additionalProperties": true,
+                      "type": "object"
+                    },
+                    "maxItems": 1000,
+                    "title": "Patches",
+                    "type": "array"
+                  },
+                  "destination": {
+                    "default": "portable",
+                    "title": "Destination",
+                    "type": "string"
+                  },
+                  "mode": {
                     "anyOf": [
                       {
                         "enum": [
-                          "all",
-                          "sample"
+                          "append",
+                          "separate"
                         ],
                         "type": "string"
                       },
@@ -41615,24 +41811,49 @@
                       }
                     ],
                     "default": null,
-                    "title": "Scope"
+                    "title": "Mode"
                   },
-                  "crs_choice": {
+                  "review_digest": {
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/CrsChoice"
+                        "type": "string"
                       },
                       {
                         "type": "null"
                       }
                     ],
-                    "default": null
+                    "default": null,
+                    "title": "Review Digest"
+                  },
+                  "field": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Field"
+                  },
+                  "delta": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Delta"
                   }
                 },
                 "required": [
                   "project_id"
                 ],
-                "title": "Request",
+                "title": "EditRequest",
                 "type": "object"
               }
             }

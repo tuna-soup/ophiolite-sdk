@@ -1326,6 +1326,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/sources/draft-records",
+    "function": "postProjectsProjectSourcesDraftRecords",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/sources/draft-save",
     "function": "postProjectsProjectSourcesDraftSave",
     "request": "schema",
