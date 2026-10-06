@@ -72,3 +72,24 @@ def test_pages_past_a_hundred_wells_and_an_empty_box(web):
     for n in range(105):alice.create_entity('well','P%03d'%n,provisional=True,command_id='p%d'%n)
     assert len(alice.wells())==105 and len(alice.wells(limit=7))==7
     assert list(alice.wells(bbox=[0,0,1,1],bbox_crs='EPSG:28992'))==[]
+
+
+
+# E44: ED50 / UTM zone 31N. Synthetic positions in the Dutch offshore (whole kilometres); the oracle is literals: the
+# stored extrema, the box they fall in, and a longitude/latitude box drawn from the zone's geometry (central meridian
+# 3 E; 500 km east is the meridian, each 100 km east about 1.5 degrees at 53 N; northing 5,900 km is about 53.2 N).
+ED50=[('ED50-A',600000,5940000),('ED50-B',580000,5920000),('ED50-C',560000,5900000)]
+
+
+def test_ed50_utm31_is_a_crs_you_can_ask_for(web):
+    alice=client(web,'alice')
+    for n,(name,x,y) in enumerate(ED50):
+        well=alice.create_entity('well',name,provisional=True,command_id='e%d'%n)
+        up=alice.upload_data(json.dumps({'x':x,'y':y,'crs':'EPSG:23031','elevation_reference':'KB'}).encode(),profile='well-location/1',name='ED50 %d'%n,
+                             attribution='Synthetic',audience=[],rights_confirmed=True,command_id='u%d'%n)
+        alice.of_entity(up.asset_id,up.revision,well,command_id='o%d'%n)
+    assert alice.extent('EPSG:23031')=={'crs':'EPSG:23031','bbox':[560000,5900000,600000,5940000],'count':3,'untransformed':0}
+    assert sorted(w.name for w in alice.wells(bbox=[570000,5910000,620000,5950000],bbox_crs='EPSG:23031'))==['ED50-A','ED50-B']
+    placed={w.name:(w.location['x'],w.location['y']) for w in alice.wells(crs='OGC:CRS84')}
+    assert all(3.8<lon<4.6 and 53.2<lat<53.7 for lon,lat in placed.values()) and placed['ED50-A'][0]>placed['ED50-C'][0], placed
+    with pytest.raises(Refused,match='EPSG:32631, EPSG:23031'):alice.extent('EPSG:2154')

@@ -14,7 +14,7 @@ def checked(model, answer):
     except (ValidationError, ValueError, TypeError): raise VerificationFailed('The well listing answered outside its documented shape.') from None
     return answer
 
-CRSS = ('OGC:CRS84', 'EPSG:4326', 'EPSG:3857', 'EPSG:28992', 'EPSG:32631')
+CRSS = ('OGC:CRS84', 'EPSG:4326', 'EPSG:3857', 'EPSG:28992', 'EPSG:32631', 'EPSG:23031')  # E44: ED50 / UTM zone 31N
 
 
 class Well:
