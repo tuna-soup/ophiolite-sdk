@@ -1,6 +1,6 @@
 {
-  "platform_commit": "9fb1e1582d6491f94244b2ba115b9d79eb492838",
-  "contracts_tree": "9158a58947694174c8b44e2aa6a26cc97cb3cf30",
+  "platform_commit": "f6ed6f7b7bec243ee5d35730b6f1d7486f20b795",
+  "contracts_tree": "cafde96c64b31e0ffdd8faa635c87fb8638cdb62",
   "registry_version": "1.23.0",
   "files": {
     "README.md": "22603a92067aff2e50da3839866c8daf497ec6bc46a182f23b3d5c7c7b6b88c6",
@@ -103,7 +103,7 @@
     "generated/v1/ophiolite-contracts.ts": "d43d741042c61a65c78ada417eda1bc975fcad8ec6b5aa840edf8f09d213c9b1",
     "mappings/v1/application-curve-to-well-curve.json": "aa2e1c1925f68aede0b3c5e7d8d7e7921ad69ea35733bc2e7d936a21c233c0dc",
     "mappings/v1/typed-standards.json": "7e5a72e2dd20bea29b7041a35b047093c1467274dcf801cc684538e8997f5c2d",
-    "openapi/v1/openapi.json": "7f67cc82b007b513699200af4d97b0ac52f4edc0b237c11eb93cc9ec18e0c8d6",
+    "openapi/v1/openapi.json": "bc7adb16910b6e4995d3ed20c447ac94c1ec50cf5da75071dc84f72e5fe0d758",
     "openapi/v1/scientific-assets.paths.json": "0f414e5b768f406eee18af26493d1a15a6404726b0b581989959b98ca4cb6249",
     "profile-schema.json": "7bf3c916757a5715a7dd9c56d09537d2108716d017e63443ed2f8e6ea74c2ab1",
     "profiles/v1/application-curve.json": "f2783cc80d26fb8a40e2d1e5f4ef24ddbf77b6f9adf217436904b160b6b5ce87",
@@ -144,7 +144,7 @@
     "profiles/v1/well-tops.json": "7c7d636d50460a3733268fad808ba47f81234a2b8feb619f07c3d1212d73dd88",
     "registry-schema.json": "03e5e729d3482c0d0e93e51e3465e23e56b2dae5238c0ac6d298d109bdd5730d",
     "registry.json": "4d7ad703f2384051806a3a4ff8c8fbb4a51d809e11a5d193451d66ecf2a62ee6",
-    "relationships/v1/README.md": "3e62aa1343832024127b199acba11cc1bdfdc87361137d4ac33984f905605609",
+    "relationships/v1/README.md": "57c5c5aee0ca2df5193dbcf84c9d4b0c993dd231aa51216b43a8dfb24b1c5d6e",
     "relationships/v1/lineage-schema.json": "8cc2d5a05b49dc3df96a7b495d3952c55d6f3bbbb8530f9bbc032b770797b431",
     "relationships/v1/registry-schema.json": "b1d7fd76574a11e7ba74ff1fa4f877bde6c0ee8a287dfaf8083d9cda67f3fa91",
     "relationships/v1/registry.json": "2e2f96b0807a660cd87882f1eb00b4a38eae4264e454b83224fa27a799096f7f",
