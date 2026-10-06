@@ -17831,7 +17831,7 @@
                       }
                     ],
                     "default": null,
-                    "description": "Required with bbox: OGC:CRS84, EPSG:4326, EPSG:3857, EPSG:28992 or EPSG:32631",
+                    "description": "Required with bbox: OGC:CRS84, EPSG:4326, EPSG:3857, EPSG:28992, EPSG:32631 or EPSG:23031",
                     "title": "Bbox Crs"
                   },
                   "crs": {
@@ -37278,6 +37278,17 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -37680,6 +37691,17 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -38012,6 +38034,17 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -38325,6 +38358,17 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -38644,6 +38688,17 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -39004,6 +39059,17 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -39373,6 +39439,17 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -39749,6 +39826,17 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -40053,6 +40141,17 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -40422,6 +40521,17 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -40761,6 +40871,17 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -41115,6 +41236,17 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -41484,6 +41616,17 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -41792,6 +41935,17 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -42105,6 +42259,17 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -42606,6 +42771,17 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -42917,6 +43093,17 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -43270,6 +43457,17 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -43596,6 +43794,397 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "Request",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/sources/mapping-preview": {
+      "post": {
+        "summary": "mapping-preview upstream source (read scope)",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "grant",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "sources/mapping-preview (E44): where the mapping puts the table's wells, for display only. Nothing is written and\nno identifier or name is returned.",
+                  "properties": {
+                    "points": {
+                      "description": "At most 2,000 [longitude, latitude], by even stride over the readable rows in identifier order.",
+                      "items": {
+                        "items": {
+                          "type": "number"
+                        },
+                        "type": "array"
+                      },
+                      "title": "Points",
+                      "type": "array"
+                    },
+                    "extent": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "type": "number"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "[west, south, east, north] of the points shown (west > east across the antimeridian); null without points.",
+                      "title": "Extent"
+                    },
+                    "extent_of": {
+                      "const": "sample",
+                      "description": "The extent describes the points shown, not every row.",
+                      "title": "Extent Of",
+                      "type": "string"
+                    },
+                    "readable": {
+                      "description": "Rows the mapping check finds ready (warnings included).",
+                      "title": "Readable",
+                      "type": "integer"
+                    },
+                    "placed": {
+                      "description": "Readable rows whose position converts to a finite longitude/latitude.",
+                      "title": "Placed",
+                      "type": "integer"
+                    },
+                    "unplaced": {
+                      "description": "Readable rows whose position has no finite result.",
+                      "title": "Unplaced",
+                      "type": "integer"
+                    },
+                    "sampled": {
+                      "description": "Readable rows the points were chosen from: all of them, or 2,000.",
+                      "title": "Sampled",
+                      "type": "integer"
+                    },
+                    "complete": {
+                      "description": "Every row was read.",
+                      "title": "Complete",
+                      "type": "boolean"
+                    },
+                    "report": {
+                      "$ref": "#/components/schemas/MappingCheckReport",
+                      "description": "E43: the mapping check of every row, with the unusual-area warning."
+                    }
+                  },
+                  "required": [
+                    "points",
+                    "extent",
+                    "extent_of",
+                    "readable",
+                    "placed",
+                    "unplaced",
+                    "sampled",
+                    "complete",
+                    "report"
+                  ],
+                  "title": "SourcesMappingPreviewAnswer",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "connection_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Connection Id"
+                  },
+                  "key": {
+                    "anyOf": [
+                      {
+                        "maxLength": 512,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Key"
+                  },
+                  "profile": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Profile"
+                  },
+                  "kind": {
+                    "anyOf": [
+                      {
+                        "maxLength": 256,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Kind"
+                  },
+                  "offset": {
+                    "default": 0,
+                    "maximum": 100000,
+                    "minimum": 0,
+                    "title": "Offset",
+                    "type": "integer"
+                  },
+                  "limit": {
+                    "default": 100,
+                    "maximum": 1000,
+                    "minimum": 1,
+                    "title": "Limit",
+                    "type": "integer"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "mode": {
+                    "default": "follow",
+                    "enum": [
+                      "follow",
+                      "pin"
+                    ],
+                    "title": "Mode",
+                    "type": "string"
+                  },
+                  "revision": {
+                    "anyOf": [
+                      {
+                        "maxLength": 128,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Revision"
+                  },
+                  "preview_digest": {
+                    "anyOf": [
+                      {
+                        "pattern": "^[a-f0-9]{64}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Preview Digest"
+                  },
+                  "acknowledge_unknowns": {
+                    "default": false,
+                    "title": "Acknowledge Unknowns",
+                    "type": "boolean"
+                  },
+                  "mapping": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Mapping"
+                  },
+                  "context": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Context"
+                  },
+                  "context_policy_revision": {
+                    "anyOf": [
+                      {
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Context Policy Revision"
+                  },
+                  "expected_generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Expected Generation",
+                    "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -43937,6 +44526,17 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -44029,6 +44629,18 @@
                       "default": null,
                       "description": "E43, with a scope: whether the mapping was saved (only a ready report saves).",
                       "title": "Saved"
+                    },
+                    "crs_basis": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/CrsBasis"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E44: present when the request sent crs_choice and the mapping was saved."
                     }
                   },
                   "required": [
@@ -44282,6 +44894,392 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "Request",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/sources/mapping-suggest": {
+      "post": {
+        "summary": "mapping-suggest upstream source (read scope)",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "grant",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "sources/mapping-suggest (E44): the systems the table's X/Y may be in, strongest grounds first. Nothing is written.",
+                  "properties": {
+                    "options": {
+                      "items": {
+                        "$ref": "#/components/schemas/CrsOption"
+                      },
+                      "title": "Options",
+                      "type": "array"
+                    },
+                    "preselected": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "Only a declaration, or a single system of your earlier reviews of this table; never a guess.",
+                      "title": "Preselected"
+                    },
+                    "conflict": {
+                      "description": "The declaration and your earlier review disagree; the declaration is preselected.",
+                      "title": "Conflict",
+                      "type": "boolean"
+                    },
+                    "readable": {
+                      "description": "Rows whose X and Y are numbers (the missing-value marker, blanks and text are not).",
+                      "title": "Readable",
+                      "type": "integer"
+                    },
+                    "rows": {
+                      "title": "Rows",
+                      "type": "integer"
+                    },
+                    "complete": {
+                      "description": "Every row was read (an import reads at most 100,000).",
+                      "title": "Complete",
+                      "type": "boolean"
+                    },
+                    "schema_digest": {
+                      "title": "Schema Digest",
+                      "type": "string"
+                    },
+                    "columns": {
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "description": "The X and Y columns judged: the request mapping's, else the suggested ones.",
+                      "title": "Columns",
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "options",
+                    "preselected",
+                    "conflict",
+                    "readable",
+                    "rows",
+                    "complete",
+                    "schema_digest",
+                    "columns"
+                  ],
+                  "title": "SourcesMappingSuggestAnswer",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "connection_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Connection Id"
+                  },
+                  "key": {
+                    "anyOf": [
+                      {
+                        "maxLength": 512,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Key"
+                  },
+                  "profile": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Profile"
+                  },
+                  "kind": {
+                    "anyOf": [
+                      {
+                        "maxLength": 256,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Kind"
+                  },
+                  "offset": {
+                    "default": 0,
+                    "maximum": 100000,
+                    "minimum": 0,
+                    "title": "Offset",
+                    "type": "integer"
+                  },
+                  "limit": {
+                    "default": 100,
+                    "maximum": 1000,
+                    "minimum": 1,
+                    "title": "Limit",
+                    "type": "integer"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "mode": {
+                    "default": "follow",
+                    "enum": [
+                      "follow",
+                      "pin"
+                    ],
+                    "title": "Mode",
+                    "type": "string"
+                  },
+                  "revision": {
+                    "anyOf": [
+                      {
+                        "maxLength": 128,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Revision"
+                  },
+                  "preview_digest": {
+                    "anyOf": [
+                      {
+                        "pattern": "^[a-f0-9]{64}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Preview Digest"
+                  },
+                  "acknowledge_unknowns": {
+                    "default": false,
+                    "title": "Acknowledge Unknowns",
+                    "type": "boolean"
+                  },
+                  "mapping": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Mapping"
+                  },
+                  "context": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Context"
+                  },
+                  "context_policy_revision": {
+                    "anyOf": [
+                      {
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Context Policy Revision"
+                  },
+                  "expected_generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Expected Generation",
+                    "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -44617,6 +45615,17 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -45044,6 +46053,17 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -45382,6 +46402,17 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -45717,6 +46748,17 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -46222,6 +47264,17 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -46649,6 +47702,17 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -47516,6 +48580,17 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -47938,6 +49013,17 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -48239,6 +49325,17 @@
                     ],
                     "default": null,
                     "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -53851,6 +54948,20 @@
                     "default": null,
                     "description": "start: the same id returns the same import; another body with it is refused.",
                     "title": "Command Id"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E44, preview and start: {confirmed}; required to be true for a guessed system. Omitted: the choice is recorded as yours.",
+                    "title": "Crs Choice"
                   }
                 },
                 "required": [
@@ -54059,6 +55170,20 @@
                     "default": null,
                     "description": "start: the same id returns the same import; another body with it is refused.",
                     "title": "Command Id"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E44, preview and start: {confirmed}; required to be true for a guessed system. Omitted: the choice is recorded as yours.",
+                    "title": "Crs Choice"
                   }
                 },
                 "required": [
@@ -54166,6 +55291,18 @@
                       "description": "The digest of the rows a start keeps.",
                       "title": "Input Revision",
                       "type": "string"
+                    },
+                    "crs_basis": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/CrsBasis"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E44: present when the request sent crs_choice."
                     }
                   },
                   "required": [
@@ -54332,6 +55469,20 @@
                     "default": null,
                     "description": "start: the same id returns the same import; another body with it is refused.",
                     "title": "Command Id"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E44, preview and start: {confirmed}; required to be true for a guessed system. Omitted: the choice is recorded as yours.",
+                    "title": "Crs Choice"
                   }
                 },
                 "required": [
@@ -54684,6 +55835,20 @@
                     "default": null,
                     "description": "start: the same id returns the same import; another body with it is refused.",
                     "title": "Command Id"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E44, preview and start: {confirmed}; required to be true for a guessed system. Omitted: the choice is recorded as yours.",
+                    "title": "Crs Choice"
                   }
                 },
                 "required": [
@@ -55036,6 +56201,20 @@
                     "default": null,
                     "description": "start: the same id returns the same import; another body with it is refused.",
                     "title": "Command Id"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E44, preview and start: {confirmed}; required to be true for a guessed system. Omitted: the choice is recorded as yours.",
+                    "title": "Crs Choice"
                   }
                 },
                 "required": [
@@ -55388,6 +56567,20 @@
                     "default": null,
                     "description": "start: the same id returns the same import; another body with it is refused.",
                     "title": "Command Id"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E44, preview and start: {confirmed}; required to be true for a guessed system. Omitted: the choice is recorded as yours.",
+                    "title": "Crs Choice"
                   }
                 },
                 "required": [
@@ -63268,7 +64461,8 @@
                                 "http://www.opengis.net/def/crs/EPSG/0/4326",
                                 "http://www.opengis.net/def/crs/EPSG/0/3857",
                                 "http://www.opengis.net/def/crs/EPSG/0/28992",
-                                "http://www.opengis.net/def/crs/EPSG/0/32631"
+                                "http://www.opengis.net/def/crs/EPSG/0/32631",
+                                "http://www.opengis.net/def/crs/EPSG/0/23031"
                               ]
                             }
                           },
@@ -63279,7 +64473,8 @@
                               "http://www.opengis.net/def/crs/EPSG/0/4326",
                               "http://www.opengis.net/def/crs/EPSG/0/3857",
                               "http://www.opengis.net/def/crs/EPSG/0/28992",
-                              "http://www.opengis.net/def/crs/EPSG/0/32631"
+                              "http://www.opengis.net/def/crs/EPSG/0/32631",
+                              "http://www.opengis.net/def/crs/EPSG/0/23031"
                             ]
                           },
                           "links": {
@@ -63331,7 +64526,8 @@
                                       "http://www.opengis.net/def/crs/EPSG/0/4326",
                                       "http://www.opengis.net/def/crs/EPSG/0/3857",
                                       "http://www.opengis.net/def/crs/EPSG/0/28992",
-                                      "http://www.opengis.net/def/crs/EPSG/0/32631"
+                                      "http://www.opengis.net/def/crs/EPSG/0/32631",
+                                      "http://www.opengis.net/def/crs/EPSG/0/23031"
                                     ]
                                   }
                                 }
@@ -63514,7 +64710,8 @@
                           "http://www.opengis.net/def/crs/EPSG/0/4326",
                           "http://www.opengis.net/def/crs/EPSG/0/3857",
                           "http://www.opengis.net/def/crs/EPSG/0/28992",
-                          "http://www.opengis.net/def/crs/EPSG/0/32631"
+                          "http://www.opengis.net/def/crs/EPSG/0/32631",
+                          "http://www.opengis.net/def/crs/EPSG/0/23031"
                         ]
                       }
                     },
@@ -63525,7 +64722,8 @@
                         "http://www.opengis.net/def/crs/EPSG/0/4326",
                         "http://www.opengis.net/def/crs/EPSG/0/3857",
                         "http://www.opengis.net/def/crs/EPSG/0/28992",
-                        "http://www.opengis.net/def/crs/EPSG/0/32631"
+                        "http://www.opengis.net/def/crs/EPSG/0/32631",
+                        "http://www.opengis.net/def/crs/EPSG/0/23031"
                       ]
                     },
                     "links": {
@@ -63577,7 +64775,8 @@
                                 "http://www.opengis.net/def/crs/EPSG/0/4326",
                                 "http://www.opengis.net/def/crs/EPSG/0/3857",
                                 "http://www.opengis.net/def/crs/EPSG/0/28992",
-                                "http://www.opengis.net/def/crs/EPSG/0/32631"
+                                "http://www.opengis.net/def/crs/EPSG/0/32631",
+                                "http://www.opengis.net/def/crs/EPSG/0/23031"
                               ]
                             }
                           }
@@ -63700,7 +64899,8 @@
                 "http://www.opengis.net/def/crs/EPSG/0/4326",
                 "http://www.opengis.net/def/crs/EPSG/0/3857",
                 "http://www.opengis.net/def/crs/EPSG/0/28992",
-                "http://www.opengis.net/def/crs/EPSG/0/32631"
+                "http://www.opengis.net/def/crs/EPSG/0/32631",
+                "http://www.opengis.net/def/crs/EPSG/0/23031"
               ]
             },
             "description": "The coordinates' CRS (default CRS84), in that CRS's axis order"
@@ -63732,7 +64932,8 @@
                 "http://www.opengis.net/def/crs/EPSG/0/4326",
                 "http://www.opengis.net/def/crs/EPSG/0/3857",
                 "http://www.opengis.net/def/crs/EPSG/0/28992",
-                "http://www.opengis.net/def/crs/EPSG/0/32631"
+                "http://www.opengis.net/def/crs/EPSG/0/32631",
+                "http://www.opengis.net/def/crs/EPSG/0/23031"
               ]
             },
             "description": "default CRS84"
@@ -64078,7 +65279,8 @@
                 "http://www.opengis.net/def/crs/EPSG/0/4326",
                 "http://www.opengis.net/def/crs/EPSG/0/3857",
                 "http://www.opengis.net/def/crs/EPSG/0/28992",
-                "http://www.opengis.net/def/crs/EPSG/0/32631"
+                "http://www.opengis.net/def/crs/EPSG/0/32631",
+                "http://www.opengis.net/def/crs/EPSG/0/23031"
               ]
             },
             "description": "The coordinates' CRS (default CRS84), in that CRS's axis order"
@@ -66528,6 +67730,43 @@
           }
         }
       },
+      "CoordinateSystem": {
+        "additionalProperties": false,
+        "description": "E44: one system a table mapping may declare (Connectors' catalogue).",
+        "properties": {
+          "code": {
+            "description": "The authority code, e.g. EPSG:28992.",
+            "title": "Code",
+            "type": "string"
+          },
+          "name": {
+            "description": "Its plain name, e.g. Amersfoort / RD New.",
+            "title": "Name",
+            "type": "string"
+          },
+          "unit": {
+            "enum": [
+              "degrees",
+              "metres"
+            ],
+            "title": "Unit",
+            "type": "string"
+          },
+          "geographic": {
+            "description": "X is longitude and Y latitude.",
+            "title": "Geographic",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "unit",
+          "geographic"
+        ],
+        "title": "CoordinateSystem",
+        "type": "object"
+      },
       "CorpusItem": {
         "additionalProperties": false,
         "properties": {
@@ -66571,6 +67810,209 @@
           "basis"
         ],
         "title": "CorpusItem",
+        "type": "object"
+      },
+      "CrsBasis": {
+        "additionalProperties": false,
+        "description": "E44: the grounds the server found for the system a mapping or import uses, recorded beside it.",
+        "properties": {
+          "class": {
+            "description": "declared (by the approved database), reviewed (your earlier mapping or finished import of this table with the same schema and X/Y), similar (a mapping of another table, or of this one before it changed), inferred (guessed from the column names or values), chosen (none of these).",
+            "enum": [
+              "declared",
+              "reviewed",
+              "similar",
+              "inferred",
+              "chosen"
+            ],
+            "title": "Class",
+            "type": "string"
+          },
+          "crs": {
+            "title": "Crs",
+            "type": "string"
+          },
+          "confirmed": {
+            "description": "The request confirmed the choice (required for an inferred system).",
+            "title": "Confirmed",
+            "type": "boolean"
+          },
+          "columns": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "description": "The X and Y columns.",
+            "title": "Columns",
+            "type": "object"
+          },
+          "schema_digest": {
+            "title": "Schema Digest",
+            "type": "string"
+          },
+          "provenance": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "reviewed: the mapping_version or import_id it was reviewed in.",
+            "title": "Provenance"
+          }
+        },
+        "required": [
+          "class",
+          "crs",
+          "confirmed",
+          "columns",
+          "schema_digest"
+        ],
+        "title": "CrsBasis",
+        "type": "object"
+      },
+      "CrsChoice": {
+        "additionalProperties": false,
+        "description": "E44: sent by a client that shows the grounds for the coordinate system; `confirmed` says the person confirmed a\nguessed one. A client that omits it is older than E44: its choice is recorded as the person's own.",
+        "properties": {
+          "confirmed": {
+            "title": "Confirmed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "confirmed"
+        ],
+        "title": "CrsChoice",
+        "type": "object"
+      },
+      "CrsGround": {
+        "additionalProperties": false,
+        "properties": {
+          "basis": {
+            "enum": [
+              "declared",
+              "reviewed",
+              "similar",
+              "inferred"
+            ],
+            "title": "Basis",
+            "type": "string"
+          },
+          "by": {
+            "anyOf": [
+              {
+                "enum": [
+                  "names",
+                  "values"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "inferred: from the column names, or from the values.",
+            "title": "By"
+          },
+          "inside": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "inferred by values: readable rows inside the system's extent.",
+            "title": "Inside"
+          },
+          "readable": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "inferred by values: readable rows.",
+            "title": "Readable"
+          },
+          "provenance": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "reviewed: each mapping_version or import_id, oldest first.",
+            "title": "Provenance"
+          }
+        },
+        "required": [
+          "basis"
+        ],
+        "title": "CrsGround",
+        "type": "object"
+      },
+      "CrsOption": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "basis": {
+            "description": "The strongest of its grounds.",
+            "enum": [
+              "declared",
+              "reviewed",
+              "similar",
+              "inferred"
+            ],
+            "title": "Basis",
+            "type": "string"
+          },
+          "grounds": {
+            "items": {
+              "$ref": "#/components/schemas/CrsGround"
+            },
+            "title": "Grounds",
+            "type": "array"
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "basis",
+          "grounds"
+        ],
+        "title": "CrsOption",
         "type": "object"
       },
       "CurveInspection": {
@@ -74449,6 +75891,26 @@
             },
             "title": "Versions",
             "type": "array"
+          },
+          "coordinate_systems": {
+            "description": "E44: the systems a mapping may declare.",
+            "items": {
+              "$ref": "#/components/schemas/CoordinateSystem"
+            },
+            "title": "Coordinate Systems",
+            "type": "array"
+          },
+          "declared_crs": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "E44: the approved database's declared system, if any.",
+            "title": "Declared Crs"
           }
         },
         "required": [
@@ -74461,7 +75923,9 @@
           "representation",
           "limits",
           "mapping",
-          "versions"
+          "versions",
+          "coordinate_systems",
+          "declared_crs"
         ],
         "title": "TableSchema",
         "type": "object"

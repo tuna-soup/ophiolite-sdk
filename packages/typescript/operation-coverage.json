@@ -1368,6 +1368,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/sources/mapping-preview",
+    "function": "postProjectsProjectSourcesMappingPreview",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/sources/mapping-report",
     "function": "postProjectsProjectSourcesMappingReport",
     "request": "schema",
@@ -1376,6 +1382,12 @@
   {
     "operation": "POST /api/v1/projects/{project}/sources/mapping-save",
     "function": "postProjectsProjectSourcesMappingSave",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/sources/mapping-suggest",
+    "function": "postProjectsProjectSourcesMappingSuggest",
     "request": "schema",
     "response": "schema"
   },
