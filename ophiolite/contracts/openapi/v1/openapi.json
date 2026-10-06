@@ -9549,6 +9549,369 @@
         }
       }
     },
+    "/api/v1/projects/{project}/applications/share-preview": {
+      "post": {
+        "summary": "share-preview application (write scope)",
+        "description": "Scope write; accepted principals: session, delegate, grant; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "grant",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E72c: what a share (or a change of who can see an original) would do, run and rolled back: nothing is saved.",
+                  "properties": {
+                    "told": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "People you may see who would gain read or reuse access; null when you may not list members.",
+                      "title": "Told"
+                    },
+                    "losing": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "People you may see who would lose read access; null when you may not list members.",
+                      "title": "Losing"
+                    }
+                  },
+                  "required": [
+                    "told",
+                    "losing"
+                  ],
+                  "title": "SharePreview",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "name": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "selection_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Selection Id"
+                  },
+                  "curve": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Curve",
+                    "type": "string"
+                  },
+                  "expected_revision": {
+                    "anyOf": [
+                      {
+                        "maxLength": 128,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Expected Revision"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "command_id": {
+                    "default": "",
+                    "maxLength": 64,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "application_version": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Application Version",
+                    "type": "string"
+                  },
+                  "parameters": {
+                    "additionalProperties": true,
+                    "title": "Parameters",
+                    "type": "object"
+                  },
+                  "changes": {
+                    "items": {
+                      "additionalProperties": true,
+                      "type": "object"
+                    },
+                    "maxItems": 1000,
+                    "title": "Changes",
+                    "type": "array"
+                  },
+                  "publication_profile": {
+                    "default": "curve-edits/1",
+                    "enum": [
+                      "curve-edits/1",
+                      "las-derived-curves/1"
+                    ],
+                    "title": "Publication Profile",
+                    "type": "string"
+                  },
+                  "derived_curves": {
+                    "items": {
+                      "additionalProperties": true,
+                      "type": "object"
+                    },
+                    "maxItems": 8,
+                    "title": "Derived Curves",
+                    "type": "array"
+                  },
+                  "destination": {
+                    "const": "portable",
+                    "default": "portable",
+                    "title": "Destination",
+                    "type": "string"
+                  },
+                  "release_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Release Id"
+                  },
+                  "asset_index": {
+                    "default": 0,
+                    "maximum": 9,
+                    "minimum": 0,
+                    "title": "Asset Index",
+                    "type": "integer"
+                  },
+                  "runners": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 100,
+                    "title": "Runners",
+                    "type": "array"
+                  },
+                  "audience": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 100,
+                    "title": "Audience",
+                    "type": "array"
+                  },
+                  "reuse_audience": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 100,
+                    "title": "Reuse Audience",
+                    "type": "array"
+                  },
+                  "expected_generation": {
+                    "anyOf": [
+                      {
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Expected Generation"
+                  },
+                  "append_to": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Append To"
+                  },
+                  "expected_parent": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Expected Parent"
+                  },
+                  "asset_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Asset Id"
+                  },
+                  "asset_revision": {
+                    "anyOf": [
+                      {
+                        "maxLength": 128,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Asset Revision"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "Request",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/applications/start": {
       "post": {
         "summary": "start application (write scope)",
@@ -20028,6 +20391,189 @@
         }
       }
     },
+    "/api/v1/projects/{project}/las-uploads/policy-preview": {
+      "post": {
+        "summary": "E72c: what a change of who can see an uploaded original would do, run and rolled back",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E72c: what a share (or a change of who can see an original) would do, run and rolled back: nothing is saved.",
+                  "properties": {
+                    "told": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "People you may see who would gain read or reuse access; null when you may not list members.",
+                      "title": "Told"
+                    },
+                    "losing": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "People you may see who would lose read access; null when you may not list members.",
+                      "title": "Losing"
+                    }
+                  },
+                  "required": [
+                    "told",
+                    "losing"
+                  ],
+                  "title": "SharePreview",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "title": "Asset Id",
+                    "type": "string"
+                  },
+                  "audience": {
+                    "description": "Who can ever see the original (the uploader is always included)",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 100,
+                    "title": "Audience",
+                    "type": "array"
+                  },
+                  "reason": {
+                    "maxLength": 500,
+                    "minLength": 1,
+                    "title": "Reason",
+                    "type": "string"
+                  },
+                  "expected_generation": {
+                    "minimum": 0,
+                    "title": "Expected Generation",
+                    "type": "integer"
+                  },
+                  "project_audience": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "read",
+                          "none"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E78: \"read\" lets everyone in the project see it, including people who join later; \"none\" uses the named audience; absent leaves it as it is",
+                    "title": "Project Audience"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "asset_id",
+                  "audience",
+                  "reason",
+                  "expected_generation"
+                ],
+                "title": "UploadPolicyChange",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/las-uploads/recipe": {
       "post": {
         "summary": "One import recipe at its head or an exact revision, with its document",
@@ -20880,6 +21426,194 @@
                     "sharing_contract"
                   ],
                   "title": "UploadShared",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "title": "Asset Id",
+                    "type": "string"
+                  },
+                  "audience": {
+                    "default": [],
+                    "description": "Read recipients, within the distribution ceiling",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Audience",
+                    "type": "array"
+                  },
+                  "reuse_audience": {
+                    "default": [],
+                    "description": "Reuse recipients, a subset of audience",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Reuse Audience",
+                    "type": "array"
+                  },
+                  "expected_generation": {
+                    "anyOf": [
+                      {
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "The grants generation you read; absent is refused with 428 condition-required",
+                    "title": "Expected Generation"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Command Id"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "asset_id"
+                ],
+                "title": "UploadShare",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/las-uploads/share-preview": {
+      "post": {
+        "summary": "E72c: what a share of an uploaded original would do (who would be told), run and rolled back",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E72c: what a share (or a change of who can see an original) would do, run and rolled back: nothing is saved.",
+                  "properties": {
+                    "told": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "People you may see who would gain read or reuse access; null when you may not list members.",
+                      "title": "Told"
+                    },
+                    "losing": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "People you may see who would lose read access; null when you may not list members.",
+                      "title": "Losing"
+                    }
+                  },
+                  "required": [
+                    "told",
+                    "losing"
+                  ],
+                  "title": "SharePreview",
                   "type": "object"
                 }
               }
@@ -27740,6 +28474,213 @@
                     "sharing_contract"
                   ],
                   "title": "PublicationShared",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "title": "Asset Id",
+                    "type": "string"
+                  },
+                  "audience": {
+                    "default": [],
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Audience",
+                    "type": "array"
+                  },
+                  "reuse_audience": {
+                    "default": [],
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Reuse Audience",
+                    "type": "array"
+                  },
+                  "expected_generation": {
+                    "anyOf": [
+                      {
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "The grants generation you read; absent is refused with 428 condition-required",
+                    "title": "Expected Generation"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Command Id"
+                  },
+                  "project_audience": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "read",
+                          "none"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E78: \"read\" lets everyone in the project view and download it, including people who join later (every input must be shared with the project too); \"none\" removes that; absent leaves it as it is",
+                    "title": "Project Audience"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "asset_id"
+                ],
+                "title": "PublicationShare",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/publications/share-preview": {
+      "post": {
+        "summary": "E72c: what a share of your derived publication would do (who would be told), run and rolled back",
+        "description": "Scope write; accepted principals: session, delegate, grant; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "grant",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E72c: what a share (or a change of who can see an original) would do, run and rolled back: nothing is saved.",
+                  "properties": {
+                    "told": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "People you may see who would gain read or reuse access; null when you may not list members.",
+                      "title": "Told"
+                    },
+                    "losing": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "People you may see who would lose read access; null when you may not list members.",
+                      "title": "Losing"
+                    }
+                  },
+                  "required": [
+                    "told",
+                    "losing"
+                  ],
+                  "title": "SharePreview",
                   "type": "object"
                 }
               }
@@ -37006,6 +37947,11 @@
                       },
                       "title": "Previous",
                       "type": "array"
+                    },
+                    "taken": {
+                      "additionalProperties": true,
+                      "title": "Taken",
+                      "type": "object"
                     }
                   },
                   "required": [
@@ -37031,7 +37977,8 @@
                     "publication_policy",
                     "reference",
                     "state",
-                    "previous"
+                    "previous",
+                    "taken"
                   ],
                   "title": "SourcesAdvanceAnswer",
                   "type": "object"
@@ -37421,6 +38368,35 @@
                     "publication_policy": {
                       "title": "Publication Policy",
                       "type": "string"
+                    },
+                    "previous": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Previous"
+                    },
+                    "taken": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Taken"
                     }
                   },
                   "required": [
@@ -40614,6 +41590,28 @@
                     "review_digest": {
                       "title": "Review Digest",
                       "type": "string"
+                    },
+                    "audience": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": {
+                            "$ref": "#/components/schemas/SendAudience"
+                          },
+                          "propertyNames": {
+                            "enum": [
+                              "append",
+                              "separate"
+                            ]
+                          },
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E72c, destination project: per offered mode, how many people the send tells (outside the review digest)",
+                      "title": "Audience"
                     }
                   },
                   "required": [
@@ -42180,6 +43178,532 @@
         }
       }
     },
+    "/api/v1/projects/{project}/sources/go-back": {
+      "post": {
+        "summary": "go-back upstream source (write scope)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "One source selection as stored: what it names, its exact reference and state, and how it is kept current.",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "project_id": {
+                      "title": "Project Id",
+                      "type": "string"
+                    },
+                    "owner": {
+                      "title": "Owner",
+                      "type": "string"
+                    },
+                    "connection_id": {
+                      "title": "Connection Id",
+                      "type": "string"
+                    },
+                    "key": {
+                      "title": "Key",
+                      "type": "string"
+                    },
+                    "profile": {
+                      "title": "Profile",
+                      "type": "string"
+                    },
+                    "authority": {
+                      "title": "Authority",
+                      "type": "string"
+                    },
+                    "connection_fingerprint": {
+                      "title": "Connection Fingerprint",
+                      "type": "string"
+                    },
+                    "asset_identity": {
+                      "title": "Asset Identity",
+                      "type": "string"
+                    },
+                    "mode": {
+                      "title": "Mode",
+                      "type": "string"
+                    },
+                    "reference": {
+                      "$ref": "#/components/schemas/SourceReference"
+                    },
+                    "manifest": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/SourceManifest"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "The exact snapshot manifest of the reference (refresh answers it; a listing omits it)."
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "meaning_digest": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Meaning Digest"
+                    },
+                    "interpretation": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Interpretation"
+                    },
+                    "state": {
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "last_checked": {
+                      "title": "Last Checked",
+                      "type": "number"
+                    },
+                    "failures": {
+                      "title": "Failures",
+                      "type": "integer"
+                    },
+                    "next_check": {
+                      "title": "Next Check",
+                      "type": "number"
+                    },
+                    "generation": {
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "publication_policy": {
+                      "title": "Publication Policy",
+                      "type": "string"
+                    },
+                    "message": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Message"
+                    },
+                    "update_available": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Update Available"
+                    },
+                    "pinned_available": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Pinned Available"
+                    },
+                    "previous": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "The exact references this selection moved from on Get (advance), oldest first, at most 20.",
+                      "title": "Previous"
+                    },
+                    "taken": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E72c: what the last Get took ({from, to, at, from_readable}); go-back takes `from` back and removes it.",
+                      "title": "Taken"
+                    },
+                    "access_health": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Access Health"
+                    },
+                    "display": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Display"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "project_id",
+                    "owner",
+                    "connection_id",
+                    "key",
+                    "profile",
+                    "authority",
+                    "connection_fingerprint",
+                    "asset_identity",
+                    "mode",
+                    "reference",
+                    "name",
+                    "interpretation",
+                    "state",
+                    "last_checked",
+                    "failures",
+                    "next_check",
+                    "generation",
+                    "publication_policy"
+                  ],
+                  "title": "SourceSelection",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "connection_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Connection Id"
+                  },
+                  "key": {
+                    "anyOf": [
+                      {
+                        "maxLength": 512,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Key"
+                  },
+                  "profile": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Profile"
+                  },
+                  "kind": {
+                    "anyOf": [
+                      {
+                        "maxLength": 256,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Kind"
+                  },
+                  "offset": {
+                    "default": 0,
+                    "maximum": 100000,
+                    "minimum": 0,
+                    "title": "Offset",
+                    "type": "integer"
+                  },
+                  "limit": {
+                    "default": 100,
+                    "maximum": 1000,
+                    "minimum": 1,
+                    "title": "Limit",
+                    "type": "integer"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "mode": {
+                    "default": "follow",
+                    "enum": [
+                      "follow",
+                      "pin"
+                    ],
+                    "title": "Mode",
+                    "type": "string"
+                  },
+                  "revision": {
+                    "anyOf": [
+                      {
+                        "maxLength": 128,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Revision"
+                  },
+                  "preview_digest": {
+                    "anyOf": [
+                      {
+                        "pattern": "^[a-f0-9]{64}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Preview Digest"
+                  },
+                  "acknowledge_unknowns": {
+                    "default": false,
+                    "title": "Acknowledge Unknowns",
+                    "type": "boolean"
+                  },
+                  "mapping": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Mapping"
+                  },
+                  "context": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Context"
+                  },
+                  "context_policy_revision": {
+                    "anyOf": [
+                      {
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Context Policy Revision"
+                  },
+                  "expected_generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Expected Generation",
+                    "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "Request",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/sources/head": {
       "post": {
         "summary": "head upstream source (read scope)",
@@ -42698,6 +44222,20 @@
                       "default": null,
                       "description": "The exact references this selection moved from on Get (advance), oldest first, at most 20.",
                       "title": "Previous"
+                    },
+                    "taken": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E72c: what the last Get took ({from, to, at, from_readable}); go-back takes `from` back and removes it.",
+                      "title": "Taken"
                     },
                     "access_health": {
                       "anyOf": [
@@ -46004,6 +47542,35 @@
                       ],
                       "default": null,
                       "title": "Update Available"
+                    },
+                    "previous": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Previous"
+                    },
+                    "taken": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Taken"
                     }
                   },
                   "required": [
@@ -47192,6 +48759,20 @@
                       "description": "The exact references this selection moved from on Get (advance), oldest first, at most 20.",
                       "title": "Previous"
                     },
+                    "taken": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E72c: what the last Get took ({from, to, at, from_readable}); go-back takes `from` back and removes it.",
+                      "title": "Taken"
+                    },
                     "access_health": {
                       "anyOf": [
                         {
@@ -47653,6 +49234,35 @@
                       ],
                       "default": null,
                       "title": "Update Available"
+                    },
+                    "previous": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Previous"
+                    },
+                    "taken": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Taken"
                     }
                   },
                   "required": [
@@ -48531,6 +50141,35 @@
                     "state": {
                       "title": "State",
                       "type": "string"
+                    },
+                    "previous": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Previous"
+                    },
+                    "taken": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Taken"
                     }
                   },
                   "required": [
@@ -48964,6 +50603,35 @@
                     "state": {
                       "title": "State",
                       "type": "string"
+                    },
+                    "previous": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Previous"
+                    },
+                    "taken": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Taken"
                     }
                   },
                   "required": [
@@ -50858,6 +52526,32 @@
                       },
                       "title": "Patches",
                       "type": "array"
+                    },
+                    "taken": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Taken"
+                    },
+                    "set_by": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Set By"
                     }
                   },
                   "required": [
@@ -51111,6 +52805,32 @@
                     "dirty": {
                       "title": "Dirty",
                       "type": "boolean"
+                    },
+                    "taken": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Taken"
+                    },
+                    "set_by": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Set By"
                     }
                   },
                   "required": [
@@ -51631,6 +53351,32 @@
                       },
                       "title": "Patches",
                       "type": "array"
+                    },
+                    "taken": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Taken"
+                    },
+                    "set_by": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Set By"
                     }
                   },
                   "required": [
@@ -51888,6 +53634,32 @@
                       },
                       "title": "Patches",
                       "type": "array"
+                    },
+                    "taken": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Taken"
+                    },
+                    "set_by": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Set By"
                     }
                   },
                   "required": [
@@ -52437,6 +54209,299 @@
                     "head"
                   ],
                   "title": "SubscriptionState",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "stream_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Stream Id"
+                  },
+                  "release_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Release Id"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Command Id"
+                  },
+                  "name": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "default": "dataset",
+                    "enum": [
+                      "dataset",
+                      "collection"
+                    ],
+                    "title": "Kind",
+                    "type": "string"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "mode": {
+                    "default": "review",
+                    "enum": [
+                      "review",
+                      "follow",
+                      "pin"
+                    ],
+                    "title": "Mode",
+                    "type": "string"
+                  },
+                  "approved_only": {
+                    "default": false,
+                    "title": "Approved Only",
+                    "type": "boolean"
+                  },
+                  "acknowledge_exclusions": {
+                    "default": false,
+                    "title": "Acknowledge Exclusions",
+                    "type": "boolean"
+                  },
+                  "version": {
+                    "default": 0,
+                    "maximum": 100,
+                    "minimum": 0,
+                    "title": "Version",
+                    "type": "integer"
+                  },
+                  "manifest_digest": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Manifest Digest"
+                  },
+                  "patches": {
+                    "items": {
+                      "additionalProperties": true,
+                      "type": "object"
+                    },
+                    "maxItems": 1000,
+                    "title": "Patches",
+                    "type": "array"
+                  },
+                  "automatic": {
+                    "default": false,
+                    "title": "Automatic",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "Request",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/subscriptions/go-back": {
+      "post": {
+        "summary": "go-back subscription",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "generation": {
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "mode": {
+                      "enum": [
+                        "review",
+                        "follow",
+                        "pin"
+                      ],
+                      "title": "Mode",
+                      "type": "string"
+                    },
+                    "approved_only": {
+                      "title": "Approved Only",
+                      "type": "boolean"
+                    },
+                    "applied": {
+                      "title": "Applied",
+                      "type": "integer"
+                    },
+                    "dirty": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "Saved working edits exist (absent on an unavailable stream).",
+                      "title": "Dirty"
+                    },
+                    "taken": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E72c: what the last Get took ({from, to, at}, versions); go-back takes `from` back and removes it.",
+                      "title": "Taken"
+                    },
+                    "set_by": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E72c: who set this subscription to follow (an access key {kind, key_id, label}, or null for another non-session principal); absent when set before this was recorded. Only its subscriber reads it.",
+                      "title": "Set By"
+                    }
+                  },
+                  "required": [
+                    "generation",
+                    "mode",
+                    "approved_only",
+                    "applied"
+                  ],
+                  "title": "SubscriptionSummary",
                   "type": "object"
                 }
               }
@@ -53204,11 +55269,43 @@
                     "generation": {
                       "title": "Generation",
                       "type": "integer"
+                    },
+                    "told": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "E72c: subscribers other than the offerer, among the people you may see, who will see this version in their Updates list; null when you may not list members.",
+                      "title": "Told"
+                    },
+                    "by_itself": {
+                      "description": "E72c: subscriptions that may see this version and are set to take each new version by itself.",
+                      "items": {
+                        "$ref": "#/components/schemas/OfferByItself"
+                      },
+                      "title": "By Itself",
+                      "type": "array"
+                    },
+                    "display": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/Display"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
                     }
                   },
                   "required": [
                     "excluded_subscribers",
-                    "generation"
+                    "generation",
+                    "told"
                   ],
                   "title": "OfferPreview",
                   "type": "object"
@@ -53454,6 +55551,32 @@
                     "dirty": {
                       "title": "Dirty",
                       "type": "boolean"
+                    },
+                    "taken": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Taken"
+                    },
+                    "set_by": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Set By"
                     }
                   },
                   "required": [
@@ -73618,6 +75741,48 @@
         "title": "OfEntity",
         "type": "object"
       },
+      "OfferByItself": {
+        "additionalProperties": false,
+        "description": "E72c: a subscription set to take each new version by itself.",
+        "properties": {
+          "person": {
+            "description": "A member id (display.member_names has the name).",
+            "title": "Person",
+            "type": "string"
+          },
+          "application": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The access key's label, only on the asker's own subscription; null otherwise.",
+            "title": "Application"
+          },
+          "recorded": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "On the asker's own: false when follow was set before E72c recorded who set it; null otherwise.",
+            "title": "Recorded"
+          }
+        },
+        "required": [
+          "person",
+          "application",
+          "recorded"
+        ],
+        "title": "OfferByItself",
+        "type": "object"
+      },
       "OrganizationDetail": {
         "additionalProperties": false,
         "properties": {
@@ -74949,6 +77114,29 @@
         "title": "SearchResult",
         "type": "object"
       },
+      "SendAudience": {
+        "additionalProperties": false,
+        "description": "E72c: how many people a send tells, among the people you may see.",
+        "properties": {
+          "told": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "null when you may not list members (no number is shown)",
+            "title": "Told"
+          }
+        },
+        "required": [
+          "told"
+        ],
+        "title": "SendAudience",
+        "type": "object"
+      },
       "ShaleVolumePreview": {
         "additionalProperties": false,
         "description": "What the preview answers: the values publishing would store, the picks used and the counts.",
@@ -75665,6 +77853,20 @@
             "description": "The exact references this selection moved from on Get (advance), oldest first, at most 20.",
             "title": "Previous"
           },
+          "taken": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E72c: what the last Get took ({from, to, at, from_readable}); go-back takes `from` back and removes it.",
+            "title": "Taken"
+          },
           "access_health": {
             "anyOf": [
               {
@@ -76032,6 +78234,34 @@
             "default": null,
             "description": "Saved working edits exist (absent on an unavailable stream).",
             "title": "Dirty"
+          },
+          "taken": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E72c: what the last Get took ({from, to, at}, versions); go-back takes `from` back and removes it.",
+            "title": "Taken"
+          },
+          "set_by": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E72c: who set this subscription to follow (an access key {kind, key_id, label}, or null for another non-session principal); absent when set before this was recorded. Only its subscriber reads it.",
+            "title": "Set By"
           }
         },
         "required": [

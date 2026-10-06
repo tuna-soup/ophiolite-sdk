@@ -450,6 +450,12 @@
     }
   },
   {
+    "operation": "POST /api/v1/projects/{project}/applications/share-preview",
+    "function": "postProjectsProjectApplicationsSharePreview",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/applications/start",
     "function": "postProjectsProjectApplicationsStart",
     "request": "schema",
@@ -822,6 +828,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/las-uploads/policy-preview",
+    "function": "postProjectsProjectLasUploadsPolicyPreview",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/las-uploads/recipe",
     "function": "postProjectsProjectLasUploadsRecipe",
     "request": "schema",
@@ -848,6 +860,12 @@
   {
     "operation": "POST /api/v1/projects/{project}/las-uploads/share",
     "function": "postProjectsProjectLasUploadsShare",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/las-uploads/share-preview",
+    "function": "postProjectsProjectLasUploadsSharePreview",
     "request": "schema",
     "response": "schema"
   },
@@ -974,6 +992,12 @@
   {
     "operation": "POST /api/v1/projects/{project}/publications/share",
     "function": "postProjectsProjectPublicationsShare",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/publications/share-preview",
+    "function": "postProjectsProjectPublicationsSharePreview",
     "request": "schema",
     "response": "schema"
   },
@@ -1344,6 +1368,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/sources/go-back",
+    "function": "postProjectsProjectSourcesGoBack",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/sources/head",
     "function": "postProjectsProjectSourcesHead",
     "request": "schema",
@@ -1538,6 +1568,12 @@
   {
     "operation": "POST /api/v1/projects/{project}/subscriptions/get",
     "function": "postProjectsProjectSubscriptionsGet",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/subscriptions/go-back",
+    "function": "postProjectsProjectSubscriptionsGoBack",
     "request": "schema",
     "response": "schema"
   },
