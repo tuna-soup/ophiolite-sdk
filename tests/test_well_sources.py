@@ -90,7 +90,9 @@ def test_each_well_joins_its_own_copy_and_row_without_dropping_or_repeating():
     rows = by_id(frame)
     assert {e: rows[e]['source.operator'] for e in ('e1', 'e2', 'e3', 'e4')} == {'e1': 'Other B', 'e2': None, 'e3': 'NAM', 'e4': 'Other A'}
     assert {e: rows[e]['source_state'] for e in rows} == {'e1': 'joined', 'e2': 'joined', 'e3': 'joined', 'e4': 'joined', 'e5': 'no origin', 'e6': 'no origin'}
-    assert rows['e5']['source_reason'] == rows['e6']['source_reason'] == NO_ORIGIN_REASON
+    assert rows['e5']['source_reason'] == NO_ORIGIN_REASON
+    # E74b: a position from a location item (a correction, or an uploaded position) says so, in words that fit both
+    assert rows['e6']['source_reason'] == 'This position comes from a location item, not from a row of a source table.'
     # one listing of the packages, one download per package, whatever the number of wells
     assert sorted(gateway.calls) == sorted(['list', 'list', 'download-snapshot', 'download'])
 

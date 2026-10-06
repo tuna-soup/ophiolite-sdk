@@ -7,7 +7,8 @@ current audience) and returns one row per well, marked:
 
 - `joined`: the row's original columns are filled;
 - `no origin`: no source row you may read locates this well (none was recorded, or the server withholds one you may
-  not read: a location is shown only from a source you may read, so the two look the same);
+  not read: a location is shown only from a source you may read, so the two look the same); when the well is located
+  by a location item (a corrected or uploaded position) the reason says so;
 - `not readable`: the well names a kept copy that cannot be read now (withdrawn, under review, or refused); the reason
   says which.
 
@@ -28,6 +29,7 @@ from .sources import SUPPORTED, _checked, _refuse, verified_table
 
 JOINED, NO_ORIGIN, NOT_READABLE = 'joined', 'no origin', 'not readable'
 NO_ORIGIN_REASON = 'No source row you may read locates this well.'
+LOCATION_ITEM_REASON = 'This position comes from a location item, not from a row of a source table.'  # E74b, e.g. a corrected position
 STATE_REASONS = {'withdrawn': 'The kept copy was withdrawn.', 'candidate': 'The kept copy is under review; read it again after it is approved.'}
 
 
@@ -92,6 +94,8 @@ def with_source(wells, client, columns=None):
     copies, marks = KeptCopies(client), []
     for well in wells:
         source = (well.location or {}).get('source') or {}
+        if source.get('profile') == 'well-location/1':
+            marks.append((NO_ORIGIN, LOCATION_ITEM_REASON, None)); continue
         if source.get('profile') != SUPPORTED or not source.get('row'):
             marks.append((NO_ORIGIN, NO_ORIGIN_REASON, None)); continue
         got = copies.table(source['asset_id'], source['revision'])

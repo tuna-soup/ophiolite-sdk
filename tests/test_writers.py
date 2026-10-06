@@ -86,6 +86,24 @@ def test_the_request_names_the_file_parents_and_method_exactly():
     with pytest.raises(ValidationFailed): derive_request('p', written, name='R', from_=[('a', '0' * 64)], method={'name': 'm'}, command_id='c', new_version_of='x')
 
 
+
+def test_the_receipt_must_name_the_parents_sent_and_a_kept_copy_by_its_source_reference():
+    """E74b: a parent kept from a connected source is recorded by the source's own reference (its key is the source's),
+    so only its revision is compared; an Ophiolite parent must match by asset id as well. Any other difference refuses."""
+    from ophiolite.errors import VerificationFailed
+    from ophiolite.models.api import PublicationReceipt
+    from ophiolite.publish import verify_derived
+    written = PointSet.write([(1, 2)], **SPATIAL)
+    body, _ = derive_request('p', written, name='R', from_=[('copy', '0' * 64), ('mine', '1' * 64)], method={'name': 'm'}, command_id='c-1')
+    def receipt(*parents):
+        return PublicationReceipt.model_validate({'asset_id': 'r' * 64, 'revision': body['output_sha256'], 'revision_number': 1, 'profile': body['profile'], 'command_id': 'c-1',
+                                                  'derived_from': [{'authority': a, 'key': k, 'revision': r, 'profile': 'points-csv/1'} for a, k, r in parents],
+                                                  'method': body['method'], 'name': 'R'})
+    assert verify_derived(body, receipt(('sql-e74b', 'w', '0' * 64), ('ophiolite:derived', 'mine', '1' * 64)))
+    for wrong in ((('sql-e74b', 'w', '2' * 64), ('ophiolite:derived', 'mine', '1' * 64)), (('sql-e74b', 'w', '0' * 64), ('ophiolite:derived', 'other', '1' * 64)),
+                  (('ophiolite:uploaded', 'w', '0' * 64), ('ophiolite:derived', 'mine', '1' * 64)), (('sql-e74b', 'w', '0' * 64),)):
+        with pytest.raises(VerificationFailed, match='different parents'): verify_derived(body, receipt(*wrong))
+
 # --- E53: wavelet, model section and seismic section ----------------------------------------------------------------
 
 def read_back(written):

@@ -637,7 +637,11 @@ def verify_derived(body,receipt):
     """The receipt names this file, these parents (in order) and this method."""
     if receipt.revision!=body['output_sha256'] or receipt.command_id!=body['command_id'] or receipt.profile!=body['profile']:
         raise VerificationFailed('The publication receipt names a different file or command.')
-    if [(r.key,r.revision) for r in receipt.derived_from]!=[(p['asset_id'],p['revision']) for p in body['derived_from']]:
+    # A parent kept from a connected source (a package copy) is recorded by that source's own reference, so its key is the
+    # source's; the exact revision (the copy's sha256) still has to match. Ophiolite's own parents match by asset id too.
+    named=[(r.authority.startswith('ophiolite:'),r.key,r.revision) for r in receipt.derived_from]
+    sent=[(p['asset_id'],p['revision']) for p in body['derived_from']]
+    if len(named)!=len(sent) or any(rev!=revision or (own and key!=asset) for (own,key,rev),(asset,revision) in zip(named,sent)):
         raise VerificationFailed('The publication receipt names different parents.')
     if body.get('new_version_of') and receipt.asset_id!=body['new_version_of']:raise VerificationFailed('The new version was published to a different result.')
     return receipt

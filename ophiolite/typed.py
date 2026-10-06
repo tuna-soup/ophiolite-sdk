@@ -9,7 +9,7 @@ import math
 from .errors import Refused
 
 TYPES = ('well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-volume',
-         'wavelet', 'model-section', 'seismic-section')
+         'wavelet', 'model-section', 'seismic-section', 'well-location')
 WAVELET_DT = (0.0005, 0.01)  # E53 D7: a bounded spectrum (at most 1001 bins of 1 Hz)
 WAVELET_SAMPLES = (3, 4095)
 
@@ -376,9 +376,24 @@ class SeismicSlice:
         return f'<SeismicSlice {self.axis} {self.label}: {len(self.rows[1])}×{len(self.columns[1])}>'
 
 
+class WellLocation(TypedData):
+    """One well's surface point as its file states it (E74b: a position file or a corrected position): `x`, `y` in
+    `crs`, with the elevation reference. Nothing is converted; `original` holds the file's exact bytes."""
+    type = 'well-location'
+
+    @property
+    def x(self): return self.data['x']
+
+    @property
+    def y(self): return self.data['y']
+
+    def __repr__(self):
+        return '<WellLocation %s, %s %s>' % (self.x, self.y, self.context['crs'])
+
+
 CLASSES = {'well-tops': WellTops, 'trajectory': Trajectory, 'regular-grid-surface': GridSurface,
            'triangulated-surface': TriangulatedSurface, 'point-set': PointSet, 'polyline-set': PolylineSet, 'seismic-volume': SeismicVolume,
-           'wavelet': Wavelet, 'model-section': ModelSection, 'seismic-section': SeismicSection}
+           'wavelet': Wavelet, 'model-section': ModelSection, 'seismic-section': SeismicSection, 'well-location': WellLocation}
 
 
 def minimum_curvature(stations):

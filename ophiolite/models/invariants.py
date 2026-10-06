@@ -96,7 +96,8 @@ def asset(value):
     elif typed:
         mapping = {'well-tops': 'well-tops/1', 'trajectory': 'trajectory/1', 'regular-grid-surface': 'regular-grid-surface/1',
                    'triangulated-surface': 'triangulated-surface/1', 'point-set': 'point-set/1', 'polyline-set': 'polyline-set/1', 'seismic-volume': 'seismic-volume/1',
-                   'wavelet': 'wavelet/1', 'model-section': 'model-section/1', 'seismic-section': 'seismic-section/1'}  # E53
+                   'wavelet': 'wavelet/1', 'model-section': 'model-section/1', 'seismic-section': 'seismic-section/1',
+                   'well-location': 'well-location/1'}  # E53; E74b: a position file or a corrected position
         require(value['interpretation'].get('mapping') == mapping.get(value['scientific']['type']), 'Scientific context and interpretation disagree')
     else:
         context(value['scientific'])

@@ -176,3 +176,21 @@ def test_the_command_line_lists_each_well_with_its_mark_and_row(run):
     assert code == 0 and "Well('Unlocated', unlocated): no origin (%s)" % NO_ORIGIN_REASON in out and "North 1" in out
     code, _ = run('bob', '--column', 'operator')
     assert code != 0
+
+
+def test_a_corrected_position_is_named_as_coming_from_a_location_item(imported):
+    """E74b: once alice corrects North 1's position from its copy, her North 1 is located by the correction, which has no
+    source row; bob, who cannot read the correction, still joins the copy's row."""
+    from ophiolite.writers import WrittenOriginal
+    from ophiolite.well_sources import LOCATION_ITEM_REASON
+    well = next(w for w in imported.alice.wells() if w.name == 'North 1')
+    raw = json.dumps({'crs': 'EPSG:4326', 'elevation_reference': 'unknown', 'x': 4.11, 'y': 52.11}, sort_keys=True, separators=(',', ':')).encode()
+    receipt = imported.alice.publish_derived(WrittenOriginal(raw, 'well-location/1'), name='North 1 position', from_=[(well.location['source']['asset_id'], well.location['source']['revision'])],
+                                   method={'name': 'Corrected in the Workspace', 'declared': False}, command_id='e74b-north-1', of_entity={'kind': 'well', 'entity_id': well.entity_id})
+    rows = by_name(imported.alice.wells().with_source(columns=['operator']))
+    assert (rows['North 1']['source_state'], rows['North 1']['source_reason']) == ('no origin', LOCATION_ITEM_REASON)
+    assert (rows['North 2']['source_state'], rows['North 2']['source.operator']) == ('joined', 'NAM')
+    assert by_name(imported.bob.wells().with_source(columns=['operator']))['North 1']['source.operator'] == 'Shell'
+    # E74b: the position item reads back as its file states it, the original byte for byte (nothing converted)
+    read = imported.alice.read_data(receipt.asset_id, receipt.revision)
+    assert (type(read).__name__, read.x, read.y, read.context['crs'], read.context['elevation_reference'], read.original) == ('WellLocation', 4.11, 52.11, 'EPSG:4326', 'unknown', raw)
