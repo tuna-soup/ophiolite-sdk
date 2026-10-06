@@ -1,4 +1,5 @@
 """Bounded reads of exact scientific revisions. No implicit login or cache access."""
+import gc
 import json
 import math
 import os
@@ -110,12 +111,14 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
     def __enter__(self):return self
     def __exit__(self,*args):self.close()
 
-    def _get(self,path,limit):
+    def _get(self,path,limit,*,ranged=None,answer=None):
         headers=self.credential.headers(self.url,self.project) if self.credential else {}
+        if ranged is not None:headers={**headers,'Range':ranged}  # E54: one byte range of an original; 206 answers it
         categories={401:(AuthenticationRequired,'Sign in again.'),403:(PermissionRefused,'Check project access and the approved grant.'),
                     404:(Unavailable,'This exact revision is unavailable or not permitted.'),409:(IntegrityConflict,'Stored data failed an integrity check. Ask the deployment administrator.'),
                     413:(CapacityExceeded,'Representation exceeds the bounded size; partial reads are not supported.'),400:(Refused,'The request was refused. Check the selected input.'),
-                    422:(Incompatible,'This scientific context is not supported.'),503:(Busy,'The service is busy or unavailable.'),429:(Busy,'The service is busy or unavailable.')}
+                    422:(Incompatible,'This scientific context is not supported.'),503:(Busy,'The service is busy or unavailable.'),429:(Busy,'The service is busy or unavailable.'),
+                    416:(Refused,'This byte range is outside the file.')}
         for attempt in range(3):
             try:
                 with self.http.stream('GET',self.url+path,headers=headers,follow_redirects=False) as response:
@@ -126,12 +129,13 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
                         if not math.isfinite(delay) or delay<0 or delay>60:delay=0
                         if attempt<2:
                             time.sleep(delay);continue
-                    if response.status_code!=200:
+                    if response.status_code!=(200 if ranged is None else 206):
                         from . import application_transport as policy
                         meta=policy.envelope(response)  # E31: the server's code, remedy, docs and request id, read with a bound
                         kind,message=categories.get(response.status_code,(Unavailable,'Scientific read failed. Check service access and retry.'))
                         if kind is Busy:raise Busy(message,meta.get('remedy',''),status=response.status_code,retry_after=delay,code=meta.get('code'),**policy.carried(meta))
                         raise kind(message,meta.get('remedy',''),status=response.status_code,code=meta.get('code'),**policy.carried(meta))
+                    if answer is not None:answer.update({k.lower():v for k,v in response.headers.items() if k.lower() in ('content-range','x-content-sha256')})
                     content=bytearray()
                     for chunk in response.iter_bytes():
                         content.extend(chunk)
@@ -539,17 +543,13 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
         return self.work_folder(path).recover(through)
 
     def upload_las(self,source,*,name,attribution,audience,rights_confirmed,filename=None,well_notes='',command_id=None):
-        """Upload original bytes. Without a WorkFolder this is not recoverable after restart."""
+        """Upload original bytes. Without a WorkFolder this is not recoverable after restart; with the same
+        `command_id`, a file sent in parts continues where it stopped (E54)."""
         import uuid
         from . import publish as planning
-        from .models.api import UploadResult
-        raw=planning.upload_bytes(source)
         filename=filename or (Path(source).name if not isinstance(source,bytes) else 'input.las')
-        _,extra=planning.upload_metadata(self.project,command_id or uuid.uuid4().hex,filename=filename,name=name,attribution=attribution,audience=audience,rights_confirmed=rights_confirmed,well_notes=well_notes)
-        result=planning.parse(UploadResult,self._post_bytes('las-uploads','upload',raw,extra_headers=extra))
-        import hashlib
-        if result.revision!=hashlib.sha256(raw).hexdigest():raise VerificationFailed('The uploaded original has a different checksum revision.')
-        return result
+        body,extra=planning.upload_metadata(self.project,command_id or uuid.uuid4().hex,filename=filename,name=name,attribution=attribution,audience=audience,rights_confirmed=rights_confirmed,well_notes=well_notes)
+        return self._send(source,body,extra)
 
     def upload_data(self,source,*,profile,name,attribution,audience,rights_confirmed,declared=None,filename=None,well_log=None,well_notes='',command_id=None,origin=None,
                     append_to=None,expected_parent=None):
@@ -557,17 +557,89 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
         meanings; nothing is inferred). Starts private. A repeated command id returns the same asset.
         E53: `append_to` (your uploaded wavelet, model or section) with `expected_parent` (its current revision)
         adds the file as that result's next version; its audience stays the result's."""
-        import uuid,hashlib
+        import uuid
+        from . import publish as planning
+        filename=filename or (Path(source).name if not isinstance(source,bytes) else 'upload')
+        body,extra=planning.upload_metadata(self.project,command_id or uuid.uuid4().hex,filename=filename,name=name,attribution=attribution,audience=audience,
+                                            rights_confirmed=rights_confirmed,well_notes=well_notes,profile=profile,declared=declared,well_log=well_log,origin=origin,
+                                            append_to=append_to,expected_parent=expected_parent)
+        return self._send(source,body,extra)
+
+    def served_limits(self):
+        """E54: this deployment's limits as its capabilities state them (`upload_bytes`, `file_bytes`, ...), read once."""
+        if getattr(self,'_served_limits',None) is None:
+            value=self._post('capabilities','describe',{},retry=True).get('limits')
+            if not isinstance(value,dict) or not all(isinstance(value.get(k),int) for k in ('upload_bytes','file_bytes')):
+                raise VerificationFailed('The deployment did not state its upload limits.')
+            self._served_limits=value
+        return self._served_limits
+
+    def _send(self,source,body,extra):
+        """E54: a file within the request limit goes in one request, as before; a larger one in parts, read from the
+        path one part at a time (bytes in memory are sliced). Either way the revision must be the file's digest."""
+        import hashlib
         from . import publish as planning
         from .models.api import UploadResult
-        raw=planning.upload_bytes(source)
-        filename=filename or (Path(source).name if not isinstance(source,bytes) else 'upload')
-        _,extra=planning.upload_metadata(self.project,command_id or uuid.uuid4().hex,filename=filename,name=name,attribution=attribution,audience=audience,
-                                         rights_confirmed=rights_confirmed,well_notes=well_notes,profile=profile,declared=declared,well_log=well_log,origin=origin,
-                                         append_to=append_to,expected_parent=expected_parent)
-        result=planning.parse(UploadResult,self._post_bytes('las-uploads','upload',raw,extra_headers=extra))
-        if result.revision!=hashlib.sha256(raw).hexdigest():raise VerificationFailed('The uploaded original has a different checksum revision.')
+        size=len(source) if isinstance(source,(bytes,bytearray)) else Path(source).stat().st_size
+        if size<=planning.SINGLE or size<=self.served_limits()['upload_bytes']:
+            raw=planning.upload_bytes(source);digest=hashlib.sha256(raw).hexdigest()
+            result=planning.parse(UploadResult,self._post_bytes('las-uploads','upload',raw,extra_headers=extra))
+        else:
+            file=planning.FileSource(source);digest=file.sha256()
+            result=planning.parse(UploadResult,self._upload_parts(file,digest,body))
+        if result.revision!=digest:raise VerificationFailed('The uploaded original has a different checksum revision.')
         return result
+
+    def _upload_parts(self,file,digest,body):
+        """begin (the same command continues), the parts not yet received, finish, the check (polled), publish."""
+        from . import publish as planning
+        begin={'command_id':body['command_id'],'filename':body['filename'],'profile':body.get('profile','las2/1'),'declared':body.get('declared',{}),
+               'bytes':file.size,'sha256':digest,**{k:body[k] for k in ('append_to','expected_parent') if k in body}}
+        view=self._post('las-uploads','begin',begin,retry=True);ref={'upload_id':view['upload_id']}
+        if view['state']=='open':
+            have={p['index'] for p in view['received']}
+            for index in range(view['parts']):
+                if index in have:continue
+                raw=file.read(index*view['part_bytes'],view['part_bytes'])
+                for attempt in (0,1):  # a part damaged on the way is sent once more
+                    try:self._post_bytes('las-uploads','part',raw,extra_headers=planning.part_header(self.project,view['upload_id'],index,raw),retry=True);break
+                    except Refused as error:
+                        if error.code!='part-corrupt' or attempt:raise
+                del raw;gc.collect(1)  # httpx keeps a response in a reference cycle with its request (and so the part) until collected
+            view=self._post('las-uploads','finish',ref,retry=True)
+        wait=0.2
+        while view['state']=='finishing':
+            time.sleep(wait);wait=min(wait*2,5.0)
+            view=self._post('las-uploads','state',ref,retry=True)
+        if view['state'] not in ('checked','published'):raise session_refusal(view)
+        fields={k:body[k] for k in ('name','attribution','audience','rights_confirmed','well_notes','well_log') if k in body}
+        return self._post('las-uploads','publish',{**ref,**fields},retry=True)
+
+    def download_original(self,asset,revision,destination,*,part_bytes=8*1024*1024):
+        """E54: save the exact original of a revision to `destination`, read by ranges and verified against the
+        whole digest the deployment states; nothing is left at `destination` unless every byte matched."""
+        import hashlib,uuid
+        destination=Path(destination)
+        path=self.prefix+'/'+quote(asset,safe='')+'/revisions/'+quote(revision,safe='')+'/representations/artifact'
+        partial=destination.with_name('.'+destination.name+'.'+uuid.uuid4().hex[:12]+'.partial')
+        whole,expected,at,size=hashlib.sha256(),None,0,None
+        try:
+            with partial.open('xb') as out:
+                while size is None or at<size:
+                    answer={}
+                    raw=self._get(path,part_bytes,ranged='bytes=%d-%d'%(at,at+part_bytes-1),answer=answer)
+                    first,total=_content_range(answer.get('content-range'))
+                    stated=answer.get('x-content-sha256')
+                    if first!=at or (size is not None and total!=size) or (expected is not None and stated!=expected) or not raw:
+                        raise VerificationFailed('The deployment answered another part of the file.')
+                    size,expected=total,stated
+                    out.write(raw);whole.update(raw);at+=len(raw)
+                out.flush();os.fsync(out.fileno())
+            if whole.hexdigest()!=expected:raise IntegrityConflict('The downloaded original does not match the file the deployment holds; nothing was saved.')
+            os.replace(partial,destination)
+        except BaseException:
+            partial.unlink(missing_ok=True);raise
+        return destination
 
     def publish_derived(self,written,*,name,from_,method,command_id,of_entity=None,new_version_of=None,expected_parent=None):
         """E30b: publish a file you derived (a `WrittenOriginal` from ophiolite.writers) from exact revisions you
@@ -647,3 +719,20 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
 
 def _public(step):
     return {k:v for k,v in step.items() if k not in ('original','declared','profile','filename','well_log','command_id','name')}
+
+
+def _content_range(value):
+    """(first byte, total) of a `Content-Range: bytes a-b/N` answer."""
+    import re
+    match=re.fullmatch(r'bytes (\d+)-(\d+)/(\d+)',value or '')
+    if match is None:raise VerificationFailed('The deployment did not say which bytes it sent.')
+    return int(match.group(1)),int(match.group(3))
+
+
+def session_refusal(view):
+    """E54: the error for a file sent in parts that ended without being saved, with the deployment's sentence."""
+    reason=view.get('reason') or {}
+    code=reason.get('code') if isinstance(reason.get('code'),str) else 'unknown-upload'
+    message=reason.get('message') if isinstance(reason.get('message'),str) else 'This upload is no longer known to this deployment. Start it again.'
+    kind={'not-a-volume':Refused,'file-mismatch':IntegrityConflict,'access-lost':PermissionRefused}.get(code,Unavailable)
+    return kind(message,status=None,code=code)

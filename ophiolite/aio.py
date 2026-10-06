@@ -56,12 +56,14 @@ class AsyncClient(Client):
         if self.credential is None:return {}
         return await _complete(self._credential_transaction())
 
-    async def _get(self,path,limit):
+    async def _get(self,path,limit,*,ranged=None,answer=None):
         headers=await self._headers()
+        if ranged is not None:headers={**headers,'Range':ranged}  # E54: one byte range of an original; 206 answers it
         categories={401:(AuthenticationRequired,'Sign in again.'),403:(PermissionRefused,'Check project access and the approved grant.'),
                     404:(Unavailable,'This exact revision is unavailable or not permitted.'),409:(IntegrityConflict,'Stored data failed an integrity check. Ask the deployment administrator.'),
                     413:(CapacityExceeded,'Representation exceeds the bounded size; partial reads are not supported.'),400:(Refused,'The request was refused. Check the selected input.'),
-                    422:(Incompatible,'This scientific context is not supported.'),503:(Busy,'The service is busy or unavailable.'),429:(Busy,'The service is busy or unavailable.')}
+                    422:(Incompatible,'This scientific context is not supported.'),503:(Busy,'The service is busy or unavailable.'),429:(Busy,'The service is busy or unavailable.'),
+                    416:(Refused,'This byte range is outside the file.')}
         for attempt in range(3):
             try:
                 async with self.http.stream('GET',self.url+path,headers=headers,follow_redirects=False) as response:
@@ -72,12 +74,13 @@ class AsyncClient(Client):
                         if not math.isfinite(delay) or delay<0 or delay>60:delay=0
                         if attempt<2:
                             await anyio.sleep(delay);continue
-                    if response.status_code!=200:
+                    if response.status_code!=(200 if ranged is None else 206):
                         from . import application_transport as policy
                         meta=policy.envelope(response,await policy.bounded(response))  # E31: the server's metadata, bounded
                         kind,message=categories.get(response.status_code,(Unavailable,'Scientific read failed. Check service access and retry.'))
                         if kind is Busy:raise Busy(message,meta.get('remedy',''),status=response.status_code,retry_after=delay,code=meta.get('code'),**policy.carried(meta))
                         raise kind(message,meta.get('remedy',''),status=response.status_code,code=meta.get('code'),**policy.carried(meta))
+                    if answer is not None:answer.update({k.lower():v for k,v in response.headers.items() if k.lower() in ('content-range','x-content-sha256')})
                     content=bytearray()
                     async for chunk in response.aiter_bytes():
                         content.extend(chunk)
@@ -267,6 +270,8 @@ class _ApplicationDriver(Client):
         if options.get('headers') is None:options['headers']=self._headers()
         return anyio.from_thread.run(partial(self.owner._post_bytes,area,operation,raw,**options))
 
+    def _get(self,path,limit,**options):return anyio.from_thread.run(partial(self.owner._get,path,limit,**options))  # E54: ranged reads
+
     def _grant_status(self,headers):return anyio.from_thread.run(self.owner._grant_status,headers)
 
 
@@ -296,7 +301,8 @@ def _async_work(name):
 
 
 for _name in ('configure','start','run_input','publish','download','results','history','grants','share','options','inspect','export',
-              'upload_las','inspect_las','upload_info','members','result_preview','result_download','recover'):
+              'upload_las','inspect_las','upload_info','members','result_preview','result_download','recover',
+              'upload_data','served_limits','download_original'):  # E54: files sent in parts, originals read by ranges
     setattr(AsyncClient,_name,_async_application(_name))
 for _name in ('configure','start','input','publish','download','upload_las','recover'):
     setattr(AsyncWorkFolder,_name,_async_work(_name))

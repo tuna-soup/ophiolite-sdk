@@ -12,7 +12,8 @@ KEYWORDS = {'$defs', '$id', '$ref', '$schema', 'additionalProperties', 'anyOf',
             'items', 'maxItems', 'maxLength', 'maximum', 'minItems', 'minLength',
             'minimum', 'exclusiveMinimum', 'oneOf', 'pattern', 'properties',
             'required', 'title', 'type', 'x-ophiolite',
-            'propertyNames', 'x-ophiolite-no-fields', 'x-ophiolite-body-of'}  # E31: typed map keys, bodies with no fields, the connector proxy
+            'propertyNames', 'x-ophiolite-no-fields', 'x-ophiolite-body-of',  # E31: typed map keys, bodies with no fields, the connector proxy
+            'if', 'then', 'maxProperties'}  # E54: value rules and map sizes the server checks; TypeScript types do not carry them
 METHODS = {'get', 'post', 'put', 'patch', 'delete', 'head', 'options'}
 
 

@@ -10,7 +10,8 @@ CONTRACTS = ROOT/'ophiolite/contracts'
 KEYWORDS = {'$defs','$id','$ref','$schema','additionalProperties','anyOf','const',
             'default','description','discriminator','enum','exclusiveMinimum','items',
             'maxItems','maxLength','maximum','minItems','minLength','minimum','oneOf',
-            'pattern','properties','required','title','type','x-ophiolite'}
+            'pattern','properties','required','title','type','x-ophiolite',
+            'if','then','maxProperties'}  # E54: value rules beside a type (an original may exceed 32 MiB) are the server's to check
 RENAMES = {'Asset':'ScientificAsset','Curve':'ApplicationCurve','ScientificContext':'ScientificContext'}
 
 def name(value):

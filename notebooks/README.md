@@ -10,6 +10,7 @@ Without `OPHIOLITE_URL` they work on a synthetic log served on the reader's own 
 | `shale-volume-from-gamma-ray/` | Percentile picks, the five methods side by side, publish one result, add a second version |
 | `make-a-wavelet/` | A 30 Hz Ricker wavelet, its strongest frequency against the declared one, upload and a second version |
 | `make-a-wedge-model/` | Rocks from HON-GT-01, a wedge model, its synthetic and the tuning thickness; publish all three |
+| `large-files/` | A seismic volume sent in parts, continued after an interruption, read back by ranges and compared byte for byte |
 
 `gallery.json` lists every notebook (slug, title, sentence, modes, data); the documentation site's gallery page is
 generated from it. Each folder holds `notebook.py`, the percent script you edit, and `notebook.ipynb`, built from it:

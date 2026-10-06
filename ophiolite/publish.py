@@ -114,11 +114,13 @@ MAP_OPERATIONS={'maps':{'export'},'catalog':{'history'}}  # E70a C4: `get` of a 
 REPORT_OPERATIONS={'activity':{'report'}}  # E70b: a confirmed `get` reports which version this holder received
 IMPORT_OPERATIONS={'well-imports':{'preview','start','step','status','list','cancel'}}  # E42a: import a copy of an approved well table
 RELEASE_OPERATIONS={'releases':{'list','get','download','download-snapshot'}}  # E50c: the kept copies Wells.with_source reads (read routes only)
+SESSION_OPERATIONS={'las-uploads':{'begin','part','state','finish','cancel'},'capabilities':{'describe'}}  # E54: a file sent in parts; the served limits
 
 
 def operation_path(project,area,operation):
     allowed=(GROUP_OPERATIONS if area=='result-groups' else READ_OPERATIONS|WRITE_OPERATIONS if area in ('applications','las-uploads')
              else ENTITY_OPERATIONS.get(area) or SOURCE_OPERATIONS.get(area) or MAP_OPERATIONS.get(area) or REPORT_OPERATIONS.get(area) or IMPORT_OPERATIONS.get(area) or RELEASE_OPERATIONS.get(area) or AI_OPERATIONS.get(area,set()))
+    allowed=allowed|SESSION_OPERATIONS.get(area,set())
     if operation not in allowed:
         raise Refused('Unsupported application operation.')
     return '/api/v1/projects/'+quote(project,safe='')+'/'+area+'/'+operation
@@ -549,7 +551,37 @@ class WorkFolder:
                 if through is None or operation==through:return result
             return result
 
-MAX_UPLOAD=32*1024*1024  # the gateway's absolute maximum; each deployment's own limit is the server's to state
+MAX_UPLOAD=32*1024*1024  # the largest single request (inspect, derive, work folders); upload_data and upload_las follow the served table
+SINGLE=8*1024*1024  # a file up to this size is sent in one request, as before E54, without asking for the limits
+DIGEST_BLOCK=1024*1024
+
+
+class FileSource:
+    """E54: an original read by ranges, from a path (never read whole) or from bytes already in memory."""
+    def __init__(self,source):
+        if isinstance(source,(bytes,bytearray,memoryview)):self.raw,self.path,self.size=bytes(source),None,len(source)
+        else:self.raw,self.path=None,Path(source);self.size=self.path.stat().st_size
+        if not self.size:raise ValidationFailed(['The file is empty; nothing was sent.'])
+
+    def read(self,offset,n):
+        if self.raw is not None:return self.raw[offset:offset+n]
+        with self.path.open('rb') as stream:
+            stream.seek(offset);return stream.read(n)
+
+    def whole(self):
+        return self.raw if self.raw is not None else self.read(0,self.size)
+
+    def sha256(self):
+        if self.raw is not None:return hashlib.sha256(self.raw).hexdigest()
+        digest=hashlib.sha256()
+        with self.path.open('rb') as stream:
+            for block in iter(lambda:stream.read(DIGEST_BLOCK),b''):digest.update(block)
+        return digest.hexdigest()
+
+
+def part_header(project,upload_id,index,raw):
+    meta={'project_id':project,'upload_id':upload_id,'index':index,'sha256':hashlib.sha256(raw).hexdigest()}
+    return {'Content-Type':'application/octet-stream','X-Ophiolite-Upload':base64.b64encode(json_bytes(meta)).decode()}
 
 
 def upload_bytes(source):

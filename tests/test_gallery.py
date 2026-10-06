@@ -65,8 +65,14 @@ def test_make_a_wedge_model_reads_the_tuning_thickness_from_the_excerpt_values(t
     assert 'Tuning thickness: 13 ms two-way time (trace 13, 26.2 m at 4024 m/s)' in text and 'Synthetic mode: nothing is published.' in text
 
 
+def test_large_files_makes_its_volume_outside_the_folder_and_sends_nothing_synthetic(tmp_path, monkeypatch):
+    text = run('large-files', tmp_path, monkeypatch)
+    assert 'dipping-reflector.sgy: 19.4 MiB, 60 inlines x 80 crosslines x 1000 samples' in text
+    assert 'Synthetic mode: nothing is sent. With 8 MiB requests this file goes in 3 parts.' in text
+
+
 def test_every_entry_is_listed_built_and_described():
-    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model']
+    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files']
     for entry in GALLERY['notebooks']:
         assert set(entry) == {'slug', 'title', 'sentence', 'modes', 'data'} and entry['modes'] == ['synthetic', 'live']
         script = (ROOT / 'notebooks' / entry['slug'] / 'notebook.py').read_text()

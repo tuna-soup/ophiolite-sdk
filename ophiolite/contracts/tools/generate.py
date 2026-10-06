@@ -240,7 +240,8 @@ class Unsupported(ValueError):
 
 ANNOTATIONS = {'$schema', '$id', 'x-ophiolite', 'title', 'description', 'default', 'examples', 'deprecated',
                'minLength', 'maxLength', 'pattern', 'format', 'minimum', 'maximum', 'exclusiveMinimum', 'exclusiveMaximum',
-               'multipleOf', 'minItems', 'maxItems', 'uniqueItems', 'discriminator'}
+               'multipleOf', 'minItems', 'maxItems', 'uniqueItems', 'discriminator',
+               'if', 'then'}  # E54: a conditional bound (only an original may exceed 32 MiB) is a value rule, not a type
 SCALARS = {'string': 'string', 'integer': 'number', 'number': 'number', 'boolean': 'boolean', 'null': 'null'}
 
 

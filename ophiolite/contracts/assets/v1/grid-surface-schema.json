@@ -135,13 +135,13 @@
           "type": "string"
         },
         "ncols": {
-          "maximum": 262144,
+          "maximum": 4194304,
           "minimum": 1,
           "title": "Ncols",
           "type": "integer"
         },
         "nrows": {
-          "maximum": 262144,
+          "maximum": 4194304,
           "minimum": 1,
           "title": "Nrows",
           "type": "integer"
@@ -160,7 +160,7 @@
           "type": "number"
         },
         "missing_count": {
-          "maximum": 262144,
+          "maximum": 4194304,
           "minimum": 0,
           "title": "Missing Count",
           "type": "integer"
@@ -329,7 +329,7 @@
           }
         ]
       },
-      "maxItems": 262144,
+      "maxItems": 4194304,
       "minItems": 1,
       "title": "Values",
       "type": "array"

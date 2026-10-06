@@ -633,13 +633,13 @@
           "type": "string"
         },
         "ncols": {
-          "maximum": 262144,
+          "maximum": 4194304,
           "minimum": 1,
           "title": "Ncols",
           "type": "integer"
         },
         "nrows": {
-          "maximum": 262144,
+          "maximum": 4194304,
           "minimum": 1,
           "title": "Nrows",
           "type": "integer"
@@ -658,7 +658,7 @@
           "type": "number"
         },
         "missing_count": {
-          "maximum": 262144,
+          "maximum": 4194304,
           "minimum": 0,
           "title": "Missing Count",
           "type": "integer"
@@ -975,7 +975,7 @@
           "type": "string"
         },
         "bytes": {
-          "maximum": 33554432,
+          "maximum": 68719476736,
           "minimum": 0,
           "title": "Bytes",
           "type": "integer"
@@ -2329,6 +2329,15 @@
     },
     "Representation": {
       "additionalProperties": false,
+      "if": {
+        "properties": {
+          "kind": {
+            "not": {
+              "const": "original"
+            }
+          }
+        }
+      },
       "properties": {
         "id": {
           "maxLength": 512,
@@ -2364,7 +2373,7 @@
           "type": "string"
         },
         "bytes": {
-          "maximum": 33554432,
+          "maximum": 68719476736,
           "minimum": 0,
           "title": "Bytes",
           "type": "integer"
@@ -2399,6 +2408,13 @@
         "available",
         "losses"
       ],
+      "then": {
+        "properties": {
+          "bytes": {
+            "maximum": 33554432
+          }
+        }
+      },
       "title": "Representation",
       "type": "object"
     },

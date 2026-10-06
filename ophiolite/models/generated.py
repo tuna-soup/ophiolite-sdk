@@ -62,7 +62,7 @@ class GridSurface(Contract):
     interpretation: TypedInterpretation = Field(...)
     schema_: Literal['ophiolite.regular-grid-surface/1'] = Field(..., alias='schema')
     context: GridContext = Field(...)
-    values: Annotated[list[float | None], Field(min_length=1, max_length=262144)] = Field(...)
+    values: Annotated[list[float | None], Field(min_length=1, max_length=4194304)] = Field(...)
     nodata_value: float | None = Field(...)
 
 class Fidelity(Contract):
@@ -82,12 +82,12 @@ class GridContext(Contract):
     vertical_datum: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
     registration: Literal['corner', 'center'] = Field(...)
     row_order: Literal['north-to-south'] = Field(...)
-    ncols: Annotated[int, Field(ge=1, le=262144)] = Field(...)
-    nrows: Annotated[int, Field(ge=1, le=262144)] = Field(...)
+    ncols: Annotated[int, Field(ge=1, le=4194304)] = Field(...)
+    nrows: Annotated[int, Field(ge=1, le=4194304)] = Field(...)
     cell_size: Annotated[float, Field(gt=0)] = Field(...)
     x_first_center: float = Field(...)
     y_first_center: float = Field(...)
-    missing_count: Annotated[int, Field(ge=0, le=262144)] = Field(...)
+    missing_count: Annotated[int, Field(ge=0, le=4194304)] = Field(...)
     value_range: Annotated[list[float], Field(min_length=2, max_length=2)] | None = Field(...)
     fidelity: Fidelity = Field(...)
 
@@ -430,7 +430,7 @@ class LineageReference(Contract):
 
 class ManifestArtifact(Contract):
     sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
-    bytes: Annotated[int, Field(ge=0, le=33554432)] = Field(...)
+    bytes: Annotated[int, Field(ge=0, le=68719476736)] = Field(...)
 
 class ManifestRepresentation(Contract):
     id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
@@ -512,7 +512,7 @@ class Representation(Contract):
     kind: Literal['original', 'captured-result', 'derived-artifact', 'normalized'] = Field(...)
     media_type: Literal['application/x-las', 'application/json', 'text/csv', 'text/plain', 'application/octet-stream'] = Field(...)
     profile: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] = Field(...)
-    bytes: Annotated[int, Field(ge=0, le=33554432)] = Field(...)
+    bytes: Annotated[int, Field(ge=0, le=68719476736)] = Field(...)
     sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
     available: bool = Field(...)
     losses: Annotated[list[Annotated[str, Field(min_length=1, max_length=512)]], Field(max_length=32)] = Field(...)

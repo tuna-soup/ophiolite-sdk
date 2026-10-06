@@ -38,7 +38,11 @@ def test_declared_keyword_constraints(schema,good,bad):
     model=generated(schema);assert model.model_validate({'value':good}).value==good
     with pytest.raises(ValidationError):model.model_validate({'value':bad})
 
-@pytest.mark.parametrize('key,value',[(k,{}) for k in ('allOf','not','patternProperties','if','format')]+[('uniqueItems',True),('additionalProperties',{'type':'string'})])
+def test_server_checked_value_rules_are_accepted_and_left_to_the_server():
+    model=generated({'type':'object','maxProperties':3,'if':{'required':['kind']},'then':{'required':['size']}})  # E54: the server checks these
+    assert model.model_validate({'value':{'kind':'x'}}).value.kind=='x'  # not required here: the then-rule is the server's
+
+@pytest.mark.parametrize('key,value',[(k,{}) for k in ('allOf','not','patternProperties','dependentSchemas','format')]+[('uniqueItems',True),('additionalProperties',{'type':'string'})])
 def test_unsupported_keywords_refuse(key,value):
     with pytest.raises(ValueError,match='unsupported|Unsupported'):
         generated({'type':'object',key:value})

@@ -78,10 +78,10 @@ def test_omission_reasons_and_their_absence(web, service, shared_log, tmp_path):
 
 
 def test_the_deployment_limit_is_the_servers_to_state(web, service, monkeypatch):
-    from ophiolite.errors import CapacityExceeded, ValidationFailed
+    from ophiolite.errors import CapacityExceeded
     monkeypatch.setenv('OPHIOLITE_MAX_UPLOAD_BYTES', str(9 * 1024 * 1024))
     bob = capability3(web, service, 'bob')
-    with pytest.raises(CapacityExceeded, match='upload limit of 9 MiB'):
+    with pytest.raises(CapacityExceeded, match='accepts files up to 9 MiB'):  # E54: above the request limit it goes in parts; the file limit inherits 9 MiB
         bob.upload_las(big_las(int(12.5 * 1024 * 1024)), name='Too large here', attribution='Synthetic', audience=[], rights_confirmed=True)
-    with pytest.raises(ValidationFailed, match='32 MiB'):
+    with pytest.raises(CapacityExceeded, match='^This file is 32 MiB. This deployment accepts files up to 9 MiB.'):  # E54: no SDK-side 32 MiB cap any more
         bob.upload_las(b'x' * (32 * 1024 * 1024 + 1), name='Never', attribution='Synthetic', audience=[], rights_confirmed=True)

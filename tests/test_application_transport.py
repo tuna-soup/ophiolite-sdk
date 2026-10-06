@@ -56,13 +56,11 @@ def test_response_size_and_redirect_refused(monkeypatch):
         with pytest.raises(Refused):Client('http://localhost','p',http=http)._post('applications','options',{})
 
 
-@pytest.mark.parametrize('damage',['empty','large','rights','name','attribution','recipient','header'])
+@pytest.mark.parametrize('damage',['empty','rights','name','attribution','recipient','header'])
 def test_upload_local_limits_send_nothing(tmp_path,damage):
     called=[]
     source=b'~Version\n';options=dict(name='Synthetic',attribution='Original fixture',audience=['alice'],rights_confirmed=True)
     if damage=='empty':source=b''
-    if damage=='large':
-        path=tmp_path/'large.las';path.write_bytes(b'x'*(publish.MAX_UPLOAD+1));source=path
     if damage=='rights':options['rights_confirmed']=False
     if damage=='name':options['name']=' '
     if damage=='attribution':options['attribution']=' '

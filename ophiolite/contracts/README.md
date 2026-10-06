@@ -136,7 +136,9 @@ emitter supports exactly: `object` with `required` (a missing name becomes
 discriminated `oneOf` keeps its members as named types so `status` narrows),
 `array`, local `$ref`, the scalar types and `type: [..., "null"]`. Any other
 keyword (`allOf`, `not`, `patternProperties`, an `additionalProperties`
-schema, `if`/`then`, a bare `object`) makes generation fail naming the path;
+schema, a bare `object`) makes generation fail naming the path; `if`/`then`
+beside a type is a value rule (E54: an original's `bytes` bound) and emits
+nothing, alone it fails as a schema with no type;
 it never emits `any` or `unknown`. A schema without `additionalProperties:
 false` still gets no index signature: contracts forbid extras. The Workspace
 commits an exact copy with compile-time checks; Integration checks the bytes.

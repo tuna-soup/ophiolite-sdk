@@ -121,7 +121,11 @@ def status(response,operation,raw=None):
     recovery=meta.get('remedy','')
     if kind is Busy:raise Busy(message,recovery,status=code,retry_after=delay(response),code=meta.get('code'),**carried(meta))
     if code==413:message=upload_limit(meta) or message
+    if meta.get('code') in UPLOAD_CODES and meta.get('message'):message=meta['message']  # E54: the server's sentence for a file sent in parts
     raise kind(message,recovery,status=code,code=meta.get('code'),**carried(meta))
+
+
+UPLOAD_CODES={'file-too-large','no-room','part-corrupt','file-mismatch','access-lost','not-a-volume','expired','unknown-upload'}
 
 
 def upload_limit(meta):

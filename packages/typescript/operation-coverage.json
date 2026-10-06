@@ -798,6 +798,24 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/las-uploads/begin",
+    "function": "postProjectsProjectLasUploadsBegin",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/las-uploads/cancel",
+    "function": "postProjectsProjectLasUploadsCancel",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/las-uploads/finish",
+    "function": "postProjectsProjectLasUploadsFinish",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/las-uploads/info",
     "function": "postProjectsProjectLasUploadsInfo",
     "request": "schema",
@@ -822,6 +840,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/las-uploads/part",
+    "function": "postProjectsProjectLasUploadsPart",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/las-uploads/policy",
     "function": "postProjectsProjectLasUploadsPolicy",
     "request": "schema",
@@ -830,6 +854,12 @@
   {
     "operation": "POST /api/v1/projects/{project}/las-uploads/policy-preview",
     "function": "postProjectsProjectLasUploadsPolicyPreview",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/las-uploads/publish",
+    "function": "postProjectsProjectLasUploadsPublish",
     "request": "schema",
     "response": "schema"
   },
@@ -866,6 +896,12 @@
   {
     "operation": "POST /api/v1/projects/{project}/las-uploads/share-preview",
     "function": "postProjectsProjectLasUploadsSharePreview",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/las-uploads/state",
+    "function": "postProjectsProjectLasUploadsState",
     "request": "schema",
     "response": "schema"
   },

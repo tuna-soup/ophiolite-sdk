@@ -28,6 +28,13 @@
       "sentence": "Take two rocks from a well log, build a wedge model, compute its synthetic with a Ricker wavelet and read the tuning thickness.",
       "modes": ["synthetic", "live"],
       "data": "Rock values measured on the HON-GT-01 excerpt, or recomputed from the HON-GT-01 log in your project; publishing creates results only you can see until you share them."
+    },
+    {
+      "slug": "large-files",
+      "title": "Send a large file",
+      "sentence": "Send a seismic volume larger than one request in parts, continue it after an interruption, and read the original back by ranges.",
+      "modes": ["synthetic", "live"],
+      "data": "A synthetic 19 MiB volume made on your computer; sending creates a volume only you can see until you share it."
     }
   ]
 }
