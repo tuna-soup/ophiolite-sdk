@@ -33,6 +33,7 @@ LINKS = 50  # links per associate call
 RESULT = {'added': 'Added', 'already-here': 'Already here', 'needs-decision': 'Needs your decision', 'not-read': 'Not read',
           'not-supported': 'Not supported', 'cancelled': 'Cancelled', 'waiting': 'Not sent yet', 'reading': 'Being added'}
 OUTCOMES = ('added', 'already-here', 'needs-decision', 'not-read', 'not-supported')
+CLAIM_WAIT = 150  # seconds: the deployment's claim on a file being added lasts 120
 COLUMNS = ('path', 'result', 'kind', 'read', 'reason', 'asset')
 
 
@@ -280,12 +281,19 @@ class UploadRuns:
 
     def send(self, run_id, folder, progress=None, passes=3):
         """Send every file the upload still waits for, in order; a file that waits for another (the same content
-        earlier in the folder) is tried again after the others. Returns the report."""
+        earlier in the folder) is tried again after the others. A file another request holds (or whose bytes were lost
+        after its head) is waited for until its claim ends, at most CLAIM_WAIT seconds; the deployment then lets it wait
+        again and it is sent. Returns the report."""
         files = {i: f for i, f in enumerate(folder.files)}
-        for _ in range(passes):
+        until, done = time.monotonic() + CLAIM_WAIT, 0
+        while done < passes:
             report = self.status(run_id)
             waiting = [i for i in report.items if i['state'] == 'waiting' and i['role'] == 'primary']
-            if report.state != 'open' or not waiting: return report
+            if report.state != 'open': return report
+            if not waiting:
+                if not any(i['state'] == 'reading' and i['role'] == 'primary' for i in report.items) or time.monotonic() > until: return report
+                time.sleep(5.0); continue
+            done += 1
             for item in waiting:
                 try: self._file(run_id, item['ordinal'], files)
                 except IntegrityConflict as error:

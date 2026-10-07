@@ -71,6 +71,34 @@ def test_an_interrupted_upload_sends_only_the_files_not_yet_added(web, tmp_path,
     assert again.counts['already-here'] == 2 and len(runs.list()) == 2
 
 
+def test_a_file_whose_bytes_were_lost_after_its_head_is_sent_when_its_claim_ends(web, tmp_path, monkeypatch):
+    """Codex round 3: the head was accepted (the row is reading, claimed for 120 s) and the body never arrived. Sending
+    again waits for the claim to end instead of returning an unfinished report; the deployment lets the file wait
+    again and it is sent (mutation: status not releasing expired claims leaves the row reading)."""
+    import base64, types, time as real
+    import httpx
+    import ophiolite.upload_runs as sdk_runs
+    import project_gateway.upload_runs as gateway_runs
+    alice = client(web, 'alice', 'delegate')
+    root = folder(tmp_path, MINI[2:3], 'Lost')
+    log = sent(web)
+    lose = [True]
+    def drop(request):
+        if request.url.path.endswith('/upload-runs/file') and json.loads(base64.b64decode(request.headers['x-ophiolite-upload']))['mode'] == 'body' and lose:
+            lose.clear(); raise httpx.ConnectError('lost', request=request)
+    web.c.event_hooks['request'].append(drop)
+    with pytest.raises(Exception): alice.upload_runs.upload(root, **SETTINGS)
+    run = alice.upload_runs.list()[0]
+    assert alice.upload_runs.status(run['run_id']).items[0]['state'] == 'reading'
+    offset, slept = [0.0], []
+    monkeypatch.setattr(gateway_runs, 'time', types.SimpleNamespace(time=lambda: real.time() + offset[0]))
+    monkeypatch.setattr(sdk_runs, 'time', types.SimpleNamespace(monotonic=lambda: real.monotonic() + offset[0], sleep=lambda s: (slept.append(s), offset.__setitem__(0, 200.0))))
+    log.clear()
+    report = alice.upload_runs.upload(root, **SETTINGS)
+    assert report.run_id == run['run_id'] and report.counts['added'] == 1 and slept == [5.0]
+    assert [(m, o) for m, o, _ in log] == [('head', 0), ('body', 0)]
+
+
 def test_the_command_line_writes_the_report_and_exits_by_outcome(web, tmp_path, monkeypatch):
     monkeypatch.setenv('OPHIOLITE_ACCESS_KEY', 'oph_api_alice:read,write')
     (tmp_path / 'configuration.json').write_text(json.dumps({'schema': 'ophiolite.read-configuration/1', 'url': ORIGIN, 'project': 'p'}))
