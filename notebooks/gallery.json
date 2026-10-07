@@ -35,6 +35,13 @@
       "sentence": "Send a seismic volume larger than one request in parts, continue it after an interruption, and read the original back by ranges.",
       "modes": ["synthetic", "live"],
       "data": "A synthetic 19 MiB volume made on your computer; sending creates a volume only you can see until you share it."
+    },
+    {
+      "slug": "a-well-folder-in-one-report",
+      "title": "A well folder in one report",
+      "sentence": "Upload a folder of well logs in one step and read one report that says what became of each file and which wellbore each log names.",
+      "modes": ["synthetic", "live"],
+      "data": "A synthetic folder of five files made on your computer; uploading creates files only you can see until you share them."
     }
   ]
 }

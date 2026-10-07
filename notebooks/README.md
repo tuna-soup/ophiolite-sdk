@@ -11,6 +11,7 @@ Without `OPHIOLITE_URL` they work on a synthetic log served on the reader's own 
 | `make-a-wavelet/` | A 30 Hz Ricker wavelet, its strongest frequency against the declared one, upload and a second version |
 | `make-a-wedge-model/` | Rocks from HON-GT-01, a wedge model, its synthetic and the tuning thickness; publish all three |
 | `large-files/` | A seismic volume sent in parts, continued after an interruption, read back by ranges and compared byte for byte |
+| `a-well-folder-in-one-report/` | A folder of logs uploaded in one step, one report per file, and the wellbores the logs name |
 
 `gallery.json` lists every notebook (slug, title, sentence, modes, data); the documentation site's gallery page is
 generated from it. Each folder holds `notebook.py`, the percent script you edit, and `notebook.ipynb`, built from it:

@@ -71,8 +71,14 @@ def test_large_files_makes_its_volume_outside_the_folder_and_sends_nothing_synth
     assert 'Synthetic mode: nothing is sent. With 8 MiB requests this file goes in 3 parts.' in text
 
 
+def test_a_well_folder_in_one_report_checks_its_folder_outside_the_download_and_sends_nothing_synthetic(tmp_path, monkeypatch):
+    text = run('a-well-folder-in-one-report', tmp_path, monkeypatch)
+    assert ': 5 files\n' in text and '/W-1/gamma_copy.las (' in text
+    assert 'Synthetic mode: nothing is sent. In your project this folder gives 2 Added, 1 Already here, 1 Not read, and 1 file that no reader recognises.' in text
+
+
 def test_every_entry_is_listed_built_and_described():
-    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files']
+    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report']
     for entry in GALLERY['notebooks']:
         assert set(entry) == {'slug', 'title', 'sentence', 'modes', 'data'} and entry['modes'] == ['synthetic', 'live']
         script = (ROOT / 'notebooks' / entry['slug'] / 'notebook.py').read_text()
