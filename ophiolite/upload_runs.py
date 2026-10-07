@@ -219,7 +219,7 @@ class UploadRuns:
 
     def decide(self, run_id, ordinals, choice, declared=None, command_id=None):
         """Answer files that need a decision: 'add-separately', 'add-new', 'declare' (with `declared`) or 'skip'. Files
-        to add go back to waiting; send them with `resume(run_id, path)`."""
+        to add go back to waiting; send them with `send(run_id, open(path))`."""
         body = {'run_id': run_id, 'ordinals': sorted(ordinals), 'choice': choice, **({'declared': dict(declared or {})} if choice == 'declare' else {})}
         body['command_id'] = command_id or _sha(['decide', body])
         return Report(self._call('decide', body, UploadRun))
