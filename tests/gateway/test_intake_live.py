@@ -89,6 +89,18 @@ def test_a_declaration_the_kind_does_not_take_is_refused_naming_what_it_takes(ke
     assert log == []
 
 
+def test_link_wellbore_links_only_the_one_wellbore_whose_normalised_name_the_header_names(keyed, tmp_path):
+    alice = keyed_client(keyed)
+    log = tmp_path / 'tum.las'
+    log.write_bytes(TUM2)  # WELL. TUBBERGEN-MANDER- 2
+    well = alice.create_entity('well', 'Tubbergen', audience=['bob'], provisional=True, statement='Synthetic test', command_id='c6-w')
+    alice.create_entity('wellbore', 'Tubbergen Mander 12', provisional=True, audience=['bob'], part_of=well, statement='Synthetic test', command_id='c6-b12')
+    alice.create_entity('wellbore', 'Tubbergen Mander 2A', provisional=True, audience=['bob'], part_of=well, statement='Synthetic test', command_id='c6-b2a')
+    bore = alice.create_entity('wellbore', 'tubbergen mander 02', provisional=True, audience=['bob'], part_of=well, statement='Synthetic test', command_id='c6-b02')
+    linked = alice.upload(log, link_wellbore=True, **SETTINGS)
+    assert [(i['association'] or {}).get('entity_id') for i in linked.items] == [bore.entity_id]  # not 12, not 2A
+
+
 @pytest.fixture
 def fetched(monkeypatch):
     """The gateway's fetch, scripted at the admission boundary (the limits are proven in Platform's test_address_fetch.py)."""
