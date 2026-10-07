@@ -75225,6 +75225,18 @@
             "maxItems": 12,
             "title": "Confirmed",
             "type": "array"
+          },
+          "well_log": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WellLogRef"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E85: the exact well log a tops or deviation file belongs to (the old form's Belongs to well log)"
           }
         },
         "required": [
@@ -84450,6 +84462,29 @@
           "revision"
         ],
         "title": "WellLog",
+        "type": "object"
+      },
+      "WellLogRef": {
+        "additionalProperties": false,
+        "properties": {
+          "asset_id": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "revision": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Revision",
+            "type": "string"
+          }
+        },
+        "required": [
+          "asset_id",
+          "revision"
+        ],
+        "title": "WellLogRef",
         "type": "object"
       }
     }

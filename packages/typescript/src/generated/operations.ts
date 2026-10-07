@@ -57,7 +57,7 @@ type WireError = { "error": string; "code": string; "message": string; "remedy":
 type WireEvidence = { "source"?: (WireSourceRevision) | (null); "statement"?: (string) | (null) };
 type WireExactRevision = { "asset_id": string; "revision": string };
 type WireExecution = { "plan": string; "agent": string; "delegator": string; "operation": string; "command_id": (string) | (null); "run_id": (string) | (null); "state": string; "response_sha256": (string) | (null); "reserved_at": number; "completed_at": (number) | (null); "approved_by": (string) | (null) };
-type WireFileIn = { "path": string; "bytes": number; "sha256": string; "decisions"?: (Record<string, unknown>) | (null); "suggested"?: Array<string>; "confirmed"?: Array<string> };
+type WireFileIn = { "path": string; "bytes": number; "sha256": string; "decisions"?: (Record<string, unknown>) | (null); "suggested"?: Array<string>; "confirmed"?: Array<string>; "well_log"?: (WireWellLogRef) | (null) };
 type WireGroupMember = { "asset_id": string; "name": (string) | (null); "head_revision": string; "revision_count": number };
 type WireIdentity = { "authority"?: (string) | (null); "key"?: (string) | (null); "provisional": boolean };
 type WireIdentityChange = { "actor": string; "at": string; "before": WireIdentity; "after": WireIdentity };
@@ -201,6 +201,7 @@ type WireWellImportTotals = { "rows": number; "names_from_numbers": number };
 type WireWellImportWell = { "entity_id": string; "name": string };
 type WireWellLocation = { "schema": "ophiolite.well-location/1"; "x": (number) | (null); "y": (number) | (null); "crs": string; "elevation_reference": "unknown" | "GL" | "KB" | "MSL"; "source": WireLocationSource; "provenance": WireLocationProvenance; "transformation"?: (WireTransformation) | ("unavailable") | (null); "stored"?: (WireStoredPoint) | (null); "ambiguous"?: boolean };
 type WireWellLog = { "asset_id": string; "revision": string };
+type WireWellLogRef = { "asset_id": string; "revision": string };
 export type postAccessKeysCreateInput = { body: { "project_id": string; "label": string; "scope": "read" | "write"; "days": number; [key: string]: unknown }; options?: OperationOptions };
 export function postAccessKeysCreate(transport: Transport, input: postAccessKeysCreateInput): Promise<{ "id": string; "key": string; "label": string; "project_id": string; "scope": "read" | "write"; "created_at": string; "expires_at": string }> {
   return transport.request<{ "id": string; "key": string; "label": string; "project_id": string; "scope": "read" | "write"; "created_at": string; "expires_at": string }>("POST", "/api/v1/access-keys/create", {}, undefined, input.body, input.options, null, false);
