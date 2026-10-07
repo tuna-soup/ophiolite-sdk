@@ -96,6 +96,12 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
         from .sync import Sync
         return Sync(self,checkpoint=checkpoint)
 
+    @property
+    def upload_runs(self):
+        """E55: upload a folder or a .zip with one report (ophiolite.upload_runs.UploadRuns)."""
+        from .upload_runs import UploadRuns
+        return UploadRuns(self)
+
     def well_imports(self):
         """E42a: import a copy of an approved well table as wells (ophiolite.well_imports.WellImports)."""
         from .well_imports import WellImports
@@ -592,10 +598,18 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
 
     def _upload_parts(self,file,digest,body):
         """begin (the same command continues), the parts not yet received, finish, the check (polled), publish."""
-        from . import publish as planning
         begin={'command_id':body['command_id'],'filename':body['filename'],'profile':body.get('profile','las2/1'),'declared':body.get('declared',{}),
                'bytes':file.size,'sha256':digest,**{k:body[k] for k in ('append_to','expected_parent') if k in body}}
-        view=self._post('las-uploads','begin',begin,retry=True);ref={'upload_id':view['upload_id']}
+        view=self._transfer_parts(file,self._post('las-uploads','begin',begin,retry=True))
+        if view['state'] not in ('checked','published'):raise session_refusal(view)
+        fields={k:body[k] for k in ('name','attribution','audience','rights_confirmed','well_notes','well_log') if k in body}
+        return self._post('las-uploads','publish',{'upload_id':view['upload_id'],**fields},retry=True)
+
+    def _transfer_parts(self,file,view):
+        """The parts a begun session has not received, finish, and its check (polled); the session's last state.
+        E55: a folder upload's large file is begun by the run and saved by it, so only this middle is shared."""
+        from . import publish as planning
+        ref={'upload_id':view['upload_id']}
         if view['state']=='open':
             have={p['index'] for p in view['received']}
             for index in range(view['parts']):
@@ -611,9 +625,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
         while view['state']=='finishing':
             time.sleep(wait);wait=min(wait*2,5.0)
             view=self._post('las-uploads','state',ref,retry=True)
-        if view['state'] not in ('checked','published'):raise session_refusal(view)
-        fields={k:body[k] for k in ('name','attribution','audience','rights_confirmed','well_notes','well_log') if k in body}
-        return self._post('las-uploads','publish',{**ref,**fields},retry=True)
+        return view
 
     def download_original(self,asset,revision,destination,*,part_bytes=8*1024*1024):
         """E54: save the exact original of a revision to `destination`, read by ranges and verified against the

@@ -125,7 +125,8 @@ def status(response,operation,raw=None):
     raise kind(message,recovery,status=code,code=meta.get('code'),**carried(meta))
 
 
-UPLOAD_CODES={'file-too-large','no-room','part-corrupt','file-mismatch','access-lost','not-a-volume','expired','unknown-upload'}
+UPLOAD_CODES={'file-too-large','no-room','part-corrupt','file-mismatch','access-lost','not-a-volume','expired','unknown-upload',
+              'unknown-run','claimed','session-mismatch','run-ended','too-many-runs','head-too-large'}  # E55: a folder upload's refusals
 
 
 def upload_limit(meta):

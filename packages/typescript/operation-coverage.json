@@ -1644,6 +1644,60 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/upload-runs/associate",
+    "function": "postProjectsProjectUploadRunsAssociate",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/upload-runs/cancel",
+    "function": "postProjectsProjectUploadRunsCancel",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/upload-runs/decide",
+    "function": "postProjectsProjectUploadRunsDecide",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/upload-runs/file",
+    "function": "postProjectsProjectUploadRunsFile",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/upload-runs/file-parts",
+    "function": "postProjectsProjectUploadRunsFileParts",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/upload-runs/list",
+    "function": "postProjectsProjectUploadRunsList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/upload-runs/share",
+    "function": "postProjectsProjectUploadRunsShare",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/upload-runs/start",
+    "function": "postProjectsProjectUploadRunsStart",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/upload-runs/status",
+    "function": "postProjectsProjectUploadRunsStatus",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/webhooks/create",
     "function": "postProjectsProjectWebhooksCreate",
     "request": "schema",

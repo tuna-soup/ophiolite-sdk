@@ -1069,7 +1069,7 @@ class ProfileEntry(Contract):
 
 class DocumentEntry(Contract):
     id: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] = Field(...)
-    kind: Literal['mapping', 'vocabulary', 'generated', 'openapi', 'fixture', 'capability', 'relationships', 'policy', 'calculation'] = Field(...)
+    kind: Literal['mapping', 'vocabulary', 'generated', 'openapi', 'fixture', 'capability', 'relationships', 'policy', 'calculation', 'reader-registry'] = Field(...)
     path: Annotated[str, Field(min_length=1)] = Field(...)
     title: Annotated[str, Field(min_length=1)] = Field(None)
     schema_: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$')] = Field(None, alias='schema')

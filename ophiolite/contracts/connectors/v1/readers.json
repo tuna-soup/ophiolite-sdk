@@ -1,0 +1,850 @@
+{
+ "schema": "ophiolite.reader-registry/1",
+ "id": "ophiolite.reader-registry/1",
+ "note": "E55: every file reader is declared once here; the upload dialog, the report, the capability pages and the OSDU check read this document.",
+ "osdu": {
+  "repository": "https://community.opengroup.org/osdu/data/data-definitions",
+  "commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+  "committed": "2026-07-17"
+ },
+ "limits": {
+  "head_bytes": 65536,
+  "files_per_run": 500,
+  "companions_per_group": 8
+ },
+ "readers": [
+  {
+   "profile": "las2/1",
+   "label": "Well log (LAS 2.0)",
+   "extensions": [
+    ".las"
+   ],
+   "detect": "las_marker",
+   "limits": {
+    "names": [
+     "upload_bytes"
+    ],
+    "template": "LAS 2.0 · UTF-8 · up to {upload_bytes} in one request / 100,000 rows / 64 curves. Original depth, units and missing samples are preserved."
+   },
+   "declared": [],
+   "companions": [],
+   "recipe": false,
+   "osdu": {
+    "kind": "work-product-component--WellLog",
+    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+   },
+   "route": {
+    "document": "las-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "real",
+    "path": "tests/fixtures/nlog-tubbergen-mander/TUBBERGEN_MANDER__2_RUN_06_RAW_CH_NOV_1991_06R_1.las",
+    "sha256": "6390264258111d5b994f81984f4bd213f56360a43f02dd09824b2093b9ea8e17",
+    "bytes": 15615,
+    "rights": "docs/release/rights/nlog-tubbergen-mander-2026-10-07.json"
+   },
+   "report": "{rows:,} rows, {curves:,} curves, {missing:,} missing samples",
+   "type": "well-log",
+   "mapping": null
+  },
+  {
+   "profile": "well-tops-csv/1",
+   "label": "Well tops (CSV)",
+   "extensions": [
+    ".csv",
+    ".txt"
+   ],
+   "detect": "csv_well_tops",
+   "limits": {
+    "names": [],
+    "template": "CSV with columns name and md, optionally tvd and source · up to 10,000 tops of one well. Names, depths and order are kept; empty cells stay missing; other columns are listed as not read."
+   },
+   "declared": [
+    {
+     "key": "depth_unit",
+     "label": "Depth unit",
+     "kind": "unit",
+     "hint": "For example m or ft"
+    },
+    {
+     "key": "depth_basis",
+     "label": "Depth reference",
+     "kind": "choice",
+     "choices": {
+      "same-as-log": "Same depth reference as the associated well log",
+      "other": "A different depth reference",
+      "unknown": "Not stated"
+     }
+    }
+   ],
+   "companions": [],
+   "recipe": false,
+   "osdu": {
+    "kind": "work-product-component--WellboreMarkerSet",
+    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+   },
+   "route": {
+    "document": "typed-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "synthetic",
+    "path": "tests/fixtures/readers/well-tops.csv",
+    "sha256": "4172c8f0d5e5b33f1870d3d7b5d9542ea2a0b2d7826d597e6684817fb3542210",
+    "bytes": 90,
+    "replaced_by": "E87"
+   },
+   "report": "{count:,} tops",
+   "type": "well-tops",
+   "mapping": "well-tops/1"
+  },
+  {
+   "profile": "deviation-csv/1",
+   "label": "Deviation survey (CSV)",
+   "extensions": [
+    ".csv",
+    ".txt"
+   ],
+   "detect": "csv_deviation",
+   "limits": {
+    "names": [],
+    "template": "CSV with columns md, inclination, azimuth and optionally tvd · measured depth must increase · up to 10,000 stations."
+   },
+   "declared": [
+    {
+     "key": "depth_unit",
+     "label": "Depth unit",
+     "kind": "unit",
+     "hint": "For example m or ft"
+    },
+    {
+     "key": "azimuth_reference",
+     "label": "Azimuths measured from",
+     "kind": "choice",
+     "choices": {
+      "true-north": "True north",
+      "grid-north": "Grid north",
+      "magnetic-north": "Magnetic north",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "depth_datum",
+     "label": "Depth datum",
+     "kind": "text",
+     "hint": "For example rotary table"
+    }
+   ],
+   "companions": [],
+   "recipe": false,
+   "osdu": {
+    "kind": "work-product-component--WellboreTrajectory",
+    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+   },
+   "route": {
+    "document": "typed-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "synthetic",
+    "path": "tests/fixtures/readers/deviation.csv",
+    "sha256": "bce64e2104addfc33ff0b356eba50be2560aa12f7e7d15be749aada2b223da7b",
+    "bytes": 63,
+    "replaced_by": "E87"
+   },
+   "report": "{count:,} stations",
+   "type": "trajectory",
+   "mapping": "trajectory/1"
+  },
+  {
+   "profile": "esri-ascii-grid/1",
+   "label": "Horizon grid (ESRI ASCII)",
+   "extensions": [
+    ".asc",
+    ".txt"
+   ],
+   "detect": "esri_ncols",
+   "limits": {
+    "names": [
+     "grid_cells"
+    ],
+    "template": "ESRI ASCII grid (ncols, nrows, corner or centre origin, cellsize, optional NODATA_value) · up to {grid_cells} cells. NODATA cells stay missing; nothing is interpolated."
+   },
+   "declared": [
+    {
+     "key": "crs",
+     "label": "Coordinate system",
+     "kind": "crs",
+     "hint": "EPSG code such as EPSG:28992"
+    },
+    {
+     "key": "xy_unit",
+     "label": "Map unit",
+     "kind": "unit",
+     "hint": "For example m"
+    },
+    {
+     "key": "z_meaning",
+     "label": "Values are",
+     "kind": "choice",
+     "choices": {
+      "depth": "Depth",
+      "elevation": "Elevation",
+      "time": "Time",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "z_unit",
+     "label": "Value unit",
+     "kind": "unit",
+     "hint": "For example m or ms"
+    },
+    {
+     "key": "positive",
+     "label": "Positive direction",
+     "kind": "choice",
+     "choices": {
+      "up": "Up",
+      "down": "Down",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "vertical_datum",
+     "label": "Vertical datum",
+     "kind": "text",
+     "hint": "For example NAP"
+    }
+   ],
+   "companions": [],
+   "recipe": false,
+   "osdu": {
+    "kind": "work-product-component--SeismicHorizon",
+    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+   },
+   "route": {
+    "document": "typed-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "synthetic",
+    "path": "tests/fixtures/readers/horizon-grid.asc",
+    "sha256": "a478059e57f0ee96de5a84ece57feeabb6d1c2c08a9f322709545a5f28d7f415",
+    "bytes": 119,
+    "replaced_by": "E56"
+   },
+   "report": "{ncols:,} × {nrows:,} cells, {missing_count:,} missing",
+   "type": "regular-grid-surface",
+   "mapping": "regular-grid-surface/1"
+  },
+  {
+   "profile": "mesh-text/1",
+   "label": "Triangulated surface (text)",
+   "extensions": [
+    ".mesh",
+    ".txt"
+   ],
+   "detect": "mesh_marker",
+   "limits": {
+    "names": [
+     "upload_bytes"
+    ],
+    "template": "Ophiolite mesh text: \"# ophiolite-mesh 1\", optional attributes, vertices (x y z, \"-\" for missing) and triangles (three vertex numbers from 0) · up to 200,000 vertices within {upload_bytes}. Only triangle references are checked."
+   },
+   "declared": [
+    {
+     "key": "crs",
+     "label": "Coordinate system",
+     "kind": "crs",
+     "hint": "EPSG code such as EPSG:28992"
+    },
+    {
+     "key": "xy_unit",
+     "label": "Map unit",
+     "kind": "unit",
+     "hint": "For example m"
+    },
+    {
+     "key": "z_meaning",
+     "label": "Values are",
+     "kind": "choice",
+     "choices": {
+      "depth": "Depth",
+      "elevation": "Elevation",
+      "time": "Time",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "z_unit",
+     "label": "Value unit",
+     "kind": "unit",
+     "hint": "For example m or ms"
+    },
+    {
+     "key": "positive",
+     "label": "Positive direction",
+     "kind": "choice",
+     "choices": {
+      "up": "Up",
+      "down": "Down",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "vertical_datum",
+     "label": "Vertical datum",
+     "kind": "text",
+     "hint": "For example NAP"
+    }
+   ],
+   "companions": [],
+   "recipe": false,
+   "osdu": {
+    "kind": "work-product-component--SeismicHorizon",
+    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+   },
+   "route": {
+    "document": "typed-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "synthetic",
+    "path": "tests/fixtures/readers/surface.mesh",
+    "sha256": "3ab2e518f8555cff5d6500f6b6471101567d12b1739b1885e35a1b253a390f94",
+    "bytes": 115,
+    "replaced_by": "E56"
+   },
+   "report": "{vertex_count:,} vertices, {triangle_count:,} triangles",
+   "type": "triangulated-surface",
+   "mapping": "triangulated-surface/1"
+  },
+  {
+   "profile": "points-csv/1",
+   "label": "Point set (CSV)",
+   "extensions": [
+    ".csv",
+    ".txt"
+   ],
+   "detect": "csv_points",
+   "limits": {
+    "names": [
+     "upload_bytes"
+    ],
+    "template": "CSV with x, y, optionally z and up to 16 numeric columns · up to 100,000 points within {upload_bytes}. Empty cells stay missing."
+   },
+   "declared": [
+    {
+     "key": "crs",
+     "label": "Coordinate system",
+     "kind": "crs",
+     "hint": "EPSG code such as EPSG:28992"
+    },
+    {
+     "key": "xy_unit",
+     "label": "Map unit",
+     "kind": "unit",
+     "hint": "For example m"
+    },
+    {
+     "key": "z_meaning",
+     "label": "Values are",
+     "kind": "choice",
+     "choices": {
+      "depth": "Depth",
+      "elevation": "Elevation",
+      "time": "Time",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "z_unit",
+     "label": "Value unit",
+     "kind": "unit",
+     "hint": "For example m or ms"
+    },
+    {
+     "key": "positive",
+     "label": "Positive direction",
+     "kind": "choice",
+     "choices": {
+      "up": "Up",
+      "down": "Down",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "vertical_datum",
+     "label": "Vertical datum",
+     "kind": "text",
+     "hint": "For example NAP"
+    }
+   ],
+   "companions": [],
+   "recipe": false,
+   "osdu": {
+    "kind": "work-product-component--GenericRepresentation",
+    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+   },
+   "route": {
+    "document": "typed-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "synthetic",
+    "path": "tests/fixtures/readers/points.csv",
+    "sha256": "88f3eabd5859f0bc8c11dddccb07ad14fef63fcdcd89f8839d7aab70f66b811c",
+    "bytes": 41,
+    "replaced_by": "E87"
+   },
+   "report": "{count:,} points",
+   "type": "point-set",
+   "mapping": "point-set/1"
+  },
+  {
+   "profile": "opendtect-faultsticks/1",
+   "label": "Fault sticks (OpendTect)",
+   "extensions": [
+    ".fss",
+    ".dat",
+    ".txt"
+   ],
+   "detect": "faultsticks_marker",
+   "limits": {
+    "names": [],
+    "template": "OpendTect fault-stick text: one point per line as x y z stick number (an optional node number is ignored) · at least two points per stick, up to 200,000 points. Sticks and points keep the order of the file."
+   },
+   "declared": [
+    {
+     "key": "crs",
+     "label": "Coordinate system",
+     "kind": "crs",
+     "hint": "EPSG code such as EPSG:28992"
+    },
+    {
+     "key": "xy_unit",
+     "label": "Map unit",
+     "kind": "unit",
+     "hint": "For example m"
+    },
+    {
+     "key": "z_meaning",
+     "label": "Values are",
+     "kind": "choice",
+     "choices": {
+      "depth": "Depth",
+      "elevation": "Elevation",
+      "time": "Time",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "z_unit",
+     "label": "Value unit",
+     "kind": "unit",
+     "hint": "For example m or ms"
+    },
+    {
+     "key": "positive",
+     "label": "Positive direction",
+     "kind": "choice",
+     "choices": {
+      "up": "Up",
+      "down": "Down",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "vertical_datum",
+     "label": "Vertical datum",
+     "kind": "text",
+     "hint": "For example NAP"
+    }
+   ],
+   "companions": [],
+   "recipe": false,
+   "osdu": {
+    "kind": "work-product-component--FaultInterpretation",
+    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+   },
+   "route": {
+    "document": "typed-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "synthetic",
+    "path": "tests/fixtures/readers/faults.fss",
+    "sha256": "44d7121ba84a469f908af7b1e2a822920910f5c373674818dedaf14c629814e5",
+    "bytes": 179,
+    "replaced_by": "E56"
+   },
+   "report": "{sticks:,} sticks, {points:,} points",
+   "type": "polyline-set",
+   "mapping": "polyline-set/1"
+  },
+  {
+   "profile": "segy/1",
+   "label": "Seismic volume (SEG-Y)",
+   "extensions": [
+    ".sgy",
+    ".segy"
+   ],
+   "detect": "segy_header",
+   "limits": {
+    "names": [
+     "file_bytes"
+    ],
+    "template": "SEG-Y rev 1 or 2, big-endian, IBM or IEEE 4-byte samples, one trace length, a full inline × crossline grid · up to {file_bytes}. The file is kept byte for byte; sections are read one at a time."
+   },
+   "declared": [
+    {
+     "key": "z_domain",
+     "label": "Samples are",
+     "kind": "choice",
+     "choices": {
+      "time": "Time",
+      "depth": "Depth",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "crs",
+     "label": "Coordinate system",
+     "kind": "crs",
+     "hint": "EPSG code such as EPSG:23031"
+    },
+    {
+     "key": "datum",
+     "label": "Datum",
+     "kind": "text",
+     "hint": "For example mean sea level"
+    }
+   ],
+   "companions": [],
+   "recipe": false,
+   "osdu": {
+    "kind": "work-product-component--SeismicTraceData",
+    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+   },
+   "route": {
+    "document": "typed-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "synthetic",
+    "path": "tests/fixtures/readers/volume.sgy",
+    "sha256": "fbdd6ea3d05076fa89c8327210d96579ff308d414d91c1cd7d1af83e463888cf",
+    "bytes": 6624,
+    "replaced_by": "E56"
+   },
+   "report": "{traces:,} traces, {samples:,} samples per trace",
+   "type": "seismic-volume",
+   "mapping": "seismic-volume/1"
+  },
+  {
+   "profile": "petrel-points-attributes/1",
+   "label": "Petrel points with attributes",
+   "extensions": [
+    ".txt",
+    ".dat"
+   ],
+   "detect": "petrel_points_header",
+   "limits": {
+    "names": [],
+    "template": "Petrel \"Points with attributes\" export with its CRS metadata and README beside it, read with the standard layout."
+   },
+   "declared": [
+    {
+     "key": "crs",
+     "label": "Coordinate system",
+     "kind": "crs",
+     "hint": "EPSG code such as EPSG:28992"
+    },
+    {
+     "key": "xy_unit",
+     "label": "Map unit",
+     "kind": "unit",
+     "hint": "For example m"
+    },
+    {
+     "key": "z_meaning",
+     "label": "Values are",
+     "kind": "choice",
+     "choices": {
+      "depth": "Depth",
+      "elevation": "Elevation",
+      "time": "Time",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "z_unit",
+     "label": "Value unit",
+     "kind": "unit",
+     "hint": "For example m or ms"
+    },
+    {
+     "key": "positive",
+     "label": "Positive direction",
+     "kind": "choice",
+     "choices": {
+      "up": "Up",
+      "down": "Down",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "vertical_datum",
+     "label": "Vertical datum",
+     "kind": "text",
+     "hint": "For example NAP"
+    }
+   ],
+   "companions": [
+    {
+     "pattern": "{stem}.crsmeta.xml",
+     "role": "crs-metadata"
+    },
+    {
+     "pattern": "README.txt",
+     "role": "readme"
+    }
+   ],
+   "recipe": true,
+   "osdu": {
+    "kind": "work-product-component--GenericRepresentation",
+    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+   },
+   "route": {
+    "document": "typed-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "synthetic",
+    "path": "tests/fixtures/petrel_points_with_readme/points.txt",
+    "sha256": "d3bbe384d54f28d0b13295db00aaf6e5c136e8c661eb5959ffd71c26ebc2d7a1",
+    "bytes": 498,
+    "replaced_by": "E89"
+   },
+   "report": "{count:,} points",
+   "type": "point-set",
+   "mapping": null
+  },
+  {
+   "profile": "opendtect-horizon-ascii/1",
+   "label": "Horizon points (OpendTect)",
+   "extensions": [
+    ".xyz",
+    ".txt"
+   ],
+   "detect": "opendtect_horizon_header",
+   "limits": {
+    "names": [],
+    "template": "OpendTect horizon ASCII export (\"X\" \"Y\" \"Z\" header), read with the standard layout."
+   },
+   "declared": [
+    {
+     "key": "crs",
+     "label": "Coordinate system",
+     "kind": "crs",
+     "hint": "EPSG code such as EPSG:28992"
+    },
+    {
+     "key": "xy_unit",
+     "label": "Map unit",
+     "kind": "unit",
+     "hint": "For example m"
+    },
+    {
+     "key": "z_meaning",
+     "label": "Values are",
+     "kind": "choice",
+     "choices": {
+      "depth": "Depth",
+      "elevation": "Elevation",
+      "time": "Time",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "z_unit",
+     "label": "Value unit",
+     "kind": "unit",
+     "hint": "For example m or ms"
+    },
+    {
+     "key": "positive",
+     "label": "Positive direction",
+     "kind": "choice",
+     "choices": {
+      "up": "Up",
+      "down": "Down",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "vertical_datum",
+     "label": "Vertical datum",
+     "kind": "text",
+     "hint": "For example NAP"
+    }
+   ],
+   "companions": [
+    {
+     "pattern": "README.txt",
+     "role": "readme"
+    }
+   ],
+   "recipe": true,
+   "osdu": {
+    "kind": "work-product-component--SeismicHorizon",
+    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+   },
+   "route": {
+    "document": "typed-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "synthetic",
+    "path": "tests/fixtures/opendtect_horizon_xyz/with_header.txt",
+    "sha256": "19767e4ef2cc7b60e44072f4ff69d0db3b31226e951a1bdc6464115f57f96145",
+    "bytes": 118,
+    "replaced_by": "E89"
+   },
+   "report": "{count:,} points",
+   "type": "point-set",
+   "mapping": null
+  },
+  {
+   "profile": "well-location/1",
+   "label": "Well location (JSON)",
+   "extensions": [
+    ".json"
+   ],
+   "detect": "well_location_json",
+   "limits": {
+    "names": [],
+    "template": "One JSON object with x, y, crs and elevation_reference; the file states its own coordinate system."
+   },
+   "declared": [],
+   "companions": [],
+   "recipe": false,
+   "osdu": {
+    "kind": "master-data--Well",
+    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+   },
+   "route": {
+    "document": "typed-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "synthetic",
+    "path": "tests/fixtures/readers/well-location.json",
+    "sha256": "f45a416268d1b4e7d15b08ae7f5b2863d25f2a0177e42bdd08069cafdb3dd2c6",
+    "bytes": 82,
+    "replaced_by": "E87"
+   },
+   "report": "One well location ({crs})",
+   "type": "well-location",
+   "mapping": "well-location/1"
+  },
+  {
+   "profile": "wavelet-text/1",
+   "label": "Wavelet (text)",
+   "extensions": [
+    ".txt"
+   ],
+   "detect": "wavelet_marker",
+   "limits": {
+    "names": [],
+    "template": "Ophiolite wavelet text (\"# ophiolite-wavelet 1\"); the file states its own sampling and polarity."
+   },
+   "declared": [],
+   "companions": [],
+   "recipe": false,
+   "osdu": {
+    "none": "a text format; its normalized profile is ophiolite.wavelet/1"
+   },
+   "route": {
+    "document": "section-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "synthetic",
+    "path": "tests/fixtures/readers/wavelet.txt",
+    "sha256": "2e3a4e864612763834b9d0d5a0bffd25a2178d5cc636a3ee2507c6067d7f2b32",
+    "bytes": 455,
+    "replaced_by": "E57"
+   },
+   "report": "{sample_count:,} samples",
+   "type": "wavelet",
+   "mapping": "wavelet/1"
+  },
+  {
+   "profile": "model-section-text/1",
+   "label": "Rock model section (text)",
+   "extensions": [
+    ".txt"
+   ],
+   "detect": "model_section_marker",
+   "limits": {
+    "names": [],
+    "template": "Ophiolite model-section text (\"# ophiolite-model-section 1\"); the file states its own axes and rocks."
+   },
+   "declared": [],
+   "companions": [],
+   "recipe": false,
+   "osdu": {
+    "none": "a text format; its normalized profile is ophiolite.model-section/1"
+   },
+   "route": {
+    "document": "section-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "synthetic",
+    "path": "tests/fixtures/readers/model-section.txt",
+    "sha256": "96d221ba7090d70d4ce2cc6dca2c89aafadcf174a5f3c3c444e91f34b88c72ea",
+    "bytes": 249,
+    "replaced_by": "E57"
+   },
+   "report": "{traces:,} traces, {samples:,} samples, {rock_count:,} rocks",
+   "type": "model-section",
+   "mapping": "model-section/1"
+  },
+  {
+   "profile": "seismic-section-text/1",
+   "label": "Seismic section (text)",
+   "extensions": [
+    ".txt"
+   ],
+   "detect": "seismic_section_marker",
+   "limits": {
+    "names": [],
+    "template": "Ophiolite seismic-section text (\"# ophiolite-seismic-section 1\"); the file states its own axes."
+   },
+   "declared": [],
+   "companions": [],
+   "recipe": false,
+   "osdu": {
+    "none": "a text format; its normalized profile is ophiolite.seismic-section/1"
+   },
+   "route": {
+    "document": "section-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "synthetic",
+    "path": "tests/fixtures/readers/seismic-section.txt",
+    "sha256": "42bb93084b286154929560b26fd05412a5a610d6f5f3b6e22b1a67fe10d03e00",
+    "bytes": 210,
+    "replaced_by": "E57"
+   },
+   "report": "{traces:,} traces, {samples:,} samples",
+   "type": "seismic-section",
+   "mapping": "seismic-section/1"
+  }
+ ]
+}

@@ -779,6 +779,12 @@
       "schema": "ophiolite.scientific-asset/1"
     },
     {
+      "id": "ophiolite.reader-registry/1",
+      "kind": "reader-registry",
+      "path": "connectors/v1/readers.json",
+      "title": "File readers: every upload kind, how it is recognised, its limits, declared fields, OSDU kind and fixture (E55)"
+    },
+    {
       "id": "ophiolite.connector-capability/file-geotiff/1",
       "kind": "capability",
       "path": "connectors/v1/capabilities/file-geotiff.json",

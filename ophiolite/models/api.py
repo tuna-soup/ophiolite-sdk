@@ -471,3 +471,65 @@ class WellImportsPreviewAnswer(Contract):
     warnings: list[dict]
     audience: dict
     input_revision: str
+
+# E55: folder uploads (upload-runs/*), the fields the SDK and the command line read; other fields are kept.
+UploadRunFileState = Literal['waiting', 'reading', 'added', 'already-here', 'needs-decision', 'not-read', 'not-supported', 'cancelled']
+
+
+class UploadRunCounts(Contract):
+    waiting: int
+    reading: int
+    added: int
+    already_here: int
+    needs_decision: int
+    not_read: int
+    not_supported: int
+    cancelled: int
+
+
+class UploadRunFile(Contract):
+    ordinal: int
+    path: str
+    bytes: int
+    sha256: str
+    role: str
+    state: UploadRunFileState
+    profile: str | None = None
+    kind: str | None = None
+    reason_code: str | None = None
+    sentence: str | None = None
+    technical: str | None = None
+    asset_id: str | None = None
+    revision: str | None = None
+    read: str | None = None
+    well: str | None = None
+    declared: dict | None = None
+    proposal: dict | None = None
+    association: dict | None = None
+
+
+class UploadRunSummary(Contract):
+    run_id: str
+    project_id: str
+    folder_name: str
+    state: Literal['open', 'closed', 'cancelled']
+    label: str
+    files: int
+    counts: UploadRunCounts
+
+
+class UploadRun(UploadRunSummary):
+    items: list[UploadRunFile]
+
+
+class UploadRunsListAnswer(Contract):
+    runs: list[UploadRunSummary]
+
+
+class UploadRunStep(Contract):
+    run_id: str
+    step: Literal['send', 'done', 'wait', 'next', 'parts', 'checking']
+    attempt: int | None = None
+    send: dict | None = None
+    file: UploadRunFile
+    session: dict | None = None

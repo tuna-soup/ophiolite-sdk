@@ -7,6 +7,7 @@ Run from the Platform root with the qualified Connectors on the path:
     PYTHONPATH=services python contracts/tools/generate.py --fixtures # synthetic fixtures only
     PYTHONPATH=services python contracts/tools/generate.py --types    # TypeScript types only
     PYTHONPATH=services python contracts/tools/generate.py --openapi  # OpenAPI snapshot only
+    PYTHONPATH=services python contracts/tools/generate.py --readers  # E55: the reader registry mirror only
 
 Pydantic models are the executable source of the structural schemas; this tool
 writes their published form. It never writes under assets/v1/fixtures/frozen/:
@@ -381,6 +382,15 @@ def openapi():
     write(OPENAPI_PATH, document())
 
 
+READERS_PATH = CONTRACTS / 'connectors/v1/readers.json'
+
+
+def reader_registry():
+    """E55: the served copy of the Connectors reader registry, byte for byte."""
+    from asset_connectors import readers
+    READERS_PATH.write_bytes(readers.raw())
+
+
 def check_complete():
     """E31 P2: refuse an OpenAPI document with a placeholder or missing schema for any operation, media type or
     response status, or one that omits a route the application serves."""
@@ -393,7 +403,7 @@ def check_complete():
     print('OpenAPI document complete')
 
 
-STEPS = {'--schemas': schemas, '--fixtures': fixtures, '--types': types, '--openapi': openapi, '--check-complete': check_complete}
+STEPS = {'--schemas': schemas, '--fixtures': fixtures, '--types': types, '--openapi': openapi, '--readers': reader_registry, '--check-complete': check_complete}
 
 
 def main(argv):

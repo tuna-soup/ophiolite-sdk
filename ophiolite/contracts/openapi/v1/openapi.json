@@ -10749,6 +10749,13 @@
                     "limits": {
                       "$ref": "#/components/schemas/Limits"
                     },
+                    "readers": {
+                      "items": {
+                        "$ref": "#/components/schemas/ReaderKind"
+                      },
+                      "title": "Readers",
+                      "type": "array"
+                    },
                     "mcp": {
                       "anyOf": [
                         {
@@ -10776,6 +10783,7 @@
                     "operations",
                     "profiles",
                     "limits",
+                    "readers",
                     "observed_at"
                   ],
                   "title": "CapabilityDescription",
@@ -57468,6 +57476,1815 @@
         }
       }
     },
+    "/api/v1/projects/{project}/upload-runs/associate": {
+      "post": {
+        "summary": "E55: Link added files to the wellbores their headers name (at most 50 per call; the same link again adds nothing)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "upload-runs/associate: the report, and how many links this call added (0 when all were already linked).",
+                  "properties": {
+                    "run_id": {
+                      "title": "Run Id",
+                      "type": "string"
+                    },
+                    "project_id": {
+                      "title": "Project Id",
+                      "type": "string"
+                    },
+                    "folder_name": {
+                      "title": "Folder Name",
+                      "type": "string"
+                    },
+                    "state": {
+                      "enum": [
+                        "open",
+                        "closed",
+                        "cancelled"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "label": {
+                      "enum": [
+                        "Adding",
+                        "Ready to resume",
+                        "Finished",
+                        "Finished with files not added",
+                        "Cancelled"
+                      ],
+                      "title": "Label",
+                      "type": "string"
+                    },
+                    "files": {
+                      "title": "Files",
+                      "type": "integer"
+                    },
+                    "counts": {
+                      "$ref": "#/components/schemas/UploadRunCounts"
+                    },
+                    "created_at": {
+                      "title": "Created At",
+                      "type": "number"
+                    },
+                    "updated_at": {
+                      "title": "Updated At",
+                      "type": "number"
+                    },
+                    "settings": {
+                      "$ref": "#/components/schemas/UploadRunSettings"
+                    },
+                    "items": {
+                      "items": {
+                        "$ref": "#/components/schemas/UploadRunFile"
+                      },
+                      "title": "Items",
+                      "type": "array"
+                    },
+                    "linked": {
+                      "title": "Linked",
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "run_id",
+                    "project_id",
+                    "folder_name",
+                    "state",
+                    "label",
+                    "files",
+                    "counts",
+                    "created_at",
+                    "updated_at",
+                    "settings",
+                    "items",
+                    "linked"
+                  ],
+                  "title": "UploadRunLinked",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "run_id": {
+                    "pattern": "^[0-9a-f]{64}$",
+                    "title": "Run Id",
+                    "type": "string"
+                  },
+                  "links": {
+                    "items": {
+                      "$ref": "#/components/schemas/Link"
+                    },
+                    "maxItems": 50,
+                    "minItems": 1,
+                    "title": "Links",
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "run_id",
+                  "links"
+                ],
+                "title": "Associate",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/upload-runs/cancel": {
+      "post": {
+        "summary": "E55: Stop a folder upload; files already added stay",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "upload-runs/start, status, cancel: one folder upload with every file.",
+                  "properties": {
+                    "run_id": {
+                      "title": "Run Id",
+                      "type": "string"
+                    },
+                    "project_id": {
+                      "title": "Project Id",
+                      "type": "string"
+                    },
+                    "folder_name": {
+                      "title": "Folder Name",
+                      "type": "string"
+                    },
+                    "state": {
+                      "enum": [
+                        "open",
+                        "closed",
+                        "cancelled"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "label": {
+                      "enum": [
+                        "Adding",
+                        "Ready to resume",
+                        "Finished",
+                        "Finished with files not added",
+                        "Cancelled"
+                      ],
+                      "title": "Label",
+                      "type": "string"
+                    },
+                    "files": {
+                      "title": "Files",
+                      "type": "integer"
+                    },
+                    "counts": {
+                      "$ref": "#/components/schemas/UploadRunCounts"
+                    },
+                    "created_at": {
+                      "title": "Created At",
+                      "type": "number"
+                    },
+                    "updated_at": {
+                      "title": "Updated At",
+                      "type": "number"
+                    },
+                    "settings": {
+                      "$ref": "#/components/schemas/UploadRunSettings"
+                    },
+                    "items": {
+                      "items": {
+                        "$ref": "#/components/schemas/UploadRunFile"
+                      },
+                      "title": "Items",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "run_id",
+                    "project_id",
+                    "folder_name",
+                    "state",
+                    "label",
+                    "files",
+                    "counts",
+                    "created_at",
+                    "updated_at",
+                    "settings",
+                    "items"
+                  ],
+                  "title": "UploadRun",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "run_id": {
+                    "pattern": "^[0-9a-f]{64}$",
+                    "title": "Run Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "run_id"
+                ],
+                "title": "RunRef",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/upload-runs/decide": {
+      "post": {
+        "summary": "E55: Decide files that need it: add separately, add as new, add with declarations, or skip (command_id)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "upload-runs/start, status, cancel: one folder upload with every file.",
+                  "properties": {
+                    "run_id": {
+                      "title": "Run Id",
+                      "type": "string"
+                    },
+                    "project_id": {
+                      "title": "Project Id",
+                      "type": "string"
+                    },
+                    "folder_name": {
+                      "title": "Folder Name",
+                      "type": "string"
+                    },
+                    "state": {
+                      "enum": [
+                        "open",
+                        "closed",
+                        "cancelled"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "label": {
+                      "enum": [
+                        "Adding",
+                        "Ready to resume",
+                        "Finished",
+                        "Finished with files not added",
+                        "Cancelled"
+                      ],
+                      "title": "Label",
+                      "type": "string"
+                    },
+                    "files": {
+                      "title": "Files",
+                      "type": "integer"
+                    },
+                    "counts": {
+                      "$ref": "#/components/schemas/UploadRunCounts"
+                    },
+                    "created_at": {
+                      "title": "Created At",
+                      "type": "number"
+                    },
+                    "updated_at": {
+                      "title": "Updated At",
+                      "type": "number"
+                    },
+                    "settings": {
+                      "$ref": "#/components/schemas/UploadRunSettings"
+                    },
+                    "items": {
+                      "items": {
+                        "$ref": "#/components/schemas/UploadRunFile"
+                      },
+                      "title": "Items",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "run_id",
+                    "project_id",
+                    "folder_name",
+                    "state",
+                    "label",
+                    "files",
+                    "counts",
+                    "created_at",
+                    "updated_at",
+                    "settings",
+                    "items"
+                  ],
+                  "title": "UploadRun",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "run_id": {
+                    "pattern": "^[0-9a-f]{64}$",
+                    "title": "Run Id",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "ordinals": {
+                    "items": {
+                      "type": "integer"
+                    },
+                    "maxItems": 500,
+                    "minItems": 1,
+                    "title": "Ordinals",
+                    "type": "array"
+                  },
+                  "choice": {
+                    "enum": [
+                      "add-separately",
+                      "add-new",
+                      "declare",
+                      "skip"
+                    ],
+                    "title": "Choice",
+                    "type": "string"
+                  },
+                  "declared": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Declared"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "run_id",
+                  "command_id",
+                  "ordinals",
+                  "choice"
+                ],
+                "title": "Decide",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/upload-runs/file": {
+      "post": {
+        "summary": "E55: One file of a folder upload (application/octet-stream, X-Ophiolite-Upload with run_id, ordinal and mode): its first 64 KiB (head), then its bytes (body)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor hdr.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "upload-runs/file and file-parts: the next step for this file and the file as the report shows it.",
+                  "properties": {
+                    "run_id": {
+                      "title": "Run Id",
+                      "type": "string"
+                    },
+                    "step": {
+                      "enum": [
+                        "send",
+                        "done",
+                        "wait",
+                        "next",
+                        "parts",
+                        "checking"
+                      ],
+                      "title": "Step",
+                      "type": "string"
+                    },
+                    "attempt": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Attempt"
+                    },
+                    "send": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/UploadRunSend"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "file": {
+                      "$ref": "#/components/schemas/UploadRunFile"
+                    },
+                    "counts": {
+                      "$ref": "#/components/schemas/UploadRunCounts"
+                    },
+                    "session": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/UploadSessionState"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    }
+                  },
+                  "required": [
+                    "run_id",
+                    "step",
+                    "attempt",
+                    "send",
+                    "file",
+                    "counts"
+                  ],
+                  "title": "UploadRunStep",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Ophiolite-Upload",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "contentEncoding": "base64",
+              "contentMediaType": "application/json",
+              "contentSchema": {
+                "additionalProperties": false,
+                "description": "X-Ophiolite-Upload of `upload-runs/file`: the row, the step and, for the body, the claim it answers.",
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "run_id": {
+                    "pattern": "^[0-9a-f]{64}$",
+                    "title": "Run Id",
+                    "type": "string"
+                  },
+                  "ordinal": {
+                    "minimum": 0,
+                    "title": "Ordinal",
+                    "type": "integer"
+                  },
+                  "mode": {
+                    "enum": [
+                      "head",
+                      "body"
+                    ],
+                    "title": "Mode",
+                    "type": "string"
+                  },
+                  "attempt": {
+                    "anyOf": [
+                      {
+                        "minimum": 1,
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Attempt"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "run_id",
+                  "ordinal",
+                  "mode"
+                ],
+                "title": "FileHeader",
+                "type": "object"
+              }
+            },
+            "description": "base64 of a UTF-8 JSON object with the shape contentSchema describes"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary",
+                "description": "LAS 2.0 bytes, 1 byte to 8 MiB, exact Content-Length"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/upload-runs/file-parts": {
+      "post": {
+        "summary": "E55: A file of a folder upload above the upload limit: begin its parts (begin), then add it once its check has finished (session)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "upload-runs/file and file-parts: the next step for this file and the file as the report shows it.",
+                  "properties": {
+                    "run_id": {
+                      "title": "Run Id",
+                      "type": "string"
+                    },
+                    "step": {
+                      "enum": [
+                        "send",
+                        "done",
+                        "wait",
+                        "next",
+                        "parts",
+                        "checking"
+                      ],
+                      "title": "Step",
+                      "type": "string"
+                    },
+                    "attempt": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Attempt"
+                    },
+                    "send": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/UploadRunSend"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "file": {
+                      "$ref": "#/components/schemas/UploadRunFile"
+                    },
+                    "counts": {
+                      "$ref": "#/components/schemas/UploadRunCounts"
+                    },
+                    "session": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/UploadSessionState"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    }
+                  },
+                  "required": [
+                    "run_id",
+                    "step",
+                    "attempt",
+                    "send",
+                    "file",
+                    "counts"
+                  ],
+                  "title": "UploadRunStep",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "run_id": {
+                    "pattern": "^[0-9a-f]{64}$",
+                    "title": "Run Id",
+                    "type": "string"
+                  },
+                  "ordinal": {
+                    "minimum": 0,
+                    "title": "Ordinal",
+                    "type": "integer"
+                  },
+                  "mode": {
+                    "enum": [
+                      "begin",
+                      "session"
+                    ],
+                    "title": "Mode",
+                    "type": "string"
+                  },
+                  "attempt": {
+                    "minimum": 1,
+                    "title": "Attempt",
+                    "type": "integer"
+                  },
+                  "upload_id": {
+                    "anyOf": [
+                      {
+                        "pattern": "^[0-9a-f]{64}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Upload Id"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "run_id",
+                  "ordinal",
+                  "mode",
+                  "attempt"
+                ],
+                "title": "FileParts",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/upload-runs/list": {
+      "post": {
+        "summary": "E55: Your folder uploads in this project, newest first (at most 100)",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "upload-runs/list: at most 100, newest first.",
+                  "properties": {
+                    "runs": {
+                      "items": {
+                        "$ref": "#/components/schemas/UploadRunSummary"
+                      },
+                      "title": "Runs",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "runs"
+                  ],
+                  "title": "UploadRunsList",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "ListRef",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/upload-runs/share": {
+      "post": {
+        "summary": "E55: Name the project members who may read this report (the whole list; empty revokes); its files keep their own access",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "upload-runs/start, status, cancel: one folder upload with every file.",
+                  "properties": {
+                    "run_id": {
+                      "title": "Run Id",
+                      "type": "string"
+                    },
+                    "project_id": {
+                      "title": "Project Id",
+                      "type": "string"
+                    },
+                    "folder_name": {
+                      "title": "Folder Name",
+                      "type": "string"
+                    },
+                    "state": {
+                      "enum": [
+                        "open",
+                        "closed",
+                        "cancelled"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "label": {
+                      "enum": [
+                        "Adding",
+                        "Ready to resume",
+                        "Finished",
+                        "Finished with files not added",
+                        "Cancelled"
+                      ],
+                      "title": "Label",
+                      "type": "string"
+                    },
+                    "files": {
+                      "title": "Files",
+                      "type": "integer"
+                    },
+                    "counts": {
+                      "$ref": "#/components/schemas/UploadRunCounts"
+                    },
+                    "created_at": {
+                      "title": "Created At",
+                      "type": "number"
+                    },
+                    "updated_at": {
+                      "title": "Updated At",
+                      "type": "number"
+                    },
+                    "settings": {
+                      "$ref": "#/components/schemas/UploadRunSettings"
+                    },
+                    "items": {
+                      "items": {
+                        "$ref": "#/components/schemas/UploadRunFile"
+                      },
+                      "title": "Items",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "run_id",
+                    "project_id",
+                    "folder_name",
+                    "state",
+                    "label",
+                    "files",
+                    "counts",
+                    "created_at",
+                    "updated_at",
+                    "settings",
+                    "items"
+                  ],
+                  "title": "UploadRun",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "run_id": {
+                    "pattern": "^[0-9a-f]{64}$",
+                    "title": "Run Id",
+                    "type": "string"
+                  },
+                  "readers": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 100,
+                    "title": "Readers",
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "run_id",
+                  "readers"
+                ],
+                "title": "Share",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/upload-runs/start": {
+      "post": {
+        "summary": "E55: Start a folder upload: every file's path, size and digest with the shared settings (command_id; the same command answers the same upload)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "upload-runs/start, status, cancel: one folder upload with every file.",
+                  "properties": {
+                    "run_id": {
+                      "title": "Run Id",
+                      "type": "string"
+                    },
+                    "project_id": {
+                      "title": "Project Id",
+                      "type": "string"
+                    },
+                    "folder_name": {
+                      "title": "Folder Name",
+                      "type": "string"
+                    },
+                    "state": {
+                      "enum": [
+                        "open",
+                        "closed",
+                        "cancelled"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "label": {
+                      "enum": [
+                        "Adding",
+                        "Ready to resume",
+                        "Finished",
+                        "Finished with files not added",
+                        "Cancelled"
+                      ],
+                      "title": "Label",
+                      "type": "string"
+                    },
+                    "files": {
+                      "title": "Files",
+                      "type": "integer"
+                    },
+                    "counts": {
+                      "$ref": "#/components/schemas/UploadRunCounts"
+                    },
+                    "created_at": {
+                      "title": "Created At",
+                      "type": "number"
+                    },
+                    "updated_at": {
+                      "title": "Updated At",
+                      "type": "number"
+                    },
+                    "settings": {
+                      "$ref": "#/components/schemas/UploadRunSettings"
+                    },
+                    "items": {
+                      "items": {
+                        "$ref": "#/components/schemas/UploadRunFile"
+                      },
+                      "title": "Items",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "run_id",
+                    "project_id",
+                    "folder_name",
+                    "state",
+                    "label",
+                    "files",
+                    "counts",
+                    "created_at",
+                    "updated_at",
+                    "settings",
+                    "items"
+                  ],
+                  "title": "UploadRun",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "folder_name": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Folder Name",
+                    "type": "string"
+                  },
+                  "files": {
+                    "items": {
+                      "$ref": "#/components/schemas/FileIn"
+                    },
+                    "minItems": 1,
+                    "title": "Files",
+                    "type": "array"
+                  },
+                  "attribution": {
+                    "maxLength": 500,
+                    "minLength": 1,
+                    "title": "Attribution",
+                    "type": "string"
+                  },
+                  "well_notes": {
+                    "default": "",
+                    "maxLength": 1000,
+                    "title": "Well Notes",
+                    "type": "string"
+                  },
+                  "audience": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 100,
+                    "title": "Audience",
+                    "type": "array"
+                  },
+                  "rights_confirmed": {
+                    "const": true,
+                    "title": "Rights Confirmed",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "command_id",
+                  "folder_name",
+                  "files",
+                  "attribution",
+                  "rights_confirmed"
+                ],
+                "title": "Start",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/upload-runs/status": {
+      "post": {
+        "summary": "E55: One folder upload with every file and its outcome",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "upload-runs/start, status, cancel: one folder upload with every file.",
+                  "properties": {
+                    "run_id": {
+                      "title": "Run Id",
+                      "type": "string"
+                    },
+                    "project_id": {
+                      "title": "Project Id",
+                      "type": "string"
+                    },
+                    "folder_name": {
+                      "title": "Folder Name",
+                      "type": "string"
+                    },
+                    "state": {
+                      "enum": [
+                        "open",
+                        "closed",
+                        "cancelled"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "label": {
+                      "enum": [
+                        "Adding",
+                        "Ready to resume",
+                        "Finished",
+                        "Finished with files not added",
+                        "Cancelled"
+                      ],
+                      "title": "Label",
+                      "type": "string"
+                    },
+                    "files": {
+                      "title": "Files",
+                      "type": "integer"
+                    },
+                    "counts": {
+                      "$ref": "#/components/schemas/UploadRunCounts"
+                    },
+                    "created_at": {
+                      "title": "Created At",
+                      "type": "number"
+                    },
+                    "updated_at": {
+                      "title": "Updated At",
+                      "type": "number"
+                    },
+                    "settings": {
+                      "$ref": "#/components/schemas/UploadRunSettings"
+                    },
+                    "items": {
+                      "items": {
+                        "$ref": "#/components/schemas/UploadRunFile"
+                      },
+                      "title": "Items",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "run_id",
+                    "project_id",
+                    "folder_name",
+                    "state",
+                    "label",
+                    "files",
+                    "counts",
+                    "created_at",
+                    "updated_at",
+                    "settings",
+                    "items"
+                  ],
+                  "title": "UploadRun",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "run_id": {
+                    "pattern": "^[0-9a-f]{64}$",
+                    "title": "Run Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "run_id"
+                ],
+                "title": "RunRef",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/webhooks/create": {
       "post": {
         "summary": "Notify an HTTPS address when this project changes; the signing secret is shown once (command_id)",
@@ -71547,7 +73364,8 @@
                     "capability",
                     "relationships",
                     "policy",
-                    "calculation"
+                    "calculation",
+                    "reader-registry"
                   ]
                 },
                 "path": {
@@ -71895,6 +73713,65 @@
           "valid_depth"
         ],
         "title": "CurveInspection",
+        "type": "object"
+      },
+      "DeclaredField": {
+        "additionalProperties": false,
+        "description": "E55: one context field a person states for an upload kind; nothing states it for them (\"Not stated\").",
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "unit",
+              "text",
+              "crs",
+              "choice"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "hint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Hint"
+          },
+          "choices": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Each stored value and the words a person reads for it.",
+            "title": "Choices"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "kind"
+        ],
+        "title": "DeclaredField",
         "type": "object"
       },
       "Display": {
@@ -72519,6 +74396,34 @@
         "title": "Execution",
         "type": "object"
       },
+      "FileIn": {
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "title": "Path",
+            "type": "string"
+          },
+          "bytes": {
+            "minimum": 0,
+            "title": "Bytes",
+            "type": "integer"
+          },
+          "sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "bytes",
+          "sha256"
+        ],
+        "title": "FileIn",
+        "type": "object"
+      },
       "GroupMember": {
         "additionalProperties": false,
         "properties": {
@@ -73133,6 +75038,28 @@
           "max_inline_bytes"
         ],
         "title": "Limits",
+        "type": "object"
+      },
+      "Link": {
+        "additionalProperties": false,
+        "properties": {
+          "ordinal": {
+            "minimum": 0,
+            "title": "Ordinal",
+            "type": "integer"
+          },
+          "entity_id": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Entity Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ordinal",
+          "entity_id"
+        ],
+        "title": "Link",
         "type": "object"
       },
       "LocationProvenance": {
@@ -78253,6 +80180,52 @@
         "title": "PublicationReceipt",
         "type": "object"
       },
+      "ReaderKind": {
+        "additionalProperties": false,
+        "description": "E55: one upload kind as the Connectors reader registry declares it.",
+        "properties": {
+          "profile": {
+            "title": "Profile",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "accept": {
+            "description": "The file name extensions this kind is offered for, comma-separated.",
+            "title": "Accept",
+            "type": "string"
+          },
+          "limits": {
+            "description": "The kind's limits sentence, with this deployment's limits filled in.",
+            "title": "Limits",
+            "type": "string"
+          },
+          "declared": {
+            "items": {
+              "$ref": "#/components/schemas/DeclaredField"
+            },
+            "title": "Declared",
+            "type": "array"
+          },
+          "recipe": {
+            "description": "Read through an import recipe from a primary file and its companion files.",
+            "title": "Recipe",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "profile",
+          "label",
+          "accept",
+          "limits",
+          "declared",
+          "recipe"
+        ],
+        "title": "ReaderKind",
+        "type": "object"
+      },
       "RecipeReference": {
         "additionalProperties": false,
         "description": "E23a: a recipe is a project-scoped asset at an exact revision.",
@@ -80212,6 +82185,596 @@
           "sha256"
         ],
         "title": "UploadReceivedPart",
+        "type": "object"
+      },
+      "UploadRunAssociation": {
+        "additionalProperties": false,
+        "properties": {
+          "entity_id": {
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "assertion_id": {
+            "title": "Assertion Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "entity_id",
+          "assertion_id"
+        ],
+        "title": "UploadRunAssociation",
+        "type": "object"
+      },
+      "UploadRunCounts": {
+        "additionalProperties": false,
+        "description": "Files of the upload in each state.",
+        "properties": {
+          "waiting": {
+            "title": "Waiting",
+            "type": "integer"
+          },
+          "reading": {
+            "title": "Reading",
+            "type": "integer"
+          },
+          "added": {
+            "title": "Added",
+            "type": "integer"
+          },
+          "already_here": {
+            "title": "Already Here",
+            "type": "integer"
+          },
+          "needs_decision": {
+            "title": "Needs Decision",
+            "type": "integer"
+          },
+          "not_read": {
+            "title": "Not Read",
+            "type": "integer"
+          },
+          "not_supported": {
+            "title": "Not Supported",
+            "type": "integer"
+          },
+          "cancelled": {
+            "title": "Cancelled",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "waiting",
+          "reading",
+          "added",
+          "already_here",
+          "needs_decision",
+          "not_read",
+          "not_supported",
+          "cancelled"
+        ],
+        "title": "UploadRunCounts",
+        "type": "object"
+      },
+      "UploadRunFile": {
+        "additionalProperties": false,
+        "description": "One file of a folder upload and its outcome. `sentence` is the default-layer words; `technical` what the reader said.",
+        "properties": {
+          "ordinal": {
+            "title": "Ordinal",
+            "type": "integer"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "bytes": {
+            "title": "Bytes",
+            "type": "integer"
+          },
+          "sha256": {
+            "title": "Sha256",
+            "type": "string"
+          },
+          "role": {
+            "description": "primary, or the companion role (readme, crs-metadata) of a file sent with the file numbered `group`",
+            "title": "Role",
+            "type": "string"
+          },
+          "group": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group"
+          },
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile"
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kind"
+          },
+          "state": {
+            "enum": [
+              "waiting",
+              "reading",
+              "added",
+              "already-here",
+              "needs-decision",
+              "not-read",
+              "not-supported",
+              "cancelled"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "reason_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "One of the closed list, or e54:<code> for a file sent in parts",
+            "title": "Reason Code"
+          },
+          "sentence": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sentence"
+          },
+          "technical": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Technical"
+          },
+          "asset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Asset Id"
+          },
+          "revision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revision"
+          },
+          "same_as": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Same As"
+          },
+          "declared": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Declared"
+          },
+          "read": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "What was read, as one line (the kind's report)",
+            "title": "Read"
+          },
+          "well": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Well"
+          },
+          "attempt": {
+            "title": "Attempt",
+            "type": "integer"
+          },
+          "upload_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Upload Id"
+          },
+          "proposal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UploadRunProposal"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The one wellbore you can read whose name matches the header's well name (D36); never created"
+          },
+          "association": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UploadRunAssociation"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The wellbore this file was linked to from this report"
+          }
+        },
+        "required": [
+          "ordinal",
+          "path",
+          "bytes",
+          "sha256",
+          "role",
+          "group",
+          "profile",
+          "kind",
+          "state",
+          "reason_code",
+          "sentence",
+          "technical",
+          "asset_id",
+          "revision",
+          "same_as",
+          "declared",
+          "read",
+          "well",
+          "attempt",
+          "upload_id",
+          "proposal",
+          "association"
+        ],
+        "title": "UploadRunFile",
+        "type": "object"
+      },
+      "UploadRunMember": {
+        "additionalProperties": false,
+        "properties": {
+          "ordinal": {
+            "title": "Ordinal",
+            "type": "integer"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          },
+          "bytes": {
+            "title": "Bytes",
+            "type": "integer"
+          },
+          "sha256": {
+            "title": "Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ordinal",
+          "path",
+          "role",
+          "bytes",
+          "sha256"
+        ],
+        "title": "UploadRunMember",
+        "type": "object"
+      },
+      "UploadRunProposal": {
+        "additionalProperties": false,
+        "properties": {
+          "entity_id": {
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "entity_id",
+          "name"
+        ],
+        "title": "UploadRunProposal",
+        "type": "object"
+      },
+      "UploadRunSend": {
+        "additionalProperties": false,
+        "description": "How to send the file: one request (`body`, the members' bytes in this order) or in parts (`parts`).",
+        "properties": {
+          "mode": {
+            "enum": [
+              "body",
+              "parts"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "members": {
+            "items": {
+              "$ref": "#/components/schemas/UploadRunMember"
+            },
+            "title": "Members",
+            "type": "array"
+          }
+        },
+        "required": [
+          "mode",
+          "members"
+        ],
+        "title": "UploadRunSend",
+        "type": "object"
+      },
+      "UploadRunSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "attribution": {
+            "title": "Attribution",
+            "type": "string"
+          },
+          "well_notes": {
+            "title": "Well Notes",
+            "type": "string"
+          },
+          "audience": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Audience",
+            "type": "array"
+          }
+        },
+        "required": [
+          "attribution",
+          "well_notes",
+          "audience"
+        ],
+        "title": "UploadRunSettings",
+        "type": "object"
+      },
+      "UploadRunSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "project_id": {
+            "title": "Project Id",
+            "type": "string"
+          },
+          "folder_name": {
+            "title": "Folder Name",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "open",
+              "closed",
+              "cancelled"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "label": {
+            "enum": [
+              "Adding",
+              "Ready to resume",
+              "Finished",
+              "Finished with files not added",
+              "Cancelled"
+            ],
+            "title": "Label",
+            "type": "string"
+          },
+          "files": {
+            "title": "Files",
+            "type": "integer"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/UploadRunCounts"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "number"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "number"
+          }
+        },
+        "required": [
+          "run_id",
+          "project_id",
+          "folder_name",
+          "state",
+          "label",
+          "files",
+          "counts",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "UploadRunSummary",
+        "type": "object"
+      },
+      "UploadSessionState": {
+        "additionalProperties": false,
+        "description": "E54: one file sent in parts, as its uploader sees it.",
+        "properties": {
+          "upload_id": {
+            "title": "Upload Id",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "open",
+              "finishing",
+              "checked",
+              "published",
+              "cancelled",
+              "expired",
+              "failed"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "filename": {
+            "title": "Filename",
+            "type": "string"
+          },
+          "profile": {
+            "title": "Profile",
+            "type": "string"
+          },
+          "bytes": {
+            "title": "Bytes",
+            "type": "integer"
+          },
+          "sha256": {
+            "title": "Sha256",
+            "type": "string"
+          },
+          "part_bytes": {
+            "description": "The length of every part but the last",
+            "title": "Part Bytes",
+            "type": "integer"
+          },
+          "parts": {
+            "title": "Parts",
+            "type": "integer"
+          },
+          "received": {
+            "description": "The parts this deployment holds: the point an interrupted upload continues from",
+            "items": {
+              "$ref": "#/components/schemas/UploadReceivedPart"
+            },
+            "title": "Received",
+            "type": "array"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UploadReason"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Why the upload ended, when it ended without being saved"
+          },
+          "review": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The server's check (checked and published): what a single-request inspection answers, with its review",
+            "title": "Review"
+          },
+          "asset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The saved item (published)",
+            "title": "Asset Id"
+          }
+        },
+        "required": [
+          "upload_id",
+          "state",
+          "filename",
+          "profile",
+          "bytes",
+          "sha256",
+          "part_bytes",
+          "parts",
+          "received",
+          "reason",
+          "review",
+          "asset_id"
+        ],
+        "title": "UploadSessionState",
         "type": "object"
       },
       "Via": {

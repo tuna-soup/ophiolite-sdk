@@ -34,6 +34,7 @@ Every verb accepts `--json`. The result is one JSON object on standard output:
 | `well-imports list` | `{"imports": [import summary]}` |
 | `well-imports status`, `start`, `resume`, `cancel` | `{"import": import}` (the documented `WellImport`: state, words, reason, counts, skipped, superseded, …) |
 | `well-imports start --dry-run` | `{"preview": preview}` (counts, skipped rows, possible duplicates, wells already here) |
+| `upload` | `{"upload": report}` (the documented `UploadRun`: state, label, counts, and every file with its state, kind, what was read, sentence and item) |
 | `publish-derived` | `{"published": receipt}` |
 | `share` | `{"shared", "recipients", "reuse_recipients"}` |
 | `status` | `{"state", "project_id", "scopes"}` |
@@ -94,6 +95,22 @@ lists every skipped row with its reason in words, and every well whose location 
 `--dry-run` it prints the preview and keeps nothing. `resume ID` continues an interrupted import from any process, with
 no row run twice; `cancel ID` stops it (the wells already added stay); `status ID` and `list` read. An import that
 pauses (`Ready to resume`, `Needs review`) exits 4 with its reason.
+
+## `upload`
+
+`upload PATH --attribution TEXT --rights-confirmed [--audience PERSON]…` uploads a folder (or a `.zip`) as one folder
+upload: every file is listed with its size and digest, its first 64 KiB is sent so the server can say what kind of file
+it is, and the whole file follows only when the server asks for it (in parts above the deployment's request limit).
+It prints one line per outcome and every file that was not added with its reason; `--report FILE` writes the report
+as CSV (`path,result,kind,read,reason,asset`) or, for a `.json` name, the whole report. Exit 0 when every file is Added
+or Already here, 4 when any is not (the report is still written), 1 when the folder or zip was refused before anything
+was sent (more than 500 files, a link, a zip entry outside the folder, over the file limit, more than 100 times its packed
+size, or more than 512 MiB unpacked in total). `--declare KIND:KEY=VALUE` (repeat) answers the files of that kind that
+need you to say what their values mean (other kinds are not touched), `--skip-decisions` skips every other file that
+needs a decision, and `--associate-matches` links each file to the one wellbore whose name its header names. Running
+the same command again continues the unfinished upload of the same folder (same paths, sizes and digests) and sends
+only the files not yet added; `--new` starts another upload. `--project ID` names another project than the
+configuration's.
 
 ## Giving a project access key
 

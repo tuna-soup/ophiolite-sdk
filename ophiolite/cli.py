@@ -209,6 +209,18 @@ def parser():
     imports.add_argument('--audience',action='append',default=[],metavar='PERSON',help='start: a project member who may read the copy and the wells it creates (repeat); you are always included')
     imports.add_argument('--command-id',help='start: the same id returns the same import instead of starting another')
     imports.add_argument('--dry-run',action='store_true',help='start: show what the import would do; nothing is kept')
+    upload=project(sub.add_parser('upload',help='Upload a folder or a .zip: every file it can read is added, and one report says what became of each'))
+    upload.add_argument('path',type=Path,help='The folder or .zip file')
+    upload.add_argument('--project',dest='upload_project',help='The project (default: the configuration\'s)')
+    upload.add_argument('--attribution',required=True,help='Where these files come from (shown with every file)')
+    upload.add_argument('--audience',action='append',default=[],metavar='PERSON',help='A project member who may later be given access (repeat); the files start private')
+    upload.add_argument('--well-notes',default='',help='Well context notes kept with every file')
+    upload.add_argument('--rights-confirmed',action='store_true',help='I have permission to retain these files, derive results and share within this audience')
+    upload.add_argument('--declare',action='append',default=[],metavar='KIND:KEY=VALUE',help='Say what the values of that kind\'s files mean (repeat); other kinds are not touched')
+    upload.add_argument('--skip-decisions',action='store_true',help='Skip every file that still needs a decision')
+    upload.add_argument('--associate-matches',action='store_true',help='Link each file to the one wellbore whose name its header names')
+    upload.add_argument('--report',type=Path,help='Write the report to this .csv (or .json) file')
+    upload.add_argument('--new',action='store_true',help='Start another upload instead of continuing the unfinished upload of this folder')
     init=sub.add_parser('init',help='Start an application from a packaged template (map-application, derive-and-publish, sync-worker, notebook, agent-workflow)')
     init.add_argument('template',nargs='?',help='The template name; omit with --list');init.add_argument('--output',type=Path,help='An empty or new folder (default: ./TEMPLATE)')
     init.add_argument('--list',action='store_true',help='List the packaged templates')
@@ -415,6 +427,31 @@ def _result(answer):
     return '\n'.join(lines)
 
 
+def _declarations(given):
+    """--declare KIND:KEY=VALUE (repeat) as {kind: {key: value}}."""
+    out={}
+    for text in given:
+        kind,_,pair=text.partition(':');key,eq,value=pair.partition('=')
+        if not (kind and key and eq):raise Refused('Give each declaration as KIND:KEY=VALUE, for example esri-ascii-grid/1:crs=EPSG:28992.')
+        out.setdefault(kind,{})[key]=value
+    return out
+
+
+def _upload(args,client):
+    """E55: upload a folder or a .zip; exit 0 when every file is added or already here, 4 when any is not (the report
+    is still written), 1 on a refusal before anything was sent."""
+    if not args.rights_confirmed:raise Refused('Confirm with --rights-confirmed that you may retain these files, derive results and share them within the audience.')
+    runs=client.upload_runs
+    def progress(report):
+        if not args.json:print('Adding files... %d of %d.' % (sum(v for k,v in report.counts.items() if k!='not-sent'),report.view['files']),file=sys.stderr,flush=True)
+    report=runs.upload(args.path,attribution=args.attribution,audience=args.audience,rights_confirmed=True,well_notes=args.well_notes,
+                       declare=_declarations(args.declare),skip_decisions=args.skip_decisions,associate_matches=args.associate_matches,new=args.new,progress=progress)
+    if args.report:report.save(args.report)
+    done(args,report.text()+('\nReport written to %s' % args.report if args.report else ''),{'upload':report.view})
+    report.exit_code=0 if report.ok else EXIT['conflict']
+    return report
+
+
 def _well_imports(args,client):
     """E42a: well-imports list | status ID | start [--dry-run] | resume ID | cancel ID. A start prints its id before the
     first step, so an interrupted import is resumed from any process; a paused import exits 4 with its reason."""
@@ -571,6 +608,7 @@ def main(argv=None):
     _load()
     if args.command=='doctor':return _doctor(args)
     config=configuration(args.configuration)
+    if getattr(args,'upload_project',None):config={**config,'project':args.upload_project}  # E55: ophiolite upload --project
     path=args.credentials or credentials_path(config)
     if args.command=='run':return _local_run(config,args.work.resolve())
     if getattr(args,'dry_run',False) and args.command!='well-imports':return _dry_run(args,config)  # E31: before any credential, network or file write (E42a: an import's dry run is its server preview, which keeps nothing)
@@ -610,6 +648,7 @@ def main(argv=None):
             return
         if args.command in ('entities','wells','changes','sources','well-imports'):return _journey(args,client)
         if args.command in ('check','get','send'):return _exchange(args,client)
+        if args.command=='upload':return _upload(args,client)
         if args.command=='publish-derived':  # E30b
             from .writers import WrittenOriginal
             parents=[tuple(p.split(':',1)) for p in args.parents]
