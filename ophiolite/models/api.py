@@ -526,6 +526,25 @@ class UploadRunsListAnswer(Contract):
     runs: list[UploadRunSummary]
 
 
+class UploadCheckFetched(Contract):
+    """E85b: what the gateway fetched from an address (the address without its query string)."""
+    address: str
+    host: str
+    name: str
+    bytes: int
+    sha256: str
+
+
+class UploadCheckAnswer(Contract):
+    """E85: upload-runs/check, the fields the SDK reads."""
+    reads: Literal['head', 'whole']
+    kind: dict | None = None
+    stated: list[dict]
+    asks: list[dict]
+    refusal: dict | None = None
+    fetched: UploadCheckFetched | None = None
+
+
 class UploadRunStep(Contract):
     run_id: str
     step: Literal['send', 'done', 'wait', 'next', 'parts', 'checking']

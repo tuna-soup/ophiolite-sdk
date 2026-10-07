@@ -1,7 +1,7 @@
 {
  "schema": "ophiolite.reader-registry/1",
  "id": "ophiolite.reader-registry/1",
- "note": "E55: every file reader is declared once here; the upload dialog, the report, the capability pages and the OSDU check read this document.",
+ "note": "E55: every file reader is declared once here; the upload dialog, the report, the capability pages and the OSDU check read this document. E85: each entry also says what a file of its kind states about itself (`states`) and how it lands (`landing`).",
  "osdu": {
   "repository": "https://community.opengroup.org/osdu/data/data-definitions",
   "commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
@@ -46,7 +46,33 @@
    },
    "report": "{rows:,} rows, {curves:,} curves, {missing:,} missing samples",
    "type": "well-log",
-   "mapping": null
+   "mapping": null,
+   "states": {
+    "function": "las",
+    "items": [
+     {
+      "key": "well",
+      "label": "Well",
+      "from": "head"
+     },
+     {
+      "key": "depth_range",
+      "label": "Depth range",
+      "from": "head"
+     },
+     {
+      "key": "depth_unit",
+      "label": "Depth unit",
+      "from": "head"
+     },
+     {
+      "key": "curves",
+      "label": "Curves",
+      "from": "head"
+     }
+    ]
+   },
+   "landing": "retained"
   },
   {
    "profile": "well-tops-csv/1",
@@ -97,7 +123,12 @@
    },
    "report": "{count:,} tops",
    "type": "well-tops",
-   "mapping": "well-tops/1"
+   "mapping": "well-tops/1",
+   "states": {
+    "function": null,
+    "items": []
+   },
+   "landing": "retained"
   },
   {
    "profile": "deviation-csv/1",
@@ -155,7 +186,12 @@
    },
    "report": "{count:,} stations",
    "type": "trajectory",
-   "mapping": "trajectory/1"
+   "mapping": "trajectory/1",
+   "states": {
+    "function": null,
+    "items": []
+   },
+   "landing": "retained"
   },
   {
    "profile": "esri-ascii-grid/1",
@@ -237,7 +273,28 @@
    },
    "report": "{ncols:,} × {nrows:,} cells, {missing_count:,} missing",
    "type": "regular-grid-surface",
-   "mapping": "regular-grid-surface/1"
+   "mapping": "regular-grid-surface/1",
+   "states": {
+    "function": "esri_grid",
+    "items": [
+     {
+      "key": "grid_size",
+      "label": "Grid size",
+      "from": "head"
+     },
+     {
+      "key": "cell_size",
+      "label": "Cell size",
+      "from": "head"
+     },
+     {
+      "key": "missing_marker",
+      "label": "Missing value marker",
+      "from": "head"
+     }
+    ]
+   },
+   "landing": "retained"
   },
   {
    "profile": "mesh-text/1",
@@ -319,7 +376,12 @@
    },
    "report": "{vertex_count:,} vertices, {triangle_count:,} triangles",
    "type": "triangulated-surface",
-   "mapping": "triangulated-surface/1"
+   "mapping": "triangulated-surface/1",
+   "states": {
+    "function": null,
+    "items": []
+   },
+   "landing": "retained"
   },
   {
    "profile": "points-csv/1",
@@ -401,7 +463,12 @@
    },
    "report": "{count:,} points",
    "type": "point-set",
-   "mapping": "point-set/1"
+   "mapping": "point-set/1",
+   "states": {
+    "function": null,
+    "items": []
+   },
+   "landing": "retained"
   },
   {
    "profile": "opendtect-faultsticks/1",
@@ -482,7 +549,12 @@
    },
    "report": "{sticks:,} sticks, {points:,} points",
    "type": "polyline-set",
-   "mapping": "polyline-set/1"
+   "mapping": "polyline-set/1",
+   "states": {
+    "function": null,
+    "items": []
+   },
+   "landing": "retained"
   },
   {
    "profile": "segy/1",
@@ -541,7 +613,28 @@
    },
    "report": "{traces:,} traces, {samples:,} samples per trace",
    "type": "seismic-volume",
-   "mapping": "seismic-volume/1"
+   "mapping": "seismic-volume/1",
+   "states": {
+    "function": "segy",
+    "items": [
+     {
+      "key": "sample_interval",
+      "label": "Sample interval",
+      "from": "head"
+     },
+     {
+      "key": "samples_per_trace",
+      "label": "Samples per trace",
+      "from": "head"
+     },
+     {
+      "key": "sample_format",
+      "label": "Sample format",
+      "from": "head"
+     }
+    ]
+   },
+   "landing": "retained"
   },
   {
    "profile": "petrel-points-attributes/1",
@@ -630,7 +723,12 @@
    },
    "report": "{count:,} points",
    "type": "point-set",
-   "mapping": null
+   "mapping": null,
+   "states": {
+    "function": null,
+    "items": []
+   },
+   "landing": "retained"
   },
   {
    "profile": "opendtect-horizon-ascii/1",
@@ -715,7 +813,12 @@
    },
    "report": "{count:,} points",
    "type": "point-set",
-   "mapping": null
+   "mapping": null,
+   "states": {
+    "function": null,
+    "items": []
+   },
+   "landing": "retained"
   },
   {
    "profile": "well-location/1",
@@ -748,7 +851,12 @@
    },
    "report": "One well location ({crs})",
    "type": "well-location",
-   "mapping": "well-location/1"
+   "mapping": "well-location/1",
+   "states": {
+    "function": null,
+    "items": []
+   },
+   "landing": "retained"
   },
   {
    "profile": "wavelet-text/1",
@@ -780,7 +888,12 @@
    },
    "report": "{sample_count:,} samples",
    "type": "wavelet",
-   "mapping": "wavelet/1"
+   "mapping": "wavelet/1",
+   "states": {
+    "function": null,
+    "items": []
+   },
+   "landing": "retained"
   },
   {
    "profile": "model-section-text/1",
@@ -812,7 +925,12 @@
    },
    "report": "{traces:,} traces, {samples:,} samples, {rock_count:,} rocks",
    "type": "model-section",
-   "mapping": "model-section/1"
+   "mapping": "model-section/1",
+   "states": {
+    "function": null,
+    "items": []
+   },
+   "landing": "retained"
   },
   {
    "profile": "seismic-section-text/1",
@@ -844,7 +962,85 @@
    },
    "report": "{traces:,} traces, {samples:,} samples",
    "type": "seismic-section",
-   "mapping": "seismic-section/1"
+   "mapping": "seismic-section/1",
+   "states": {
+    "function": null,
+    "items": []
+   },
+   "landing": "retained"
+  },
+  {
+   "profile": "geotiff/1",
+   "label": "Surface grid (GeoTIFF)",
+   "extensions": [
+    ".tif",
+    ".tiff"
+   ],
+   "detect": "tiff_header",
+   "limits": {
+    "names": [],
+    "template": "GeoTIFF · one band of 32- or 64-bit floats, north-up, 2 × 2 to 100,000 cells, no band scale or offset. A coordinate system the file does not state is asked; nothing is guessed."
+   },
+   "declared": [
+    {
+     "key": "crs",
+     "label": "Coordinate system",
+     "kind": "crs",
+     "hint": "EPSG code such as EPSG:28992"
+    },
+    {
+     "key": "z_unit",
+     "label": "Value unit",
+     "kind": "unit",
+     "hint": "For example m or ms"
+    },
+    {
+     "key": "vertical_datum",
+     "label": "Vertical datum",
+     "kind": "text",
+     "hint": "For example NAP"
+    }
+   ],
+   "companions": [],
+   "recipe": false,
+   "osdu": {
+    "none": "A single-band scalar surface kept as its file; its typed-surface correspondence comes with E65."
+   },
+   "route": {
+    "document": "file-geotiff",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "real",
+    "path": "tests/fixtures/usgs-3dep/elevation-32.tif",
+    "sha256": "5a480d267c7cfe648afb803da54fb44be3186f8a02097357cde54e37818aeecf",
+    "bytes": 66342,
+    "rights": "tests/fixtures/scalar-map/usgs-crs/acquisition.json"
+   },
+   "report": "{ncols:,} × {nrows:,} cells, {missing_count:,} missing",
+   "type": "regular-grid-surface",
+   "mapping": null,
+   "states": {
+    "function": "geotiff",
+    "items": [
+     {
+      "key": "crs",
+      "label": "Coordinate system",
+      "from": "whole"
+     },
+     {
+      "key": "grid_size",
+      "label": "Grid size",
+      "from": "whole"
+     },
+     {
+      "key": "z_unit",
+      "label": "Value unit",
+      "from": "whole"
+     }
+    ]
+   },
+   "landing": "retained"
   }
  ]
 }

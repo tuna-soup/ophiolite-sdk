@@ -9,6 +9,7 @@
       "index": "/api/v1/contracts",
       "served_profiles": [
         "las2/1",
+        "geotiff/1",
         "well-tops-csv/1",
         "deviation-csv/1",
         "esri-ascii-grid/1",
@@ -20650,7 +20651,8 @@
                       "well-location/1",
                       "wavelet-text/1",
                       "model-section-text/1",
-                      "seismic-section-text/1"
+                      "seismic-section-text/1",
+                      "geotiff/1"
                     ],
                     "title": "Profile",
                     "type": "string"
@@ -23487,7 +23489,8 @@
                       "well-location/1",
                       "wavelet-text/1",
                       "model-section-text/1",
-                      "seismic-section-text/1"
+                      "seismic-section-text/1",
+                      "geotiff/1"
                     ],
                     "title": "Profile",
                     "type": "string"
@@ -57869,6 +57872,314 @@
         }
       }
     },
+    "/api/v1/projects/{project}/upload-runs/check": {
+      "post": {
+        "summary": "E85: Read one file before anything is asked (application/octet-stream, X-Ophiolite-Upload with name, bytes and mode, or an https address the gateway fetches): its kind, what it states, what it leaves open; nothing is written",
+        "description": "Scope write; accepted principals: session, delegate; project extractor hdr.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "upload-runs/check: what the file is and says, read before anything is asked; nothing was written.",
+                  "properties": {
+                    "reads": {
+                      "enum": [
+                        "head",
+                        "whole"
+                      ],
+                      "title": "Reads",
+                      "type": "string"
+                    },
+                    "kind": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/CheckKind"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "table": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/CheckTable"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "web_page": {
+                      "title": "Web Page",
+                      "type": "boolean"
+                    },
+                    "stated": {
+                      "items": {
+                        "$ref": "#/components/schemas/CheckStated"
+                      },
+                      "title": "Stated",
+                      "type": "array"
+                    },
+                    "read": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/CheckRead"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "asks": {
+                      "items": {
+                        "$ref": "#/components/schemas/CheckAsk"
+                      },
+                      "title": "Asks",
+                      "type": "array"
+                    },
+                    "suggestions": {
+                      "items": {
+                        "$ref": "#/components/schemas/CheckSuggestion"
+                      },
+                      "title": "Suggestions",
+                      "type": "array"
+                    },
+                    "proposals": {
+                      "items": {
+                        "$ref": "#/components/schemas/CheckProposal"
+                      },
+                      "title": "Proposals",
+                      "type": "array"
+                    },
+                    "same_as": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/CheckSame"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "refusal": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/CheckRefusal"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "fetched": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/CheckFetched"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E85b: present when an address was read"
+                    }
+                  },
+                  "required": [
+                    "reads",
+                    "kind",
+                    "table",
+                    "web_page",
+                    "stated",
+                    "read",
+                    "asks",
+                    "suggestions",
+                    "proposals",
+                    "same_as",
+                    "refusal"
+                  ],
+                  "title": "UploadCheck",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Ophiolite-Upload",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "contentEncoding": "base64",
+              "contentMediaType": "application/json",
+              "contentSchema": {
+                "additionalProperties": false,
+                "description": "X-Ophiolite-Upload of `upload-runs/check`: the file's name and size, and whether its head or its whole body is sent.",
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Name"
+                  },
+                  "bytes": {
+                    "anyOf": [
+                      {
+                        "minimum": 1,
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Bytes"
+                  },
+                  "mode": {
+                    "enum": [
+                      "head",
+                      "whole"
+                    ],
+                    "title": "Mode",
+                    "type": "string"
+                  },
+                  "sha256": {
+                    "anyOf": [
+                      {
+                        "pattern": "^[0-9a-f]{64}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Sha256"
+                  },
+                  "address": {
+                    "anyOf": [
+                      {
+                        "maxLength": 2000,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E85b: an https address instead of bytes (mode whole, no name or size, no body); the gateway fetches and reads it, and the answer's `fetched` names what was read",
+                    "title": "Address"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "mode"
+                ],
+                "title": "CheckHeader",
+                "type": "object"
+              }
+            },
+            "description": "base64 of a UTF-8 JSON object with the shape contentSchema describes"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary",
+                "description": "The file's first 64 KiB (head) or all of its bytes within the upload limit (whole), exact Content-Length; empty with an address (E85b)"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/upload-runs/decide": {
       "post": {
         "summary": "E55: Decide files that need it: add separately, add as new, add with declarations, or skip (command_id)",
@@ -58103,7 +58414,7 @@
     },
     "/api/v1/projects/{project}/upload-runs/file": {
       "post": {
-        "summary": "E55: One file of a folder upload (application/octet-stream, X-Ophiolite-Upload with run_id, ordinal and mode): its first 64 KiB (head), then its bytes (body)",
+        "summary": "E55: One file of a folder upload (application/octet-stream, X-Ophiolite-Upload with run_id, ordinal and mode): its first 64 KiB (head), then its bytes (body); or, for a run started from an address, that address again and no bytes (E85b)",
         "description": "Scope write; accepted principals: session, delegate; project extractor hdr.",
         "security": [
           {
@@ -58298,6 +58609,20 @@
                     ],
                     "default": null,
                     "title": "Attempt"
+                  },
+                  "address": {
+                    "anyOf": [
+                      {
+                        "maxLength": 2000,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E85b: the address the run was started with, query included; the server fetches it again (no body is sent) and adds the file only if its bytes are the ones read",
+                    "title": "Address"
                   }
                 },
                 "required": [
@@ -58320,7 +58645,7 @@
               "schema": {
                 "type": "string",
                 "format": "binary",
-                "description": "LAS 2.0 bytes, 1 byte to 8 MiB, exact Content-Length"
+                "description": "A file of a folder upload: its first 64 KiB (head) or its bytes (body), exact Content-Length; empty with an address (E85b)"
               }
             }
           }
@@ -59078,6 +59403,20 @@
                     "const": true,
                     "title": "Rights Confirmed",
                     "type": "boolean"
+                  },
+                  "address": {
+                    "anyOf": [
+                      {
+                        "maxLength": 2000,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E85b: the https address of the run's one file; kept without its query string",
+                    "title": "Address"
                   }
                 },
                 "required": [
@@ -68444,7 +68783,8 @@
                               "application/json",
                               "text/csv",
                               "text/plain",
-                              "application/octet-stream"
+                              "application/octet-stream",
+                              "image/tiff"
                             ],
                             "title": "Media Type",
                             "type": "string"
@@ -73003,6 +73343,445 @@
         "title": "ChangeEvent",
         "type": "object"
       },
+      "CheckAsk": {
+        "additionalProperties": false,
+        "description": "A declaration the file does not state; it lands as Not stated unless the person answers.",
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "unit",
+              "text",
+              "crs",
+              "choice"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "hint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Hint"
+          },
+          "choices": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Choices"
+          },
+          "default": {
+            "const": "none",
+            "type": "string",
+            "title": "Default"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "kind",
+          "default"
+        ],
+        "title": "CheckAsk",
+        "type": "object"
+      },
+      "CheckFetched": {
+        "additionalProperties": false,
+        "description": "E85b: what was fetched from an address: start the run with this name, size and digest and the same address.",
+        "properties": {
+          "address": {
+            "description": "The address without its query string",
+            "title": "Address",
+            "type": "string"
+          },
+          "host": {
+            "title": "Host",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "bytes": {
+            "title": "Bytes",
+            "type": "integer"
+          },
+          "sha256": {
+            "title": "Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "address",
+          "host",
+          "name",
+          "bytes",
+          "sha256"
+        ],
+        "title": "CheckFetched",
+        "type": "object"
+      },
+      "CheckKind": {
+        "additionalProperties": false,
+        "properties": {
+          "profile": {
+            "description": "The reader registry entry (shown under Technical details)",
+            "title": "Profile",
+            "type": "string"
+          },
+          "label": {
+            "description": "The kind as a person reads it",
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "profile",
+          "label"
+        ],
+        "title": "CheckKind",
+        "type": "object"
+      },
+      "CheckProposal": {
+        "additionalProperties": false,
+        "description": "The one readable wellbore whose name matches the well the file names; applied only by the person's own Link it.",
+        "properties": {
+          "entity_id": {
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "class": {
+            "const": "inferred",
+            "title": "Class",
+            "type": "string"
+          }
+        },
+        "required": [
+          "entity_id",
+          "name",
+          "class"
+        ],
+        "title": "CheckProposal",
+        "type": "object"
+      },
+      "CheckRead": {
+        "additionalProperties": false,
+        "description": "What only a whole read counts (each present when the kind's reader counts it).",
+        "properties": {
+          "line": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The kind's report line, as the folder upload's report shows it",
+            "title": "Line"
+          },
+          "rows": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Rows"
+          },
+          "curves": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Curves"
+          },
+          "missing": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Missing"
+          },
+          "valid_range": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Valid Range"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Unit"
+          },
+          "cells": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Cells"
+          },
+          "missing_cells": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Missing Cells"
+          }
+        },
+        "required": [
+          "line"
+        ],
+        "title": "CheckRead",
+        "type": "object"
+      },
+      "CheckRefusal": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "sentence": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sentence"
+          },
+          "technical": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Technical"
+          }
+        },
+        "required": [
+          "code",
+          "sentence",
+          "technical"
+        ],
+        "title": "CheckRefusal",
+        "type": "object"
+      },
+      "CheckSame": {
+        "additionalProperties": false,
+        "properties": {
+          "asset_id": {
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "asset_id",
+          "name"
+        ],
+        "title": "CheckSame",
+        "type": "object"
+      },
+      "CheckStated": {
+        "additionalProperties": false,
+        "description": "One thing the file says about itself, in its own words.",
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            ],
+            "title": "Value"
+          },
+          "class": {
+            "const": "declared",
+            "title": "Class",
+            "type": "string"
+          },
+          "source": {
+            "const": "file",
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "value",
+          "class",
+          "source"
+        ],
+        "title": "CheckStated",
+        "type": "object"
+      },
+      "CheckSuggestion": {
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          },
+          "class": {
+            "enum": [
+              "previously-reviewed",
+              "project-default",
+              "inferred"
+            ],
+            "title": "Class",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "value",
+          "class",
+          "source"
+        ],
+        "title": "CheckSuggestion",
+        "type": "object"
+      },
+      "CheckTable": {
+        "additionalProperties": false,
+        "description": "A table no reader knows: delimited text (columns and rows counted in the head), a workbook or Parquet (not counted).",
+        "properties": {
+          "format": {
+            "enum": [
+              "delimited",
+              "xlsx",
+              "parquet"
+            ],
+            "title": "Format",
+            "type": "string"
+          },
+          "columns": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Columns"
+          },
+          "rows": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rows"
+          }
+        },
+        "required": [
+          "format",
+          "columns",
+          "rows"
+        ],
+        "title": "CheckTable",
+        "type": "object"
+      },
       "ConnectionAdminConnection": {
         "additionalProperties": false,
         "description": "One connection in connection-admin/list, and the answer of create, enable and rotate.",
@@ -74414,6 +75193,38 @@
             "pattern": "^[0-9a-f]{64}$",
             "title": "Sha256",
             "type": "string"
+          },
+          "decisions": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "maxProperties": 12,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Decisions"
+          },
+          "suggested": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 12,
+            "title": "Suggested",
+            "type": "array"
+          },
+          "confirmed": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 12,
+            "title": "Confirmed",
+            "type": "array"
           }
         },
         "required": [
@@ -82268,6 +83079,53 @@
         "title": "UploadRunCounts",
         "type": "object"
       },
+      "UploadRunEvidence": {
+        "additionalProperties": false,
+        "description": "E85: one decided field and where it came from; the server derives the class.",
+        "properties": {
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "class": {
+            "enum": [
+              "declared",
+              "previously-reviewed",
+              "project-default",
+              "inferred",
+              "none"
+            ],
+            "title": "Class",
+            "type": "string"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "you (typed or picked), file (the file states it), or the producer of a suggestion",
+            "title": "Source"
+          }
+        },
+        "required": [
+          "value",
+          "class",
+          "source"
+        ],
+        "title": "UploadRunEvidence",
+        "type": "object"
+      },
       "UploadRunFile": {
         "additionalProperties": false,
         "description": "One file of a folder upload and its outcome. `sentence` is the default-layer words; `technical` what the reader said.",
@@ -82480,6 +83338,14 @@
               }
             ],
             "description": "The wellbore this file was linked to from this report"
+          },
+          "evidence": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/UploadRunEvidence"
+            },
+            "description": "E85: each declared field the person decided, with its class",
+            "title": "Evidence",
+            "type": "object"
           }
         },
         "required": [
@@ -82606,6 +83472,18 @@
             },
             "title": "Audience",
             "type": "array"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UploadRunSource"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E85b: present when the run's file was fetched from an address"
           }
         },
         "required": [
@@ -82614,6 +83492,26 @@
           "audience"
         ],
         "title": "UploadRunSettings",
+        "type": "object"
+      },
+      "UploadRunSource": {
+        "additionalProperties": false,
+        "description": "E85b: the address a run's one file was fetched from, without its query string, and its host.",
+        "properties": {
+          "address": {
+            "title": "Address",
+            "type": "string"
+          },
+          "host": {
+            "title": "Host",
+            "type": "string"
+          }
+        },
+        "required": [
+          "address",
+          "host"
+        ],
+        "title": "UploadRunSource",
         "type": "object"
       },
       "UploadRunSummary": {

@@ -102,6 +102,14 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
         from .upload_runs import UploadRuns
         return UploadRuns(self)
 
+    def upload(self,path_or_address,*,attribution,rights_confirmed,audience=(),well_notes='',declare=None,skip_decisions=False,link_wellbore=False,new=False,progress=None):
+        """E85: add a file, a folder, a .zip or an https address in one upload and return its report
+        (ophiolite.upload_runs.Report). `declare` {kind: {field: value}} answers what the files of that kind leave open;
+        `link_wellbore` links each file to the one wellbore whose name its header names. An address is fetched by the
+        gateway: no file bytes are sent from here."""
+        return self.upload_runs.upload(path_or_address,attribution=attribution,rights_confirmed=rights_confirmed,audience=audience,well_notes=well_notes,
+                                       declare=declare,skip_decisions=skip_decisions,associate_matches=link_wellbore,new=new,progress=progress)
+
     def well_imports(self):
         """E42a: import a copy of an approved well table as wells (ophiolite.well_imports.WellImports)."""
         from .well_imports import WellImports

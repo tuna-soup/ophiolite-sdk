@@ -119,6 +119,7 @@ def status(response,operation,raw=None):
         413:(CapacityExceeded,'This operation exceeds its supported size.'),
         429:(Busy,'The service is busy.'),503:(Busy,'The service is busy.')}.get(code,(Refused,'The application request was refused. Check the input and supported profile.'))
     recovery=meta.get('remedy','')
+    if meta.get('code') in UPLOAD_CODES and meta.get('message') and kind is Busy:message=meta['message']  # E85b: busy fetching
     if kind is Busy:raise Busy(message,recovery,status=code,retry_after=delay(response),code=meta.get('code'),**carried(meta))
     if code==413:message=upload_limit(meta) or message
     if meta.get('code') in UPLOAD_CODES and meta.get('message'):message=meta['message']  # E54: the server's sentence for a file sent in parts
@@ -126,7 +127,10 @@ def status(response,operation,raw=None):
 
 
 UPLOAD_CODES={'file-too-large','no-room','part-corrupt','file-mismatch','access-lost','not-a-volume','expired','unknown-upload',
-              'unknown-run','claimed','session-mismatch','run-ended','too-many-runs','head-too-large'}  # E55: a folder upload's refusals
+              'unknown-run','claimed','session-mismatch','run-ended','too-many-runs','head-too-large',  # E55: a folder upload's refusals
+              'address-invalid','address-not-found','address-private','address-certificate','address-other-site','address-redirects','address-sign-in',
+              'address-answer','address-too-large','address-too-large-unknown','address-too-slow','address-compressed','address-off','address-busy',
+              'address-other-run'}  # E85b: an address's refusals, the deployment's sentence (it names the host only)
 
 
 def upload_limit(meta):

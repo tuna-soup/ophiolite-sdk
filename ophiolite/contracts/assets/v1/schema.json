@@ -2361,7 +2361,8 @@
             "application/json",
             "text/csv",
             "text/plain",
-            "application/octet-stream"
+            "application/octet-stream",
+            "image/tiff"
           ],
           "title": "Media Type",
           "type": "string"

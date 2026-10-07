@@ -510,7 +510,7 @@ class Relationships(Contract):
 class Representation(Contract):
     id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     kind: Literal['original', 'captured-result', 'derived-artifact', 'normalized'] = Field(...)
-    media_type: Literal['application/x-las', 'application/json', 'text/csv', 'text/plain', 'application/octet-stream'] = Field(...)
+    media_type: Literal['application/x-las', 'application/json', 'text/csv', 'text/plain', 'application/octet-stream', 'image/tiff'] = Field(...)
     profile: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] = Field(...)
     bytes: Annotated[int, Field(ge=0, le=68719476736)] = Field(...)
     sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)

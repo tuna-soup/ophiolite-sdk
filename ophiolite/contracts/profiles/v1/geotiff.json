@@ -5,6 +5,9 @@
   "lifecycle": "preview",
   "display_name": "GeoTIFF raster (single band)",
   "description": "A single-band GeoTIFF kept as the source stored it; its nodata and CRS are source declarations.",
+  "serves": [
+    "ophiolite.scientific-asset/1"
+  ],
   "connector": {
     "scientific_profile": "raster-source/1",
     "source_schema": "GeoTIFF/single-band",
@@ -14,5 +17,16 @@
   "role": "artifact",
   "media_types": [
     "image/tiff"
-  ]
+  ],
+  "normalized_profile": "ophiolite.regular-grid-surface/1",
+  "context_schema": "ophiolite.typed-context/1",
+  "representation_rules": {
+    "artifact_kind_by_origin": {
+      "source-reference": "original",
+      "retained-capture": "original",
+      "managed-derived": "derived-artifact"
+    },
+    "normalized": 1,
+    "total": 2
+  }
 }

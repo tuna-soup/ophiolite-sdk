@@ -128,7 +128,7 @@ def test_a_decision_answered_for_one_kind_leaves_the_others(web, tmp_path):
     assert first.counts['needs-decision'] == 3
     report = alice.upload_runs.upload(root, declare={'esri-ascii-grid/1': {'crs': 'EPSG:28992'}}, **SETTINGS)
     assert [(i['state'], i['declared']) for i in report.items] == [('added', {'crs': 'EPSG:28992'})] * 2 + [('needs-decision', None)]  # the points keep theirs
-    other = alice.upload_runs.upload(folder(tmp_path, [('h/three.asc', grid.replace(b'\n', b'  \n', 1))], 'More'), declare={'las2/1': {'x': 'y'}}, **SETTINGS)
+    other = alice.upload_runs.upload(folder(tmp_path, [('h/three.asc', grid.replace(b'\n', b'  \n', 1))], 'More'), declare={'points-csv/1': {'crs': 'EPSG:28992'}}, **SETTINGS)
     assert other.counts['needs-decision'] == 1  # a declaration for another kind is not applied
     skipped = alice.upload_runs.upload(folder(tmp_path, [('h/three.asc', grid.replace(b'\n', b'  \n', 1))], 'More'), skip_decisions=True, **SETTINGS)
     assert skipped.counts.get('cancelled') == 1 and skipped.items[0]['sentence'] == 'Skipped by you.'

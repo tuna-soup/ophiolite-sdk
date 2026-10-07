@@ -431,7 +431,7 @@ export type Relationships = {
 export type Representation = {
   id: string;
   kind: "original" | "captured-result" | "derived-artifact" | "normalized";
-  media_type: "application/x-las" | "application/json" | "text/csv" | "text/plain" | "application/octet-stream";
+  media_type: "application/x-las" | "application/json" | "text/csv" | "text/plain" | "application/octet-stream" | "image/tiff";
   profile: string;
   bytes: number;
   sha256: string;

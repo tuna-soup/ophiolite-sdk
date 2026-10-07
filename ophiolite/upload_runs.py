@@ -9,6 +9,9 @@ words. Nothing is converted or repaired, and no wellbore is linked unless you as
 
 Running the same upload again after an interruption continues the unfinished upload of the same folder (the same
 paths, sizes and digests): files already added are not sent again. `new=True` starts another upload instead.
+
+E85: one file is a folder of one, and an https address is read and added by the gateway itself: the SDK sends the
+address, never the file's bytes, and the report names the host and the file, never the address's query string.
 """
 import base64
 import csv
@@ -23,7 +26,7 @@ import zipfile
 from pathlib import Path, PurePosixPath
 
 from .errors import IntegrityConflict, Refused, ValidationFailed, VerificationFailed
-from .models.api import UploadRun, UploadRunsListAnswer, UploadRunStep
+from .models.api import UploadCheckAnswer, UploadRun, UploadRunsListAnswer, UploadRunStep
 
 HEAD = 65536
 MAX_FILES = 500
@@ -51,9 +54,10 @@ def _sha(value):
 # --- what is sent ------------------------------------------------------------------------------------------------------
 
 class File:
-    """One file of the folder or zip: its path in the upload, size and digest; its bytes are read only when sent."""
-    def __init__(self, path, size, sha256, read, disk=None):
-        self.path, self.size, self.sha256, self._read, self.disk = path, size, sha256, read, disk
+    """One file of the folder or zip: its path in the upload, size and digest; its bytes are read only when sent.
+    A file at an address (E85b) has no bytes here: the gateway fetches it."""
+    def __init__(self, path, size, sha256, read, disk=None, address=None):
+        self.path, self.size, self.sha256, self._read, self.disk, self.address = path, size, sha256, read, disk, address
 
     def head(self):
         if self.disk is None: return self._read()[:HEAD]
@@ -77,8 +81,8 @@ class File:
 
 
 class Folder:
-    def __init__(self, name, files):
-        self.name, self.files = name, files
+    def __init__(self, name, files, address=None):
+        self.name, self.files, self.address = name, files, address
 
     def listing(self): return [{'path': f.path, 'bytes': f.size, 'sha256': f.sha256} for f in self.files]
 
@@ -112,6 +116,35 @@ def open_folder(path):
     found.sort()
     _too_many(len(found))
     return Folder(root.name, [File(rel, os.path.getsize(full), _digest(full), lambda full=full: Path(full).read_bytes(), full) for rel, full in found])
+
+
+def readers():
+    """The deployment's reader registry as the SDK's contract snapshot holds it."""
+    return json.loads((Path(__file__).parent / 'contracts/connectors/v1/readers.json').read_text())['readers']
+
+
+def checked_declarations(declare):
+    """E85: `declare` names kinds and the items each kind can be told; anything else is refused before anything is sent."""
+    entries = {e['profile']: e for e in readers()}
+    for kind, values in (declare or {}).items():
+        entry = entries.get(kind)
+        if entry is None: raise Refused('No kind of file is named %s. Kinds: %s.' % (kind[:80], ', '.join(entries)))
+        known = [f['key'] for f in entry['declared']]
+        unknown = sorted(set(values) - set(known))
+        if unknown:
+            raise Refused('%s files do not take %s; they take %s.' % (entry['label'], ', '.join(k[:40] for k in unknown[:4]), ', '.join(known) if known else 'no declarations'))
+    return declare
+
+
+def is_address(path):
+    return isinstance(path, str) and '://' in path[:12]
+
+
+def open_file(path):
+    """One file as a folder of one: its name is its path in the upload. A link is refused, as in a folder."""
+    path = Path(path)
+    if not stat.S_ISREG(os.lstat(path).st_mode): raise Refused('%s is not a regular file. Nothing was sent.' % path.name, 'Links and special files are not followed.')
+    return Folder(path.name, [File(path.name, os.path.getsize(path), _digest(path), lambda: path.read_bytes(), str(path))])
 
 
 def open_zip(path, file_bytes):
@@ -237,24 +270,39 @@ class UploadRuns:
 
     def open(self, path):
         """The folder or zip at PATH as it will be sent (checked; nothing is sent)."""
+        if is_address(path): raise Refused('An address is read by the gateway; use upload(address).')
         path = Path(path)
         if path.is_dir(): return open_folder(path)
         if path.suffix.lower() == '.zip': return open_zip(path, self.client.served_limits()['file_bytes'])
-        raise Refused('Choose a folder or a .zip file.')
+        if path.is_file() or path.is_symlink(): return open_file(path)
+        raise Refused('%s was not found. Choose a file, a folder, a .zip file or an https address.' % path.name)
+
+    def check(self, address):
+        """E85b: what the gateway reads at an https address (its kind, what the file states and leaves open, and what was
+        fetched); nothing is added. Its refusals carry the deployment's sentence."""
+        header = {'project_id': self.client.project, 'mode': 'whole', 'address': address}
+        extra = {'Content-Type': 'application/octet-stream', 'X-Ophiolite-Upload': base64.b64encode(json.dumps(header, separators=(',', ':')).encode()).decode()}
+        return _checked(UploadCheckAnswer, self.client._post_bytes('upload-runs', 'check', b'', extra_headers=extra, retry=True), 'file check')
+
+    def fetched(self, address):
+        """The address as a folder of one file, from the gateway's read of it."""
+        got = self.check(address)['fetched']
+        return Folder(got['host'][:160], [File(got['name'], got['bytes'], got['sha256'], None, address=address)], address)
 
     def upload(self, path, *, attribution, rights_confirmed, audience=(), well_notes='', declare=None, skip_decisions=False,
                associate_matches=False, new=False, progress=None):
-        """Upload a folder or a .zip and return its Report. `declare` {kind: {field: value}} answers the files of that
+        """Upload a file, a folder, a .zip or an https address and return its Report. `declare` {kind: {field: value}} answers the files of that
         kind (profile, e.g. 'esri-ascii-grid/1') that need you to say what their values mean; `skip_decisions` skips
         every other file that needs a decision; `associate_matches` links each file to the one wellbore its header names.
         `progress(report)` is called after each file."""
         if rights_confirmed is not True:
             raise ValidationFailed(['Confirm that you may retain these files, derive results and share them within the audience.'])
-        folder = self.open(path)
+        checked_declarations(declare)
+        folder = self.fetched(path) if is_address(path) else self.open(path)
         run = None if new else self.unfinished(folder)
         if run is None:
             body = {'command_id': uuid.uuid4().hex, 'folder_name': folder.name[:160], 'files': folder.listing(), 'attribution': attribution,
-                    'well_notes': well_notes, 'audience': list(audience), 'rights_confirmed': True}
+                    'well_notes': well_notes, 'audience': list(audience), 'rights_confirmed': True, **({'address': folder.address} if folder.address else {})}
             run = self._call('start', body, UploadRun)['run_id']
         report = self.send(run, folder, progress)
         if declare or skip_decisions:
@@ -302,13 +350,15 @@ class UploadRuns:
                 if progress: progress(self.status(run_id))
         return self.status(run_id)
 
-    def _post_file(self, run_id, ordinal, mode, raw, attempt=None):
-        header = {'project_id': self.client.project, 'run_id': run_id, 'ordinal': ordinal, 'mode': mode, **({'attempt': attempt} if attempt else {})}
+    def _post_file(self, run_id, ordinal, mode, raw, attempt=None, address=None):
+        header = {'project_id': self.client.project, 'run_id': run_id, 'ordinal': ordinal, 'mode': mode, **({'attempt': attempt} if attempt else {}),
+                  **({'address': address} if address else {})}
         extra = {'Content-Type': 'application/octet-stream', 'X-Ophiolite-Upload': base64.b64encode(json.dumps(header, separators=(',', ':')).encode()).decode()}
         self.sent_bytes += len(raw)
         return _checked(UploadRunStep, self.client._post_bytes('upload-runs', 'file', raw, extra_headers=extra, retry=mode == 'head'), 'folder upload file')
 
     def _file(self, run_id, ordinal, files):
+        if files[ordinal].address: return self._post_file(run_id, ordinal, 'head', b'', address=files[ordinal].address)  # the gateway fetches it again
         step = self._post_file(run_id, ordinal, 'head', files[ordinal].head())
         if step['step'] != 'send': return step
         members = step['send']['members']

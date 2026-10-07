@@ -209,8 +209,8 @@ def parser():
     imports.add_argument('--audience',action='append',default=[],metavar='PERSON',help='start: a project member who may read the copy and the wells it creates (repeat); you are always included')
     imports.add_argument('--command-id',help='start: the same id returns the same import instead of starting another')
     imports.add_argument('--dry-run',action='store_true',help='start: show what the import would do; nothing is kept')
-    upload=project(sub.add_parser('upload',help='Upload a folder or a .zip: every file it can read is added, and one report says what became of each'))
-    upload.add_argument('path',type=Path,help='The folder or .zip file')
+    upload=project(sub.add_parser('upload',help='Upload a file, a folder, a .zip or an https address: every file it can read is added, and one report says what became of each'))
+    upload.add_argument('path',help='The file, folder or .zip file, or an https:// address the deployment fetches')
     upload.add_argument('--project',dest='upload_project',help='The project (default: the configuration\'s)')
     upload.add_argument('--attribution',required=True,help='Where these files come from (shown with every file)')
     upload.add_argument('--audience',action='append',default=[],metavar='PERSON',help='A project member who may later be given access (repeat); the files start private')
@@ -444,7 +444,8 @@ def _upload(args,client):
     runs=client.upload_runs
     def progress(report):
         if not args.json:print('Adding files... %d of %d.' % (sum(v for k,v in report.counts.items() if k!='not-sent'),report.view['files']),file=sys.stderr,flush=True)
-    report=runs.upload(args.path,attribution=args.attribution,audience=args.audience,rights_confirmed=True,well_notes=args.well_notes,
+    from .upload_runs import is_address
+    report=runs.upload(args.path if is_address(args.path) else Path(args.path),attribution=args.attribution,audience=args.audience,rights_confirmed=True,well_notes=args.well_notes,
                        declare=_declarations(args.declare),skip_decisions=args.skip_decisions,associate_matches=args.associate_matches,new=args.new,progress=progress)
     if args.report:report.save(args.report)
     done(args,report.text()+('\nReport written to %s' % args.report if args.report else ''),{'upload':report.view})
