@@ -1266,6 +1266,18 @@
                     "pruned_through": {
                       "title": "Pruned Through",
                       "type": "integer"
+                    },
+                    "display": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/Display"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "H12: names of the people who acted in these events, keyed by actor id; an id without a known name is absent."
                     }
                   },
                   "required": [
@@ -60507,6 +60519,18 @@
                     "pruned_through": {
                       "title": "Pruned Through",
                       "type": "integer"
+                    },
+                    "display": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/Display"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "H12: names of the people who acted in these events, keyed by actor id; an id without a known name is absent."
                     }
                   },
                   "required": [
@@ -71846,13 +71870,29 @@
           "missing_count": {
             "title": "Missing Count",
             "type": "integer"
+          },
+          "valid_depth": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "H12: the shallowest and deepest depth holding a sample of this curve; null when every sample is missing.",
+            "title": "Valid Depth"
           }
         },
         "required": [
           "mnemonic",
           "unit",
           "description",
-          "missing_count"
+          "missing_count",
+          "valid_depth"
         ],
         "title": "CurveInspection",
         "type": "object"
