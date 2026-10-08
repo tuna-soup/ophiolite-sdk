@@ -42,6 +42,13 @@
       "sentence": "Upload a folder of well logs in one step and read one report that says what became of each file and which wellbore each log names.",
       "modes": ["synthetic", "live"],
       "data": "A synthetic folder of five files made on your computer; uploading creates files only you can see until you share them."
+    },
+    {
+      "slug": "time-depth-table",
+      "title": "Write a time-depth table",
+      "sentence": "Compute the two-way times of a two-layer velocity model, write them as a time-depth table with its declarations, and upload it.",
+      "modes": ["synthetic", "live"],
+      "data": "Computed on your computer; uploading creates a table only you can see until you share it."
     }
   ]
 }

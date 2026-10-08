@@ -97,7 +97,7 @@ def asset(value):
         mapping = {'well-tops': 'well-tops/1', 'trajectory': 'trajectory/1', 'regular-grid-surface': 'regular-grid-surface/1',
                    'triangulated-surface': 'triangulated-surface/1', 'point-set': 'point-set/1', 'polyline-set': 'polyline-set/1', 'seismic-volume': 'seismic-volume/1',
                    'wavelet': 'wavelet/1', 'model-section': 'model-section/1', 'seismic-section': 'seismic-section/1',
-                   'well-location': 'well-location/1'}  # E53; E74b: a position file or a corrected position
+                   'well-location': 'well-location/1', 'time-depth': 'time-depth/1'}  # E53; E74b: a position file or a corrected position
         require(value['interpretation'].get('mapping') == mapping.get(value['scientific']['type']), 'Scientific context and interpretation disagree')
     else:
         context(value['scientific'])
@@ -252,6 +252,11 @@ def typed_payload(value):
     elif kind == 'seismic-section':
         grid = value['grid']; section_axes(c); grid_shape(c, grid)
         require([c['minimum'], c['maximum']] == [min(min(r) for r in grid), max(max(r) for r in grid)], 'Samples and their context disagree')
+    elif kind == 'time-depth':  # E57: pairs in file order, both strictly increasing; velocity as stated or absent
+        depth, time, velocity = value['depth'], value['time'], value['velocity']
+        require(len(depth) == len(time) == c['count'] >= 2 and (velocity is None) == (not c['velocity_provided']) and (velocity is None or len(velocity) == len(depth)), 'Pairs and their context disagree')
+        require(all(a < b for a, b in zip(depth, depth[1:])) and all(a < b for a, b in zip(time, time[1:])), 'Depth and time must strictly increase')
+        require(c['depth_range'] == [depth[0], depth[-1]] and c['time_range'] == [time[0], time[-1]], 'Pairs and their ranges disagree')
 
 
 def section_axes(c):

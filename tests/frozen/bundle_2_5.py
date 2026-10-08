@@ -26,11 +26,10 @@ VERSION = '1.0.0'
 SCHEMA_2 = 'ophiolite.portable-bundle/2'
 VERSION_2 = '2.0.0'
 TYPED_ORIGINALS = {'well-tops-csv/1': 'original.csv', 'deviation-csv/1': 'original.csv', 'esri-ascii-grid/1': 'original.asc', 'mesh-text/1': 'original.txt', 'points-csv/1': 'original.csv',
-                   'opendtect-faultsticks/1': 'original.txt', 'wavelet-text/1': 'original.txt', 'model-section-text/1': 'original.txt', 'seismic-section-text/1': 'original.txt',
-                   'time-depth-csv/1': 'original.csv'}
-NEWER_TYPES = {'triangulated-surface': 2, 'point-set': 2, 'polyline-set': 3, 'seismic-slice': 3, 'wavelet': 5, 'model-section': 5, 'seismic-section': 5, 'time-depth': 6}  # the 2.x minor that introduced them
+                   'opendtect-faultsticks/1': 'original.txt', 'wavelet-text/1': 'original.txt', 'model-section-text/1': 'original.txt', 'seismic-section-text/1': 'original.txt'}
+NEWER_TYPES = {'triangulated-surface': 2, 'point-set': 2, 'polyline-set': 3, 'seismic-slice': 3, 'wavelet': 5, 'model-section': 5, 'seismic-section': 5}  # the 2.x minor that introduced them
 TYPES_2 = ('well-log', 'well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-slice',
-           'wavelet', 'model-section', 'seismic-section', 'time-depth')  # 2.5 (E53); 2.6 (E57)
+           'wavelet', 'model-section', 'seismic-section')  # 2.5 (E53)
 NOT_IMPORTED_SYNTHETIC = ('A synthetic section is not imported: its model and wavelet are not part of the project it would join. '
                           'Import them and compute it again.')
 SLICE_NAME = re.compile(r'^slice-(inline|crossline|sample)-(-?[0-9]{1,9})\.json$')
@@ -541,9 +540,7 @@ DECLARABLE = {'well-tops': ('depth_unit', 'depth_basis'), 'trajectory': ('depth_
               'regular-grid-surface': ('crs', 'xy_unit', 'z_unit', 'z_meaning', 'positive', 'vertical_datum'),
               'triangulated-surface': ('crs', 'xy_unit', 'z_unit', 'z_meaning', 'positive', 'vertical_datum'),
               'point-set': ('crs', 'xy_unit', 'z_unit', 'z_meaning', 'positive', 'vertical_datum'),
-              'polyline-set': ('crs', 'xy_unit', 'z_unit', 'z_meaning', 'positive', 'vertical_datum'),
-              'time-depth': ('depth_type', 'depth_unit', 'time_kind', 'time_unit', 'datum')}
-DECLARABLE_NUMBERS = {'time-depth': ('seismic_reference_elevation',)}  # E57: served as a number, declared as its canonical decimal text
+              'polyline-set': ('crs', 'xy_unit', 'z_unit', 'z_meaning', 'positive', 'vertical_datum')}
 
 
 def import_plan(bundle, well_logs):
@@ -574,8 +571,6 @@ def import_plan(bundle, well_logs):
             for key in DECLARABLE.get(asset.type, ()):
                 value = context.get(key)
                 if isinstance(value, str) and value and value != 'unknown': declared[key] = value
-            for key in DECLARABLE_NUMBERS.get(asset.type, ()):
-                if context.get(key) is not None: declared[key] = _decimal(context[key], key)
             link = (entry.get('relationships') or {}).get('well_log')
             if link:
                 exported = link if isinstance(link, str) else link.get('asset_id')
@@ -589,5 +584,5 @@ def import_plan(bundle, well_logs):
 
 
 # E30b: Curve.write(depth, {mnemonic: (unit, values)}, depth_unit=...) writes LAS 2.0 for Client.publish_derived.
-from .writers import _decimal, write_curves as _write_curves
+from .writers import write_curves as _write_curves
 Curve.write = staticmethod(_write_curves)

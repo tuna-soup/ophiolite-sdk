@@ -8,6 +8,7 @@ argument you must give (write "unknown" when it is unknown), and a value the fil
 Numbers are written in their shortest exact decimal spelling. Importing this module contacts nothing.
 """
 import math
+from decimal import Decimal
 from dataclasses import dataclass, field
 from .errors import ValidationFailed
 
@@ -275,3 +276,54 @@ def write_seismic_section(section, *, domain=None, first_sample=None, sample_int
     lines = ['# ophiolite-seismic-section 1', *header, *(['origin synthetic'] if origin == 'synthetic' else []), f'polarity {polarity}', 'grid']
     lines += [' '.join(_number(v, 'A sample') for v in row) for row in grid]
     return WrittenOriginal(('\n'.join(lines) + '\n').encode(), 'seismic-section-text/1', {}, filename)
+
+
+
+
+# E57: time-depth tables. The declarations are the reader's choices; `_decimal` is the one canonical spelling of a declared
+# number (the Connectors `time_depth.decimal`): the shortest that reads back as the same float, never an exponent.
+DEPTH_TYPES = ('md', 'tvd', 'tvdss', 'unknown')
+TIME_KINDS = ('one-way', 'two-way', 'unknown')
+TIME_UNITS = ('ms', 's', 'us', 'unknown')
+
+
+def _decimal(value, what):
+    try: value = float(value)
+    except (TypeError, ValueError): raise ValidationFailed([f'{what} must be a number.']) from None
+    if not math.isfinite(value): raise ValidationFailed([f'{what} must be finite.'])
+    text = repr(value)
+    if 'e' in text or 'E' in text: text = format(Decimal(text), 'f')
+    if '.' in text: text = text.rstrip('0')
+    text = text.rstrip('.')
+    return '0' if text == '-0' else text
+
+
+def _choice(value, allowed, what):
+    if value not in allowed: raise ValidationFailed([f'Choose the {what} from: ' + ', '.join(allowed) + '.'])
+    return value
+
+
+def write_time_depth(pairs, *, depth_type=None, depth_unit=None, time_kind=None, time_unit=None, datum=None, seismic_reference_elevation=None,
+                     filename='time-depth.csv'):
+    """Time-depth CSV (checkshots, a velocity table): `pairs` is a sequence of (depth, time) or (depth, time, velocity) in
+    strictly increasing depth and time; a missing velocity is None. Every declaration but the datum and the seismic
+    reference elevation is required ("unknown" allowed). Lines end in CRLF (RFC 4180)."""
+    _required(depth_type=depth_type, depth_unit=depth_unit, time_kind=time_kind, time_unit=time_unit)
+    declared = {'depth_type': _choice(depth_type, DEPTH_TYPES, 'depth type'), 'depth_unit': depth_unit,
+                'time_kind': _choice(time_kind, TIME_KINDS, 'time kind'), 'time_unit': _choice(time_unit, TIME_UNITS, 'time unit')}
+    if datum is not None: declared['datum'] = _cell(datum, 'The datum')
+    if seismic_reference_elevation is not None: declared['seismic_reference_elevation'] = _decimal(seismic_reference_elevation, 'The seismic reference elevation')
+    declared = {k: v for k, v in declared.items() if v != 'unknown'}
+    pairs = [tuple(p) for p in pairs]
+    if len(pairs) < 2: raise ValidationFailed(['Write at least two pairs.'])
+    if len(pairs) > 100_000: raise ValidationFailed(['Write at most 100,000 pairs.'])
+    with_velocity = any(len(p) > 2 and p[2] is not None for p in pairs)
+    lines, previous = ['depth,time' + (',velocity' if with_velocity else '')], None
+    for i, p in enumerate(pairs, 1):
+        depth, time = float(_decimal(p[0], 'A depth')), float(_decimal(p[1], 'A time'))
+        if previous and depth <= previous[0]: raise ValidationFailed([f'Depth of pair {i} does not increase; pairs must be in strictly increasing depth.'])
+        if previous and time <= previous[1]: raise ValidationFailed([f'Time of pair {i} does not increase; pairs must be in strictly increasing time.'])
+        row = [_decimal(depth, 'A depth'), _decimal(time, 'A time')]
+        if with_velocity: row.append('' if len(p) < 3 or p[2] is None else _decimal(p[2], 'A velocity'))
+        lines.append(','.join(row)); previous = (depth, time)
+    return WrittenOriginal(('\r\n'.join(lines) + '\r\n').encode(), 'time-depth-csv/1', declared, filename)

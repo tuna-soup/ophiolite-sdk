@@ -352,3 +352,32 @@ def test_a_synthetic_is_planned_as_not_imported_with_its_reason(tmp_path):
     plan = bundle.import_plan(opened, {})
     assert [s['state'] for s in plan] == ['ready', 'ready', 'refused'] and plan[2]['reason'] == bundle.NOT_IMPORTED_SYNTHETIC == (
         'A synthetic section is not imported: its model and wavelet are not part of the project it would join. Import them and compute it again.')
+
+
+# --- E57: bundle 2.6 carries time-depth tables; the declarations, the numeric one included, travel to an import ----
+
+def time_depth_items():
+    r = typed_read('time-depth')
+    return typed_items() + [({'asset_id': r._wire_descriptor['asset_id'], 'revision': r._wire_descriptor['revision'], 'curves': None}, r)]
+
+
+def test_bundle_time_depth(tmp_path):
+    opened = bundle.write_bundle(tmp_path / 'b', time_depth_items())
+    assert opened.manifest['bundle_version'] == '2.6.0' and opened.assets[-1].type == 'time-depth'
+    table = opened.assets[-1]
+    assert table.original == FIXTURES.joinpath('time-depth.original').read_bytes() and table.data.pairs == [(0, 0, 0), (0.96, 1, 1913.18), (1.91, 2, 1913.18)]
+    [step] = [s for s in bundle.import_plan(opened, {}) if s['type'] == 'time-depth']
+    assert (step['state'], step['profile']) == ('ready', 'time-depth-csv/1')
+    assert step['declared'] == {'depth_type': 'tvd', 'depth_unit': 'm', 'time_kind': 'two-way', 'time_unit': 'ms'}  # datum "unknown" is not declared
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('ophiolite._frozen_bundle_25', Path(__file__).parent / 'frozen/bundle_2_5.py')
+    frozen = importlib.util.module_from_spec(spec); spec.loader.exec_module(frozen)
+    with pytest.raises(VerificationFailed, match='An asset has an unknown type.'): frozen.open_bundle(opened.path)  # the released 2.5 reader
+    assert [a.type for a in frozen.open_bundle(bundle.write_bundle(tmp_path / 'old', section_items()).path).assets][-1] == 'seismic-section'
+
+
+def test_numeric_declaration_travels_as_its_decimal_text(tmp_path):
+    opened = bundle.write_bundle(tmp_path / 'b', time_depth_items())
+    opened.assets[-1].data.context['seismic_reference_elevation'] = 12.5  # as a table declared with 12.5 reads
+    [step] = [s for s in bundle.import_plan(opened, {}) if s['type'] == 'time-depth']
+    assert step['declared']['seismic_reference_elevation'] == '12.5'

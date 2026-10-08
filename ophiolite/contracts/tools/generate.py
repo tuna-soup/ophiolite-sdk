@@ -39,11 +39,11 @@ def schemas():
     """Publish the Pydantic-generated schemas listed in the registry."""
     from project_gateway.scientific_assets import (Asset, AssetSummary, Curve, ScientificContext, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface,
                                                    PointSet, PolylineSet, SeismicVolume, SeismicSlice, ImportRecipe, PointSet2,
-                                                   WellLocationUpload, WellLocation, Wavelet, ModelSection, SeismicSection)
+                                                   WellLocationUpload, WellLocation, Wavelet, ModelSection, SeismicSection, TimeDepth)
     from project_gateway.domain import RelationshipRegistry, Entity, EntityAssets, Lineage
     for model in (Asset, Curve, ScientificContext, AssetSummary, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface, PointSet, PolylineSet, SeismicVolume, SeismicSlice,
                   RelationshipRegistry, Entity, EntityAssets, Lineage, ImportRecipe, PointSet2, WellLocationUpload, WellLocation,
-                  Wavelet, ModelSection, SeismicSection):  # E53
+                  Wavelet, ModelSection, SeismicSection, TimeDepth):  # E53; E57
         write(CONTRACTS / model.CONTRACT['path'], model.model_json_schema())
 
 
@@ -127,6 +127,9 @@ TYPED = {
                       b'horizontal distance\nhorizontal_first 0\nhorizontal_step 25\nrocks\n1 4073 2629 Claystone\n2 4024 2379 Sandstone\ngrid\n1 1\n1 2\n2 2\n', {}),
     'seismic-section': ('seismic-section-text/1', 'text/plain', b'# ophiolite-seismic-section 1\ndomain time\nfirst_sample 0\nsample_interval 0.002\nsamples 3\ntraces 2\n'
                         b'horizontal trace-number\nhorizontal_first 1\nhorizontal_step 1\npolarity unknown\ngrid\n0.0 0.0\n-0.05 0.0\n0.05 -0.05\n', {}),
+    # E57: PRW-06's first checkshot pairs (NLOG document/924335000); the datum is not stated, so it stays unknown.
+    'time-depth': ('time-depth-csv/1', 'text/csv', b'depth,time,velocity\r\n0,0,0\r\n0.96,1,1913.18\r\n1.91,2,1913.18\r\n',
+                   {'depth_type': 'tvd', 'depth_unit': 'm', 'time_kind': 'two-way', 'time_unit': 'ms'}),
 }
 
 

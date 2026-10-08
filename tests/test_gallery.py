@@ -77,8 +77,14 @@ def test_a_well_folder_in_one_report_checks_its_folder_outside_the_download_and_
     assert 'Synthetic mode: nothing is sent. In your project this folder gives 2 Added, 1 Already here, 1 Not read, and 1 file that no reader recognises.' in text
 
 
+def test_time_depth_table_writes_the_two_layer_model_and_publishes_nothing_synthetic(tmp_path, monkeypatch):
+    text = run('time-depth-table', tmp_path, monkeypatch)
+    assert '41 pairs, from (0, 0.0) to (2000, 1666.667)' in text and 'Interval velocities (m/s, rounded): [2000, 3000]' in text
+    assert "depth,time 0,0 2000,1666.667" in text and 'Synthetic mode: nothing is published.' in text
+
+
 def test_every_entry_is_listed_built_and_described():
-    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report']
+    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table']
     for entry in GALLERY['notebooks']:
         assert set(entry) == {'slug', 'title', 'sentence', 'modes', 'data'} and entry['modes'] == ['synthetic', 'live']
         script = (ROOT / 'notebooks' / entry['slug'] / 'notebook.py').read_text()

@@ -15,7 +15,7 @@
  "readers": [
   {
    "profile": "las2/1",
-   "label": "Well log (LAS 2.0)",
+   "label": "Well log (LAS)",
    "extensions": [
     ".las"
    ],
@@ -24,7 +24,7 @@
     "names": [
      "upload_bytes"
     ],
-    "template": "LAS 2.0 · UTF-8 · up to {upload_bytes} in one request / 100,000 rows / 64 curves. Original depth, units and missing samples are preserved."
+    "template": "LAS 1.2, 2.0 or 3.0 (one ~ASCII section, spaces or tabs) · UTF-8 · up to {upload_bytes} in one request / 100,000 rows / 64 curves. Original depth, units and missing samples are preserved."
    },
    "declared": [],
    "companions": [],
@@ -1039,6 +1039,96 @@
       "from": "whole"
      }
     ]
+   },
+   "landing": "retained"
+  },
+  {
+   "profile": "time-depth-csv/1",
+   "label": "Time-depth table (CSV)",
+   "extensions": [
+    ".csv",
+    ".txt"
+   ],
+   "detect": "csv_time_depth",
+   "limits": {
+    "names": [],
+    "template": "CSV with columns depth and time, optionally velocity · up to 100,000 pairs of one wellbore, both strictly increasing. Pairs, their order and empty velocity cells are kept; nothing is interpolated or converted."
+   },
+   "declared": [
+    {
+     "key": "depth_type",
+     "label": "Depth measured as",
+     "kind": "choice",
+     "choices": {
+      "md": "Measured depth",
+      "tvd": "True vertical depth",
+      "tvdss": "True vertical depth below sea level",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "depth_unit",
+     "label": "Depth unit",
+     "kind": "unit",
+     "hint": "For example m or ft"
+    },
+    {
+     "key": "time_kind",
+     "label": "Time is",
+     "kind": "choice",
+     "choices": {
+      "one-way": "One-way time",
+      "two-way": "Two-way time",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "time_unit",
+     "label": "Time unit",
+     "kind": "choice",
+     "choices": {
+      "ms": "Milliseconds",
+      "s": "Seconds",
+      "us": "Microseconds",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "datum",
+     "label": "Depth datum",
+     "kind": "text",
+     "hint": "For example rotary table or mean sea level"
+    },
+    {
+     "key": "seismic_reference_elevation",
+     "label": "Seismic reference elevation",
+     "kind": "text",
+     "hint": "A decimal number in the depth unit, for example 12.5"
+    }
+   ],
+   "companions": [],
+   "recipe": false,
+   "osdu": {
+    "kind": "work-product-component--WellLog",
+    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+   },
+   "route": {
+    "document": "typed-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "real",
+    "path": "tests/fixtures/nlog/prw06_checkshot.csv",
+    "sha256": "fe423f313b7b2a8f484a348cb0a2bdb8934f2cdeb70b7ebfd7ab15a12462abf2",
+    "bytes": 39311,
+    "rights": "docs/release/rights/nlog-well-files-2026-10-08.json"
+   },
+   "report": "{count:,} pairs",
+   "type": "time-depth",
+   "mapping": "time-depth/1",
+   "states": {
+    "function": null,
+    "items": []
    },
    "landing": "retained"
   }

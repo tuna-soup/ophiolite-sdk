@@ -23,7 +23,8 @@
     "well-location/1": {"scientific_profile": "well-location/1", "source_schema": "JSON/{x,y,crs,elevation_reference}", "mapping_version": "well-location/1", "history": "retained-exact-read"},
     "wavelet-text/1": {"scientific_profile": "wavelet-source/1", "source_schema": "ophiolite-wavelet/1", "mapping_version": "wavelet/1", "history": "retained-exact-read"},
     "model-section-text/1": {"scientific_profile": "model-section-source/1", "source_schema": "ophiolite-model-section/1", "mapping_version": "model-section/1", "history": "retained-exact-read"},
-    "seismic-section-text/1": {"scientific_profile": "seismic-section-source/1", "source_schema": "ophiolite-seismic-section/1", "mapping_version": "seismic-section/1", "history": "retained-exact-read"}
+    "seismic-section-text/1": {"scientific_profile": "seismic-section-source/1", "source_schema": "ophiolite-seismic-section/1", "mapping_version": "seismic-section/1", "history": "retained-exact-read"},
+    "time-depth-csv/1": {"scientific_profile": "time-depth-source/1", "source_schema": "CSV/depth,time[,velocity]", "mapping_version": "time-depth/1", "history": "retained-exact-read"}
   },
   "policy_defaults": {"retained": false, "retention_permitted": false, "redistribution_permitted": false, "audience": []},
   "identity": {"entity": "source namespace plus explicit stable entity key; never name or coordinate inference", "revision": "exact source revision; opaque string", "representation": "profile plus payload SHA-256; does not create a new authority"},

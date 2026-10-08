@@ -147,6 +147,23 @@
       "osdu": "none: a text format; its normalized profile is ophiolite.seismic-section/1",
       "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
       "normalized_profile": "ophiolite.seismic-section/1"
+    },
+    {
+      "profile": "ophiolite.time-depth/1",
+      "osdu": "work-product-component--WellLog 1.5.0 (LogCurveMainFamily TimeDepth; curves CheckshotOneWayTime or CheckshotTwoWayTime against depth; SeismicReferenceElevation)",
+      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "energistics": "WITSML 2.1 Log with a time-depth curve pair (no dedicated object)",
+      "differences": [
+        "Depth type, time kind, units and the datum are the uploader's statements; unstated ones stay unknown, never defaulted.",
+        "The wellbore is an explicit of-entity association, not a WellboreID read from the file.",
+        "The velocity column is carried as stated; it is not recomputed from the pairs."
+      ]
+    },
+    {
+      "profile": "time-depth-csv/1",
+      "osdu": "none: a text format; its normalized profile is ophiolite.time-depth/1",
+      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "normalized_profile": "ophiolite.time-depth/1"
     }
   ],
   "licences": "The standards are referenced by name only; no schema text is copied."

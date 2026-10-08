@@ -1,0 +1,64 @@
+{
+  "schema": "ophiolite.time-depth/1",
+  "representation": "normalized",
+  "source": {
+    "authority": "ophiolite:uploaded",
+    "key": "synthetic-time-depth",
+    "revision": "a30abdd45ee6439775469cb92e020fe6a1731003959f44c7c0fbef3cfcc6583b",
+    "profile": "time-depth-csv/1"
+  },
+  "source_sha256": "a30abdd45ee6439775469cb92e020fe6a1731003959f44c7c0fbef3cfcc6583b",
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "mapping": "time-depth/1",
+    "parsing_policy": "typed-strict/1",
+    "null_policy": "empty cell or declared NODATA value is missing; never zero-filled"
+  },
+  "context": {
+    "type": "time-depth",
+    "depth_type": "tvd",
+    "depth_unit": "m",
+    "time_kind": "two-way",
+    "time_unit": "ms",
+    "datum": "unknown",
+    "seismic_reference_elevation": null,
+    "count": 3,
+    "depth_range": [
+      0.0,
+      1.91
+    ],
+    "time_range": [
+      0.0,
+      2.0
+    ],
+    "velocity_provided": true,
+    "fidelity": {
+      "status": "assessed",
+      "preserved": [
+        "depth and time pairs in file order",
+        "velocity as stated (empty cells stay missing)"
+      ],
+      "losses": [
+        "Text formatting (whitespace, quoting, line endings, number spelling) is kept only in the exact original"
+      ],
+      "unknown_context": [
+        "datum"
+      ]
+    }
+  },
+  "depth": [
+    0.0,
+    0.96,
+    1.91
+  ],
+  "time": [
+    0.0,
+    1.0,
+    2.0
+  ],
+  "velocity": [
+    0.0,
+    1913.18,
+    1913.18
+  ]
+}

@@ -160,7 +160,8 @@ def parser():
     derived=sub.add_parser('publish-derived',help='Publish a file you derived from exact revisions, with its declared method (a command id or a work folder is required)')
     derived.add_argument('--configuration',type=Path,default=Path('configuration.json'));derived.add_argument('--credentials',type=Path)
     derived.add_argument('file',type=Path,help='The derived file (LAS 2.0 or one of the typed formats)')
-    derived.add_argument('--profile',required=True,choices=['las2/1','points-csv/1','mesh-text/1','esri-ascii-grid/1','well-tops-csv/1','deviation-csv/1','opendtect-faultsticks/1'])
+    derived.add_argument('--profile',required=True,choices=['las2/1','points-csv/1','mesh-text/1','esri-ascii-grid/1','well-tops-csv/1','deviation-csv/1','opendtect-faultsticks/1',
+                                                              'time-depth-csv/1'])  # E57: declare depth_type, depth_unit, time_kind, time_unit
     derived.add_argument('--name',required=True);derived.add_argument('--from',dest='parents',action='append',required=True,metavar='ASSET:REVISION',help='Repeat once per exact parent (1-32)')
     derived.add_argument('--method',required=True,help='What you did, for example scipy.spatial.Delaunay');derived.add_argument('--library',default='');derived.add_argument('--library-version',default='')
     derived.add_argument('--parameters',type=Path,help='A JSON file of the parameters you used (up to 4096 bytes)');derived.add_argument('--declare',action='append',default=[],metavar='KEY=VALUE',help='A declaration such as crs=EPSG:28992 (repeat)')

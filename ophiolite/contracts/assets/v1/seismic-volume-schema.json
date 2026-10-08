@@ -346,7 +346,8 @@
             "well-location/1",
             "wavelet/1",
             "model-section/1",
-            "seismic-section/1"
+            "seismic-section/1",
+            "time-depth/1"
           ],
           "title": "Mapping",
           "type": "string"
