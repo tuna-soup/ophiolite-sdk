@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.23.0",
+  "version": "1.24.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -21,7 +21,7 @@
   "schemas": [
     {
       "id": "ophiolite.contracts-registry/1",
-      "version": "1.4.0",
+      "version": "1.5.0",
       "lifecycle": "preview",
       "path": "registry-schema.json",
       "title": "ContractsRegistry",
@@ -29,7 +29,7 @@
     },
     {
       "id": "ophiolite.contract-profile/1",
-      "version": "1.4.0",
+      "version": "1.5.0",
       "lifecycle": "preview",
       "path": "profile-schema.json",
       "title": "ContractProfile",
@@ -258,6 +258,14 @@
       "path": "relationships/v1/lineage-schema.json",
       "title": "Lineage",
       "description": "One hop each way from an exact revision: parents, derivations and superseded revisions the caller may read (E20)."
+    },
+    {
+      "id": "ophiolite.table-target/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "table-target-schema.json",
+      "title": "TableTarget",
+      "description": "What a table must hold to become one type of data: its fields, the choices that describe the whole table and, for a free table, the questions asked of each column (E86)."
     }
   ],
   "profiles": [
@@ -1018,6 +1026,60 @@
       "kind": "fixture",
       "path": "scientific/v1/fixtures/hon-gt-01-gamma-ray-excerpt.las",
       "title": "HON-GT-01 gamma-ray excerpt, NLOG, cropped (E52)"
+    },
+    {
+      "id": "ophiolite.table-target/wells/1",
+      "kind": "table-target",
+      "path": "targets/v1/wells.json",
+      "title": "Wells: identifier, name, X/Y and depth columns of a SQL table (E86)",
+      "schema": "ophiolite.table-target/1"
+    },
+    {
+      "id": "ophiolite.table-target/well-tops/1",
+      "kind": "table-target",
+      "path": "targets/v1/well-tops.json",
+      "title": "Well tops: one row per top, by well (E86)",
+      "schema": "ophiolite.table-target/1"
+    },
+    {
+      "id": "ophiolite.table-target/deviation-survey/1",
+      "kind": "table-target",
+      "path": "targets/v1/deviation-survey.json",
+      "title": "Deviation survey: measured depth, inclination and azimuth, by well (E86)",
+      "schema": "ophiolite.table-target/1"
+    },
+    {
+      "id": "ophiolite.table-target/point-set/1",
+      "kind": "table-target",
+      "path": "targets/v1/point-set.json",
+      "title": "Point set: X, Y, optional Z and up to 16 attributes (E86)",
+      "schema": "ophiolite.table-target/1"
+    },
+    {
+      "id": "ophiolite.table-target/time-depth/1",
+      "kind": "table-target",
+      "path": "targets/v1/time-depth.json",
+      "title": "Time-depth pairs (pending E57) (E86)",
+      "schema": "ophiolite.table-target/1"
+    },
+    {
+      "id": "ophiolite.table-target/table/1",
+      "kind": "table-target",
+      "path": "targets/v1/table.json",
+      "title": "A free table: unit, quantity and missing marker per column (pending E58b) (E86)",
+      "schema": "ophiolite.table-target/1"
+    },
+    {
+      "id": "ophiolite.mapping-check-words/1",
+      "kind": "vocabulary",
+      "path": "vocabulary/v1/mapping-check-words.json",
+      "title": "Mapping check codes: severity, sentence templates and parameters, one per code (E86)"
+    },
+    {
+      "id": "ophiolite.coordinate-systems/1",
+      "kind": "vocabulary",
+      "path": "vocabulary/v1/coordinate-systems.json",
+      "title": "Coordinate systems: code, name, convertible, declarable and inferable subsets, area of use; with the EPSG Dataset notice (E44, E86)"
     }
   ]
 }

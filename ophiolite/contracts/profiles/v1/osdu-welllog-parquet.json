@@ -14,5 +14,8 @@
   "role": "artifact",
   "media_types": [
     "application/vnd.apache.parquet"
-  ]
+  ],
+  "table_target": {
+    "none": "not-a-table"
+  }
 }

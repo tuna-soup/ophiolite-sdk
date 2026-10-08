@@ -17,5 +17,8 @@
   },
   "mappings": [
     "ophiolite.mapping/typed-standards/1"
-  ]
+  ],
+  "table_target": {
+    "none": "not-a-table"
+  }
 }

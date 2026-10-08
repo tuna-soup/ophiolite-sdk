@@ -1,0 +1,261 @@
+{
+ "schema": "ophiolite.table-target/1",
+ "id": "ophiolite.table-target/point-set/1",
+ "target": "point-set",
+ "display_name": "Points",
+ "description": "Points with X, Y, an optional Z and up to sixteen numeric attributes, one row per point.",
+ "lands_on": [
+  "points-csv/1"
+ ],
+ "pending": null,
+ "standards": {
+  "profile": "ophiolite.point-set/1"
+ },
+ "splits_by": null,
+ "settings": {
+  "missing_marker": true,
+  "retain_extras": false,
+  "unique_columns": true,
+  "other_columns": "refused"
+ },
+ "ui": {
+  "captions": true
+ },
+ "fields": [
+  {
+   "name": "x",
+   "label": "X",
+   "noun": "X",
+   "kind": "coordinate",
+   "axis": "x",
+   "required": true,
+   "blank": "not-allowed",
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "canonical": "x",
+   "aliases": [
+    "x",
+    "easting",
+    "longitude",
+    "lon"
+   ]
+  },
+  {
+   "name": "y",
+   "label": "Y",
+   "noun": "Y",
+   "kind": "coordinate",
+   "axis": "y",
+   "required": true,
+   "blank": "not-allowed",
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "canonical": "y",
+   "aliases": [
+    "y",
+    "northing",
+    "latitude",
+    "lat"
+   ]
+  },
+  {
+   "name": "z",
+   "label": "Z",
+   "noun": "Z value",
+   "kind": "number",
+   "dimension": "dimensionless",
+   "required": false,
+   "blank": "null",
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "canonical": "z",
+   "aliases": [
+    "z",
+    "value",
+    "depth",
+    "elevation",
+    "time"
+   ]
+  },
+  {
+   "name": "attributes",
+   "label": "Attributes",
+   "noun": "attribute",
+   "kind": "number",
+   "dimension": "dimensionless",
+   "required": false,
+   "blank": "null",
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "canonical": null,
+   "multiple": {
+    "max": 16,
+    "name_pattern": "^[A-Za-z][A-Za-z0-9_]{0,31}$"
+   },
+   "aliases": []
+  }
+ ],
+ "column_rows": [],
+ "declarations": [
+  {
+   "name": "crs",
+   "label": "Coordinate system of X and Y",
+   "noun": "coordinate reference",
+   "kind": "crs",
+   "accepts": "epsg-code",
+   "required": false,
+   "default": null,
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "applies_to": [
+    "x",
+    "y"
+   ],
+   "values": []
+  },
+  {
+   "name": "xy_unit",
+   "label": "Map unit",
+   "noun": "map unit",
+   "kind": "unit",
+   "dimension": "length",
+   "accepts": "unit-text",
+   "required": false,
+   "default": null,
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "applies_to": [
+    "x",
+    "y"
+   ],
+   "values": [
+    {
+     "value": "m",
+     "label": "Metres"
+    },
+    {
+     "value": "ft",
+     "label": "International feet"
+    }
+   ]
+  },
+  {
+   "name": "z_unit",
+   "label": "Value unit",
+   "noun": "value unit",
+   "kind": "unit",
+   "dimension": "dimensionless",
+   "accepts": "unit-text",
+   "required": false,
+   "default": null,
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "applies_to": [
+    "z"
+   ],
+   "values": [
+    {
+     "value": "m",
+     "label": "Metres"
+    },
+    {
+     "value": "ft",
+     "label": "International feet"
+    },
+    {
+     "value": "ms",
+     "label": "Milliseconds"
+    },
+    {
+     "value": "s",
+     "label": "Seconds"
+    }
+   ]
+  },
+  {
+   "name": "z_meaning",
+   "label": "What Z holds",
+   "noun": "value meaning",
+   "kind": "choice",
+   "required": false,
+   "default": null,
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "applies_to": [
+    "z"
+   ],
+   "values": [
+    {
+     "value": "depth",
+     "label": "Depth"
+    },
+    {
+     "value": "elevation",
+     "label": "Elevation"
+    },
+    {
+     "value": "time",
+     "label": "Time"
+    }
+   ]
+  },
+  {
+   "name": "positive",
+   "label": "Positive direction",
+   "noun": "positive direction",
+   "kind": "choice",
+   "required": false,
+   "default": null,
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "applies_to": [
+    "z"
+   ],
+   "values": [
+    {
+     "value": "up",
+     "label": "Up"
+    },
+    {
+     "value": "down",
+     "label": "Down"
+    }
+   ]
+  },
+  {
+   "name": "vertical_datum",
+   "label": "Vertical datum",
+   "noun": "vertical datum",
+   "kind": "text",
+   "max_length": 128,
+   "required": false,
+   "default": null,
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "applies_to": [
+    "z"
+   ],
+   "values": []
+  }
+ ]
+}

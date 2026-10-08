@@ -1,0 +1,47 @@
+{
+ "schema": "ophiolite.table-target/1",
+ "id": "ophiolite.table-target/table/1",
+ "target": "table",
+ "display_name": "Table",
+ "description": "Any table kept as its columns, each with an optional unit, quantity and missing-value marker.",
+ "lands_on": [],
+ "pending": {
+  "epic": "E58b",
+  "profiles": []
+ },
+ "standards": {
+  "none": "A table keeps its columns as given; no standard type applies"
+ },
+ "splits_by": null,
+ "settings": {
+  "missing_marker": false,
+  "retain_extras": true,
+  "unique_columns": true,
+  "other_columns": "retained"
+ },
+ "ui": {
+  "captions": true
+ },
+ "fields": [],
+ "column_rows": [
+  {
+   "name": "unit",
+   "label": "Unit",
+   "kind": "text",
+   "max_length": 32
+  },
+  {
+   "name": "quantity",
+   "label": "Quantity",
+   "kind": "choice",
+   "from": "ophiolite.quantities/1"
+  },
+  {
+   "name": "missing",
+   "label": "Missing-value marker",
+   "kind": "text",
+   "max_length": 40
+  }
+ ],
+ "declarations": []
+}

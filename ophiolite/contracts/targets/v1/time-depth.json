@@ -1,0 +1,263 @@
+{
+ "schema": "ophiolite.table-target/1",
+ "id": "ophiolite.table-target/time-depth/1",
+ "target": "time-depth",
+ "display_name": "Time-depth pairs",
+ "description": "Depth and seismic time pairs of one well, both increasing, with an optional velocity.",
+ "lands_on": [],
+ "pending": {
+  "epic": "E57",
+  "profiles": [
+   "time-depth-csv/1",
+   "ophiolite.time-depth/1"
+  ]
+ },
+ "standards": {
+  "none": "E57 adds the time-depth type and its standards row"
+ },
+ "splits_by": "well",
+ "settings": {
+  "missing_marker": true,
+  "retain_extras": false,
+  "unique_columns": true,
+  "other_columns": "refused"
+ },
+ "ui": {
+  "captions": true
+ },
+ "fields": [
+  {
+   "name": "well",
+   "label": "Well",
+   "noun": "well",
+   "kind": "reference",
+   "to": "well",
+   "required": false,
+   "blank": "not-allowed",
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "canonical": null,
+   "aliases": [
+    "well",
+    "well name",
+    "wellbore",
+    "well id",
+    "uwi",
+    "borehole"
+   ]
+  },
+  {
+   "name": "depth",
+   "label": "Depth",
+   "noun": "depth",
+   "kind": "number",
+   "dimension": "length",
+   "required": true,
+   "blank": "not-allowed",
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "canonical": "depth",
+   "increasing": true,
+   "aliases": [
+    "depth",
+    "md",
+    "tvd",
+    "z"
+   ]
+  },
+  {
+   "name": "time",
+   "label": "Time",
+   "noun": "time",
+   "kind": "number",
+   "dimension": "time",
+   "required": true,
+   "blank": "not-allowed",
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "canonical": "time",
+   "increasing": true,
+   "aliases": [
+    "time",
+    "twt",
+    "owt",
+    "two way time",
+    "one way time"
+   ]
+  },
+  {
+   "name": "velocity",
+   "label": "Velocity",
+   "noun": "velocity",
+   "kind": "number",
+   "dimension": "velocity",
+   "required": false,
+   "blank": "null",
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "canonical": "velocity",
+   "aliases": [
+    "velocity",
+    "vel",
+    "vint",
+    "vrms"
+   ]
+  }
+ ],
+ "column_rows": [],
+ "declarations": [
+  {
+   "name": "depth_type",
+   "label": "Depth measured as",
+   "noun": "depth type",
+   "kind": "choice",
+   "required": false,
+   "default": null,
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "applies_to": [
+    "depth"
+   ],
+   "values": [
+    {
+     "value": "md",
+     "label": "Measured depth"
+    },
+    {
+     "value": "tvd",
+     "label": "True vertical depth"
+    },
+    {
+     "value": "tvdss",
+     "label": "Vertical depth below sea level"
+    }
+   ]
+  },
+  {
+   "name": "depth_unit",
+   "label": "Depth unit",
+   "noun": "depth unit",
+   "kind": "unit",
+   "dimension": "length",
+   "accepts": "unit-text",
+   "required": false,
+   "default": null,
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "applies_to": [
+    "depth"
+   ],
+   "values": [
+    {
+     "value": "m",
+     "label": "Metres"
+    },
+    {
+     "value": "ft",
+     "label": "International feet"
+    }
+   ]
+  },
+  {
+   "name": "time_kind",
+   "label": "Time is",
+   "noun": "time kind",
+   "kind": "choice",
+   "required": false,
+   "default": null,
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "applies_to": [
+    "time"
+   ],
+   "values": [
+    {
+     "value": "one-way",
+     "label": "One-way time"
+    },
+    {
+     "value": "two-way",
+     "label": "Two-way time"
+    }
+   ]
+  },
+  {
+   "name": "time_unit",
+   "label": "Time unit",
+   "noun": "time unit",
+   "kind": "unit",
+   "dimension": "time",
+   "accepts": "menu-only",
+   "required": false,
+   "default": null,
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "applies_to": [
+    "time"
+   ],
+   "values": [
+    {
+     "value": "ms",
+     "label": "Milliseconds"
+    },
+    {
+     "value": "s",
+     "label": "Seconds"
+    },
+    {
+     "value": "us",
+     "label": "Microseconds"
+    }
+   ]
+  },
+  {
+   "name": "datum",
+   "label": "Depth datum",
+   "noun": "depth datum",
+   "kind": "text",
+   "max_length": 128,
+   "required": false,
+   "default": null,
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "applies_to": [
+    "depth"
+   ],
+   "values": []
+  },
+  {
+   "name": "seismic_reference_elevation",
+   "label": "Seismic reference elevation",
+   "noun": "seismic reference elevation",
+   "kind": "number",
+   "required": false,
+   "default": null,
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "applies_to": [
+    "depth"
+   ],
+   "values": []
+  }
+ ]
+}
