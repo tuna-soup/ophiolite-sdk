@@ -6,7 +6,10 @@ export * from "./api-types.js";
 export { verifyPair, validateDescriptor } from "./verify.js";
 
 export type Auth = { mode: "session"; csrf: () => string | Promise<string> } | { mode: "bearer"; token: () => Promise<{ token: string; grant?: string }> } | { mode: "none" };
-export type OperationOptions = { signal?: AbortSignal; upload?: UploadMetadata };
+export type OperationOptions = { signal?: AbortSignal; upload?: UploadMetadata; traceparent?: string };
+/** E93: what this package reports on every request (product and version only; never a host name or user text). */
+export const CLIENT_HEADER = "ophiolite-typescript/0.1.0";
+const TRACEPARENT = /^00-(?!0{32})[0-9a-f]{32}-(?!0{16})[0-9a-f]{16}-[0-9a-f]{2}$/;
 export interface Transport {
   request<T>(method: string, path: string, params: Record<string, unknown>, query?: Record<string, unknown>, body?: unknown, options?: OperationOptions, adapter?: string | null, binary?: boolean): Promise<T>;
 }
@@ -36,7 +39,8 @@ export class Client implements Transport {
     });
     const url = new URL(route, this.url);
     for (const [key, value] of Object.entries(query ?? {})) if (value !== undefined && value !== null) url.searchParams.set(key, String(value));
-    const headers = new Headers({ Accept: "application/json" });
+    const headers = new Headers({ Accept: "application/json", "X-Ophiolite-Client": CLIENT_HEADER });
+    if (options?.traceparent !== undefined && TRACEPARENT.test(options.traceparent)) headers.set("traceparent", options.traceparent);  // the caller's trace; never invented
     if (this.auth.mode === "session") headers.set("X-CSRF-Token", await this.auth.csrf());
     if (this.auth.mode === "bearer") {
       const credential = await this.auth.token();

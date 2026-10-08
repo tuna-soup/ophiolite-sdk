@@ -8,6 +8,7 @@ exactly that bound — for a single-project credential, one project. Opening a p
 import json
 from urllib.parse import quote
 import httpx
+from . import _client_header  # E93
 from ._core import origin
 from .errors import AuthenticationRequired, PermissionRefused, Refused, Unavailable
 from .models.api import OrganizationsPage, ProjectsPage
@@ -34,7 +35,7 @@ class Account:
     def __exit__(self, *args): self.close()
 
     def _discover(self, operation, body):
-        headers = self.credential.discovery_headers(self.url)
+        headers = _client_header.stamp(self.credential.discovery_headers(self.url))  # E93
         try: response = self.http.post(self.url + '/api/v1/projects/' + quote(operation, safe=''), json=body, headers=headers, follow_redirects=False)
         except httpx.HTTPError: raise Unavailable('Cannot reach the service. Check its address and network connection.', code='unreachable') from None
         if response.status_code != 200:

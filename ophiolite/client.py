@@ -7,6 +7,7 @@ import time
 from pathlib import Path
 from urllib.parse import quote
 import httpx
+from . import _client_header  # E93
 from . import _core
 from .errors import (AuthenticationRequired, PermissionRefused, IntegrityConflict, CapacityExceeded, Refused, Busy,
                      Incompatible, Unavailable, VerificationFailed)
@@ -126,7 +127,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
     def __exit__(self,*args):self.close()
 
     def _get(self,path,limit,*,ranged=None,answer=None):
-        headers=self.credential.headers(self.url,self.project) if self.credential else {}
+        headers=self._headers()
         if ranged is not None:headers={**headers,'Range':ranged}  # E54: one byte range of an original; 206 answers it
         categories={401:(AuthenticationRequired,'Sign in again.'),403:(PermissionRefused,'Check project access and the approved grant.'),
                     404:(Unavailable,'This exact revision is unavailable or not permitted.'),409:(IntegrityConflict,'Stored data failed an integrity check. Ask the deployment administrator.'),
@@ -325,7 +326,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
         return out or None,None
 
     def _headers(self):
-        return self.credential.headers(self.url,self.project) if self.credential else {}
+        return _client_header.stamp(self.credential.headers(self.url,self.project) if self.credential else {})  # E93
 
     def _post_bytes(self,area,operation,raw,*,extra_headers=None,headers=None,retry=False,expected_context=None,timeout=None):
         from . import publish as planning,application_transport as policy
@@ -334,7 +335,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
         if expected_context is not None and (url,project)!=expected_context:raise RecoveryUnavailable('The gateway or project changed during this operation.')
         path=planning.operation_path(project,area,operation)
         if extra_headers and any(key.lower() not in ('content-type','x-ophiolite-upload') for key in extra_headers):raise Refused('Saved request headers cannot replace authorization.')
-        captured=dict(self._headers() if headers is None else headers)
+        captured=_client_header.stamp(self._headers() if headers is None else headers)
         captured.update(extra_headers or {'Content-Type':'application/json'})
         attempts=3 if operation!='share' and (retry or operation in planning.READ_OPERATIONS) else 1
         for attempt in range(attempts):
@@ -544,7 +545,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
 
     def _grant_status(self,headers):
         from .auth import request
-        return request(self.url+'/api/v1/application-access/status',{'id':headers['X-Ophiolite-Application-Grant']},headers,http=self.http)
+        return request(self.url+'/api/v1/application-access/status',{'id':headers['X-Ophiolite-Application-Grant']},_client_header.stamp(headers),http=self.http)
 
     def work_folder(self,path,**options):
         from .publish import WorkFolder

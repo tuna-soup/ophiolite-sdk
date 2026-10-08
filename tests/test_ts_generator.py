@@ -20,7 +20,7 @@ def test_every_route_has_one_generated_operation_and_truthful_coverage():
     document=json.loads((generator.CONTRACTS/'openapi/v1/openapi.json').read_text())
     generated=generator.outputs();coverage=json.loads(generated['operation-coverage.json'])
     expected={method.upper()+' '+path for path,ops in document['paths'].items() if path.startswith('/api/v1/') for method in ops if method in generator.METHODS}
-    assert len(coverage)==len(expected)==286  # E85: upload-runs/check; E55: the nine upload-runs operations; E54: las-uploads begin, part, state, finish, cancel and publish; E72c: sources/go-back, subscriptions/go-back and four share previews; E74a: sources/draft-records; E44: sources/mapping-suggest and mapping-preview; E42a: the six well-imports operations; E72a: sources/check and sources/hold; E70c: version-contributors and -save; E70b: activity/report
+    assert len(coverage)==len(expected)==290  # E93: account/activity, organizations/activity, activity/attempts and activity/provenance; E85: upload-runs/check; E55: the nine upload-runs operations; E54: las-uploads begin, part, state, finish, cancel and publish; E72c: sources/go-back, subscriptions/go-back and four share previews; E74a: sources/draft-records; E44: sources/mapping-suggest and mapping-preview; E42a: the six well-imports operations; E72a: sources/check and sources/hold; E70c: version-contributors and -save; E70b: activity/report
     assert {row['operation'] for row in coverage}==expected
     assert len({row['function'] for row in coverage})==len(coverage)
     for row in coverage:

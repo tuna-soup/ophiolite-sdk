@@ -6,6 +6,7 @@ import math
 from urllib.parse import quote
 import anyio
 import httpx
+from . import _client_header  # E93
 from . import _core
 from .client import Client, CurveSet
 from .errors import (AuthenticationRequired,PermissionRefused,Unavailable,IntegrityConflict,
@@ -53,8 +54,8 @@ class AsyncClient(Client):
                     partial(self.credential.headers,self.url,self.project),abandon_on_cancel=False)
 
     async def _headers(self):
-        if self.credential is None:return {}
-        return await _complete(self._credential_transaction())
+        if self.credential is None:return _client_header.stamp({})  # E93
+        return _client_header.stamp(await _complete(self._credential_transaction()))
 
     async def _get(self,path,limit,*,ranged=None,answer=None):
         headers=await self._headers()
@@ -178,7 +179,7 @@ class AsyncClient(Client):
         if expected_context is not None and (url,project)!=expected_context:raise RecoveryUnavailable('The gateway or project changed during this operation.')
         path=planning.operation_path(project,area,operation)
         if extra_headers and any(key.lower() not in ('content-type','x-ophiolite-upload') for key in extra_headers):raise Refused('Saved request headers cannot replace authorization.')
-        captured=dict(await self._headers() if headers is None else headers)
+        captured=_client_header.stamp(await self._headers() if headers is None else headers)
         captured.update(extra_headers or {'Content-Type':'application/json'})
         attempts=3 if operation!='share' and (retry or operation in planning.READ_OPERATIONS) else 1
         for attempt in range(attempts):
@@ -209,7 +210,7 @@ class AsyncClient(Client):
         try:
             async with self.http.stream('POST',self.url+'/api/v1/application-access/status',
                  content=json_bytes({'id':headers['X-Ophiolite-Application-Grant']}),
-                 headers={**headers,'Content-Type':'application/json'},follow_redirects=False) as response:
+                 headers=_client_header.stamp({**headers,'Content-Type':'application/json'}),follow_redirects=False) as response:
                 policy.status(response,'status',None if response.is_success else await policy.bounded(response));raw=bytearray()
                 async for chunk in response.aiter_bytes():
                     raw.extend(chunk)

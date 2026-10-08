@@ -704,6 +704,164 @@
         }
       }
     },
+    "/api/v1/account/activity": {
+      "post": {
+        "summary": "E93: your own account's record (sign-ins, sign-outs, joins)",
+        "description": "Scope read; accepted principals: session; project extractor none.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E93: a page of organisation or account record rows.",
+                  "properties": {
+                    "schema": {
+                      "const": "ophiolite.record-page/1",
+                      "title": "Schema",
+                      "type": "string"
+                    },
+                    "stream_id": {
+                      "title": "Stream Id",
+                      "type": "string"
+                    },
+                    "events": {
+                      "items": {
+                        "$ref": "#/components/schemas/ActivityEvent"
+                      },
+                      "title": "Events",
+                      "type": "array"
+                    },
+                    "next_cursor": {
+                      "title": "Next Cursor",
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "schema",
+                    "stream_id",
+                    "events",
+                    "next_cursor"
+                  ],
+                  "title": "RecordPage",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "E93: one page of an account's record: the caller's own, or a member's for an administrator of an organization\nthat member belongs to.",
+                "properties": {
+                  "account_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 200,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Another account's record; you must administer an organization it belongs to.",
+                    "title": "Account Id"
+                  },
+                  "after": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "After",
+                    "type": "integer"
+                  },
+                  "limit": {
+                    "default": 100,
+                    "maximum": 200,
+                    "minimum": 1,
+                    "title": "Limit",
+                    "type": "integer"
+                  },
+                  "request_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Only the rows written by this request (never widens what you may see).",
+                    "title": "Request Id"
+                  }
+                },
+                "title": "AccountRecordPageRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/account/revoke": {
       "post": {
         "summary": "Revoke an account session",
@@ -913,6 +1071,179 @@
         }
       }
     },
+    "/api/v1/projects/{project}/activity/attempts": {
+      "post": {
+        "summary": "E93: refused requests in this project (project administrators only), newest first",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "schema": {
+                      "const": "ophiolite.attempts/1",
+                      "title": "Schema",
+                      "type": "string"
+                    },
+                    "attempts": {
+                      "items": {
+                        "$ref": "#/components/schemas/Attempt"
+                      },
+                      "title": "Attempts",
+                      "type": "array"
+                    },
+                    "next_before": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Next Before"
+                    }
+                  },
+                  "required": [
+                    "schema",
+                    "attempts",
+                    "next_before"
+                  ],
+                  "title": "Attempts",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "E93: refused requests in a project (its administrators only), newest first.",
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "before": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Continue below this time (the `at` of the last row seen).",
+                    "title": "Before"
+                  },
+                  "limit": {
+                    "default": 100,
+                    "maximum": 200,
+                    "minimum": 1,
+                    "title": "Limit",
+                    "type": "integer"
+                  },
+                  "request_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Request Id"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "AttemptsRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/activity/export": {
       "post": {
         "summary": "Activity export (application/x-ndjson with X-Next-Cursor)",
@@ -1047,6 +1378,18 @@
                       ],
                       "default": null,
                       "description": "B1(a): the project access key a publication was made through, as named then; only on the reader's own events."
+                    },
+                    "trace_context": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/TraceCarrier"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E93: the W3C trace context the row was written under (lifecycle rows have carried it since E2)."
                     }
                   },
                   "required": [
@@ -1138,6 +1481,19 @@
                     "minimum": 1,
                     "title": "Limit",
                     "type": "integer"
+                  },
+                  "request_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Request Id"
                   }
                 },
                 "required": [
@@ -1371,12 +1727,225 @@
                     "minimum": 1,
                     "title": "Limit",
                     "type": "integer"
+                  },
+                  "request_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Request Id"
                   }
                 },
                 "required": [
                   "project_id"
                 ],
                 "title": "Page",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/activity/provenance": {
+      "post": {
+        "summary": "E93: the record as PROV-JSON, one page per call (follow `next` with the same `until`)",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "schema": {
+                      "const": "ophiolite.provenance-page/1",
+                      "title": "Schema",
+                      "type": "string"
+                    },
+                    "document": {
+                      "additionalProperties": true,
+                      "description": "A PROV-JSON document of one bundle, `record:<project>:<until>`; pages merge by id.",
+                      "title": "Document",
+                      "type": "object"
+                    },
+                    "next": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Next"
+                    },
+                    "until": {
+                      "title": "Until",
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "schema",
+                    "document",
+                    "next",
+                    "until"
+                  ],
+                  "title": "ProvenancePage",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "E93: one page of the project's record as a PROV-JSON document.",
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "after": {
+                    "default": 0,
+                    "description": "Continue after this row (the `next` of the previous page).",
+                    "minimum": 0,
+                    "title": "After",
+                    "type": "integer"
+                  },
+                  "until": {
+                    "anyOf": [
+                      {
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "The upper boundary the first page answered; send it with every continuation.",
+                    "title": "Until"
+                  },
+                  "from": {
+                    "anyOf": [
+                      {
+                        "format": "date",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "First day (inclusive), UTC.",
+                    "title": "From"
+                  },
+                  "to": {
+                    "anyOf": [
+                      {
+                        "format": "date",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Last day (inclusive), UTC.",
+                    "title": "To"
+                  },
+                  "limit": {
+                    "default": 1000,
+                    "maximum": 5000,
+                    "minimum": 1,
+                    "title": "Limit",
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "ProvenanceRequest",
                 "type": "object"
               }
             }
@@ -27218,6 +27787,158 @@
                   "user_id"
                 ],
                 "title": "OrganizationAccessPreview",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/activity": {
+      "post": {
+        "summary": "E93: the organisation's record (its administrators only)",
+        "description": "Scope read; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E93: a page of organisation or account record rows.",
+                  "properties": {
+                    "schema": {
+                      "const": "ophiolite.record-page/1",
+                      "title": "Schema",
+                      "type": "string"
+                    },
+                    "stream_id": {
+                      "title": "Stream Id",
+                      "type": "string"
+                    },
+                    "events": {
+                      "items": {
+                        "$ref": "#/components/schemas/ActivityEvent"
+                      },
+                      "title": "Events",
+                      "type": "array"
+                    },
+                    "next_cursor": {
+                      "title": "Next Cursor",
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "schema",
+                    "stream_id",
+                    "events",
+                    "next_cursor"
+                  ],
+                  "title": "RecordPage",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "E93: one page of an organisation's record (its administrators only).",
+                "properties": {
+                  "organization_id": {
+                    "maxLength": 80,
+                    "minLength": 1,
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "after": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "After",
+                    "type": "integer"
+                  },
+                  "limit": {
+                    "default": 100,
+                    "maximum": 200,
+                    "minimum": 1,
+                    "title": "Limit",
+                    "type": "integer"
+                  },
+                  "request_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Only the rows written by this request (never widens what you may see).",
+                    "title": "Request Id"
+                  }
+                },
+                "required": [
+                  "organization_id"
+                ],
+                "title": "RecordPageRequest",
                 "type": "object"
               }
             }
@@ -62779,6 +63500,19 @@
                     "minimum": 1,
                     "title": "Limit",
                     "type": "integer"
+                  },
+                  "request_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Request Id"
                   }
                 },
                 "required": [
@@ -72495,6 +73229,138 @@
         "title": "AccountSession",
         "type": "object"
       },
+      "ActivityEvent": {
+        "additionalProperties": false,
+        "description": "One activity event (ophiolite.activity/1); activity/export answers one per line.",
+        "properties": {
+          "schema": {
+            "const": "ophiolite.activity/1",
+            "title": "Schema",
+            "type": "string"
+          },
+          "event_id": {
+            "title": "Event Id",
+            "type": "string"
+          },
+          "project_id": {
+            "title": "Project Id",
+            "type": "string"
+          },
+          "actor_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actor Id"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "evidence": {
+            "title": "Evidence",
+            "type": "string"
+          },
+          "coverage_profile": {
+            "title": "Coverage Profile",
+            "type": "string"
+          },
+          "data": {
+            "additionalProperties": true,
+            "description": "The event's typed data (by kind).",
+            "title": "Data",
+            "type": "object"
+          },
+          "recorded_at": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Recorded At"
+          },
+          "cursor": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Cursor"
+          },
+          "trace_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Trace Id"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Run Id"
+          },
+          "via": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Via"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "B1(a): the project access key a publication was made through, as named then; only on the reader's own events."
+          },
+          "trace_context": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TraceCarrier"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E93: the W3C trace context the row was written under (lifecycle rows have carried it since E2)."
+          }
+        },
+        "required": [
+          "schema",
+          "event_id",
+          "project_id",
+          "actor_id",
+          "kind",
+          "evidence",
+          "coverage_profile",
+          "data",
+          "recorded_at"
+        ],
+        "title": "ActivityEvent",
+        "type": "object"
+      },
       "AdministrationBlocker": {
         "additionalProperties": false,
         "description": "What stops adding a connection; listed in this order.",
@@ -73105,6 +73971,69 @@
           "kind"
         ],
         "title": "AssociationSubject",
+        "type": "object"
+      },
+      "Attempt": {
+        "additionalProperties": false,
+        "properties": {
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          },
+          "at": {
+            "title": "At",
+            "type": "number"
+          },
+          "actor": {
+            "description": "The account that was refused, or \"unknown\" where the credential did not resolve.",
+            "title": "Actor",
+            "type": "string"
+          },
+          "kind": {
+            "description": "The operation (area/name), the MCP tool (mcp:<tool>) or the path.",
+            "title": "Kind",
+            "type": "string"
+          },
+          "class": {
+            "enum": [
+              "not-allowed",
+              "not-found",
+              "changed",
+              "limit",
+              "invalid",
+              "unavailable",
+              "other"
+            ],
+            "title": "Class",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "integer"
+          },
+          "raw_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The service text; shown only under Technical details.",
+            "title": "Raw Error"
+          }
+        },
+        "required": [
+          "request_id",
+          "at",
+          "actor",
+          "kind",
+          "class",
+          "status",
+          "raw_error"
+        ],
+        "title": "Attempt",
         "type": "object"
       },
       "Binding": {
@@ -82740,6 +83669,38 @@
           "declared_crs"
         ],
         "title": "TableSchema",
+        "type": "object"
+      },
+      "TraceCarrier": {
+        "additionalProperties": false,
+        "description": "E93: a W3C trace context carrier; empty when tracing is off.",
+        "properties": {
+          "traceparent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Traceparent"
+          },
+          "tracestate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Tracestate"
+          }
+        },
+        "title": "TraceCarrier",
         "type": "object"
       },
       "Transformation": {

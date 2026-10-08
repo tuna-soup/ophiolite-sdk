@@ -117,7 +117,7 @@ async def test_sync_and_async_share_one_refresh(tmp_path):
                 await anyio.sleep(.1)
                 assert not captured.is_set() and not server.second.is_set()
                 server.release.set()
-                assert await first==await second
+                assert {**await first,"X-Ophiolite-Client":"ophiolite-python/0.1.0"}==await second  # E93: the client stamps its name
                 assert len(server.requests)==1
             finally:
                 server.release.set()

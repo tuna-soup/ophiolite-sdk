@@ -13,6 +13,7 @@ response and never runs twice.
 """
 import time
 import httpx
+from . import _client_header  # E93
 from .errors import (OphioliteError, AuthenticationRequired, PermissionRefused, Unavailable, IntegrityConflict,
                      Refused, Busy)
 
@@ -43,7 +44,7 @@ class AgentClient:
         return self._credential.headers(self.url, self.project) if self._credential else self._headers
 
     def _post(self, area, operation, body, plan=None):
-        headers = {**self._auth(), **({'X-Ophiolite-Plan': plan} if plan else {})}
+        headers = _client_header.stamp({**self._auth(), **({'X-Ophiolite-Plan': plan} if plan else {})})  # E93
         try:
             response = self.http.post('%s/api/v1/projects/%s/%s/%s' % (self.url, self.project, area, operation),
                                       json={'project_id': self.project, **body}, headers=headers)

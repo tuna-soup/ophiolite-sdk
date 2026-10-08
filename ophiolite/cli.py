@@ -590,6 +590,13 @@ def _local_run(config,work):
 
 
 def main(argv=None):
+    from . import _client_header
+    token=_client_header._NAME.set('ophiolite-cli')  # E93: the command line names itself on every gateway request
+    try:return _main(argv)
+    finally:_client_header._NAME.reset(token)
+
+
+def _main(argv=None):
     args=parser().parse_args(argv)
     if args.command in ('projects','orgs'):return _discover(args)
     if args.command=='init':return _init(args)  # E31: offline; copies packaged files only

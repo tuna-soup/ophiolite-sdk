@@ -18,6 +18,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/account/activity",
+    "function": "postAccountActivity",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/account/revoke",
     "function": "postAccountRevoke",
     "request": "schema",
@@ -110,6 +116,12 @@
   {
     "operation": "POST /api/v1/organizations/access-preview",
     "function": "postOrganizationsAccessPreview",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/organizations/activity",
+    "function": "postOrganizationsActivity",
     "request": "schema",
     "response": "schema"
   },
@@ -228,6 +240,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/activity/attempts",
+    "function": "postProjectsProjectActivityAttempts",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/activity/export",
     "function": "postProjectsProjectActivityExport",
     "request": "schema",
@@ -236,6 +254,12 @@
   {
     "operation": "POST /api/v1/projects/{project}/activity/list",
     "function": "postProjectsProjectActivityList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/activity/provenance",
+    "function": "postProjectsProjectActivityProvenance",
     "request": "schema",
     "response": "schema"
   },
