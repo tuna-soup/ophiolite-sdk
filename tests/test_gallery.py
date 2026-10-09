@@ -125,6 +125,12 @@ def test_time_depth_table_writes_the_two_layer_model_and_publishes_nothing_synth
     assert "depth,time 0,0 2000,1666.667" in text and 'Synthetic mode: nothing is published.' in text
 
 
+def test_grids_and_gis_files_draws_the_outlines_with_the_hole_empty_and_publishes_nothing_synthetic(tmp_path, monkeypatch):
+    text = run('grids-and-gis-files', tmp_path, monkeypatch)
+    assert "2 features: ['ELL', 'RING']" in text and 'the hole is empty' in text and "{'geojson/1': {'crs': 'EPSG:23031'}}" in text
+    assert 'Synthetic mode: nothing is published.' in text
+
+
 def test_how_was_this_made_reads_the_story_the_change_and_the_refusal_synthetic(tmp_path, monkeypatch):
     text = run('how-was-this-made', tmp_path, monkeypatch)
     assert 'Shale volume, made in a notebook, version 2\n  Reported by Alice; Ophiolite did not run this calculation.' in text
@@ -133,7 +139,7 @@ def test_how_was_this_made_reads_the_story_the_change_and_the_refusal_synthetic(
 
 
 def test_every_entry_is_listed_built_and_described():
-    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'how-was-this-made']
+    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'grids-and-gis-files', 'how-was-this-made']
     for entry in GALLERY['notebooks']:
         assert set(entry) == {'slug', 'title', 'sentence', 'modes', 'data'} and entry['modes'] == ['synthetic', 'live']
         script = (ROOT / 'notebooks' / entry['slug'] / 'notebook.py').read_text()
