@@ -11,7 +11,14 @@ IDENTITY={'kind':'retained','project_id':'synthetic-project','asset_id':'curve-a
 DISPLAY='A window is for display; read the exact curve'
 
 
-@pytest.fixture(autouse=True,params=['sync','async'])
+def pytest_generate_tests(metafunc):
+    """Every case runs sync and async, except the command line, which is synchronous (no skipped case: the SDK lane refuses skips)."""
+    if 'window_transport' in metafunc.fixturenames:
+        sync_only=metafunc.function.__name__.startswith('test_cli_')
+        metafunc.parametrize('window_transport',['sync'] if sync_only else ['sync','async'],indirect=True)
+
+
+@pytest.fixture(autouse=True)
 def window_transport(request,monkeypatch):
     """The same cases through real AsyncClient calls (as test_read.read_transport)."""
     if request.param=='sync':yield;return
@@ -184,7 +191,6 @@ def cli_run(fixture,monkeypatch,tmp_path,pages,*argv):
 
 
 def test_cli_json_equals_the_sdk_result(fixture,monkeypatch,tmp_path,capsys):
-    if Client.__name__!='Client':pytest.skip('the command line is synchronous')
     assert cli_run(fixture,monkeypatch,tmp_path,three_pages(),'--level','0','--json')==0
     printed=json.loads(capsys.readouterr().out)
     assert printed==window(fixture,three_pages())[0].to_dict() and printed['pages']==3 and printed['value']==[0,10,None,30,40]
@@ -195,7 +201,6 @@ def test_cli_json_equals_the_sdk_result(fixture,monkeypatch,tmp_path,capsys):
 
 
 def test_cli_exit_codes(fixture,monkeypatch,tmp_path,capsys):
-    if Client.__name__!='Client':pytest.skip('the command line is synchronous')
     assert cli_run(fixture,monkeypatch,tmp_path,{},'--level','0','--rows','8')==1
     assert cli_run(fixture,monkeypatch,tmp_path,{None:(404,{'code':'not-found','message':'no'})},'--level','0')==4
     assert cli_run(fixture,monkeypatch,tmp_path,{None:(422,{'code':'incompatible-context','message':'no'})},'--level','0')==1
