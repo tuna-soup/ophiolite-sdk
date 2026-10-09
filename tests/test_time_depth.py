@@ -51,9 +51,7 @@ def test_write_round_trip():
     written = write_time_depth(PAIRS, **DECLARED, filename='prw06.csv')
     assert written.bytes == ORIGINAL and (written.profile, written.filename) == ('time-depth-csv/1', 'prw06.csv')
     assert written.declared == DECLARED
-    reader = pytest.importorskip('asset_connectors.time_depth')  # the Connectors reader reads back the same pairs
-    _, data, _ = reader.read_csv(written.bytes.decode(), written.declared)
-    assert list(zip(data['depth'], data['time'], data['velocity'])) == PAIRS
+    # the Connectors reader reads a written table back through the gateway: gateway/test_time_depth.py (the unit lane has no Connectors)
     unknown = write_time_depth(PAIRS, depth_type='unknown', depth_unit='unknown', time_kind='two-way', time_unit='ms', datum='MSL')
     assert unknown.declared == {'time_kind': 'two-way', 'time_unit': 'ms', 'datum': 'MSL'}  # "unknown" stays unknown: not declared
     assert write_time_depth([(0, 0), (1.5, 2)], **DECLARED).bytes == b'depth,time\r\n0,0\r\n1.5,2\r\n'  # no velocity column
