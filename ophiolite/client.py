@@ -120,8 +120,9 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
 
     def exchange(self,work,**options):
         """E70a: check for updates, get latest and send to project from a work folder (ophiolite.exchange.Exchange)."""
-        from .exchange import Exchange,ClientTransport
-        return Exchange(ClientTransport(self),work,**options)
+        from .exchange import ClientTransport
+        from .presentation import PresentedExchange  # E104: the outcome shows itself with a link to this Workspace
+        return PresentedExchange(ClientTransport(self),work,origin=self.url,**options)
 
     def close(self):
         if self._owns_http:self.http.close()
@@ -676,7 +677,10 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
         from .models.api import PublicationReceipt
         body,extra=planning.derive_request(self.project,written,name=name,from_=from_,method=method,command_id=command_id,of_entity=of_entity,
                                            new_version_of=new_version_of,expected_parent=expected_parent)
-        return planning.verify_derived(body,planning.parse(PublicationReceipt,self._post_bytes('publications','derive',written.bytes,extra_headers=extra,retry=True)))
+        from .presentation import PresentedReceipt,publication_recipe
+        recipe=publication_recipe(name=name,from_=from_,method=method,of_entity=of_entity)  # E104: "Send again", at call time
+        receipt=planning.verify_derived(body,planning.parse(PublicationReceipt,self._post_bytes('publications','derive',written.bytes,extra_headers=extra,retry=True)))
+        return PresentedReceipt.present(receipt,{'origin':self.url,'project':self.project,'family':'m','recipe':recipe})
 
     def import_bundle(self,bundle,*,audience,attribution,rights_confirmed,well_logs=None):
         """E18: upload every original a portable bundle carries as your own new, private upload, with
