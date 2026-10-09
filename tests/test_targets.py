@@ -40,7 +40,7 @@ def test_targets_json_prints_the_document(capsys):
 def test_targets_without_a_name_lists_them_in_words(capsys):
     entrypoint(['targets'])
     assert capsys.readouterr().out.splitlines() == ['wells - Wells', 'well-tops - Well tops', 'deviation-survey - Deviation survey', 'point-set - Points',
-                                                    'time-depth - Time-depth pairs (waits for E57)', 'table - Table (waits for E58b)']
+                                                    'time-depth - Time-depth pairs', 'table - Table (waits for E58b)']
 
 
 def test_an_unknown_target_exits_2(capsys):

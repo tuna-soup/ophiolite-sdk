@@ -1,0 +1,24 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "ophiolite.time-depth/1",
+  "kind": "normalized",
+  "lifecycle": "preview",
+  "display_name": "Normalized time-depth table",
+  "description": "Depth and time pairs of one wellbore in file order, both strictly increasing, with the velocity column as stated and the declared depth type, time kind, units and datum; nothing is interpolated or converted.",
+  "payload_schema": "ophiolite.time-depth/1",
+  "role": "normalized",
+  "media_types": [
+    "application/json"
+  ],
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "parsing_policy": "typed-strict/1",
+    "mapping": "time-depth/1"
+  },
+  "mappings": [
+    "ophiolite.mapping/typed-standards/1"
+  ],
+  "table_target": {
+    "none": "normalized-form"
+  }
+}

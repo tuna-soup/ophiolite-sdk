@@ -40,7 +40,7 @@ def test_the_mini_folder_gives_one_outcome_per_file_and_a_clean_folder_is_ok(web
     assert (report.label, report.ok) == ('Finished with files not added', False)
     rows = report.rows()
     assert [r['result'] for r in rows] == ['Not supported', 'Added', 'Already here', 'Added', 'Added', 'Not read']  # in path order
-    assert rows[3]['read'] == '394 rows, 3 curves, 2 missing samples' and rows[3]['kind'] == 'Well log (LAS 2.0)'
+    assert rows[3]['read'] == '394 rows, 3 curves, 2 missing samples' and rows[3]['kind'] == 'Well log (LAS)'  # E57: LAS 1.2 and 3.0 are read too
     assert rows[5]['reason'] == 'The file is damaged or is not plain text (UTF-8). Nothing was repaired; export a UTF-8 LAS 2.0 copy.'
     clean = alice.upload_runs.upload(folder(tmp_path, MINI[:1], 'Clean'), **SETTINGS)
     assert (clean.counts['already-here'], clean.ok, clean.label) == (1, True, 'Finished')

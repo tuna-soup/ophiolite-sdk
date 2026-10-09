@@ -93,7 +93,7 @@ class GridContext(Contract):
 
 class TypedInterpretation(Contract):
     reader: Literal['asset_connectors.typed_reader/1'] = Field(...)
-    mapping: Literal['well-tops/1', 'trajectory/1', 'regular-grid-surface/1', 'triangulated-surface/1', 'point-set/1', 'polyline-set/1', 'seismic-volume/1', 'well-location/1', 'wavelet/1', 'model-section/1', 'seismic-section/1'] = Field(...)
+    mapping: Literal['well-tops/1', 'trajectory/1', 'regular-grid-surface/1', 'triangulated-surface/1', 'point-set/1', 'polyline-set/1', 'seismic-volume/1', 'well-location/1', 'wavelet/1', 'model-section/1', 'seismic-section/1', 'time-depth/1'] = Field(...)
     parsing_policy: Literal['typed-strict/1'] = Field(...)
     null_policy: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
 
@@ -349,7 +349,7 @@ class ScientificAsset(Contract):
     custodian: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(...)
     source_reference: Reference | None = Field(...)
     profile: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] = Field(...)
-    scientific: ScientificContext | TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext | RecipePointContext | WellLocationContext | WaveletContext | ModelSectionContext | SeismicSectionContext = Field(...)
+    scientific: ScientificContext | TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext | RecipePointContext | WellLocationContext | WaveletContext | ModelSectionContext | SeismicSectionContext | TimeDepthContext = Field(...)
     interpretation: Interpretation | TypedInterpretation | RecipeInterpretation = Field(...)
     interpretation_evidence: Literal['live', 'recorded', 'recorded-differs', 'not-recorded'] = Field('live')
     recorded_interpretation: RecordedInterpretation | None = Field(None)
@@ -575,6 +575,20 @@ class SeismicSectionContext(Contract):
     minimum: float = Field(...)
     maximum: float = Field(...)
 
+class TimeDepthContext(Contract):
+    type: Literal['time-depth'] = Field(...)
+    depth_type: Literal['md', 'tvd', 'tvdss', 'unknown'] = Field(...)
+    depth_unit: Annotated[str, Field(pattern='^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$')] = Field(...)
+    time_kind: Literal['one-way', 'two-way', 'unknown'] = Field(...)
+    time_unit: Literal['ms', 's', 'us', 'unknown'] = Field(...)
+    datum: Annotated[str, Field(min_length=1, max_length=128)] | None = Field(...)
+    seismic_reference_elevation: float | None = Field(...)
+    count: Annotated[int, Field(ge=2, le=100000)] = Field(...)
+    depth_range: Annotated[list[float], Field(min_length=2, max_length=2)] = Field(...)
+    time_range: Annotated[list[float], Field(min_length=2, max_length=2)] = Field(...)
+    velocity_provided: bool = Field(...)
+    fidelity: Fidelity = Field(...)
+
 class TopsContext(Contract):
     type: Literal['well-tops'] = Field(...)
     depth_unit: Annotated[str, Field(pattern='^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$')] = Field(...)
@@ -708,6 +722,17 @@ class AssetSummary(Contract):
     allowed_operations: Annotated[list[Literal['read', 'export', 'use-as-input']], Field(max_length=3)] = Field(...)
     display: Display | None = Field(None)
 
+class TimeDepth(Contract):
+    representation: Literal['normalized'] = Field(...)
+    source: Reference = Field(...)
+    source_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    interpretation: TypedInterpretation = Field(...)
+    schema_: Literal['ophiolite.time-depth/1'] = Field(..., alias='schema')
+    context: TimeDepthContext = Field(...)
+    depth: Annotated[list[float], Field(min_length=2, max_length=100000)] = Field(...)
+    time: Annotated[list[float], Field(min_length=2, max_length=100000)] = Field(...)
+    velocity: Annotated[list[float | None], Field(max_length=100000)] | None = Field(None)
+
 class Trajectory(Contract):
     representation: Literal['normalized'] = Field(...)
     source: Reference = Field(...)
@@ -735,7 +760,7 @@ class TriangulatedSurface(Contract):
     attributes: Annotated[list[Attribute], Field(max_length=16)] = Field(...)
 
 class TypedContext(Contract):
-    context: Annotated[TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext | WellLocationContext | WaveletContext | ModelSectionContext | SeismicSectionContext, Field(discriminator='type')] = Field(...)
+    context: Annotated[TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext | WellLocationContext | WaveletContext | ModelSectionContext | SeismicSectionContext | TimeDepthContext, Field(discriminator='type')] = Field(...)
 
 class Wavelet(Contract):
     representation: Literal['normalized'] = Field(...)
@@ -906,7 +931,7 @@ class BundleAssetV2(Contract):
     parent_visibility: Literal['complete', 'restricted'] = Field(...)
     omissions: list[str] = Field(...)
     losses: list[str] = Field(...)
-    type: Literal['well-log', 'well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-slice', 'wavelet', 'model-section', 'seismic-section'] = Field(...)
+    type: Literal['well-log', 'well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-slice', 'wavelet', 'model-section', 'seismic-section', 'time-depth'] = Field(...)
     relationships: BundleAssetV2Relationships = Field(None)
     original: BundleAssetV2Original = Field(None)
     slices: Annotated[list[BundleSliceV2], Field(min_length=1, max_length=64)] = Field(None)
@@ -1446,6 +1471,7 @@ RevisionManifest.model_rebuild()
 RevisionManifestV2.model_rebuild()
 SeismicContext.model_rebuild()
 SeismicSectionContext.model_rebuild()
+TimeDepthContext.model_rebuild()
 TopsContext.model_rebuild()
 TrajectoryContext.model_rebuild()
 Version.model_rebuild()
@@ -1462,6 +1488,7 @@ SeismicVolume.model_rebuild()
 Chunk.model_rebuild()
 HeaderPositions.model_rebuild()
 AssetSummary.model_rebuild()
+TimeDepth.model_rebuild()
 Trajectory.model_rebuild()
 Station.model_rebuild()
 TriangulatedSurface.model_rebuild()

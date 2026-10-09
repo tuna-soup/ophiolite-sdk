@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.24.0",
+  "version": "1.25.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -37,7 +37,7 @@
     },
     {
       "id": "ophiolite.scientific-asset/1",
-      "version": "1.15.0",
+      "version": "1.16.0",
       "lifecycle": "preview",
       "path": "assets/v1/schema.json",
       "title": "ScientificAsset",
@@ -69,11 +69,11 @@
     },
     {
       "id": "ophiolite.typed-context/1",
-      "version": "1.4.0",
+      "version": "1.5.0",
       "lifecycle": "preview",
       "path": "assets/v1/typed-context-schema.json",
       "title": "TypedContext",
-      "description": "Observed and declared context of a typed asset (tops, trajectory, grid, triangulated surface, point set, fault sticks, seismic volume, wavelet, rock model section, seismic section) with its fidelity report."
+      "description": "Observed and declared context of a typed asset (tops, trajectory, grid, triangulated surface, point set, fault sticks, seismic volume, wavelet, rock model section, seismic section, time-depth table) with its fidelity report."
     },
     {
       "id": "ophiolite.well-tops/1",
@@ -157,11 +157,11 @@
     },
     {
       "id": "ophiolite.portable-bundle/2",
-      "version": "2.5.0",
+      "version": "2.6.0",
       "lifecycle": "preview",
       "path": "bundles/v2/manifest-schema.json",
       "title": "PortableBundleManifestV2",
-      "description": "Portable bundle 2: exact selected revisions of well logs, well tops, trajectories, regular-grid surfaces, meshes, point sets, fault sticks, seismic slices, wavelets, rock model sections and seismic sections with files, digests, served context, permitted lineage and relationships."
+      "description": "Portable bundle 2: exact selected revisions of well logs, well tops, trajectories, regular-grid surfaces, meshes, point sets, fault sticks, seismic slices, wavelets, rock model sections, seismic sections and time-depth tables with files, digests, served context, permitted lineage and relationships."
     },
     {
       "id": "ophiolite.polyline-set/1",
@@ -210,6 +210,14 @@
       "path": "assets/v1/seismic-section-schema.json",
       "title": "SeismicSection",
       "description": "A normalized 2D seismic section: every sample, one row per vertical sample, on declared axes with origin and polarity, source reference, digest and reader identity (E53)."
+    },
+    {
+      "id": "ophiolite.time-depth/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/time-depth-schema.json",
+      "title": "TimeDepth",
+      "description": "A normalized time-depth table: depth and time pairs in file order, both strictly increasing, with the stated velocity column, the declared depth type, time kind, units and datum, source reference, digest and reader identity (E57)."
     },
     {
       "id": "ophiolite.seismic-volume/1",
@@ -556,6 +564,22 @@
       "description": "Every sample, one row per vertical sample and one value per trace, with the declared axes, origin and polarity.",
       "lifecycle": "preview",
       "path": "profiles/v1/seismic-section.json"
+    },
+    {
+      "id": "time-depth-csv/1",
+      "kind": "source",
+      "display_name": "Time-depth table (CSV)",
+      "description": "A checkshot or time-depth table as CSV with the columns depth and time, optionally velocity, kept byte for byte.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/time-depth-csv.json"
+    },
+    {
+      "id": "ophiolite.time-depth/1",
+      "kind": "normalized",
+      "display_name": "Normalized time-depth table",
+      "description": "Depth and time pairs of one wellbore in file order, both strictly increasing, with the velocity column as stated and the declared depth type, time kind, units and datum; nothing is interpolated or converted.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/time-depth.json"
     }
   ],
   "documents": [
