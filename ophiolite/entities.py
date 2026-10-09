@@ -4,7 +4,7 @@ The Client mixes in the generated `Navigation` (one assert and one follow method
 people may assert, from the predicate registry) and these hand-written reads. Every call is one
 route; nothing is inferred from names.
 """
-from .errors import VerificationFailed
+from .errors import OphioliteError, Refused, VerificationFailed
 
 
 class Entity:
@@ -29,6 +29,16 @@ class Entity:
     def well(self):
         link = self.document.get('part_of')
         return self._client.entity(link['entity_id']) if link else None
+
+
+def _in_its_words(call):
+    """E94: a refused remake or save (409, 422) says why in the server's sentence (Journey J2: "Ophiolite did not run this
+    calculation, so it cannot make it again."), not the transport's generic one; the category, code and remedy stay."""
+    try: return call()
+    except OphioliteError as refused:
+        if refused.status not in (409, 422) or not refused.server_message or refused.server_message == refused.message: raise
+        raise type(refused)(refused.server_message, refused.recovery, status=refused.status, code=refused.code, remedy=refused.remedy,
+                            docs=refused.docs, request_id=refused.request_id, server_message=refused.server_message, details=refused.details) from None
 
 
 class EntityClient:
@@ -85,6 +95,44 @@ class EntityClient:
     def lineage(self, asset, revision):
         """One hop each way: parents, derivations and superseded revisions you may read."""
         return self._entities('lineage', {'asset_id': asset, 'revision': revision})
+
+    # --- E94: how a result was made, what changed, what depends on it, and making it again ------------------------
+
+    def story(self, asset, revision, *, cursor=None, limit=None):
+        """One page of how an exact result version was made: the version, its inputs and their inputs (breadth first).
+        Follow `next_cursor` for the next page; `continue_from` names results to open when a history is long."""
+        return self._post('results', 'story', {'asset_id': asset, 'revision': revision, **({'cursor': cursor} if cursor else {}),
+                                               **({'limit': limit} if limit else {})}, retry=True)
+
+    def what_changed(self, a, b):
+        """What differs in how two exact result versions were made. `a` and `b` are (asset_id, revision) pairs."""
+        pair = lambda x: {'asset_id': x[0], 'revision': x[1]}
+        return self._post('results', 'what-changed', {'a': pair(a), 'b': pair(b)}, retry=True)
+
+    def dependents(self, asset, revision, *, cursor=None, limit=None):
+        """The results made from an exact version you may read, with "Newer input available" where it applies."""
+        return self._post('results', 'dependents', {'asset_id': asset, 'revision': revision, **({'cursor': cursor} if cursor else {}),
+                                                    **({'limit': limit} if limit else {})}, retry=True)
+
+    def remake(self, asset, revision, *, step='preview', inputs=None, command_id=None, execution_id=None):
+        """Make an exact result version again. `preview` names the exact inputs (`inputs='recorded'` or `'newer'`); `run`
+        takes those inputs and a command id and holds a different output for 24 hours; `status` reads it and `discard`
+        drops it. Nothing is saved: `remake_save` does that, on a separate confirm."""
+        if step not in ('preview', 'run', 'status', 'discard'): raise Refused('Choose preview, run, status or discard.')
+        if step == 'run' and not command_id: raise Refused('Running needs a command id; the same id answers the same receipt.')
+        if step in ('status', 'discard') and not execution_id: raise Refused('Name the execution the run returned.')
+        body = {'asset_id': asset, 'revision': revision, 'step': step, **({'inputs': inputs} if inputs is not None else {}),
+                **({'command_id': command_id} if command_id else {}), **({'execution_id': execution_id} if execution_id else {})}
+        return _in_its_words(lambda: self._post('results', 'remake-run', body, retry=step != 'discard'))
+
+    def remake_save(self, execution_id, outputs):
+        """Save held outputs that differ: each {role, target ('new-result' or 'new-version'), command_id}, and for a new
+        version the `audience_digest` the status showed and the person confirmed."""
+        if not isinstance(outputs, (list, tuple)) or not outputs: raise Refused('Name each output to save.')
+        for one in outputs:
+            if not isinstance(one, dict) or one.get('target') not in ('new-result', 'new-version') or not one.get('command_id'):
+                raise Refused('Save each output as a new result or a new version, with its own command id.')
+        return _in_its_words(lambda: self._post('results', 'remake-save', {'execution_id': execution_id, 'outputs': list(outputs)}, retry=True))
 
     def _associate(self, predicate, subject, entity, evidence, command_id):
         target = self.entity(entity) if not isinstance(entity, dict) else None

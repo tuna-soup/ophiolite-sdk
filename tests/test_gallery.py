@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import sys
 import tarfile
+import tempfile
 import zipfile
 
 import pytest
@@ -16,6 +17,24 @@ ROOT = Path(__file__).resolve().parents[1]
 GALLERY = json.loads((ROOT / 'notebooks/gallery.json').read_text())
 SLUGS = [entry['slug'] for entry in GALLERY['notebooks']]
 MEANS = {'Linear (simple)': '0.500000', 'Larionov, Tertiary rocks': '0.394427', 'Larionov, older rocks': '0.435935', 'Clavier': '0.427542', 'Steiber': '0.404551'}
+
+
+def ipc_folder():
+    """H23: a short folder for the kernel's Unix sockets (a socket path is at most 107 bytes), outside the notebook's."""
+    base = os.environ.get('XDG_RUNTIME_DIR')
+    folder = tempfile.mkdtemp(prefix='nb-', dir=base if base and os.access(base, os.W_OK) else None)
+    if len(folder) > 60:
+        shutil.rmtree(folder); folder = tempfile.mkdtemp(prefix='nb-', dir='/tmp')
+    return folder
+
+
+def client(notebook, folder, sockets):
+    """H23: the kernel's channels over IPC sockets in SOCKETS, not TCP ports: a port chosen free can be taken by another
+    process before the kernel binds it (Visual 37884770925, sdk-templates: 'Address already in use', port 32777)."""
+    from traitlets.config import Config
+    nbclient = pytest.importorskip('nbclient')
+    config = Config({'KernelManager': {'transport': 'ipc', 'ip': os.path.join(sockets, 'kernel')}})
+    return nbclient.NotebookClient(notebook, timeout=120, kernel_name='python3', resources={'metadata': {'path': str(folder)}}, config=config)
 
 
 def run(slug, tmp_path, monkeypatch):
@@ -27,7 +46,11 @@ def run(slug, tmp_path, monkeypatch):
     shutil.copy(ROOT / 'notebooks' / slug / 'notebook.ipynb', folder / (slug + '.ipynb'))
     notebook = nbformat.read(folder / (slug + '.ipynb'), as_version=4)
     notebook.cells.append(nbformat.v4.new_code_cell('import ophiolite\nprint("SDK:", ophiolite.__file__)'))
-    executed = nbclient.NotebookClient(notebook, timeout=120, kernel_name='python3', resources={'metadata': {'path': str(folder)}}).execute()
+    sockets = ipc_folder()
+    try:
+        executed = client(notebook, folder, sockets).execute()
+    finally:
+        shutil.rmtree(sockets, ignore_errors=True)
     outputs = [output for cell in executed.cells for output in cell.get('outputs', [])]
     assert all(output.output_type != 'error' for output in outputs)
     text = ''.join(output.get('text', '') for output in outputs)
@@ -36,6 +59,25 @@ def run(slug, tmp_path, monkeypatch):
     assert sorted(p.name for p in folder.iterdir()) == sorted([slug + '.ipynb', slug + '.png'])
     assert (folder / (slug + '.png')).read_bytes().startswith(b'\x89PNG')
     return text
+
+
+def test_the_gallery_kernel_talks_over_ipc_sockets(tmp_path):
+    """H23: while the kernel is live its transport is ipc, its sockets are files in their own folder, and a request
+    gets its answer."""
+    if os.environ.get('OPHIOLITE_RUN_TEMPLATES') != '1': pytest.skip('Provision the notebook lock and an installed SDK, and run the required template lane')
+    nbformat = pytest.importorskip('nbformat')
+    notebook = nbformat.v4.new_notebook(cells=[nbformat.v4.new_code_cell('1 + 1')])
+    sockets = ipc_folder()
+    try:
+        nb = client(notebook, tmp_path, sockets)
+        with nb.setup_kernel():
+            info = nb.km.get_connection_info()
+            assert (nb.km.transport, info['transport']) == ('ipc', 'ipc')
+            assert any(name.startswith('kernel-') for name in os.listdir(sockets)), os.listdir(sockets)
+            cell = nb.execute_cell(notebook.cells[0], 0)
+        assert cell.outputs[0]['data']['text/plain'] == '2'
+    finally:
+        shutil.rmtree(sockets, ignore_errors=True)
 
 
 def test_read_a_well_log_runs_from_an_empty_directory(tmp_path, monkeypatch):
@@ -83,8 +125,15 @@ def test_time_depth_table_writes_the_two_layer_model_and_publishes_nothing_synth
     assert "depth,time 0,0 2000,1666.667" in text and 'Synthetic mode: nothing is published.' in text
 
 
+def test_how_was_this_made_reads_the_story_the_change_and_the_refusal_synthetic(tmp_path, monkeypatch):
+    text = run('how-was-this-made', tmp_path, monkeypatch)
+    assert 'Shale volume, made in a notebook, version 2\n  Reported by Alice; Ophiolite did not run this calculation.' in text
+    assert '  Synthetic gamma ray, version 1\n    A file added by Alice on Not recorded: original.las.' in text
+    assert 'Ophiolite did not run this calculation, so it cannot make it again.' in text and 'Nothing differs' not in text
+
+
 def test_every_entry_is_listed_built_and_described():
-    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table']
+    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'how-was-this-made']
     for entry in GALLERY['notebooks']:
         assert set(entry) == {'slug', 'title', 'sentence', 'modes', 'data'} and entry['modes'] == ['synthetic', 'live']
         script = (ROOT / 'notebooks' / entry['slug'] / 'notebook.py').read_text()
