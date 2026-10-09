@@ -28,5 +28,8 @@
     },
     "normalized": 1,
     "total": 2
+  },
+  "table_target": {
+    "none": "not-a-table"
   }
 }

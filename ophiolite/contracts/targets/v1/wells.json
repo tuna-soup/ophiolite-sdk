@@ -1,0 +1,247 @@
+{
+ "schema": "ophiolite.table-target/1",
+ "id": "ophiolite.table-target/wells/1",
+ "target": "wells",
+ "display_name": "Wells",
+ "description": "Where each well is: one row per well with its identifier, name and surface position.",
+ "lands_on": [
+  "sql-wells/1"
+ ],
+ "pending": null,
+ "standards": {
+  "profile": "ophiolite.well-location-upload/1"
+ },
+ "splits_by": null,
+ "settings": {
+  "missing_marker": true,
+  "retain_extras": true,
+  "unique_columns": false,
+  "other_columns": "not-read"
+ },
+ "ui": {
+  "captions": true
+ },
+ "fields": [
+  {
+   "name": "id",
+   "label": "Well identifier",
+   "noun": "well identifier",
+   "kind": "identifier",
+   "entity": "well",
+   "required": true,
+   "blank": "not-allowed",
+   "prefill": [
+    "declared",
+    "previously-reviewed",
+    "inferred"
+   ],
+   "canonical": null,
+   "aliases": [
+    "well_id",
+    "id",
+    "uwi"
+   ]
+  },
+  {
+   "name": "name",
+   "label": "Well name",
+   "noun": "well name",
+   "kind": "name",
+   "required": true,
+   "blank": "not-allowed",
+   "prefill": [
+    "declared",
+    "previously-reviewed",
+    "inferred"
+   ],
+   "canonical": null,
+   "aliases": [
+    "well_name",
+    "name"
+   ]
+  },
+  {
+   "name": "x",
+   "label": "Surface X",
+   "noun": "X",
+   "kind": "coordinate",
+   "axis": "x",
+   "required": true,
+   "blank": "not-allowed",
+   "prefill": [
+    "declared",
+    "previously-reviewed",
+    "inferred"
+   ],
+   "canonical": null,
+   "aliases": [
+    "longitude",
+    "easting",
+    "x"
+   ]
+  },
+  {
+   "name": "y",
+   "label": "Surface Y",
+   "noun": "Y",
+   "kind": "coordinate",
+   "axis": "y",
+   "required": true,
+   "blank": "not-allowed",
+   "prefill": [
+    "declared",
+    "previously-reviewed",
+    "inferred"
+   ],
+   "canonical": null,
+   "aliases": [
+    "latitude",
+    "northing",
+    "y"
+   ]
+  },
+  {
+   "name": "depth",
+   "label": "Depth",
+   "noun": "depth",
+   "kind": "number",
+   "dimension": "length",
+   "required": false,
+   "blank": "null",
+   "prefill": [
+    "declared",
+    "previously-reviewed",
+    "inferred"
+   ],
+   "canonical": null,
+   "aliases": [
+    "total_depth",
+    "depth"
+   ]
+  },
+  {
+   "name": "operator",
+   "label": "Operating organization",
+   "noun": "operating organization",
+   "kind": "text",
+   "required": false,
+   "blank": "null",
+   "prefill": [
+    "declared",
+    "previously-reviewed",
+    "inferred"
+   ],
+   "canonical": null,
+   "aliases": [
+    "operator",
+    "operator_name"
+   ]
+  }
+ ],
+ "column_rows": [],
+ "declarations": [
+  {
+   "name": "crs",
+   "label": "Coordinate system of X and Y",
+   "noun": "coordinate reference",
+   "kind": "crs",
+   "accepts": "menu-only",
+   "required": true,
+   "default": null,
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "applies_to": [
+    "x",
+    "y"
+   ],
+   "values": []
+  },
+  {
+   "name": "depth_unit",
+   "label": "Depth unit",
+   "noun": "depth unit",
+   "kind": "unit",
+   "dimension": "length",
+   "accepts": "menu-only",
+   "required": true,
+   "default": "m",
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "applies_to": [
+    "depth"
+   ],
+   "values": [
+    {
+     "value": "m",
+     "label": "Metres"
+    },
+    {
+     "value": "ft",
+     "label": "International feet"
+    }
+   ]
+  },
+  {
+   "name": "depth_kind",
+   "label": "Depth type",
+   "noun": "depth type",
+   "kind": "choice",
+   "required": true,
+   "default": "MD",
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "applies_to": [
+    "depth"
+   ],
+   "values": [
+    {
+     "value": "MD",
+     "label": "Measured depth"
+    },
+    {
+     "value": "TVD",
+     "label": "True vertical depth"
+    }
+   ]
+  },
+  {
+   "name": "depth_reference",
+   "label": "Depth reference",
+   "noun": "depth reference",
+   "kind": "choice",
+   "required": true,
+   "default": "unknown",
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "applies_to": [
+    "depth"
+   ],
+   "values": [
+    {
+     "value": "unknown",
+     "label": "Unknown"
+    },
+    {
+     "value": "GL",
+     "label": "Ground level"
+    },
+    {
+     "value": "KB",
+     "label": "Kelly bushing"
+    },
+    {
+     "value": "MSL",
+     "label": "Mean sea level"
+    }
+   ]
+  }
+ ]
+}

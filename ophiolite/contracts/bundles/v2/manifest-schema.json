@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/bundles/v2/manifest-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.portable-bundle/2",
-    "version": "2.5.0",
+    "version": "2.6.0",
     "lifecycle": "preview"
   },
   "title": "PortableBundleManifestV2",
@@ -466,7 +466,8 @@
             "seismic-slice",
             "wavelet",
             "model-section",
-            "seismic-section"
+            "seismic-section",
+            "time-depth"
           ]
         },
         "relationships": {

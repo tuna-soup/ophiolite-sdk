@@ -1,9 +1,9 @@
 {
   "schema": "ophiolite.connector-capability/1",
   "id": "typed-upload",
-  "display_name": "Tops, survey, grid, fault and seismic upload",
+  "display_name": "Tops, survey, time-depth, grid, fault and seismic upload",
   "kind": "source",
-  "summary": "Upload well tops, deviation surveys, horizon grids, triangulated surfaces, point sets, fault sticks, SEG-Y seismic volumes, or Petrel and OpendTect horizon point exports; declared context stays as declared.",
+  "summary": "Upload well tops, deviation surveys, time-depth tables, horizon grids, triangulated surfaces, point sets, fault sticks, SEG-Y seismic volumes, or Petrel and OpendTect horizon point exports; declared context stays as declared.",
   "host": {
     "name": "Web browser",
     "versions": [],
@@ -219,6 +219,28 @@
       "unsupported": [
         "CRS transformation at upload",
         "more than one well per file"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    },
+    {
+      "profile": "time-depth-csv/1",
+      "data": "Time-depth table",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "Text formatting is kept only in the exact original",
+        "The velocity column is kept as stated; it is not recomputed from the pairs"
+      ],
+      "unsupported": [
+        "Excel workbooks (.xls, .xlsx)",
+        "interpolation, depth-time conversion or a datum default",
+        "more than 100,000 pairs"
       ],
       "qualification": {
         "status": "unverified",

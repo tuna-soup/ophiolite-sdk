@@ -1,0 +1,569 @@
+{
+ "schema": "ophiolite.mapping-render-cases/1",
+ "cases": [
+  {
+   "target": "wells",
+   "report": {
+    "rows_checked": 10
+   },
+   "group": {
+    "field": "id",
+    "code": "id-repeated",
+    "severity": "invalid",
+    "rows": 1,
+    "examples": [
+     {
+      "row_key": "row 2",
+      "value": "B-1",
+      "truncated": false
+     }
+    ]
+   },
+   "declarations": {
+    "crs": "EPSG:28992"
+   },
+   "sentence": "1 of 10 rows share their well identifier with another row; each well needs its own."
+  },
+  {
+   "target": "wells",
+   "report": {
+    "rows_checked": 1
+   },
+   "group": {
+    "field": "id",
+    "code": "id-missing",
+    "severity": "invalid",
+    "rows": 1,
+    "examples": []
+   },
+   "declarations": {
+    "crs": "EPSG:28992"
+   },
+   "sentence": "1 of 1 row have no well identifier."
+  },
+  {
+   "target": "wells",
+   "report": {
+    "rows_checked": 10
+   },
+   "group": {
+    "field": "x",
+    "code": "coordinate-missing",
+    "severity": "invalid",
+    "rows": 2,
+    "examples": []
+   },
+   "declarations": {
+    "crs": "EPSG:28992"
+   },
+   "sentence": "2 of 10 rows have no X value."
+  },
+  {
+   "target": "wells",
+   "report": {
+    "rows_checked": 1200
+   },
+   "group": {
+    "field": "depth",
+    "code": "not-numeric",
+    "severity": "invalid",
+    "rows": 3,
+    "examples": [
+     {
+      "row_key": "row 2",
+      "value": "deep",
+      "truncated": false
+     },
+     {
+      "row_key": "row 3",
+      "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "truncated": true
+     },
+     {
+      "row_key": "row 4",
+      "value": "z",
+      "truncated": false
+     }
+    ]
+   },
+   "declarations": {
+    "crs": "EPSG:28992"
+   },
+   "sentence": "3 of 1,200 rows have a depth that is not a number, for example deep and xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx…."
+  },
+  {
+   "target": "wells",
+   "report": {
+    "rows_checked": 5
+   },
+   "group": {
+    "field": "x",
+    "code": "longitude-out-of-range",
+    "severity": "invalid",
+    "rows": 1,
+    "examples": [
+     {
+      "row_key": "row 2",
+      "value": 181,
+      "truncated": false
+     }
+    ]
+   },
+   "declarations": {
+    "crs": "EPSG:28992"
+   },
+   "sentence": "1 of 5 rows have an X outside -180 to 180, for example 181; the selected system is Amersfoort / RD New (metres)."
+  },
+  {
+   "target": "wells",
+   "report": {
+    "rows_checked": 2
+   },
+   "group": {
+    "field": "y",
+    "code": "latitude-out-of-range",
+    "severity": "invalid",
+    "rows": 1,
+    "examples": [
+     {
+      "row_key": "row 2",
+      "value": 91.5,
+      "truncated": false
+     }
+    ]
+   },
+   "declarations": {
+    "crs": "EPSG:9999"
+   },
+   "sentence": "1 of 2 rows have a Y outside -90 to 90, for example 91.5."
+  },
+  {
+   "target": "wells",
+   "report": {
+    "rows_checked": 7
+   },
+   "group": {
+    "field": "x",
+    "code": "outside-usual-area",
+    "severity": "unusual",
+    "rows": 6,
+    "examples": []
+   },
+   "declarations": {
+    "crs": "EPSG:4326"
+   },
+   "sentence": "6 of 7 rows lie outside the area WGS 84 (longitude, latitude) is meant for. This is allowed; check that the coordinate reference is the one the table uses."
+  },
+  {
+   "target": "wells",
+   "report": {
+    "rows_checked": 7
+   },
+   "group": {
+    "field": "x",
+    "code": "outside-usual-area",
+    "severity": "unusual",
+    "rows": 6,
+    "examples": [
+     {
+      "row_key": "row 2",
+      "value": 4.0,
+      "truncated": false
+     }
+    ]
+   },
+   "declarations": {
+    "crs": ""
+   },
+   "sentence": "6 of 7 rows lie outside the area the selected system is meant for, for example 4. This is allowed; check that the coordinate reference is the one the table uses."
+  },
+  {
+   "target": "wells",
+   "report": {
+    "rows_checked": 0
+   },
+   "group": {
+    "field": "name",
+    "code": "field-not-mapped",
+    "severity": "not-supported",
+    "rows": null,
+    "examples": []
+   },
+   "declarations": {
+    "crs": "EPSG:28992"
+   },
+   "sentence": "Choose the column that holds the well name."
+  },
+  {
+   "target": "wells",
+   "report": {
+    "rows_checked": 0
+   },
+   "group": {
+    "field": "extras",
+    "code": "column-unknown",
+    "severity": "not-supported",
+    "rows": null,
+    "examples": []
+   },
+   "declarations": {
+    "crs": "EPSG:28992"
+   },
+   "sentence": "The chosen column for the additional metadata column is no longer in this table; choose another."
+  },
+  {
+   "target": "wells",
+   "report": {
+    "rows_checked": 0
+   },
+   "group": {
+    "field": "crs",
+    "code": "crs-not-accepted",
+    "severity": "not-supported",
+    "rows": null,
+    "examples": []
+   },
+   "declarations": {
+    "crs": "EPSG:28992"
+   },
+   "sentence": "Choose the coordinate reference the table’s X and Y use."
+  },
+  {
+   "target": "wells",
+   "report": {
+    "rows_checked": 0
+   },
+   "group": {
+    "field": "depth",
+    "code": "depth-options",
+    "severity": "not-supported",
+    "rows": null,
+    "examples": []
+   },
+   "declarations": {
+    "crs": "EPSG:28992"
+   },
+   "sentence": "Choose the depth unit, depth type and depth reference."
+  },
+  {
+   "target": "wells",
+   "report": {
+    "rows_checked": 100000
+   },
+   "group": {
+    "field": null,
+    "code": "source-limit",
+    "severity": "not-supported",
+    "rows": null,
+    "examples": []
+   },
+   "declarations": {
+    "crs": "EPSG:28992"
+   },
+   "sentence": "Not every row could be read: the table is larger than one check can read. Nothing was skipped silently; the mapping cannot be saved until every row is checked."
+  },
+  {
+   "target": "wells",
+   "report": {
+    "rows_checked": 0
+   },
+   "group": {
+    "field": null,
+    "code": "mapping-invalid",
+    "severity": "not-supported",
+    "rows": null,
+    "examples": []
+   },
+   "declarations": {
+    "crs": "EPSG:28992"
+   },
+   "sentence": "Part of this mapping cannot be used as it is; review its settings."
+  },
+  {
+   "target": "wells",
+   "report": {
+    "rows_checked": 0
+   },
+   "group": {
+    "field": null,
+    "code": "a-code-from-a-newer-server",
+    "severity": "not-supported",
+    "rows": null,
+    "examples": []
+   },
+   "declarations": {
+    "crs": "EPSG:28992"
+   },
+   "sentence": "Part of this mapping cannot be used as it is; review its settings."
+  },
+  {
+   "target": "well-tops",
+   "report": {
+    "rows_checked": 5
+   },
+   "group": {
+    "field": "md",
+    "code": "not-numeric",
+    "severity": "invalid",
+    "rows": 1,
+    "examples": [
+     {
+      "row_key": "row 2",
+      "value": "17x9.0",
+      "truncated": false
+     }
+    ]
+   },
+   "declarations": {},
+   "sentence": "1 of 5 rows have a measured depth that is not a number, for example 17x9.0."
+  },
+  {
+   "target": "well-tops",
+   "report": {
+    "rows_checked": 5
+   },
+   "group": {
+    "field": "well",
+    "code": "reference-missing",
+    "severity": "invalid",
+    "rows": 1,
+    "examples": [
+     {
+      "row_key": "row 2",
+      "value": null,
+      "truncated": false
+     }
+    ],
+    "params": {
+     "noun": "well",
+     "entity": "well"
+    }
+   },
+   "declarations": {},
+   "sentence": "1 of 5 rows have no well."
+  },
+  {
+   "target": "well-tops",
+   "report": {
+    "rows_checked": 3
+   },
+   "group": {
+    "field": "name",
+    "code": "text-too-long",
+    "severity": "invalid",
+    "rows": 1,
+    "examples": [
+     {
+      "row_key": "row 2",
+      "value": "A very long formation name that goes on",
+      "truncated": false
+     }
+    ],
+    "params": {
+     "noun": "top name",
+     "limit": 128
+    }
+   },
+   "declarations": {},
+   "sentence": "1 of 3 rows have a top name longer than 128 characters, for example A very long formation na…."
+  },
+  {
+   "target": "well-tops",
+   "report": {
+    "rows_checked": 3
+   },
+   "group": {
+    "field": "md",
+    "code": "column-used-twice",
+    "severity": "not-supported",
+    "rows": null,
+    "examples": [],
+    "params": {
+     "noun": "measured depth"
+    }
+   },
+   "declarations": {},
+   "sentence": "One column is chosen for the measured depth and for another field; each field needs its own."
+  },
+  {
+   "target": "deviation-survey",
+   "report": {
+    "rows_checked": 4
+   },
+   "group": {
+    "field": "azimuth",
+    "code": "out-of-range",
+    "severity": "invalid",
+    "rows": 1,
+    "examples": [
+     {
+      "row_key": "row 2",
+      "value": 360,
+      "truncated": false
+     }
+    ],
+    "params": {
+     "noun": "azimuth",
+     "low": 0,
+     "high": 360
+    }
+   },
+   "declarations": {},
+   "sentence": "In 1 of 4 rows, the azimuth is outside 0 up to but not including 360, for example 360."
+  },
+  {
+   "target": "deviation-survey",
+   "report": {
+    "rows_checked": 4
+   },
+   "group": {
+    "field": "inclination",
+    "code": "out-of-range",
+    "severity": "invalid",
+    "rows": 3,
+    "examples": [
+     {
+      "row_key": "row 2",
+      "value": 190.5,
+      "truncated": false
+     },
+     {
+      "row_key": "row 3",
+      "value": 200,
+      "truncated": false
+     },
+     {
+      "row_key": "row 4",
+      "value": 181,
+      "truncated": false
+     }
+    ],
+    "params": {
+     "noun": "inclination",
+     "low": 0,
+     "high": 180
+    }
+   },
+   "declarations": {},
+   "sentence": "In 3 of 4 rows, the inclination is outside 0 to 180, for example 190.5, 200 and 181."
+  },
+  {
+   "target": "deviation-survey",
+   "report": {
+    "rows_checked": 4
+   },
+   "group": {
+    "field": "depth_unit",
+    "code": "declaration-missing",
+    "severity": "not-supported",
+    "rows": null,
+    "examples": [],
+    "params": {
+     "noun": "depth unit"
+    }
+   },
+   "declarations": {},
+   "sentence": "Choose the depth unit."
+  },
+  {
+   "target": "time-depth",
+   "report": {
+    "rows_checked": 1906
+   },
+   "group": {
+    "field": "time",
+    "code": "not-increasing",
+    "severity": "invalid",
+    "rows": 4,
+    "examples": [
+     {
+      "row_key": "row 2",
+      "value": 12,
+      "truncated": false
+     },
+     {
+      "row_key": "row 3",
+      "value": 11,
+      "truncated": false
+     },
+     {
+      "row_key": "row 4",
+      "value": 10,
+      "truncated": false
+     },
+     {
+      "row_key": "row 5",
+      "value": 9,
+      "truncated": false
+     }
+    ],
+    "params": {
+     "noun": "time"
+    }
+   },
+   "declarations": {},
+   "sentence": "In 4 of 1,906 rows, the time is not larger than in the row before, for example 12, 11 and 10."
+  },
+  {
+   "target": "time-depth",
+   "report": {
+    "rows_checked": 9
+   },
+   "group": {
+    "field": "depth",
+    "code": "value-missing",
+    "severity": "invalid",
+    "rows": 2,
+    "examples": [],
+    "params": {
+     "noun": "depth"
+    }
+   },
+   "declarations": {},
+   "sentence": "2 of 9 rows have no depth value."
+  },
+  {
+   "target": "time-depth",
+   "report": {
+    "rows_checked": 0
+   },
+   "group": {
+    "field": "seismic_reference_elevation",
+    "code": "declaration-not-numeric",
+    "severity": "not-supported",
+    "rows": null,
+    "examples": [],
+    "params": {
+     "noun": "seismic reference elevation"
+    }
+   },
+   "declarations": {},
+   "sentence": "The seismic reference elevation must be a plain number such as 12.5."
+  },
+  {
+   "target": "well-tops",
+   "report": {
+    "rows_checked": 5
+   },
+   "group": {
+    "field": "well",
+    "code": "reference-unknown",
+    "severity": "unusual",
+    "rows": 1,
+    "examples": [
+     {
+      "row_key": "row 2",
+      "value": "TM-9",
+      "truncated": false
+     }
+    ],
+    "params": {
+     "noun": "well",
+     "entity": "well"
+    }
+   },
+   "declarations": {},
+   "sentence": "1 of 5 rows name a well this project does not have yet, for example TM-9."
+  }
+ ]
+}

@@ -146,6 +146,8 @@ def parser():
             whole.add_argument('--project',dest='project',action='store_const',const=True,help='Also share with everyone in this project, including people who join later (derived publications)')
             whole.add_argument('--no-project',dest='project',action='store_const',const=False,help='Stop sharing with everyone in this project; the people named still see it')
             p.add_argument('--dry-run',action='store_true',help='Print the change without sending it or writing anything')
+    tables=sub.add_parser('targets',help='What each type of table needs: its fields, which are required and the choices that describe it (offline)')  # E86
+    tables.add_argument('name',nargs='?',help='One type, for example well-tops')
     bundle=sub.add_parser('bundle',help='Check or summarize a portable bundle offline (no server or account needed)')
     bundle.add_argument('action',choices=['check','show','pack']);bundle.add_argument('path',type=Path);bundle.add_argument('archive',type=Path,nargs='?',help='pack: the .zip to write')
     export=sub.add_parser('export',help='Export exact revisions into a new portable bundle')
@@ -161,7 +163,8 @@ def parser():
     derived=sub.add_parser('publish-derived',help='Publish a file you derived from exact revisions, with its declared method (a command id or a work folder is required)')
     derived.add_argument('--configuration',type=Path,default=Path('configuration.json'));derived.add_argument('--credentials',type=Path)
     derived.add_argument('file',type=Path,help='The derived file (LAS 2.0 or one of the typed formats)')
-    derived.add_argument('--profile',required=True,choices=['las2/1','points-csv/1','mesh-text/1','esri-ascii-grid/1','well-tops-csv/1','deviation-csv/1','opendtect-faultsticks/1'])
+    derived.add_argument('--profile',required=True,choices=['las2/1','points-csv/1','mesh-text/1','esri-ascii-grid/1','well-tops-csv/1','deviation-csv/1','opendtect-faultsticks/1',
+                                                              'time-depth-csv/1'])  # E57: declare depth_type, depth_unit, time_kind, time_unit
     derived.add_argument('--name',required=True);derived.add_argument('--from',dest='parents',action='append',required=True,metavar='ASSET:REVISION',help='Repeat once per exact parent (1-32)')
     derived.add_argument('--method',required=True,help='What you did, for example scipy.spatial.Delaunay');derived.add_argument('--library',default='');derived.add_argument('--library-version',default='')
     derived.add_argument('--parameters',type=Path,help='A JSON file of the parameters you used (up to 4096 bytes)');derived.add_argument('--declare',action='append',default=[],metavar='KEY=VALUE',help='A declaration such as crs=EPSG:28992 (repeat)')
@@ -662,6 +665,26 @@ def _local_run(config,work):
     print('Calculation finished. Inspect the outputs before ophiolite publish.')
 
 
+def _targets(args):
+    """E86: the table types (no name), or one type's fields and declarations; --json prints the document itself."""
+    from . import targets
+    if args.name is None:
+        listed=targets.targets()
+        return done(args,'\n'.join(t.target+' - '+t.display_name+(' (waits for '+t.pending.epic+')' if t.pending else '') for t in listed),
+                    {'targets':[{'target':t.target,'display_name':t.display_name,'pending':t.pending.epic if t.pending else None} for t in listed]})
+    try:one=targets.target(args.name)
+    except KeyError as error:
+        message=error.args[0]
+        if args.json:print(json.dumps({'error':{'code':'unknown-target','message':message}},indent=2))
+        else:print(message,file=sys.stderr)
+        raise SystemExit(EXIT['usage'])
+    lines=[one.display_name+': '+one.description]
+    lines+=['  '+f.label+(' (required)' if f.required else '') for f in one.fields]
+    lines+=['  '+d.label+(': '+', '.join(v.label for v in d.values) if getattr(d,'values',None) else '') for d in one.declarations]
+    lines+=['  Each column: '+', '.join(c.label for c in one.column_rows)] if one.column_rows else []
+    return done(args,'\n'.join(lines),targets.document(args.name))
+
+
 def main(argv=None):
     from . import _client_header
     token=_client_header._NAME.set('ophiolite-cli')  # E93: the command line names itself on every gateway request
@@ -675,6 +698,7 @@ def _main(argv=None):
     if args.command=='init':return _init(args)  # E31: offline; copies packaged files only
     if args.command=='skills':
         return done(args,str(files('ophiolite').joinpath('skills')),{'path':str(files('ophiolite').joinpath('skills'))})
+    if args.command=='targets':return _targets(args)  # E86: offline; reads the packaged contracts only
     if args.command=='bundle':
         # Offline: no configuration, credentials or network are read.
         from .bundle import open_bundle,pack

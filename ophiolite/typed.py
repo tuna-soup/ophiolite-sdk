@@ -1,4 +1,5 @@
-"""Typed scientific data (E11): well tops, trajectories and regular-grid surfaces; wavelets and sections (E53).
+"""Typed scientific data (E11): well tops, trajectories and regular-grid surfaces; wavelets and sections (E53); time-depth
+tables (E57).
 
 Objects hold the exact original bytes, the verified descriptor and the served
 normalized data. Nothing is converted: units, references and coordinate systems
@@ -9,7 +10,7 @@ import math
 from .errors import Refused
 
 TYPES = ('well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-volume',
-         'wavelet', 'model-section', 'seismic-section', 'well-location')
+         'wavelet', 'model-section', 'seismic-section', 'well-location', 'time-depth')
 WAVELET_DT = (0.0005, 0.01)  # E53 D7: a bounded spectrum (at most 1001 bins of 1 Hz)
 WAVELET_SAMPLES = (3, 4095)
 
@@ -391,9 +392,34 @@ class WellLocation(TypedData):
         return '<WellLocation %s, %s %s>' % (self.x, self.y, self.context['crs'])
 
 
+class TimeDepth(TypedData):
+    """A time-depth table of one wellbore (E57): depth and time pairs in file order, strictly increasing in both, with
+    velocity as stated (a missing cell stays missing). Depth type and unit, time kind and unit and the datum are the
+    uploader's declarations; "unknown" stays unknown and nothing is converted."""
+    type = 'time-depth'
+
+    @property
+    def pairs(self):
+        velocity = self.data['velocity'] or [None] * len(self.data['depth'])
+        return list(zip(self.data['depth'], self.data['time'], velocity))
+
+    def __len__(self): return len(self.data['depth'])
+
+    def to_frame(self):
+        pd = self._pandas()
+        velocity = self.data['velocity'] or [None] * len(self.data['depth'])
+        return pd.DataFrame({'depth': pd.array(self.data['depth'], dtype='float64'), 'time': pd.array(self.data['time'], dtype='float64'),
+                             'velocity': pd.array(velocity, dtype='Float64')})
+
+    def __repr__(self):
+        c = self.context
+        return '<TimeDepth %d pairs, %s %s depth, %s %s time>' % (c['count'], c['depth_type'], c['depth_unit'], c['time_kind'], c['time_unit'])
+
+
 CLASSES = {'well-tops': WellTops, 'trajectory': Trajectory, 'regular-grid-surface': GridSurface,
            'triangulated-surface': TriangulatedSurface, 'point-set': PointSet, 'polyline-set': PolylineSet, 'seismic-volume': SeismicVolume,
-           'wavelet': Wavelet, 'model-section': ModelSection, 'seismic-section': SeismicSection, 'well-location': WellLocation}
+           'wavelet': Wavelet, 'model-section': ModelSection, 'seismic-section': SeismicSection, 'well-location': WellLocation,
+           'time-depth': TimeDepth}
 
 
 def minimum_curvature(stations):

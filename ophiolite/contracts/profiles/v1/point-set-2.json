@@ -12,5 +12,8 @@
   ],
   "mappings": [
     "ophiolite.mapping/typed-standards/1"
-  ]
+  ],
+  "table_target": {
+    "none": "normalized-form"
+  }
 }

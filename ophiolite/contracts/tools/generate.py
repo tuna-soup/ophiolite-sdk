@@ -8,6 +8,7 @@ Run from the Platform root with the qualified Connectors on the path:
     PYTHONPATH=services python contracts/tools/generate.py --types    # TypeScript types only
     PYTHONPATH=services python contracts/tools/generate.py --openapi  # OpenAPI snapshot only
     PYTHONPATH=services python contracts/tools/generate.py --readers  # E55: the reader registry mirror only
+    PYTHONPATH=services python contracts/tools/generate.py --targets  # E86: table targets, words, coordinate systems
 
 Pydantic models are the executable source of the structural schemas; this tool
 writes their published form. It never writes under assets/v1/fixtures/frozen/:
@@ -39,12 +40,12 @@ def schemas():
     """Publish the Pydantic-generated schemas listed in the registry."""
     from project_gateway.scientific_assets import (Asset, AssetSummary, Curve, ScientificContext, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface,
                                                    PointSet, PolylineSet, SeismicVolume, SeismicSlice, ImportRecipe, PointSet2,
-                                                   WellLocationUpload, WellLocation, Wavelet, ModelSection, SeismicSection)
+                                                   WellLocationUpload, WellLocation, Wavelet, ModelSection, SeismicSection, TimeDepth)
     from project_gateway.domain import RelationshipRegistry, Entity, EntityAssets, Lineage
     from project_gateway.scientific_assets import DerivationRecord, Parameters  # E94
     for model in (DerivationRecord, Parameters, Asset, Curve, ScientificContext, AssetSummary, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface, PointSet, PolylineSet, SeismicVolume, SeismicSlice,
                   RelationshipRegistry, Entity, EntityAssets, Lineage, ImportRecipe, PointSet2, WellLocationUpload, WellLocation,
-                  Wavelet, ModelSection, SeismicSection):  # E53
+                  Wavelet, ModelSection, SeismicSection, TimeDepth):  # E53; E57
         write(CONTRACTS / model.CONTRACT['path'], model.model_json_schema())
 
 
@@ -128,6 +129,9 @@ TYPED = {
                       b'horizontal distance\nhorizontal_first 0\nhorizontal_step 25\nrocks\n1 4073 2629 Claystone\n2 4024 2379 Sandstone\ngrid\n1 1\n1 2\n2 2\n', {}),
     'seismic-section': ('seismic-section-text/1', 'text/plain', b'# ophiolite-seismic-section 1\ndomain time\nfirst_sample 0\nsample_interval 0.002\nsamples 3\ntraces 2\n'
                         b'horizontal trace-number\nhorizontal_first 1\nhorizontal_step 1\npolarity unknown\ngrid\n0.0 0.0\n-0.05 0.0\n0.05 -0.05\n', {}),
+    # E57: PRW-06's first checkshot pairs (NLOG document/924335000); the datum is not stated, so it stays unknown.
+    'time-depth': ('time-depth-csv/1', 'text/csv', b'depth,time,velocity\r\n0,0,0\r\n0.96,1,1913.18\r\n1.91,2,1913.18\r\n',
+                   {'depth_type': 'tvd', 'depth_unit': 'm', 'time_kind': 'two-way', 'time_unit': 'ms'}),
 }
 
 
@@ -392,6 +396,24 @@ def reader_registry():
     READERS_PATH.write_bytes(readers.raw())
 
 
+TARGETS = {'table-target-schema.json': 'targets/table-target-schema.json',  # E86: served path -> Connectors package path
+           'vocabulary/v1/mapping-check-words.json': 'targets/mapping-check-words.json',
+           'vocabulary/v1/coordinate-systems.json': 'coordinate_systems.json',
+           'vocabulary/v1/coordinate-systems.NOTICE': 'coordinate_systems.NOTICE',
+           **{'targets/v1/%s.json' % name: 'targets/v1/%s.json' % name
+              for name in ('wells', 'well-tops', 'deviation-survey', 'point-set', 'time-depth', 'table')}}
+
+
+def table_targets():
+    """E86: the served copies of Connectors' table-target documents, schema, words and coordinate-system catalogue
+    (with the EPSG notice beside it), byte for byte."""
+    from importlib.resources import files
+    for served, packaged in TARGETS.items():
+        path = CONTRACTS / served
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(files('asset_connectors').joinpath(packaged).read_bytes())
+
+
 def check_complete():
     """E31 P2: refuse an OpenAPI document with a placeholder or missing schema for any operation, media type or
     response status, or one that omits a route the application serves."""
@@ -404,7 +426,8 @@ def check_complete():
     print('OpenAPI document complete')
 
 
-STEPS = {'--schemas': schemas, '--fixtures': fixtures, '--types': types, '--openapi': openapi, '--readers': reader_registry, '--check-complete': check_complete}
+STEPS = {'--schemas': schemas, '--fixtures': fixtures, '--targets': table_targets, '--types': types, '--openapi': openapi,
+         '--readers': reader_registry, '--check-complete': check_complete}  # E86: targets before types (types read their schema)
 
 
 def main(argv):

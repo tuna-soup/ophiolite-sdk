@@ -29,5 +29,8 @@
     },
     "normalized": 1,
     "total": 2
+  },
+  "table_target": {
+    "none": "read-by-recipe"
   }
 }

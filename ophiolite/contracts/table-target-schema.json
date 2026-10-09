@@ -1,0 +1,874 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://ophiolite.dev/contracts/table-target-schema.json",
+ "x-ophiolite": {
+  "id": "ophiolite.table-target/1",
+  "version": "1.0.0",
+  "lifecycle": "preview"
+ },
+ "title": "TableTarget",
+ "description": "What a table must hold to become one type of data: its fields, the choices that describe the whole table and, for a free table, the rows per column (E86).",
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "schema",
+  "id",
+  "target",
+  "display_name",
+  "description",
+  "lands_on",
+  "pending",
+  "standards",
+  "splits_by",
+  "settings",
+  "ui",
+  "fields",
+  "column_rows",
+  "declarations"
+ ],
+ "properties": {
+  "schema": {
+   "const": "ophiolite.table-target/1"
+  },
+  "id": {
+   "type": "string",
+   "pattern": "^ophiolite\\.table-target/[a-z][a-z0-9-]*/[0-9]+$"
+  },
+  "target": {
+   "type": "string",
+   "pattern": "^[a-z][a-z0-9-]{1,31}$"
+  },
+  "display_name": {
+   "type": "string",
+   "minLength": 1,
+   "maxLength": 60
+  },
+  "description": {
+   "type": "string",
+   "minLength": 1,
+   "maxLength": 240
+  },
+  "lands_on": {
+   "type": "array",
+   "items": {
+    "type": "string",
+    "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$"
+   }
+  },
+  "pending": {
+   "anyOf": [
+    {
+     "type": "null"
+    },
+    {
+     "$ref": "#/$defs/Pending"
+    }
+   ]
+  },
+  "standards": {
+   "oneOf": [
+    {
+     "$ref": "#/$defs/StandardsProfile"
+    },
+    {
+     "$ref": "#/$defs/StandardsNone"
+    }
+   ]
+  },
+  "splits_by": {
+   "anyOf": [
+    {
+     "type": "null"
+    },
+    {
+     "type": "string",
+     "pattern": "^[a-z][a-z0-9_]{0,31}$"
+    }
+   ]
+  },
+  "settings": {
+   "$ref": "#/$defs/Settings"
+  },
+  "ui": {
+   "$ref": "#/$defs/Ui"
+  },
+  "fields": {
+   "type": "array",
+   "maxItems": 16,
+   "items": {
+    "oneOf": [
+     {
+      "$ref": "#/$defs/TextField"
+     },
+     {
+      "$ref": "#/$defs/ReferenceField"
+     },
+     {
+      "$ref": "#/$defs/NumberField"
+     },
+     {
+      "$ref": "#/$defs/CoordinateField"
+     }
+    ]
+   }
+  },
+  "column_rows": {
+   "type": "array",
+   "maxItems": 3,
+   "items": {
+    "$ref": "#/$defs/ColumnRow"
+   }
+  },
+  "declarations": {
+   "type": "array",
+   "maxItems": 8,
+   "items": {
+    "$ref": "#/$defs/Declaration"
+   }
+  }
+ },
+ "$defs": {
+  "Pending": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "epic",
+    "profiles"
+   ],
+   "properties": {
+    "epic": {
+     "type": "string",
+     "pattern": "^E[0-9]+[a-z]?$"
+    },
+    "profiles": {
+     "type": "array",
+     "items": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$"
+     }
+    }
+   }
+  },
+  "StandardsProfile": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "profile"
+   ],
+   "properties": {
+    "profile": {
+     "type": "string",
+     "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$"
+    }
+   }
+  },
+  "StandardsNone": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "none"
+   ],
+   "properties": {
+    "none": {
+     "type": "string",
+     "minLength": 8,
+     "maxLength": 160
+    }
+   }
+  },
+  "Settings": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "missing_marker",
+    "retain_extras",
+    "unique_columns",
+    "other_columns"
+   ],
+   "properties": {
+    "missing_marker": {
+     "type": "boolean"
+    },
+    "retain_extras": {
+     "type": "boolean"
+    },
+    "unique_columns": {
+     "type": "boolean",
+     "description": "Whether each field needs its own column."
+    },
+    "other_columns": {
+     "enum": [
+      "refused",
+      "not-read",
+      "retained"
+     ],
+     "description": "What the reader does with a column no field names."
+    }
+   }
+  },
+  "Ui": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "captions"
+   ],
+   "properties": {
+    "captions": {
+     "type": "boolean"
+    }
+   }
+  },
+  "TextField": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "name",
+    "label",
+    "noun",
+    "kind",
+    "required",
+    "blank",
+    "prefill",
+    "canonical",
+    "aliases"
+   ],
+   "properties": {
+    "name": {
+     "type": "string",
+     "pattern": "^[a-z][a-z0-9_]{0,31}$"
+    },
+    "label": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 60
+    },
+    "noun": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 60
+    },
+    "short": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 30
+    },
+    "description": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 240
+    },
+    "required": {
+     "type": "boolean",
+     "description": "The column must be chosen."
+    },
+    "blank": {
+     "enum": [
+      "not-allowed",
+      "null"
+     ],
+     "description": "A blank cell is a problem, or a missing value."
+    },
+    "prefill": {
+     "type": "array",
+     "maxItems": 4,
+     "description": "Evidence classes that may be shown pre-selected, always with the class; never none.",
+     "items": {
+      "enum": [
+       "declared",
+       "previously-reviewed",
+       "project-default",
+       "inferred"
+      ]
+     }
+    },
+    "canonical": {
+     "anyOf": [
+      {
+       "type": "null"
+      },
+      {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9_]{0,31}$"
+      }
+     ],
+     "description": "The column name the reader looks for."
+    },
+    "osdu": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 120
+    },
+    "aliases": {
+     "type": "array",
+     "maxItems": 24,
+     "items": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40
+     }
+    },
+    "kind": {
+     "enum": [
+      "identifier",
+      "name",
+      "text"
+     ]
+    },
+    "max_length": {
+     "type": "integer",
+     "minimum": 1,
+     "maximum": 128
+    },
+    "entity": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 60,
+     "description": "What one row is, for an identifier (\"well\")."
+    }
+   }
+  },
+  "ReferenceField": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "name",
+    "label",
+    "noun",
+    "kind",
+    "required",
+    "blank",
+    "prefill",
+    "canonical",
+    "aliases",
+    "to"
+   ],
+   "properties": {
+    "name": {
+     "type": "string",
+     "pattern": "^[a-z][a-z0-9_]{0,31}$"
+    },
+    "label": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 60
+    },
+    "noun": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 60
+    },
+    "short": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 30
+    },
+    "description": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 240
+    },
+    "required": {
+     "type": "boolean",
+     "description": "The column must be chosen."
+    },
+    "blank": {
+     "enum": [
+      "not-allowed",
+      "null"
+     ],
+     "description": "A blank cell is a problem, or a missing value."
+    },
+    "prefill": {
+     "type": "array",
+     "maxItems": 4,
+     "description": "Evidence classes that may be shown pre-selected, always with the class; never none.",
+     "items": {
+      "enum": [
+       "declared",
+       "previously-reviewed",
+       "project-default",
+       "inferred"
+      ]
+     }
+    },
+    "canonical": {
+     "anyOf": [
+      {
+       "type": "null"
+      },
+      {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9_]{0,31}$"
+      }
+     ],
+     "description": "The column name the reader looks for."
+    },
+    "osdu": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 120
+    },
+    "aliases": {
+     "type": "array",
+     "maxItems": 24,
+     "items": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40
+     }
+    },
+    "kind": {
+     "const": "reference"
+    },
+    "to": {
+     "enum": [
+      "well",
+      "wellbore"
+     ]
+    }
+   }
+  },
+  "NumberField": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "name",
+    "label",
+    "noun",
+    "kind",
+    "required",
+    "blank",
+    "prefill",
+    "canonical",
+    "aliases",
+    "dimension"
+   ],
+   "properties": {
+    "name": {
+     "type": "string",
+     "pattern": "^[a-z][a-z0-9_]{0,31}$"
+    },
+    "label": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 60
+    },
+    "noun": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 60
+    },
+    "short": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 30
+    },
+    "description": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 240
+    },
+    "required": {
+     "type": "boolean",
+     "description": "The column must be chosen."
+    },
+    "blank": {
+     "enum": [
+      "not-allowed",
+      "null"
+     ],
+     "description": "A blank cell is a problem, or a missing value."
+    },
+    "prefill": {
+     "type": "array",
+     "maxItems": 4,
+     "description": "Evidence classes that may be shown pre-selected, always with the class; never none.",
+     "items": {
+      "enum": [
+       "declared",
+       "previously-reviewed",
+       "project-default",
+       "inferred"
+      ]
+     }
+    },
+    "canonical": {
+     "anyOf": [
+      {
+       "type": "null"
+      },
+      {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9_]{0,31}$"
+      }
+     ],
+     "description": "The column name the reader looks for."
+    },
+    "osdu": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 120
+    },
+    "aliases": {
+     "type": "array",
+     "maxItems": 24,
+     "items": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40
+     }
+    },
+    "kind": {
+     "const": "number"
+    },
+    "dimension": {
+     "enum": [
+      "length",
+      "time",
+      "velocity",
+      "angle",
+      "dimensionless"
+     ]
+    },
+    "bounds": {
+     "$ref": "#/$defs/Bounds"
+    },
+    "increasing": {
+     "type": "boolean"
+    },
+    "multiple": {
+     "$ref": "#/$defs/Multiple"
+    }
+   }
+  },
+  "CoordinateField": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "name",
+    "label",
+    "noun",
+    "kind",
+    "required",
+    "blank",
+    "prefill",
+    "canonical",
+    "aliases",
+    "axis"
+   ],
+   "properties": {
+    "name": {
+     "type": "string",
+     "pattern": "^[a-z][a-z0-9_]{0,31}$"
+    },
+    "label": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 60
+    },
+    "noun": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 60
+    },
+    "short": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 30
+    },
+    "description": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 240
+    },
+    "required": {
+     "type": "boolean",
+     "description": "The column must be chosen."
+    },
+    "blank": {
+     "enum": [
+      "not-allowed",
+      "null"
+     ],
+     "description": "A blank cell is a problem, or a missing value."
+    },
+    "prefill": {
+     "type": "array",
+     "maxItems": 4,
+     "description": "Evidence classes that may be shown pre-selected, always with the class; never none.",
+     "items": {
+      "enum": [
+       "declared",
+       "previously-reviewed",
+       "project-default",
+       "inferred"
+      ]
+     }
+    },
+    "canonical": {
+     "anyOf": [
+      {
+       "type": "null"
+      },
+      {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9_]{0,31}$"
+      }
+     ],
+     "description": "The column name the reader looks for."
+    },
+    "osdu": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 120
+    },
+    "aliases": {
+     "type": "array",
+     "maxItems": 24,
+     "items": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40
+     }
+    },
+    "kind": {
+     "const": "coordinate"
+    },
+    "axis": {
+     "enum": [
+      "x",
+      "y"
+     ]
+    }
+   }
+  },
+  "Bounds": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "min",
+    "min_inclusive",
+    "max",
+    "max_inclusive"
+   ],
+   "properties": {
+    "min": {
+     "anyOf": [
+      {
+       "type": "null"
+      },
+      {
+       "type": "number"
+      }
+     ]
+    },
+    "min_inclusive": {
+     "type": "boolean"
+    },
+    "max": {
+     "anyOf": [
+      {
+       "type": "null"
+      },
+      {
+       "type": "number"
+      }
+     ]
+    },
+    "max_inclusive": {
+     "type": "boolean"
+    }
+   }
+  },
+  "Multiple": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "max",
+    "name_pattern"
+   ],
+   "properties": {
+    "max": {
+     "type": "integer",
+     "minimum": 1,
+     "maximum": 64
+    },
+    "name_pattern": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 120
+    }
+   }
+  },
+  "ColumnRow": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "name",
+    "label",
+    "kind"
+   ],
+   "properties": {
+    "name": {
+     "enum": [
+      "unit",
+      "quantity",
+      "missing"
+     ]
+    },
+    "label": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 60
+    },
+    "kind": {
+     "enum": [
+      "choice",
+      "text"
+     ]
+    },
+    "from": {
+     "const": "ophiolite.quantities/1"
+    },
+    "max_length": {
+     "type": "integer",
+     "minimum": 1,
+     "maximum": 128
+    }
+   }
+  },
+  "Value": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "value",
+    "label"
+   ],
+   "properties": {
+    "value": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 40
+    },
+    "label": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 60
+    }
+   }
+  },
+  "Declaration": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "name",
+    "label",
+    "noun",
+    "kind",
+    "required",
+    "default",
+    "prefill",
+    "applies_to",
+    "values"
+   ],
+   "properties": {
+    "name": {
+     "type": "string",
+     "pattern": "^[a-z][a-z0-9_]{0,31}$"
+    },
+    "label": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 60
+    },
+    "noun": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 60
+    },
+    "description": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 240
+    },
+    "kind": {
+     "enum": [
+      "choice",
+      "unit",
+      "crs",
+      "text",
+      "number"
+     ]
+    },
+    "dimension": {
+     "enum": [
+      "length",
+      "time",
+      "velocity",
+      "angle",
+      "dimensionless"
+     ]
+    },
+    "accepts": {
+     "enum": [
+      "menu-only",
+      "unit-text",
+      "epsg-code"
+     ]
+    },
+    "max_length": {
+     "type": "integer",
+     "minimum": 1,
+     "maximum": 128
+    },
+    "required": {
+     "type": "boolean"
+    },
+    "default": {
+     "anyOf": [
+      {
+       "type": "null"
+      },
+      {
+       "type": "string",
+       "minLength": 1,
+       "maxLength": 40
+      }
+     ],
+     "description": "null: Not stated."
+    },
+    "prefill": {
+     "type": "array",
+     "maxItems": 4,
+     "items": {
+      "enum": [
+       "declared",
+       "previously-reviewed",
+       "project-default",
+       "inferred"
+      ]
+     }
+    },
+    "applies_to": {
+     "type": "array",
+     "items": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,31}$"
+     }
+    },
+    "values": {
+     "type": "array",
+     "maxItems": 24,
+     "items": {
+      "$ref": "#/$defs/Value"
+     }
+    },
+    "osdu": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 120
+    }
+   }
+  }
+ }
+}
