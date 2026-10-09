@@ -72,9 +72,10 @@ class CurveSet:
 
 from .locations import LocationClient  # noqa: E402
 from .sources import SourceClient  # noqa: E402
+from .checks import CheckClient  # noqa: E402
 
 
-class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: wells() and extent(); E50a: sources()
+class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient):  # E29: wells() and extent(); E50a: sources(); E96: checks
     def __init__(self,url,project,credential=None,http=None):
         self.url=origin(url)
         if not isinstance(project,str) or not project:raise Refused('Choose a project.')
