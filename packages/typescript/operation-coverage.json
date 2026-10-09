@@ -324,6 +324,18 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/agents/rerun-link",
+    "function": "postProjectsProjectAgentsRerunLink",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/agents/rerun-offer",
+    "function": "postProjectsProjectAgentsRerunOffer",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/agents/revoke",
     "function": "postProjectsProjectAgentsRevoke",
     "request": "schema",

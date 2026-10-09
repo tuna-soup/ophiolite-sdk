@@ -3762,6 +3762,294 @@
         }
       }
     },
+    "/api/v1/projects/{project}/agents/rerun-link": {
+      "post": {
+        "summary": "Record that your run of results/remake-run was run again from what this plan produced",
+        "description": "Scope write; accepted principals: session; project extractor top.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "plan": {
+                      "title": "Plan",
+                      "type": "string"
+                    },
+                    "execution_id": {
+                      "title": "Execution Id",
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "title": "Created At",
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "plan",
+                    "execution_id",
+                    "created_at"
+                  ],
+                  "title": "RerunLinked",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "E95 C5: your results/remake-run execution was run again from what this plan produced.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "plan": {
+                    "title": "Plan",
+                    "type": "string"
+                  },
+                  "execution_id": {
+                    "title": "Execution Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "plan",
+                  "execution_id"
+                ],
+                "title": "RerunLink",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/agents/rerun-offer": {
+      "post": {
+        "summary": "Whether the result an agent's plan produced can be run again by you, in the reason's own words; stores nothing",
+        "description": "Scope read; accepted principals: session; project extractor top.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "eligible": {
+                      "title": "Eligible",
+                      "type": "boolean"
+                    },
+                    "reason": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "Why not, in the words of results/remake-run (or of the plan having no result)",
+                      "title": "Reason"
+                    },
+                    "asset_id": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Asset Id"
+                    },
+                    "revision": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Revision"
+                    }
+                  },
+                  "required": [
+                    "eligible"
+                  ],
+                  "title": "RerunOffered",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "E95 C5: may the result this plan produced be run again by you (stores nothing).",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "plan": {
+                    "title": "Plan",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "plan"
+                ],
+                "title": "RerunOffer",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/agents/revoke": {
       "post": {
         "summary": "Revoke one of your agents",
@@ -89426,6 +89714,14 @@
                 "type": "null"
               }
             ]
+          },
+          "reruns": {
+            "description": "E95 C5: the delegator's runs again from this plan's result, oldest first",
+            "items": {
+              "$ref": "#/components/schemas/TimelineRerun"
+            },
+            "title": "Reruns",
+            "type": "array"
           }
         },
         "required": [
@@ -89442,6 +89738,49 @@
           "result"
         ],
         "title": "TimelinePlan",
+        "type": "object"
+      },
+      "TimelineRerun": {
+        "additionalProperties": false,
+        "description": "E95 C5: a person's run of the result again, linked to this plan (\"Run again from\").",
+        "properties": {
+          "execution_id": {
+            "title": "Execution Id",
+            "type": "string"
+          },
+          "by": {
+            "title": "By",
+            "type": "string"
+          },
+          "by_name": {
+            "description": "The person's name, or \"Not recorded\"; never the id",
+            "title": "By Name",
+            "type": "string"
+          },
+          "at": {
+            "title": "At",
+            "type": "number"
+          },
+          "state": {
+            "description": "The E94 execution's state",
+            "title": "State",
+            "type": "string"
+          },
+          "words": {
+            "description": "\"Done by <person>, run again from <agent>'s request\"; the reader adds the date",
+            "title": "Words",
+            "type": "string"
+          }
+        },
+        "required": [
+          "execution_id",
+          "by",
+          "by_name",
+          "at",
+          "state",
+          "words"
+        ],
+        "title": "TimelineRerun",
         "type": "object"
       },
       "TimelineResult": {
