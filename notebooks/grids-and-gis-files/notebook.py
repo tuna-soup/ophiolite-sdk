@@ -33,7 +33,7 @@ client = connect()
 L_SHAPE = [[540000, 6160000], [544000, 6160000], [544000, 6162000], [542000, 6162000], [542000, 6170000], [540000, 6170000], [540000, 6160000]]
 RING = [[546000, 6160000], [550000, 6160000], [550000, 6164000], [546000, 6164000], [546000, 6160000]]
 HOLE = [[547000, 6161000], [547000, 6163000], [549000, 6163000], [549000, 6161000], [547000, 6161000]]  # clockwise, as GeoJSON holes are
-collection = {'type': 'FeatureCollection', 'features': [
+collection = {'type': 'FeatureCollection', 'crs': {'type': 'name', 'properties': {'name': 'urn:ogc:def:crs:EPSG::23031'}}, 'features': [
     {'type': 'Feature', 'geometry': {'type': 'Polygon', 'coordinates': [L_SHAPE]}, 'properties': {'FIELD_CODE': 'ELL', 'WELLS': 3}},
     {'type': 'Feature', 'geometry': {'type': 'Polygon', 'coordinates': [RING, HOLE]}, 'properties': {'FIELD_CODE': 'RING', 'WELLS': 1}}]}
 print(len(collection['features']), 'features:', [f['properties']['FIELD_CODE'] for f in collection['features']])
@@ -60,9 +60,11 @@ inside = sum(Outline(ring).contains_point((548000, 6162000)) for ring in rings) 
 print('Wrote grids-and-gis-files.png; the hole is', 'filled' if inside else 'empty')
 # %% [markdown]
 # ## What the file leaves open
-# A GeoJSON file of these coordinates does not say its coordinate system, so it is declared. A Shapefile states it
-# in its `.prj`, a GeoPackage in its tables; a ZMAP+ grid does not say whether its corner values are cell centres or
-# edges. `declare` answers, by kind, what a kind asks before it is read; anything not declared stays "Not stated".
+# The file names its coordinate system in a `crs` member, as map servers write projected GeoJSON; without one, a
+# GeoJSON file holds longitude and latitude (RFC 7946) and these eastings would be refused. A Shapefile states its
+# system in its `.prj`, a GeoPackage in its tables; a ZMAP+ grid does not say whether its corner values are cell
+# centres or edges. `declare` answers, by kind, what a kind asks before it is read: naming the system the file states
+# agrees with it, naming another is refused, and anything not declared stays "Not stated".
 # %%
 declare = {'geojson/1': {'crs': 'EPSG:23031'}}
 print(declare)
