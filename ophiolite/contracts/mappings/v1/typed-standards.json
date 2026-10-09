@@ -164,6 +164,53 @@
       "osdu": "none: a text format; its normalized profile is ophiolite.time-depth/1",
       "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
       "normalized_profile": "ophiolite.time-depth/1"
+    },
+    {
+      "profile": "ophiolite.feature-set/1",
+      "osdu": "none: no OSDU kind models a general feature collection (data-definitions master 2026-07-17); a field outline is closest to master-data--Field geometry, a fault trace to work-product-component--FaultSystem, neither general",
+      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "energistics": "none (RESQML models interpretations, not generic GIS layers)",
+      "differences": [
+        "Coordinates, axes and ring orientation are kept as stored; nothing is converted (E64 owns conversion).",
+        "The coordinate system is the file's statement, else the uploader's, else unknown; never defaulted.",
+        "M values are dropped and counted as a listed loss, never read as heights."
+      ]
+    },
+    {
+      "profile": "zmap-plus-grid/1",
+      "osdu": "none: a file format; its normalized profile is ophiolite.regular-grid-surface/1",
+      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "normalized_profile": "ophiolite.regular-grid-surface/1"
+    },
+    {
+      "profile": "cps3-ascii-grid/1",
+      "osdu": "none: a file format; its normalized profile is ophiolite.regular-grid-surface/1",
+      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "normalized_profile": "ophiolite.regular-grid-surface/1"
+    },
+    {
+      "profile": "irap-ascii-grid/1",
+      "osdu": "none: a file format; its normalized profile is ophiolite.regular-grid-surface/1",
+      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "normalized_profile": "ophiolite.regular-grid-surface/1"
+    },
+    {
+      "profile": "esri-shapefile/1",
+      "osdu": "none: a file format; its normalized profile is ophiolite.feature-set/1",
+      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "normalized_profile": "ophiolite.feature-set/1"
+    },
+    {
+      "profile": "ogc-geopackage/1",
+      "osdu": "none: a file format; its normalized profile is ophiolite.feature-set/1",
+      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "normalized_profile": "ophiolite.feature-set/1"
+    },
+    {
+      "profile": "geojson/1",
+      "osdu": "none: a file format; its normalized profile is ophiolite.feature-set/1",
+      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "normalized_profile": "ophiolite.feature-set/1"
     }
   ],
   "licences": "The standards are referenced by name only; no schema text is copied."

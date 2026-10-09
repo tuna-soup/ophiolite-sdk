@@ -55,6 +55,71 @@ class Reference(Contract):
     revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     profile: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] = Field(...)
 
+class FeatureSet(Contract):
+    representation: Literal['normalized'] = Field(...)
+    source: Reference = Field(...)
+    source_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    interpretation: TypedInterpretation | PackageInterpretation = Field(...)
+    schema_: Literal['ophiolite.feature-set/1'] = Field(..., alias='schema')
+    context: FeatureContext = Field(...)
+    features: Annotated[list[Feature], Field(min_length=1, max_length=50000)] = Field(...)
+
+class Feature(Contract):
+    index: Annotated[int, Field(ge=0, lt=50000)] = Field(...)
+    geometry: Geometry | None = Field(...)
+    properties: dict[str, Annotated[str, Field(max_length=10000)] | bool | int | float | None] = Field(...)
+
+class FeatureContext(Contract):
+    type: Literal['feature-set'] = Field(...)
+    crs: Annotated[str, Field(pattern='^(EPSG:[0-9]{4,6}|OGC:CRS84|unknown)$')] = Field(...)
+    axes: Literal['easting-northing', 'northing-easting', 'longitude-latitude', 'latitude-longitude', 'unknown'] = Field(...)
+    xy_unit: Annotated[str, Field(pattern='^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$')] = Field(...)
+    z_unit: Annotated[str, Field(pattern='^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$')] = Field(...)
+    z_meaning: Literal['depth', 'elevation', 'time', 'unknown'] = Field(...)
+    positive: Literal['up', 'down', 'unknown'] = Field(...)
+    vertical_datum: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+    encoding: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+    count: Annotated[int, Field(ge=1, le=50000)] = Field(...)
+    vertex_count: Annotated[int, Field(ge=0, le=500000)] = Field(...)
+    geometry_types: Annotated[list[Literal['Point', 'MultiPoint', 'LineString', 'MultiLineString', 'Polygon', 'MultiPolygon']], Field(max_length=6)] = Field(...)
+    has_z: bool = Field(...)
+    null_geometry_count: Annotated[int, Field(ge=0, le=50000)] = Field(...)
+    x_range: Annotated[list[float], Field(min_length=2, max_length=2)] | None = Field(...)
+    y_range: Annotated[list[float], Field(min_length=2, max_length=2)] | None = Field(...)
+    z_range: Annotated[list[float], Field(min_length=2, max_length=2)] | None = Field(...)
+    fields: Annotated[list[FeatureField], Field(max_length=64)] = Field(...)
+    layer: Annotated[str, Field(min_length=1, max_length=128)] | None = Field(None)
+    layer_title: Annotated[str, Field(min_length=1, max_length=128)] | None = Field(None)
+    fidelity: Fidelity = Field(...)
+
+class FeatureField(Contract):
+    name: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+    source_name: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+    kind: Literal['text', 'integer', 'number', 'date', 'boolean'] = Field(...)
+
+class Fidelity(Contract):
+    status: Literal['assessed'] = Field(...)
+    preserved: Annotated[list[Annotated[str, Field(min_length=1, max_length=512)]], Field(max_length=16)] = Field(...)
+    losses: Annotated[list[Annotated[str, Field(min_length=1, max_length=512)]], Field(max_length=16)] = Field(...)
+    unknown_context: Annotated[list[Annotated[str, Field(min_length=1, max_length=128)]], Field(max_length=16)] = Field(...)
+    decisions: Annotated[list[Annotated[str, Field(min_length=1, max_length=512)]], Field(max_length=64)] | None = Field(None)
+
+class Geometry(Contract):
+    type: Literal['Point', 'MultiPoint', 'LineString', 'MultiLineString', 'Polygon', 'MultiPolygon'] = Field(...)
+    coordinates: Annotated[list[float], Field(min_length=2, max_length=3)] | list[Annotated[list[float], Field(min_length=2, max_length=3)]] | list[list[Annotated[list[float], Field(min_length=2, max_length=3)]]] | list[list[list[Annotated[list[float], Field(min_length=2, max_length=3)]]]] = Field(...)
+
+class PackageInterpretation(Contract):
+    reader: Literal['asset_connectors.feature_files/1'] = Field(...)
+    mapping: Literal['feature-set/1'] = Field(...)
+    parsing_policy: Literal['package-strict/1'] = Field(...)
+    null_policy: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+
+class TypedInterpretation(Contract):
+    reader: Literal['asset_connectors.typed_reader/1', 'asset_connectors.feature_files/1'] = Field(...)
+    mapping: Literal['well-tops/1', 'trajectory/1', 'regular-grid-surface/1', 'triangulated-surface/1', 'point-set/1', 'polyline-set/1', 'seismic-volume/1', 'well-location/1', 'wavelet/1', 'model-section/1', 'seismic-section/1', 'time-depth/1', 'feature-set/1'] = Field(...)
+    parsing_policy: Literal['typed-strict/1'] = Field(...)
+    null_policy: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+
 class GridSurface(Contract):
     representation: Literal['normalized'] = Field(...)
     source: Reference = Field(...)
@@ -64,13 +129,6 @@ class GridSurface(Contract):
     context: GridContext = Field(...)
     values: Annotated[list[float | None], Field(min_length=1, max_length=4194304)] = Field(...)
     nodata_value: float | None = Field(...)
-
-class Fidelity(Contract):
-    status: Literal['assessed'] = Field(...)
-    preserved: Annotated[list[Annotated[str, Field(min_length=1, max_length=512)]], Field(max_length=16)] = Field(...)
-    losses: Annotated[list[Annotated[str, Field(min_length=1, max_length=512)]], Field(max_length=16)] = Field(...)
-    unknown_context: Annotated[list[Annotated[str, Field(min_length=1, max_length=128)]], Field(max_length=16)] = Field(...)
-    decisions: Annotated[list[Annotated[str, Field(min_length=1, max_length=512)]], Field(max_length=64)] | None = Field(None)
 
 class GridContext(Contract):
     type: Literal['regular-grid-surface'] = Field(...)
@@ -90,12 +148,6 @@ class GridContext(Contract):
     missing_count: Annotated[int, Field(ge=0, le=4194304)] = Field(...)
     value_range: Annotated[list[float], Field(min_length=2, max_length=2)] | None = Field(...)
     fidelity: Fidelity = Field(...)
-
-class TypedInterpretation(Contract):
-    reader: Literal['asset_connectors.typed_reader/1'] = Field(...)
-    mapping: Literal['well-tops/1', 'trajectory/1', 'regular-grid-surface/1', 'triangulated-surface/1', 'point-set/1', 'polyline-set/1', 'seismic-volume/1', 'well-location/1', 'wavelet/1', 'model-section/1', 'seismic-section/1', 'time-depth/1'] = Field(...)
-    parsing_policy: Literal['typed-strict/1'] = Field(...)
-    null_policy: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
 
 class ImportRecipe(Contract):
     schema_: Literal['ophiolite.import-recipe/1'] = Field(..., alias='schema')
@@ -349,8 +401,8 @@ class ScientificAsset(Contract):
     custodian: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(...)
     source_reference: Reference | None = Field(...)
     profile: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] = Field(...)
-    scientific: ScientificContext | TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext | RecipePointContext | WellLocationContext | WaveletContext | ModelSectionContext | SeismicSectionContext | TimeDepthContext = Field(...)
-    interpretation: Interpretation | TypedInterpretation | RecipeInterpretation = Field(...)
+    scientific: ScientificContext | TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext | RecipePointContext | WellLocationContext | WaveletContext | ModelSectionContext | SeismicSectionContext | TimeDepthContext | FeatureContext = Field(...)
+    interpretation: Interpretation | TypedInterpretation | RecipeInterpretation | PackageInterpretation = Field(...)
     interpretation_evidence: Literal['live', 'recorded', 'recorded-differs', 'not-recorded'] = Field('live')
     recorded_interpretation: RecordedInterpretation | None = Field(None)
     representations: Annotated[list[Representation], Field(min_length=2, max_length=8)] = Field(...)
@@ -474,7 +526,7 @@ class PackageMemberRecord(Contract):
 class PackageRecord(Contract):
     package_digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
     members: Annotated[list[PackageMemberRecord], Field(min_length=1, max_length=8)] = Field(...)
-    recipe: RecipePin = Field(...)
+    recipe: RecipePin | None = Field(...)
     status: Literal['decided', 'needs-decision'] = Field(...)
     unresolved: Annotated[list[Literal['crs', 'xy_unit', 'z_unit', 'z_meaning', 'positive', 'vertical_datum']], Field(max_length=6)] = Field(...)
 
@@ -510,7 +562,7 @@ class Relationships(Contract):
 class Representation(Contract):
     id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     kind: Literal['original', 'captured-result', 'derived-artifact', 'normalized'] = Field(...)
-    media_type: Literal['application/x-las', 'application/json', 'text/csv', 'text/plain', 'application/octet-stream', 'image/tiff'] = Field(...)
+    media_type: Literal['application/x-las', 'application/json', 'text/csv', 'text/plain', 'application/octet-stream', 'image/tiff', 'application/x-esri-shapefile', 'application/geopackage+sqlite3', 'application/geo+json'] = Field(...)
     profile: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] = Field(...)
     bytes: Annotated[int, Field(ge=0, le=68719476736)] = Field(...)
     sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
@@ -760,7 +812,7 @@ class TriangulatedSurface(Contract):
     attributes: Annotated[list[Attribute], Field(max_length=16)] = Field(...)
 
 class TypedContext(Contract):
-    context: Annotated[TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext | WellLocationContext | WaveletContext | ModelSectionContext | SeismicSectionContext | TimeDepthContext, Field(discriminator='type')] = Field(...)
+    context: Annotated[TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext | WellLocationContext | WaveletContext | ModelSectionContext | SeismicSectionContext | TimeDepthContext | FeatureContext, Field(discriminator='type')] = Field(...)
 
 class Wavelet(Contract):
     representation: Literal['normalized'] = Field(...)
@@ -931,7 +983,7 @@ class BundleAssetV2(Contract):
     parent_visibility: Literal['complete', 'restricted'] = Field(...)
     omissions: list[str] = Field(...)
     losses: list[str] = Field(...)
-    type: Literal['well-log', 'well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-slice', 'wavelet', 'model-section', 'seismic-section', 'time-depth'] = Field(...)
+    type: Literal['well-log', 'well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-slice', 'wavelet', 'model-section', 'seismic-section', 'time-depth', 'feature-set'] = Field(...)
     relationships: BundleAssetV2Relationships = Field(None)
     original: BundleAssetV2Original = Field(None)
     slices: Annotated[list[BundleSliceV2], Field(min_length=1, max_length=64)] = Field(None)
@@ -1034,6 +1086,7 @@ class ContractProfile(Contract):
     normalized_profile: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$')] = Field(None)
     context_schema: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$')] = Field(None)
     recipe_schema: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$')] = Field(None)
+    package: Literal['without-recipe'] = Field(None)
     representation_rules: RepresentationRules = Field(None)
     interpretation: InterpretationIdentity = Field(None)
     mappings: list[Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$')]] = Field(None)
@@ -1409,10 +1462,16 @@ ApplicationCurve.model_rebuild()
 CurveContext.model_rebuild()
 Interpretation.model_rebuild()
 Reference.model_rebuild()
-GridSurface.model_rebuild()
+FeatureSet.model_rebuild()
+Feature.model_rebuild()
+FeatureContext.model_rebuild()
+FeatureField.model_rebuild()
 Fidelity.model_rebuild()
-GridContext.model_rebuild()
+Geometry.model_rebuild()
+PackageInterpretation.model_rebuild()
 TypedInterpretation.model_rebuild()
+GridSurface.model_rebuild()
+GridContext.model_rebuild()
 ImportRecipe.model_rebuild()
 Declare.model_rebuild()
 MarkMissing.model_rebuild()

@@ -5,6 +5,15 @@
 Supported 0.x client over preview contracts, installable from reviewed source.
 No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
 
+- Grids and GIS files (E56, preview API): `client.read_data` returns `FeatureSet` for map features from a Shapefile,
+  a GeoPackage layer or a GeoJSON file (`features` in file order with coordinates as stored, `fields`, `to_frame()`
+  with one row per feature), checked offline against the server's rules; ZMAP+, CPS-3 and IRAP grids read as
+  `GridSurface`. `upload` answers a question a file asks only once it is read (a GeoPackage layer, a grid's corners)
+  from `declare` and sends it again, at most three sends; `declare` also takes a file's path,
+  `{'a.gpkg': {'ogc-geopackage/1': {'layer': 'fields'}}}`, which wins over its kind field by field. An open file is
+  refused with a sentence; pass a path. Portable bundles carry GeoJSON and GeoPackage feature sets and the new grid
+  formats at 2.7.0; a Shapefile-read feature set is not exported yet (its companion files), and a CPS-3 grid is
+  imported by uploading its file again.
 - Well files (E57, preview API): `client.read_data` returns `TimeDepth` for a time-depth table (`pairs` in file order,
   `context` with the declared depth type, time kind, units and datum, `to_frame()` with a nullable `Float64` velocity
   so an empty cell stays missing). `ophiolite.writers.write_time_depth(pairs, *, depth_type, depth_unit, time_kind,

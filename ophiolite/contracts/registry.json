@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.25.0",
+  "version": "1.26.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -29,7 +29,7 @@
     },
     {
       "id": "ophiolite.contract-profile/1",
-      "version": "1.5.0",
+      "version": "1.6.0",
       "lifecycle": "preview",
       "path": "profile-schema.json",
       "title": "ContractProfile",
@@ -37,7 +37,7 @@
     },
     {
       "id": "ophiolite.scientific-asset/1",
-      "version": "1.16.0",
+      "version": "1.17.0",
       "lifecycle": "preview",
       "path": "assets/v1/schema.json",
       "title": "ScientificAsset",
@@ -69,11 +69,11 @@
     },
     {
       "id": "ophiolite.typed-context/1",
-      "version": "1.5.0",
+      "version": "1.6.0",
       "lifecycle": "preview",
       "path": "assets/v1/typed-context-schema.json",
       "title": "TypedContext",
-      "description": "Observed and declared context of a typed asset (tops, trajectory, grid, triangulated surface, point set, fault sticks, seismic volume, wavelet, rock model section, seismic section, time-depth table) with its fidelity report."
+      "description": "Observed and declared context of a typed asset (tops, trajectory, grid, triangulated surface, point set, fault sticks, seismic volume, wavelet, rock model section, seismic section, time-depth table, feature set) with its fidelity report."
     },
     {
       "id": "ophiolite.well-tops/1",
@@ -157,11 +157,11 @@
     },
     {
       "id": "ophiolite.portable-bundle/2",
-      "version": "2.6.0",
+      "version": "2.7.0",
       "lifecycle": "preview",
       "path": "bundles/v2/manifest-schema.json",
       "title": "PortableBundleManifestV2",
-      "description": "Portable bundle 2: exact selected revisions of well logs, well tops, trajectories, regular-grid surfaces, meshes, point sets, fault sticks, seismic slices, wavelets, rock model sections, seismic sections and time-depth tables with files, digests, served context, permitted lineage and relationships."
+      "description": "Portable bundle 2: exact selected revisions of well logs, well tops, trajectories, regular-grid surfaces, meshes, point sets, fault sticks, seismic slices, wavelets, rock model sections, seismic sections, time-depth tables and feature sets with files, digests, served context, permitted lineage and relationships."
     },
     {
       "id": "ophiolite.polyline-set/1",
@@ -218,6 +218,14 @@
       "path": "assets/v1/time-depth-schema.json",
       "title": "TimeDepth",
       "description": "A normalized time-depth table: depth and time pairs in file order, both strictly increasing, with the stated velocity column, the declared depth type, time kind, units and datum, source reference, digest and reader identity (E57)."
+    },
+    {
+      "id": "ophiolite.feature-set/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/feature-set-schema.json",
+      "title": "FeatureSet",
+      "description": "A normalized feature set: every feature of one map layer in file order with stored coordinates, attribute values by field, the stated or declared coordinate system and axes, source reference, digest and reader identity (E56)."
     },
     {
       "id": "ophiolite.seismic-volume/1",
@@ -580,6 +588,62 @@
       "description": "Depth and time pairs of one wellbore in file order, both strictly increasing, with the velocity column as stated and the declared depth type, time kind, units and datum; nothing is interpolated or converted.",
       "lifecycle": "preview",
       "path": "profiles/v1/time-depth.json"
+    },
+    {
+      "id": "zmap-plus-grid/1",
+      "kind": "source",
+      "display_name": "Horizon grid (ZMAP+)",
+      "description": "A regular grid of surface values in the ZMAP+ ASCII grid format, kept byte for byte as the uploader provided it; registration is declared, never inferred.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/zmap-plus-grid.json"
+    },
+    {
+      "id": "cps3-ascii-grid/1",
+      "kind": "source",
+      "display_name": "Horizon grid (CPS-3 ASCII)",
+      "description": "A regular grid of surface values in the CPS-3 ASCII grid format, kept byte for byte; registration and the in-column direction are declared, never inferred.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/cps3-ascii-grid.json"
+    },
+    {
+      "id": "irap-ascii-grid/1",
+      "kind": "source",
+      "display_name": "Horizon grid (IRAP classic ASCII)",
+      "description": "A regular grid of surface values in the IRAP classic ASCII grid format, kept byte for byte as the uploader provided it.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/irap-ascii-grid.json"
+    },
+    {
+      "id": "esri-shapefile/1",
+      "kind": "source",
+      "display_name": "Map features (Shapefile)",
+      "description": "An ESRI Shapefile: the .shp with its .dbf and the .shx, .prj, .cpg or .cst beside it, kept byte for byte and read without an import recipe; coordinates, axes and ring order as stored.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/esri-shapefile.json"
+    },
+    {
+      "id": "ogc-geopackage/1",
+      "kind": "source",
+      "display_name": "Map features (GeoPackage)",
+      "description": "One feature layer of an OGC GeoPackage 1.2 to 1.4 file, kept byte for byte; coordinates, axes and ring order as stored.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/ogc-geopackage.json"
+    },
+    {
+      "id": "geojson/1",
+      "kind": "source",
+      "display_name": "Map features (GeoJSON)",
+      "description": "A GeoJSON feature or feature collection (RFC 7946, or the older form whose crs member names EPSG), kept byte for byte; coordinates as stored.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/geojson.json"
+    },
+    {
+      "id": "ophiolite.feature-set/1",
+      "kind": "normalized",
+      "display_name": "Normalized feature set",
+      "description": "Every feature of one map layer in file order with its stored coordinates (axes and ring orientation as stored), its attribute values by field and the stated or declared coordinate system; nothing is converted.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/feature-set.json"
     }
   ],
   "documents": [

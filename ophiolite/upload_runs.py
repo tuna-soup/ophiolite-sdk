@@ -30,6 +30,7 @@ from .models.api import UploadCheckAnswer, UploadRun, UploadRunsListAnswer, Uplo
 
 HEAD = 65536
 MAX_FILES = 500
+SENDS = 3  # E56 (N8): a question a file asks only once it is read is answered and the file sent again, at most three sends in all
 ZIP_RATIO = 100  # an entry, or the whole zip, unpacked to more than this many times its packed size is refused
 ZIP_TOTAL = 512 * 1024 * 1024
 LINKS = 50  # links per associate call
@@ -123,17 +124,43 @@ def readers():
     return json.loads((Path(__file__).parent / 'contracts/connectors/v1/readers.json').read_text())['readers']
 
 
-def checked_declarations(declare):
-    """E85: `declare` names kinds and the items each kind can be told; anything else is refused before anything is sent."""
+def checked_declarations(declare, folder=None):
+    """E85: `declare` names kinds and the items each kind can be told; anything else is refused before anything is sent.
+    E56 (L1): a key that names a file of the folder (its path, or its name when only one file has it) holds
+    {kind: {field: value}} for that file alone and wins over the kind's values."""
     entries = {e['profile']: e for e in readers()}
-    for kind, values in (declare or {}).items():
+    def kind_values(kind, values):
         entry = entries.get(kind)
         if entry is None: raise Refused('No kind of file is named %s. Kinds: %s.' % (kind[:80], ', '.join(entries)))
         known = [f['key'] for f in entry['declared']]
         unknown = sorted(set(values) - set(known))
         if unknown:
             raise Refused('%s files do not take %s; they take %s.' % (entry['label'], ', '.join(k[:40] for k in unknown[:4]), ', '.join(known) if known else 'no declarations'))
+    for key, values in (declare or {}).items():
+        if key in entries or not isinstance(values, dict) or not all(isinstance(v, dict) for v in values.values()) or not values:
+            kind_values(key, values); continue
+        for kind, inner in values.items(): kind_values(kind, inner)
+        if folder is not None and _named(folder.files, key) is None:
+            raise Refused('No file of this upload is named %s; name a file by its path in the folder.' % key[:160])
     return declare
+
+
+def _named(files, key):
+    """The path of the one file `key` names (its path, else its name if no other file has it), or None."""
+    paths = [f.path for f in files]
+    if key in paths: return key
+    same = [p for p in paths if PurePosixPath(p).name == key]
+    return same[0] if len(same) == 1 else None
+
+
+def declared_for(declare, files, item):
+    """The values `declare` gives one file: its kind's, with its own (by path) winning field by field; None if neither names it."""
+    kinds = {e['profile'] for e in readers()}
+    own = [values[item['profile']] for key, values in (declare or {}).items()
+           if key not in kinds and _named(files, key) == item['path'] and item['profile'] in values]
+    general = (declare or {}).get(item['profile'])
+    if not own and general is None: return None
+    return {**(general or {}), **(own[0] if own else {})}
 
 
 def is_address(path):
@@ -297,33 +324,51 @@ class UploadRuns:
         `progress(report)` is called after each file."""
         if rights_confirmed is not True:
             raise ValidationFailed(['Confirm that you may retain these files, derive results and share them within the audience.'])
+        if not isinstance(path, (str, os.PathLike)):  # E56 (F1): a path is read and digested here; an open stream is not
+            raise Refused('Pass the path of a file, a folder or a .zip, or an https address; an open file is not read. Nothing was sent.')
         checked_declarations(declare)
         folder = self.fetched(path) if is_address(path) else self.open(path)
+        checked_declarations(declare, folder)
         run = None if new else self.unfinished(folder)
         if run is None:
             body = {'command_id': uuid.uuid4().hex, 'folder_name': folder.name[:160], 'files': folder.listing(), 'attribution': attribution,
                     'well_notes': well_notes, 'audience': list(audience), 'rights_confirmed': True, **({'address': folder.address} if folder.address else {})}
             run = self._call('start', body, UploadRun)['run_id']
         report = self.send(run, folder, progress)
-        if declare or skip_decisions:
-            for kind, values in (declare or {}).items():
-                ordinals = [i['ordinal'] for i in report.items if i['state'] == 'needs-decision' and i['reason_code'] == 'needs-declarations' and i['profile'] == kind]
-                if ordinals: self.decide(run, ordinals, 'declare', values)
-            if skip_decisions:
-                ordinals = [i['ordinal'] for i in self.status(run).items if i['state'] == 'needs-decision' and i['role'] == 'primary']
-                if ordinals: self.decide(run, ordinals, 'skip')
+        for _ in range(SENDS - 1):  # E56 (N8): a file may ask again once it is read (a layer, corners); answered from `declare`
+            if not self.answer(run, report, declare, folder): break
+            report = self.send(run, folder, progress)
+        if skip_decisions:
+            ordinals = [i['ordinal'] for i in self.status(run).items if i['state'] == 'needs-decision' and i['role'] == 'primary']
+            if ordinals: self.decide(run, ordinals, 'skip')
             report = self.send(run, folder, progress)
         if associate_matches:
             links = [(i['ordinal'], i['proposal']['entity_id']) for i in report.items if i.get('proposal')]
             if links: report, _ = self.associate(run, links)
         return report
 
+    def answer(self, run, report, declare, folder):
+        """Answer from `declare` each file that waits for declarations and is told something it asks; True if any was."""
+        answered = False
+        for item in report.items:
+            if item['state'] != 'needs-decision' or item['reason_code'] != 'needs-declarations' or item['role'] != 'primary': continue
+            values = declared_for(declare, folder.files, item)
+            if values is None: continue
+            asks = item.get('asks')
+            if asks is not None:  # asked after it was read: what it asks and is known adds to what it was told before
+                values = {k: v for k, v in values.items() if k in {a['key'] for a in asks}}
+                if not values: continue
+            self.decide(run, [item['ordinal']], 'declare', values); answered = True
+        return answered
+
     def unfinished(self, folder):
-        """The id of your unfinished upload of this folder (the same name, paths, sizes and digests), or None."""
+        """The id of your unfinished upload of this folder (the same name, paths, sizes and digests), or None. An upload
+        whose files all ended but one still waits for a decision is unfinished too (E56, N8): `declare` may answer it now."""
         listing = folder.listing()
         for summary in self.list():
-            if summary['state'] != 'open' or summary['folder_name'] != folder.name[:160]: continue
+            if summary['state'] not in ('open', 'closed') or summary['folder_name'] != folder.name[:160]: continue
             view = self.status(summary['run_id']).view
+            if summary['state'] == 'closed' and not any(i['state'] == 'needs-decision' and i['role'] == 'primary' for i in view['items']): continue
             if [{'path': i['path'], 'bytes': i['bytes'], 'sha256': i['sha256']} for i in view['items']] == listing: return summary['run_id']
         return None
 

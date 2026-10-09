@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/profile-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.contract-profile/1",
-    "version": "1.5.0",
+    "version": "1.6.0",
     "lifecycle": "preview"
   },
   "title": "ContractProfile",
@@ -90,6 +90,13 @@
       "type": "string",
       "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
       "description": "E23a: the import-recipe schema that reads this source profile."
+    },
+    "package": {
+      "type": "string",
+      "enum": [
+        "without-recipe"
+      ],
+      "description": "E56: this source profile is read from its package members (the primary and its companions) without an import recipe."
     },
     "representation_rules": {
       "$ref": "#/$defs/RepresentationRules"
