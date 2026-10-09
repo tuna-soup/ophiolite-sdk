@@ -145,6 +145,8 @@ def parser():
             whole.add_argument('--project',dest='project',action='store_const',const=True,help='Also share with everyone in this project, including people who join later (derived publications)')
             whole.add_argument('--no-project',dest='project',action='store_const',const=False,help='Stop sharing with everyone in this project; the people named still see it')
             p.add_argument('--dry-run',action='store_true',help='Print the change without sending it or writing anything')
+    tables=sub.add_parser('targets',help='What each type of table needs: its fields, which are required and the choices that describe it (offline)')  # E86
+    tables.add_argument('name',nargs='?',help='One type, for example well-tops')
     bundle=sub.add_parser('bundle',help='Check or summarize a portable bundle offline (no server or account needed)')
     bundle.add_argument('action',choices=['check','show','pack']);bundle.add_argument('path',type=Path);bundle.add_argument('archive',type=Path,nargs='?',help='pack: the .zip to write')
     export=sub.add_parser('export',help='Export exact revisions into a new portable bundle')
@@ -590,6 +592,26 @@ def _local_run(config,work):
     print('Calculation finished. Inspect the outputs before ophiolite publish.')
 
 
+def _targets(args):
+    """E86: the table types (no name), or one type's fields and declarations; --json prints the document itself."""
+    from . import targets
+    if args.name is None:
+        listed=targets.targets()
+        return done(args,'\n'.join(t.target+' - '+t.display_name+(' (waits for '+t.pending.epic+')' if t.pending else '') for t in listed),
+                    {'targets':[{'target':t.target,'display_name':t.display_name,'pending':t.pending.epic if t.pending else None} for t in listed]})
+    try:one=targets.target(args.name)
+    except KeyError as error:
+        message=error.args[0]
+        if args.json:print(json.dumps({'error':{'code':'unknown-target','message':message}},indent=2))
+        else:print(message,file=sys.stderr)
+        raise SystemExit(EXIT['usage'])
+    lines=[one.display_name+': '+one.description]
+    lines+=['  '+f.label+(' (required)' if f.required else '') for f in one.fields]
+    lines+=['  '+d.label+(': '+', '.join(v.label for v in d.values) if getattr(d,'values',None) else '') for d in one.declarations]
+    lines+=['  Each column: '+', '.join(c.label for c in one.column_rows)] if one.column_rows else []
+    return done(args,'\n'.join(lines),targets.document(args.name))
+
+
 def main(argv=None):
     from . import _client_header
     token=_client_header._NAME.set('ophiolite-cli')  # E93: the command line names itself on every gateway request
@@ -603,6 +625,7 @@ def _main(argv=None):
     if args.command=='init':return _init(args)  # E31: offline; copies packaged files only
     if args.command=='skills':
         return done(args,str(files('ophiolite').joinpath('skills')),{'path':str(files('ophiolite').joinpath('skills'))})
+    if args.command=='targets':return _targets(args)  # E86: offline; reads the packaged contracts only
     if args.command=='bundle':
         # Offline: no configuration, credentials or network are read.
         from .bundle import open_bundle,pack

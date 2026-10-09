@@ -8,6 +8,7 @@ Run from the Platform root with the qualified Connectors on the path:
     PYTHONPATH=services python contracts/tools/generate.py --types    # TypeScript types only
     PYTHONPATH=services python contracts/tools/generate.py --openapi  # OpenAPI snapshot only
     PYTHONPATH=services python contracts/tools/generate.py --readers  # E55: the reader registry mirror only
+    PYTHONPATH=services python contracts/tools/generate.py --targets  # E86: table targets, words, coordinate systems
 
 Pydantic models are the executable source of the structural schemas; this tool
 writes their published form. It never writes under assets/v1/fixtures/frozen/:
@@ -394,6 +395,24 @@ def reader_registry():
     READERS_PATH.write_bytes(readers.raw())
 
 
+TARGETS = {'table-target-schema.json': 'targets/table-target-schema.json',  # E86: served path -> Connectors package path
+           'vocabulary/v1/mapping-check-words.json': 'targets/mapping-check-words.json',
+           'vocabulary/v1/coordinate-systems.json': 'coordinate_systems.json',
+           'vocabulary/v1/coordinate-systems.NOTICE': 'coordinate_systems.NOTICE',
+           **{'targets/v1/%s.json' % name: 'targets/v1/%s.json' % name
+              for name in ('wells', 'well-tops', 'deviation-survey', 'point-set', 'time-depth', 'table')}}
+
+
+def table_targets():
+    """E86: the served copies of Connectors' table-target documents, schema, words and coordinate-system catalogue
+    (with the EPSG notice beside it), byte for byte."""
+    from importlib.resources import files
+    for served, packaged in TARGETS.items():
+        path = CONTRACTS / served
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(files('asset_connectors').joinpath(packaged).read_bytes())
+
+
 def check_complete():
     """E31 P2: refuse an OpenAPI document with a placeholder or missing schema for any operation, media type or
     response status, or one that omits a route the application serves."""
@@ -406,7 +425,8 @@ def check_complete():
     print('OpenAPI document complete')
 
 
-STEPS = {'--schemas': schemas, '--fixtures': fixtures, '--types': types, '--openapi': openapi, '--readers': reader_registry, '--check-complete': check_complete}
+STEPS = {'--schemas': schemas, '--fixtures': fixtures, '--targets': table_targets, '--types': types, '--openapi': openapi,
+         '--readers': reader_registry, '--check-complete': check_complete}  # E86: targets before types (types read their schema)
 
 
 def main(argv):

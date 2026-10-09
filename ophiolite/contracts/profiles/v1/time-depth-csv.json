@@ -28,5 +28,6 @@
     },
     "normalized": 1,
     "total": 2
-  }
+  },
+  "table_target": "ophiolite.table-target/time-depth/1"
 }

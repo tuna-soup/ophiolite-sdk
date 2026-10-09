@@ -9,5 +9,8 @@
   "role": "normalized",
   "media_types": [
     "application/json"
-  ]
+  ],
+  "table_target": {
+    "none": "not-a-table"
+  }
 }
