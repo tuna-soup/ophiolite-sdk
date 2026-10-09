@@ -5,7 +5,7 @@
     "version": "1.0.0-pilot",
     "description": "One public API for every project operation. Three credential kinds reach it: the browser session (opaque HttpOnly cookie plus the X-CSRF-Token proof and, on non-GET requests, the exact Origin), a project-scoped delegate lasting at most five minutes (Bearer oph_api_..., parent session and current native permissions remain mandatory), and a browser-approved provider grant (Bearer provider token plus X-Ophiolite-Application-Grant; capability 1: the scientific read resources and the applications route within its read/write scopes; capability 3 adds reading wells, wellbores and lineage and the LAS upload routes). A request that carries an Authorization header is a machine request and is refused with MACHINE_AUTH_REQUIRED when a cookie or Origin travels with it. Scope and capability are ceilings; every operation runs the same native permission checks whoever calls it. Not a stable SDK or unattended service-account contract.",
     "x-ophiolite-contracts": {
-      "registry_version": "1.26.0",
+      "registry_version": "1.27.0",
       "index": "/api/v1/contracts",
       "served_profiles": [
         "las2/1",
@@ -73816,6 +73816,1820 @@
                   ],
                   "title": "SeismicSlice",
                   "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Versioned error; see README",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error",
+                    "code",
+                    "message",
+                    "remedy",
+                    "docs",
+                    "request_id"
+                  ],
+                  "description": "Every refusal (E31): error is kept for existing clients and equals message; request_id equals the X-Request-Id header.",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "The stable machine-readable code; see docs"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "remedy": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "What the caller can do next"
+                    },
+                    "docs": {
+                      "type": "string",
+                      "description": "The code's anchor on the errors reference page, /docs/reference/errors/#<code>"
+                    },
+                    "request_id": {
+                      "type": "string",
+                      "description": "Equals the X-Request-Id response header; quote it when reporting a failure"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Busy: retry the same exact request after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error",
+                    "code",
+                    "message",
+                    "remedy",
+                    "docs",
+                    "request_id"
+                  ],
+                  "description": "Every refusal (E31): error is kept for existing clients and equals message; request_id equals the X-Request-Id header.",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "The stable machine-readable code; see docs"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "remedy": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "What the caller can do next"
+                    },
+                    "docs": {
+                      "type": "string",
+                      "description": "The code's anchor on the errors reference page, /docs/reference/errors/#<code>"
+                    },
+                    "request_id": {
+                      "type": "string",
+                      "description": "Equals the X-Request-Id response header; quote it when reporting a failure"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "grant",
+          "session"
+        ]
+      }
+    },
+    "/api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/windows": {
+      "get": {
+        "description": "One page of a depth window of a retained revision's stored well curve (ophiolite.curve-window/1): raw samples at level 0, or runs, blocks and missing stretches at levels 1 to 17; at most 2,048 items a page. Only increasing depth axes are windowed (422 incompatible-context otherwise; read the whole curve). A conditional request (If-None-Match with an earlier strong ETag) is authorised first and answers 304 when the ETag is current.",
+        "parameters": [
+          {
+            "name": "project",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "asset",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "revision",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "curve",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The stored value curve (mnemonic); no default is inferred."
+          },
+          {
+            "name": "top",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "description": "Top of the depth window, in the curve's depth unit."
+          },
+          {
+            "name": "base",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "description": "Base of the depth window, in the curve's depth unit."
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 17
+            },
+            "description": "0: raw samples; 1-17: blocks of up to 2^level samples. Exactly one of level and rows."
+          },
+          {
+            "name": "rows",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2048
+            },
+            "description": "Item budget: the server chooses the smallest level whose item count is at most rows (level 17 when none is). Exactly one of level and rows."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The previous page's next; refused with another revision, range, level, shape or reference."
+          },
+          {
+            "name": "reference",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "md",
+                "tvd",
+                "tvdss"
+              ]
+            },
+            "description": "Depth reference; only md is windowed (tvd and tvdss answer 422)."
+          }
+        ],
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authorised window page",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Strong; sha256 of every byte-determining input"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "private, no-cache"
+                }
+              },
+              "Vary": {
+                "schema": {
+                  "type": "string",
+                  "const": "Cookie, Authorization"
+                }
+              },
+              "X-Ophiolite-Access-Generation": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The asset's access generation (0 when never changed)"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "x-ophiolite": {
+                    "id": "ophiolite.curve-window/1",
+                    "version": "1.0.0",
+                    "lifecycle": "preview"
+                  },
+                  "title": "Curve window",
+                  "description": "One page of a depth window of a stored well curve: raw samples (level 0) or, at levels 1..17, runs of present samples, blocks of up to 2^level samples inside one run with their extrema, and the missing stretches. A page holds at most 2,048 items.",
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "schema",
+                    "shape",
+                    "identity",
+                    "unit",
+                    "reference",
+                    "depth_unit",
+                    "source",
+                    "request",
+                    "range",
+                    "level",
+                    "exact",
+                    "limit",
+                    "items",
+                    "rows_met",
+                    "next",
+                    "before",
+                    "after"
+                  ],
+                  "properties": {
+                    "schema": {
+                      "const": "ophiolite.curve-window/1"
+                    },
+                    "shape": {
+                      "enum": [
+                        "raw",
+                        "summary"
+                      ]
+                    },
+                    "identity": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "kind",
+                        "project_id",
+                        "asset_id",
+                        "revision",
+                        "curve"
+                      ],
+                      "properties": {
+                        "kind": {
+                          "enum": [
+                            "retained",
+                            "native"
+                          ]
+                        },
+                        "project_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 512
+                        },
+                        "asset_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 512
+                        },
+                        "revision": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 128
+                        },
+                        "curve": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 512
+                        },
+                        "native": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "well_id",
+                            "well_version",
+                            "curve_asset_revision",
+                            "curve_id"
+                          ],
+                          "properties": {
+                            "well_id": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 512
+                            },
+                            "well_version": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "curve_asset_revision": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 128
+                            },
+                            "curve_id": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 512
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "unit": {
+                      "type": "string",
+                      "maxLength": 128
+                    },
+                    "reference": {
+                      "const": "md"
+                    },
+                    "depth_unit": {
+                      "type": "string",
+                      "maxLength": 128
+                    },
+                    "source": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "algorithm",
+                        "algorithm_version",
+                        "source_digest"
+                      ],
+                      "properties": {
+                        "algorithm": {
+                          "const": "run-blocks"
+                        },
+                        "algorithm_version": {
+                          "const": 1
+                        },
+                        "source_digest": {
+                          "type": "string",
+                          "pattern": "^[0-9a-f]{64}$"
+                        }
+                      }
+                    },
+                    "request": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "top",
+                        "base",
+                        "level",
+                        "rows",
+                        "cursor"
+                      ],
+                      "properties": {
+                        "top": {
+                          "type": "number"
+                        },
+                        "base": {
+                          "type": "number"
+                        },
+                        "level": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "minimum": 0,
+                          "maximum": 17
+                        },
+                        "rows": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "minimum": 1,
+                          "maximum": 2048
+                        },
+                        "cursor": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "maxLength": 1024
+                        }
+                      }
+                    },
+                    "range": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "served_first_depth",
+                            "served_last_depth"
+                          ],
+                          "properties": {
+                            "served_first_depth": {
+                              "type": "number"
+                            },
+                            "served_last_depth": {
+                              "type": "number"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 17
+                    },
+                    "exact": {
+                      "type": "boolean"
+                    },
+                    "limit": {
+                      "const": 2048
+                    },
+                    "items": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "rows_met": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ]
+                    },
+                    "next": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "maxLength": 1024
+                    },
+                    "before": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "sample_index",
+                            "depth",
+                            "value"
+                          ],
+                          "properties": {
+                            "sample_index": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "depth": {
+                              "type": "number"
+                            },
+                            "value": {
+                              "type": [
+                                "number",
+                                "null"
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "after": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "sample_index",
+                            "depth",
+                            "value"
+                          ],
+                          "properties": {
+                            "sample_index": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "depth": {
+                              "type": "number"
+                            },
+                            "value": {
+                              "type": [
+                                "number",
+                                "null"
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "sample_index": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "maxItems": 2048
+                    },
+                    "depth": {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      },
+                      "maxItems": 2048
+                    },
+                    "value": {
+                      "type": "array",
+                      "items": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "maxItems": 2048
+                    },
+                    "runs": {
+                      "type": "array",
+                      "maxItems": 2048,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "run",
+                          "first_index",
+                          "last_index",
+                          "first_depth",
+                          "last_depth"
+                        ],
+                        "properties": {
+                          "run": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "first_index": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "last_index": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "first_depth": {
+                            "type": "number"
+                          },
+                          "last_depth": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    },
+                    "blocks": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "run",
+                        "first_index",
+                        "last_index",
+                        "first_depth",
+                        "last_depth",
+                        "first",
+                        "last",
+                        "min",
+                        "min_index",
+                        "min_depth",
+                        "max",
+                        "max_index",
+                        "max_depth",
+                        "count"
+                      ],
+                      "properties": {
+                        "run": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "first_index": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "last_index": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "first_depth": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "last_depth": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "first": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "last": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "min": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "min_index": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "min_depth": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "max": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "max_index": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "max_depth": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "count": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "maxItems": 2048
+                        }
+                      }
+                    },
+                    "missing": {
+                      "type": "array",
+                      "maxItems": 2048,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "from_index",
+                          "to_index",
+                          "from_depth",
+                          "to_depth"
+                        ],
+                        "properties": {
+                          "from_index": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "to_index": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "from_depth": {
+                            "type": "number"
+                          },
+                          "to_depth": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "if": {
+                    "type": "object"
+                  },
+                  "then": {
+                    "description": "The value rules: the shape discriminates the body (raw at level 0 and exact; summary at 1..17), and only a native identity carries native.",
+                    "allOf": [
+                      {
+                        "if": {
+                          "properties": {
+                            "shape": {
+                              "const": "raw"
+                            }
+                          }
+                        },
+                        "then": {
+                          "required": [
+                            "sample_index",
+                            "depth",
+                            "value"
+                          ],
+                          "properties": {
+                            "level": {
+                              "const": 0
+                            },
+                            "exact": {
+                              "const": true
+                            }
+                          },
+                          "not": {
+                            "anyOf": [
+                              {
+                                "required": [
+                                  "runs"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "blocks"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "missing"
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        "else": {
+                          "required": [
+                            "runs",
+                            "blocks",
+                            "missing"
+                          ],
+                          "properties": {
+                            "level": {
+                              "minimum": 1
+                            },
+                            "exact": {
+                              "const": false
+                            }
+                          },
+                          "not": {
+                            "anyOf": [
+                              {
+                                "required": [
+                                  "sample_index"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "depth"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "value"
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "identity": {
+                              "properties": {
+                                "kind": {
+                                  "const": "native"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "identity": {
+                              "required": [
+                                "native"
+                              ]
+                            }
+                          }
+                        },
+                        "else": {
+                          "properties": {
+                            "identity": {
+                              "not": {
+                                "required": [
+                                  "native"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "The If-None-Match ETag is current; no body",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Strong; sha256 of every byte-determining input"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "private, no-cache"
+                }
+              },
+              "Vary": {
+                "schema": {
+                  "type": "string",
+                  "const": "Cookie, Authorization"
+                }
+              },
+              "X-Ophiolite-Access-Generation": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The asset's access generation (0 when never changed)"
+              }
+            }
+          },
+          "default": {
+            "description": "Versioned error; see README",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error",
+                    "code",
+                    "message",
+                    "remedy",
+                    "docs",
+                    "request_id"
+                  ],
+                  "description": "Every refusal (E31): error is kept for existing clients and equals message; request_id equals the X-Request-Id header.",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "The stable machine-readable code; see docs"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "remedy": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "What the caller can do next"
+                    },
+                    "docs": {
+                      "type": "string",
+                      "description": "The code's anchor on the errors reference page, /docs/reference/errors/#<code>"
+                    },
+                    "request_id": {
+                      "type": "string",
+                      "description": "Equals the X-Request-Id response header; quote it when reporting a failure"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Busy: retry the same exact request after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error",
+                    "code",
+                    "message",
+                    "remedy",
+                    "docs",
+                    "request_id"
+                  ],
+                  "description": "Every refusal (E31): error is kept for existing clients and equals message; request_id equals the X-Request-Id header.",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "The stable machine-readable code; see docs"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "remedy": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "What the caller can do next"
+                    },
+                    "docs": {
+                      "type": "string",
+                      "description": "The code's anchor on the errors reference page, /docs/reference/errors/#<code>"
+                    },
+                    "request_id": {
+                      "type": "string",
+                      "description": "Equals the X-Request-Id response header; quote it when reporting a failure"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "grant",
+          "session"
+        ]
+      }
+    },
+    "/api/v1/projects/{project}/wells/{well}/versions/{version}/curve-assets/{asset}/revisions/{revision}/windows": {
+      "get": {
+        "description": "One page of a depth window of a native well curve asset (ophiolite.curve-window/1, identity.kind native), read through the caller\u2019s own GetCurveAsset; MD only (tvd and tvdss answer 422). A conditional request (If-None-Match) still reads the curve as the caller and answers 304 when the ETag is current.",
+        "parameters": [
+          {
+            "name": "project",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "well",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "asset",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "revision",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "An immutable curve-asset revision (1 or later)."
+          },
+          {
+            "name": "top",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "description": "Top of the depth window, in the curve's depth unit."
+          },
+          {
+            "name": "base",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "description": "Base of the depth window, in the curve's depth unit."
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 17
+            },
+            "description": "0: raw samples; 1-17: blocks of up to 2^level samples. Exactly one of level and rows."
+          },
+          {
+            "name": "rows",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2048
+            },
+            "description": "Item budget: the server chooses the smallest level whose item count is at most rows (level 17 when none is). Exactly one of level and rows."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The previous page's next; refused with another revision, range, level, shape or reference."
+          },
+          {
+            "name": "reference",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "md",
+                "tvd",
+                "tvdss"
+              ]
+            },
+            "description": "Depth reference; only md is windowed (tvd and tvdss answer 422)."
+          }
+        ],
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authorised window page",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Strong; sha256 of every byte-determining input"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "private, no-cache"
+                }
+              },
+              "Vary": {
+                "schema": {
+                  "type": "string",
+                  "const": "Cookie, Authorization"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "x-ophiolite": {
+                    "id": "ophiolite.curve-window/1",
+                    "version": "1.0.0",
+                    "lifecycle": "preview"
+                  },
+                  "title": "Curve window",
+                  "description": "One page of a depth window of a stored well curve: raw samples (level 0) or, at levels 1..17, runs of present samples, blocks of up to 2^level samples inside one run with their extrema, and the missing stretches. A page holds at most 2,048 items.",
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "schema",
+                    "shape",
+                    "identity",
+                    "unit",
+                    "reference",
+                    "depth_unit",
+                    "source",
+                    "request",
+                    "range",
+                    "level",
+                    "exact",
+                    "limit",
+                    "items",
+                    "rows_met",
+                    "next",
+                    "before",
+                    "after"
+                  ],
+                  "properties": {
+                    "schema": {
+                      "const": "ophiolite.curve-window/1"
+                    },
+                    "shape": {
+                      "enum": [
+                        "raw",
+                        "summary"
+                      ]
+                    },
+                    "identity": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "kind",
+                        "project_id",
+                        "asset_id",
+                        "revision",
+                        "curve"
+                      ],
+                      "properties": {
+                        "kind": {
+                          "enum": [
+                            "retained",
+                            "native"
+                          ]
+                        },
+                        "project_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 512
+                        },
+                        "asset_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 512
+                        },
+                        "revision": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 128
+                        },
+                        "curve": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 512
+                        },
+                        "native": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "well_id",
+                            "well_version",
+                            "curve_asset_revision",
+                            "curve_id"
+                          ],
+                          "properties": {
+                            "well_id": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 512
+                            },
+                            "well_version": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "curve_asset_revision": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 128
+                            },
+                            "curve_id": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 512
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "unit": {
+                      "type": "string",
+                      "maxLength": 128
+                    },
+                    "reference": {
+                      "const": "md"
+                    },
+                    "depth_unit": {
+                      "type": "string",
+                      "maxLength": 128
+                    },
+                    "source": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "algorithm",
+                        "algorithm_version",
+                        "source_digest"
+                      ],
+                      "properties": {
+                        "algorithm": {
+                          "const": "run-blocks"
+                        },
+                        "algorithm_version": {
+                          "const": 1
+                        },
+                        "source_digest": {
+                          "type": "string",
+                          "pattern": "^[0-9a-f]{64}$"
+                        }
+                      }
+                    },
+                    "request": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "top",
+                        "base",
+                        "level",
+                        "rows",
+                        "cursor"
+                      ],
+                      "properties": {
+                        "top": {
+                          "type": "number"
+                        },
+                        "base": {
+                          "type": "number"
+                        },
+                        "level": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "minimum": 0,
+                          "maximum": 17
+                        },
+                        "rows": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "minimum": 1,
+                          "maximum": 2048
+                        },
+                        "cursor": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "maxLength": 1024
+                        }
+                      }
+                    },
+                    "range": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "served_first_depth",
+                            "served_last_depth"
+                          ],
+                          "properties": {
+                            "served_first_depth": {
+                              "type": "number"
+                            },
+                            "served_last_depth": {
+                              "type": "number"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 17
+                    },
+                    "exact": {
+                      "type": "boolean"
+                    },
+                    "limit": {
+                      "const": 2048
+                    },
+                    "items": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "rows_met": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ]
+                    },
+                    "next": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "maxLength": 1024
+                    },
+                    "before": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "sample_index",
+                            "depth",
+                            "value"
+                          ],
+                          "properties": {
+                            "sample_index": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "depth": {
+                              "type": "number"
+                            },
+                            "value": {
+                              "type": [
+                                "number",
+                                "null"
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "after": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "sample_index",
+                            "depth",
+                            "value"
+                          ],
+                          "properties": {
+                            "sample_index": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "depth": {
+                              "type": "number"
+                            },
+                            "value": {
+                              "type": [
+                                "number",
+                                "null"
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "sample_index": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "maxItems": 2048
+                    },
+                    "depth": {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      },
+                      "maxItems": 2048
+                    },
+                    "value": {
+                      "type": "array",
+                      "items": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "maxItems": 2048
+                    },
+                    "runs": {
+                      "type": "array",
+                      "maxItems": 2048,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "run",
+                          "first_index",
+                          "last_index",
+                          "first_depth",
+                          "last_depth"
+                        ],
+                        "properties": {
+                          "run": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "first_index": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "last_index": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "first_depth": {
+                            "type": "number"
+                          },
+                          "last_depth": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    },
+                    "blocks": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "run",
+                        "first_index",
+                        "last_index",
+                        "first_depth",
+                        "last_depth",
+                        "first",
+                        "last",
+                        "min",
+                        "min_index",
+                        "min_depth",
+                        "max",
+                        "max_index",
+                        "max_depth",
+                        "count"
+                      ],
+                      "properties": {
+                        "run": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "first_index": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "last_index": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "first_depth": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "last_depth": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "first": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "last": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "min": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "min_index": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "min_depth": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "max": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "max_index": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "max_depth": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "count": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "maxItems": 2048
+                        }
+                      }
+                    },
+                    "missing": {
+                      "type": "array",
+                      "maxItems": 2048,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "from_index",
+                          "to_index",
+                          "from_depth",
+                          "to_depth"
+                        ],
+                        "properties": {
+                          "from_index": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "to_index": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "from_depth": {
+                            "type": "number"
+                          },
+                          "to_depth": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "if": {
+                    "type": "object"
+                  },
+                  "then": {
+                    "description": "The value rules: the shape discriminates the body (raw at level 0 and exact; summary at 1..17), and only a native identity carries native.",
+                    "allOf": [
+                      {
+                        "if": {
+                          "properties": {
+                            "shape": {
+                              "const": "raw"
+                            }
+                          }
+                        },
+                        "then": {
+                          "required": [
+                            "sample_index",
+                            "depth",
+                            "value"
+                          ],
+                          "properties": {
+                            "level": {
+                              "const": 0
+                            },
+                            "exact": {
+                              "const": true
+                            }
+                          },
+                          "not": {
+                            "anyOf": [
+                              {
+                                "required": [
+                                  "runs"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "blocks"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "missing"
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        "else": {
+                          "required": [
+                            "runs",
+                            "blocks",
+                            "missing"
+                          ],
+                          "properties": {
+                            "level": {
+                              "minimum": 1
+                            },
+                            "exact": {
+                              "const": false
+                            }
+                          },
+                          "not": {
+                            "anyOf": [
+                              {
+                                "required": [
+                                  "sample_index"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "depth"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "value"
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "identity": {
+                              "properties": {
+                                "kind": {
+                                  "const": "native"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "identity": {
+                              "required": [
+                                "native"
+                              ]
+                            }
+                          }
+                        },
+                        "else": {
+                          "properties": {
+                            "identity": {
+                              "not": {
+                                "required": [
+                                  "native"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "The If-None-Match ETag is current; no body",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Strong; sha256 of every byte-determining input"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "private, no-cache"
+                }
+              },
+              "Vary": {
+                "schema": {
+                  "type": "string",
+                  "const": "Cookie, Authorization"
                 }
               }
             }

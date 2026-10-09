@@ -1398,6 +1398,12 @@
     "response": "schema"
   },
   {
+    "operation": "GET /api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/windows",
+    "function": "getProjectsProjectScientificAssetsAssetRevisionsRevisionWindows",
+    "request": "explicitly-untyped",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/search/query",
     "function": "postProjectsProjectSearchQuery",
     "request": "schema",
@@ -1863,6 +1869,12 @@
     "operation": "POST /api/v1/projects/{project}/well-imports/step",
     "function": "postProjectsProjectWellImportsStep",
     "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "GET /api/v1/projects/{project}/wells/{well}/versions/{version}/curve-assets/{asset}/revisions/{revision}/windows",
+    "function": "getProjectsProjectWellsWellVersionsVersionCurveAssetsAssetRevisionsRevisionWindows",
+    "request": "explicitly-untyped",
     "response": "schema"
   }
 ]

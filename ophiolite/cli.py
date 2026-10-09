@@ -197,6 +197,12 @@ def parser():
     changes=project(sub.add_parser('changes',help='The project event log: its head, pages after a cursor, or follow it live'))
     changes.add_argument('action',choices=['head','list','follow'])
     changes.add_argument('--epoch');changes.add_argument('--after',type=int);changes.add_argument('--seconds',type=int,default=300,help='follow: stop after this long')
+    curves=project(sub.add_parser('curves',help='A depth window of one exact curve for display: every sample (level 0) or blocks with their extrema'))
+    curves.add_argument('action',choices=['window'])
+    curves.add_argument('--asset',required=True);curves.add_argument('--revision',required=True);curves.add_argument('--curve',required=True)
+    curves.add_argument('--top',type=float,required=True);curves.add_argument('--base',type=float,required=True)
+    curves.add_argument('--level',type=int,help='0 = every sample (exact); 1 to 17 = blocks of up to 2^level samples');curves.add_argument('--rows',type=int,help='Instead of --level: at most this many rows (1 to 2048)')
+    curves.add_argument('--max-pages',type=int,default=64);curves.add_argument('--output',type=Path,help='Write the window as JSON to this new file')
     sources=project(sub.add_parser('sources',help='Your upstream source selections: list them, describe one (costs one full read), or read its rows'))
     sources.add_argument('action',choices=['list','describe','read'])
     sources.add_argument('id',nargs='?',help='describe/read: the selection id from `sources list`')
@@ -388,6 +394,18 @@ def _remake(args,client):
         told=', '.join(one['notified']) or 'nobody'
         out.append('Saved %s as %s (version %s); told: %s.' % (one['role'],'a new result only you can read' if one['target']=='new-result' else 'a new version',one.get('revision_number'),told))
     return done(args,'\n'.join(out),payload)
+
+
+def _curves(args,client):
+    """E100a: ophiolite curves window; --json prints the same document as CurveWindow.to_dict()."""
+    if args.output is not None and (args.output.exists() or args.output.is_symlink()):raise Refused('The output file already exists; choose a new file.')
+    window=client.curve_window(args.asset,args.revision,args.curve,args.top,args.base,level=args.level,rows=args.rows,max_pages=args.max_pages)
+    document=window.to_dict()
+    if args.output is not None:
+        with open(args.output,'x') as out:out.write(json.dumps(document,indent=2)+'\n')
+    what='%d samples (exact)' % len(window) if window.exact else '%d blocks at level %d (for display; read the exact curve for analysis)' % (len(window),window.level)
+    return done(args,'%s %s..%s %s: %s in %d page%s%s' % (args.curve,args.top,args.base,window.depth_unit or 'depth unit unknown',what,window.pages,'' if window.pages==1 else 's',
+                                                        ' - written to %s' % args.output if args.output else ''),document)
 
 
 def _journey(args,client):
@@ -751,6 +769,7 @@ def _main(argv=None):
             if args.json:return done(args,None,{'assets':items})
             for item in items:print(json.dumps(item))
             return
+        if args.command=='curves':return _curves(args,client)
         if args.command in ('entities','wells','changes','sources','well-imports','story','what-changed','dependents','remake'):return _journey(args,client)
         if args.command in ('check','get','send'):return _exchange(args,client)
         if args.command=='upload':return _upload(args,client)

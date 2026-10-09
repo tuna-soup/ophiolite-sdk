@@ -55,6 +55,31 @@ class Reference(Contract):
     revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     profile: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] = Field(...)
 
+class Curvewindow(Contract):
+    schema_: Literal['ophiolite.curve-window/1'] = Field(..., alias='schema')
+    shape: Literal['raw', 'summary'] = Field(...)
+    identity: CurvewindowIdentity = Field(...)
+    unit: Annotated[str, Field(max_length=128)] = Field(...)
+    reference: Literal['md'] = Field(...)
+    depth_unit: Annotated[str, Field(max_length=128)] = Field(...)
+    source: CurvewindowSource = Field(...)
+    request: CurvewindowRequest = Field(...)
+    range: None | CurvewindowRange1 = Field(...)
+    level: Annotated[int, Field(ge=0, le=17)] = Field(...)
+    exact: bool = Field(...)
+    limit: Literal[2048] = Field(...)
+    items: Annotated[int, Field(ge=0)] = Field(...)
+    rows_met: bool | None = Field(...)
+    next: Annotated[str, Field(max_length=1024)] | None = Field(...)
+    before: None | CurvewindowBefore1 = Field(...)
+    after: None | CurvewindowAfter1 = Field(...)
+    sample_index: Annotated[list[Annotated[int, Field(ge=0)]], Field(max_length=2048)] = Field(None)
+    depth: Annotated[list[float], Field(max_length=2048)] = Field(None)
+    value: Annotated[list[float | None], Field(max_length=2048)] = Field(None)
+    runs: Annotated[list[CurvewindowRunsItem], Field(max_length=2048)] = Field(None)
+    blocks: CurvewindowBlocks = Field(None)
+    missing: Annotated[list[CurvewindowMissingItem], Field(max_length=2048)] = Field(None)
+
 class GridSurface(Contract):
     representation: Literal['normalized'] = Field(...)
     source: Reference = Field(...)
@@ -949,7 +974,7 @@ class BundleAsset(Contract):
     revision: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
     origin: Literal['source-reference', 'retained-capture', 'managed-derived'] = Field(...)
     profile: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
-    name: Annotated[str, Field(max_length=160)] | Annotated[None, Field(max_length=160)] = Field(None)
+    name: Annotated[str, Field(max_length=160)] | None = Field(None)
     files: Annotated[list[BundleFile], Field(min_length=2, max_length=129)] = Field(...)
     history: BundleHistory | None = Field(None)
     parents: Annotated[list[BundleParent], Field(max_length=8)] = Field(...)
@@ -1010,7 +1035,7 @@ class BundleAssetV2(Contract):
     revision: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
     origin: Literal['source-reference', 'retained-capture', 'managed-derived'] = Field(...)
     profile: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
-    name: Annotated[str, Field(max_length=160)] | Annotated[None, Field(max_length=160)] = Field(None)
+    name: Annotated[str, Field(max_length=160)] | None = Field(None)
     files: Annotated[list[BundleFileV2], Field(min_length=2, max_length=129)] = Field(...)
     history: BundleHistoryV2 | None = Field(None)
     parents: Annotated[list[BundleParent], Field(max_length=8)] = Field(...)
@@ -1393,6 +1418,69 @@ class Declaration(Contract):
     values: Annotated[list[Value], Field(max_length=24)] = Field(...)
     osdu: Annotated[str, Field(min_length=1, max_length=120)] = Field(None)
 
+class CurvewindowIdentity(Contract):
+    kind: Literal['retained', 'native'] = Field(...)
+    project_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    asset_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    revision: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+    curve: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    native: CurvewindowIdentityNative = Field(None)
+
+class CurvewindowSource(Contract):
+    algorithm: Literal['run-blocks'] = Field(...)
+    algorithm_version: Literal[1] = Field(...)
+    source_digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+
+class CurvewindowRequest(Contract):
+    top: float = Field(...)
+    base: float = Field(...)
+    level: Annotated[int, Field(ge=0, le=17)] | None = Field(...)
+    rows: Annotated[int, Field(ge=1, le=2048)] | None = Field(...)
+    cursor: Annotated[str, Field(max_length=1024)] | None = Field(...)
+
+class CurvewindowRange1(Contract):
+    served_first_depth: float = Field(...)
+    served_last_depth: float = Field(...)
+
+class CurvewindowBefore1(Contract):
+    sample_index: Annotated[int, Field(ge=0)] = Field(...)
+    depth: float = Field(...)
+    value: float | None = Field(...)
+
+class CurvewindowAfter1(Contract):
+    sample_index: Annotated[int, Field(ge=0)] = Field(...)
+    depth: float = Field(...)
+    value: float | None = Field(...)
+
+class CurvewindowRunsItem(Contract):
+    run: Annotated[int, Field(ge=0)] = Field(...)
+    first_index: Annotated[int, Field(ge=0)] = Field(...)
+    last_index: Annotated[int, Field(ge=0)] = Field(...)
+    first_depth: float = Field(...)
+    last_depth: float = Field(...)
+
+class CurvewindowBlocks(Contract):
+    run: Annotated[list[Annotated[int, Field(ge=0)]], Field(max_length=2048)] = Field(...)
+    first_index: Annotated[list[Annotated[int, Field(ge=0)]], Field(max_length=2048)] = Field(...)
+    last_index: Annotated[list[Annotated[int, Field(ge=0)]], Field(max_length=2048)] = Field(...)
+    first_depth: Annotated[list[float], Field(max_length=2048)] = Field(...)
+    last_depth: Annotated[list[float], Field(max_length=2048)] = Field(...)
+    first: Annotated[list[float], Field(max_length=2048)] = Field(...)
+    last: Annotated[list[float], Field(max_length=2048)] = Field(...)
+    min: Annotated[list[float], Field(max_length=2048)] = Field(...)
+    min_index: Annotated[list[Annotated[int, Field(ge=0)]], Field(max_length=2048)] = Field(...)
+    min_depth: Annotated[list[float], Field(max_length=2048)] = Field(...)
+    max: Annotated[list[float], Field(max_length=2048)] = Field(...)
+    max_index: Annotated[list[Annotated[int, Field(ge=0)]], Field(max_length=2048)] = Field(...)
+    max_depth: Annotated[list[float], Field(max_length=2048)] = Field(...)
+    count: Annotated[list[Annotated[int, Field(ge=1)]], Field(max_length=2048)] = Field(...)
+
+class CurvewindowMissingItem(Contract):
+    from_index: Annotated[int, Field(ge=0)] = Field(...)
+    to_index: Annotated[int, Field(ge=0)] = Field(...)
+    from_depth: float = Field(...)
+    to_depth: float = Field(...)
+
 class PortableBundleManifestExporter(Contract):
     name: Annotated[str, Field(max_length=64)] = Field(...)
     version: Annotated[str, Field(max_length=64)] = Field(...)
@@ -1461,6 +1549,12 @@ class RepresentationRulesArtifact_Kind_By_Origin(Contract):
     retained_capture: Literal['original', 'captured-result', 'derived-artifact'] = Field(..., alias='retained-capture')
     managed_derived: Literal['original', 'captured-result', 'derived-artifact'] = Field(..., alias='managed-derived')
 
+class CurvewindowIdentityNative(Contract):
+    well_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    well_version: Annotated[int, Field(ge=0)] = Field(...)
+    curve_asset_revision: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+    curve_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+
 class PortableBundleManifestV2EntitiesItemIdentity(Contract):
     authority: str | None = Field(...)
     key: str | None = Field(...)
@@ -1495,6 +1589,7 @@ ApplicationCurve.model_rebuild()
 CurveContext.model_rebuild()
 Interpretation.model_rebuild()
 Reference.model_rebuild()
+Curvewindow.model_rebuild()
 GridSurface.model_rebuild()
 Fidelity.model_rebuild()
 GridContext.model_rebuild()
@@ -1661,6 +1756,15 @@ Multiple.model_rebuild()
 ColumnRow.model_rebuild()
 Value.model_rebuild()
 Declaration.model_rebuild()
+CurvewindowIdentity.model_rebuild()
+CurvewindowSource.model_rebuild()
+CurvewindowRequest.model_rebuild()
+CurvewindowRange1.model_rebuild()
+CurvewindowBefore1.model_rebuild()
+CurvewindowAfter1.model_rebuild()
+CurvewindowRunsItem.model_rebuild()
+CurvewindowBlocks.model_rebuild()
+CurvewindowMissingItem.model_rebuild()
 PortableBundleManifestExporter.model_rebuild()
 PortableBundleManifestLimits.model_rebuild()
 PortableBundleManifestObservations.model_rebuild()
@@ -1675,6 +1779,7 @@ BundleAssetV2Original.model_rebuild()
 BundleGroupV2Recommended1.model_rebuild()
 ContractProfileTable_Target1.model_rebuild()
 RepresentationRulesArtifact_Kind_By_Origin.model_rebuild()
+CurvewindowIdentityNative.model_rebuild()
 PortableBundleManifestV2EntitiesItemIdentity.model_rebuild()
 PortableBundleManifestV2RelationshipsItemSubject.model_rebuild()
 PortableBundleManifestV2RelationshipsItemObject.model_rebuild()

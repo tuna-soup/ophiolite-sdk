@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.26.0",
+  "version": "1.27.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -58,6 +58,14 @@
       "path": "assets/v1/curve-context-schema.json",
       "title": "ScientificContext",
       "description": "Observed facts about a normalized curve: units and their status, sample and missing counts, axis order."
+    },
+    {
+      "id": "ophiolite.curve-window/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/curve-window-schema.json",
+      "title": "CurveWindow",
+      "description": "One page of a depth window of a stored well curve: raw samples at level 0, or runs, blocks with their extrema and missing stretches at levels 1 to 17; at most 2,048 items a page."
     },
     {
       "id": "ophiolite.asset-summary/1",
