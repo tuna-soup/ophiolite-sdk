@@ -5,7 +5,7 @@
     "version": "1.0.0-pilot",
     "description": "One public API for every project operation. Three credential kinds reach it: the browser session (opaque HttpOnly cookie plus the X-CSRF-Token proof and, on non-GET requests, the exact Origin), a project-scoped delegate lasting at most five minutes (Bearer oph_api_..., parent session and current native permissions remain mandatory), and a browser-approved provider grant (Bearer provider token plus X-Ophiolite-Application-Grant; capability 1: the scientific read resources and the applications route within its read/write scopes; capability 3 adds reading wells, wellbores and lineage and the LAS upload routes). A request that carries an Authorization header is a machine request and is refused with MACHINE_AUTH_REQUIRED when a cookie or Origin travels with it. Scope and capability are ceilings; every operation runs the same native permission checks whoever calls it. Not a stable SDK or unattended service-account contract.",
     "x-ophiolite-contracts": {
-      "registry_version": "1.26.0",
+      "registry_version": "1.27.0",
       "index": "/api/v1/contracts",
       "served_profiles": [
         "las2/1",
@@ -14803,6 +14803,1179 @@
                   "project_id"
                 ],
                 "title": "ChangesStreamRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/checks/compare": {
+      "post": {
+        "summary": "Compare a result you can read with a file of yours; the comparison is kept for you (at most 20 for one version)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "x-ophiolite": {
+                    "id": "ophiolite.check/1",
+                    "version": "1.0.0",
+                    "lifecycle": "preview"
+                  },
+                  "additionalProperties": false,
+                  "description": "Your comparison, kept for you, with the words to show it.",
+                  "properties": {
+                    "schema": {
+                      "const": "ophiolite.check/1",
+                      "title": "Schema",
+                      "type": "string"
+                    },
+                    "subject": {
+                      "discriminator": {
+                        "mapping": {
+                          "implementation": "#/components/schemas/CheckImplementationSubject",
+                          "result": "#/components/schemas/CheckResultSubject"
+                        },
+                        "propertyName": "kind"
+                      },
+                      "oneOf": [
+                        {
+                          "$ref": "#/components/schemas/CheckImplementationSubject"
+                        },
+                        {
+                          "$ref": "#/components/schemas/CheckResultSubject"
+                        }
+                      ],
+                      "title": "Subject"
+                    },
+                    "fixture": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/CheckFixture"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "reference": {
+                      "$ref": "#/components/schemas/CheckReference"
+                    },
+                    "output_digest": {
+                      "pattern": "^[0-9a-f]{64}$",
+                      "title": "Output Digest",
+                      "type": "string"
+                    },
+                    "rules_id": {
+                      "enum": [
+                        "series-compare/1",
+                        "grid-compare/1"
+                      ],
+                      "title": "Rules Id",
+                      "type": "string"
+                    },
+                    "tolerance": {
+                      "anyOf": [
+                        {
+                          "discriminator": {
+                            "mapping": {
+                              "absolute": "#/components/schemas/AbsoluteTolerance",
+                              "relative": "#/components/schemas/RelativeTolerance"
+                            },
+                            "propertyName": "kind"
+                          },
+                          "oneOf": [
+                            {
+                              "$ref": "#/components/schemas/AbsoluteTolerance"
+                            },
+                            {
+                              "$ref": "#/components/schemas/RelativeTolerance"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Tolerance"
+                    },
+                    "request_digest": {
+                      "anyOf": [
+                        {
+                          "pattern": "^[0-9a-f]{64}$",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Request Digest"
+                    },
+                    "interpretation_digest": {
+                      "anyOf": [
+                        {
+                          "pattern": "^[0-9a-f]{64}$",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Interpretation Digest"
+                    },
+                    "outcome": {
+                      "enum": [
+                        "passed",
+                        "differed",
+                        "not_compared"
+                      ],
+                      "title": "Outcome",
+                      "type": "string"
+                    },
+                    "reason": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "axis_mismatch",
+                            "unit_mismatch",
+                            "context_mismatch",
+                            "shape_mismatch",
+                            "another_kind",
+                            "declarations_missing",
+                            "declarations_incompatible",
+                            "unreadable",
+                            "too_large",
+                            "empty",
+                            "no_such_curve"
+                          ],
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Reason"
+                    },
+                    "differences": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/CheckDifferences"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "witness": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "server",
+                            "claimed",
+                            "personal"
+                          ],
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Witness"
+                    },
+                    "recorded_by": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/CheckPrincipal"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "command_id": {
+                      "anyOf": [
+                        {
+                          "maxLength": 128,
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Command Id"
+                    },
+                    "at": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "At"
+                    },
+                    "server_output_digest": {
+                      "anyOf": [
+                        {
+                          "pattern": "^[0-9a-f]{64}$",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Server Output Digest"
+                    },
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "interpretation": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": {
+                            "type": "string"
+                          },
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "A grid: the confirmed envelope, whose digest is interpretation_digest",
+                      "title": "Interpretation"
+                    },
+                    "bound": {
+                      "description": "The allowed difference in words (\"Exactly equal\", \"Within 0.01 metres\")",
+                      "title": "Bound",
+                      "type": "string"
+                    },
+                    "sentence": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "Not compared because the file is another kind: the sentence to show",
+                      "title": "Sentence"
+                    },
+                    "fields": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "declarations_missing or declarations_incompatible: the declarations concerned",
+                      "title": "Fields"
+                    }
+                  },
+                  "required": [
+                    "schema",
+                    "subject",
+                    "fixture",
+                    "reference",
+                    "output_digest",
+                    "rules_id",
+                    "tolerance",
+                    "request_digest",
+                    "interpretation_digest",
+                    "outcome",
+                    "reason",
+                    "differences",
+                    "id",
+                    "bound"
+                  ],
+                  "title": "ComparedCheck",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "The same command id and body answer the same comparison",
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "description": "The result to compare with",
+                    "title": "Asset Id",
+                    "type": "string"
+                  },
+                  "revision": {
+                    "description": "Its exact version",
+                    "title": "Revision",
+                    "type": "string"
+                  },
+                  "curve": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "A well log: the curve to compare (its mnemonic in your file and in the result)",
+                    "title": "Curve"
+                  },
+                  "file_name": {
+                    "anyOf": [
+                      {
+                        "maxLength": 200,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Your file's name, used to recognise its kind",
+                    "title": "File Name"
+                  },
+                  "files": {
+                    "$ref": "#/components/schemas/CheckCompareFile"
+                  },
+                  "tolerance": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Absent: exactly equal. {kind: absolute, value, unit} in the compared unit, or {kind: relative, value}; a value is a finite number of at least 0 (refused tolerance otherwise)",
+                    "title": "Tolerance"
+                  },
+                  "interpretation": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "A grid result: your file's confirmed interpretation envelope (required; refused schema without it)",
+                    "title": "Interpretation"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "command_id",
+                  "asset_id",
+                  "revision",
+                  "files"
+                ],
+                "title": "CheckCompareRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/checks/list": {
+      "post": {
+        "summary": "The check records of an implementation or of a result you can read, grouped by key, with disagreements",
+        "description": "Scope read; accepted principals: session, delegate, workload; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session",
+          "workload"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "records": {
+                      "items": {
+                        "$ref": "#/components/schemas/StoredCheck"
+                      },
+                      "title": "Records",
+                      "type": "array"
+                    },
+                    "groups": {
+                      "items": {
+                        "$ref": "#/components/schemas/CheckGroup"
+                      },
+                      "title": "Groups",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "records",
+                    "groups"
+                  ],
+                  "title": "CheckList",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "subject": {
+                    "$ref": "#/components/schemas/CheckSubjectQuery"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "subject"
+                ],
+                "title": "CheckListRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/checks/publish": {
+      "post": {
+        "summary": "Publish a check record with its fixture, reference and output files; the server runs a registered implementation itself (witness server) or stores it claimed",
+        "description": "Scope write; accepted principals: session, delegate, workload; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session",
+          "workload"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "x-ophiolite": {
+                    "id": "ophiolite.check/1",
+                    "version": "1.0.0",
+                    "lifecycle": "preview"
+                  },
+                  "additionalProperties": false,
+                  "description": "A stored check record with its id.",
+                  "properties": {
+                    "schema": {
+                      "const": "ophiolite.check/1",
+                      "title": "Schema",
+                      "type": "string"
+                    },
+                    "subject": {
+                      "discriminator": {
+                        "mapping": {
+                          "implementation": "#/components/schemas/CheckImplementationSubject",
+                          "result": "#/components/schemas/CheckResultSubject"
+                        },
+                        "propertyName": "kind"
+                      },
+                      "oneOf": [
+                        {
+                          "$ref": "#/components/schemas/CheckImplementationSubject"
+                        },
+                        {
+                          "$ref": "#/components/schemas/CheckResultSubject"
+                        }
+                      ],
+                      "title": "Subject"
+                    },
+                    "fixture": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/CheckFixture"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "reference": {
+                      "$ref": "#/components/schemas/CheckReference"
+                    },
+                    "output_digest": {
+                      "pattern": "^[0-9a-f]{64}$",
+                      "title": "Output Digest",
+                      "type": "string"
+                    },
+                    "rules_id": {
+                      "enum": [
+                        "series-compare/1",
+                        "grid-compare/1"
+                      ],
+                      "title": "Rules Id",
+                      "type": "string"
+                    },
+                    "tolerance": {
+                      "anyOf": [
+                        {
+                          "discriminator": {
+                            "mapping": {
+                              "absolute": "#/components/schemas/AbsoluteTolerance",
+                              "relative": "#/components/schemas/RelativeTolerance"
+                            },
+                            "propertyName": "kind"
+                          },
+                          "oneOf": [
+                            {
+                              "$ref": "#/components/schemas/AbsoluteTolerance"
+                            },
+                            {
+                              "$ref": "#/components/schemas/RelativeTolerance"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Tolerance"
+                    },
+                    "request_digest": {
+                      "anyOf": [
+                        {
+                          "pattern": "^[0-9a-f]{64}$",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Request Digest"
+                    },
+                    "interpretation_digest": {
+                      "anyOf": [
+                        {
+                          "pattern": "^[0-9a-f]{64}$",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Interpretation Digest"
+                    },
+                    "outcome": {
+                      "enum": [
+                        "passed",
+                        "differed",
+                        "not_compared"
+                      ],
+                      "title": "Outcome",
+                      "type": "string"
+                    },
+                    "reason": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "axis_mismatch",
+                            "unit_mismatch",
+                            "context_mismatch",
+                            "shape_mismatch",
+                            "another_kind",
+                            "declarations_missing",
+                            "declarations_incompatible",
+                            "unreadable",
+                            "too_large",
+                            "empty",
+                            "no_such_curve"
+                          ],
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Reason"
+                    },
+                    "differences": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/CheckDifferences"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "witness": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "server",
+                            "claimed",
+                            "personal"
+                          ],
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Witness"
+                    },
+                    "recorded_by": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/CheckPrincipal"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "command_id": {
+                      "anyOf": [
+                        {
+                          "maxLength": 128,
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Command Id"
+                    },
+                    "at": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "At"
+                    },
+                    "server_output_digest": {
+                      "anyOf": [
+                        {
+                          "pattern": "^[0-9a-f]{64}$",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Server Output Digest"
+                    },
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "schema",
+                    "subject",
+                    "fixture",
+                    "reference",
+                    "output_digest",
+                    "rules_id",
+                    "tolerance",
+                    "request_digest",
+                    "interpretation_digest",
+                    "outcome",
+                    "reason",
+                    "differences",
+                    "id"
+                  ],
+                  "title": "StoredCheck",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "The same command id and body answer the same record; another body is refused (request)",
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "record": {
+                    "additionalProperties": true,
+                    "description": "An ophiolite.check/1 record (contracts/scientific/v1/check.json) without the server's fields (witness, recorded_by, command_id, at, server_output_digest); any other field is refused (schema)",
+                    "title": "Record",
+                    "type": "object"
+                  },
+                  "files": {
+                    "$ref": "#/components/schemas/CheckFiles"
+                  },
+                  "request": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "The executable request of the implementation (its parameters); its canonical sha256 is request_digest. Without it the record is stored claimed",
+                    "title": "Request"
+                  },
+                  "interpretation": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "A grid check: the confirmed interpretation envelope (crs, horizontal_unit, value_unit, value_meaning, direction, vertical_datum)",
+                    "title": "Interpretation"
+                  },
+                  "publisher": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "When sent, it must be the credential that sends it ({id, kind}); refused (publisher) otherwise",
+                    "title": "Publisher"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "command_id",
+                  "record",
+                  "files"
+                ],
+                "title": "CheckPublishRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/checks/publishers": {
+      "post": {
+        "summary": "Who may publish checks in this project: list, grant or revoke (project administrators)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "publishers": {
+                      "items": {
+                        "$ref": "#/components/schemas/CheckPublisher"
+                      },
+                      "title": "Publishers",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "publishers"
+                  ],
+                  "title": "CheckPublishers",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "action": {
+                    "default": "list",
+                    "enum": [
+                      "list",
+                      "grant",
+                      "revoke"
+                    ],
+                    "title": "Action",
+                    "type": "string"
+                  },
+                  "principal": {
+                    "anyOf": [
+                      {
+                        "maxLength": 200,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "grant and revoke: the person or workload client id",
+                    "title": "Principal"
+                  },
+                  "kind": {
+                    "default": "person",
+                    "enum": [
+                      "person",
+                      "workload"
+                    ],
+                    "title": "Kind",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "CheckPublishersRequest",
                 "type": "object"
               }
             }
@@ -76305,6 +77478,35 @@
         "title": "AIUseReader",
         "type": "object"
       },
+      "AbsoluteTolerance": {
+        "additionalProperties": false,
+        "description": "In the compared quantity's unit.",
+        "properties": {
+          "kind": {
+            "const": "absolute",
+            "title": "Kind",
+            "type": "string"
+          },
+          "value": {
+            "minimum": 0,
+            "title": "Value",
+            "type": "number"
+          },
+          "unit": {
+            "maxLength": 40,
+            "minLength": 1,
+            "title": "Unit",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "value",
+          "unit"
+        ],
+        "title": "AbsoluteTolerance",
+        "type": "object"
+      },
       "AccessKeyRefusal": {
         "additionalProperties": false,
         "properties": {
@@ -78084,6 +79286,103 @@
         "title": "CheckAsk",
         "type": "object"
       },
+      "CheckCompareFile": {
+        "additionalProperties": false,
+        "properties": {
+          "file": {
+            "description": "Your file, base64 (at most 2 MiB decoded)",
+            "maxLength": 2796204,
+            "title": "File",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "title": "CheckCompareFile",
+        "type": "object"
+      },
+      "CheckDifferences": {
+        "additionalProperties": false,
+        "properties": {
+          "count": {
+            "minimum": 0,
+            "title": "Count",
+            "type": "integer"
+          },
+          "total": {
+            "minimum": 0,
+            "title": "Total",
+            "type": "integer"
+          },
+          "largest": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Largest"
+          },
+          "value_to_missing": {
+            "minimum": 0,
+            "title": "Value To Missing",
+            "type": "integer"
+          },
+          "missing_to_value": {
+            "minimum": 0,
+            "title": "Missing To Value",
+            "type": "integer"
+          },
+          "first": {
+            "items": {
+              "$ref": "#/components/schemas/CheckSample"
+            },
+            "maxItems": 20,
+            "title": "First",
+            "type": "array"
+          },
+          "changed_range": {
+            "anyOf": [
+              {
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "items": {
+                        "type": "integer"
+                      },
+                      "type": "array"
+                    }
+                  ]
+                },
+                "maxItems": 2,
+                "minItems": 2,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Changed Range"
+          }
+        },
+        "required": [
+          "count",
+          "total",
+          "largest",
+          "value_to_missing",
+          "missing_to_value",
+          "first",
+          "changed_range"
+        ],
+        "title": "CheckDifferences",
+        "type": "object"
+      },
       "CheckFetched": {
         "additionalProperties": false,
         "description": "E85b: what was fetched from an address: start the run with this name, size and digest and the same address.",
@@ -78120,6 +79419,137 @@
         "title": "CheckFetched",
         "type": "object"
       },
+      "CheckFiles": {
+        "additionalProperties": false,
+        "properties": {
+          "fixture": {
+            "description": "The fixture file, base64 (at most 2 MiB decoded); its sha256 is fixture.digest",
+            "maxLength": 2796204,
+            "title": "Fixture",
+            "type": "string"
+          },
+          "reference": {
+            "description": "The reference file, base64; its sha256 is reference.digest",
+            "maxLength": 2796204,
+            "title": "Reference",
+            "type": "string"
+          },
+          "output": {
+            "description": "The output file (ophiolite.check-output/1), base64; its sha256 is output_digest",
+            "maxLength": 2796204,
+            "title": "Output",
+            "type": "string"
+          }
+        },
+        "required": [
+          "fixture",
+          "reference",
+          "output"
+        ],
+        "title": "CheckFiles",
+        "type": "object"
+      },
+      "CheckFixture": {
+        "additionalProperties": false,
+        "properties": {
+          "digest": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Digest",
+            "type": "string"
+          },
+          "display_name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Display Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "digest",
+          "display_name"
+        ],
+        "title": "CheckFixture",
+        "type": "object"
+      },
+      "CheckGroup": {
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "latest": {
+            "$ref": "#/components/schemas/StoredCheck"
+          },
+          "earlier": {
+            "items": {
+              "$ref": "#/components/schemas/StoredCheck"
+            },
+            "title": "Earlier",
+            "type": "array"
+          },
+          "disagreement": {
+            "description": "Records with this key give different outcomes",
+            "title": "Disagreement",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "latest",
+          "earlier",
+          "disagreement"
+        ],
+        "title": "CheckGroup",
+        "type": "object"
+      },
+      "CheckImplementationSubject": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "implementation",
+            "title": "Kind",
+            "type": "string"
+          },
+          "id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "version": {
+            "maxLength": 40,
+            "minLength": 1,
+            "title": "Version",
+            "type": "string"
+          },
+          "script_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Script Sha256",
+            "type": "string"
+          },
+          "release_number": {
+            "pattern": "^[0-9]{4}\\.[0-9]{1,2}\\.[0-9]{1,4}$",
+            "title": "Release Number",
+            "type": "string"
+          },
+          "release_digest": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Release Digest",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "id",
+          "version",
+          "script_sha256",
+          "release_number",
+          "release_digest"
+        ],
+        "title": "CheckImplementationSubject",
+        "type": "object"
+      },
       "CheckKind": {
         "additionalProperties": false,
         "properties": {
@@ -78139,6 +79569,31 @@
           "label"
         ],
         "title": "CheckKind",
+        "type": "object"
+      },
+      "CheckPrincipal": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "person",
+              "workload"
+            ],
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind"
+        ],
+        "title": "CheckPrincipal",
         "type": "object"
       },
       "CheckProposal": {
@@ -78165,6 +79620,39 @@
           "class"
         ],
         "title": "CheckProposal",
+        "type": "object"
+      },
+      "CheckPublisher": {
+        "additionalProperties": false,
+        "properties": {
+          "principal": {
+            "title": "Principal",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "person",
+              "workload"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "granted_by": {
+            "title": "Granted By",
+            "type": "string"
+          },
+          "at": {
+            "title": "At",
+            "type": "number"
+          }
+        },
+        "required": [
+          "principal",
+          "kind",
+          "granted_by",
+          "at"
+        ],
+        "title": "CheckPublisher",
         "type": "object"
       },
       "CheckRead": {
@@ -78277,6 +79765,56 @@
         "title": "CheckRead",
         "type": "object"
       },
+      "CheckReference": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "independent-computation",
+              "reference-file",
+              "external-package"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "version": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Version",
+            "type": "string"
+          },
+          "digest": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Digest",
+            "type": "string"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CheckRights"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "kind",
+          "name",
+          "version",
+          "digest"
+        ],
+        "title": "CheckReference",
+        "type": "object"
+      },
       "CheckRefusal": {
         "additionalProperties": false,
         "properties": {
@@ -78315,6 +79853,58 @@
         "title": "CheckRefusal",
         "type": "object"
       },
+      "CheckResultSubject": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "result",
+            "title": "Kind",
+            "type": "string"
+          },
+          "asset_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "revision": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Revision",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "asset_id",
+          "revision"
+        ],
+        "title": "CheckResultSubject",
+        "type": "object"
+      },
+      "CheckRights": {
+        "additionalProperties": false,
+        "properties": {
+          "licence": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Licence",
+            "type": "string"
+          },
+          "source": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "licence",
+          "source"
+        ],
+        "title": "CheckRights",
+        "type": "object"
+      },
       "CheckSame": {
         "additionalProperties": false,
         "properties": {
@@ -78332,6 +79922,54 @@
           "name"
         ],
         "title": "CheckSame",
+        "type": "object"
+      },
+      "CheckSample": {
+        "additionalProperties": false,
+        "properties": {
+          "at": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              }
+            ],
+            "title": "At"
+          },
+          "reference": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference"
+          },
+          "output": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Output"
+          }
+        },
+        "required": [
+          "at",
+          "reference",
+          "output"
+        ],
+        "title": "CheckSample",
         "type": "object"
       },
       "CheckStated": {
@@ -78379,6 +80017,72 @@
           "source"
         ],
         "title": "CheckStated",
+        "type": "object"
+      },
+      "CheckSubjectQuery": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "implementation",
+              "result"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Id"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Version"
+          },
+          "asset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Asset Id"
+          },
+          "revision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Revision"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "title": "CheckSubjectQuery",
         "type": "object"
       },
       "CheckSuggestion": {
@@ -79890,6 +81594,29 @@
               "type": "string"
             },
             "description": "E94: only with code audience-changed: who can read the new version now; confirm again"
+          },
+          "field": {
+            "type": "string",
+            "enum": [
+              "permission",
+              "schema",
+              "publisher",
+              "tolerance",
+              "interpretation",
+              "fixture.digest",
+              "reference.digest",
+              "output.digest",
+              "rights",
+              "release.digest",
+              "implementation.script_sha256",
+              "outcome",
+              "timeout",
+              "capacity",
+              "limit",
+              "size",
+              "request"
+            ],
+            "description": "E96: only with code check-refused: the one field the refusal names"
           }
         }
       },
@@ -86495,6 +88222,28 @@
         "title": "Reference",
         "type": "object"
       },
+      "RelativeTolerance": {
+        "additionalProperties": false,
+        "description": "A dimensionless fraction of |reference|; a zero reference allows no difference.",
+        "properties": {
+          "kind": {
+            "const": "relative",
+            "title": "Kind",
+            "type": "string"
+          },
+          "value": {
+            "minimum": 0,
+            "title": "Value",
+            "type": "number"
+          }
+        },
+        "required": [
+          "kind",
+          "value"
+        ],
+        "title": "RelativeTolerance",
+        "type": "object"
+      },
       "ReleaseOnBoard": {
         "additionalProperties": false,
         "properties": {
@@ -88442,6 +90191,241 @@
         "title": "StageView",
         "type": "object"
       },
+      "StoredCheck": {
+        "additionalProperties": false,
+        "description": "A stored check record with its id.",
+        "properties": {
+          "schema": {
+            "const": "ophiolite.check/1",
+            "title": "Schema",
+            "type": "string"
+          },
+          "subject": {
+            "discriminator": {
+              "mapping": {
+                "implementation": "#/components/schemas/CheckImplementationSubject",
+                "result": "#/components/schemas/CheckResultSubject"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CheckImplementationSubject"
+              },
+              {
+                "$ref": "#/components/schemas/CheckResultSubject"
+              }
+            ],
+            "title": "Subject"
+          },
+          "fixture": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CheckFixture"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reference": {
+            "$ref": "#/components/schemas/CheckReference"
+          },
+          "output_digest": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Output Digest",
+            "type": "string"
+          },
+          "rules_id": {
+            "enum": [
+              "series-compare/1",
+              "grid-compare/1"
+            ],
+            "title": "Rules Id",
+            "type": "string"
+          },
+          "tolerance": {
+            "anyOf": [
+              {
+                "discriminator": {
+                  "mapping": {
+                    "absolute": "#/components/schemas/AbsoluteTolerance",
+                    "relative": "#/components/schemas/RelativeTolerance"
+                  },
+                  "propertyName": "kind"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/AbsoluteTolerance"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RelativeTolerance"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tolerance"
+          },
+          "request_digest": {
+            "anyOf": [
+              {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Digest"
+          },
+          "interpretation_digest": {
+            "anyOf": [
+              {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Interpretation Digest"
+          },
+          "outcome": {
+            "enum": [
+              "passed",
+              "differed",
+              "not_compared"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "enum": [
+                  "axis_mismatch",
+                  "unit_mismatch",
+                  "context_mismatch",
+                  "shape_mismatch",
+                  "another_kind",
+                  "declarations_missing",
+                  "declarations_incompatible",
+                  "unreadable",
+                  "too_large",
+                  "empty",
+                  "no_such_curve"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "differences": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CheckDifferences"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "witness": {
+            "anyOf": [
+              {
+                "enum": [
+                  "server",
+                  "claimed",
+                  "personal"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Witness"
+          },
+          "recorded_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CheckPrincipal"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "command_id": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Command Id"
+          },
+          "at": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "At"
+          },
+          "server_output_digest": {
+            "anyOf": [
+              {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Server Output Digest"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema",
+          "subject",
+          "fixture",
+          "reference",
+          "output_digest",
+          "rules_id",
+          "tolerance",
+          "request_digest",
+          "interpretation_digest",
+          "outcome",
+          "reason",
+          "differences",
+          "id"
+        ],
+        "title": "StoredCheck",
+        "type": "object"
+      },
       "StoredPoint": {
         "additionalProperties": false,
         "properties": {
@@ -88509,6 +90493,379 @@
           "name"
         ],
         "title": "StoryAgain",
+        "type": "object"
+      },
+      "StoryCheck": {
+        "additionalProperties": false,
+        "description": "E96: whether this calculation was checked against a reference, for its implementation, script and release.",
+        "properties": {
+          "state": {
+            "enum": [
+              "checked",
+              "reported",
+              "none",
+              "not_recorded"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "words": {
+            "description": "The headline sentences: the first line's words, or \"Not checked against a reference.\" and why",
+            "items": {
+              "type": "string"
+            },
+            "title": "Words",
+            "type": "array"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/StoryCheckLine"
+            },
+            "title": "Lines",
+            "type": "array"
+          }
+        },
+        "required": [
+          "state",
+          "words",
+          "lines"
+        ],
+        "title": "StoryCheck",
+        "type": "object"
+      },
+      "StoryCheckEarlier": {
+        "additionalProperties": false,
+        "properties": {
+          "words": {
+            "description": "The earlier record's first sentence",
+            "items": {
+              "type": "string"
+            },
+            "title": "Words",
+            "type": "array"
+          },
+          "technical": {
+            "$ref": "#/components/schemas/StoryCheckTechnical"
+          }
+        },
+        "required": [
+          "words",
+          "technical"
+        ],
+        "title": "StoryCheckEarlier",
+        "type": "object"
+      },
+      "StoryCheckLine": {
+        "additionalProperties": false,
+        "description": "One tested condition (a check key): its latest record, earlier ones newest first, and whether they disagree.",
+        "properties": {
+          "witness": {
+            "enum": [
+              "server",
+              "claimed"
+            ],
+            "title": "Witness",
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "passed",
+              "differed",
+              "not_compared"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "words": {
+            "description": "\"Checked against ...\" (the server repeated it) or \"Reported check by ...\" (it did not), with the bound or the difference",
+            "items": {
+              "type": "string"
+            },
+            "title": "Words",
+            "type": "array"
+          },
+          "disagreement": {
+            "title": "Disagreement",
+            "type": "boolean"
+          },
+          "earlier": {
+            "items": {
+              "$ref": "#/components/schemas/StoryCheckEarlier"
+            },
+            "title": "Earlier",
+            "type": "array"
+          },
+          "technical": {
+            "$ref": "#/components/schemas/StoryCheckTechnical"
+          }
+        },
+        "required": [
+          "witness",
+          "outcome",
+          "words",
+          "disagreement",
+          "earlier",
+          "technical"
+        ],
+        "title": "StoryCheckLine",
+        "type": "object"
+      },
+      "StoryCheckTechnical": {
+        "additionalProperties": false,
+        "description": "Raw values of one check record: Technical details only, never the default layer.",
+        "properties": {
+          "implementation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Implementation"
+          },
+          "implementation_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Implementation Version"
+          },
+          "release_digest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Release Digest"
+          },
+          "script_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Script Sha256"
+          },
+          "fixture": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fixture"
+          },
+          "fixture_digest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fixture Digest"
+          },
+          "reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference"
+          },
+          "reference_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Version"
+          },
+          "reference_digest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Digest"
+          },
+          "output_digest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Output Digest"
+          },
+          "server_output_digest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Server Output Digest"
+          },
+          "request_digest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Digest"
+          },
+          "rules_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rules Id"
+          },
+          "tolerance_kind": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tolerance Kind"
+          },
+          "tolerance_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tolerance Value"
+          },
+          "witness": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Witness"
+          },
+          "command_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Command Id"
+          },
+          "recorded_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recorded By"
+          }
+        },
+        "required": [
+          "implementation",
+          "implementation_version",
+          "release_digest",
+          "script_sha256",
+          "fixture",
+          "fixture_digest",
+          "reference",
+          "reference_version",
+          "reference_digest",
+          "output_digest",
+          "server_output_digest",
+          "request_digest",
+          "rules_id",
+          "tolerance_kind",
+          "tolerance_value",
+          "witness",
+          "command_id",
+          "recorded_by"
+        ],
+        "title": "StoryCheckTechnical",
+        "type": "object"
+      },
+      "StoryCompared": {
+        "additionalProperties": false,
+        "description": "E96: a person's own comparison of this version with a file; its author and administrators read it. Never a check.",
+        "properties": {
+          "outcome": {
+            "enum": [
+              "passed",
+              "differed",
+              "not_compared"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "words": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Words",
+            "type": "array"
+          },
+          "technical": {
+            "$ref": "#/components/schemas/StoryCheckTechnical"
+          }
+        },
+        "required": [
+          "outcome",
+          "words",
+          "technical"
+        ],
+        "title": "StoryCompared",
         "type": "object"
       },
       "StoryContinue": {
@@ -88876,9 +91233,30 @@
             "title": "Receipts"
           },
           "check": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StoryCheck"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "compared": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/StoryCompared"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "default": null,
-            "title": "Check",
-            "type": "null"
+            "title": "Compared"
           },
           "plan": {
             "anyOf": [

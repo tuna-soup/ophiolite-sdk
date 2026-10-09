@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.26.0",
+  "version": "1.27.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -266,6 +266,14 @@
       "path": "relationships/v1/lineage-schema.json",
       "title": "Lineage",
       "description": "One hop each way from an exact revision: parents, derivations and superseded revisions the caller may read (E20)."
+    },
+    {
+      "id": "ophiolite.check/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "scientific/v1/check.json",
+      "title": "CheckRecord",
+      "description": "One comparison of an output with a reference under stated rules and a tolerance: what was compared, the outcome and its differences, and who witnessed it (server, claimed or personal); a refusal names one field (E96)."
     },
     {
       "id": "ophiolite.derivation/1",

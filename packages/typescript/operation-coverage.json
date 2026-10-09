@@ -606,6 +606,30 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/checks/compare",
+    "function": "postProjectsProjectChecksCompare",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/checks/list",
+    "function": "postProjectsProjectChecksList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/checks/publish",
+    "function": "postProjectsProjectChecksPublish",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/checks/publishers",
+    "function": "postProjectsProjectChecksPublishers",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/collections/delete",
     "function": "postProjectsProjectCollectionsDelete",
     "request": "schema",
