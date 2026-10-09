@@ -77,8 +77,15 @@ def test_a_well_folder_in_one_report_checks_its_folder_outside_the_download_and_
     assert 'Synthetic mode: nothing is sent. In your project this folder gives 2 Added, 1 Already here, 1 Not read, and 1 file that no reader recognises.' in text
 
 
+def test_how_was_this_made_reads_the_story_the_change_and_the_refusal_synthetic(tmp_path, monkeypatch):
+    text = run('how-was-this-made', tmp_path, monkeypatch)
+    assert 'Shale volume, made in a notebook, version 2\n  Reported by Alice; Ophiolite did not run this calculation.' in text
+    assert '  Synthetic gamma ray, version 1\n    A file added by Alice on Not recorded: original.las.' in text
+    assert 'Ophiolite did not run this calculation, so it cannot make it again.' in text and 'Nothing differs' not in text
+
+
 def test_every_entry_is_listed_built_and_described():
-    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report']
+    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'how-was-this-made']
     for entry in GALLERY['notebooks']:
         assert set(entry) == {'slug', 'title', 'sentence', 'modes', 'data'} and entry['modes'] == ['synthetic', 'live']
         script = (ROOT / 'notebooks' / entry['slug'] / 'notebook.py').read_text()

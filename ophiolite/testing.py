@@ -426,6 +426,9 @@ def synthetic_server():
             if route.endswith('/entities/extent'): return 200, {'crs':request.get('crs','OGC:CRS84'),'bbox':[5.1,52.1,6.2,52.9],'count':2,'untransformed':0}
             return 200, {'entities':[dict(well, location=dict(well['location'], crs=request.get('crs') or 'OGC:CRS84') if well['location'] else None) for well in WELLS],
                          'next_cursor':None,'untransformed':0}
+        if method == 'POST' and '/results/' in route:  # E94: how a result was made, from the fixture's own records
+            if not token: return 401, {'error':'Sign in again.'}
+            return _results(route.rsplit('/', 1)[-1], json.loads(body or b'{}'), _owner(token), applications, summary)
         return applications(method,path,body,headers)
 
     server.handler = handler
@@ -436,6 +439,107 @@ def synthetic_server():
     server.template_descriptor = descriptor
     with server:
         yield server
+
+
+# --- E94: results/story, what-changed, dependents and remake-run on the synthetic server -----------------------------
+# The same page shapes as the server's (`ophiolite.story/1`, `ophiolite.dependents/1`, `ophiolite.what-changed/1`) for
+# the fixture's synthetic log and the derived publications made against it. Every publication here is reported by its
+# publisher (a declared method), so making one again is refused with the server's words, as the server refuses it.
+
+NOT_RUN = 'Ophiolite did not run this calculation, so it cannot make it again.'
+
+
+def _day(at):
+    import time
+    return time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(at)) if at else None
+
+
+def _declared_setting(key, value):
+    """(label, words, raw) for one declared parameter, in the server's words (contracts/scientific/v1/parameter-labels.json)."""
+    from decimal import Decimal
+    words = json.loads(files('ophiolite').joinpath('contracts/scientific/v1/parameter-labels.json').read_text())
+    entry = words['keys'].get(key) or {}
+    if isinstance(value, bool): shown = 'yes' if value else 'no'
+    elif isinstance(value, (int, float)): shown = format(Decimal(repr(value)).normalize(), 'f')
+    elif isinstance(value, str): shown = (entry.get('values') or {}).get(value) or words['neutral']['value']
+    elif value is None: shown = 'Not recorded'
+    else: shown = words['neutral']['value']
+    return entry.get('label') or words['neutral']['key'], shown, json.dumps(value, sort_keys=True)
+
+
+def _results(operation, request, owner, applications, log):
+    publications = getattr(applications, 'publications', {})
+    names = {}
+
+    def version_of(asset, revision):
+        item = applications.readable(asset, owner)
+        return item, next((v for v in item['versions'] if v['revision'] == revision), None) if item else None
+
+    def node(asset, revision):
+        """One node, or None when the reader cannot open it (the page then says so, never how many)."""
+        ident = asset + '#' + revision
+        if (asset, revision) == (log['asset_id'], log['revision']):
+            names['alice'] = 'Alice'
+            return {'id': ident, 'kind': 'original', 'asset_id': asset, 'revision': revision, 'version': 1, 'name': log['name'],
+                    'made': {'at': None, 'by': 'alice', 'by_kind': 'person', 'by_name': None, 'on_behalf_of': None, 'through': None, 'reported_by': None},
+                    'method': None, 'settings': [], 'history': None, 'file': 'original.las', 'technical': {'asset_id': asset, 'revision': revision}}
+        item, version = version_of(asset, revision)
+        if version is None: return None
+        method = version['method']; names[version['by']] = version['by'].capitalize()
+        settings = {key: _declared_setting(key, value) for key, value in sorted((method.get('parameters') or {}).items())}
+        return {'id': ident, 'kind': 'declared', 'asset_id': asset, 'revision': revision, 'version': version['number'], 'name': item['name'],
+                'made': {'at': _day(version['published_at']), 'by': version['by'], 'by_kind': 'person', 'by_name': None, 'on_behalf_of': None,
+                         'through': None, 'reported_by': version['by']},
+                'method': {'display': METHOD_WORDS.get(method.get('name'), 'Method declared by its publisher'), 'version_label': 'Not recorded', 'release': 'Not recorded'},
+                'settings': [{'label': label, 'unit': None, 'value': words} for label, words, _ in settings.values()],
+                'history': None, 'newer_input': False, 'technical': {'asset_id': asset, 'revision': revision, 'declared_method': method.get('name')},
+                '_parents': [(p['key'], p['revision']) for p in version['parents']], '_settings': settings}
+
+    def page(schema, root, follow):
+        first = node(root[0], root[1])
+        if first is None: return 404, _envelope('Result unavailable', 'not-found')
+        nodes, queue, seen, restricted = [], [first], {first['id']}, False
+        while queue:
+            current = queue.pop(0); nodes.append(current); links = []
+            for asset, revision in follow(current):
+                found = node(asset, revision)
+                if found is None: restricted = True; continue
+                links.append({'id': found['id'], 'slot': None})
+                if found['id'] not in seen: seen.add(found['id']); queue.append(found)
+            current['dependents' if schema == 'ophiolite.dependents/1' else 'inputs'] = links
+        for n in nodes: n.pop('_parents', None); n.pop('_settings', None)
+        return 200, {'schema': schema, 'root': first['id'], 'nodes': nodes, 'restricted': restricted, 'next_cursor': None, 'continue_from': None,
+                     'display': {'member_names': dict(names)}}
+
+    def made_from(current):
+        return current.get('_parents') or []
+
+    def made_with(current):
+        asset, revision = current['asset_id'], current['revision']
+        return [(ident, v['revision']) for ident, item in publications.items() for v in item['versions']
+                if (asset, revision) in [(p['key'], p['revision']) for p in v['parents']]]
+
+    if operation == 'story': return page('ophiolite.story/1', (request.get('asset_id'), request.get('revision')), made_from)
+    if operation == 'dependents': return page('ophiolite.dependents/1', (request.get('asset_id'), request.get('revision')), made_with)
+    if operation == 'what-changed':
+        a, b = (node(request[k]['asset_id'], request[k]['revision']) for k in ('a', 'b'))
+        if a is None or b is None: return 404, _envelope('Result unavailable', 'not-found')
+        before, after = a.get('_settings') or {}, b.get('_settings') or {}
+        settings = [{'label': (after.get(key) or before[key])[0], 'unit': None, 'a': before[key][1] if key in before else 'Not recorded',
+                     'b': after[key][1] if key in after else 'Not recorded'}
+                    for key in sorted(set(before) | set(after)) if not (key in before and key in after and before[key][2] == after[key][2])]
+        calculation = [(x['method'] or {}).get('display') or 'Not recorded' for x in (a, b)]
+        same = sorted(a.get('_parents') or []) == sorted(b.get('_parents') or [])
+        answer = {'schema': 'ophiolite.what-changed/1', 'sentence': None, 'inputs_same': same, 'inputs': [] if same else [{'restricted': False, 'sentence': 'The inputs differ.'}],
+                  'settings': settings, 'calculation': {'same': calculation[0] == calculation[1], 'a': calculation[0], 'b': calculation[1]},
+                  'release': {'same': True, 'a': 'Not recorded', 'b': 'Not recorded'},
+                  'a': {'asset_id': a['asset_id'], 'revision': a['revision']}, 'b': {'asset_id': b['asset_id'], 'revision': b['revision']}}
+        if same and not settings and answer['calculation']['same']: answer['sentence'] = 'Nothing differs in how these were made.'
+        return 200, answer
+    if operation == 'remake-run':
+        if node(request.get('asset_id', ''), request.get('revision', '')) is None: return 404, _envelope('Result unavailable', 'not-found')
+        return 422, _envelope(NOT_RUN, 'incompatible-context')
+    return 404, _envelope('Fixture operation unavailable', 'not-found')
 
 
 def _owner(token):

@@ -7,7 +7,7 @@ ROOT=Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('public_inputs',ROOT/'tools/check_public_inputs.py')
 audit=importlib.util.module_from_spec(spec);spec.loader.exec_module(audit)
 
-def test_current_inputs():assert audit.verify()==184  # E55: the reader registry; E53: three section schemas, six profiles, nine fixtures, the section capability and the 2.5 manifest fixture
+def test_current_inputs():assert audit.verify()==190  # E94: derivation, parameters and parameter-labels contracts and three story fixtures; E55: the reader registry; E53: three section schemas, six profiles, nine fixtures, the section capability and the 2.5 manifest fixture
 
 @pytest.mark.parametrize('case',['missing','duplicate','hash','rights','evidence','source','canary','notice','third-party-licence','third-party-notice','third-party-register'])
 def test_unqualified_input_refusal(tmp_path,case):

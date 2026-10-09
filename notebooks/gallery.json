@@ -42,6 +42,13 @@
       "sentence": "Upload a folder of well logs in one step and read one report that says what became of each file and which wellbore each log names.",
       "modes": ["synthetic", "live"],
       "data": "A synthetic folder of five files made on your computer; uploading creates files only you can see until you share them."
+    },
+    {
+      "slug": "how-was-this-made",
+      "title": "How was this made",
+      "sentence": "Publish a result and a second version, then read how each was made, what changed between them, what was made from the log, and whether it can be made again.",
+      "modes": ["synthetic", "live"],
+      "data": "A synthetic five-sample gamma-ray log, or a log in your project; publishing creates a result only you can see until you share it."
     }
   ]
 }

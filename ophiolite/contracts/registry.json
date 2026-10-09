@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.23.0",
+  "version": "1.24.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -37,7 +37,7 @@
     },
     {
       "id": "ophiolite.scientific-asset/1",
-      "version": "1.15.0",
+      "version": "1.16.0",
       "lifecycle": "preview",
       "path": "assets/v1/schema.json",
       "title": "ScientificAsset",
@@ -258,6 +258,22 @@
       "path": "relationships/v1/lineage-schema.json",
       "title": "Lineage",
       "description": "One hop each way from an exact revision: parents, derivations and superseded revisions the caller may read (E20)."
+    },
+    {
+      "id": "ophiolite.derivation/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "scientific/v1/derivation.json",
+      "title": "DerivationRecord",
+      "description": "How a version was made: kind, implementation, the registry words at execution time, parameters, release, inputs by slot and lineage commitment, outputs by role, and the digest over the making (E94)."
+    },
+    {
+      "id": "ophiolite.parameters/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "scientific/v1/parameters.json",
+      "title": "Parameters",
+      "description": "A calculation's request and what it resolved to, as canonical typed trees: sorted object entries, ordered arrays, numbers as shortest round-trip decimal text, NFC strings (E94)."
     }
   ],
   "profiles": [
@@ -1006,6 +1022,12 @@
       "kind": "vocabulary",
       "path": "vocabulary/v1/quantities.json",
       "title": "Curve quantities with their OSDU LogCurveFamily names (E52)"
+    },
+    {
+      "id": "ophiolite.parameter-labels/1",
+      "kind": "vocabulary",
+      "path": "scientific/v1/parameter-labels.json",
+      "title": "Words for declared calculation settings: documented keys and values (E94)"
     },
     {
       "id": "ophiolite.shale-volume-methods/1",

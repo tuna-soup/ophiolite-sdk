@@ -7,6 +7,7 @@ import math
 import os
 from pathlib import Path
 import subprocess
+import uuid
 import sys
 from importlib.resources import files
 from .errors import Refused
@@ -200,6 +201,20 @@ def parser():
     sources.add_argument('--expect-revision',help='describe/read: refuse (exit 4, nothing written) unless this is the revision returned')
     sources.add_argument('--out',type=Path,help='read: write the rows to this .csv or .json file instead of standard output. The file is your own copy: it is not shared, kept up to date or checked again')
     sources.add_argument('--force',action='store_true',help='read --out: replace an existing file')
+    # E94: how a result was made, what changed, what depends on it, and making it again
+    story=project(sub.add_parser('story',help='How an exact result version was made: its inputs and their inputs, a page at a time'))
+    story.add_argument('asset');story.add_argument('revision');story.add_argument('--cursor',help='The next_cursor of the previous page')
+    changed=project(sub.add_parser('what-changed',help='What differs in how two exact result versions were made'))
+    changed.add_argument('asset');changed.add_argument('revision',help='The newer version');changed.add_argument('since',help='The version to compare it with')
+    changed.add_argument('--since-asset',help='When the other version belongs to another result')
+    depends=project(sub.add_parser('dependents',help='The results made from an exact version you may read'))
+    depends.add_argument('asset');depends.add_argument('revision');depends.add_argument('--cursor')
+    remake=project(sub.add_parser('remake',help='Make an exact result version again and compare; nothing is saved without --save'))
+    remake.add_argument('asset');remake.add_argument('revision')
+    remake.add_argument('--newer',action='store_true',help='Use the newest version of each input instead of the recorded ones')
+    remake.add_argument('--command-id',help='Run (and save) once: the same id answers the same result. Needed with --save')
+    remake.add_argument('--save',action='store_true',help='Save each output that differs (needs --command-id and --target)')
+    remake.add_argument('--target',choices=['new-result','new-version'],help='--save: a new result only you can read, or a new version that its readers are told about')
     imports=project(sub.add_parser('well-imports',help='Import a copy of an approved well table as wells: list, status ID, start (--dry-run to preview), resume ID, cancel ID'))
     imports.add_argument('action',choices=['list','status','start','resume','cancel'])
     imports.add_argument('id',nargs='?',help='status/resume/cancel: the import id from `well-imports list`')
@@ -322,6 +337,56 @@ def _dry_run(args,config):
     return done(args,'Would publish %s (%d bytes, %s) from %d parent(s). Nothing was sent.' % (args.name,len(written.bytes),args.profile,len(parents)),plan)
 
 
+def changed_lines(c,pad=''):
+    """E94: a what-changed answer in words (b is the newer version, a the one it is compared with)."""
+    if c.get('sentence'):return [pad+c['sentence']]
+    out=[]
+    if c['settings']:out.append(pad+'Settings: '+'; '.join('%s %s%s, was %s%s' % (s['label'],s['b'],' '+s['unit'] if s.get('unit') else '',s['a'],' '+s['unit'] if s.get('unit') else '') for s in c['settings'])+'.')
+    if c['inputs_same']:out.append(pad+'Inputs: the same.')
+    for i in c['inputs']:
+        if i.get('restricted'):out.append(pad+'An input you cannot open differs.');continue
+        if i.get('sentence'):out.append(pad+'Input %s: %s' % (i.get('slot') or '',i['sentence']));continue
+        version=lambda v:'version %s' % v['version'] if v and v.get('version') else 'not used'
+        out.append(pad+'Input %s: %s, was %s.' % (i.get('slot') or '',version(i.get('b')),version(i.get('a'))))
+        if i.get('change'):out.extend(changed_lines(i['change'],pad+'  '))
+    for key,label in (('calculation','Calculation'),('release','Ophiolite release')):
+        pair=c[key];out.append(pad+('%s: the same.' % label if pair['same'] else '%s: %s, was %s.' % (label,pair['b'],pair['a'])))
+    return out
+
+
+def _remake(args,client):
+    """E94: preview the exact inputs, run once, show what differs; save only with --save, --target and --command-id."""
+    if args.save and not (args.command_id and args.target):raise Refused('--save needs --command-id and --target (new-result or new-version).')
+    if args.target and not args.save:raise Refused('--target is for --save.')
+    if args.command_id and len(args.command_id)>48:raise Refused('--command-id is at most 48 characters.')
+    preview=client.remake(args.asset,args.revision,step='preview',inputs='newer' if args.newer else 'recorded')
+    inputs=[{'slot':i['slot'],'asset_id':i['asset_id'],'revision':i['revision']} for i in preview['inputs']]
+    command=args.command_id or 'cli-'+uuid.uuid4().hex[:24]
+    receipt=client.remake(args.asset,args.revision,step='run',inputs=inputs,command_id=command)
+    status=client.remake(args.asset,args.revision,step='status',execution_id=receipt['execution_id'])
+    out=['%s: %s' % (o['label'],{'equal':'the same','different':'different','saved':'saved','discarded':'discarded','expired':'no longer kept'}[o['outcome']]) for o in status['outcomes']]
+    for held in status.get('held') or []:
+        if held.get('summary'):out.append('  %s: %s' % (held['label'],held['summary']['reason']))
+    if status.get('failure'):out.append(status['failure']['sentence'])
+    payload={'preview':preview,'status':status,'saves':[]}
+    different=[o for o in status['outcomes'] if o['outcome']=='different']
+    if not args.save:
+        if different:out.append('Nothing was saved. It is kept for you until %s; to save it run again with --save --target new-result (or new-version) and --command-id %s.' % (status.get('expires_at') or 'it expires',command))
+        else:out.append('Nothing was saved.')
+        return done(args,'\n'.join(out),payload)
+    held={h['role']:h for h in status.get('held') or []}
+    outputs=[{'role':o['role'],'target':args.target,'command_id':'%s-%d' % (command,n),
+              **({'audience_digest':held[o['role']]['audience']['digest']} if args.target=='new-version' and (held.get(o['role']) or {}).get('audience') else {})}
+             for n,o in enumerate(different)]
+    if not outputs:out.append('Nothing differs, so nothing was saved.');return done(args,'\n'.join(out),payload)
+    saved=client.remake_save(receipt['execution_id'],outputs)
+    payload['saves']=saved['saves']
+    for one in saved['saves']:
+        told=', '.join(one['notified']) or 'nobody'
+        out.append('Saved %s as %s (version %s); told: %s.' % (one['role'],'a new result only you can read' if one['target']=='new-result' else 'a new version',one.get('revision_number'),told))
+    return done(args,'\n'.join(out),payload)
+
+
 def _journey(args,client):
     """E31: entities, wells, changes and sources, each with its documented --json shape."""
     if args.command=='entities':
@@ -347,6 +412,14 @@ def _journey(args,client):
                            'row':{n[len('source.'):]:joined[n] for n in names} if state=='joined' else None}
         text='\n'.join('%r: %s%s' % (w,r['source']['state'],' ('+r['source']['reason']+')' if r['source']['reason'] else '') for w,r in zip(wells,rows))
         return done(args,text or 'No well you may read.',{'wells':rows,'crs':wells.crs,'untransformed':wells.untransformed})
+    if args.command in ('story','dependents'):
+        from . import story as told
+        page=(client.story if args.command=='story' else client.dependents)(args.asset,args.revision,cursor=args.cursor)
+        return done(args,'\n'.join(told.lines(page)),page)
+    if args.command=='what-changed':
+        answer=client.what_changed((args.since_asset or args.asset,args.since),(args.asset,args.revision))
+        return done(args,'\n'.join(changed_lines(answer)),answer)
+    if args.command=='remake':return _remake(args,client)
     if args.command=='sources':
         return _sources(args,client)
     if args.command=='well-imports':
@@ -654,7 +727,7 @@ def _main(argv=None):
             if args.json:return done(args,None,{'assets':items})
             for item in items:print(json.dumps(item))
             return
-        if args.command in ('entities','wells','changes','sources','well-imports'):return _journey(args,client)
+        if args.command in ('entities','wells','changes','sources','well-imports','story','what-changed','dependents','remake'):return _journey(args,client)
         if args.command in ('check','get','send'):return _exchange(args,client)
         if args.command=='upload':return _upload(args,client)
         if args.command=='publish-derived':  # E30b

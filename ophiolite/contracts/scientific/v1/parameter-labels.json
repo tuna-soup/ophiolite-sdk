@@ -1,0 +1,23 @@
+{
+ "schema": "ophiolite.parameter-labels/1",
+ "id": "ophiolite.parameter-labels/1",
+ "title": "Words for declared calculation settings: documented keys and documented values (E94). Entries are added by review only; an unmapped key reads \"Not recorded\" and an unmapped text value reads as neutral words, both with the raw text under Technical details.",
+ "neutral": {
+  "key": "Not recorded",
+  "value": "A value given by the publisher"
+ },
+ "keys": {
+  "method": {"label": "Method", "values": {"linear": "Linear (simple)", "larionov-tertiary": "Larionov, Tertiary rocks", "larionov-older": "Larionov, older rocks", "clavier": "Clavier", "steiber": "Steiber"}},
+  "clean": {"label": "Clean value"},
+  "shale": {"label": "Shale value"},
+  "top": {"label": "Top depth"},
+  "base": {"label": "Base depth"},
+  "low": {"label": "Low percentile"},
+  "high": {"label": "High percentile"},
+  "delta": {"label": "Offset"},
+  "frequency": {"label": "Frequency"},
+  "length": {"label": "Length"},
+  "sample_interval": {"label": "Sample interval"},
+  "interpolation": {"label": "Interpolation", "values": {"linear": "Linear", "nearest": "Nearest value", "cubic": "Cubic"}}
+ }
+}
