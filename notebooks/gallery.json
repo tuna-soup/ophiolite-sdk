@@ -56,6 +56,13 @@
       "sentence": "Publish a result and a second version, then read how each was made, what changed between them, what was made from the log, and whether it can be made again.",
       "modes": ["synthetic", "live"],
       "data": "A synthetic five-sample gamma-ray log, or a log in your project; publishing creates a result only you can see until you share it."
+    },
+    {
+      "slug": "open-it-here",
+      "title": "Open it here",
+      "sentence": "Publish a result, open its exact version in the Workspace from the notebook, and add the next version with its Send again line, which refuses once someone else added one first.",
+      "modes": ["synthetic", "live"],
+      "data": "A synthetic five-sample gamma-ray log, or a log in your project; publishing creates a result only you can see until you share it."
     }
   ]
 }
