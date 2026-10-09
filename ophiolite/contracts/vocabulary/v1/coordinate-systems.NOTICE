@@ -1,0 +1,6 @@
+Coordinate reference system codes and names in coordinate_systems.json
+
+Codes and names of coordinate reference systems are a subset of the EPSG Dataset. EPSG Dataset © IOGP (International Association of Oil & Gas Producers), used under the EPSG Dataset Terms of Use.
+Terms of Use: https://epsg.org/terms-of-use.html
+
+Areas of use and native extents are Ophiolite data derived from EPSG Dataset v12.029 (rounded to the nearest hundredth of a degree and projected); they are not EPSG data.

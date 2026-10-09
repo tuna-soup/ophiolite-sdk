@@ -1,0 +1,215 @@
+{
+ "schema": "ophiolite.table-target/1",
+ "id": "ophiolite.table-target/deviation-survey/1",
+ "target": "deviation-survey",
+ "display_name": "Deviation survey",
+ "description": "The path of a well: measured depth with inclination and azimuth at each station, in increasing depth.",
+ "lands_on": [
+  "deviation-csv/1"
+ ],
+ "pending": null,
+ "standards": {
+  "profile": "ophiolite.trajectory/1"
+ },
+ "splits_by": "well",
+ "settings": {
+  "missing_marker": true,
+  "retain_extras": false,
+  "unique_columns": true,
+  "other_columns": "refused"
+ },
+ "ui": {
+  "captions": true
+ },
+ "fields": [
+  {
+   "name": "well",
+   "label": "Well",
+   "noun": "well",
+   "kind": "reference",
+   "to": "well",
+   "required": false,
+   "blank": "not-allowed",
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "canonical": null,
+   "aliases": [
+    "well",
+    "well name",
+    "wellbore",
+    "well id",
+    "uwi",
+    "borehole"
+   ]
+  },
+  {
+   "name": "md",
+   "label": "Measured depth",
+   "noun": "measured depth",
+   "kind": "number",
+   "dimension": "length",
+   "required": true,
+   "blank": "not-allowed",
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "canonical": "md",
+   "increasing": true,
+   "aliases": [
+    "md",
+    "measured depth",
+    "depth",
+    "mah"
+   ]
+  },
+  {
+   "name": "inclination",
+   "label": "Inclination",
+   "noun": "inclination",
+   "kind": "number",
+   "dimension": "angle",
+   "required": true,
+   "blank": "null",
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "canonical": "inclination",
+   "bounds": {
+    "min": 0,
+    "min_inclusive": true,
+    "max": 180,
+    "max_inclusive": true
+   },
+   "aliases": [
+    "inclination",
+    "inc",
+    "incl"
+   ]
+  },
+  {
+   "name": "azimuth",
+   "label": "Azimuth",
+   "noun": "azimuth",
+   "kind": "number",
+   "dimension": "angle",
+   "required": true,
+   "blank": "null",
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "canonical": "azimuth",
+   "bounds": {
+    "min": 0,
+    "min_inclusive": true,
+    "max": 360,
+    "max_inclusive": false
+   },
+   "aliases": [
+    "azimuth",
+    "azi",
+    "az"
+   ]
+  },
+  {
+   "name": "tvd",
+   "label": "Vertical depth",
+   "noun": "vertical depth",
+   "kind": "number",
+   "dimension": "length",
+   "required": false,
+   "blank": "null",
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "canonical": "tvd",
+   "aliases": [
+    "tvd",
+    "true vertical depth"
+   ]
+  }
+ ],
+ "column_rows": [],
+ "declarations": [
+  {
+   "name": "depth_unit",
+   "label": "Depth unit",
+   "noun": "depth unit",
+   "kind": "unit",
+   "dimension": "length",
+   "accepts": "unit-text",
+   "required": false,
+   "default": null,
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "applies_to": [
+    "md",
+    "tvd"
+   ],
+   "values": [
+    {
+     "value": "m",
+     "label": "Metres"
+    },
+    {
+     "value": "ft",
+     "label": "International feet"
+    }
+   ]
+  },
+  {
+   "name": "azimuth_reference",
+   "label": "Azimuth reference",
+   "noun": "azimuth reference",
+   "kind": "choice",
+   "required": false,
+   "default": null,
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "applies_to": [
+    "azimuth"
+   ],
+   "values": [
+    {
+     "value": "true-north",
+     "label": "True north"
+    },
+    {
+     "value": "grid-north",
+     "label": "Grid north"
+    },
+    {
+     "value": "magnetic-north",
+     "label": "Magnetic north"
+    }
+   ]
+  },
+  {
+   "name": "depth_datum",
+   "label": "Depth datum",
+   "noun": "depth datum",
+   "kind": "text",
+   "max_length": 128,
+   "required": false,
+   "default": null,
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "applies_to": [
+    "md",
+    "tvd"
+   ],
+   "values": []
+  }
+ ]
+}

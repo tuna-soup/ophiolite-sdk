@@ -1,0 +1,188 @@
+{
+ "schema": "ophiolite.table-target/1",
+ "id": "ophiolite.table-target/well-tops/1",
+ "target": "well-tops",
+ "display_name": "Well tops",
+ "description": "Named depths along a well where a formation or marker begins, one row per top.",
+ "lands_on": [
+  "well-tops-csv/1"
+ ],
+ "pending": null,
+ "standards": {
+  "profile": "ophiolite.well-tops/1"
+ },
+ "splits_by": "well",
+ "settings": {
+  "missing_marker": true,
+  "retain_extras": false,
+  "unique_columns": true,
+  "other_columns": "not-read"
+ },
+ "ui": {
+  "captions": true
+ },
+ "fields": [
+  {
+   "name": "well",
+   "label": "Well",
+   "noun": "well",
+   "kind": "reference",
+   "to": "well",
+   "required": false,
+   "blank": "not-allowed",
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "canonical": null,
+   "aliases": [
+    "well",
+    "well name",
+    "wellbore",
+    "well id",
+    "uwi",
+    "borehole"
+   ]
+  },
+  {
+   "name": "name",
+   "label": "Top name",
+   "noun": "top name",
+   "kind": "name",
+   "required": true,
+   "blank": "not-allowed",
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "canonical": "name",
+   "max_length": 128,
+   "aliases": [
+    "name",
+    "top",
+    "top name",
+    "formation",
+    "marker",
+    "horizon",
+    "pick"
+   ]
+  },
+  {
+   "name": "md",
+   "label": "Measured depth",
+   "noun": "measured depth",
+   "kind": "number",
+   "dimension": "length",
+   "required": true,
+   "blank": "not-allowed",
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "canonical": "md",
+   "osdu": "Markers[].MarkerMeasuredDepth",
+   "aliases": [
+    "md",
+    "measured depth",
+    "depth",
+    "depth md",
+    "mah",
+    "top md"
+   ]
+  },
+  {
+   "name": "tvd",
+   "label": "Vertical depth",
+   "noun": "vertical depth",
+   "kind": "number",
+   "dimension": "length",
+   "required": false,
+   "blank": "null",
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "canonical": "tvd",
+   "aliases": [
+    "tvd",
+    "true vertical depth"
+   ]
+  },
+  {
+   "name": "source",
+   "label": "Source",
+   "noun": "source",
+   "kind": "text",
+   "required": false,
+   "blank": "null",
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "canonical": "source",
+   "aliases": [
+    "source",
+    "interpreter",
+    "picked by",
+    "origin"
+   ]
+  }
+ ],
+ "column_rows": [],
+ "declarations": [
+  {
+   "name": "depth_unit",
+   "label": "Depth unit",
+   "noun": "depth unit",
+   "kind": "unit",
+   "dimension": "length",
+   "accepts": "unit-text",
+   "required": false,
+   "default": null,
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "applies_to": [
+    "md",
+    "tvd"
+   ],
+   "values": [
+    {
+     "value": "m",
+     "label": "Metres"
+    },
+    {
+     "value": "ft",
+     "label": "International feet"
+    }
+   ]
+  },
+  {
+   "name": "depth_basis",
+   "label": "Depth reference",
+   "noun": "depth reference",
+   "kind": "choice",
+   "required": false,
+   "default": null,
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "applies_to": [
+    "md",
+    "tvd"
+   ],
+   "values": [
+    {
+     "value": "same-as-log",
+     "label": "The same as the well log"
+    },
+    {
+     "value": "other",
+     "label": "Another reference"
+    }
+   ]
+  }
+ ]
+}

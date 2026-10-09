@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/registry-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.contracts-registry/1",
-    "version": "1.4.0",
+    "version": "1.5.0",
     "lifecycle": "preview"
   },
   "title": "ContractsRegistry",
@@ -70,7 +70,7 @@
       "required": ["id", "kind", "path"],
       "properties": {
         "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$", "maxLength": 128},
-        "kind": {"enum": ["mapping", "vocabulary", "generated", "openapi", "fixture", "capability", "relationships", "policy", "calculation", "reader-registry"]},
+        "kind": {"enum": ["mapping", "vocabulary", "generated", "openapi", "fixture", "capability", "relationships", "policy", "calculation", "reader-registry", "table-target"]},
         "path": {"type": "string", "minLength": 1},
         "title": {"type": "string", "minLength": 1},
         "schema": {"type": "string", "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$"}

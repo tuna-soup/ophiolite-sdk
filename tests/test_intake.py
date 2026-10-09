@@ -31,6 +31,6 @@ def test_declarations_name_a_kind_and_only_the_items_it_takes():
     assert checked_declarations(None) is None
     with pytest.raises(Refused) as error: checked_declarations({'segy/1': {'depth_unit': 'm'}})
     assert str(error.value) == 'Seismic volume (SEG-Y) files do not take depth_unit; they take z_domain, crs, datum.'
-    with pytest.raises(Refused, match='Well log \\(LAS 2.0\\) files do not take crs; they take no declarations.'): checked_declarations({'las2/1': {'crs': 'x'}})
+    with pytest.raises(Refused, match='Well log \\(LAS\\) files do not take crs; they take no declarations.'): checked_declarations({'las2/1': {'crs': 'x'}})
     with pytest.raises(Refused, match='No kind of file is named las'): checked_declarations({'las': {}})
     assert 'geotiff/1' in [e['profile'] for e in readers()]  # the snapshot holds the fifteenth kind

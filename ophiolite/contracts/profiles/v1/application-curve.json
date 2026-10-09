@@ -17,5 +17,8 @@
   },
   "mappings": [
     "ophiolite.mapping/application-curve-to-well-curve/1"
-  ]
+  ],
+  "table_target": {
+    "none": "not-a-table"
+  }
 }

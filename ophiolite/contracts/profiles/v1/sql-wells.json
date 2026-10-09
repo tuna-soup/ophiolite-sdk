@@ -14,5 +14,6 @@
   "role": "artifact",
   "media_types": [
     "application/json"
-  ]
+  ],
+  "table_target": "ophiolite.table-target/wells/1"
 }

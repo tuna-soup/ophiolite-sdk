@@ -52,3 +52,11 @@ says `origin: synthetic` is exported with its lineage like any result, but an im
 skips it with the reason "A synthetic section is not imported: its model and wavelet are
 not part of the project it would join. Import them and compute it again." A 2.4 reader
 refuses 2.5 content by its asset types ([fixture](fixtures/manifest-sections.json)).
+
+## 2.6 — time-depth tables
+
+2.6 adds `time-depth` (files as the other typed assets: `original.csv`, `descriptor.json`,
+`data.json`, the served `ophiolite.time-depth/1`). The declared context travels in the
+descriptor, `seismic_reference_elevation` as canonical decimal text; the wellbore
+association travels in the graph form. A 2.5 reader refuses 2.6 content by its asset types
+with "An asset has an unknown type."

@@ -1,0 +1,191 @@
+{
+ "schema": "ophiolite.mapping-check-words/1",
+ "id": "ophiolite.mapping-check-words/1",
+ "description": "The plain sentence for every mapping check code, its placeholders and the captions shown beside a pre-selected value (E86). The first fifteen codes are E43's words, unchanged.",
+ "codes": {
+  "id-missing": {
+   "severity": "invalid",
+   "template": "{of} have no {noun}.",
+   "examples": "none"
+  },
+  "id-repeated": {
+   "severity": "invalid",
+   "template": "{of} share their {noun} with another row; each {entity} needs its own.",
+   "examples": "none"
+  },
+  "name-missing": {
+   "severity": "invalid",
+   "template": "{of} have no {noun}.",
+   "examples": "none"
+  },
+  "coordinate-missing": {
+   "severity": "invalid",
+   "template": "{of} have no {noun} value.",
+   "examples": "none"
+  },
+  "not-numeric": {
+   "severity": "invalid",
+   "template": "{of} have a {noun} that is not a number{examples}.",
+   "examples": "legacy"
+  },
+  "non-finite": {
+   "severity": "invalid",
+   "template": "{of} have a {noun} that is not a finite number{examples}.",
+   "examples": "legacy"
+  },
+  "longitude-out-of-range": {
+   "severity": "invalid",
+   "template": "{of} have an X outside -180 to 180{examples}{system}.",
+   "examples": "legacy"
+  },
+  "latitude-out-of-range": {
+   "severity": "invalid",
+   "template": "{of} have a Y outside -90 to 90{examples}{system}.",
+   "examples": "legacy"
+  },
+  "outside-usual-area": {
+   "severity": "unusual",
+   "template": "{of} lie outside the area {system_name} is meant for{examples}. This is allowed; check that the coordinate reference is the one the table uses.",
+   "examples": "legacy"
+  },
+  "field-not-mapped": {
+   "severity": "not-supported",
+   "template": "Choose the column that holds the {noun}.",
+   "examples": "none"
+  },
+  "column-unknown": {
+   "severity": "not-supported",
+   "template": "The chosen column for the {noun} is no longer in this table; choose another.",
+   "examples": "legacy"
+  },
+  "crs-not-accepted": {
+   "severity": "not-supported",
+   "template": "Choose the coordinate reference the table’s X and Y use.",
+   "examples": "legacy"
+  },
+  "depth-options": {
+   "severity": "not-supported",
+   "template": "Choose the depth unit, depth type and depth reference.",
+   "examples": "legacy"
+  },
+  "source-limit": {
+   "severity": "not-supported",
+   "template": "Not every row could be read: the table is larger than one check can read. Nothing was skipped silently; the mapping cannot be saved until every row is checked.",
+   "examples": "none"
+  },
+  "mapping-invalid": {
+   "severity": "not-supported",
+   "template": "Part of this mapping cannot be used as it is; review its settings.",
+   "examples": "legacy"
+  },
+  "value-missing": {
+   "severity": "invalid",
+   "template": "{of} have no {noun} value.",
+   "examples": "none"
+  },
+  "out-of-range": {
+   "severity": "invalid",
+   "template": "In {of}, the {noun} is outside {range}{examples}.",
+   "examples": "new"
+  },
+  "not-increasing": {
+   "severity": "invalid",
+   "template": "In {of}, the {noun} is not larger than in the row before{examples}.",
+   "examples": "new"
+  },
+  "reference-missing": {
+   "severity": "invalid",
+   "template": "{of} have no {noun}.",
+   "examples": "none"
+  },
+  "reference-unknown": {
+   "severity": "unusual",
+   "template": "{of} name a {noun} this project does not have yet{examples}.",
+   "examples": "new"
+  },
+  "text-too-long": {
+   "severity": "invalid",
+   "template": "{of} have a {noun} longer than {limit} characters{examples}.",
+   "examples": "new"
+  },
+  "column-used-twice": {
+   "severity": "not-supported",
+   "template": "One column is chosen for the {noun} and for another field; each field needs its own.",
+   "examples": "none"
+  },
+  "declaration-missing": {
+   "severity": "not-supported",
+   "template": "Choose the {noun}.",
+   "examples": "none"
+  },
+  "declaration-not-numeric": {
+   "severity": "not-supported",
+   "template": "The {noun} must be a plain number such as 12.5.",
+   "examples": "none"
+  }
+ },
+ "legacy_codes": [
+  "id-missing",
+  "id-repeated",
+  "name-missing",
+  "coordinate-missing",
+  "not-numeric",
+  "non-finite",
+  "longitude-out-of-range",
+  "latitude-out-of-range",
+  "outside-usual-area",
+  "field-not-mapped",
+  "column-unknown",
+  "crs-not-accepted",
+  "depth-options",
+  "source-limit",
+  "mapping-invalid"
+ ],
+ "over_25_words": [
+  "source-limit",
+  "outside-usual-area"
+ ],
+ "of": "{n} of {rows}",
+ "rows": [
+  "row",
+  "rows"
+ ],
+ "range": {
+  "inclusive": "{low} to {high}",
+  "exclusive_high": "{low} up to but not including {high}"
+ },
+ "system": "; the selected system is {system_name}",
+ "system_fallback": "the selected system",
+ "examples": {
+  "legacy": {
+   "max": 2,
+   "lead": ", for example ",
+   "join": " and ",
+   "truncated": "…",
+   "cut": null
+  },
+  "new": {
+   "max": 3,
+   "lead": ", for example ",
+   "join": ", ",
+   "last": " and ",
+   "truncated": "…",
+   "cut": 24
+  }
+ },
+ "nouns": {
+  "extras": "additional metadata column",
+  "crs": "coordinate reference"
+ },
+ "noun_fallback": "value",
+ "entity_fallback": "row",
+ "captions": {
+  "declared": "Stated in the connection settings",
+  "declared-file": "Stated in the file",
+  "declared-person": "You said",
+  "previously-reviewed": "Used in your earlier import",
+  "inferred": "Suggested from the column name",
+  "project-default": "Project default",
+  "none": "Not stated"
+ }
+}

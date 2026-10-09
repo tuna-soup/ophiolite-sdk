@@ -93,7 +93,7 @@ class GridContext(Contract):
 
 class TypedInterpretation(Contract):
     reader: Literal['asset_connectors.typed_reader/1'] = Field(...)
-    mapping: Literal['well-tops/1', 'trajectory/1', 'regular-grid-surface/1', 'triangulated-surface/1', 'point-set/1', 'polyline-set/1', 'seismic-volume/1', 'well-location/1', 'wavelet/1', 'model-section/1', 'seismic-section/1'] = Field(...)
+    mapping: Literal['well-tops/1', 'trajectory/1', 'regular-grid-surface/1', 'triangulated-surface/1', 'point-set/1', 'polyline-set/1', 'seismic-volume/1', 'well-location/1', 'wavelet/1', 'model-section/1', 'seismic-section/1', 'time-depth/1'] = Field(...)
     parsing_policy: Literal['typed-strict/1'] = Field(...)
     null_policy: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
 
@@ -349,7 +349,7 @@ class ScientificAsset(Contract):
     custodian: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(...)
     source_reference: Reference | None = Field(...)
     profile: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] = Field(...)
-    scientific: ScientificContext | TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext | RecipePointContext | WellLocationContext | WaveletContext | ModelSectionContext | SeismicSectionContext = Field(...)
+    scientific: ScientificContext | TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext | RecipePointContext | WellLocationContext | WaveletContext | ModelSectionContext | SeismicSectionContext | TimeDepthContext = Field(...)
     interpretation: Interpretation | TypedInterpretation | RecipeInterpretation = Field(...)
     interpretation_evidence: Literal['live', 'recorded', 'recorded-differs', 'not-recorded'] = Field('live')
     recorded_interpretation: RecordedInterpretation | None = Field(None)
@@ -661,6 +661,20 @@ class StringLeaf(Contract):
     type: Literal['string'] = Field(...)
     value: Annotated[str, Field(max_length=1024)] = Field(...)
 
+class TimeDepthContext(Contract):
+    type: Literal['time-depth'] = Field(...)
+    depth_type: Literal['md', 'tvd', 'tvdss', 'unknown'] = Field(...)
+    depth_unit: Annotated[str, Field(pattern='^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$')] = Field(...)
+    time_kind: Literal['one-way', 'two-way', 'unknown'] = Field(...)
+    time_unit: Literal['ms', 's', 'us', 'unknown'] = Field(...)
+    datum: Annotated[str, Field(min_length=1, max_length=128)] | None = Field(...)
+    seismic_reference_elevation: float | None = Field(...)
+    count: Annotated[int, Field(ge=2, le=100000)] = Field(...)
+    depth_range: Annotated[list[float], Field(min_length=2, max_length=2)] = Field(...)
+    time_range: Annotated[list[float], Field(min_length=2, max_length=2)] = Field(...)
+    velocity_provided: bool = Field(...)
+    fidelity: Fidelity = Field(...)
+
 class TopsContext(Contract):
     type: Literal['well-tops'] = Field(...)
     depth_unit: Annotated[str, Field(pattern='^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$')] = Field(...)
@@ -794,6 +808,17 @@ class AssetSummary(Contract):
     allowed_operations: Annotated[list[Literal['read', 'export', 'use-as-input']], Field(max_length=3)] = Field(...)
     display: Display | None = Field(None)
 
+class TimeDepth(Contract):
+    representation: Literal['normalized'] = Field(...)
+    source: Reference = Field(...)
+    source_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    interpretation: TypedInterpretation = Field(...)
+    schema_: Literal['ophiolite.time-depth/1'] = Field(..., alias='schema')
+    context: TimeDepthContext = Field(...)
+    depth: Annotated[list[float], Field(min_length=2, max_length=100000)] = Field(...)
+    time: Annotated[list[float], Field(min_length=2, max_length=100000)] = Field(...)
+    velocity: Annotated[list[float | None], Field(max_length=100000)] | None = Field(None)
+
 class Trajectory(Contract):
     representation: Literal['normalized'] = Field(...)
     source: Reference = Field(...)
@@ -821,7 +846,7 @@ class TriangulatedSurface(Contract):
     attributes: Annotated[list[Attribute], Field(max_length=16)] = Field(...)
 
 class TypedContext(Contract):
-    context: Annotated[TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext | WellLocationContext | WaveletContext | ModelSectionContext | SeismicSectionContext, Field(discriminator='type')] = Field(...)
+    context: Annotated[TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext | WellLocationContext | WaveletContext | ModelSectionContext | SeismicSectionContext | TimeDepthContext, Field(discriminator='type')] = Field(...)
 
 class Wavelet(Contract):
     representation: Literal['normalized'] = Field(...)
@@ -992,7 +1017,7 @@ class BundleAssetV2(Contract):
     parent_visibility: Literal['complete', 'restricted'] = Field(...)
     omissions: list[str] = Field(...)
     losses: list[str] = Field(...)
-    type: Literal['well-log', 'well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-slice', 'wavelet', 'model-section', 'seismic-section'] = Field(...)
+    type: Literal['well-log', 'well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-slice', 'wavelet', 'model-section', 'seismic-section', 'time-depth'] = Field(...)
     relationships: BundleAssetV2Relationships = Field(None)
     original: BundleAssetV2Original = Field(None)
     slices: Annotated[list[BundleSliceV2], Field(min_length=1, max_length=64)] = Field(None)
@@ -1099,6 +1124,7 @@ class ContractProfile(Contract):
     interpretation: InterpretationIdentity = Field(None)
     mappings: list[Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$')]] = Field(None)
     mapped_from: list[Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$')]] = Field(None)
+    table_target: Annotated[str, Field(pattern='^ophiolite\\.table-target/[a-z][a-z0-9-]*/[0-9]+$')] | ContractProfileTable_Target1 = Field(None)
 
 class ConnectorSemantics(Contract):
     scientific_profile: Annotated[str, Field(min_length=1)] = Field(...)
@@ -1155,7 +1181,7 @@ class ProfileEntry(Contract):
 
 class DocumentEntry(Contract):
     id: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] = Field(...)
-    kind: Literal['mapping', 'vocabulary', 'generated', 'openapi', 'fixture', 'capability', 'relationships', 'policy', 'calculation', 'reader-registry'] = Field(...)
+    kind: Literal['mapping', 'vocabulary', 'generated', 'openapi', 'fixture', 'capability', 'relationships', 'policy', 'calculation', 'reader-registry', 'table-target'] = Field(...)
     path: Annotated[str, Field(min_length=1)] = Field(...)
     title: Annotated[str, Field(min_length=1)] = Field(None)
     schema_: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$')] = Field(None, alias='schema')
@@ -1231,6 +1257,142 @@ class WellCurve(Contract):
     original_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(None)
     source_revision: str = Field(None)
 
+class TableTarget(Contract):
+    schema_: Literal['ophiolite.table-target/1'] = Field(..., alias='schema')
+    id: Annotated[str, Field(pattern='^ophiolite\\.table-target/[a-z][a-z0-9-]*/[0-9]+$')] = Field(...)
+    target: Annotated[str, Field(pattern='^[a-z][a-z0-9-]{1,31}$')] = Field(...)
+    display_name: Annotated[str, Field(min_length=1, max_length=60)] = Field(...)
+    description: Annotated[str, Field(min_length=1, max_length=240)] = Field(...)
+    lands_on: list[Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$')]] = Field(...)
+    pending: None | Pending = Field(...)
+    standards: StandardsProfile | StandardsNone = Field(...)
+    splits_by: None | Annotated[str, Field(pattern='^[a-z][a-z0-9_]{0,31}$')] = Field(...)
+    settings: Settings = Field(...)
+    ui: Ui = Field(...)
+    fields: Annotated[list[TextField | ReferenceField | NumberField | CoordinateField], Field(max_length=16)] = Field(...)
+    column_rows: Annotated[list[ColumnRow], Field(max_length=3)] = Field(...)
+    declarations: Annotated[list[Declaration], Field(max_length=8)] = Field(...)
+
+class Pending(Contract):
+    epic: Annotated[str, Field(pattern='^E[0-9]+[a-z]?$')] = Field(...)
+    profiles: list[Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$')]] = Field(...)
+
+class StandardsProfile(Contract):
+    profile: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$')] = Field(...)
+
+class StandardsNone(Contract):
+    none: Annotated[str, Field(min_length=8, max_length=160)] = Field(...)
+
+class Settings(Contract):
+    missing_marker: bool = Field(...)
+    retain_extras: bool = Field(...)
+    unique_columns: bool = Field(...)
+    other_columns: Literal['refused', 'not-read', 'retained'] = Field(...)
+
+class Ui(Contract):
+    captions: bool = Field(...)
+
+class TextField(Contract):
+    name: Annotated[str, Field(pattern='^[a-z][a-z0-9_]{0,31}$')] = Field(...)
+    label: Annotated[str, Field(min_length=1, max_length=60)] = Field(...)
+    noun: Annotated[str, Field(min_length=1, max_length=60)] = Field(...)
+    short: Annotated[str, Field(min_length=1, max_length=30)] = Field(None)
+    description: Annotated[str, Field(min_length=1, max_length=240)] = Field(None)
+    required: bool = Field(...)
+    blank: Literal['not-allowed', 'null'] = Field(...)
+    prefill: Annotated[list[Literal['declared', 'previously-reviewed', 'project-default', 'inferred']], Field(max_length=4)] = Field(...)
+    canonical: None | Annotated[str, Field(pattern='^[a-z][a-z0-9_]{0,31}$')] = Field(...)
+    osdu: Annotated[str, Field(min_length=1, max_length=120)] = Field(None)
+    aliases: Annotated[list[Annotated[str, Field(min_length=1, max_length=40)]], Field(max_length=24)] = Field(...)
+    kind: Literal['identifier', 'name', 'text'] = Field(...)
+    max_length: Annotated[int, Field(ge=1, le=128)] = Field(None)
+    entity: Annotated[str, Field(min_length=1, max_length=60)] = Field(None)
+
+class ReferenceField(Contract):
+    name: Annotated[str, Field(pattern='^[a-z][a-z0-9_]{0,31}$')] = Field(...)
+    label: Annotated[str, Field(min_length=1, max_length=60)] = Field(...)
+    noun: Annotated[str, Field(min_length=1, max_length=60)] = Field(...)
+    short: Annotated[str, Field(min_length=1, max_length=30)] = Field(None)
+    description: Annotated[str, Field(min_length=1, max_length=240)] = Field(None)
+    required: bool = Field(...)
+    blank: Literal['not-allowed', 'null'] = Field(...)
+    prefill: Annotated[list[Literal['declared', 'previously-reviewed', 'project-default', 'inferred']], Field(max_length=4)] = Field(...)
+    canonical: None | Annotated[str, Field(pattern='^[a-z][a-z0-9_]{0,31}$')] = Field(...)
+    osdu: Annotated[str, Field(min_length=1, max_length=120)] = Field(None)
+    aliases: Annotated[list[Annotated[str, Field(min_length=1, max_length=40)]], Field(max_length=24)] = Field(...)
+    kind: Literal['reference'] = Field(...)
+    to: Literal['well', 'wellbore'] = Field(...)
+
+class NumberField(Contract):
+    name: Annotated[str, Field(pattern='^[a-z][a-z0-9_]{0,31}$')] = Field(...)
+    label: Annotated[str, Field(min_length=1, max_length=60)] = Field(...)
+    noun: Annotated[str, Field(min_length=1, max_length=60)] = Field(...)
+    short: Annotated[str, Field(min_length=1, max_length=30)] = Field(None)
+    description: Annotated[str, Field(min_length=1, max_length=240)] = Field(None)
+    required: bool = Field(...)
+    blank: Literal['not-allowed', 'null'] = Field(...)
+    prefill: Annotated[list[Literal['declared', 'previously-reviewed', 'project-default', 'inferred']], Field(max_length=4)] = Field(...)
+    canonical: None | Annotated[str, Field(pattern='^[a-z][a-z0-9_]{0,31}$')] = Field(...)
+    osdu: Annotated[str, Field(min_length=1, max_length=120)] = Field(None)
+    aliases: Annotated[list[Annotated[str, Field(min_length=1, max_length=40)]], Field(max_length=24)] = Field(...)
+    kind: Literal['number'] = Field(...)
+    dimension: Literal['length', 'time', 'velocity', 'angle', 'dimensionless'] = Field(...)
+    bounds: Bounds = Field(None)
+    increasing: bool = Field(None)
+    multiple: Multiple = Field(None)
+
+class CoordinateField(Contract):
+    name: Annotated[str, Field(pattern='^[a-z][a-z0-9_]{0,31}$')] = Field(...)
+    label: Annotated[str, Field(min_length=1, max_length=60)] = Field(...)
+    noun: Annotated[str, Field(min_length=1, max_length=60)] = Field(...)
+    short: Annotated[str, Field(min_length=1, max_length=30)] = Field(None)
+    description: Annotated[str, Field(min_length=1, max_length=240)] = Field(None)
+    required: bool = Field(...)
+    blank: Literal['not-allowed', 'null'] = Field(...)
+    prefill: Annotated[list[Literal['declared', 'previously-reviewed', 'project-default', 'inferred']], Field(max_length=4)] = Field(...)
+    canonical: None | Annotated[str, Field(pattern='^[a-z][a-z0-9_]{0,31}$')] = Field(...)
+    osdu: Annotated[str, Field(min_length=1, max_length=120)] = Field(None)
+    aliases: Annotated[list[Annotated[str, Field(min_length=1, max_length=40)]], Field(max_length=24)] = Field(...)
+    kind: Literal['coordinate'] = Field(...)
+    axis: Literal['x', 'y'] = Field(...)
+
+class Bounds(Contract):
+    min: None | float = Field(...)
+    min_inclusive: bool = Field(...)
+    max: None | float = Field(...)
+    max_inclusive: bool = Field(...)
+
+class Multiple(Contract):
+    max: Annotated[int, Field(ge=1, le=64)] = Field(...)
+    name_pattern: Annotated[str, Field(min_length=1, max_length=120)] = Field(...)
+
+class ColumnRow(Contract):
+    name: Literal['unit', 'quantity', 'missing'] = Field(...)
+    label: Annotated[str, Field(min_length=1, max_length=60)] = Field(...)
+    kind: Literal['choice', 'text'] = Field(...)
+    from_: Literal['ophiolite.quantities/1'] = Field(None, alias='from')
+    max_length: Annotated[int, Field(ge=1, le=128)] = Field(None)
+
+class Value(Contract):
+    value: Annotated[str, Field(min_length=1, max_length=40)] = Field(...)
+    label: Annotated[str, Field(min_length=1, max_length=60)] = Field(...)
+
+class Declaration(Contract):
+    name: Annotated[str, Field(pattern='^[a-z][a-z0-9_]{0,31}$')] = Field(...)
+    label: Annotated[str, Field(min_length=1, max_length=60)] = Field(...)
+    noun: Annotated[str, Field(min_length=1, max_length=60)] = Field(...)
+    description: Annotated[str, Field(min_length=1, max_length=240)] = Field(None)
+    kind: Literal['choice', 'unit', 'crs', 'text', 'number'] = Field(...)
+    dimension: Literal['length', 'time', 'velocity', 'angle', 'dimensionless'] = Field(None)
+    accepts: Literal['menu-only', 'unit-text', 'epsg-code'] = Field(None)
+    max_length: Annotated[int, Field(ge=1, le=128)] = Field(None)
+    required: bool = Field(...)
+    default: None | Annotated[str, Field(min_length=1, max_length=40)] = Field(...)
+    prefill: Annotated[list[Literal['declared', 'previously-reviewed', 'project-default', 'inferred']], Field(max_length=4)] = Field(...)
+    applies_to: list[Annotated[str, Field(pattern='^[a-z][a-z0-9_]{0,31}$')]] = Field(...)
+    values: Annotated[list[Value], Field(max_length=24)] = Field(...)
+    osdu: Annotated[str, Field(min_length=1, max_length=120)] = Field(None)
+
 class PortableBundleManifestExporter(Contract):
     name: Annotated[str, Field(max_length=64)] = Field(...)
     version: Annotated[str, Field(max_length=64)] = Field(...)
@@ -1290,6 +1452,9 @@ class BundleGroupV2Recommended1(Contract):
     by: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
     at: float = Field(...)
     reason: Annotated[str, Field(min_length=1, max_length=500)] = Field(...)
+
+class ContractProfileTable_Target1(Contract):
+    none: Literal['normalized-form', 'read-by-recipe', 'not-a-table'] = Field(...)
 
 class RepresentationRulesArtifact_Kind_By_Origin(Contract):
     source_reference: Literal['original', 'captured-result', 'derived-artifact'] = Field(..., alias='source-reference')
@@ -1409,6 +1574,7 @@ RevisionManifestV3.model_rebuild()
 SeismicContext.model_rebuild()
 SeismicSectionContext.model_rebuild()
 StringLeaf.model_rebuild()
+TimeDepthContext.model_rebuild()
 TopsContext.model_rebuild()
 TrajectoryContext.model_rebuild()
 Version.model_rebuild()
@@ -1425,6 +1591,7 @@ SeismicVolume.model_rebuild()
 Chunk.model_rebuild()
 HeaderPositions.model_rebuild()
 AssetSummary.model_rebuild()
+TimeDepth.model_rebuild()
 Trajectory.model_rebuild()
 Station.model_rebuild()
 TriangulatedSurface.model_rebuild()
@@ -1479,6 +1646,21 @@ RegistryKind.model_rebuild()
 ScalarMap.model_rebuild()
 ScalarGrid.model_rebuild()
 WellCurve.model_rebuild()
+TableTarget.model_rebuild()
+Pending.model_rebuild()
+StandardsProfile.model_rebuild()
+StandardsNone.model_rebuild()
+Settings.model_rebuild()
+Ui.model_rebuild()
+TextField.model_rebuild()
+ReferenceField.model_rebuild()
+NumberField.model_rebuild()
+CoordinateField.model_rebuild()
+Bounds.model_rebuild()
+Multiple.model_rebuild()
+ColumnRow.model_rebuild()
+Value.model_rebuild()
+Declaration.model_rebuild()
 PortableBundleManifestExporter.model_rebuild()
 PortableBundleManifestLimits.model_rebuild()
 PortableBundleManifestObservations.model_rebuild()
@@ -1491,6 +1673,7 @@ PortableBundleManifestV2RelationshipsItem.model_rebuild()
 BundleAssetV2Relationships.model_rebuild()
 BundleAssetV2Original.model_rebuild()
 BundleGroupV2Recommended1.model_rebuild()
+ContractProfileTable_Target1.model_rebuild()
 RepresentationRulesArtifact_Kind_By_Origin.model_rebuild()
 PortableBundleManifestV2EntitiesItemIdentity.model_rebuild()
 PortableBundleManifestV2RelationshipsItemSubject.model_rebuild()

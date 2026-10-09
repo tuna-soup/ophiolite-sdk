@@ -5,7 +5,7 @@
     "version": "1.0.0-pilot",
     "description": "One public API for every project operation. Three credential kinds reach it: the browser session (opaque HttpOnly cookie plus the X-CSRF-Token proof and, on non-GET requests, the exact Origin), a project-scoped delegate lasting at most five minutes (Bearer oph_api_..., parent session and current native permissions remain mandatory), and a browser-approved provider grant (Bearer provider token plus X-Ophiolite-Application-Grant; capability 1: the scientific read resources and the applications route within its read/write scopes; capability 3 adds reading wells, wellbores and lineage and the LAS upload routes). A request that carries an Authorization header is a machine request and is refused with MACHINE_AUTH_REQUIRED when a cookie or Origin travels with it. Scope and capability are ceilings; every operation runs the same native permission checks whoever calls it. Not a stable SDK or unattended service-account contract.",
     "x-ophiolite-contracts": {
-      "registry_version": "1.24.0",
+      "registry_version": "1.26.0",
       "index": "/api/v1/contracts",
       "served_profiles": [
         "las2/1",
@@ -22,7 +22,8 @@
         "well-location/1",
         "wavelet-text/1",
         "model-section-text/1",
-        "seismic-section-text/1"
+        "seismic-section-text/1",
+        "time-depth-csv/1"
       ]
     },
     "x-ophiolite-capabilities": {
@@ -21234,7 +21235,8 @@
                       "wavelet-text/1",
                       "model-section-text/1",
                       "seismic-section-text/1",
-                      "geotiff/1"
+                      "geotiff/1",
+                      "time-depth-csv/1"
                     ],
                     "title": "Profile",
                     "type": "string"
@@ -24072,7 +24074,8 @@
                       "wavelet-text/1",
                       "model-section-text/1",
                       "seismic-section-text/1",
-                      "geotiff/1"
+                      "geotiff/1",
+                      "time-depth-csv/1"
                     ],
                     "title": "Profile",
                     "type": "string"
@@ -30020,7 +30023,8 @@
                         "well-location/1",
                         "wavelet-text/1",
                         "model-section-text/1",
-                        "seismic-section-text/1"
+                        "seismic-section-text/1",
+                        "time-depth-csv/1"
                       ],
                       "title": "Profile",
                       "type": "string"
@@ -30139,7 +30143,8 @@
                       "well-location/1",
                       "wavelet-text/1",
                       "model-section-text/1",
-                      "seismic-section-text/1"
+                      "seismic-section-text/1",
+                      "time-depth-csv/1"
                     ],
                     "title": "Profile",
                     "type": "string"
@@ -49659,6 +49664,18 @@
                       ],
                       "default": null,
                       "description": "E44: present when the request sent crs_choice and the mapping was saved."
+                    },
+                    "column_basis": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/ColumnBasis"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E86: present when the mapping was saved."
                     }
                   },
                   "required": [
@@ -62518,6 +62535,18 @@
                       },
                       "title": "Superseded",
                       "type": "array"
+                    },
+                    "column_basis": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/ColumnBasis"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E86: the class of each column pick, recorded when the import started."
                     }
                   },
                   "required": [
@@ -63405,6 +63434,18 @@
                       },
                       "title": "Superseded",
                       "type": "array"
+                    },
+                    "column_basis": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/ColumnBasis"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E86: the class of each column pick, recorded when the import started."
                     }
                   },
                   "required": [
@@ -63771,6 +63812,18 @@
                       },
                       "title": "Superseded",
                       "type": "array"
+                    },
+                    "column_basis": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/ColumnBasis"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E86: the class of each column pick, recorded when the import started."
                     }
                   },
                   "required": [
@@ -64137,6 +64190,18 @@
                       },
                       "title": "Superseded",
                       "type": "array"
+                    },
+                    "column_basis": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/ColumnBasis"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E86: the class of each column pick, recorded when the import started."
                     }
                   },
                   "required": [
@@ -66443,7 +66508,7 @@
                 "schema": {
                   "x-ophiolite": {
                     "id": "ophiolite.scientific-asset/1",
-                    "version": "1.16.0",
+                    "version": "1.17.0",
                     "lifecycle": "preview"
                   },
                   "additionalProperties": false,
@@ -71212,6 +71277,184 @@
                           ],
                           "title": "SeismicSectionContext",
                           "type": "object"
+                        },
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "type": {
+                              "const": "time-depth",
+                              "title": "Type",
+                              "type": "string"
+                            },
+                            "depth_type": {
+                              "enum": [
+                                "md",
+                                "tvd",
+                                "tvdss",
+                                "unknown"
+                              ],
+                              "title": "Depth Type",
+                              "type": "string"
+                            },
+                            "depth_unit": {
+                              "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+                              "title": "Depth Unit",
+                              "type": "string"
+                            },
+                            "time_kind": {
+                              "enum": [
+                                "one-way",
+                                "two-way",
+                                "unknown"
+                              ],
+                              "title": "Time Kind",
+                              "type": "string"
+                            },
+                            "time_unit": {
+                              "enum": [
+                                "ms",
+                                "s",
+                                "us",
+                                "unknown"
+                              ],
+                              "title": "Time Unit",
+                              "type": "string"
+                            },
+                            "datum": {
+                              "anyOf": [
+                                {
+                                  "maxLength": 128,
+                                  "minLength": 1,
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "title": "Datum"
+                            },
+                            "seismic_reference_elevation": {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "title": "Seismic Reference Elevation"
+                            },
+                            "count": {
+                              "maximum": 100000,
+                              "minimum": 2,
+                              "title": "Count",
+                              "type": "integer"
+                            },
+                            "depth_range": {
+                              "items": {
+                                "type": "number"
+                              },
+                              "maxItems": 2,
+                              "minItems": 2,
+                              "title": "Depth Range",
+                              "type": "array"
+                            },
+                            "time_range": {
+                              "items": {
+                                "type": "number"
+                              },
+                              "maxItems": 2,
+                              "minItems": 2,
+                              "title": "Time Range",
+                              "type": "array"
+                            },
+                            "velocity_provided": {
+                              "title": "Velocity Provided",
+                              "type": "boolean"
+                            },
+                            "fidelity": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "status": {
+                                  "const": "assessed",
+                                  "title": "Status",
+                                  "type": "string"
+                                },
+                                "preserved": {
+                                  "items": {
+                                    "maxLength": 512,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Preserved",
+                                  "type": "array"
+                                },
+                                "losses": {
+                                  "items": {
+                                    "maxLength": 512,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Losses",
+                                  "type": "array"
+                                },
+                                "unknown_context": {
+                                  "items": {
+                                    "maxLength": 128,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Unknown Context",
+                                  "type": "array"
+                                },
+                                "decisions": {
+                                  "anyOf": [
+                                    {
+                                      "items": {
+                                        "maxLength": 512,
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      "maxItems": 64,
+                                      "type": "array"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "default": null,
+                                  "title": "Decisions"
+                                }
+                              },
+                              "required": [
+                                "status",
+                                "preserved",
+                                "losses",
+                                "unknown_context"
+                              ],
+                              "title": "Fidelity",
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "depth_type",
+                            "depth_unit",
+                            "time_kind",
+                            "time_unit",
+                            "datum",
+                            "seismic_reference_elevation",
+                            "count",
+                            "depth_range",
+                            "time_range",
+                            "velocity_provided",
+                            "fidelity"
+                          ],
+                          "title": "TimeDepthContext",
+                          "type": "object"
                         }
                       ],
                       "title": "Scientific"
@@ -71281,7 +71524,8 @@
                                 "well-location/1",
                                 "wavelet/1",
                                 "model-section/1",
-                                "seismic-section/1"
+                                "seismic-section/1",
+                                "time-depth/1"
                               ],
                               "title": "Mapping",
                               "type": "string"
@@ -72220,7 +72464,8 @@
                             "well-location/1",
                             "wavelet/1",
                             "model-section/1",
-                            "seismic-section/1"
+                            "seismic-section/1",
+                            "time-depth/1"
                           ],
                           "title": "Mapping",
                           "type": "string"
@@ -76973,6 +77218,109 @@
         "title": "CheckTable",
         "type": "object"
       },
+      "ColumnBasis": {
+        "additionalProperties": false,
+        "description": "E86: the class of each column pick, derived by the server and recorded beside the mapping or import (never inside it).",
+        "properties": {
+          "target": {
+            "title": "Target",
+            "type": "string"
+          },
+          "schema_digest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Schema Digest"
+          },
+          "rows": {
+            "description": "One per field of the target, in its order.",
+            "items": {
+              "$ref": "#/components/schemas/ColumnBasisRow"
+            },
+            "title": "Rows",
+            "type": "array"
+          }
+        },
+        "required": [
+          "target",
+          "schema_digest",
+          "rows"
+        ],
+        "title": "ColumnBasis",
+        "type": "object"
+      },
+      "ColumnBasisRow": {
+        "additionalProperties": false,
+        "properties": {
+          "field": {
+            "title": "Field",
+            "type": "string"
+          },
+          "class": {
+            "description": "declared (by the connection, or by you when nothing else supports the pick), previously-reviewed (your earlier mapping or finished import of this table with the same schema picked it), inferred (the suggestion), none (no column).",
+            "enum": [
+              "declared",
+              "previously-reviewed",
+              "inferred",
+              "none"
+            ],
+            "title": "Class",
+            "type": "string"
+          },
+          "by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "declared: \"the connection\" or \"you\"; inferred: what the suggestion read (\"names\").",
+            "title": "By"
+          },
+          "reuse": {
+            "anyOf": [
+              {
+                "const": "same-table",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "previously-reviewed: always same-table.",
+            "title": "Reuse"
+          },
+          "supported_by": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "previously-reviewed: the newest mapping_version or import_id that picked it.",
+            "title": "Supported By"
+          }
+        },
+        "required": [
+          "field",
+          "class",
+          "by",
+          "reuse",
+          "supported_by"
+        ],
+        "title": "ColumnBasisRow",
+        "type": "object"
+      },
       "Comparison": {
         "additionalProperties": false,
         "properties": {
@@ -77190,7 +77538,7 @@
       "ContractsRegistry": {
         "x-ophiolite": {
           "id": "ophiolite.contracts-registry/1",
-          "version": "1.4.0",
+          "version": "1.5.0",
           "lifecycle": "preview"
         },
         "title": "ContractsRegistry",
@@ -77399,7 +77747,8 @@
                     "relationships",
                     "policy",
                     "calculation",
-                    "reader-registry"
+                    "reader-registry",
+                    "table-target"
                   ]
                 },
                 "path": {
@@ -77445,6 +77794,22 @@
             "description": "X is longitude and Y latitude.",
             "title": "Geographic",
             "type": "boolean"
+          },
+          "area_of_use": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E86: [west, south, east, north] in degrees, derived from the EPSG Dataset (see the catalogue's notice).",
+            "title": "Area Of Use"
           }
         },
         "required": [
@@ -79345,7 +79710,16 @@
               "crs-not-accepted",
               "depth-options",
               "source-limit",
-              "outside-usual-area"
+              "outside-usual-area",
+              "value-missing",
+              "out-of-range",
+              "not-increasing",
+              "reference-missing",
+              "reference-unknown",
+              "text-too-long",
+              "column-used-twice",
+              "declaration-missing",
+              "declaration-not-numeric"
             ],
             "title": "Code",
             "type": "string"
@@ -79379,6 +79753,20 @@
             },
             "title": "Examples",
             "type": "array"
+          },
+          "params": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E86: on the nine field-kind codes only: noun, entity, low, high, limit for the sentence.",
+            "title": "Params"
           }
         },
         "required": [
@@ -79469,6 +79857,20 @@
             "default": null,
             "description": "Present and true when examples were dropped to keep the report under 64 KiB.",
             "title": "Examples Omitted"
+          },
+          "splits": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E86: for a target that splits by a reference field, how many values it splits into; never for wells.",
+            "title": "Splits"
           }
         },
         "required": [
@@ -84506,7 +84908,8 @@
               "well-location/1",
               "wavelet-text/1",
               "model-section-text/1",
-              "seismic-section-text/1"
+              "seismic-section-text/1",
+              "time-depth-csv/1"
             ],
             "title": "Profile",
             "type": "string"
@@ -87741,6 +88144,34 @@
             ],
             "description": "E44: the approved database's declared system, if any.",
             "title": "Declared Crs"
+          },
+          "target": {
+            "anyOf": [
+              {
+                "const": "wells",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E86: the table type the mapping lands on (ophiolite.table-target/wells/1).",
+            "title": "Target"
+          },
+          "column_suggestions": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E86: ophiolite.mapping-suggestions/1, a column per field with its class and whether it is pre-filled; your earlier pick of this table comes first, a pick of another table (reuse similar) is only offered.",
+            "title": "Column Suggestions"
           }
         },
         "required": [
