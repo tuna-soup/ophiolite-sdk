@@ -7,17 +7,27 @@ approves it, and the agent then executes that same request with the plan. If the
 lost, `recover()` returns what was recorded; executing the same plan again returns the same
 response and never runs twice.
 
+E95: `propose(..., evidence=...)` records what the person asked, the model the agent says it used
+and where its conversation lives; the person approves the plan naming that record, and `execute`
+sends its id as `X-Ophiolite-Evidence`. The reported provider and model are also set on the
+caller's current OpenTelemetry span (`ophiolite._genai`); the instruction never is.
+
     agent = AgentClient('https://ophiolite.example', 'project-id', credential)
     run = agent.run('applications/start', {'id': binding, 'generation': 1, 'command_id': 'run-1',
-                                           'application_version': 'my-script/1'})
+                                           'application_version': 'my-script/1'},
+                    evidence={'instruction': 'Tidy the gamma ray of HON-GT-01.', 'client': 'well-tidy/0.3',
+                              'model': {'provider': 'anthropic', 'id': 'claude-sonnet-5-5'},
+                              'conversation': {'kind': 'notebook', 'reference': 'thread-4471'}})
 """
 import time
 import httpx
 from . import _client_header  # E93
+from . import _genai  # E95
 from .errors import (OphioliteError, AuthenticationRequired, PermissionRefused, Unavailable, IntegrityConflict,
                      Refused, Busy)
 
-CHANGES = ('applications/configure', 'applications/start', 'applications/publish', 'applications/share', 'runners/submit', 'runners/cancel')
+CHANGES = ('applications/configure', 'applications/start', 'applications/publish', 'applications/share', 'runners/submit', 'runners/cancel',
+           'results/remake-run')  # E94: run an approved calculation again; a person saves
 
 
 class PlanDeclined(OphioliteError): code = 'plan-declined'
@@ -43,8 +53,9 @@ class AgentClient:
     def _auth(self):
         return self._credential.headers(self.url, self.project) if self._credential else self._headers
 
-    def _post(self, area, operation, body, plan=None):
-        headers = _client_header.stamp({**self._auth(), **({'X-Ophiolite-Plan': plan} if plan else {})})  # E93
+    def _post(self, area, operation, body, plan=None, evidence=None):
+        headers = _client_header.stamp({**self._auth(), **({'X-Ophiolite-Plan': plan} if plan else {}),
+                                        **({'X-Ophiolite-Evidence': evidence} if evidence else {})})  # E93; E95
         try:
             response = self.http.post('%s/api/v1/projects/%s/%s/%s' % (self.url, self.project, area, operation),
                                       json={'project_id': self.project, **body}, headers=headers)
@@ -76,33 +87,45 @@ class AgentClient:
         if self._headers is None: raise Refused('An assistant\'s MCP client signs in itself; no key is handed over.')
         return mcp_settings(self.url, self._headers['Authorization'][7:])
 
-    def propose(self, operation, request, summary=''):
-        if operation not in CHANGES: raise Refused('Agents change application configurations, runs, publications, recipients and runner jobs only.')
-        return self._post('agents', 'propose', {'operation': operation, 'request': {'project_id': self.project, **request}, 'summary': summary})
+    def propose(self, operation, request, summary='', *, evidence=None):
+        """Propose the exact request. `evidence` (E95), when given: `instruction` (what the person asked, as you received
+        it), `model` ({provider, id, label?}), `conversation` ({kind, reference, label?}) and `client` (product/version).
+        The answer's `evidence` is the record's id; pass it to `wait` and `execute`."""
+        if operation not in CHANGES: raise Refused('Agents change application configurations, runs, publications, recipients, runner jobs and recalculations only.')
+        body = {'operation': operation, 'request': {'project_id': self.project, **request}, 'summary': summary}
+        if evidence is not None:
+            body['evidence'] = evidence
+            _genai.annotate(evidence)
+        return self._post('agents', 'propose', body)
 
     def status(self, plan):
         return self._post('agents', 'status', {'hash': plan})['state']
 
-    def wait(self, plan, *, timeout=3600, interval=5, clock=time.monotonic, sleep=time.sleep):
-        """Until the person decides: returns on approval, raises when declined or expired."""
+    def wait(self, plan, *, evidence_id=None, timeout=3600, interval=5, clock=time.monotonic, sleep=time.sleep):
+        """Until the person decides: returns on approval, raises when declined or expired. With `evidence_id` (E95) it
+        returns only once the approval names that record: a plan approved with earlier evidence keeps waiting."""
         deadline = clock() + timeout
         while True:
-            state = self.status(plan)
-            if state in ('approved', 'consumed'): return state
+            answer = self._post('agents', 'status', {'hash': plan})
+            state = answer['state']
+            if state in ('approved', 'consumed') and (evidence_id is None or answer.get('evidence_approved') == evidence_id): return state
+            if state == 'consumed': raise IntegrityConflict('The plan already ran with other evidence; propose again.', code='evidence-superseded')
             if state == 'declined': raise PlanDeclined('The person declined this plan.')
             if state == 'expired': raise PlanExpired('The plan expired before a decision; propose it again.')
             if clock() >= deadline: raise PlanExpired('No decision within the wait; the plan stays pending.', code='plan-pending')
             sleep(interval)
 
-    def execute(self, operation, request, plan):
+    def execute(self, operation, request, plan, evidence=None):
+        """Execute the approved plan; `evidence` is the record id `propose` answered (sent as X-Ophiolite-Evidence)."""
         area, name = operation.split('/', 1)
-        return self._post(area, name, request, plan)
+        return self._post(area, name, request, plan, evidence)
 
-    def run(self, operation, request, summary='', **wait):
+    def run(self, operation, request, summary='', *, evidence=None, **wait):
         """Propose, wait for approval, execute. Safe to repeat: the same request is the same plan."""
-        plan = self.propose(operation, request, summary)['hash']
-        self.wait(plan, **wait)
-        return self.execute(operation, request, plan)
+        proposed = self.propose(operation, request, summary, evidence=evidence)
+        record = proposed.get('evidence') if evidence is not None else None
+        self.wait(proposed['hash'], evidence_id=record, **wait)
+        return self.execute(operation, request, proposed['hash'], record)
 
     def job(self, job_id):
         """A runner job (E13): state, reason, limits, bounded logs and the published result."""

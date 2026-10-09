@@ -294,6 +294,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/agents/evidence-reject",
+    "function": "postProjectsProjectAgentsEvidenceReject",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/agents/list",
     "function": "postProjectsProjectAgentsList",
     "request": "schema",
@@ -318,14 +324,44 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/agents/rerun-link",
+    "function": "postProjectsProjectAgentsRerunLink",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/agents/rerun-offer",
+    "function": "postProjectsProjectAgentsRerunOffer",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/agents/revoke",
     "function": "postProjectsProjectAgentsRevoke",
     "request": "schema",
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/agents/settings",
+    "function": "postProjectsProjectAgentsSettings",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/agents/settings-save",
+    "function": "postProjectsProjectAgentsSettingsSave",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/agents/status",
     "function": "postProjectsProjectAgentsStatus",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/agents/timeline",
+    "function": "postProjectsProjectAgentsTimeline",
     "request": "schema",
     "response": "schema"
   },

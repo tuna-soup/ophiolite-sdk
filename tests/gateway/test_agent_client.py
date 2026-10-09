@@ -23,7 +23,7 @@ def test_propose_approve_publish_lose_the_response_and_recover(web):
     def approve_once(seconds):  # the person approves while the agent waits
         if not decided:
             [plan] = alice.ok('agents', 'plans', {'state': 'pending'})['plans']
-            alice.ok('agents', 'approve', {'hash': plan['hash']}); decided.append(plan['hash'])
+            alice.ok('agents', 'approve', {'hash': plan['hash'], 'evidence': None, 'evidence_generation': 0}); decided.append(plan['hash'])  # E95: the approval names its evidence (none)
     plan = agent.propose('applications/publish', publish, 'Publish the corrected gamma ray')['hash']
     assert agent.wait(plan, sleep=approve_once) == 'approved' and decided == [plan]
     agent.execute('applications/publish', publish, plan)  # the agent stops before using the answer
@@ -35,7 +35,7 @@ def test_propose_approve_publish_lose_the_response_and_recover(web):
         second = agent.run('applications/start', {'id': binding['id'], 'generation': binding['generation'], 'command_id': 'agent-run-2',
                                                    'application_version': 'agent-script/1'})
         pending = agent.propose('applications/publish', {'id': second['id'], 'changes': []})['hash']
-        alice.ok('agents', 'approve', {'hash': pending})
+        alice.ok('agents', 'approve', {'hash': pending, 'evidence': None, 'evidence_generation': 0})
         agent.execute('applications/publish', {'id': second['id'], 'changes': []}, pending)
     other = AgentClient('https://workspace.example', 'p', alice.ok('agents', 'register', {'name': 'Other', 'scopes': ['read', 'write'], 'budgets': {},
                                                                                         'expires_in_days': 1, 'policy': []})['credential'], http=web.c)
