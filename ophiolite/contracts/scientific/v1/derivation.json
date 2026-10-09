@@ -1,0 +1,612 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/scientific/v1/derivation.json",
+  "x-ophiolite": {
+    "id": "ophiolite.derivation/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "ArrayNode": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "array",
+          "title": "Type",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "array": "#/$defs/ArrayNode",
+                "boolean": "#/$defs/BooleanLeaf",
+                "integer": "#/$defs/IntegerLeaf",
+                "null": "#/$defs/NullLeaf",
+                "number": "#/$defs/NumberLeaf",
+                "object": "#/$defs/ObjectNode",
+                "string": "#/$defs/StringLeaf"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/NumberLeaf"
+              },
+              {
+                "$ref": "#/$defs/IntegerLeaf"
+              },
+              {
+                "$ref": "#/$defs/StringLeaf"
+              },
+              {
+                "$ref": "#/$defs/BooleanLeaf"
+              },
+              {
+                "$ref": "#/$defs/NullLeaf"
+              },
+              {
+                "$ref": "#/$defs/ObjectNode"
+              },
+              {
+                "$ref": "#/$defs/ArrayNode"
+              }
+            ]
+          },
+          "maxItems": 256,
+          "title": "Items",
+          "type": "array"
+        }
+      },
+      "required": [
+        "type",
+        "items"
+      ],
+      "title": "ArrayNode",
+      "type": "object"
+    },
+    "BooleanLeaf": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "boolean",
+          "title": "Type",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ],
+      "title": "BooleanLeaf",
+      "type": "object"
+    },
+    "DerivationDisplay": {
+      "additionalProperties": false,
+      "description": "The registry entry's words at execution time; history reads without the registry.",
+      "properties": {
+        "method": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Method",
+          "type": "string"
+        },
+        "parameters": {
+          "items": {
+            "$ref": "#/$defs/ParameterLabel"
+          },
+          "maxItems": 64,
+          "title": "Parameters",
+          "type": "array"
+        }
+      },
+      "required": [
+        "method",
+        "parameters"
+      ],
+      "title": "DerivationDisplay",
+      "type": "object"
+    },
+    "DerivationInput": {
+      "additionalProperties": false,
+      "description": "A parent by its slot and the salted lineage commitment the manifest carries for it; never an asset id.",
+      "properties": {
+        "slot": {
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Slot",
+          "type": "string"
+        },
+        "commitment": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Commitment",
+          "type": "string"
+        }
+      },
+      "required": [
+        "slot",
+        "commitment"
+      ],
+      "title": "DerivationInput",
+      "type": "object"
+    },
+    "DerivationOutput": {
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Role",
+          "type": "string"
+        },
+        "digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role",
+        "digest"
+      ],
+      "title": "DerivationOutput",
+      "type": "object"
+    },
+    "Implementation": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "version": {
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        },
+        "version_label": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Version Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "version_label"
+      ],
+      "title": "Implementation",
+      "type": "object"
+    },
+    "IntegerLeaf": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "integer",
+          "title": "Type",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^-?(0|[1-9][0-9]{0,30})$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ],
+      "title": "IntegerLeaf",
+      "type": "object"
+    },
+    "NullLeaf": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "null",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "NullLeaf",
+      "type": "object"
+    },
+    "NumberLeaf": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "number",
+          "title": "Type",
+          "type": "string"
+        },
+        "value": {
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ],
+      "title": "NumberLeaf",
+      "type": "object"
+    },
+    "ObjectNode": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "object",
+          "title": "Type",
+          "type": "string"
+        },
+        "entries": {
+          "items": {
+            "$ref": "#/$defs/ParameterEntry"
+          },
+          "maxItems": 64,
+          "title": "Entries",
+          "type": "array"
+        }
+      },
+      "required": [
+        "type",
+        "entries"
+      ],
+      "title": "ObjectNode",
+      "type": "object"
+    },
+    "ParameterEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "value": {
+          "discriminator": {
+            "mapping": {
+              "array": "#/$defs/ArrayNode",
+              "boolean": "#/$defs/BooleanLeaf",
+              "integer": "#/$defs/IntegerLeaf",
+              "null": "#/$defs/NullLeaf",
+              "number": "#/$defs/NumberLeaf",
+              "object": "#/$defs/ObjectNode",
+              "string": "#/$defs/StringLeaf"
+            },
+            "propertyName": "type"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/NumberLeaf"
+            },
+            {
+              "$ref": "#/$defs/IntegerLeaf"
+            },
+            {
+              "$ref": "#/$defs/StringLeaf"
+            },
+            {
+              "$ref": "#/$defs/BooleanLeaf"
+            },
+            {
+              "$ref": "#/$defs/NullLeaf"
+            },
+            {
+              "$ref": "#/$defs/ObjectNode"
+            },
+            {
+              "$ref": "#/$defs/ArrayNode"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "key",
+        "value"
+      ],
+      "title": "ParameterEntry",
+      "type": "object"
+    },
+    "ParameterLabel": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "maxLength": 40,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        }
+      },
+      "required": [
+        "key",
+        "label"
+      ],
+      "title": "ParameterLabel",
+      "type": "object"
+    },
+    "Parameters": {
+      "additionalProperties": false,
+      "description": "E94 (`ophiolite.parameters/1`): what must be given again to reproduce a calculation (`request`) and what that\nrequest resolved to when it ran (`resolved`), both canonical trees.",
+      "properties": {
+        "schema": {
+          "const": "ophiolite.parameters/1",
+          "title": "Schema",
+          "type": "string"
+        },
+        "request": {
+          "discriminator": {
+            "mapping": {
+              "array": "#/$defs/ArrayNode",
+              "boolean": "#/$defs/BooleanLeaf",
+              "integer": "#/$defs/IntegerLeaf",
+              "null": "#/$defs/NullLeaf",
+              "number": "#/$defs/NumberLeaf",
+              "object": "#/$defs/ObjectNode",
+              "string": "#/$defs/StringLeaf"
+            },
+            "propertyName": "type"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/NumberLeaf"
+            },
+            {
+              "$ref": "#/$defs/IntegerLeaf"
+            },
+            {
+              "$ref": "#/$defs/StringLeaf"
+            },
+            {
+              "$ref": "#/$defs/BooleanLeaf"
+            },
+            {
+              "$ref": "#/$defs/NullLeaf"
+            },
+            {
+              "$ref": "#/$defs/ObjectNode"
+            },
+            {
+              "$ref": "#/$defs/ArrayNode"
+            }
+          ],
+          "title": "Request"
+        },
+        "resolved": {
+          "discriminator": {
+            "mapping": {
+              "array": "#/$defs/ArrayNode",
+              "boolean": "#/$defs/BooleanLeaf",
+              "integer": "#/$defs/IntegerLeaf",
+              "null": "#/$defs/NullLeaf",
+              "number": "#/$defs/NumberLeaf",
+              "object": "#/$defs/ObjectNode",
+              "string": "#/$defs/StringLeaf"
+            },
+            "propertyName": "type"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/NumberLeaf"
+            },
+            {
+              "$ref": "#/$defs/IntegerLeaf"
+            },
+            {
+              "$ref": "#/$defs/StringLeaf"
+            },
+            {
+              "$ref": "#/$defs/BooleanLeaf"
+            },
+            {
+              "$ref": "#/$defs/NullLeaf"
+            },
+            {
+              "$ref": "#/$defs/ObjectNode"
+            },
+            {
+              "$ref": "#/$defs/ArrayNode"
+            }
+          ],
+          "title": "Resolved"
+        }
+      },
+      "required": [
+        "schema",
+        "request",
+        "resolved"
+      ],
+      "title": "Parameters",
+      "type": "object"
+    },
+    "ReleaseRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "number": {
+          "pattern": "^[0-9]{4}\\.[0-9]{1,2}\\.[0-9]{1,4}$",
+          "title": "Number",
+          "type": "string"
+        },
+        "digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "number",
+        "digest"
+      ],
+      "title": "ReleaseRecord",
+      "type": "object"
+    },
+    "StringLeaf": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "string",
+          "title": "Type",
+          "type": "string"
+        },
+        "value": {
+          "maxLength": 1024,
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ],
+      "title": "StringLeaf",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "E94 (`ophiolite.derivation/1`): how a version was made. `derivation_digest` covers the making (implementation id\nand version, script digest, parameters, slot-to-commitment pairs and output roles); release, output digests and\ndisplay words sit outside it, so 'same making, different release' and 'same making, different output' are\nseparate statements.",
+  "properties": {
+    "schema": {
+      "const": "ophiolite.derivation/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "executed",
+        "declared",
+        "edited",
+        "received"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "implementation": {
+      "$ref": "#/$defs/Implementation"
+    },
+    "display": {
+      "$ref": "#/$defs/DerivationDisplay"
+    },
+    "parameters": {
+      "$ref": "#/$defs/Parameters"
+    },
+    "script_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Script Sha256"
+    },
+    "release": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ReleaseRecord"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "inputs": {
+      "items": {
+        "$ref": "#/$defs/DerivationInput"
+      },
+      "maxItems": 32,
+      "title": "Inputs",
+      "type": "array"
+    },
+    "outputs": {
+      "items": {
+        "$ref": "#/$defs/DerivationOutput"
+      },
+      "maxItems": 16,
+      "title": "Outputs",
+      "type": "array"
+    },
+    "execution_id": {
+      "anyOf": [
+        {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Execution Id"
+    },
+    "request_id": {
+      "anyOf": [
+        {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Request Id"
+    },
+    "derivation_digest": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Derivation Digest",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema",
+    "kind",
+    "implementation",
+    "display",
+    "parameters",
+    "script_sha256",
+    "release",
+    "inputs",
+    "outputs",
+    "execution_id",
+    "request_id",
+    "derivation_digest"
+  ],
+  "title": "DerivationRecord",
+  "type": "object"
+}

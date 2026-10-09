@@ -173,8 +173,9 @@ def manifest(value, raw, normalized):
     was served: the artifact, the normalized representation, every disclosed lineage entry and the
     parents. Hidden entries stay bare commitments; the digest covers them all."""
     m = value['manifest']
-    require(m['schema'] in ('ophiolite.revision-manifest/1', 'ophiolite.revision-manifest/2'), 'Unknown revision manifest')
-    require((m['schema'] == 'ophiolite.revision-manifest/2') == ('method' in m), 'The revision manifest schema does not match its method')  # 1.11.0 (E30a)
+    require(m['schema'] in ('ophiolite.revision-manifest/1', 'ophiolite.revision-manifest/2', 'ophiolite.revision-manifest/3'), 'Unknown revision manifest')
+    require((m['schema'] != 'ophiolite.revision-manifest/1') == ('method' in m), 'The revision manifest schema does not match its method')  # 1.11.0 (E30a)
+    require((m['schema'] == 'ophiolite.revision-manifest/3') == ('derivation_record' in m), 'The revision manifest schema does not match its derivation record')  # E94
     derivation = value.get('derivation')
     require((derivation is not None) == ('method' in m) and (derivation is None or derivation['method'] == m['method']), 'A declared derivation method must be the one its manifest records')
     require((m['artifact']['sha256'], m['artifact']['bytes']) == (raw['sha256'], raw['bytes']), 'The revision manifest names another artifact')
@@ -195,7 +196,38 @@ def manifest(value, raw, normalized):
             'representations': sorted(({'id': r['id'], 'sha256': r['sha256'], 'bytes': r['bytes']} for r in m['representations']), key=lambda r: r['id']),
             'lineage': sorted(e['commitment'] for e in m['lineage'])}
     if 'method' in m: body['method'] = m['method']  # /2: the declared method, as served, is digested too
+    if m['schema'] == 'ophiolite.revision-manifest/3':
+        derivation_record(m)
+        require(_sha_utf8({**body, 'schema': 'ophiolite.revision-manifest/2'}) == m['digest_v2'], 'The revision manifest /2 view digest does not match its contents')
+        body['derivation_record'] = m['derivation_record']  # E94 /3: the record of how it was made is digested too
+        require(_sha_utf8(body) == m['digest'], 'The revision manifest digest does not match its contents')
+        return
     require(_sha(_canonical(body)) == m['digest'], 'The revision manifest digest does not match its contents')
+
+
+def _sha_utf8(value):
+    import hashlib
+    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False, ensure_ascii=False).encode()).hexdigest()
+
+
+def derivation_digest(record):
+    """E94 (`ophiolite.derivation/1`), recomputed independently: the making is the implementation id and version, the
+    script digest, the parameters, the sorted slot-to-commitment pairs and the sorted output roles."""
+    return _sha_utf8({'implementation': {'id': record['implementation']['id'], 'version': record['implementation']['version']},
+                      'script_sha256': record['script_sha256'], 'parameters': record['parameters'],
+                      'inputs': sorted([i['slot'], i['commitment']] for i in record['inputs']),
+                      'outputs': sorted(o['role'] for o in record['outputs'])})
+
+
+def derivation_record(m):
+    """E94: a /3 manifest's derivation record names only lineage commitments of this revision, each input and output
+    once, and its digest is the digest of the making it states."""
+    record = m['derivation_record']
+    require(record.get('schema') == 'ophiolite.derivation/1', 'Unknown derivation record')
+    require({i['commitment'] for i in record['inputs']} <= {e['commitment'] for e in m['lineage']}, 'A derivation input is not a lineage commitment of this revision')
+    require(len({(i['slot'], i['commitment']) for i in record['inputs']}) == len(record['inputs']), 'A derivation names each input once')
+    require(len({o['role'] for o in record['outputs']}) == len(record['outputs']), 'A derivation names each output role once')
+    require(derivation_digest(record) == record['derivation_digest'], 'The derivation digest does not match the record')
 
 
 def interpretation(value):

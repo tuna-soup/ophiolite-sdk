@@ -25,6 +25,12 @@ SDK folder is recovered instead of starting another calculation. `--share bob`
 explicitly requests a recipient change after reading current grants. The agent
 recipe also tests a bounded interval-offset correction.
 
+An agent acting for a person through `ophiolite.agents.AgentClient` proposes each
+change with `evidence=` (what the person asked, the model it used, its conversation
+and this program's name) and executes with the evidence id the proposal returned;
+the person approves the plan naming that evidence. This template's synthetic mode
+needs no agent key.
+
 ## Live mode and recovery
 
 Set `OPHIOLITE_URL` and `OPHIOLITE_PROJECT`, sign in with `ophiolite login` and

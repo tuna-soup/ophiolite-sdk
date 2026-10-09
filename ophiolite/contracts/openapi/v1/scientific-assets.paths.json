@@ -137,6 +137,16 @@
               "type": "string"
             },
             "description": "Required for descriptor and curve:<mnemonic>; artifact is independent of curve."
+          },
+          {
+            "name": "profiles",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 512
+            },
+            "description": "The revision manifest profiles this reader verifies, comma separated (for example /1,/2,/3). Absent means /1,/2: a /3 revision is then served as its /2 view, with digest_v2 as its digest and no derivation_record."
           }
         ],
         "security": [

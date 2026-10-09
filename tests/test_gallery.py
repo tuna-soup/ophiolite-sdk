@@ -125,8 +125,15 @@ def test_time_depth_table_writes_the_two_layer_model_and_publishes_nothing_synth
     assert "depth,time 0,0 2000,1666.667" in text and 'Synthetic mode: nothing is published.' in text
 
 
+def test_how_was_this_made_reads_the_story_the_change_and_the_refusal_synthetic(tmp_path, monkeypatch):
+    text = run('how-was-this-made', tmp_path, monkeypatch)
+    assert 'Shale volume, made in a notebook, version 2\n  Reported by Alice; Ophiolite did not run this calculation.' in text
+    assert '  Synthetic gamma ray, version 1\n    A file added by Alice on Not recorded: original.las.' in text
+    assert 'Ophiolite did not run this calculation, so it cannot make it again.' in text and 'Nothing differs' not in text
+
+
 def test_every_entry_is_listed_built_and_described():
-    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table']
+    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'how-was-this-made']
     for entry in GALLERY['notebooks']:
         assert set(entry) == {'slug', 'title', 'sentence', 'modes', 'data'} and entry['modes'] == ['synthetic', 'live']
         script = (ROOT / 'notebooks' / entry['slug'] / 'notebook.py').read_text()

@@ -1,0 +1,584 @@
+{
+ "note": "E94 C5: one request and answer per call; Python (tests/test_story_client.py) and TypeScript (packages/typescript/tests/story.test.ts) must send these bodies and return these answers.",
+ "exchanges": [
+  {
+   "call": "story",
+   "request": {
+    "project_id": "p",
+    "asset_id": "a-shale",
+    "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "limit": 5
+   },
+   "response": {
+    "schema": "ophiolite.story/1",
+    "root": "n-shale-2",
+    "nodes": [
+     {
+      "id": "n-shale-2",
+      "kind": "executed",
+      "asset_id": "a-shale",
+      "revision": "r-shale-2",
+      "version": 2,
+      "name": "Shale volume HON-GT-01",
+      "made": {
+       "at": "2026-10-06T12:12:00Z",
+       "by": "sanne",
+       "by_kind": "person",
+       "by_name": null,
+       "on_behalf_of": null,
+       "through": "the browser",
+       "reported_by": null
+      },
+      "method": {
+       "display": "Shale volume from gamma ray, Linear (simple)",
+       "version_label": "version 1",
+       "release": "Ophiolite 2026.10.60"
+      },
+      "settings": [
+       {
+        "label": "Clean value",
+        "unit": "gAPI",
+        "value": "30"
+       },
+       {
+        "label": "Shale value",
+        "unit": "gAPI",
+        "value": "150"
+       },
+       {
+        "label": "Method",
+        "unit": null,
+        "value": "Linear (simple)"
+       }
+      ],
+      "history": null,
+      "newer_input": true,
+      "inputs": [
+       {
+        "id": "n-gr-2",
+        "slot": "gamma"
+       }
+      ],
+      "made_again_from": {
+       "asset_id": "a-shale-old",
+       "revision": "r-old-1",
+       "version": 1,
+       "name": "Shale volume HON-GT-01 (first)"
+      },
+      "technical": {
+       "asset_id": "a-shale",
+       "revision": "r-shale-2",
+       "implementation": "ophiolite.shale-volume",
+       "implementation_version": "1",
+       "derivation_digest": "4f1c0c7d2bd1a1b5b8b0bb3c6cfe8f0a0f4f0f1f7c2b9e8d1a3c5e7f9b1d3e5a"
+      }
+     },
+     {
+      "id": "n-gr-2",
+      "kind": "declared",
+      "asset_id": "a-gr",
+      "revision": "r-gr-2",
+      "version": 2,
+      "name": "HON-GT-01 gamma ray",
+      "made": {
+       "at": "2026-10-01T09:00:00Z",
+       "by": null,
+       "by_kind": null,
+       "by_name": null,
+       "on_behalf_of": null,
+       "through": null,
+       "reported_by": "bram"
+      },
+      "method": {
+       "display": "Method declared by its publisher",
+       "version_label": "Not recorded",
+       "release": "Not recorded"
+      },
+      "settings": [],
+      "history": null,
+      "inputs": [
+       {
+        "id": "n-las",
+        "slot": null
+       },
+       {
+        "id": "n-db",
+        "slot": null
+       }
+      ],
+      "technical": {
+       "asset_id": "a-gr",
+       "revision": "r-gr-2",
+       "declared_method": "gr-clean"
+      }
+     },
+     {
+      "id": "n-las",
+      "kind": "original",
+      "asset_id": "a-las",
+      "revision": "r-las-1",
+      "version": 1,
+      "name": "HON-GT-01",
+      "made": {
+       "at": "2026-10-01T08:30:00Z",
+       "by": "bram",
+       "by_kind": "person",
+       "by_name": null,
+       "on_behalf_of": null,
+       "through": "the browser",
+       "reported_by": null
+      },
+      "method": null,
+      "settings": [],
+      "history": null,
+      "file": "HON-GT-01.las",
+      "technical": {
+       "asset_id": "a-las",
+       "revision": "r-las-1"
+      }
+     },
+     {
+      "id": "n-db",
+      "kind": "reference",
+      "asset_id": null,
+      "revision": null,
+      "version": null,
+      "name": "the well database Groningen wells",
+      "made": null,
+      "method": null,
+      "settings": [],
+      "history": "Read from the well database Groningen wells",
+      "technical": {
+       "authority": "sql-wells",
+       "key": "HON-GT-01"
+      }
+     }
+    ],
+    "restricted": true,
+    "next_cursor": null,
+    "continue_from": null,
+    "display": {
+     "member_names": {
+      "sanne": "Sanne de Vries",
+      "bram": "Bram Koster"
+     }
+    }
+   },
+   "path": "/api/v1/projects/p/results/story"
+  },
+  {
+   "call": "what-changed",
+   "request": {
+    "project_id": "p",
+    "a": {
+     "asset_id": "a-shale",
+     "revision": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    },
+    "b": {
+     "asset_id": "a-shale",
+     "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+   },
+   "response": {
+    "schema": "ophiolite.what-changed/1",
+    "sentence": null,
+    "inputs_same": false,
+    "inputs": [
+     {
+      "restricted": false,
+      "slot": "gamma",
+      "a": {
+       "asset_id": "a-gr",
+       "revision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+       "version": 1
+      },
+      "b": {
+       "asset_id": "a-gr",
+       "revision": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+       "version": 2
+      },
+      "change": {
+       "sentence": "Nothing differs in how these were made.",
+       "inputs_same": true,
+       "inputs": [],
+       "settings": [],
+       "calculation": {
+        "same": true,
+        "a": "x",
+        "b": "x"
+       },
+       "release": {
+        "same": true,
+        "a": "y",
+        "b": "y"
+       }
+      }
+     },
+     {
+      "restricted": true
+     }
+    ],
+    "settings": [
+     {
+      "label": "Clean value",
+      "unit": "gAPI",
+      "a": "30",
+      "b": "35"
+     }
+    ],
+    "calculation": {
+     "same": true,
+     "a": "Linear (simple), version 1",
+     "b": "Linear (simple), version 1"
+    },
+    "release": {
+     "same": false,
+     "a": "Ophiolite 2026.10.59",
+     "b": "Ophiolite 2026.10.60"
+    },
+    "a": {
+     "asset_id": "a-shale",
+     "revision": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    },
+    "b": {
+     "asset_id": "a-shale",
+     "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+   },
+   "path": "/api/v1/projects/p/results/what-changed"
+  },
+  {
+   "call": "dependents",
+   "request": {
+    "project_id": "p",
+    "asset_id": "a-shale",
+    "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   },
+   "response": {
+    "schema": "ophiolite.dependents/1",
+    "root": "n-shale-2",
+    "nodes": [
+     {
+      "id": "n-shale-2",
+      "kind": "executed",
+      "asset_id": "a-shale",
+      "revision": "r-shale-2",
+      "version": 2,
+      "name": "Shale volume HON-GT-01",
+      "made": {
+       "at": "2026-10-06T12:12:00Z",
+       "by": "sanne",
+       "by_kind": "person",
+       "by_name": null,
+       "on_behalf_of": null,
+       "through": "the browser",
+       "reported_by": null
+      },
+      "method": {
+       "display": "Shale volume from gamma ray, Linear (simple)",
+       "version_label": "version 1",
+       "release": "Ophiolite 2026.10.60"
+      },
+      "settings": [
+       {
+        "label": "Clean value",
+        "unit": "gAPI",
+        "value": "30"
+       },
+       {
+        "label": "Shale value",
+        "unit": "gAPI",
+        "value": "150"
+       },
+       {
+        "label": "Method",
+        "unit": null,
+        "value": "Linear (simple)"
+       }
+      ],
+      "history": null,
+      "newer_input": true,
+      "made_again_from": {
+       "asset_id": "a-shale-old",
+       "revision": "r-old-1",
+       "version": 1,
+       "name": "Shale volume HON-GT-01 (first)"
+      },
+      "technical": {
+       "asset_id": "a-shale",
+       "revision": "r-shale-2",
+       "implementation": "ophiolite.shale-volume",
+       "implementation_version": "1",
+       "derivation_digest": "4f1c0c7d2bd1a1b5b8b0bb3c6cfe8f0a0f4f0f1f7c2b9e8d1a3c5e7f9b1d3e5a"
+      },
+      "dependents": [
+       {
+        "id": "n-gr-2",
+        "slot": "gamma"
+       }
+      ]
+     },
+     {
+      "id": "n-gr-2",
+      "kind": "declared",
+      "asset_id": "a-gr",
+      "revision": "r-gr-2",
+      "version": 2,
+      "name": "HON-GT-01 gamma ray",
+      "made": {
+       "at": "2026-10-01T09:00:00Z",
+       "by": null,
+       "by_kind": null,
+       "by_name": null,
+       "on_behalf_of": null,
+       "through": null,
+       "reported_by": "bram"
+      },
+      "method": {
+       "display": "Method declared by its publisher",
+       "version_label": "Not recorded",
+       "release": "Not recorded"
+      },
+      "settings": [],
+      "history": null,
+      "technical": {
+       "asset_id": "a-gr",
+       "revision": "r-gr-2",
+       "declared_method": "gr-clean"
+      },
+      "dependents": [
+       {
+        "id": "n-las",
+        "slot": null
+       },
+       {
+        "id": "n-db",
+        "slot": null
+       }
+      ]
+     },
+     {
+      "id": "n-las",
+      "kind": "original",
+      "asset_id": "a-las",
+      "revision": "r-las-1",
+      "version": 1,
+      "name": "HON-GT-01",
+      "made": {
+       "at": "2026-10-01T08:30:00Z",
+       "by": "bram",
+       "by_kind": "person",
+       "by_name": null,
+       "on_behalf_of": null,
+       "through": "the browser",
+       "reported_by": null
+      },
+      "method": null,
+      "settings": [],
+      "history": null,
+      "file": "HON-GT-01.las",
+      "technical": {
+       "asset_id": "a-las",
+       "revision": "r-las-1"
+      },
+      "dependents": []
+     },
+     {
+      "id": "n-db",
+      "kind": "reference",
+      "asset_id": null,
+      "revision": null,
+      "version": null,
+      "name": "the well database Groningen wells",
+      "made": null,
+      "method": null,
+      "settings": [],
+      "history": "Read from the well database Groningen wells",
+      "technical": {
+       "authority": "sql-wells",
+       "key": "HON-GT-01"
+      },
+      "dependents": []
+     }
+    ],
+    "restricted": true,
+    "next_cursor": null,
+    "continue_from": null,
+    "display": {
+     "member_names": {
+      "sanne": "Sanne de Vries",
+      "bram": "Bram Koster"
+     }
+    }
+   },
+   "path": "/api/v1/projects/p/results/dependents"
+  },
+  {
+   "call": "remake-run",
+   "request": {
+    "project_id": "p",
+    "asset_id": "a-shale",
+    "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "step": "preview",
+    "inputs": "newer"
+   },
+   "response": {
+    "schema": "ophiolite.remake-preview/1",
+    "asset_id": "a-shale",
+    "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "inputs": [
+     {
+      "slot": "gamma",
+      "label": "Gamma ray",
+      "asset_id": "a-gr",
+      "revision": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "version": 2,
+      "name": "HON-GT-01 gamma ray",
+      "recorded_version": 1,
+      "newer": true
+     }
+    ],
+    "method": {
+     "display": "Shale volume",
+     "version_label": "version 1",
+     "release": "Ophiolite 2026.10.60"
+    },
+    "made_with": "Ophiolite 2026.10.60",
+    "settings": [],
+    "changes": null
+   },
+   "path": "/api/v1/projects/p/results/remake-run"
+  },
+  {
+   "call": "remake-run",
+   "request": {
+    "project_id": "p",
+    "asset_id": "a-shale",
+    "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "step": "run",
+    "inputs": [
+     {
+      "slot": "gamma",
+      "asset_id": "a-gr",
+      "revision": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+     }
+    ],
+    "command_id": "k1"
+   },
+   "response": {
+    "schema": "ophiolite.remake/1",
+    "execution_id": "e1",
+    "state": "running",
+    "asset_id": "a-shale",
+    "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "outcomes": [
+     {
+      "role": "vshale",
+      "label": "Shale volume",
+      "outcome": "different"
+     }
+    ],
+    "release": "Ophiolite 2026.10.60",
+    "made": {
+     "at": null,
+     "by": "sanne",
+     "agent": null
+    },
+    "expires_at": "2026-10-10T12:00:00Z",
+    "failure": null,
+    "held": null
+   },
+   "path": "/api/v1/projects/p/results/remake-run"
+  },
+  {
+   "call": "remake-run",
+   "request": {
+    "project_id": "p",
+    "asset_id": "a-shale",
+    "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "step": "status",
+    "execution_id": "e1"
+   },
+   "response": {
+    "schema": "ophiolite.remake/1",
+    "execution_id": "e1",
+    "state": "completed",
+    "asset_id": "a-shale",
+    "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "outcomes": [
+     {
+      "role": "vshale",
+      "label": "Shale volume",
+      "outcome": "different"
+     }
+    ],
+    "release": "Ophiolite 2026.10.60",
+    "made": {
+     "at": null,
+     "by": "sanne",
+     "agent": null
+    },
+    "expires_at": "2026-10-10T12:00:00Z",
+    "failure": null,
+    "held": [
+     {
+      "role": "vshale",
+      "label": "Shale volume",
+      "output": {},
+      "summary": {
+       "reason": "12 of 400 samples changed; the largest change is 0.04 v/v.",
+       "changed": 12,
+       "of": 400,
+       "largest": 0.04,
+       "unit": "v/v"
+      },
+      "audience": {
+       "everyone": false,
+       "recipients": [
+        "bram"
+       ],
+       "notified": [
+        "bram"
+       ],
+       "digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      }
+     }
+    ]
+   },
+   "path": "/api/v1/projects/p/results/remake-run"
+  },
+  {
+   "call": "remake-save",
+   "request": {
+    "project_id": "p",
+    "execution_id": "e1",
+    "outputs": [
+     {
+      "role": "vshale",
+      "target": "new-version",
+      "command_id": "k1-0",
+      "audience_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+     }
+    ]
+   },
+   "response": {
+    "schema": "ophiolite.remake-saves/1",
+    "execution_id": "e1",
+    "saves": [
+     {
+      "role": "vshale",
+      "target": "new-version",
+      "command_id": "k1-0",
+      "asset_id": "a-shale",
+      "revision": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "revision_number": 3,
+      "notified": [
+       "bram"
+      ]
+     }
+    ]
+   },
+   "path": "/api/v1/projects/p/results/remake-save"
+  }
+ ]
+}

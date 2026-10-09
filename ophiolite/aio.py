@@ -8,7 +8,7 @@ import anyio
 import httpx
 from . import _client_header  # E93
 from . import _core
-from .client import Client, CurveSet
+from .client import Client, CurveSet, PROFILES
 from .errors import (AuthenticationRequired,PermissionRefused,Unavailable,IntegrityConflict,
                      CapacityExceeded,Refused,Incompatible,Busy,VerificationFailed,OphioliteError)
 
@@ -110,7 +110,7 @@ class AsyncClient(Client):
 
     async def describe(self,asset,revision,curve):
         path,query=self._path(asset,revision,curve)
-        return _core.verify_descriptor(await self._json(path+query,256*1024),self.project,asset,revision,curve)
+        return _core.verify_descriptor(await self._json(path+query+PROFILES,256*1024),self.project,asset,revision,curve)
 
     async def read(self,asset,revision,curves,*,strict_interpretation=False):
         if not isinstance(curves,(list,tuple)) or not curves or len(set(curves))!=len(curves):
@@ -118,7 +118,7 @@ class AsyncClient(Client):
         descriptors=[];views=[];artifact=None;wire_descriptors=[];wire_curves=[]
         for curve in curves:
             path,query=self._path(asset,revision,curve)
-            data=await self._json(path+query,256*1024)
+            data=await self._json(path+query+PROFILES,256*1024)
             _core.verify_descriptor(data,self.project,asset,revision,curve)
             raw=_core.rules.artifact(data)
             normalized=next(r for r in data['representations'] if r['kind']=='normalized')
@@ -134,7 +134,7 @@ class AsyncClient(Client):
         """E11: typed read (well tops, trajectory, regular-grid surface); same checks as Client.read_data."""
         if not all(isinstance(x,str) and x for x in (asset,revision)):raise Refused('Choose an asset and exact revision.')
         path=self.prefix+'/'+quote(asset,safe='')+'/revisions/'+quote(revision,safe='')
-        data=await self._json(path,256*1024)
+        data=await self._json(path+'?'+PROFILES[1:],256*1024)
         _core.verify_typed_descriptor(data,self.project,asset,revision)
         raw=_core.rules.artifact(data)
         normalized=next(r for r in data['representations'] if r['kind']=='normalized')

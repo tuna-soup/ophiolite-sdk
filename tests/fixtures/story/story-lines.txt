@@ -1,0 +1,15 @@
+Shale volume HON-GT-01, version 2
+  Made by Sanne de Vries on 2026-10-06.
+  Through the browser.
+  Made with Shale volume from gamma ray, Linear (simple), version 1, Ophiolite 2026.10.60.
+  Settings: Clean value: 30 gAPI; Shale value: 150 gAPI; Method: Linear (simple).
+  Made again from Shale volume HON-GT-01 (first), version 1.
+  Newer input available.
+  HON-GT-01 gamma ray, version 2
+    Reported by Bram Koster; Ophiolite did not run this calculation.
+    Method declared by its publisher.
+    HON-GT-01, version 1
+      A file added by Bram Koster on 2026-10-01: HON-GT-01.las.
+    the well database Groningen wells
+      Read from the well database Groningen wells.
+Some earlier steps are not shown because you cannot open them.

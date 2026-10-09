@@ -317,6 +317,34 @@ uses the same SDK credential transactions when upgraded. Frozen old installation
 remain separate and cannot safely share the new credential cache.
 
 
+## Agents (preview)
+
+`ophiolite.agents.AgentClient` acts for the person who issued its key (Workspace
+Settings → Agents): it proposes an exact change, waits for the person's approval and
+executes that same request. With `evidence=` (E95) a proposal also records what the
+person asked, the model the agent says it used and where its conversation lives:
+
+```python
+agent = AgentClient(url, project, credential)
+proposed = agent.propose('applications/publish', {'id': run, 'changes': changes},
+                         evidence={'instruction': 'Tidy the gamma ray of HON-GT-01.',
+                                   'model': {'provider': 'anthropic', 'id': 'claude-sonnet-5-5'},
+                                   'conversation': {'kind': 'notebook', 'reference': 'thread-4471'},
+                                   'client': 'well-tidy/0.3'})
+agent.wait(proposed['hash'], evidence_id=proposed['evidence'])  # until the approval names this record
+agent.execute('applications/publish', {'id': run, 'changes': changes}, proposed['hash'], proposed['evidence'])
+```
+
+`agent.run(..., evidence=...)` does the three steps. The project setting decides whether
+the instruction text is kept or only its fingerprint; it is never sent anywhere else.
+Inside a program that has its own OpenTelemetry span, that span gains
+`gen_ai.provider.name` and `gen_ai.request.model` (semantic conventions 1.37.0) and
+nothing more; the library creates no span. Install `ophiolite[telemetry]` for this.
+
+The person approves naming the evidence they read: `agents/approve` takes `evidence`
+(a record id, or null) and `evidence_generation`, and refuses a body without them.
+Agents may also propose `results/remake-run`; saving the remade result is the person's.
+
 ## Packaged workflow guides
 
 Run `ophiolite skills path` to locate six installed guides: authenticate, read exact
