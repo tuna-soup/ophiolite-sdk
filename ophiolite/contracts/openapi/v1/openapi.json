@@ -2126,7 +2126,7 @@
     },
     "/api/v1/projects/{project}/agents/approve": {
       "post": {
-        "summary": "Approve a pending plan",
+        "summary": "Approve a pending plan naming the evidence you saw (or none) at its generation; again before it runs to approve newer evidence",
         "description": "Scope write; accepted principals: session; project extractor top.",
         "security": [
           {
@@ -2163,10 +2163,64 @@
                         "approved",
                         "declined",
                         "expired",
-                        "executed"
+                        "executed",
+                        "consumed"
                       ],
                       "title": "State",
                       "type": "string"
+                    },
+                    "evidence_approved": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E95: the evidence id the current approval names (status)",
+                      "title": "Evidence Approved"
+                    },
+                    "evidence": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E95: the evidence id this proposal recorded (propose)",
+                      "title": "Evidence"
+                    },
+                    "approved": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E95: whether that evidence is the approved one (propose)",
+                      "title": "Approved"
+                    },
+                    "summary_replaced": {
+                      "anyOf": [
+                        {
+                          "const": true,
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E95: the stored summary is the operation's plain words, not the one sent",
+                      "title": "Summary Replaced"
                     }
                   },
                   "required": [
@@ -2231,6 +2285,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "description": "E95: approve naming the evidence you saw: an id of this plan's, or null to approve without any, and the generation.",
                 "properties": {
                   "project_id": {
                     "title": "Project Id",
@@ -2239,13 +2294,33 @@
                   "hash": {
                     "title": "Hash",
                     "type": "string"
+                  },
+                  "evidence": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "The evidence record you approve, or null for none",
+                    "title": "Evidence"
+                  },
+                  "evidence_generation": {
+                    "description": "The newest evidence generation you saw (0 for none)",
+                    "minimum": 0,
+                    "title": "Evidence Generation",
+                    "type": "integer"
                   }
                 },
                 "required": [
                   "project_id",
-                  "hash"
+                  "hash",
+                  "evidence",
+                  "evidence_generation"
                 ],
-                "title": "PlanByHash",
+                "title": "ApprovePlan",
                 "type": "object"
               }
             }
@@ -2462,6 +2537,18 @@
                       ],
                       "title": "Response Sha256"
                     },
+                    "evidence": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/UsedEvidence"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E95: the evidence the execution used, from its snapshot"
+                    },
                     "receipt": {
                       "anyOf": [
                         {
@@ -2624,10 +2711,64 @@
                         "approved",
                         "declined",
                         "expired",
-                        "executed"
+                        "executed",
+                        "consumed"
                       ],
                       "title": "State",
                       "type": "string"
+                    },
+                    "evidence_approved": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E95: the evidence id the current approval names (status)",
+                      "title": "Evidence Approved"
+                    },
+                    "evidence": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E95: the evidence id this proposal recorded (propose)",
+                      "title": "Evidence"
+                    },
+                    "approved": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E95: whether that evidence is the approved one (propose)",
+                      "title": "Approved"
+                    },
+                    "summary_replaced": {
+                      "anyOf": [
+                        {
+                          "const": true,
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E95: the stored summary is the operation's plain words, not the one sent",
+                      "title": "Summary Replaced"
                     }
                   },
                   "required": [
@@ -2707,6 +2848,196 @@
                   "hash"
                 ],
                 "title": "PlanByHash",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/agents/evidence-reject": {
+      "post": {
+        "summary": "Reject an approved plan's newer evidence up to the generation you saw; the approval stays for its own evidence",
+        "description": "Scope write; accepted principals: session; project extractor top.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "hash": {
+                      "title": "Hash",
+                      "type": "string"
+                    },
+                    "state": {
+                      "enum": [
+                        "pending",
+                        "approved",
+                        "declined",
+                        "expired",
+                        "executed",
+                        "consumed"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "evidence_approved": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E95: the evidence id the current approval names (status)",
+                      "title": "Evidence Approved"
+                    },
+                    "evidence": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E95: the evidence id this proposal recorded (propose)",
+                      "title": "Evidence"
+                    },
+                    "approved": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E95: whether that evidence is the approved one (propose)",
+                      "title": "Approved"
+                    },
+                    "summary_replaced": {
+                      "anyOf": [
+                        {
+                          "const": true,
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E95: the stored summary is the operation's plain words, not the one sent",
+                      "title": "Summary Replaced"
+                    }
+                  },
+                  "required": [
+                    "hash",
+                    "state"
+                  ],
+                  "title": "PlanState",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "E95: reject an approved plan's newer evidence up to the generation you saw.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "hash": {
+                    "title": "Hash",
+                    "type": "string"
+                  },
+                  "evidence_generation": {
+                    "minimum": 1,
+                    "title": "Evidence Generation",
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "hash",
+                  "evidence_generation"
+                ],
+                "title": "EvidenceReject",
                 "type": "object"
               }
             }
@@ -3002,10 +3333,64 @@
                         "approved",
                         "declined",
                         "expired",
-                        "executed"
+                        "executed",
+                        "consumed"
                       ],
                       "title": "State",
                       "type": "string"
+                    },
+                    "evidence_approved": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E95: the evidence id the current approval names (status)",
+                      "title": "Evidence Approved"
+                    },
+                    "evidence": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E95: the evidence id this proposal recorded (propose)",
+                      "title": "Evidence"
+                    },
+                    "approved": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E95: whether that evidence is the approved one (propose)",
+                      "title": "Approved"
+                    },
+                    "summary_replaced": {
+                      "anyOf": [
+                        {
+                          "const": true,
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E95: the stored summary is the operation's plain words, not the one sent",
+                      "title": "Summary Replaced"
                     }
                   },
                   "required": [
@@ -3088,8 +3473,21 @@
                   },
                   "summary": {
                     "default": "",
+                    "description": "Accepted; the stored summary is the operation's plain words (E95)",
                     "title": "Summary",
                     "type": "string"
+                  },
+                  "evidence": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/AgentEvidence"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E95: what the agent was asked and by which model, kept as an immutable record of the plan"
                   }
                 },
                 "required": [
@@ -3486,6 +3884,254 @@
         }
       }
     },
+    "/api/v1/projects/{project}/agents/settings": {
+      "post": {
+        "summary": "Whether new agent evidence keeps what people asked agents or a fingerprint only",
+        "description": "Scope read; accepted principals: session; project extractor top.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "keep": {
+                      "description": "True: new evidence keeps the instruction text. False: only its sha256 fingerprint. Earlier records keep what they stored; the request body of a plan is not covered.",
+                      "title": "Keep",
+                      "type": "boolean"
+                    },
+                    "generation": {
+                      "title": "Generation",
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "keep",
+                    "generation"
+                  ],
+                  "title": "AgentSetting",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "ProjectOnly",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/agents/settings-save": {
+      "post": {
+        "summary": "Keep what people asked agents, or a fingerprint only, from now on (administrators; compare-and-set)",
+        "description": "Scope write; accepted principals: session; project extractor top.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "keep": {
+                      "description": "True: new evidence keeps the instruction text. False: only its sha256 fingerprint. Earlier records keep what they stored; the request body of a plan is not covered.",
+                      "title": "Keep",
+                      "type": "boolean"
+                    },
+                    "generation": {
+                      "title": "Generation",
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "keep",
+                    "generation"
+                  ],
+                  "title": "AgentSetting",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "E95 C3: keep what people asked agents (true) or a fingerprint only (false), from now on.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "keep": {
+                    "title": "Keep",
+                    "type": "boolean"
+                  },
+                  "expected_generation": {
+                    "minimum": 0,
+                    "title": "Expected Generation",
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "keep",
+                  "expected_generation"
+                ],
+                "title": "AgentSettingSave",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/agents/status": {
       "post": {
         "summary": "The state of one of the agent's own plans",
@@ -3525,10 +4171,64 @@
                         "approved",
                         "declined",
                         "expired",
-                        "executed"
+                        "executed",
+                        "consumed"
                       ],
                       "title": "State",
                       "type": "string"
+                    },
+                    "evidence_approved": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E95: the evidence id the current approval names (status)",
+                      "title": "Evidence Approved"
+                    },
+                    "evidence": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E95: the evidence id this proposal recorded (propose)",
+                      "title": "Evidence"
+                    },
+                    "approved": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E95: whether that evidence is the approved one (propose)",
+                      "title": "Approved"
+                    },
+                    "summary_replaced": {
+                      "anyOf": [
+                        {
+                          "const": true,
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E95: the stored summary is the operation's plain words, not the one sent",
+                      "title": "Summary Replaced"
                     }
                   },
                   "required": [
@@ -3608,6 +4308,188 @@
                   "hash"
                 ],
                 "title": "PlanByHash",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/agents/timeline": {
+      "post": {
+        "summary": "What agents did, plan by plan: your own plans, or every plan for an administrator",
+        "description": "Scope read; accepted principals: session; project extractor top.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "plans": {
+                      "items": {
+                        "$ref": "#/components/schemas/TimelinePlan"
+                      },
+                      "title": "Plans",
+                      "type": "array"
+                    },
+                    "next_cursor": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Next Cursor"
+                    },
+                    "display": {
+                      "$ref": "#/components/schemas/Display"
+                    }
+                  },
+                  "required": [
+                    "plans",
+                    "next_cursor",
+                    "display"
+                  ],
+                  "title": "Timeline",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "plan": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Plan"
+                  },
+                  "person": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "An administrator's filter by delegator; anyone else reads only their own plans",
+                    "title": "Person"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
+                  "limit": {
+                    "anyOf": [
+                      {
+                        "maximum": 50,
+                        "minimum": 1,
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Limit"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "TimelineRequest",
                 "type": "object"
               }
             }
@@ -75479,6 +76361,77 @@
         "title": "AdministrationWarning",
         "type": "object"
       },
+      "AgentEvidence": {
+        "additionalProperties": false,
+        "description": "E95: what the agent reports it was asked, the model it says it used and where its conversation lives.",
+        "properties": {
+          "instruction": {
+            "description": "The person's instruction as the agent received it (kept only while the project keeps it)",
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Instruction",
+            "type": "string"
+          },
+          "model": {
+            "$ref": "#/components/schemas/EvidenceModel"
+          },
+          "conversation": {
+            "$ref": "#/components/schemas/EvidenceConversation"
+          },
+          "client": {
+            "description": "The program, in the X-Ophiolite-Client grammar (product/version)",
+            "maxLength": 128,
+            "title": "Client",
+            "type": "string"
+          },
+          "reported_by": {
+            "const": "agent",
+            "default": "agent",
+            "title": "Reported By",
+            "type": "string"
+          }
+        },
+        "required": [
+          "instruction",
+          "model",
+          "conversation",
+          "client"
+        ],
+        "title": "AgentEvidence",
+        "type": "object"
+      },
+      "AgentLabel": {
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "description": "The agent name when it reads as a name, else \"An agent\"",
+            "title": "Label",
+            "type": "string"
+          },
+          "label_readable": {
+            "title": "Label Readable",
+            "type": "boolean"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Id"
+          }
+        },
+        "required": [
+          "label",
+          "label_readable"
+        ],
+        "title": "AgentLabel",
+        "type": "object"
+      },
       "AgentView": {
         "additionalProperties": false,
         "properties": {
@@ -78319,6 +79272,164 @@
         "title": "Evidence",
         "type": "object"
       },
+      "EvidenceConversation": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Kind",
+            "type": "string"
+          },
+          "reference": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Reference",
+            "type": "string"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Label"
+          }
+        },
+        "required": [
+          "kind",
+          "reference"
+        ],
+        "title": "EvidenceConversation",
+        "type": "object"
+      },
+      "EvidenceModel": {
+        "additionalProperties": false,
+        "properties": {
+          "provider": {
+            "pattern": "^[a-z0-9._-]{1,64}$",
+            "title": "Provider",
+            "type": "string"
+          },
+          "id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Label"
+          }
+        },
+        "required": [
+          "provider",
+          "id"
+        ],
+        "title": "EvidenceModel",
+        "type": "object"
+      },
+      "EvidenceRecord": {
+        "additionalProperties": false,
+        "description": "E95: one immutable evidence record of a plan; `instruction` only for its delegator and administrators.",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "generation": {
+            "title": "Generation",
+            "type": "integer"
+          },
+          "digest": {
+            "title": "Digest",
+            "type": "string"
+          },
+          "instruction_sha256": {
+            "title": "Instruction Sha256",
+            "type": "string"
+          },
+          "kept": {
+            "title": "Kept",
+            "type": "boolean"
+          },
+          "instruction_removed": {
+            "title": "Instruction Removed",
+            "type": "boolean"
+          },
+          "reported_by": {
+            "const": "agent",
+            "title": "Reported By",
+            "type": "string"
+          },
+          "client": {
+            "title": "Client",
+            "type": "string"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "number"
+          },
+          "model": {
+            "$ref": "#/components/schemas/EvidenceModel"
+          },
+          "conversation": {
+            "$ref": "#/components/schemas/EvidenceConversation"
+          },
+          "approved": {
+            "description": "The plan's current approval names this record",
+            "title": "Approved",
+            "type": "boolean"
+          },
+          "rejected": {
+            "title": "Rejected",
+            "type": "boolean"
+          },
+          "instruction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Instruction"
+          }
+        },
+        "required": [
+          "id",
+          "generation",
+          "digest",
+          "instruction_sha256",
+          "kept",
+          "instruction_removed",
+          "reported_by",
+          "client",
+          "created_at",
+          "model",
+          "conversation",
+          "approved",
+          "rejected"
+        ],
+        "title": "EvidenceRecord",
+        "type": "object"
+      },
       "ExactRevision": {
         "additionalProperties": false,
         "properties": {
@@ -78419,6 +79530,19 @@
               }
             ],
             "title": "Approved By"
+          },
+          "evidence": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E95: the evidence id the execution's snapshot names",
+            "title": "Evidence"
           }
         },
         "required": [
@@ -84099,6 +85223,26 @@
             "description": "The exact request the agent proposed.",
             "title": "Request",
             "type": "object"
+          },
+          "evidence": {
+            "description": "E95: the evidence records, oldest first",
+            "items": {
+              "$ref": "#/components/schemas/EvidenceRecord"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "evidence_pending": {
+            "default": false,
+            "description": "E95: approved and not yet run, with a newer record neither approved nor rejected",
+            "title": "Evidence Pending",
+            "type": "boolean"
+          },
+          "evidence_generation": {
+            "default": 0,
+            "description": "E95: the newest record's generation; approve and evidence-reject send the one you saw",
+            "title": "Evidence Generation",
+            "type": "integer"
           }
         },
         "required": [
@@ -87133,9 +88277,15 @@
             "type": "null"
           },
           "plan": {
-            "default": null,
-            "title": "Plan",
-            "type": "null"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StoryPlan"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
           },
           "inputs": {
             "anyOf": [
@@ -87212,6 +88362,73 @@
           "technical"
         ],
         "title": "StoryNode",
+        "type": "object"
+      },
+      "StoryPerson": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "StoryPerson",
+        "type": "object"
+      },
+      "StoryPlan": {
+        "additionalProperties": false,
+        "description": "E95 C4 (row 90): the agent that made this version and for whom; the evidence for its delegator and administrators only.",
+        "properties": {
+          "made_by": {
+            "$ref": "#/components/schemas/AgentLabel"
+          },
+          "on_behalf_of": {
+            "$ref": "#/components/schemas/StoryPerson"
+          },
+          "plan_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Plan Ref"
+          },
+          "evidence": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WordedEvidence"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "evidence_words": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Evidence Words"
+          }
+        },
+        "required": [
+          "made_by",
+          "on_behalf_of"
+        ],
+        "title": "StoryPlan",
         "type": "object"
       },
       "StorySetting": {
@@ -87758,6 +88975,241 @@
           "declared_crs"
         ],
         "title": "TableSchema",
+        "type": "object"
+      },
+      "TimelineEvidence": {
+        "additionalProperties": false,
+        "properties": {
+          "state": {
+            "description": "used: the execution's snapshot; approved: the current approval; else none approved yet",
+            "enum": [
+              "used",
+              "approved",
+              "not-yet-approved"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "record": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WordedEvidence"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "records": {
+            "items": {
+              "$ref": "#/components/schemas/WordedEvidence"
+            },
+            "title": "Records",
+            "type": "array"
+          },
+          "words": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "\"Not reported\" when there is no evidence",
+            "title": "Words"
+          }
+        },
+        "required": [
+          "state",
+          "record",
+          "records",
+          "words"
+        ],
+        "title": "TimelineEvidence",
+        "type": "object"
+      },
+      "TimelinePlan": {
+        "additionalProperties": false,
+        "properties": {
+          "hash": {
+            "title": "Hash",
+            "type": "string"
+          },
+          "operation": {
+            "title": "Operation",
+            "type": "string"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "agent": {
+            "$ref": "#/components/schemas/AgentLabel"
+          },
+          "delegator": {
+            "title": "Delegator",
+            "type": "string"
+          },
+          "delegator_name": {
+            "title": "Delegator Name",
+            "type": "string"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "number"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/TimelineStep"
+            },
+            "title": "Steps",
+            "type": "array"
+          },
+          "evidence": {
+            "$ref": "#/components/schemas/TimelineEvidence"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TimelineResult"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "hash",
+          "operation",
+          "summary",
+          "agent",
+          "delegator",
+          "delegator_name",
+          "state",
+          "created_at",
+          "steps",
+          "evidence",
+          "result"
+        ],
+        "title": "TimelinePlan",
+        "type": "object"
+      },
+      "TimelineResult": {
+        "additionalProperties": false,
+        "properties": {
+          "words": {
+            "title": "Words",
+            "type": "string"
+          },
+          "asset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Asset Id"
+          },
+          "revision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Revision"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "An E94 execution: equal, prepared, saved, discarded, expired or failed",
+            "title": "Status"
+          }
+        },
+        "required": [
+          "words"
+        ],
+        "title": "TimelineResult",
+        "type": "object"
+      },
+      "TimelineStep": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "asked",
+              "proposed",
+              "approved-automatically",
+              "approved-by",
+              "declined-by",
+              "waiting",
+              "running",
+              "done"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "at": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "At"
+          },
+          "by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "By"
+          },
+          "by_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The person's name, or \"Not recorded\"; never the id",
+            "title": "By Name"
+          }
+        },
+        "required": [
+          "kind",
+          "at"
+        ],
+        "title": "TimelineStep",
         "type": "object"
       },
       "TraceCarrier": {
@@ -88749,6 +90201,37 @@
         "title": "UploadSessionState",
         "type": "object"
       },
+      "UsedEvidence": {
+        "additionalProperties": false,
+        "description": "E95: the record an execution's snapshot names, without text.",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "digest": {
+            "title": "Digest",
+            "type": "string"
+          },
+          "kept": {
+            "title": "Kept",
+            "type": "boolean"
+          },
+          "reported_by": {
+            "const": "agent",
+            "title": "Reported By",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "digest",
+          "kept",
+          "reported_by"
+        ],
+        "title": "UsedEvidence",
+        "type": "object"
+      },
       "Via": {
         "additionalProperties": false,
         "description": "B1(a): the project access key a change was made through, as it was named then (the person stays the author;\nthis is the route, not a verified application identity). `key_id` belongs under Technical details.",
@@ -89535,6 +91018,199 @@
           "revision"
         ],
         "title": "WellLogRef",
+        "type": "object"
+      },
+      "WordedConversation": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Kind",
+            "type": "string"
+          },
+          "reference": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Reference",
+            "type": "string"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Label"
+          },
+          "words": {
+            "description": "The conversation label when it reads as a name, else \"A conversation\"",
+            "title": "Words",
+            "type": "string"
+          },
+          "label_readable": {
+            "title": "Label Readable",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "kind",
+          "reference",
+          "words",
+          "label_readable"
+        ],
+        "title": "WordedConversation",
+        "type": "object"
+      },
+      "WordedEvidence": {
+        "additionalProperties": false,
+        "description": "E95 C4: an evidence record as its delegator and administrators read it.",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "generation": {
+            "title": "Generation",
+            "type": "integer"
+          },
+          "digest": {
+            "title": "Digest",
+            "type": "string"
+          },
+          "instruction_sha256": {
+            "title": "Instruction Sha256",
+            "type": "string"
+          },
+          "kept": {
+            "title": "Kept",
+            "type": "boolean"
+          },
+          "instruction_removed": {
+            "title": "Instruction Removed",
+            "type": "boolean"
+          },
+          "reported_by": {
+            "const": "agent",
+            "title": "Reported By",
+            "type": "string"
+          },
+          "client": {
+            "title": "Client",
+            "type": "string"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "number"
+          },
+          "model": {
+            "$ref": "#/components/schemas/WordedModel"
+          },
+          "conversation": {
+            "$ref": "#/components/schemas/WordedConversation"
+          },
+          "approved": {
+            "description": "The plan's current approval names this record",
+            "title": "Approved",
+            "type": "boolean"
+          },
+          "rejected": {
+            "title": "Rejected",
+            "type": "boolean"
+          },
+          "instruction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Instruction"
+          },
+          "instruction_words": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "\"Instruction text was not kept\" or \"Instruction text was removed\" when there is no text",
+            "title": "Instruction Words"
+          }
+        },
+        "required": [
+          "id",
+          "generation",
+          "digest",
+          "instruction_sha256",
+          "kept",
+          "instruction_removed",
+          "reported_by",
+          "client",
+          "created_at",
+          "model",
+          "conversation",
+          "approved",
+          "rejected",
+          "instruction_words"
+        ],
+        "title": "WordedEvidence",
+        "type": "object"
+      },
+      "WordedModel": {
+        "additionalProperties": false,
+        "properties": {
+          "provider": {
+            "pattern": "^[a-z0-9._-]{1,64}$",
+            "title": "Provider",
+            "type": "string"
+          },
+          "id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Label"
+          },
+          "words": {
+            "description": "The model as a person reads it: its label or id when it reads as a name (display.readable_label), else \"A model\"",
+            "title": "Words",
+            "type": "string"
+          },
+          "label_readable": {
+            "title": "Label Readable",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "provider",
+          "id",
+          "words",
+          "label_readable"
+        ],
+        "title": "WordedModel",
         "type": "object"
       }
     }

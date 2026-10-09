@@ -294,6 +294,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/agents/evidence-reject",
+    "function": "postProjectsProjectAgentsEvidenceReject",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/agents/list",
     "function": "postProjectsProjectAgentsList",
     "request": "schema",
@@ -324,8 +330,26 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/agents/settings",
+    "function": "postProjectsProjectAgentsSettings",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/agents/settings-save",
+    "function": "postProjectsProjectAgentsSettingsSave",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/agents/status",
     "function": "postProjectsProjectAgentsStatus",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/agents/timeline",
+    "function": "postProjectsProjectAgentsTimeline",
     "request": "schema",
     "response": "schema"
   },

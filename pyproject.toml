@@ -17,7 +17,8 @@ ophiolite = "ophiolite.cli:entrypoint"
 numpy = ["numpy>=1.24"]
 pandas = ["pandas>=2"]
 validation = ["jsonschema>=4.26"]
-dev = ["pytest>=8", "build>=1", "jsonschema>=4.26", "lasio>=0.32"]
+telemetry = ["opentelemetry-api>=1.37"]  # E95: the reported model on the caller's span
+dev = ["pytest>=8", "build>=1", "jsonschema>=4.26", "lasio>=0.32", "opentelemetry-sdk>=1.37"]
 
 [tool.setuptools.packages.find]
 include = ["ophiolite*"]

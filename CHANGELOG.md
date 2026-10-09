@@ -5,6 +5,16 @@
 Supported 0.x client over preview contracts, installable from reviewed source.
 No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
 
+- Agents on the record (E95): `AgentClient.propose(..., evidence={instruction, model, conversation, client})` records
+  what the person asked, the model the agent reports and where its conversation lives; `execute(..., evidence=id)` sends
+  the record's id as `X-Ophiolite-Evidence`; `wait(plan, evidence_id=id)` returns only once the approval names that
+  record; `run(..., evidence=...)` does all three. `CHANGES` adds `results/remake-run`. The reported provider and model
+  are set as `gen_ai.provider.name` and `gen_ai.request.model` (OpenTelemetry semantic conventions 1.37.0) on the
+  caller's current recording span; no span is created and the instruction never reaches telemetry (extra `telemetry`).
+  Breaking for approvers: `agents/approve` now needs `evidence` (an id or null) and `evidence_generation` and refuses
+  a body without them, naming the field; there is no compatibility window. The SDK pin advances with the release that
+  carries this change; an older gateway refuses the `evidence` field and the library does not retry without it.
+
 - Well imports (E42a): `client.well_imports()` previews, starts, steps (`run`), reads, lists and cancels an import of an
   approved well table as wells; `ophiolite well-imports list|status|start [--dry-run]|resume ID|cancel ID` does the same
   and prints every skipped row with its reason. Answers are checked against the pinned contract.
