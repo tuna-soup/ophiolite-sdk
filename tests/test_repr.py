@@ -5,16 +5,20 @@ from ophiolite.models.generated import Display
 from test_scientific import view
 
 class Visible(HTMLParser):
-    def __init__(self):super().__init__();self.closed=0;self.text=[];self.details=[]
+    # E104 C2: a closed details still shows its own summary, and an input shows its value.
+    def __init__(self):super().__init__();self.closed=0;self.text=[];self.details=[];self.summary=0
+    def _shown(self):return not self.closed or self.summary and self.closed==1 and self.details[-1]
     def handle_starttag(self,tag,attrs):
         if tag=='details':
             hidden=not any(key=='open' for key,value in attrs);self.details.append(hidden);self.closed+=int(hidden)
-        if not self.closed:
-            self.text.extend(value for key,value in attrs if key in ('aria-label','aria-description','title','alt') and value)
+        if tag=='summary':self.summary+=1
+        if self._shown():
+            self.text.extend(value for key,value in attrs if key in ('aria-label','aria-description','title','alt') or tag=='input' and key=='value' if value)
     def handle_endtag(self,tag):
         if tag=='details':self.closed-=int(self.details.pop())
+        if tag=='summary':self.summary-=1
     def handle_data(self,value):
-        if not self.closed:self.text.append(value)
+        if self._shown():self.text.append(value)
 
 def visible(raw):
     parser=Visible();parser.feed(raw);return ' '.join(parser.text)
@@ -63,3 +67,13 @@ def test_vocabulary_contains_other_origins_and_contract_constants():
     from ophiolite.repr import technical_vocabulary
     assert {'managed-derived','not-evaluated','use-as-input','recorded-differs',
             'ophiolite.contract-profile/1','ophiolite.contracts-registry/1'} <= technical_vocabulary()
+
+
+def test_oracle_sees_summaries_and_input_values():
+    # E104 C2: proof that the oracle can fail. Mutations: summaries hidden again; input values ignored.
+    assert 'SECRETID' in visible('<details><summary>SECRETID</summary><pre>x</pre></details>')
+    assert 'SECRETID' not in visible('<details><summary>Shown</summary><pre>SECRETID</pre></details>')
+    assert 'SECRETID' not in visible('<details><summary>Shown</summary><details><summary>SECRETID</summary></details></details>')
+    assert 'SECRETID' in visible('<details><summary aria-label="SECRETID">x</summary></details>')
+    assert 'SECRETID' in visible('<p><input readonly value="SECRETID"></p>')
+    assert 'SECRETID' not in visible('<details><summary>Copy link</summary><input readonly value="SECRETID"></details>')

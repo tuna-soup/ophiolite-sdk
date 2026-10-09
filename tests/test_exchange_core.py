@@ -234,14 +234,19 @@ def test_expected_without_of_is_not_valid(project, tmp_path):
                                'Nothing was sent.') and not [c for c in project.calls if c[0] == 'publish']
 
 
+@pytest.mark.parametrize('move', ['record', 'get'], ids=['held-record-edited', 'got-through-get'])
 @pytest.mark.parametrize('again', [{'expected': sha(V1)}, {}], ids=['expected-passed-again', 'expected-left-out'])
-def test_a_retry_replays_the_saved_command_and_parent_whatever_is_held_now(project, tmp_path, again):
+def test_a_retry_replays_the_saved_command_and_parent_whatever_is_held_now(project, tmp_path, again, move):
     e = ex(project, tmp_path / 'w'); e.get('poro', output=tmp_path / 'o')    # holds v1
     project.drop_after_commit = True
     refused('outcome-unknown', lambda: send(e, V2, expected=sha(V1)))
     command = e._load()['pending']['command_id']
     project.drop_after_commit = False; project.add('poro', V3, name='Porosity')
-    record = e._load(); record['items']['poro']['revision'] = sha(V3); e._save(record)  # the held record moved on meanwhile
+    if move == 'get':                                                        # the public path: get the newer version meanwhile
+        assert e.get('poro', output=tmp_path / 'o').outcome == 'got' and e._load()['pending']['command_id'] == command
+    else:
+        record = e._load(); record['items']['poro']['revision'] = sha(V3); e._save(record)  # the held record moved on meanwhile
+    assert e.held()['poro']['revision'] == sha(V3)
     retried = send(ex(project, tmp_path / 'w'), V2, **again)
     assert retried.outcome == 'sent-version' and retried.technical['command_id'] == command
     # mutation: expected re-checked on replay -> newer-version-exists; resolved rebuilt from the held record -> parent sha(V3)
