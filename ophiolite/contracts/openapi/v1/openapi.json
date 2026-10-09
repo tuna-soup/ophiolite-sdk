@@ -90962,6 +90962,19 @@
             "default": null,
             "description": "E56: what the file says about itself, read in the run; only on a needs-decision row",
             "title": "Stated"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E56 (N5): the title of the GeoPackage layer this file landed as; the layer key stays in technical",
+            "title": "Title"
           }
         },
         "required": [
