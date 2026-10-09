@@ -10,6 +10,7 @@ import copy
 import html
 import json
 import math
+import uuid
 from pydantic import PrivateAttr
 from .exchange import Exchange, Outcome
 from .links import FAMILY_OF_KIND, item_url
@@ -21,6 +22,9 @@ SEND_AGAIN = ('Runs the same send with a new file: <code>ex</code> is this folde
               'new file. It adds the next version only while this folder still holds this one.')
 SEND_NEW = ('Runs the same send with a new file: <code>ex</code> is this folder\'s exchange and <code>new_file</code> the '
             'new file. It sends another new item.')
+PUBLISH_AGAIN = ('Publishes the next version with a new file: <code>client</code> is your client and <code>new_written</code> '
+                 'the new file you wrote. It adds the next version only while this is still the latest; running it again '
+                 'after a lost answer returns the same receipt.')
 RECIPE_LIMIT = 4096
 
 
@@ -47,6 +51,28 @@ def send_again(arguments, asset, revision):
     else: line.pop('of', None); line.pop('expected', None)
     order = ('name', 'profile', 'how', 'based_on', 'of', 'declare', 'extra', 'expected')
     text = 'ex.send(new_file, ' + ', '.join('%s=%r' % (k, _lists(line[k])) for k in order if line.get(k) is not None) + ')'
+    return text if len(text) <= RECIPE_LIMIT else None
+
+
+def publication_recipe(*, name, from_, method, of_entity=None):
+    """A snapshot of a `publish_derived` call's arguments, taken at call time; None when one is not plain data."""
+    from .publish import _parent
+    try:
+        items = from_ if isinstance(from_, (list, tuple)) and not (len(from_) == 2 and isinstance(from_[0], str)) else [from_]
+        arguments = {'name': name, 'from_': [[p['asset_id'], p['revision']] for p in map(_parent, items)],
+                     'method': method.model_dump() if hasattr(method, 'model_dump') else dict(method),
+                     'of_entity': dict(of_entity) if of_entity is not None else None}
+        return {'call': 'publish_derived', 'arguments': copy.deepcopy(arguments)}
+    except Exception:
+        return None
+
+
+def publish_again(arguments, asset, revision, command_id):
+    """The "Publish again" line: the next version of `asset` on `revision`, under the minted `command_id`."""
+    if not _plain(arguments): return None
+    line = {**arguments, 'command_id': command_id, 'new_version_of': asset, 'expected_parent': revision}
+    order = ('name', 'from_', 'method', 'of_entity', 'command_id', 'new_version_of', 'expected_parent')
+    text = 'client.publish_derived(new_written, ' + ', '.join('%s=%r' % (k, _lists(line[k])) for k in order if line.get(k) is not None) + ')'
     return text if len(text) <= RECIPE_LIMIT else None
 
 
@@ -110,5 +136,10 @@ class PresentedReceipt(PublicationReceipt):
 
     def _repr_html_(self):
         context = self._context or {}
-        return _card(((context.get('recipe') or {}).get('arguments') or {}).get('name'), self.revision_number, _url(self._context, self.asset_id, self.revision),
-                     self.model_dump(mode='json'), (self.asset_id, self.revision, self.command_id, self.profile, context.get('project')))
+        recipe = context.get('recipe') or {}
+        line = None
+        if recipe.get('call') == 'publish_derived':
+            minted = context.setdefault('minted', uuid.uuid4().hex)  # once per receipt: re-rendering shows the same line
+            line = publish_again(recipe['arguments'], self.asset_id, self.revision, minted)
+        return _card((recipe.get('arguments') or {}).get('name'), self.revision_number, _url(self._context, self.asset_id, self.revision),
+                     self.model_dump(mode='json'), (self.asset_id, self.revision, self.command_id, self.profile, context.get('project')), line, PUBLISH_AGAIN)

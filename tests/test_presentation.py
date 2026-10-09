@@ -7,7 +7,7 @@ import pytest
 
 from ophiolite.exchange import Outcome
 from ophiolite.models.api import PublicationReceipt
-from ophiolite.presentation import PresentedExchange, PresentedOutcome, PresentedReceipt
+from ophiolite.presentation import PresentedExchange, PresentedOutcome, PresentedReceipt, publication_recipe
 from test_repr import visible
 
 HERE = Path(__file__).parent
@@ -91,14 +91,14 @@ def test_identifier_shaped_name_falls_back():
 
 
 def test_receipt_frozen_and_private_context():
-    r = receipt(CONTEXT | {'recipe': {'call': 'publish_derived', 'arguments': {'name': 'Porosity'}}})
+    r = receipt(CONTEXT | {'recipe': publication_recipe(name='Porosity', from_=[('k', 'v')], method={'name': 'recomputed'})})
     assert isinstance(r, PublicationReceipt)
     assert repr(r) == RECEIPT_REPR                                            # mutation: bare subclass prints its own name
     assert r.model_dump() == RECEIPT_DUMP                                     # mutation: context as an extra
     raw = r._repr_html_()
     url = 'https://ws.example/project/a%20project/data/m~' + 'r' * 64 + '?revision=' + 'b' * 64
     assert '<strong>Porosity</strong><p>Version 2</p><a href="' + url + '">Open in Workspace</a>' in raw
-    assert visible(raw) == 'Result Porosity Version 2 Open in Workspace Copy link Technical details'
+    assert visible(raw) == 'Result Porosity Version 2 Open in Workspace Copy link Send again Technical details'
 
 
 class Boom:
@@ -214,3 +214,50 @@ def test_no_line_when_it_cannot_be_shown_whole(extra):
                          {**CONTEXT, 'recipe': {'call': 'send', 'arguments': {**ARGS, 'extra': extra}}})
     raw = o._repr_html_()
     assert 'Send again' not in raw and 'ex.send' not in raw and '...' not in raw
+
+
+# -- "Send again" for a publication (E104 C3): executed against a recording client; the gateway lane runs it for real --------
+
+class Recording:
+    def __init__(self): self.calls = []
+    def publish_derived(self, written, **arguments): self.calls.append((written, arguments)); return 'receipt'
+
+
+def published(**changes):
+    arguments = dict(name='Rock & "Sand"', from_=[('k', 'v'), ('k2', 'v2')], method={'name': 'recomputed', 'parameters': {'a': 1}},
+                     of_entity={'well': 'W-1'}); arguments.update(changes)
+    return receipt(CONTEXT | {'recipe': publication_recipe(**arguments)}), arguments
+
+
+def receipt_line(r):
+    found = re.search(r'<summary>Send again</summary><p>.*?</p><pre>(.*?)</pre>', r._repr_html_(), re.S)
+    return _html.unescape(found.group(1)) if found else None
+
+
+def test_the_publication_line_names_every_argument_and_the_next_version():
+    r, _ = published()
+    client, scope = Recording(), {}
+    text = receipt_line(r)
+    exec('result = ' + text, {'client': client, 'new_written': 'NEW'}, scope)
+    (written, arguments), = client.calls
+    minted = arguments['command_id']
+    assert written == 'NEW' and arguments == {'name': 'Rock & "Sand"', 'from_': [['k', 'v'], ['k2', 'v2']],
+                                              'method': {'name': 'recomputed', 'parameters': {'a': 1}}, 'of_entity': {'well': 'W-1'},
+                                              'command_id': minted, 'new_version_of': 'r' * 64, 'expected_parent': 'b' * 64}
+    # mutations: of_entity dropped; expected_parent or new_version_of left out; the receipt's own command id reused
+    assert re.fullmatch('[0-9a-f]{32}', minted) and minted != 'c-1'
+    assert receipt_line(r) == text                                           # mutation: minted per render
+    assert minted not in visible(r._repr_html_())
+
+
+def test_the_publication_line_is_a_snapshot():
+    from_, method, of_entity = [('k', 'v')], {'name': 'recomputed'}, {'well': 'W-1'}
+    r, _ = published(from_=from_, method=method, of_entity=of_entity)
+    from_.append(('x', 'y')); method['name'] = 'changed'; of_entity['well'] = 'W-2'  # mutation: snapshot by reference
+    text = receipt_line(r)
+    assert "from_=[['k', 'v']], method={'name': 'recomputed'}, of_entity={'well': 'W-1'}" in text
+
+
+def test_no_publication_line_for_data_that_is_not_plain():
+    r, _ = published(of_entity={'when': float('inf')})
+    assert receipt_line(r) is None and 'publish_derived' not in r._repr_html_()
