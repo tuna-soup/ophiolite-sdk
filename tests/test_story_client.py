@@ -1,7 +1,7 @@
 """E94 C5: the story, what changed, dependents and making it again, from Python and the command line.
 
-The story lines are frozen in tests/fixtures/story/story-lines.txt; the Workspace story panel asserts the same file
-from the same JSON. The route answers here are written by hand in the shapes of the Platform's operation models;
+The story lines are frozen in tests/fixtures/story/story-lines.txt (the Workspace words the same JSON in the Journey's
+sentences, app/tests/story.mjs). The route answers here are written by hand in the shapes of the Platform's operation models;
 tests/gateway/test_story.py proves the same calls against the real routes."""
 import copy
 import json
@@ -41,6 +41,15 @@ def run(argv, client, capsys):
 
 def test_the_story_lines_are_the_frozen_ones():
     assert story.lines(PAGE) == LINES
+
+
+def test_the_servers_through_sentence_reads_once():
+    """The server sends E93's sentence ("Through the Python library 0.1.0"); an older answer the bare name."""
+    for through in ('Through the Python library 0.1.0', 'the Python library 0.1.0'):
+        page = copy.deepcopy(PAGE)
+        next(n for n in page['nodes'] if n['id'] == page['root'])['made']['through'] = through
+        assert '  Through the Python library 0.1.0.' in story.lines(page)
+    assert not any('Through Through' in line for line in story.lines(page))
 
 
 def test_the_story_keeps_the_order_of_the_inputs_given():

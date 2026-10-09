@@ -1,7 +1,7 @@
 """E94: a story page (`results/story` or `results/dependents`) as plain lines, the way `ophiolite story` prints it.
 
-The same JSON gives the same lines in the Workspace (its test asserts tests/fixtures/story/story-lines.txt). Identifiers
-stay out of the lines: they are under `technical` in the JSON (`--json`)."""
+The Workspace words the same JSON in the Journey's sentences with dates in words (its app/tests/story.mjs); these lines
+keep ISO dates. Identifiers stay out of the lines: they are under `technical` in the JSON (`--json`)."""
 
 NOT_RECORDED = 'Not recorded'
 RESTRICTED = {'ophiolite.story/1': 'Some earlier steps are not shown because you cannot open them.',
@@ -15,6 +15,13 @@ def _title(node):
 
 def _day(at):
     return at[:10] if isinstance(at, str) and at else NOT_RECORDED
+
+
+def _through(through):
+    """The server sends the sentence ("Through the Python library 0.1.0", E93 `through_words`); an older answer sent the
+    bare name. Either reads once as "Through …."."""
+    if not through: return 'Through: %s.' % NOT_RECORDED
+    return (through if through.startswith('Through ') else 'Through ' + through).rstrip('.') + '.'
 
 
 def details(node, names):
@@ -35,7 +42,7 @@ def details(node, names):
         else: by = made.get('by_name') or ('an agent' if made.get('by_kind') == 'agent' else NOT_RECORDED)
         behalf = ', on behalf of %s,' % who(made['on_behalf_of']) if made.get('on_behalf_of') else ''
         out.append('Made by %s%s on %s.' % (by, behalf, _day(made.get('at'))))
-        out.append('Through %s.' % made['through'] if made.get('through') else 'Through: %s.' % NOT_RECORDED)
+        out.append(_through(made.get('through')))
         if method: out.append('Made with %s, %s, %s.' % (method['display'], method['version_label'], method['release']))
     elif kind == 'not-recorded':
         out.append('How this was made was not recorded.')
