@@ -13,6 +13,8 @@ from .errors import (AuthenticationRequired, PermissionRefused, IntegrityConflic
                      Incompatible, Unavailable, VerificationFailed)
 
 MAX_BYTES=32*1024*1024
+# E94: every descriptor request declares the revision manifest profiles this library verifies (/3 carries how a result was made)
+PROFILES='&profiles=%2F1%2C%2F2%2C%2F3'
 
 
 from ._core import origin
@@ -185,7 +187,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
 
     def describe(self,asset,revision,curve):
         path,query=self._path(asset,revision,curve)
-        return _core.verify_descriptor(self._json(path+query,256*1024),self.project,asset,revision,curve)
+        return _core.verify_descriptor(self._json(path+query+PROFILES,256*1024),self.project,asset,revision,curve)
 
     def read(self,asset,revision,curves,*,strict_interpretation=False):
         if not isinstance(curves,(list,tuple)) or not curves or len(set(curves))!=len(curves):
@@ -193,7 +195,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
         descriptors=[];views=[];artifact=None;wire_descriptors=[];wire_curves=[];wire_curve_bytes=[]
         for curve in curves:
             path,query=self._path(asset,revision,curve)
-            data=self._json(path+query,256*1024)
+            data=self._json(path+query+PROFILES,256*1024)
             _core.verify_descriptor(data,self.project,asset,revision,curve)
             raw=_core.rules.artifact(data)
             normalized=next(r for r in data['representations'] if r['kind']=='normalized')
@@ -209,7 +211,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
         """E11: read well tops, a trajectory or a regular-grid surface at an exact revision."""
         if not all(isinstance(x,str) and x for x in (asset,revision)):raise Refused('Choose an asset and exact revision.')
         path=self.prefix+'/'+quote(asset,safe='')+'/revisions/'+quote(revision,safe='')
-        data=self._json(path,256*1024)
+        data=self._json(path+'?'+PROFILES[1:],256*1024)
         _core.verify_typed_descriptor(data,self.project,asset,revision)
         raw=_core.rules.artifact(data)
         normalized=next(r for r in data['representations'] if r['kind']=='normalized')

@@ -1,0 +1,339 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/scientific/v1/parameters.json",
+  "x-ophiolite": {
+    "id": "ophiolite.parameters/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "ArrayNode": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "array",
+          "title": "Type",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "array": "#/$defs/ArrayNode",
+                "boolean": "#/$defs/BooleanLeaf",
+                "integer": "#/$defs/IntegerLeaf",
+                "null": "#/$defs/NullLeaf",
+                "number": "#/$defs/NumberLeaf",
+                "object": "#/$defs/ObjectNode",
+                "string": "#/$defs/StringLeaf"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/NumberLeaf"
+              },
+              {
+                "$ref": "#/$defs/IntegerLeaf"
+              },
+              {
+                "$ref": "#/$defs/StringLeaf"
+              },
+              {
+                "$ref": "#/$defs/BooleanLeaf"
+              },
+              {
+                "$ref": "#/$defs/NullLeaf"
+              },
+              {
+                "$ref": "#/$defs/ObjectNode"
+              },
+              {
+                "$ref": "#/$defs/ArrayNode"
+              }
+            ]
+          },
+          "maxItems": 256,
+          "title": "Items",
+          "type": "array"
+        }
+      },
+      "required": [
+        "type",
+        "items"
+      ],
+      "title": "ArrayNode",
+      "type": "object"
+    },
+    "BooleanLeaf": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "boolean",
+          "title": "Type",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ],
+      "title": "BooleanLeaf",
+      "type": "object"
+    },
+    "IntegerLeaf": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "integer",
+          "title": "Type",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^-?(0|[1-9][0-9]{0,30})$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ],
+      "title": "IntegerLeaf",
+      "type": "object"
+    },
+    "NullLeaf": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "null",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "NullLeaf",
+      "type": "object"
+    },
+    "NumberLeaf": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "number",
+          "title": "Type",
+          "type": "string"
+        },
+        "value": {
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ],
+      "title": "NumberLeaf",
+      "type": "object"
+    },
+    "ObjectNode": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "object",
+          "title": "Type",
+          "type": "string"
+        },
+        "entries": {
+          "items": {
+            "$ref": "#/$defs/ParameterEntry"
+          },
+          "maxItems": 64,
+          "title": "Entries",
+          "type": "array"
+        }
+      },
+      "required": [
+        "type",
+        "entries"
+      ],
+      "title": "ObjectNode",
+      "type": "object"
+    },
+    "ParameterEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "value": {
+          "discriminator": {
+            "mapping": {
+              "array": "#/$defs/ArrayNode",
+              "boolean": "#/$defs/BooleanLeaf",
+              "integer": "#/$defs/IntegerLeaf",
+              "null": "#/$defs/NullLeaf",
+              "number": "#/$defs/NumberLeaf",
+              "object": "#/$defs/ObjectNode",
+              "string": "#/$defs/StringLeaf"
+            },
+            "propertyName": "type"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/NumberLeaf"
+            },
+            {
+              "$ref": "#/$defs/IntegerLeaf"
+            },
+            {
+              "$ref": "#/$defs/StringLeaf"
+            },
+            {
+              "$ref": "#/$defs/BooleanLeaf"
+            },
+            {
+              "$ref": "#/$defs/NullLeaf"
+            },
+            {
+              "$ref": "#/$defs/ObjectNode"
+            },
+            {
+              "$ref": "#/$defs/ArrayNode"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "key",
+        "value"
+      ],
+      "title": "ParameterEntry",
+      "type": "object"
+    },
+    "StringLeaf": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "string",
+          "title": "Type",
+          "type": "string"
+        },
+        "value": {
+          "maxLength": 1024,
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ],
+      "title": "StringLeaf",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "E94 (`ophiolite.parameters/1`): what must be given again to reproduce a calculation (`request`) and what that\nrequest resolved to when it ran (`resolved`), both canonical trees.",
+  "properties": {
+    "schema": {
+      "const": "ophiolite.parameters/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "request": {
+      "discriminator": {
+        "mapping": {
+          "array": "#/$defs/ArrayNode",
+          "boolean": "#/$defs/BooleanLeaf",
+          "integer": "#/$defs/IntegerLeaf",
+          "null": "#/$defs/NullLeaf",
+          "number": "#/$defs/NumberLeaf",
+          "object": "#/$defs/ObjectNode",
+          "string": "#/$defs/StringLeaf"
+        },
+        "propertyName": "type"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/NumberLeaf"
+        },
+        {
+          "$ref": "#/$defs/IntegerLeaf"
+        },
+        {
+          "$ref": "#/$defs/StringLeaf"
+        },
+        {
+          "$ref": "#/$defs/BooleanLeaf"
+        },
+        {
+          "$ref": "#/$defs/NullLeaf"
+        },
+        {
+          "$ref": "#/$defs/ObjectNode"
+        },
+        {
+          "$ref": "#/$defs/ArrayNode"
+        }
+      ],
+      "title": "Request"
+    },
+    "resolved": {
+      "discriminator": {
+        "mapping": {
+          "array": "#/$defs/ArrayNode",
+          "boolean": "#/$defs/BooleanLeaf",
+          "integer": "#/$defs/IntegerLeaf",
+          "null": "#/$defs/NullLeaf",
+          "number": "#/$defs/NumberLeaf",
+          "object": "#/$defs/ObjectNode",
+          "string": "#/$defs/StringLeaf"
+        },
+        "propertyName": "type"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/NumberLeaf"
+        },
+        {
+          "$ref": "#/$defs/IntegerLeaf"
+        },
+        {
+          "$ref": "#/$defs/StringLeaf"
+        },
+        {
+          "$ref": "#/$defs/BooleanLeaf"
+        },
+        {
+          "$ref": "#/$defs/NullLeaf"
+        },
+        {
+          "$ref": "#/$defs/ObjectNode"
+        },
+        {
+          "$ref": "#/$defs/ArrayNode"
+        }
+      ],
+      "title": "Resolved"
+    }
+  },
+  "required": [
+    "schema",
+    "request",
+    "resolved"
+  ],
+  "title": "Parameters",
+  "type": "object"
+}

@@ -1254,6 +1254,36 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/results/dependents",
+    "function": "postProjectsProjectResultsDependents",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/results/remake-run",
+    "function": "postProjectsProjectResultsRemakeRun",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/results/remake-save",
+    "function": "postProjectsProjectResultsRemakeSave",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/results/story",
+    "function": "postProjectsProjectResultsStory",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/results/what-changed",
+    "function": "postProjectsProjectResultsWhatChanged",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/reviews/comment-add",
     "function": "postProjectsProjectReviewsCommentAdd",
     "request": "schema",

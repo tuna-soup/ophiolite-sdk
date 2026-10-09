@@ -1,0 +1,29 @@
+{
+ "schema": "ophiolite.story/1",
+ "root": "n-shale-2",
+ "nodes": [
+  {"id": "n-shale-2", "kind": "executed", "asset_id": "a-shale", "revision": "r-shale-2", "version": 2, "name": "Shale volume HON-GT-01",
+   "made": {"at": "2026-10-06T12:12:00Z", "by": "sanne", "by_kind": "person", "by_name": null, "on_behalf_of": null, "through": "the browser", "reported_by": null},
+   "method": {"display": "Shale volume from gamma ray, Linear (simple)", "version_label": "version 1", "release": "Ophiolite 2026.10.60"},
+   "settings": [{"label": "Clean value", "unit": "gAPI", "value": "30"}, {"label": "Shale value", "unit": "gAPI", "value": "150"}, {"label": "Method", "unit": null, "value": "Linear (simple)"}],
+   "history": null, "newer_input": true, "inputs": [{"id": "n-gr-2", "slot": "gamma"}],
+   "made_again_from": {"asset_id": "a-shale-old", "revision": "r-old-1", "version": 1, "name": "Shale volume HON-GT-01 (first)"},
+   "technical": {"asset_id": "a-shale", "revision": "r-shale-2", "implementation": "ophiolite.shale-volume", "implementation_version": "1", "derivation_digest": "4f1c0c7d2bd1a1b5b8b0bb3c6cfe8f0a0f4f0f1f7c2b9e8d1a3c5e7f9b1d3e5a"}},
+  {"id": "n-gr-2", "kind": "declared", "asset_id": "a-gr", "revision": "r-gr-2", "version": 2, "name": "HON-GT-01 gamma ray",
+   "made": {"at": "2026-10-01T09:00:00Z", "by": null, "by_kind": null, "by_name": null, "on_behalf_of": null, "through": null, "reported_by": "bram"},
+   "method": {"display": "Method declared by its publisher", "version_label": "Not recorded", "release": "Not recorded"},
+   "settings": [], "history": null, "inputs": [{"id": "n-las", "slot": null}, {"id": "n-db", "slot": null}],
+   "technical": {"asset_id": "a-gr", "revision": "r-gr-2", "declared_method": "gr-clean"}},
+  {"id": "n-las", "kind": "original", "asset_id": "a-las", "revision": "r-las-1", "version": 1, "name": "HON-GT-01",
+   "made": {"at": "2026-10-01T08:30:00Z", "by": "bram", "by_kind": "person", "by_name": null, "on_behalf_of": null, "through": "the browser", "reported_by": null},
+   "method": null, "settings": [], "history": null, "file": "HON-GT-01.las",
+   "technical": {"asset_id": "a-las", "revision": "r-las-1"}},
+  {"id": "n-db", "kind": "reference", "asset_id": null, "revision": null, "version": null, "name": "the well database Groningen wells",
+   "made": null, "method": null, "settings": [], "history": "Read from the well database Groningen wells",
+   "technical": {"authority": "sql-wells", "key": "HON-GT-01"}}
+ ],
+ "restricted": true,
+ "next_cursor": null,
+ "continue_from": null,
+ "display": {"member_names": {"sanne": "Sanne de Vries", "bram": "Bram Koster"}}
+}

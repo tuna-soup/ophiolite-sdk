@@ -1,6 +1,8 @@
 import { adapt, type UploadMetadata } from "./api-types.js";
 import { CapacityExceeded, Refused, ShareOutcomeUnknown, VerificationFailed, httpError } from "./errors.js";
 import { object, requireValue, validateDescriptor, verifyPair } from "./verify.js";
+import { postProjectsProjectResultsDependents, postProjectsProjectResultsRemakeRun, postProjectsProjectResultsRemakeSave, postProjectsProjectResultsStory, postProjectsProjectResultsWhatChanged } from "./generated/operations.js";
+import type { postProjectsProjectResultsRemakeSaveInput } from "./generated/operations.js";
 export * from "./errors.js";
 export * from "./api-types.js";
 export { verifyPair, validateDescriptor } from "./verify.js";
@@ -14,6 +16,8 @@ export interface Transport {
   request<T>(method: string, path: string, params: Record<string, unknown>, query?: Record<string, unknown>, body?: unknown, options?: OperationOptions, adapter?: string | null, binary?: boolean): Promise<T>;
 }
 const MAX_BYTES = 32 * 1024 * 1024;
+/** E94: the revision manifest profiles this package reads (/3 carries how a result was made). */
+export const PROFILES = "/1,/2,/3";
 function uploadHeader(value: UploadMetadata): string {
   const v = object(value);
   for (const [name, limit] of Object.entries({project_id:160,command_id:64,filename:160,name:160,attribution:500})) {
@@ -91,10 +95,34 @@ export class Client implements Transport {
   async readCurve(project: string, asset: string, revision: string, curve: string, options?: OperationOptions) {
     const path = "/api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}";
     const params = { project, asset, revision };
-    const descriptor = validateDescriptor(await this.request<unknown>("GET", path, params, { curve }, undefined, options));
+    const descriptor = validateDescriptor(await this.request<unknown>("GET", path, params, { curve, profiles: PROFILES }, undefined, options));
     requireValue(descriptor.project_id === project && descriptor.asset_id === asset && descriptor.revision === revision && (descriptor.scientific as { curve?: string }).curve === curve);
     const rep = descriptor.representations.find(x => x.kind === "normalized")!;
     const bytes = await this.send("GET", path + "/representations/{representation}", { ...params, representation: rep.id }, { curve }, undefined, options, false);
     return verifyPair(descriptor, bytes);
   }
+}
+
+/** E94: one page of how an exact result version was made (follow `next_cursor`; `continue_from` when a history is long). */
+export function story(transport: Transport, project: string, asset: string, revision: string, page: { cursor?: string; limit?: number } = {}, options?: OperationOptions): ReturnType<typeof postProjectsProjectResultsStory> {
+  return postProjectsProjectResultsStory(transport, { path: { project }, body: { project_id: project, asset_id: asset, revision, ...page }, options });
+}
+/** E94: what differs in how two exact result versions were made; `a` is the earlier one. */
+export function whatChanged(transport: Transport, project: string, a: { asset_id: string; revision: string }, b: { asset_id: string; revision: string }, options?: OperationOptions): ReturnType<typeof postProjectsProjectResultsWhatChanged> {
+  return postProjectsProjectResultsWhatChanged(transport, { path: { project }, body: { project_id: project, a, b }, options });
+}
+/** E94: the results made from an exact version the reader may open. */
+export function dependents(transport: Transport, project: string, asset: string, revision: string, page: { cursor?: string; limit?: number } = {}, options?: OperationOptions): ReturnType<typeof postProjectsProjectResultsDependents> {
+  return postProjectsProjectResultsDependents(transport, { path: { project }, body: { project_id: project, asset_id: asset, revision, ...page }, options });
+}
+export type RemakeStep = { step: "preview"; inputs?: "recorded" | "newer" } | { step: "run"; inputs: { slot: string; asset_id: string; revision: string }[]; command_id: string } | { step: "status" | "discard"; execution_id: string };
+/** E94: make an exact result version again (preview, run, status, discard). Nothing is saved; `remakeSave` does that. */
+export function remake(transport: Transport, project: string, asset: string, revision: string, step: RemakeStep, options?: OperationOptions): ReturnType<typeof postProjectsProjectResultsRemakeRun> {
+  if (step.step === "run" && !step.command_id) throw new Refused();
+  return postProjectsProjectResultsRemakeRun(transport, { path: { project }, body: { project_id: project, asset_id: asset, revision, ...step }, options });
+}
+/** E94: save held outputs that differ, each on its own command id; a new version carries the confirmed audience digest. */
+export function remakeSave(transport: Transport, project: string, execution_id: string, outputs: postProjectsProjectResultsRemakeSaveInput["body"]["outputs"], options?: OperationOptions): ReturnType<typeof postProjectsProjectResultsRemakeSave> {
+  requireValue(outputs.length > 0 && outputs.every(o => (o.target === "new-result" || o.target === "new-version") && !!o.command_id));
+  return postProjectsProjectResultsRemakeSave(transport, { path: { project }, body: { project_id: project, execution_id, outputs }, options });
 }

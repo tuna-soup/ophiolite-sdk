@@ -42,7 +42,8 @@ def schemas():
                                                    PointSet, PolylineSet, SeismicVolume, SeismicSlice, ImportRecipe, PointSet2,
                                                    WellLocationUpload, WellLocation, Wavelet, ModelSection, SeismicSection, TimeDepth)
     from project_gateway.domain import RelationshipRegistry, Entity, EntityAssets, Lineage
-    for model in (Asset, Curve, ScientificContext, AssetSummary, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface, PointSet, PolylineSet, SeismicVolume, SeismicSlice,
+    from project_gateway.scientific_assets import DerivationRecord, Parameters  # E94
+    for model in (DerivationRecord, Parameters, Asset, Curve, ScientificContext, AssetSummary, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface, PointSet, PolylineSet, SeismicVolume, SeismicSlice,
                   RelationshipRegistry, Entity, EntityAssets, Lineage, ImportRecipe, PointSet2, WellLocationUpload, WellLocation,
                   Wavelet, ModelSection, SeismicSection, TimeDepth):  # E53; E57
         write(CONTRACTS / model.CONTRACT['path'], model.model_json_schema())
