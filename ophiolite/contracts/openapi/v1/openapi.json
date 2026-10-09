@@ -79343,93 +79343,6 @@
         "title": "EvidenceModel",
         "type": "object"
       },
-      "EvidenceRecord": {
-        "additionalProperties": false,
-        "description": "E95: one immutable evidence record of a plan; `instruction` only for its delegator and administrators.",
-        "properties": {
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "generation": {
-            "title": "Generation",
-            "type": "integer"
-          },
-          "digest": {
-            "title": "Digest",
-            "type": "string"
-          },
-          "instruction_sha256": {
-            "title": "Instruction Sha256",
-            "type": "string"
-          },
-          "kept": {
-            "title": "Kept",
-            "type": "boolean"
-          },
-          "instruction_removed": {
-            "title": "Instruction Removed",
-            "type": "boolean"
-          },
-          "reported_by": {
-            "const": "agent",
-            "title": "Reported By",
-            "type": "string"
-          },
-          "client": {
-            "title": "Client",
-            "type": "string"
-          },
-          "created_at": {
-            "title": "Created At",
-            "type": "number"
-          },
-          "model": {
-            "$ref": "#/components/schemas/EvidenceModel"
-          },
-          "conversation": {
-            "$ref": "#/components/schemas/EvidenceConversation"
-          },
-          "approved": {
-            "description": "The plan's current approval names this record",
-            "title": "Approved",
-            "type": "boolean"
-          },
-          "rejected": {
-            "title": "Rejected",
-            "type": "boolean"
-          },
-          "instruction": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "title": "Instruction"
-          }
-        },
-        "required": [
-          "id",
-          "generation",
-          "digest",
-          "instruction_sha256",
-          "kept",
-          "instruction_removed",
-          "reported_by",
-          "client",
-          "created_at",
-          "model",
-          "conversation",
-          "approved",
-          "rejected"
-        ],
-        "title": "EvidenceRecord",
-        "type": "object"
-      },
       "ExactRevision": {
         "additionalProperties": false,
         "properties": {
@@ -85225,9 +85138,9 @@
             "type": "object"
           },
           "evidence": {
-            "description": "E95: the evidence records, oldest first",
+            "description": "E95: the evidence records, oldest first, with the words a person reads",
             "items": {
-              "$ref": "#/components/schemas/EvidenceRecord"
+              "$ref": "#/components/schemas/WordedEvidence"
             },
             "title": "Evidence",
             "type": "array"
