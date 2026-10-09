@@ -91,7 +91,7 @@ def test_identifier_shaped_name_falls_back():
 
 
 def test_receipt_frozen_and_private_context():
-    r = receipt(CONTEXT | {'recipe': {'name': 'Porosity'}})
+    r = receipt(CONTEXT | {'recipe': {'call': 'publish_derived', 'arguments': {'name': 'Porosity'}}})
     assert isinstance(r, PublicationReceipt)
     assert repr(r) == RECEIPT_REPR                                            # mutation: bare subclass prints its own name
     assert r.model_dump() == RECEIPT_DUMP                                     # mutation: context as an extra
@@ -123,3 +123,94 @@ def test_presented_exchange_without_origin_has_no_link(tmp_path):
     e.get('poro', output=tmp_path / 'o')
     raw = e.send(b'porosity v2', name='Porosity', profile='table/1', how='recomputed', based_on=['poro'], of='poro')._repr_html_()
     assert '<a' not in raw and '<strong>Porosity</strong><p>Version 2</p>' in raw
+
+
+# -- "Send again" (E104 C3): the rendered line is executed against the fake project, never matched as text alone ----------
+
+import html as _html
+import re
+
+from ophiolite import exchange as _exchange
+
+V1, V2, V3, V4 = b'porosity v1', b'porosity v2', b'porosity v3', b'porosity v4'
+ARGS = dict(name='Porosity', profile='table/1', how='recomputed', based_on=['poro'], of='poro')
+
+
+def folder(tmp_path, fake=None):
+    fake = fake or Fake()
+    if 'poro' not in fake.items: fake.add('poro', V1, name='Porosity')
+    e = PresentedExchange(fake, tmp_path / 'w', origin='https://ws.example', clock=lambda: 1300.0)
+    e.get('poro', output=tmp_path / 'o')
+    return fake, e
+
+
+def line(result):
+    found = re.search(r'<summary>Send again</summary><p>.*?</p><pre>(.*?)</pre>', result._repr_html_(), re.S)
+    return _html.unescape(found.group(1)) if found else None
+
+
+def run(text, e, data):
+    scope = {'ex': e, 'new_file': data}
+    exec('result = ' + text, scope)
+    return scope['result']
+
+
+def publishes(fake): return [c for c in fake.calls if c[0] == 'publish']
+
+
+def test_the_line_refuses_once_the_folder_holds_a_newer_version(tmp_path):
+    fake, e = folder(tmp_path)
+    sent = e.send(V2, **ARGS)                                                # poro version 2
+    old = line(sent)
+    assert old == ("ex.send(new_file, name='Porosity', profile='table/1', how='recomputed', based_on=['poro'], of='poro', "
+                   "expected='%s')" % sha(V2))
+    fake.add('poro', V3, name='Porosity', by='Bob Example', at=1250.0); e.get('poro', output=tmp_path / 'o')
+    before = len(publishes(fake))
+    with pytest.raises(_exchange.REFUSALS['newer-version-exists']):
+        run(old, e, V4)                                                      # mutation: line without expected -> version 4 added
+    assert len(publishes(fake)) == before
+
+
+def test_each_result_offers_the_next_version(tmp_path):
+    fake, e = folder(tmp_path)
+    two = e.send(V2, **ARGS)
+    three = run(line(two), e, V3)
+    assert (three.outcome, three.facts['number']) == ('sent-version', 3) and publishes(fake)[-1][2] == sha(V2)  # transmitted parent
+    four = run(line(three), e, V4)
+    assert (four.outcome, four.facts['number']) == ('sent-version', 4) and publishes(fake)[-1][2] == sha(V3)
+    assert line(four) == line(three).replace(sha(V3), sha(V4))               # the same shape one version later
+
+
+def test_a_new_item_line_sends_another_new_item_with_its_declarations(tmp_path):
+    fake, e = folder(tmp_path)
+    seen = []; publish = fake.publish
+    fake.publish = lambda data, request, resolved, command_id: (seen.append(request), publish(data, request, resolved, command_id))[1]
+    first = e.send(V2, name='Rock & "Sand"', profile='table/1', how='recomputed', based_on=['poro'], declare={'unit': 'm'}, extra={'k': [1, 2]})
+    text = line(first)
+    assert 'of=' not in text and 'expected=' not in text and SEND_NEW_TEXT in first._repr_html_()
+    assert "<pre>ex.send(new_file, name=&#x27;Rock &amp; &quot;Sand&quot;&#x27;," in first._repr_html_()  # mutation: line not escaped
+    again = run(text, e, V3)
+    assert again.outcome == 'sent-new' and again.technical['asset_id'] != first.technical['asset_id']
+    assert seen[-1]['declare'] == {'unit': 'm'} and seen[-1]['extra'] == {'k': [1, 2]}  # mutation: either dropped
+    assert fake.items[again.technical['asset_id']]['name'] == 'Rock & "Sand"'          # quote and ampersand survive
+
+
+SEND_NEW_TEXT = 'It sends another new item.'
+
+
+def test_the_line_is_a_snapshot_of_the_call(tmp_path):
+    fake, e = folder(tmp_path)
+    based_on, declare, extra = ['poro'], {'unit': 'm'}, {'k': [1]}
+    sent = e.send(V2, **{**ARGS, 'based_on': based_on, 'declare': declare, 'extra': extra})
+    based_on.append('other'); declare['unit'] = 'ft'; extra['k'].append(2)   # mutation: snapshot by reference
+    assert line(sent) == ("ex.send(new_file, name='Porosity', profile='table/1', how='recomputed', based_on=['poro'], of='poro', "
+                          "declare={'unit': 'm'}, extra={'k': [1]}, expected='%s')" % sha(V2))
+
+
+@pytest.mark.parametrize('extra', [{'long': 'x' * 4096}, {'when': float('nan')}, {'object': object()}],
+                         ids=['over-4096-characters', 'not-finite', 'not-plain-data'])
+def test_no_line_when_it_cannot_be_shown_whole(extra):
+    o = PresentedOutcome('sent-version', SENTENCE, dict(FACTS), {'asset_id': 'poro', 'revision': 'r'},
+                         {**CONTEXT, 'recipe': {'call': 'send', 'arguments': {**ARGS, 'extra': extra}}})
+    raw = o._repr_html_()
+    assert 'Send again' not in raw and 'ex.send' not in raw and '...' not in raw
