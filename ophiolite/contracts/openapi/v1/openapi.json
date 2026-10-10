@@ -79345,7 +79345,7 @@
     },
     "/api/v1/projects/{project}/features": {
       "get": {
-        "summary": "Landing page of the wells as OGC API - Features",
+        "summary": "Landing page of the project's map layers as OGC API - Features",
         "description": "OGC API - Features (E29); scope read; accepted principals: session, delegate, agent, grant (capability 3).",
         "security": [
           {
@@ -79374,7 +79374,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Landing page of the wells as OGC API - Features",
+            "description": "Landing page of the project's map layers as OGC API - Features",
             "headers": {
               "X-Request-Id": {
                 "description": "This request's id; every response carries it, and an error body repeats it as request_id",
@@ -79491,7 +79491,7 @@
     },
     "/api/v1/projects/{project}/features/": {
       "get": {
-        "summary": "Landing page of the wells as OGC API - Features",
+        "summary": "Landing page of the project's map layers as OGC API - Features",
         "description": "OGC API - Features (E29); scope read; accepted principals: session, delegate, agent, grant (capability 3).",
         "security": [
           {
@@ -79520,7 +79520,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Landing page of the wells as OGC API - Features",
+            "description": "Landing page of the project's map layers as OGC API - Features",
             "headers": {
               "X-Request-Id": {
                 "description": "This request's id; every response carries it, and an error body repeats it as request_id",
@@ -79895,7 +79895,7 @@
     },
     "/api/v1/projects/{project}/features/collections": {
       "get": {
-        "summary": "The one collection: wells",
+        "summary": "The collections: wells, tops, wellbore paths, point sets, lines and vector features",
         "description": "OGC API - Features (E29); scope read; accepted principals: session, delegate, agent, grant (capability 3).",
         "security": [
           {
@@ -79924,7 +79924,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The one collection: wells",
+            "description": "The collections: wells, tops, wellbore paths, point sets, lines and vector features",
             "headers": {
               "X-Request-Id": {
                 "description": "This request's id; every response carries it, and an error body repeats it as request_id",
@@ -79953,7 +79953,16 @@
                         "properties": {
                           "id": {
                             "type": "string",
-                            "const": "wells"
+                            "enum": [
+                              "wells",
+                              "tops",
+                              "wellbore-paths",
+                              "point-sets",
+                              "lines",
+                              "feature-points",
+                              "feature-lines",
+                              "feature-polygons"
+                            ]
                           },
                           "title": {
                             "type": "string"
@@ -80144,7 +80153,7 @@
     },
     "/api/v1/projects/{project}/features/collections/{collection}": {
       "get": {
-        "summary": "The wells collection: extent (CRS84), CRSs offered and storage CRS when single",
+        "summary": "One collection: extent (CRS84), CRSs offered and storage CRS when single",
         "description": "OGC API - Features (E29); scope read; accepted principals: session, delegate, agent, grant (capability 3).",
         "security": [
           {
@@ -80176,13 +80185,22 @@
             "required": true,
             "schema": {
               "type": "string",
-              "const": "wells"
+              "enum": [
+                "wells",
+                "tops",
+                "wellbore-paths",
+                "point-sets",
+                "lines",
+                "feature-points",
+                "feature-lines",
+                "feature-polygons"
+              ]
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "The wells collection: extent (CRS84), CRSs offered and storage CRS when single",
+            "description": "One collection: extent (CRS84), CRSs offered and storage CRS when single",
             "headers": {
               "X-Request-Id": {
                 "description": "This request's id; every response carries it, and an error body repeats it as request_id",
@@ -80202,7 +80220,16 @@
                   "properties": {
                     "id": {
                       "type": "string",
-                      "const": "wells"
+                      "enum": [
+                        "wells",
+                        "tops",
+                        "wellbore-paths",
+                        "point-sets",
+                        "lines",
+                        "feature-points",
+                        "feature-lines",
+                        "feature-polygons"
+                      ]
                     },
                     "title": {
                       "type": "string"
@@ -80366,7 +80393,7 @@
     },
     "/api/v1/projects/{project}/features/collections/{collection}/items": {
       "get": {
-        "summary": "Wells you may see located, as GeoJSON features",
+        "summary": "The collection's features you may read, as GeoJSON features (a feature that cannot be placed has a null geometry and the reason)",
         "description": "OGC API - Features (E29); scope read; accepted principals: session, delegate, agent, grant (capability 3).",
         "security": [
           {
@@ -80398,7 +80425,16 @@
             "required": true,
             "schema": {
               "type": "string",
-              "const": "wells"
+              "enum": [
+                "wells",
+                "tops",
+                "wellbore-paths",
+                "point-sets",
+                "lines",
+                "feature-points",
+                "feature-lines",
+                "feature-polygons"
+              ]
             }
           },
           {
@@ -80460,7 +80496,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "An instant or interval (RFC 3339; an open end is ..). Wells carry no time, so every well is returned; a malformed value is refused"
+            "description": "An instant or interval (RFC 3339; an open end is ..). These features carry no time, so every feature is returned; a malformed value is refused"
           },
           {
             "in": "query",
@@ -80488,7 +80524,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Wells you may see located, as GeoJSON features",
+            "description": "The collection's features you may read, as GeoJSON features (a feature that cannot be placed has a null geometry and the reason)",
             "headers": {
               "X-Request-Id": {
                 "description": "This request's id; every response carries it, and an error body repeats it as request_id",
@@ -80541,19 +80577,137 @@
                                   "type",
                                   "coordinates"
                                 ],
-                                "properties": {
-                                  "type": {
-                                    "const": "Point"
+                                "anyOf": [
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "const": "Point"
+                                      },
+                                      "coordinates": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "number"
+                                        },
+                                        "minItems": 2,
+                                        "maxItems": 3
+                                      }
+                                    }
                                   },
-                                  "coordinates": {
-                                    "type": "array",
-                                    "minItems": 2,
-                                    "maxItems": 2,
-                                    "items": {
-                                      "type": "number"
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "const": "MultiPoint"
+                                      },
+                                      "coordinates": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "array",
+                                          "items": {
+                                            "type": "number"
+                                          },
+                                          "minItems": 2,
+                                          "maxItems": 3
+                                        }
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "const": "LineString"
+                                      },
+                                      "coordinates": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "array",
+                                          "items": {
+                                            "type": "number"
+                                          },
+                                          "minItems": 2,
+                                          "maxItems": 3
+                                        },
+                                        "minItems": 2
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "const": "MultiLineString"
+                                      },
+                                      "coordinates": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "array",
+                                          "items": {
+                                            "type": "array",
+                                            "items": {
+                                              "type": "number"
+                                            },
+                                            "minItems": 2,
+                                            "maxItems": 3
+                                          },
+                                          "minItems": 2
+                                        }
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "const": "Polygon"
+                                      },
+                                      "coordinates": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "array",
+                                          "items": {
+                                            "type": "array",
+                                            "items": {
+                                              "type": "number"
+                                            },
+                                            "minItems": 2,
+                                            "maxItems": 3
+                                          },
+                                          "minItems": 4
+                                        },
+                                        "minItems": 1
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "const": "MultiPolygon"
+                                      },
+                                      "coordinates": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "array",
+                                          "items": {
+                                            "type": "array",
+                                            "items": {
+                                              "type": "array",
+                                              "items": {
+                                                "type": "number"
+                                              },
+                                              "minItems": 2,
+                                              "maxItems": 3
+                                            },
+                                            "minItems": 4
+                                          },
+                                          "minItems": 1
+                                        }
+                                      }
                                     }
                                   }
-                                }
+                                ]
                               },
                               {
                                 "type": "null"
@@ -80585,52 +80739,314 @@
                             }
                           },
                           "properties": {
-                            "type": "object",
-                            "required": [
-                              "name",
-                              "kind",
-                              "entity_id"
-                            ],
-                            "description": "The well name first; source revision and row, elevation reference, ambiguity and the transformation performed; for a well whose stored CRS cannot be converted, stored_x, stored_y, stored_crs and transformation \"unavailable\" with a null geometry.",
-                            "properties": {
-                              "name": {
-                                "type": "string"
+                            "description": "Per collection (Technical details): wells: The well name first; source revision and row, elevation reference, ambiguity and the transformation performed; for a well whose stored CRS cannot be converted, stored_x, stored_y, stored_crs and transformation \"unavailable\" with a null geometry. tops: The top name, its measured depth and (when the file gives it) vertical depth in the stated unit, the wellbore and the exact source revision; a top whose wellbore has no location you may read has a null geometry and the reason in placement. wellbore-paths: The wellbore name, the survey's measured-depth range and station count, its azimuth reference and the exact source revision; placement states the rule that drew the line or why it is not drawn. point-sets: The point set name, the point's index in its file, its height when given, the exact source revision and each attribute of the set by name (an attribute whose name is reserved here is served as attribute_<name>). lines: The polyline set name, the stick number in its file and the exact source revision. feature-points: The layer name, the feature's index in its file, the exact source revision and each declared attribute by name (an attribute whose name is reserved here is served as attribute_<name>). feature-lines: The layer name, the feature's index in its file, the exact source revision and each declared attribute by name (an attribute whose name is reserved here is served as attribute_<name>). feature-polygons: The layer name, the feature's index in its file, the exact source revision and each declared attribute by name (an attribute whose name is reserved here is served as attribute_<name>).",
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "required": [
+                                  "name",
+                                  "kind",
+                                  "entity_id"
+                                ],
+                                "description": "The well name first; source revision and row, elevation reference, ambiguity and the transformation performed; for a well whose stored CRS cannot be converted, stored_x, stored_y, stored_crs and transformation \"unavailable\" with a null geometry.",
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "kind": {
+                                    "const": "well"
+                                  },
+                                  "entity_id": {
+                                    "type": "string"
+                                  },
+                                  "source_asset_id": {
+                                    "type": "string"
+                                  },
+                                  "source_revision": {
+                                    "type": "string"
+                                  },
+                                  "source_profile": {
+                                    "type": "string"
+                                  },
+                                  "source_row": {
+                                    "type": "string"
+                                  },
+                                  "elevation_reference": {
+                                    "type": "string"
+                                  },
+                                  "ambiguous": {
+                                    "type": "boolean"
+                                  },
+                                  "stored_x": {
+                                    "type": "number"
+                                  },
+                                  "stored_y": {
+                                    "type": "number"
+                                  },
+                                  "stored_crs": {
+                                    "type": "string"
+                                  },
+                                  "transformation": {}
+                                }
                               },
-                              "kind": {
-                                "const": "well"
+                              {
+                                "type": "object",
+                                "required": [
+                                  "name",
+                                  "md",
+                                  "entity_id",
+                                  "source_asset_id",
+                                  "source_revision",
+                                  "source_profile"
+                                ],
+                                "description": "The top name, its measured depth and (when the file gives it) vertical depth in the stated unit, the wellbore and the exact source revision; a top whose wellbore has no location you may read has a null geometry and the reason in placement.",
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "md": {
+                                    "type": "number"
+                                  },
+                                  "tvd": {
+                                    "type": "number"
+                                  },
+                                  "depth_unit": {
+                                    "type": "string"
+                                  },
+                                  "depth_basis": {
+                                    "type": "string"
+                                  },
+                                  "entity_id": {
+                                    "type": "string"
+                                  },
+                                  "wellbore": {
+                                    "type": "string"
+                                  },
+                                  "source_asset_id": {
+                                    "type": "string"
+                                  },
+                                  "source_revision": {
+                                    "type": "string"
+                                  },
+                                  "source_profile": {
+                                    "type": "string"
+                                  },
+                                  "placement": {
+                                    "type": "string",
+                                    "description": "Why the feature has no geometry, or (paths) the rule that placed it"
+                                  }
+                                }
                               },
-                              "entity_id": {
-                                "type": "string"
+                              {
+                                "type": "object",
+                                "required": [
+                                  "name",
+                                  "entity_id",
+                                  "stations",
+                                  "source_asset_id",
+                                  "source_revision",
+                                  "source_profile",
+                                  "placement"
+                                ],
+                                "description": "The wellbore name, the survey's measured-depth range and station count, its azimuth reference and the exact source revision; placement states the rule that drew the line or why it is not drawn.",
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "entity_id": {
+                                    "type": "string"
+                                  },
+                                  "md_first": {
+                                    "type": "number"
+                                  },
+                                  "md_last": {
+                                    "type": "number"
+                                  },
+                                  "stations": {
+                                    "type": "integer"
+                                  },
+                                  "azimuth_reference": {
+                                    "type": "string"
+                                  },
+                                  "source_asset_id": {
+                                    "type": "string"
+                                  },
+                                  "source_revision": {
+                                    "type": "string"
+                                  },
+                                  "source_profile": {
+                                    "type": "string"
+                                  },
+                                  "placement": {
+                                    "type": "string",
+                                    "description": "Why the feature has no geometry, or (paths) the rule that placed it"
+                                  }
+                                }
                               },
-                              "source_asset_id": {
-                                "type": "string"
+                              {
+                                "type": "object",
+                                "required": [
+                                  "name",
+                                  "feature_index",
+                                  "source_asset_id",
+                                  "source_revision",
+                                  "source_profile"
+                                ],
+                                "description": "The point set name, the point's index in its file, its height when given, the exact source revision and each attribute of the set by name (an attribute whose name is reserved here is served as attribute_<name>).",
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "feature_index": {
+                                    "type": "integer"
+                                  },
+                                  "z": {
+                                    "type": "number"
+                                  },
+                                  "source_asset_id": {
+                                    "type": "string"
+                                  },
+                                  "source_revision": {
+                                    "type": "string"
+                                  },
+                                  "source_profile": {
+                                    "type": "string"
+                                  },
+                                  "placement": {
+                                    "type": "string",
+                                    "description": "Why the feature has no geometry, or (paths) the rule that placed it"
+                                  }
+                                }
                               },
-                              "source_revision": {
-                                "type": "string"
+                              {
+                                "type": "object",
+                                "required": [
+                                  "name",
+                                  "stick",
+                                  "source_asset_id",
+                                  "source_revision",
+                                  "source_profile"
+                                ],
+                                "description": "The polyline set name, the stick number in its file and the exact source revision.",
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "stick": {
+                                    "type": "integer"
+                                  },
+                                  "source_asset_id": {
+                                    "type": "string"
+                                  },
+                                  "source_revision": {
+                                    "type": "string"
+                                  },
+                                  "source_profile": {
+                                    "type": "string"
+                                  },
+                                  "placement": {
+                                    "type": "string",
+                                    "description": "Why the feature has no geometry, or (paths) the rule that placed it"
+                                  }
+                                }
                               },
-                              "source_profile": {
-                                "type": "string"
+                              {
+                                "type": "object",
+                                "required": [
+                                  "name",
+                                  "feature_index",
+                                  "source_asset_id",
+                                  "source_revision",
+                                  "source_profile"
+                                ],
+                                "description": "The layer name, the feature's index in its file, the exact source revision and each declared attribute by name (an attribute whose name is reserved here is served as attribute_<name>).",
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "feature_index": {
+                                    "type": "integer"
+                                  },
+                                  "source_asset_id": {
+                                    "type": "string"
+                                  },
+                                  "source_revision": {
+                                    "type": "string"
+                                  },
+                                  "source_profile": {
+                                    "type": "string"
+                                  },
+                                  "placement": {
+                                    "type": "string",
+                                    "description": "Why the feature has no geometry, or (paths) the rule that placed it"
+                                  }
+                                }
                               },
-                              "source_row": {
-                                "type": "string"
+                              {
+                                "type": "object",
+                                "required": [
+                                  "name",
+                                  "feature_index",
+                                  "source_asset_id",
+                                  "source_revision",
+                                  "source_profile"
+                                ],
+                                "description": "The layer name, the feature's index in its file, the exact source revision and each declared attribute by name (an attribute whose name is reserved here is served as attribute_<name>).",
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "feature_index": {
+                                    "type": "integer"
+                                  },
+                                  "source_asset_id": {
+                                    "type": "string"
+                                  },
+                                  "source_revision": {
+                                    "type": "string"
+                                  },
+                                  "source_profile": {
+                                    "type": "string"
+                                  },
+                                  "placement": {
+                                    "type": "string",
+                                    "description": "Why the feature has no geometry, or (paths) the rule that placed it"
+                                  }
+                                }
                               },
-                              "elevation_reference": {
-                                "type": "string"
-                              },
-                              "ambiguous": {
-                                "type": "boolean"
-                              },
-                              "stored_x": {
-                                "type": "number"
-                              },
-                              "stored_y": {
-                                "type": "number"
-                              },
-                              "stored_crs": {
-                                "type": "string"
-                              },
-                              "transformation": {}
-                            }
+                              {
+                                "type": "object",
+                                "required": [
+                                  "name",
+                                  "feature_index",
+                                  "source_asset_id",
+                                  "source_revision",
+                                  "source_profile"
+                                ],
+                                "description": "The layer name, the feature's index in its file, the exact source revision and each declared attribute by name (an attribute whose name is reserved here is served as attribute_<name>).",
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "feature_index": {
+                                    "type": "integer"
+                                  },
+                                  "source_asset_id": {
+                                    "type": "string"
+                                  },
+                                  "source_revision": {
+                                    "type": "string"
+                                  },
+                                  "source_profile": {
+                                    "type": "string"
+                                  },
+                                  "placement": {
+                                    "type": "string",
+                                    "description": "Why the feature has no geometry, or (paths) the rule that placed it"
+                                  }
+                                }
+                              }
+                            ]
                           }
                         }
                       }
@@ -80667,6 +81083,11 @@
                       "type": "integer",
                       "minimum": 0,
                       "description": "Wells whose stored CRS could not be converted (null geometry, or left out of the bbox)"
+                    },
+                    "unplaced": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "feature-points only: vector files you may read with no geometry at all (in no collection)"
                     }
                   }
                 }
@@ -80738,7 +81159,7 @@
     },
     "/api/v1/projects/{project}/features/collections/{collection}/items/{feature}": {
       "get": {
-        "summary": "One well as a GeoJSON feature",
+        "summary": "One feature as GeoJSON",
         "description": "OGC API - Features (E29); scope read; accepted principals: session, delegate, agent, grant (capability 3).",
         "security": [
           {
@@ -80770,7 +81191,16 @@
             "required": true,
             "schema": {
               "type": "string",
-              "const": "wells"
+              "enum": [
+                "wells",
+                "tops",
+                "wellbore-paths",
+                "point-sets",
+                "lines",
+                "feature-points",
+                "feature-lines",
+                "feature-polygons"
+              ]
             }
           },
           {
@@ -80801,7 +81231,7 @@
         ],
         "responses": {
           "200": {
-            "description": "One well as a GeoJSON feature",
+            "description": "One feature as GeoJSON",
             "headers": {
               "X-Request-Id": {
                 "description": "This request's id; every response carries it, and an error body repeats it as request_id",
@@ -80841,19 +81271,137 @@
                             "type",
                             "coordinates"
                           ],
-                          "properties": {
-                            "type": {
-                              "const": "Point"
+                          "anyOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "const": "Point"
+                                },
+                                "coordinates": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "number"
+                                  },
+                                  "minItems": 2,
+                                  "maxItems": 3
+                                }
+                              }
                             },
-                            "coordinates": {
-                              "type": "array",
-                              "minItems": 2,
-                              "maxItems": 2,
-                              "items": {
-                                "type": "number"
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "const": "MultiPoint"
+                                },
+                                "coordinates": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "number"
+                                    },
+                                    "minItems": 2,
+                                    "maxItems": 3
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "const": "LineString"
+                                },
+                                "coordinates": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "number"
+                                    },
+                                    "minItems": 2,
+                                    "maxItems": 3
+                                  },
+                                  "minItems": 2
+                                }
+                              }
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "const": "MultiLineString"
+                                },
+                                "coordinates": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "number"
+                                      },
+                                      "minItems": 2,
+                                      "maxItems": 3
+                                    },
+                                    "minItems": 2
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "const": "Polygon"
+                                },
+                                "coordinates": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "number"
+                                      },
+                                      "minItems": 2,
+                                      "maxItems": 3
+                                    },
+                                    "minItems": 4
+                                  },
+                                  "minItems": 1
+                                }
+                              }
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "const": "MultiPolygon"
+                                },
+                                "coordinates": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "number"
+                                        },
+                                        "minItems": 2,
+                                        "maxItems": 3
+                                      },
+                                      "minItems": 4
+                                    },
+                                    "minItems": 1
+                                  }
+                                }
                               }
                             }
-                          }
+                          ]
                         },
                         {
                           "type": "null"
@@ -80885,52 +81433,314 @@
                       }
                     },
                     "properties": {
-                      "type": "object",
-                      "required": [
-                        "name",
-                        "kind",
-                        "entity_id"
-                      ],
-                      "description": "The well name first; source revision and row, elevation reference, ambiguity and the transformation performed; for a well whose stored CRS cannot be converted, stored_x, stored_y, stored_crs and transformation \"unavailable\" with a null geometry.",
-                      "properties": {
-                        "name": {
-                          "type": "string"
+                      "description": "Per collection (Technical details): wells: The well name first; source revision and row, elevation reference, ambiguity and the transformation performed; for a well whose stored CRS cannot be converted, stored_x, stored_y, stored_crs and transformation \"unavailable\" with a null geometry. tops: The top name, its measured depth and (when the file gives it) vertical depth in the stated unit, the wellbore and the exact source revision; a top whose wellbore has no location you may read has a null geometry and the reason in placement. wellbore-paths: The wellbore name, the survey's measured-depth range and station count, its azimuth reference and the exact source revision; placement states the rule that drew the line or why it is not drawn. point-sets: The point set name, the point's index in its file, its height when given, the exact source revision and each attribute of the set by name (an attribute whose name is reserved here is served as attribute_<name>). lines: The polyline set name, the stick number in its file and the exact source revision. feature-points: The layer name, the feature's index in its file, the exact source revision and each declared attribute by name (an attribute whose name is reserved here is served as attribute_<name>). feature-lines: The layer name, the feature's index in its file, the exact source revision and each declared attribute by name (an attribute whose name is reserved here is served as attribute_<name>). feature-polygons: The layer name, the feature's index in its file, the exact source revision and each declared attribute by name (an attribute whose name is reserved here is served as attribute_<name>).",
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "name",
+                            "kind",
+                            "entity_id"
+                          ],
+                          "description": "The well name first; source revision and row, elevation reference, ambiguity and the transformation performed; for a well whose stored CRS cannot be converted, stored_x, stored_y, stored_crs and transformation \"unavailable\" with a null geometry.",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "kind": {
+                              "const": "well"
+                            },
+                            "entity_id": {
+                              "type": "string"
+                            },
+                            "source_asset_id": {
+                              "type": "string"
+                            },
+                            "source_revision": {
+                              "type": "string"
+                            },
+                            "source_profile": {
+                              "type": "string"
+                            },
+                            "source_row": {
+                              "type": "string"
+                            },
+                            "elevation_reference": {
+                              "type": "string"
+                            },
+                            "ambiguous": {
+                              "type": "boolean"
+                            },
+                            "stored_x": {
+                              "type": "number"
+                            },
+                            "stored_y": {
+                              "type": "number"
+                            },
+                            "stored_crs": {
+                              "type": "string"
+                            },
+                            "transformation": {}
+                          }
                         },
-                        "kind": {
-                          "const": "well"
+                        {
+                          "type": "object",
+                          "required": [
+                            "name",
+                            "md",
+                            "entity_id",
+                            "source_asset_id",
+                            "source_revision",
+                            "source_profile"
+                          ],
+                          "description": "The top name, its measured depth and (when the file gives it) vertical depth in the stated unit, the wellbore and the exact source revision; a top whose wellbore has no location you may read has a null geometry and the reason in placement.",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "md": {
+                              "type": "number"
+                            },
+                            "tvd": {
+                              "type": "number"
+                            },
+                            "depth_unit": {
+                              "type": "string"
+                            },
+                            "depth_basis": {
+                              "type": "string"
+                            },
+                            "entity_id": {
+                              "type": "string"
+                            },
+                            "wellbore": {
+                              "type": "string"
+                            },
+                            "source_asset_id": {
+                              "type": "string"
+                            },
+                            "source_revision": {
+                              "type": "string"
+                            },
+                            "source_profile": {
+                              "type": "string"
+                            },
+                            "placement": {
+                              "type": "string",
+                              "description": "Why the feature has no geometry, or (paths) the rule that placed it"
+                            }
+                          }
                         },
-                        "entity_id": {
-                          "type": "string"
+                        {
+                          "type": "object",
+                          "required": [
+                            "name",
+                            "entity_id",
+                            "stations",
+                            "source_asset_id",
+                            "source_revision",
+                            "source_profile",
+                            "placement"
+                          ],
+                          "description": "The wellbore name, the survey's measured-depth range and station count, its azimuth reference and the exact source revision; placement states the rule that drew the line or why it is not drawn.",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "entity_id": {
+                              "type": "string"
+                            },
+                            "md_first": {
+                              "type": "number"
+                            },
+                            "md_last": {
+                              "type": "number"
+                            },
+                            "stations": {
+                              "type": "integer"
+                            },
+                            "azimuth_reference": {
+                              "type": "string"
+                            },
+                            "source_asset_id": {
+                              "type": "string"
+                            },
+                            "source_revision": {
+                              "type": "string"
+                            },
+                            "source_profile": {
+                              "type": "string"
+                            },
+                            "placement": {
+                              "type": "string",
+                              "description": "Why the feature has no geometry, or (paths) the rule that placed it"
+                            }
+                          }
                         },
-                        "source_asset_id": {
-                          "type": "string"
+                        {
+                          "type": "object",
+                          "required": [
+                            "name",
+                            "feature_index",
+                            "source_asset_id",
+                            "source_revision",
+                            "source_profile"
+                          ],
+                          "description": "The point set name, the point's index in its file, its height when given, the exact source revision and each attribute of the set by name (an attribute whose name is reserved here is served as attribute_<name>).",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "feature_index": {
+                              "type": "integer"
+                            },
+                            "z": {
+                              "type": "number"
+                            },
+                            "source_asset_id": {
+                              "type": "string"
+                            },
+                            "source_revision": {
+                              "type": "string"
+                            },
+                            "source_profile": {
+                              "type": "string"
+                            },
+                            "placement": {
+                              "type": "string",
+                              "description": "Why the feature has no geometry, or (paths) the rule that placed it"
+                            }
+                          }
                         },
-                        "source_revision": {
-                          "type": "string"
+                        {
+                          "type": "object",
+                          "required": [
+                            "name",
+                            "stick",
+                            "source_asset_id",
+                            "source_revision",
+                            "source_profile"
+                          ],
+                          "description": "The polyline set name, the stick number in its file and the exact source revision.",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "stick": {
+                              "type": "integer"
+                            },
+                            "source_asset_id": {
+                              "type": "string"
+                            },
+                            "source_revision": {
+                              "type": "string"
+                            },
+                            "source_profile": {
+                              "type": "string"
+                            },
+                            "placement": {
+                              "type": "string",
+                              "description": "Why the feature has no geometry, or (paths) the rule that placed it"
+                            }
+                          }
                         },
-                        "source_profile": {
-                          "type": "string"
+                        {
+                          "type": "object",
+                          "required": [
+                            "name",
+                            "feature_index",
+                            "source_asset_id",
+                            "source_revision",
+                            "source_profile"
+                          ],
+                          "description": "The layer name, the feature's index in its file, the exact source revision and each declared attribute by name (an attribute whose name is reserved here is served as attribute_<name>).",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "feature_index": {
+                              "type": "integer"
+                            },
+                            "source_asset_id": {
+                              "type": "string"
+                            },
+                            "source_revision": {
+                              "type": "string"
+                            },
+                            "source_profile": {
+                              "type": "string"
+                            },
+                            "placement": {
+                              "type": "string",
+                              "description": "Why the feature has no geometry, or (paths) the rule that placed it"
+                            }
+                          }
                         },
-                        "source_row": {
-                          "type": "string"
+                        {
+                          "type": "object",
+                          "required": [
+                            "name",
+                            "feature_index",
+                            "source_asset_id",
+                            "source_revision",
+                            "source_profile"
+                          ],
+                          "description": "The layer name, the feature's index in its file, the exact source revision and each declared attribute by name (an attribute whose name is reserved here is served as attribute_<name>).",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "feature_index": {
+                              "type": "integer"
+                            },
+                            "source_asset_id": {
+                              "type": "string"
+                            },
+                            "source_revision": {
+                              "type": "string"
+                            },
+                            "source_profile": {
+                              "type": "string"
+                            },
+                            "placement": {
+                              "type": "string",
+                              "description": "Why the feature has no geometry, or (paths) the rule that placed it"
+                            }
+                          }
                         },
-                        "elevation_reference": {
-                          "type": "string"
-                        },
-                        "ambiguous": {
-                          "type": "boolean"
-                        },
-                        "stored_x": {
-                          "type": "number"
-                        },
-                        "stored_y": {
-                          "type": "number"
-                        },
-                        "stored_crs": {
-                          "type": "string"
-                        },
-                        "transformation": {}
-                      }
+                        {
+                          "type": "object",
+                          "required": [
+                            "name",
+                            "feature_index",
+                            "source_asset_id",
+                            "source_revision",
+                            "source_profile"
+                          ],
+                          "description": "The layer name, the feature's index in its file, the exact source revision and each declared attribute by name (an attribute whose name is reserved here is served as attribute_<name>).",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "feature_index": {
+                              "type": "integer"
+                            },
+                            "source_asset_id": {
+                              "type": "string"
+                            },
+                            "source_revision": {
+                              "type": "string"
+                            },
+                            "source_profile": {
+                              "type": "string"
+                            },
+                            "placement": {
+                              "type": "string",
+                              "description": "Why the feature has no geometry, or (paths) the rule that placed it"
+                            }
+                          }
+                        }
+                      ]
                     }
                   }
                 }
