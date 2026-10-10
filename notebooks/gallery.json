@@ -63,6 +63,13 @@
       "sentence": "Publish a result and a second version, then read how each was made, what changed between them, what was made from the log, and whether it can be made again.",
       "modes": ["synthetic", "live"],
       "data": "A synthetic five-sample gamma-ray log, or a log in your project; publishing creates a result only you can see until you share it."
+    },
+    {
+      "slug": "layers-for-a-gis",
+      "title": "Layers for a GIS",
+      "sentence": "Read the layers QGIS opens from your project, every collection page by page, see why a path is not placed, and draw the wellbore paths in plan view.",
+      "modes": ["synthetic", "live"],
+      "data": "Two pages written in the notebook, or the layers you may read in your project; reading changes nothing."
     }
   ]
 }
