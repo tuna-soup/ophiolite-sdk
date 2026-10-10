@@ -47,11 +47,11 @@ def test_unsupported_keywords_refuse(key,value):
     with pytest.raises(ValueError,match='unsupported|Unsupported'):
         generated({'type':'object',key:value})
 
-def test_schema_valued_additional_properties_is_a_map_only_without_properties():
-    model=generated({'type':'object','additionalProperties':{'type':'string'}})  # E50b1: table/1 declarations, a map keyed by column name
-    assert model.model_validate({'value':{'depth':'m'}}).value=={'depth':'m'}
-    with pytest.raises(Exception): model.model_validate({'value':{'depth':1}})
-    with pytest.raises(ValueError,match='schema-valued additionalProperties unsupported'):
+def test_a_typed_map_generates_and_refuses_beside_properties():  # E56: feature properties are a map of typed values
+    model=generated({'type':'object','additionalProperties':{'type':'string'}})
+    assert model.model_validate({'value':{'a':'x'}}).value=={'a':'x'}
+    with pytest.raises(Exception): model.model_validate({'value':{'a':1}})
+    with pytest.raises(ValueError,match='unsupported beside properties'):
         generated({'type':'object','properties':{'a':{'type':'string'}},'additionalProperties':{'type':'string'}})
 
 def test_default_ref_and_discriminated_union():

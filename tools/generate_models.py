@@ -8,7 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACTS = ROOT/'ophiolite/contracts'
 KEYWORDS = {'$defs','$id','$ref','$schema','additionalProperties','anyOf','const',
-            'default','description','discriminator','enum','exclusiveMinimum','items',
+            'default','description','discriminator','enum','exclusiveMinimum','exclusiveMaximum','items',
             'maxItems','maxLength','maximum','minItems','minLength','minimum','oneOf',
             'pattern','properties','required','title','type','x-ophiolite',
             'if','then','maxProperties'}  # E54: value rules beside a type (an original may exceed 32 MiB) are the server's to check
@@ -33,8 +33,8 @@ class Generator:
         unknown = schema.keys()-KEYWORDS
         if unknown: raise ValueError(path+': unsupported keyword '+sorted(unknown)[0])
         if isinstance(schema.get('additionalProperties'), dict):
-            if schema.get('properties'): raise ValueError(path+': schema-valued additionalProperties unsupported')
-            self.scan(schema['additionalProperties'],path+'/additionalProperties')  # E50b1: a map keyed by name (table/1 declarations)
+            if schema.get('properties'): raise ValueError(path+': schema-valued additionalProperties unsupported beside properties')
+            self.scan(schema['additionalProperties'], path+'/additionalProperties')  # E56: a map of typed values (feature properties)
         for key in ('$defs','properties'):
             for field, child in schema.get(key, {}).items(): self.scan(child,path+'/'+key+'/'+field)
         if 'items' in schema: self.scan(schema['items'],path+'/items')
@@ -72,17 +72,18 @@ class Generator:
                 expression = ' | '.join(self.expression({**schema,'type':t},hint,document) for t in kind)
                 return expression
             if kind == 'object' and not schema.get('properties') and schema.get('additionalProperties') is True: expression = 'dict[str, Any]'  # a free-form JSON object
-            elif kind == 'object' and not schema.get('properties') and isinstance(schema.get('additionalProperties'), dict):
+            elif kind == 'object' and not schema.get('properties') and isinstance(schema.get('additionalProperties'), dict):  # E56: a typed map
                 expression = 'dict[str, '+self.expression(schema['additionalProperties'],hint+'Value',document)+']'
             elif kind == 'object': expression = self.model(hint,schema,document)
             elif kind == 'array': expression = 'list['+self.expression(schema['items'],hint+'Item',document)+']'
+            elif kind == 'null': return 'None'  # E100a: a sibling type's constraints never apply to null (pydantic raises TypeError on None)
             elif kind in ('string','number','integer','boolean','null'):
                 expression = {'string':'str','number':'float','integer':'int','boolean':'bool','null':'None'}[kind]
             else: raise ValueError(hint+': missing/unsupported type '+repr(kind))
         fields = []
         for key, target in [('pattern','pattern'),('minLength','min_length'),('maxLength','max_length'),
                             ('minItems','min_length'),('maxItems','max_length'),('minimum','ge'),
-                            ('maximum','le'),('exclusiveMinimum','gt')]:
+                            ('maximum','le'),('exclusiveMinimum','gt'),('exclusiveMaximum','lt')]:  # E56: a feature index below the cap
             if key in schema: fields.append(target+'='+repr(schema[key]))
         if 'discriminator' in schema:
             fields.append('discriminator='+repr(python_field(schema['discriminator']['propertyName'])))  # the Python name ('schema' is aliased)

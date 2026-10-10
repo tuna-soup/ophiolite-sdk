@@ -1,0 +1,634 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/assets/v1/curve-window-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.curve-window/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "title": "Curve window",
+  "description": "One page of a depth window of a stored well curve: raw samples (level 0) or, at levels 1..17, runs of present samples, blocks of up to 2^level samples inside one run with their extrema, and the missing stretches. A page holds at most 2,048 items.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "shape",
+    "identity",
+    "unit",
+    "reference",
+    "depth_unit",
+    "source",
+    "request",
+    "range",
+    "level",
+    "exact",
+    "limit",
+    "items",
+    "rows_met",
+    "next",
+    "before",
+    "after"
+  ],
+  "properties": {
+    "schema": {
+      "const": "ophiolite.curve-window/1"
+    },
+    "shape": {
+      "enum": [
+        "raw",
+        "summary"
+      ]
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "project_id",
+        "asset_id",
+        "revision",
+        "curve"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "retained",
+            "native"
+          ]
+        },
+        "project_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "asset_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "revision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "curve": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "native": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "well_id",
+            "well_version",
+            "curve_asset_revision",
+            "curve_id"
+          ],
+          "properties": {
+            "well_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "well_version": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "curve_asset_revision": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "curve_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            }
+          }
+        }
+      }
+    },
+    "unit": {
+      "type": "string",
+      "maxLength": 128
+    },
+    "reference": {
+      "const": "md"
+    },
+    "depth_unit": {
+      "type": "string",
+      "maxLength": 128
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "algorithm_version",
+        "source_digest"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "run-blocks"
+        },
+        "algorithm_version": {
+          "const": 1
+        },
+        "source_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "top",
+        "base",
+        "level",
+        "rows",
+        "cursor"
+      ],
+      "properties": {
+        "top": {
+          "type": "number"
+        },
+        "base": {
+          "type": "number"
+        },
+        "level": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 17
+        },
+        "rows": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 2048
+        },
+        "cursor": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 1024
+        }
+      }
+    },
+    "range": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "served_first_depth",
+            "served_last_depth"
+          ],
+          "properties": {
+            "served_first_depth": {
+              "type": "number"
+            },
+            "served_last_depth": {
+              "type": "number"
+            }
+          }
+        }
+      ]
+    },
+    "level": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 17
+    },
+    "exact": {
+      "type": "boolean"
+    },
+    "limit": {
+      "const": 2048
+    },
+    "items": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "rows_met": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "next": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 1024
+    },
+    "before": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sample_index",
+            "depth",
+            "value"
+          ],
+          "properties": {
+            "sample_index": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "depth": {
+              "type": "number"
+            },
+            "value": {
+              "type": [
+                "number",
+                "null"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "after": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sample_index",
+            "depth",
+            "value"
+          ],
+          "properties": {
+            "sample_index": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "depth": {
+              "type": "number"
+            },
+            "value": {
+              "type": [
+                "number",
+                "null"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "sample_index": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "maxItems": 2048
+    },
+    "depth": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "maxItems": 2048
+    },
+    "value": {
+      "type": "array",
+      "items": {
+        "type": [
+          "number",
+          "null"
+        ]
+      },
+      "maxItems": 2048
+    },
+    "runs": {
+      "type": "array",
+      "maxItems": 2048,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "run",
+          "first_index",
+          "last_index",
+          "first_depth",
+          "last_depth"
+        ],
+        "properties": {
+          "run": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "first_index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "last_index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "first_depth": {
+            "type": "number"
+          },
+          "last_depth": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "blocks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "run",
+        "first_index",
+        "last_index",
+        "first_depth",
+        "last_depth",
+        "first",
+        "last",
+        "min",
+        "min_index",
+        "min_depth",
+        "max",
+        "max_index",
+        "max_depth",
+        "count"
+      ],
+      "properties": {
+        "run": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "maxItems": 2048
+        },
+        "first_index": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "maxItems": 2048
+        },
+        "last_index": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "maxItems": 2048
+        },
+        "first_depth": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 2048
+        },
+        "last_depth": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 2048
+        },
+        "first": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 2048
+        },
+        "last": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 2048
+        },
+        "min": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 2048
+        },
+        "min_index": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "maxItems": 2048
+        },
+        "min_depth": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 2048
+        },
+        "max": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 2048
+        },
+        "max_index": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "maxItems": 2048
+        },
+        "max_depth": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 2048
+        },
+        "count": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "maxItems": 2048
+        }
+      }
+    },
+    "missing": {
+      "type": "array",
+      "maxItems": 2048,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "from_index",
+          "to_index",
+          "from_depth",
+          "to_depth"
+        ],
+        "properties": {
+          "from_index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "to_index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "from_depth": {
+            "type": "number"
+          },
+          "to_depth": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  },
+  "if": {
+    "type": "object"
+  },
+  "then": {
+    "description": "The value rules: the shape discriminates the body (raw at level 0 and exact; summary at 1..17), and only a native identity carries native.",
+    "allOf": [
+      {
+        "if": {
+          "properties": {
+            "shape": {
+              "const": "raw"
+            }
+          }
+        },
+        "then": {
+          "required": [
+            "sample_index",
+            "depth",
+            "value"
+          ],
+          "properties": {
+            "level": {
+              "const": 0
+            },
+            "exact": {
+              "const": true
+            }
+          },
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "runs"
+                ]
+              },
+              {
+                "required": [
+                  "blocks"
+                ]
+              },
+              {
+                "required": [
+                  "missing"
+                ]
+              }
+            ]
+          }
+        },
+        "else": {
+          "required": [
+            "runs",
+            "blocks",
+            "missing"
+          ],
+          "properties": {
+            "level": {
+              "minimum": 1
+            },
+            "exact": {
+              "const": false
+            }
+          },
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "sample_index"
+                ]
+              },
+              {
+                "required": [
+                  "depth"
+                ]
+              },
+              {
+                "required": [
+                  "value"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "if": {
+          "properties": {
+            "identity": {
+              "properties": {
+                "kind": {
+                  "const": "native"
+                }
+              }
+            }
+          }
+        },
+        "then": {
+          "properties": {
+            "identity": {
+              "required": [
+                "native"
+              ]
+            }
+          }
+        },
+        "else": {
+          "properties": {
+            "identity": {
+              "not": {
+                "required": [
+                  "native"
+                ]
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

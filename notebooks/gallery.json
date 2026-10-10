@@ -51,6 +51,13 @@
       "data": "Computed on your computer; uploading creates a table only you can see until you share it."
     },
     {
+      "slug": "grids-and-gis-files",
+      "title": "Map features from a GIS file",
+      "sentence": "Draw two field outlines as a GIS file stores them, a hole kept empty, declare what the file leaves open, and upload them as a map layer.",
+      "modes": ["synthetic", "live"],
+      "data": "Drawn on your computer; uploading creates a map layer only you can see until you share it."
+    },
+    {
       "slug": "how-was-this-made",
       "title": "How was this made",
       "sentence": "Publish a result and a second version, then read how each was made, what changed between them, what was made from the log, and whether it can be made again.",

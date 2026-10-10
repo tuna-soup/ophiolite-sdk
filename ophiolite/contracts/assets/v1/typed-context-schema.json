@@ -3,10 +3,260 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/typed-context-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.typed-context/1",
-    "version": "1.5.0",
+    "version": "1.6.0",
     "lifecycle": "preview"
   },
   "$defs": {
+    "FeatureContext": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "feature-set",
+          "title": "Type",
+          "type": "string"
+        },
+        "crs": {
+          "pattern": "^(EPSG:[0-9]{4,6}|OGC:CRS84|unknown)$",
+          "title": "Crs",
+          "type": "string"
+        },
+        "axes": {
+          "enum": [
+            "easting-northing",
+            "northing-easting",
+            "longitude-latitude",
+            "latitude-longitude",
+            "unknown"
+          ],
+          "title": "Axes",
+          "type": "string"
+        },
+        "xy_unit": {
+          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+          "title": "Xy Unit",
+          "type": "string"
+        },
+        "z_unit": {
+          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+          "title": "Z Unit",
+          "type": "string"
+        },
+        "z_meaning": {
+          "enum": [
+            "depth",
+            "elevation",
+            "time",
+            "unknown"
+          ],
+          "title": "Z Meaning",
+          "type": "string"
+        },
+        "positive": {
+          "enum": [
+            "up",
+            "down",
+            "unknown"
+          ],
+          "title": "Positive",
+          "type": "string"
+        },
+        "vertical_datum": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Vertical Datum",
+          "type": "string"
+        },
+        "encoding": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Encoding",
+          "type": "string"
+        },
+        "count": {
+          "maximum": 50000,
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        },
+        "vertex_count": {
+          "maximum": 500000,
+          "minimum": 0,
+          "title": "Vertex Count",
+          "type": "integer"
+        },
+        "geometry_types": {
+          "items": {
+            "enum": [
+              "Point",
+              "MultiPoint",
+              "LineString",
+              "MultiLineString",
+              "Polygon",
+              "MultiPolygon"
+            ],
+            "type": "string"
+          },
+          "maxItems": 6,
+          "title": "Geometry Types",
+          "type": "array"
+        },
+        "has_z": {
+          "title": "Has Z",
+          "type": "boolean"
+        },
+        "null_geometry_count": {
+          "maximum": 50000,
+          "minimum": 0,
+          "title": "Null Geometry Count",
+          "type": "integer"
+        },
+        "x_range": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "number"
+              },
+              "maxItems": 2,
+              "minItems": 2,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "X Range"
+        },
+        "y_range": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "number"
+              },
+              "maxItems": 2,
+              "minItems": 2,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Y Range"
+        },
+        "z_range": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "number"
+              },
+              "maxItems": 2,
+              "minItems": 2,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Z Range"
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/$defs/FeatureField"
+          },
+          "maxItems": 64,
+          "title": "Fields",
+          "type": "array"
+        },
+        "layer": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Layer"
+        },
+        "layer_title": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Layer Title"
+        },
+        "fidelity": {
+          "$ref": "#/$defs/Fidelity"
+        }
+      },
+      "required": [
+        "type",
+        "crs",
+        "axes",
+        "xy_unit",
+        "z_unit",
+        "z_meaning",
+        "positive",
+        "vertical_datum",
+        "encoding",
+        "count",
+        "vertex_count",
+        "geometry_types",
+        "has_z",
+        "null_geometry_count",
+        "x_range",
+        "y_range",
+        "z_range",
+        "fields",
+        "fidelity"
+      ],
+      "title": "FeatureContext",
+      "type": "object"
+    },
+    "FeatureField": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "source_name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Source Name",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "text",
+            "integer",
+            "number",
+            "date",
+            "boolean"
+          ],
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "source_name",
+        "kind"
+      ],
+      "title": "FeatureField",
+      "type": "object"
+    },
     "Fidelity": {
       "additionalProperties": false,
       "properties": {
@@ -1403,6 +1653,7 @@
     "context": {
       "discriminator": {
         "mapping": {
+          "feature-set": "#/$defs/FeatureContext",
           "model-section": "#/$defs/ModelSectionContext",
           "point-set": "#/$defs/PointContext",
           "polyline-set": "#/$defs/PolylineContext",
@@ -1454,6 +1705,9 @@
         },
         {
           "$ref": "#/$defs/TimeDepthContext"
+        },
+        {
+          "$ref": "#/$defs/FeatureContext"
         }
       ],
       "title": "Context"

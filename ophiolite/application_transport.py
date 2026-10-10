@@ -17,6 +17,7 @@ SOURCE_CODES={'SOURCE_NEEDS_REVIEW':SourceNeedsReview,'SOURCE_REVISION_UNAVAILAB
               'SOURCE_DELETED':Unavailable,'SOURCE_OFFLINE':Busy,'SOURCE_PENDING':Busy,'SOURCE_SIGN_IN_ROWS_DIFFER':SourceSignInRowsDiffer}
 SOURCE_REMEDIES={'SOURCE_DETACHED':'This source was removed from the project. Ask a project administrator to resume it; selecting it again does not bring it back.'}
 FINAL_CODES={code for code,kind in SOURCE_CODES.items() if not getattr(kind,'retryable',False)}  # a 429/503 naming one is never retried
+FINAL_CODES|={'check-refused'}  # E96: a check past the wait (timeout) may still be running, and its capacity is then in use; the sentence says so
 
 
 def too_large():
@@ -51,6 +52,7 @@ def delay(response):
 ENVELOPE_LIMIT=16*1024  # an error body is small; never read more of a refusal than this
 CODE=re.compile(r'^[A-Za-z0-9_.-]{1,64}$')
 STAGE=re.compile(r'^[a-z][a-z-]{0,39}$')
+FIELD=re.compile(r'^[a-z][a-z0-9_.]{0,63}$')
 
 
 async def bounded(response):
@@ -88,12 +90,14 @@ def envelope(response,raw=None):
     if 'message' not in meta and isinstance(body.get('error'),str) and 0<len(body['error'])<=1000:meta['message']=body['error']
     if isinstance(body.get('code'),str) and CODE.match(body['code']):meta['code']=body['code']
     if isinstance(body.get('stage'),str) and STAGE.match(body['stage']):meta['stage']=body['stage']  # E51a
+    if isinstance(body.get('field'),str) and FIELD.match(body['field']):meta['field']=body['field']  # E96: the one field a check refusal names
     return meta
 
 
 def carried(meta):
     """The error keyword arguments a parsed envelope supplies (E51a: also the server's own sentence and a credential's stage)."""
-    return {'remedy':meta.get('remedy'),'docs':meta.get('docs'),'request_id':meta.get('request_id'),'stage':meta.get('stage'),'server_message':meta.get('message')}
+    return {'remedy':meta.get('remedy'),'docs':meta.get('docs'),'request_id':meta.get('request_id'),'stage':meta.get('stage'),'server_message':meta.get('message'),
+            'details':{'field':meta['field']} if 'field' in meta else None}
 
 
 def status(response,operation,raw=None):

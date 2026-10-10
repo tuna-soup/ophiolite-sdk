@@ -1,0 +1,35 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "zmap-plus-grid/1",
+  "kind": "source",
+  "lifecycle": "preview",
+  "display_name": "Horizon grid (ZMAP+)",
+  "description": "A regular grid of surface values in the ZMAP+ ASCII grid format, kept byte for byte as the uploader provided it; registration is declared, never inferred.",
+  "serves": [
+    "ophiolite.scientific-asset/1"
+  ],
+  "connector": {
+    "scientific_profile": "regular-grid-surface-source/1",
+    "source_schema": "ZMAP-plus-grid",
+    "mapping_version": "regular-grid-surface/1",
+    "history": "retained-exact-read"
+  },
+  "role": "artifact",
+  "media_types": [
+    "text/plain"
+  ],
+  "normalized_profile": "ophiolite.regular-grid-surface/1",
+  "context_schema": "ophiolite.typed-context/1",
+  "representation_rules": {
+    "artifact_kind_by_origin": {
+      "source-reference": "original",
+      "retained-capture": "original",
+      "managed-derived": "derived-artifact"
+    },
+    "normalized": 1,
+    "total": 2
+  },
+  "table_target": {
+    "none": "not-a-table"
+  }
+}
