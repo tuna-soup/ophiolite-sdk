@@ -451,3 +451,4 @@ PolylineSet.write = staticmethod(_writers.write_sticks)
 Wavelet.write = staticmethod(_writers.write_wavelet)  # E53
 ModelSection.write = staticmethod(_writers.write_model_section)
 SeismicSection.write = staticmethod(_writers.write_seismic_section)
+WellLocation.write = staticmethod(_writers.write_location)  # E105a

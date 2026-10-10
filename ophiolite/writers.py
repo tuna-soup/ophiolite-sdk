@@ -8,6 +8,7 @@ argument you must give (write "unknown" when it is unknown), and a value the fil
 Numbers are written in their shortest exact decimal spelling. Importing this module contacts nothing.
 """
 import math
+import re
 from decimal import Decimal
 from dataclasses import dataclass, field
 from .errors import ValidationFailed
@@ -327,3 +328,23 @@ def write_time_depth(pairs, *, depth_type=None, depth_unit=None, time_kind=None,
         if with_velocity: row.append('' if len(p) < 3 or p[2] is None else _decimal(p[2], 'A velocity'))
         lines.append(','.join(row)); previous = (depth, time)
     return WrittenOriginal(('\r\n'.join(lines) + '\r\n').encode(), 'time-depth-csv/1', declared, filename)
+
+
+ELEVATION_REFERENCES = ('unknown', 'GL', 'KB', 'MSL')
+
+
+def write_location(x, y, *, crs=None, elevation_reference=None, filename='location.json'):
+    """Well location JSON (E105a): one well's surface point, `x` and `y` in `crs` (EPSG:<code>, OGC:CRS84 or unknown;
+    for OGC:CRS84 and EPSG:4326 x is longitude and y latitude), with the elevation reference (unknown, GL, KB or MSL).
+    The file states its own CRS, so nothing is declared beside it. Keys are sorted; numbers are written in their
+    shortest exact decimal spelling."""
+    _required(crs=crs, elevation_reference=elevation_reference)
+    if any(isinstance(v, bool) for v in (x, y)): raise ValidationFailed(['A coordinate must be a number.'])
+    x_text, y_text = _number(x, 'A coordinate'), _number(y, 'A coordinate')
+    if not isinstance(crs, str) or not (crs in ('OGC:CRS84', 'unknown') or re.fullmatch(r'EPSG:[0-9]{4,6}', crs)):
+        raise ValidationFailed(['State the coordinate reference system as EPSG:<code>, OGC:CRS84 or unknown.'])
+    if crs in ('OGC:CRS84', 'EPSG:4326') and (abs(float(x)) > 180 or abs(float(y)) > 90):
+        raise ValidationFailed(['Longitude and latitude are outside their range for this coordinate reference system.'])
+    reference = _choice(elevation_reference, ELEVATION_REFERENCES, 'elevation reference')
+    text = '{"crs":"%s","elevation_reference":"%s","x":%s,"y":%s}\n' % (crs, reference, x_text, y_text)
+    return WrittenOriginal(text.encode(), 'well-location/1', {}, filename)
