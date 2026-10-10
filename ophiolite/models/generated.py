@@ -1281,6 +1281,84 @@ class RegistryKind(Contract):
     id: Literal['revision', 'well', 'wellbore', 'result-group'] = Field(...)
     title: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
 
+class CheckRecord(Contract):
+    schema_: Literal['ophiolite.check/1'] = Field(..., alias='schema')
+    subject: Annotated[CheckImplementationSubject | CheckResultSubject, Field(discriminator='kind')] = Field(...)
+    fixture: CheckFixture | None = Field(...)
+    reference: CheckReference = Field(...)
+    output_digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    rules_id: Literal['series-compare/1', 'grid-compare/1'] = Field(...)
+    tolerance: Annotated[AbsoluteTolerance | RelativeTolerance, Field(discriminator='kind')] | None = Field(...)
+    request_digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] | None = Field(...)
+    interpretation_digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] | None = Field(...)
+    outcome: Literal['passed', 'differed', 'not_compared'] = Field(...)
+    reason: Literal['axis_mismatch', 'unit_mismatch', 'context_mismatch', 'shape_mismatch', 'another_kind', 'declarations_missing', 'declarations_incompatible', 'unreadable', 'too_large', 'empty', 'no_such_curve'] | None = Field(...)
+    differences: CheckDifferences | None = Field(...)
+    witness: Literal['server', 'claimed', 'personal'] | None = Field(None)
+    recorded_by: CheckPrincipal | None = Field(None)
+    command_id: Annotated[str, Field(min_length=1, max_length=128)] | None = Field(None)
+    at: float | None = Field(None)
+    server_output_digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] | None = Field(None)
+
+class AbsoluteTolerance(Contract):
+    kind: Literal['absolute'] = Field(...)
+    value: Annotated[float, Field(ge=0)] = Field(...)
+    unit: Annotated[str, Field(min_length=1, max_length=40)] = Field(...)
+
+class CheckDifferences(Contract):
+    count: Annotated[int, Field(ge=0)] = Field(...)
+    total: Annotated[int, Field(ge=0)] = Field(...)
+    largest: float | None = Field(...)
+    value_to_missing: Annotated[int, Field(ge=0)] = Field(...)
+    missing_to_value: Annotated[int, Field(ge=0)] = Field(...)
+    first: Annotated[list[CheckSample], Field(max_length=20)] = Field(...)
+    changed_range: Annotated[list[float | list[int]], Field(min_length=2, max_length=2)] | None = Field(...)
+
+class CheckFixture(Contract):
+    digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    display_name: Annotated[str, Field(min_length=1, max_length=200)] = Field(...)
+
+class CheckImplementationSubject(Contract):
+    kind: Literal['implementation'] = Field(...)
+    id: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+    version: Annotated[str, Field(min_length=1, max_length=40)] = Field(...)
+    script_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    release_number: Annotated[str, Field(pattern='^[0-9]{4}\\.[0-9]{1,2}\\.[0-9]{1,4}$')] = Field(...)
+    release_digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+
+class CheckPrincipal(Contract):
+    id: Annotated[str, Field(min_length=1, max_length=200)] = Field(...)
+    kind: Literal['person', 'workload'] = Field(...)
+
+class CheckReference(Contract):
+    kind: Literal['independent-computation', 'reference-file', 'external-package'] = Field(...)
+    name: Annotated[str, Field(min_length=1, max_length=200)] = Field(...)
+    version: Annotated[str, Field(min_length=1, max_length=80)] = Field(...)
+    digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    rights: CheckRights | None = Field(None)
+
+class CheckResultSubject(Contract):
+    kind: Literal['result'] = Field(...)
+    asset_id: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+    revision: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+
+class CheckRights(Contract):
+    licence: Annotated[str, Field(min_length=1, max_length=200)] = Field(...)
+    source: Annotated[str, Field(min_length=1, max_length=500)] = Field(...)
+
+class CheckSample(Contract):
+    at: float | list[int] = Field(...)
+    reference: float | None = Field(...)
+    output: float | None = Field(...)
+
+class RelativeTolerance(Contract):
+    kind: Literal['relative'] = Field(...)
+    value: Annotated[float, Field(ge=0)] = Field(...)
+
+class CheckRefusal(Contract):
+    field: Literal['permission', 'schema', 'publisher', 'tolerance', 'interpretation', 'fixture.digest', 'reference.digest', 'output.digest', 'rights', 'release.digest', 'implementation.script_sha256', 'outcome', 'timeout', 'capacity', 'limit', 'size', 'request'] = Field(...)
+    message: Annotated[str, Field(min_length=1, max_length=500)] = Field(...)
+
 class ScalarMap(Contract):
     kind: Literal['scalar-map'] = Field(...)
     unit: Annotated[str, Field(pattern='\\S', min_length=1, max_length=128)] = Field(...)
@@ -1702,6 +1780,18 @@ ManagedReference.model_rebuild()
 RelationshipRegistry.model_rebuild()
 Predicate.model_rebuild()
 RegistryKind.model_rebuild()
+CheckRecord.model_rebuild()
+AbsoluteTolerance.model_rebuild()
+CheckDifferences.model_rebuild()
+CheckFixture.model_rebuild()
+CheckImplementationSubject.model_rebuild()
+CheckPrincipal.model_rebuild()
+CheckReference.model_rebuild()
+CheckResultSubject.model_rebuild()
+CheckRights.model_rebuild()
+CheckSample.model_rebuild()
+RelativeTolerance.model_rebuild()
+CheckRefusal.model_rebuild()
 ScalarMap.model_rebuild()
 ScalarGrid.model_rebuild()
 WellCurve.model_rebuild()

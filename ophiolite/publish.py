@@ -112,6 +112,7 @@ ENTITY_OPERATIONS={'entities':{'list','get','assets','associations','lineage','c
 SOURCE_OPERATIONS={'sources':{'list','export'}}  # E50a: the source reads (not READ_OPERATIONS, which would also allow applications/export)
 MAP_OPERATIONS={'maps':{'export'},'catalog':{'history'}}  # E70a C4: `get` of a scalar map and its version numbers (existing read routes)
 RESULT_OPERATIONS={'results':{'story','what-changed','dependents','remake-run','remake-save'}}  # E94: how a result was made, and making it again
+CHECK_OPERATIONS={'checks':{'publish','list','compare','publishers'}}  # E96: checks against a reference
 REPORT_OPERATIONS={'activity':{'report'}}  # E70b: a confirmed `get` reports which version this holder received
 IMPORT_OPERATIONS={'well-imports':{'preview','start','step','status','list','cancel'},  # E42a: import a copy of an approved well table
                    'upload-runs':{'start','file','check','file-parts','status','list','cancel','associate','decide','share'}}  # E55: a folder upload; E85: check
@@ -128,7 +129,7 @@ def operation_path(project,area,operation):
         if operation not in ORGANIZATION_OPERATIONS[area]:raise Refused('Unsupported application operation.')
         return '/api/v1/'+area+'/'+operation
     allowed=(GROUP_OPERATIONS if area=='result-groups' else READ_OPERATIONS|WRITE_OPERATIONS if area in ('applications','las-uploads')
-             else ENTITY_OPERATIONS.get(area) or SOURCE_OPERATIONS.get(area) or MAP_OPERATIONS.get(area) or REPORT_OPERATIONS.get(area) or RESULT_OPERATIONS.get(area) or IMPORT_OPERATIONS.get(area) or RELEASE_OPERATIONS.get(area) or AI_OPERATIONS.get(area,set()))
+             else ENTITY_OPERATIONS.get(area) or SOURCE_OPERATIONS.get(area) or MAP_OPERATIONS.get(area) or REPORT_OPERATIONS.get(area) or RESULT_OPERATIONS.get(area) or CHECK_OPERATIONS.get(area) or IMPORT_OPERATIONS.get(area) or RELEASE_OPERATIONS.get(area) or AI_OPERATIONS.get(area,set()))
     allowed=allowed|SESSION_OPERATIONS.get(area,set())
     if operation not in allowed:
         raise Refused('Unsupported application operation.')
