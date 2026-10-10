@@ -32967,6 +32967,217 @@
         }
       }
     },
+    "/api/v1/organizations/invitation-decline": {
+      "post": {
+        "summary": "invitation-decline organisation administration",
+        "description": "Scope write; accepted principals: session; project extractor none.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "declined": {
+                      "description": "False when it was already declined",
+                      "title": "Declined",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "declined"
+                  ],
+                  "title": "InvitationDeclined",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "invitation": {
+                    "pattern": "^[A-Za-z0-9-]{1,64}$",
+                    "title": "Invitation",
+                    "type": "string"
+                  },
+                  "generation": {
+                    "description": "The link generation the person was shown; a resend changes it",
+                    "pattern": "^[0-9a-f]{16}$",
+                    "title": "Generation",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "invitation",
+                  "generation"
+                ],
+                "title": "InvitationDecline",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/invitations-for-me": {
+      "post": {
+        "summary": "invitations-for-me organisation administration",
+        "description": "Scope read; accepted principals: session; project extractor none.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "invitations": {
+                      "description": "E48: pending invitations to organisations you are not a member of, for the address your provider verified in this sign-in, under the operator's trust rule",
+                      "items": {
+                        "$ref": "#/components/schemas/FoundInvitation"
+                      },
+                      "title": "Invitations",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "invitations"
+                  ],
+                  "title": "InvitationsForMe",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "This operation reads no fields from its body; send an empty object.",
+                "properties": {},
+                "title": "NoFields",
+                "type": "object",
+                "x-ophiolite-no-fields": true
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/organizations/invite-create": {
       "post": {
         "summary": "invite-create organisation administration",
@@ -86185,6 +86396,48 @@
         "title": "FileIn",
         "type": "object"
       },
+      "FoundInvitation": {
+        "additionalProperties": false,
+        "properties": {
+          "invitation": {
+            "title": "Invitation",
+            "type": "string"
+          },
+          "organization": {
+            "title": "Organization",
+            "type": "string"
+          },
+          "sender": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sender"
+          },
+          "generation": {
+            "description": "Name it to accept or decline; a resend changes it",
+            "title": "Generation",
+            "type": "string"
+          },
+          "expires_at": {
+            "title": "Expires At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "invitation",
+          "organization",
+          "sender",
+          "generation",
+          "expires_at"
+        ],
+        "title": "FoundInvitation",
+        "type": "object"
+      },
       "GroupMember": {
         "additionalProperties": false,
         "properties": {
@@ -86446,6 +86699,18 @@
             "title": "Revoked",
             "type": "boolean"
           },
+          "declined_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "ISO 8601; E48: when the invited person declined",
+            "title": "Declined At"
+          },
           "delivery": {
             "anyOf": [
               {
@@ -86475,6 +86740,7 @@
           "expires_at",
           "accepted_by",
           "revoked",
+          "declined_at",
           "delivery",
           "error_code"
         ],
@@ -91566,8 +91832,16 @@
             "type": "integer"
           },
           "actor_id": {
-            "title": "Actor Id",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "None: an invited person without an account (E48 decline)",
+            "title": "Actor Id"
           },
           "action": {
             "title": "Action",
