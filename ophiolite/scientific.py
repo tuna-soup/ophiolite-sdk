@@ -1,5 +1,4 @@
 """Scientific array views. Values and their source metadata travel separately."""
-from urllib.parse import quote
 from .models.generated import Contract
 from .models.invariants import INTERPRETATION, REFERENCE, known, registry
 from .errors import AxisMismatch, MissingExtra, Refused
@@ -49,12 +48,11 @@ class Descriptor(Contract):
 
 
 def workspace_url(data):
-    from ._core import origin
+    """The stored data page (E45 `m~`) at this exact version (E104 C2; the page takes no curve key, Left 2)."""
+    from .links import item_url
     if not data.url:return None
     asset=data.descriptors[0]
-    return (origin(data.url)+'/project/'+quote(asset.project_id,safe='')+'/asset/'+
-            quote(asset.asset_id,safe='')+'?revision='+quote(asset.revision,safe='')+
-            '&kind=scientific&curve='+quote(asset.scientific.curve,safe=''))
+    return item_url(data.url,asset.project_id,'m',asset.asset_id,asset.revision)
 
 
 def aligned(data):
