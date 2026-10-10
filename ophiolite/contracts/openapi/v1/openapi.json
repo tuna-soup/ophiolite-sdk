@@ -99364,7 +99364,8 @@
                 "identifier-in-use",
                 "no-longer-visible",
                 "name-ambiguous",
-                "name-repeated"
+                "name-repeated",
+                "identifier-names-another-well"
               ],
               "type": "string"
             },
@@ -102539,7 +102540,8 @@
                 "identifier-in-use",
                 "no-longer-visible",
                 "name-ambiguous",
-                "name-repeated"
+                "name-repeated",
+                "identifier-names-another-well"
               ],
               "type": "string"
             },
@@ -102591,7 +102593,8 @@
                 "identifier-in-use",
                 "no-longer-visible",
                 "name-ambiguous",
-                "name-repeated"
+                "name-repeated",
+                "identifier-names-another-well"
               ],
               "type": "string"
             },
