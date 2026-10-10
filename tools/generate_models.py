@@ -74,6 +74,7 @@ class Generator:
                 expression = 'dict[str, '+self.expression(schema['additionalProperties'],hint+'Value',document)+']'
             elif kind == 'object': expression = self.model(hint,schema,document)
             elif kind == 'array': expression = 'list['+self.expression(schema['items'],hint+'Item',document)+']'
+            elif kind == 'null': return 'None'  # E100a: a sibling type's constraints never apply to null (pydantic raises TypeError on None)
             elif kind in ('string','number','integer','boolean','null'):
                 expression = {'string':'str','number':'float','integer':'int','boolean':'bool','null':'None'}[kind]
             else: raise ValueError(hint+': missing/unsupported type '+repr(kind))

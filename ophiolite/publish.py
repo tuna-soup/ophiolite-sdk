@@ -21,6 +21,8 @@ def validate_derived_curves(curves, *, source, sample_count):
     Raw duplicate source mnemonics are a deliberate SDK refusal; server readers
     may rename duplicates. No unit inference, resampling or value coercion occurs.
     """
+    from .windows import refuse_window  # E100a: blocks are not samples
+    refuse_window(curves,*(curves if isinstance(curves,list) else ()),*(c.get('values') for c in curves if isinstance(c,dict)) if isinstance(curves,list) else ())
     inventory=source_curves(source);marker=source_null_marker(source);violations=[]
     names=[curve.mnemonic.upper() for curve in inventory]
     if len(set(names))!=len(names):violations.append('Source curve names repeat, including case variants.')

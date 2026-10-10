@@ -81,7 +81,7 @@ class AsyncClient(Client):
                         kind,message=categories.get(response.status_code,(Unavailable,'Scientific read failed. Check service access and retry.'))
                         if kind is Busy:raise Busy(message,meta.get('remedy',''),status=response.status_code,retry_after=delay,code=meta.get('code'),**policy.carried(meta))
                         raise kind(message,meta.get('remedy',''),status=response.status_code,code=meta.get('code'),**policy.carried(meta))
-                    if answer is not None:answer.update({k.lower():v for k,v in response.headers.items() if k.lower() in ('content-range','x-content-sha256')})
+                    if answer is not None:answer.update({k.lower():v for k,v in response.headers.items() if k.lower() in ('content-range','x-content-sha256','etag','x-ophiolite-access-generation')})  # E100a: window validators
                     content=bytearray()
                     async for chunk in response.aiter_bytes():
                         content.extend(chunk)
@@ -129,6 +129,17 @@ class AsyncClient(Client):
             descriptors.append(model);views.append(view)
             wire_descriptors.append(data);wire_curves.append(json.loads(body))
         return CurveSet(descriptors,views,artifact,url=self.url,project=self.project,wire_descriptors=wire_descriptors,wire_curves=wire_curves)
+
+    async def curve_window(self,asset,revision,curve,top,base,*,level=None,rows=None,max_pages=64):
+        """E100a: Client.curve_window with the same checks."""
+        from .windows import Window,PAGE_BYTES
+        window=Window(self.project,asset,revision,curve,top,base,level,rows,max_pages)
+        path,query=self._path(asset,revision,curve)
+        data=await self._json(path+query+PROFILES,256*1024)
+        _core.verify_descriptor(data,self.project,asset,revision,curve);window.bind(data)
+        while True:
+            answer={}
+            if not window.accept(await self._get(window.path(path),PAGE_BYTES,answer=answer),answer):return window.result()
 
     async def read_data(self,asset,revision):
         """E11: typed read (well tops, trajectory, regular-grid surface); same checks as Client.read_data."""
