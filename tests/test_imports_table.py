@@ -34,6 +34,7 @@ class Fake:
         return answer
 
     def _post(self, area, operation, body, **options):
+        if (area, operation) == ('layouts', 'match'): return {'matches': [], 'retired_ignored': 0}  # E89: no project layout has these columns
         assert area == 'table-imports' and options.get('retry') is True
         return self._answer(operation, body)
 

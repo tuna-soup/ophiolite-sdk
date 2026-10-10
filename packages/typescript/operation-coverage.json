@@ -1056,6 +1056,78 @@
     }
   },
   {
+    "operation": "POST /api/v1/projects/{project}/layouts/export",
+    "function": "postProjectsProjectLayoutsExport",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/layouts/get",
+    "function": "postProjectsProjectLayoutsGet",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/layouts/import",
+    "function": "postProjectsProjectLayoutsImport",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/layouts/keep",
+    "function": "postProjectsProjectLayoutsKeep",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/layouts/list",
+    "function": "postProjectsProjectLayoutsList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/layouts/match",
+    "function": "postProjectsProjectLayoutsMatch",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/layouts/reconnect",
+    "function": "postProjectsProjectLayoutsReconnect",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/layouts/rename",
+    "function": "postProjectsProjectLayoutsRename",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/layouts/retire",
+    "function": "postProjectsProjectLayoutsRetire",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/layouts/save",
+    "function": "postProjectsProjectLayoutsSave",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/layouts/update",
+    "function": "postProjectsProjectLayoutsUpdate",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/layouts/use-again",
+    "function": "postProjectsProjectLayoutsUseAgain",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/maps/curve-import",
     "function": "postProjectsProjectMapsCurveImport",
     "request": "schema",
