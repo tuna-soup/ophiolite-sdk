@@ -41,11 +41,17 @@ Every verb accepts `--json`. The result is one JSON object on standard output:
 | `list` | `{"assets": [asset]}` |
 | `doctor` | `{"configuration", "python", "local_contracts", "server_contracts"?}` |
 | `check`, `get`, `send` | `{"outcome", "sentence", "facts", "technical"}` (see below) |
+| `checks publish` | `{"published": [stored check]}` (each an `ophiolite.check/1` record with its `id`, `witness`, `recorded_by`, `command_id`, `at`) |
+| `checks list` | `{"records": [stored check], "groups": [{key, latest, earlier, disagreement}]}` |
+| `checks compare` | the stored comparison with `bound`, and `interpretation`, `sentence` or `fields` when they apply |
+| `checks publishers list`, `add`, `remove` | `{"publishers": [{principal, kind, granted_by, at}]}` |
 
 A refusal with `--json` prints `{"error": {"code", "message", "status", "remedy", "docs", "request_id"}}` on standard
 output (the server's own code, remedy, documentation anchor and request id when it sent them) and exits with the code
 above. Without `--json`, the message goes to standard error. A refusal from `check`, `get` or `send` also carries
 `"outcome"`, `"sentence"`, `"facts"` and `"technical"` (the server's own words are only there).
+A refusal from `checks` also carries `"field"`, the one field the server refused (for example `reference.digest`);
+the sentence never names it.
 
 ## `check`, `get` and `send`
 
@@ -71,6 +77,36 @@ after an interrupted one never publishes twice.
 | `access-refused`, `sign-in-needed` | 3 | "The project did not allow this with this access key, so nothing was sent. …" / "Your access key is not accepted any more. Ask for a new one." |
 | `not-visible`, `map-unavailable`, `newer-version-exists`, `nothing-changed` | 4 | "You can no longer see …" / "That version of the map is not available …" / "Version {k} was added by {who}, {when}. Your change was not sent. …" / "This is the same as version {j}; nothing was sent." |
 | `outcome-unknown`, `folder-busy`, `rate-limited`, `could-not-reach` | 5 | "An earlier send of {name} may or may not have arrived. Run the same send again …" / "Another program is using this folder. …" / "The project is busy. …" / "Could not reach the project. …" |
+
+## `checks`
+
+Checks against a reference (E96). `check` above is a different command and is unchanged.
+
+```sh
+ophiolite checks publish checks/20261007/            # a check folder, or a folder of them (python -m conformance.checks produce DIR)
+ophiolite checks list --asset A --revision R [--earlier]
+ophiolite checks list --implementation ophiolite.shale-volume --version 1
+ophiolite checks compare --asset A --revision R --file ref.las [--curve VSH] [--tolerance 0.001]
+ophiolite checks publishers add|remove PRINCIPAL [--workload]
+ophiolite checks publishers list
+```
+
+`publish` sends each folder's `check.json`, `fixture.*`, `reference.*`, `output.json` and `request.json` (and a grid's
+`interpretation.json`); project administrators and the people or workloads they named may publish. The server repeats
+the calculation when it runs the same implementation and release ("checked by the server"); otherwise the record is
+kept as reported. Sending the same folder again answers the record already kept. `compare` keeps the comparison on that
+result for you (and administrators who can read it); it is never a check of the method. `--tolerance` is in the file's
+unit for the curve (or `--unit`), or a fraction with `--relative`. `publishers` changes who may publish; only an
+administrator may.
+
+| Refusal | Sentence | `field` |
+|---|---|---|
+| No permission | "Publishing checks needs permission. Ask a project administrator." | `permission` |
+| Another release | "Not published: the check was made for release 2026.10.55, not the release this server runs." | `release.digest` |
+| A changed file | "Not published: the reference file does not match the recorded file." | `reference.digest` (also `fixture.digest`, `output.digest`) |
+| Past the wait | "Not published: the server did not finish the check in time. Nothing was saved." | `timeout` |
+| Busy | "Not published: the server is busy. Try again." | `capacity` |
+| Too many kept | "You have saved 20 comparisons on this result. Ask a project administrator to review them." | `limit` |
 
 ## `sources`
 

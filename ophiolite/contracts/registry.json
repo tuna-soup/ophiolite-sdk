@@ -60,6 +60,14 @@
       "description": "Observed facts about a normalized curve: units and their status, sample and missing counts, axis order."
     },
     {
+      "id": "ophiolite.curve-window/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/curve-window-schema.json",
+      "title": "CurveWindow",
+      "description": "One page of a depth window of a stored well curve: raw samples at level 0, or runs, blocks with their extrema and missing stretches at levels 1 to 17; at most 2,048 items a page."
+    },
+    {
       "id": "ophiolite.asset-summary/1",
       "version": "1.3.0",
       "lifecycle": "preview",
@@ -274,6 +282,14 @@
       "path": "relationships/v1/lineage-schema.json",
       "title": "Lineage",
       "description": "One hop each way from an exact revision: parents, derivations and superseded revisions the caller may read (E20)."
+    },
+    {
+      "id": "ophiolite.check/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "scientific/v1/check.json",
+      "title": "CheckRecord",
+      "description": "One comparison of an output with a reference under stated rules and a tolerance: what was compared, the outcome and its differences, and who witnessed it (server, claimed or personal); a refusal names one field (E96)."
     },
     {
       "id": "ophiolite.derivation/1",

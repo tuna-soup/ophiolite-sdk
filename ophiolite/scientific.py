@@ -104,6 +104,7 @@ def descriptor(data):
 
 
 def to_numpy(data):
+    from .windows import refuse_window;refuse_window(data)  # E100a
     try:import numpy as np
     except ImportError:raise MissingExtra("Install the NumPy extra: pip install 'ophiolite[numpy]'.") from None
     meta=descriptor(data)
