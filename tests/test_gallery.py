@@ -142,6 +142,7 @@ def test_a_spreadsheet_becomes_wells_and_tops_matches_its_columns_on_this_comput
     text = run('a-spreadsheet-becomes-wells-and-tops', tmp_path, monkeypatch)
     assert ': 6 rows, columns Well, Formation, Top MD (m)' in text and "Columns used: well from 'Well', name from 'Formation', md from 'Top MD (m)'" in text
     assert 'Synthetic mode: nothing is sent. In your project this table gives 2 sets of tops (3 rows and 2 rows), skips Row 6' in text
+    assert 'Synthetic mode: nothing is sent. In your project the layout "Gallery tops" is remembered' in text  # E89
 
 
 def test_every_entry_is_listed_built_and_described():
