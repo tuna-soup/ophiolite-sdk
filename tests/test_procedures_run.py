@@ -23,7 +23,7 @@ SHIFTED = b'name,md\nTop Chalk,1003\nBase Chalk,1202.5\n'
 
 def depth_shift(tmp_path, code=None, **manifest_changes):
     folder = tmp_path / 'depth-shift'
-    shutil.copytree(FIXTURES / 'bundles/depth-shift', folder, dirs_exist_ok=True)
+    shutil.copytree(FIXTURES / 'bundles/depth-shift', folder, dirs_exist_ok=True, ignore=shutil.ignore_patterns('__pycache__'))  # an installed SDK carries pip's bytecode
     if code is not None: (folder / 'procedure.py').write_text(code)
     if manifest_changes:
         manifest = json.loads((folder / 'procedure.json').read_text()); manifest.update(manifest_changes)
