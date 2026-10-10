@@ -1,0 +1,489 @@
+{
+ "accept": {
+  "accepted_at": 1791650662.2296484,
+  "accepted_by": "alice",
+  "aliases": [],
+  "created": {
+   "wellbores": 1,
+   "wells": 1
+  },
+  "entities": [
+   "well-cb3e423798014f69bd4d9b4a4139e25a",
+   "wellbore-0240b7aac4444316a3984280a32eb850"
+  ],
+  "linked": 2,
+  "runs": [
+   "1d02972b35c010aeeb28d3a7e05220202333b6b67159529d8c0dee61b0600896",
+   "a0302a46a7c501e80924ed9f56fe12ae9bc28d10ec3ce8eb6f8e678b329ac508"
+  ],
+  "skipped": [],
+  "state": "accepted",
+  "unlinked": 0
+ },
+ "aliases": {
+  "aliases": [],
+  "entity_id": "well-cb3e423798014f69bd4d9b4a4139e25a"
+ },
+ "go_back": {
+  "aliases": 0,
+  "entities": [
+   "well-cb3e423798014f69bd4d9b4a4139e25a",
+   "wellbore-0240b7aac4444316a3984280a32eb850"
+  ],
+  "removed": {
+   "wellbores": 1,
+   "wells": 1
+  },
+  "removed_at": 1791650662.2373261,
+  "removed_by": "alice",
+  "revoked": 3,
+  "runs": [
+   "1d02972b35c010aeeb28d3a7e05220202333b6b67159529d8c0dee61b0600896",
+   "a0302a46a7c501e80924ed9f56fe12ae9bc28d10ec3ce8eb6f8e678b329ac508"
+  ],
+  "state": "removed"
+ },
+ "go_back_again": {
+  "aliases": 0,
+  "entities": [],
+  "removed": {
+   "wellbores": 0,
+   "wells": 0
+  },
+  "removed_at": 1791650662.24219,
+  "removed_by": "alice",
+  "revoked": 0,
+  "runs": [
+   "1d02972b35c010aeeb28d3a7e05220202333b6b67159529d8c0dee61b0600896",
+   "a0302a46a7c501e80924ed9f56fe12ae9bc28d10ec3ce8eb6f8e678b329ac508"
+  ],
+  "state": "nothing"
+ },
+ "is": {
+  "accept": {
+   "accepted_at": 1791650663.154297,
+   "accepted_by": "alice",
+   "aliases": [
+    {
+     "as_written": "HON-GT-01",
+     "entity_id": "well-9686983f379642749aca27cc0c680048",
+     "level": "well"
+    },
+    {
+     "as_written": "HON-GT-01",
+     "entity_id": "wellbore-6fdfa73fd1234980ae570cb1cb4e0d0f",
+     "level": "wellbore"
+    }
+   ],
+   "created": {
+    "wellbores": 0,
+    "wells": 0
+   },
+   "entities": [
+    "well-9686983f379642749aca27cc0c680048",
+    "wellbore-6fdfa73fd1234980ae570cb1cb4e0d0f"
+   ],
+   "linked": 2,
+   "runs": [
+    "1d02972b35c010aeeb28d3a7e05220202333b6b67159529d8c0dee61b0600896",
+    "a0302a46a7c501e80924ed9f56fe12ae9bc28d10ec3ce8eb6f8e678b329ac508"
+   ],
+   "skipped": [],
+   "state": "accepted",
+   "unlinked": 0
+  },
+  "aliases": {
+   "aliases": [
+    {
+     "accepted_at": 1791650663.154297,
+     "accepted_by": "alice",
+     "accepted_by_name": "Ana",
+     "as_written": "HON-GT-01",
+     "level": "wellbore"
+    }
+   ],
+   "entity_id": "wellbore-6fdfa73fd1234980ae570cb1cb4e0d0f"
+  },
+  "propose": {
+   "digest": "bdb8c488b66b3b135f9a31505d710a1f23064e4e770f81d7e07be101c9ccccdd.b6408a6d1810fe2e2f494863c0600db6a8d4620e4a99a96a9c3fe059e41694ef",
+   "rows": [
+    {
+     "groups": [
+      {
+       "answer": "listed",
+       "audience": [
+        "alice"
+       ],
+       "candidates": [],
+       "gid": "1ae02ec617f7585fcf35b93e27ed87e9245b20fc830bbbb00ea13569f5dfe402",
+       "level": "well",
+       "mentions": [
+        {
+         "asset_id": "8e4c7e80deab80dc471f7a71cba955261a75bdf52a73df6c521ae80b86a05a02",
+         "level": "well",
+         "origin": {
+          "file": "hon_gt_01-tops.csv",
+          "rows": [
+           [
+            2,
+            3
+           ]
+          ],
+          "run": "a0302a46a7c501e80924ed9f56fe12ae9bc28d10ec3ce8eb6f8e678b329ac508",
+          "unit": 0
+         },
+         "revision": "aa6c9382c11611780d324dcce17bbf45a6450e1935e8d155a44b1967a49b3924",
+         "value": "hon_gt_01"
+        }
+       ],
+       "previously_reviewed": false
+      },
+      {
+       "answer": "listed",
+       "audience": [
+        "alice"
+       ],
+       "candidates": [],
+       "gid": "c71bc25c16a8b741afb39b9e2378f06bb7fc9f5e51a5476f383ffd68f544ae30",
+       "level": "wellbore",
+       "mentions": [
+        {
+         "asset_id": "1a5921439e3078066ade61550c9136c24d2d2d3da35b89089dbb4a565388aff0",
+         "level": "wellbore",
+         "origin": {
+          "file": "F-MIX/HON-GT-01.las",
+          "mnemonic": "WELL",
+          "run": "1d02972b35c010aeeb28d3a7e05220202333b6b67159529d8c0dee61b0600896"
+         },
+         "revision": "9d3aa6930e6dc64e8cc30c24b2bf9e351aae25dac8ca1a890efb14487635df6e",
+         "value": "HON-GT-01"
+        }
+       ],
+       "previously_reviewed": false
+      }
+     ],
+     "name": "HON-GT-01",
+     "normalised": "hon-gt-1"
+    }
+   ],
+   "runs": [
+    "1d02972b35c010aeeb28d3a7e05220202333b6b67159529d8c0dee61b0600896",
+    "a0302a46a7c501e80924ed9f56fe12ae9bc28d10ec3ce8eb6f8e678b329ac508"
+   ]
+  },
+  "refused": {
+   "body": {
+    "code": "entity-unavailable",
+    "error": "That one is not available to you any more. Nothing was linked. Choose another or press Not this one.",
+    "refusal": 4
+   },
+   "status": 422
+  },
+  "well": "well-9686983f379642749aca27cc0c680048",
+  "wellbore": "wellbore-6fdfa73fd1234980ae570cb1cb4e0d0f"
+ },
+ "link": {
+  "accept": {
+   "accepted_at": 1791650662.6991851,
+   "accepted_by": "alice",
+   "aliases": [],
+   "created": {
+    "wellbores": 0,
+    "wells": 0
+   },
+   "entities": [
+    "well-26b4d61270084f399570bb1ee04cf967",
+    "wellbore-54642687736846b8b4f70ae8c9924155"
+   ],
+   "linked": 2,
+   "runs": [
+    "1d02972b35c010aeeb28d3a7e05220202333b6b67159529d8c0dee61b0600896",
+    "a0302a46a7c501e80924ed9f56fe12ae9bc28d10ec3ce8eb6f8e678b329ac508"
+   ],
+   "skipped": [],
+   "state": "accepted",
+   "unlinked": 0
+  },
+  "propose": {
+   "digest": "bdb8c488b66b3b135f9a31505d710a1f23064e4e770f81d7e07be101c9ccccdd.57934d904f1705a0a598030ac4c7de6dd6001fcfe817c9c1bc7f297a4478848d",
+   "rows": [
+    {
+     "groups": [
+      {
+       "answer": "link",
+       "audience": [
+        "alice"
+       ],
+       "candidates": [
+        {
+         "entity_id": "well-26b4d61270084f399570bb1ee04cf967",
+         "generation": 1
+        }
+       ],
+       "gid": "1ae02ec617f7585fcf35b93e27ed87e9245b20fc830bbbb00ea13569f5dfe402",
+       "level": "well",
+       "mentions": [
+        {
+         "asset_id": "8e4c7e80deab80dc471f7a71cba955261a75bdf52a73df6c521ae80b86a05a02",
+         "level": "well",
+         "origin": {
+          "file": "hon_gt_01-tops.csv",
+          "rows": [
+           [
+            2,
+            3
+           ]
+          ],
+          "run": "a0302a46a7c501e80924ed9f56fe12ae9bc28d10ec3ce8eb6f8e678b329ac508",
+          "unit": 0
+         },
+         "revision": "aa6c9382c11611780d324dcce17bbf45a6450e1935e8d155a44b1967a49b3924",
+         "value": "hon_gt_01"
+        }
+       ],
+       "previously_reviewed": false
+      },
+      {
+       "answer": "link",
+       "audience": [
+        "alice"
+       ],
+       "candidates": [
+        {
+         "entity_id": "wellbore-54642687736846b8b4f70ae8c9924155",
+         "generation": 1
+        }
+       ],
+       "gid": "c71bc25c16a8b741afb39b9e2378f06bb7fc9f5e51a5476f383ffd68f544ae30",
+       "level": "wellbore",
+       "mentions": [
+        {
+         "asset_id": "1a5921439e3078066ade61550c9136c24d2d2d3da35b89089dbb4a565388aff0",
+         "level": "wellbore",
+         "origin": {
+          "file": "F-MIX/HON-GT-01.las",
+          "mnemonic": "WELL",
+          "run": "1d02972b35c010aeeb28d3a7e05220202333b6b67159529d8c0dee61b0600896"
+         },
+         "revision": "9d3aa6930e6dc64e8cc30c24b2bf9e351aae25dac8ca1a890efb14487635df6e",
+         "value": "HON-GT-01"
+        }
+       ],
+       "previously_reviewed": false
+      }
+     ],
+     "name": "HON-GT-01",
+     "normalised": "hon-gt-1"
+    }
+   ],
+   "runs": [
+    "1d02972b35c010aeeb28d3a7e05220202333b6b67159529d8c0dee61b0600896",
+    "a0302a46a7c501e80924ed9f56fe12ae9bc28d10ec3ce8eb6f8e678b329ac508"
+   ]
+  },
+  "well": "well-26b4d61270084f399570bb1ee04cf967",
+  "wellbore": "wellbore-54642687736846b8b4f70ae8c9924155"
+ },
+ "propose": {
+  "digest": "bdb8c488b66b3b135f9a31505d710a1f23064e4e770f81d7e07be101c9ccccdd.b6408a6d1810fe2e2f494863c0600db6a8d4620e4a99a96a9c3fe059e41694ef",
+  "rows": [
+   {
+    "groups": [
+     {
+      "answer": "listed",
+      "audience": [
+       "alice"
+      ],
+      "candidates": [],
+      "gid": "1ae02ec617f7585fcf35b93e27ed87e9245b20fc830bbbb00ea13569f5dfe402",
+      "level": "well",
+      "mentions": [
+       {
+        "asset_id": "8e4c7e80deab80dc471f7a71cba955261a75bdf52a73df6c521ae80b86a05a02",
+        "level": "well",
+        "origin": {
+         "file": "hon_gt_01-tops.csv",
+         "rows": [
+          [
+           2,
+           3
+          ]
+         ],
+         "run": "a0302a46a7c501e80924ed9f56fe12ae9bc28d10ec3ce8eb6f8e678b329ac508",
+         "unit": 0
+        },
+        "revision": "aa6c9382c11611780d324dcce17bbf45a6450e1935e8d155a44b1967a49b3924",
+        "value": "hon_gt_01"
+       }
+      ],
+      "previously_reviewed": false
+     },
+     {
+      "answer": "listed",
+      "audience": [
+       "alice"
+      ],
+      "candidates": [],
+      "gid": "c71bc25c16a8b741afb39b9e2378f06bb7fc9f5e51a5476f383ffd68f544ae30",
+      "level": "wellbore",
+      "mentions": [
+       {
+        "asset_id": "1a5921439e3078066ade61550c9136c24d2d2d3da35b89089dbb4a565388aff0",
+        "level": "wellbore",
+        "origin": {
+         "file": "F-MIX/HON-GT-01.las",
+         "mnemonic": "WELL",
+         "run": "1d02972b35c010aeeb28d3a7e05220202333b6b67159529d8c0dee61b0600896"
+        },
+        "revision": "9d3aa6930e6dc64e8cc30c24b2bf9e351aae25dac8ca1a890efb14487635df6e",
+        "value": "HON-GT-01"
+       }
+      ],
+      "previously_reviewed": false
+     }
+    ],
+    "name": "HON-GT-01",
+    "normalised": "hon-gt-1"
+   }
+  ],
+  "runs": [
+   "1d02972b35c010aeeb28d3a7e05220202333b6b67159529d8c0dee61b0600896",
+   "a0302a46a7c501e80924ed9f56fe12ae9bc28d10ec3ce8eb6f8e678b329ac508"
+  ]
+ },
+ "propose_after": {
+  "digest": "bdb8c488b66b3b135f9a31505d710a1f23064e4e770f81d7e07be101c9ccccdd.b6408a6d1810fe2e2f494863c0600db6a8d4620e4a99a96a9c3fe059e41694ef",
+  "rows": [
+   {
+    "groups": [
+     {
+      "answer": "listed",
+      "audience": [
+       "alice"
+      ],
+      "candidates": [],
+      "gid": "1ae02ec617f7585fcf35b93e27ed87e9245b20fc830bbbb00ea13569f5dfe402",
+      "level": "well",
+      "mentions": [
+       {
+        "asset_id": "8e4c7e80deab80dc471f7a71cba955261a75bdf52a73df6c521ae80b86a05a02",
+        "level": "well",
+        "origin": {
+         "file": "hon_gt_01-tops.csv",
+         "rows": [
+          [
+           2,
+           3
+          ]
+         ],
+         "run": "a0302a46a7c501e80924ed9f56fe12ae9bc28d10ec3ce8eb6f8e678b329ac508",
+         "unit": 0
+        },
+        "revision": "aa6c9382c11611780d324dcce17bbf45a6450e1935e8d155a44b1967a49b3924",
+        "value": "hon_gt_01"
+       }
+      ],
+      "previously_reviewed": false
+     },
+     {
+      "answer": "listed",
+      "audience": [
+       "alice"
+      ],
+      "candidates": [],
+      "gid": "c71bc25c16a8b741afb39b9e2378f06bb7fc9f5e51a5476f383ffd68f544ae30",
+      "level": "wellbore",
+      "mentions": [
+       {
+        "asset_id": "1a5921439e3078066ade61550c9136c24d2d2d3da35b89089dbb4a565388aff0",
+        "level": "wellbore",
+        "origin": {
+         "file": "F-MIX/HON-GT-01.las",
+         "mnemonic": "WELL",
+         "run": "1d02972b35c010aeeb28d3a7e05220202333b6b67159529d8c0dee61b0600896"
+        },
+        "revision": "9d3aa6930e6dc64e8cc30c24b2bf9e351aae25dac8ca1a890efb14487635df6e",
+        "value": "HON-GT-01"
+       }
+      ],
+      "previously_reviewed": false
+     }
+    ],
+    "name": "HON-GT-01",
+    "normalised": "hon-gt-1"
+   }
+  ],
+  "runs": [
+   "1d02972b35c010aeeb28d3a7e05220202333b6b67159529d8c0dee61b0600896",
+   "a0302a46a7c501e80924ed9f56fe12ae9bc28d10ec3ce8eb6f8e678b329ac508"
+  ]
+ },
+ "refusals": {
+  "edit-required": {
+   "body": {
+    "code": "edit-required",
+    "error": "Only people who can edit this project can add wells. Ask a project administrator to give you edit access.",
+    "refusal": 1
+   },
+   "status": 403
+  },
+  "entity-removed": {
+   "body": {
+    "code": "entity-removed",
+    "error": "This well was removed on 2026-10-10. Open the project again."
+   },
+   "status": 410
+  },
+  "list-changed": {
+   "body": {
+    "code": "list-changed",
+    "error": "The files or who can read them changed after you opened this list. Nothing was created. Open the list again.",
+    "refusal": 2
+   },
+   "status": 409
+  },
+  "list-removed": {
+   "body": {
+    "code": "list-removed",
+    "error": "These wells were removed by Ana on 10 October. Open the list again.",
+    "refusal": 14
+   },
+   "status": 409
+  },
+  "not-yours": {
+   "body": {
+    "code": "not-yours",
+    "error": "Only the person who created these wells, or a project administrator, can remove them.",
+    "refusal": 11
+   },
+   "status": 403
+  },
+  "other-runs": {
+   "body": {
+    "code": "other-runs",
+    "error": "These are not the files this list was made from. Nothing was changed. Open the list again for the files you want.",
+    "refusal": 16
+   },
+   "status": 422
+  },
+  "runs-count": {
+   "body": {
+    "code": "runs-count",
+    "error": "Choose between 1 and 50 uploads or imports to list the wells they name.",
+    "refusal": 17
+   },
+   "status": 422
+  },
+  "unknown-run": {
+   "body": {
+    "code": "unknown-run",
+    "error": "This folder upload is not known to this deployment, or it is not yours."
+   },
+   "status": 404
+  }
+ },
+ "runs": [
+  "1d02972b35c010aeeb28d3a7e05220202333b6b67159529d8c0dee61b0600896",
+  "a0302a46a7c501e80924ed9f56fe12ae9bc28d10ec3ce8eb6f8e678b329ac508"
+ ]
+}

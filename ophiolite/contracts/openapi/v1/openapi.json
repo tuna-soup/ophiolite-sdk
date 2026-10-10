@@ -71545,6 +71545,707 @@
         }
       }
     },
+    "/api/v1/projects/{project}/well-names/accept": {
+      "post": {
+        "summary": "E88: Create the listed wells as provisional wells and link every file that names them, or link to a well you have, in one step; your answers stay with this set of runs (runs, digest, create, is, link, skip)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "well-names/accept: what one accept did; a replay returns it unchanged.",
+                  "properties": {
+                    "runs": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Runs",
+                      "type": "array"
+                    },
+                    "created": {
+                      "$ref": "#/components/schemas/WellsCreated"
+                    },
+                    "linked": {
+                      "description": "Files and tables linked to a well or wellbore",
+                      "title": "Linked",
+                      "type": "integer"
+                    },
+                    "unlinked": {
+                      "description": "Mentions left unlinked (a well that has no parent well, or a file already linked to another)",
+                      "title": "Unlinked",
+                      "type": "integer"
+                    },
+                    "aliases": {
+                      "items": {
+                        "$ref": "#/components/schemas/WellAliasAdded"
+                      },
+                      "title": "Aliases",
+                      "type": "array"
+                    },
+                    "entities": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Entities",
+                      "type": "array"
+                    },
+                    "skipped": {
+                      "description": "Rows answered Not this one",
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Skipped",
+                      "type": "array"
+                    },
+                    "state": {
+                      "const": "accepted",
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "accepted_by": {
+                      "title": "Accepted By",
+                      "type": "string"
+                    },
+                    "accepted_at": {
+                      "title": "Accepted At",
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "runs",
+                    "created",
+                    "linked",
+                    "unlinked",
+                    "aliases",
+                    "entities",
+                    "skipped",
+                    "state",
+                    "accepted_by",
+                    "accepted_at"
+                  ],
+                  "title": "WellNamesAccepted",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "runs": {
+                    "description": "The runs the list was made from (its set: order and repeats do not count)",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Runs",
+                    "type": "array"
+                  },
+                  "digest": {
+                    "description": "The list's digest from propose; a changed list is refused",
+                    "maxLength": 200,
+                    "minLength": 1,
+                    "title": "Digest",
+                    "type": "string"
+                  },
+                  "create": {
+                    "anyOf": [
+                      {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      {
+                        "const": "all",
+                        "type": "string"
+                      }
+                    ],
+                    "description": "Rows (normalised names) to create as provisional wells, or all listed rows",
+                    "title": "Create"
+                  },
+                  "is": {
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "description": "Row to the readable well or wellbore it is (a link and another name for it)",
+                    "title": "Is",
+                    "type": "object"
+                  },
+                  "link": {
+                    "description": "Rows with one readable match to link to it",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Link",
+                    "type": "array"
+                  },
+                  "skip": {
+                    "description": "Rows answered Not this one (remembered for this set of runs)",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Skip",
+                    "type": "array"
+                  },
+                  "command_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "runs",
+                  "digest",
+                  "command_id"
+                ],
+                "title": "Accept",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/well-names/aliases": {
+      "post": {
+        "summary": "E88: The other names a well or wellbore you can read is known by, who answered and when",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "well-names/aliases: an entity's other names; none for an entity you cannot read.",
+                  "properties": {
+                    "entity_id": {
+                      "title": "Entity Id",
+                      "type": "string"
+                    },
+                    "aliases": {
+                      "items": {
+                        "$ref": "#/components/schemas/WellAlias"
+                      },
+                      "title": "Aliases",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "entity_id",
+                    "aliases"
+                  ],
+                  "title": "WellAliases",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "entity_id": {
+                    "maxLength": 200,
+                    "minLength": 1,
+                    "title": "Entity Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "entity_id"
+                ],
+                "title": "Aliases",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/well-names/go-back": {
+      "post": {
+        "summary": "E88: Remove the wells your accepted lists of this set of runs created, and their links and other names, while nothing else refers to them; the creator or a project administrator (runs)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "well-names/go-back: what one go back removed; `nothing` when this set's lists were removed already.",
+                  "properties": {
+                    "runs": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Runs",
+                      "type": "array"
+                    },
+                    "removed": {
+                      "$ref": "#/components/schemas/WellsRemoved"
+                    },
+                    "revoked": {
+                      "description": "The accepts' own links revoked (kept as revoked, as a dissociate keeps them)",
+                      "title": "Revoked",
+                      "type": "integer"
+                    },
+                    "aliases": {
+                      "description": "Other names this set of runs recorded, now removed",
+                      "title": "Aliases",
+                      "type": "integer"
+                    },
+                    "entities": {
+                      "description": "The wells and wellbores now removed",
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Entities",
+                      "type": "array"
+                    },
+                    "state": {
+                      "enum": [
+                        "removed",
+                        "nothing"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "removed_by": {
+                      "title": "Removed By",
+                      "type": "string"
+                    },
+                    "removed_at": {
+                      "title": "Removed At",
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "runs",
+                    "removed",
+                    "revoked",
+                    "aliases",
+                    "entities",
+                    "state",
+                    "removed_by",
+                    "removed_at"
+                  ],
+                  "title": "WellNamesWentBack",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "runs": {
+                    "description": "The runs the accepted list was made from (its set: order and repeats do not count)",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Runs",
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "runs"
+                ],
+                "title": "GoBack",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/well-names/propose": {
+      "post": {
+        "summary": "E88: The wells 1 to 50 of your finished folder uploads and table imports name that this project does not have, or matches only by name, with what named each; nothing is written (runs)",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "well-names/propose: the list over the given runs (sorted, each once) and the digest accept binds.",
+                  "properties": {
+                    "runs": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Runs",
+                      "type": "array"
+                    },
+                    "rows": {
+                      "items": {
+                        "$ref": "#/components/schemas/WellNameRow"
+                      },
+                      "title": "Rows",
+                      "type": "array"
+                    },
+                    "digest": {
+                      "description": "The set of runs, then the list: accept compares both",
+                      "title": "Digest",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "runs",
+                    "rows",
+                    "digest"
+                  ],
+                  "title": "WellNamesProposal",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "runs": {
+                    "description": "1 to 50 folder uploads or table imports (their ids); repeats count once. More or none is refused in words",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Runs",
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "runs"
+                ],
+                "title": "Propose",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/activity": {
       "post": {
         "summary": "Activity page (historical path of activity/list for existing workload clients)",
@@ -99364,7 +100065,8 @@
                 "identifier-in-use",
                 "no-longer-visible",
                 "name-ambiguous",
-                "name-repeated"
+                "name-repeated",
+                "identifier-names-another-well"
               ],
               "type": "string"
             },
@@ -102317,6 +103019,98 @@
         "title": "WebhookDelivery",
         "type": "object"
       },
+      "WellAlias": {
+        "additionalProperties": false,
+        "properties": {
+          "as_written": {
+            "title": "As Written",
+            "type": "string"
+          },
+          "level": {
+            "enum": [
+              "well",
+              "wellbore"
+            ],
+            "title": "Level",
+            "type": "string"
+          },
+          "accepted_by": {
+            "title": "Accepted By",
+            "type": "string"
+          },
+          "accepted_by_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accepted By Name"
+          },
+          "accepted_at": {
+            "title": "Accepted At",
+            "type": "number"
+          }
+        },
+        "required": [
+          "as_written",
+          "level",
+          "accepted_by",
+          "accepted_by_name",
+          "accepted_at"
+        ],
+        "title": "WellAlias",
+        "type": "object"
+      },
+      "WellAliasAdded": {
+        "additionalProperties": false,
+        "properties": {
+          "as_written": {
+            "title": "As Written",
+            "type": "string"
+          },
+          "level": {
+            "enum": [
+              "well",
+              "wellbore"
+            ],
+            "title": "Level",
+            "type": "string"
+          },
+          "entity_id": {
+            "title": "Entity Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "as_written",
+          "level",
+          "entity_id"
+        ],
+        "title": "WellAliasAdded",
+        "type": "object"
+      },
+      "WellCandidate": {
+        "additionalProperties": false,
+        "properties": {
+          "entity_id": {
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "generation": {
+            "title": "Generation",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "entity_id",
+          "generation"
+        ],
+        "title": "WellCandidate",
+        "type": "object"
+      },
       "WellImportAudience": {
         "additionalProperties": false,
         "properties": {
@@ -102539,7 +103333,8 @@
                 "identifier-in-use",
                 "no-longer-visible",
                 "name-ambiguous",
-                "name-repeated"
+                "name-repeated",
+                "identifier-names-another-well"
               ],
               "type": "string"
             },
@@ -102591,7 +103386,8 @@
                 "identifier-in-use",
                 "no-longer-visible",
                 "name-ambiguous",
-                "name-repeated"
+                "name-repeated",
+                "identifier-names-another-well"
               ],
               "type": "string"
             },
@@ -102931,6 +103727,178 @@
           "revision"
         ],
         "title": "WellLogRef",
+        "type": "object"
+      },
+      "WellMention": {
+        "additionalProperties": false,
+        "properties": {
+          "value": {
+            "description": "The name as the file wrote it",
+            "title": "Value",
+            "type": "string"
+          },
+          "level": {
+            "enum": [
+              "well",
+              "wellbore"
+            ],
+            "title": "Level",
+            "type": "string"
+          },
+          "asset_id": {
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "revision": {
+            "title": "Revision",
+            "type": "string"
+          },
+          "origin": {
+            "additionalProperties": true,
+            "description": "Where it came from: the run, the file, and the LAS mnemonic or the table unit and its rows",
+            "title": "Origin",
+            "type": "object"
+          }
+        },
+        "required": [
+          "value",
+          "level",
+          "asset_id",
+          "revision",
+          "origin"
+        ],
+        "title": "WellMention",
+        "type": "object"
+      },
+      "WellNameGroup": {
+        "additionalProperties": false,
+        "properties": {
+          "gid": {
+            "description": "The typed group: project, normalised name and level",
+            "title": "Gid",
+            "type": "string"
+          },
+          "level": {
+            "enum": [
+              "well",
+              "wellbore"
+            ],
+            "title": "Level",
+            "type": "string"
+          },
+          "answer": {
+            "description": "listed: nothing readable has this name; link: one readable match (or a reviewed alias); choose: two or more readable matches, never linked without a choice",
+            "enum": [
+              "listed",
+              "link",
+              "choose"
+            ],
+            "title": "Answer",
+            "type": "string"
+          },
+          "previously_reviewed": {
+            "title": "Previously Reviewed",
+            "type": "boolean"
+          },
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/WellCandidate"
+            },
+            "title": "Candidates",
+            "type": "array"
+          },
+          "mentions": {
+            "items": {
+              "$ref": "#/components/schemas/WellMention"
+            },
+            "title": "Mentions",
+            "type": "array"
+          },
+          "audience": {
+            "description": "Who can read every file that names it, and you",
+            "items": {
+              "type": "string"
+            },
+            "title": "Audience",
+            "type": "array"
+          }
+        },
+        "required": [
+          "gid",
+          "level",
+          "answer",
+          "previously_reviewed",
+          "candidates",
+          "mentions",
+          "audience"
+        ],
+        "title": "WellNameGroup",
+        "type": "object"
+      },
+      "WellNameRow": {
+        "additionalProperties": false,
+        "properties": {
+          "normalised": {
+            "title": "Normalised",
+            "type": "string"
+          },
+          "name": {
+            "description": "The spelling written most often",
+            "title": "Name",
+            "type": "string"
+          },
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/WellNameGroup"
+            },
+            "title": "Groups",
+            "type": "array"
+          }
+        },
+        "required": [
+          "normalised",
+          "name",
+          "groups"
+        ],
+        "title": "WellNameRow",
+        "type": "object"
+      },
+      "WellsCreated": {
+        "additionalProperties": false,
+        "properties": {
+          "wells": {
+            "title": "Wells",
+            "type": "integer"
+          },
+          "wellbores": {
+            "title": "Wellbores",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "wells",
+          "wellbores"
+        ],
+        "title": "WellsCreated",
+        "type": "object"
+      },
+      "WellsRemoved": {
+        "additionalProperties": false,
+        "properties": {
+          "wells": {
+            "title": "Wells",
+            "type": "integer"
+          },
+          "wellbores": {
+            "title": "Wellbores",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "wells",
+          "wellbores"
+        ],
+        "title": "WellsRemoved",
         "type": "object"
       },
       "WordedConversation": {

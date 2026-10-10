@@ -189,8 +189,15 @@ def parser():
         return p
     entities=project(sub.add_parser('entities',help='List the wells and wellbores you may read'))
     entities.add_argument('--kind',choices=['well','wellbore'])
-    wells=project(sub.add_parser('wells',help='The wells you may read, located (list), or their extent'))
-    wells.add_argument('action',choices=['list','extent'])
+    wells=project(sub.add_parser('wells',help='The wells you may read, located (list), or their extent; from-run RUN...: the wells your files name (E88)'))
+    wells.add_argument('action',choices=['list','extent','from-run'])
+    wells.add_argument('runs',nargs='*',metavar='RUN',help='from-run: the folder uploads and table imports the list is made from (1 to 50)')
+    wells.add_argument('--create',action='append',default=[],metavar='NAME',help='from-run: create this row as a provisional well (repeat)')
+    wells.add_argument('--is',dest='is_',action='append',default=[],metavar='NAME=ENTITY',help='from-run: this row is that well or wellbore; its name stays as another name for it (repeat)')
+    wells.add_argument('--skip',action='append',default=[],metavar='NAME',help='from-run: answer this row Not this one (repeat)')
+    wells.add_argument('--create-all',action='store_true',help='from-run: create every row nothing you can read is called, as provisional wells')
+    wells.add_argument('--link-exact-only',action='store_true',help='from-run: link only rows that match a well you can read exactly or by another name; create nothing')
+    wells.add_argument('--dry-run',action='store_true',help='from-run: print the list and what the answers would do; change nothing')
     wells.add_argument('--bbox',help='minx,miny,maxx,maxy in --bbox-crs');wells.add_argument('--bbox-crs');wells.add_argument('--crs',help='Convert locations to this CRS on the server')
     wells.add_argument('--limit',type=int)
     wells.add_argument('--with-source',action='store_true',help='list: also read the source row each well is located from, from the copy its import kept (E50c)')
@@ -499,6 +506,9 @@ def _journey(args,client):
         rows=[{'entity_id':e.entity_id,'kind':e.kind,'name':e.name} for e in client.entities(kind=args.kind)]
         return done(args,'\n'.join('%s %s' % (r['kind'],r['name']) for r in rows) or 'No well or wellbore you may read.',{'entities':rows})
     if args.command=='wells':
+        if args.action=='from-run':return _wells_from_run(args,client)
+        if args.runs or args.create or args.is_ or args.skip or args.create_all or args.link_exact_only or args.dry_run:
+            raise Refused('Only wells from-run takes runs, --create, --is, --skip, --create-all, --link-exact-only or --dry-run.')
         if args.action=='extent':
             extent=client.extent(**({'crs':args.crs} if args.crs else {}))
             return done(args,('%d wells in %s: %s' % (extent['count'],extent['crs'],extent['bbox'])) if extent['bbox'] else 'No well you may read is located.',{'extent':extent})
@@ -622,6 +632,18 @@ def _declarations(given):
     return out
 
 
+def _named_wells(client,run):
+    """E88: the upload report's last line: the wells its files name that are not in this project, and the command that
+    lists them. None when there are none, or when the server has no well-names (an older deployment)."""
+    from .well_names import counts_line
+    names=getattr(client,'well_names',None)
+    if names is None:return None
+    try:proposal=names.proposals(run)
+    except OphioliteError:return None
+    line=counts_line(proposal)
+    return '%s Run: ophiolite wells from-run %s' % (line,' '.join(proposal['runs'])) if line else None
+
+
 def _upload(args,client):
     """E55: upload a folder or a .zip; exit 0 when every file is added or already here, 4 when any is not (the report
     is still written), 1 on a refusal before anything was sent."""
@@ -633,9 +655,40 @@ def _upload(args,client):
     report=runs.upload(args.path if is_address(args.path) else Path(args.path),attribution=args.attribution,audience=args.audience,rights_confirmed=True,well_notes=args.well_notes,
                        declare=_declarations(args.declare),skip_decisions=args.skip_decisions,associate_matches=args.associate_matches,new=args.new,progress=progress)
     if args.report:report.save(args.report)
-    done(args,report.text()+('\nReport written to %s' % args.report if args.report else ''),{'upload':report.view})
+    wells=_named_wells(client,report.run_id)
+    done(args,report.text()+('\n'+wells if wells else '')+('\nReport written to %s' % args.report if args.report else ''),{'upload':report.view})
     report.exit_code=0 if report.ok else EXIT['conflict']
     return report
+
+
+def _wells_from_run(args,client):
+    """E88: the list a set of runs names (J1 words) and, with a decision flag, one accept of it (J2). With no decision
+    flag, or with --dry-run, nothing changes. --create-all with --link-exact-only is a usage error (exit 2)."""
+    from .well_names import BOTH, list_lines, result_line
+    if args.create_all and args.link_exact_only:
+        if args.json:print(json.dumps({'error':{'code':'usage','message':BOTH}},indent=2))
+        else:print(BOTH,file=sys.stderr)
+        raise SystemExit(EXIT['usage'])
+    if not args.runs:raise Refused('Give the uploads or imports: ophiolite wells from-run RUN [RUN]...')
+    chosen={}
+    for given in args.is_:
+        name,_,entity=given.rpartition('=')
+        if not name or not entity:raise Refused('Give --is as NAME=ENTITY, for example --is "TM3C=wellbore-…".')
+        chosen[name]=entity
+    names=client.well_names
+    proposal=names.proposals(args.runs)
+    decided=bool(args.create or chosen or args.skip or args.create_all or args.link_exact_only)
+    if not decided or args.dry_run:
+        lines=list_lines(proposal)
+        if decided:lines=['Dry run, nothing was changed.']+lines
+        return done(args,'\n'.join(lines),{'proposal':proposal})
+    accepted=names.accept(args.runs,digest=proposal['digest'],create=args.create or None,create_all=args.create_all,is_=chosen or None,skip=args.skip,
+                          link_exact_only=args.link_exact_only)
+    said={}
+    for entity in sorted({a['entity_id'] for a in accepted['aliases']}):
+        try:said[entity]=client.entity(entity).name
+        except OphioliteError:pass
+    return done(args,result_line(accepted,said),{'proposal':proposal,'accepted':accepted})
 
 
 def _well_imports(args,client):
@@ -868,7 +921,7 @@ def _main(argv=None):
     if getattr(args,'upload_project',None):config={**config,'project':args.upload_project}  # E55: ophiolite upload --project
     path=args.credentials or credentials_path(config)
     if args.command=='run':return _local_run(config,args.work.resolve())
-    if getattr(args,'dry_run',False) and args.command not in ('well-imports','import'):return _dry_run(args,config)  # E31: before any credential, network or file write (E42a: an import's dry run is its server preview, which keeps nothing)
+    if getattr(args,'dry_run',False) and args.command not in ('well-imports','import','wells'):return _dry_run(args,config)  # E88: wells from-run --dry-run is its server list, which keeps nothing; E31: before any credential, network or file write (E42a: an import's dry run is its server preview, which keeps nothing)
     given=supplied_key(args) if args.command=='login' else None
     if given:
         # E25a: saved for later processes; nothing is sent now and the key is never printed.

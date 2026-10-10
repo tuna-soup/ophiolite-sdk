@@ -2004,6 +2004,30 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/well-names/accept",
+    "function": "postProjectsProjectWellNamesAccept",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/well-names/aliases",
+    "function": "postProjectsProjectWellNamesAliases",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/well-names/go-back",
+    "function": "postProjectsProjectWellNamesGoBack",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/well-names/propose",
+    "function": "postProjectsProjectWellNamesPropose",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "GET /api/v1/projects/{project}/wells/{well}/versions/{version}/curve-assets/{asset}/revisions/{revision}/windows",
     "function": "getProjectsProjectWellsWellVersionsVersionCurveAssetsAssetRevisionsRevisionWindows",
     "request": "explicitly-untyped",
