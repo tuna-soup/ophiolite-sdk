@@ -1,0 +1,205 @@
+{
+ "export": {
+  "manifest": {
+   "bytes": 747,
+   "contract": {
+    "capabilities": {
+     "native_operation_telemetry": "not-assessed",
+     "read": true,
+     "write": "requires-separate-destination-grant"
+    },
+    "distribution": {
+     "audience": [],
+     "redistribution_permitted": false,
+     "retained": false,
+     "retention_permitted": false
+    },
+    "fidelity": {
+     "assessor": "ophiolite-connectors",
+     "limitations": [],
+     "losses": [],
+     "method": "connector-profile-assessment/1: the summary and preview this connector derives are compared with the exact representation read; the representation itself is retained byte for byte",
+     "schema": "ophiolite.fidelity/1",
+     "scope": "source-representation",
+     "state": "assessed-no-loss",
+     "version": "1"
+    },
+    "history": {
+     "guarantee": "Exact reads depend on continued source availability and authorization.",
+     "mode": "current-only",
+     "retained": false
+    },
+    "identity": {
+     "authority": "nlog",
+     "key": "lithology_log",
+     "profile": "table/1",
+     "revision": "e0d7a7b48d42b09080663287de71128547705210fa7ef3a768d59504e0fa700c"
+    },
+    "mapping": {
+     "destination_schema": null,
+     "scientific_profile": "ophiolite.table/1",
+     "source_schema": "d9bb23313af9e0c3cf4f3e9e5fe9568ea3224aa7da0c628695d5bb1c6e2324b0",
+     "version": "1"
+    },
+    "representation": {
+     "media_type": "application/json",
+     "profile": "table/1",
+     "sha256": "e0d7a7b48d42b09080663287de71128547705210fa7ef3a768d59504e0fa700c"
+    },
+    "schema": "ophiolite.connector-semantics/1"
+   },
+   "interpretation": null,
+   "losses": [],
+   "media_type": "application/json",
+   "metadata": {
+    "columns": [
+     {
+      "comment": null,
+      "db_type": "text",
+      "logical": "text",
+      "name": "well_code",
+      "nullable": true,
+      "read": true
+     },
+     {
+      "comment": null,
+      "db_type": "double precision",
+      "logical": "float",
+      "name": "top_m",
+      "nullable": true,
+      "read": true
+     },
+     {
+      "comment": null,
+      "db_type": "double precision",
+      "logical": "float",
+      "name": "base_m",
+      "nullable": true,
+      "read": true
+     },
+     {
+      "comment": null,
+      "db_type": "text",
+      "logical": "text",
+      "name": "lithology",
+      "nullable": true,
+      "read": true
+     },
+     {
+      "comment": null,
+      "db_type": "text",
+      "logical": "text",
+      "name": "note",
+      "nullable": true,
+      "read": true
+     }
+    ],
+    "declaration_version": 1,
+    "declarations": {
+     "columns": {},
+     "coordinates": null
+    },
+    "encoding": "table-encoding/1",
+    "key": null,
+    "kind": "table",
+    "name": "lithology_log",
+    "not_read": [],
+    "null_counts": {
+     "base_m": 0,
+     "lithology": 0,
+     "note": 1,
+     "top_m": 0,
+     "well_code": 0
+    },
+    "preview_rows": [
+     {
+      "base_m": 12.5,
+      "lithology": "sand",
+      "note": null,
+      "top_m": 0.0,
+      "well_code": "NL-001"
+     },
+     {
+      "base_m": 40.0,
+      "lithology": "clay",
+      "note": "soft",
+      "top_m": 12.5,
+      "well_code": "NL-001"
+     },
+     {
+      "base_m": 40.0,
+      "lithology": "clay",
+      "note": "soft",
+      "top_m": 12.5,
+      "well_code": "NL-001"
+     }
+    ],
+    "quantities": {},
+    "representation_notes": [
+     "Values as table-encoding/1 writes them: integers and decimals as exact text, temporals as canonical text"
+    ],
+    "samples": 3,
+    "schema_digest": "d9bb23313af9e0c3cf4f3e9e5fe9568ea3224aa7da0c628695d5bb1c6e2324b0",
+    "unresolved": []
+   },
+   "reference": {
+    "authority": "nlog",
+    "key": "lithology_log",
+    "profile": "table/1",
+    "revision": "e0d7a7b48d42b09080663287de71128547705210fa7ef3a768d59504e0fa700c"
+   },
+   "reviewed_meaning_digest": "4ebeb8003b83ce5af0bd3fd1b8a827ed192070fd399171a84a884f8735c75912",
+   "schema": "ophiolite.source-snapshot/1",
+   "scientific_validation": "source-declared; review required",
+   "sha256": "e0d7a7b48d42b09080663287de71128547705210fa7ef3a768d59504e0fa700c"
+  },
+  "payload_base64": "eyJjb2x1bW5zIjpbeyJjb21tZW50IjpudWxsLCJkYl90eXBlIjoidGV4dCIsImxvZ2ljYWwiOiJ0ZXh0IiwibmFtZSI6IndlbGxfY29kZSIsIm51bGxhYmxlIjp0cnVlLCJyZWFkIjp0cnVlfSx7ImNvbW1lbnQiOm51bGwsImRiX3R5cGUiOiJkb3VibGUgcHJlY2lzaW9uIiwibG9naWNhbCI6ImZsb2F0IiwibmFtZSI6InRvcF9tIiwibnVsbGFibGUiOnRydWUsInJlYWQiOnRydWV9LHsiY29tbWVudCI6bnVsbCwiZGJfdHlwZSI6ImRvdWJsZSBwcmVjaXNpb24iLCJsb2dpY2FsIjoiZmxvYXQiLCJuYW1lIjoiYmFzZV9tIiwibnVsbGFibGUiOnRydWUsInJlYWQiOnRydWV9LHsiY29tbWVudCI6bnVsbCwiZGJfdHlwZSI6InRleHQiLCJsb2dpY2FsIjoidGV4dCIsIm5hbWUiOiJsaXRob2xvZ3kiLCJudWxsYWJsZSI6dHJ1ZSwicmVhZCI6dHJ1ZX0seyJjb21tZW50IjpudWxsLCJkYl90eXBlIjoidGV4dCIsImxvZ2ljYWwiOiJ0ZXh0IiwibmFtZSI6Im5vdGUiLCJudWxsYWJsZSI6dHJ1ZSwicmVhZCI6dHJ1ZX1dLCJkZWNsYXJhdGlvbnMiOnsiY29sdW1ucyI6e30sImNvb3JkaW5hdGVzIjpudWxsfSwiZW5jb2RpbmciOiJ0YWJsZS1lbmNvZGluZy8xIiwia2V5IjpudWxsLCJyb3dzIjpbWyJOTC0wMDEiLDAuMCwxMi41LCJzYW5kIixudWxsXSxbIk5MLTAwMSIsMTIuNSw0MC4wLCJjbGF5Iiwic29mdCJdLFsiTkwtMDAxIiwxMi41LDQwLjAsImNsYXkiLCJzb2Z0Il1dLCJzY2hlbWEiOiJvcGhpb2xpdGUudGFibGUvMSJ9"
+ },
+ "selection": {
+  "access_health": {
+   "checked": 1.0,
+   "message": "Access succeeded",
+   "state": "current"
+  },
+  "asset_identity": "3b3cd44c60fcaa0b6ec448e83a34d83e41b1e6021918347dc14dff50e76c98f1",
+  "authority": "nlog",
+  "connection_fingerprint": "d00551c8256958ef5e0be97c46a0bbd35951f441ef6d5c04a1440f9fd596bab6",
+  "connection_id": "nlog",
+  "display": {
+   "held_as": "Linked",
+   "last_checked": 1.0,
+   "source": "NLOG provinces",
+   "status": "Up to date",
+   "type": "Table from a SQL database",
+   "updates": "Keeps up to date",
+   "version": {
+    "at": null,
+    "by": null,
+    "of": null,
+    "ordinal": null,
+    "source_version": null
+   }
+  },
+  "failures": 0,
+  "generation": 1,
+  "id": "98bb5251b7b689d6a303f6f586c25351988105fe9067496527817ca60851ed1c",
+  "interpretation": null,
+  "key": "lithology_log",
+  "last_checked": 1.0,
+  "mode": "follow",
+  "name": "lithology_log",
+  "next_check": 1.0,
+  "owner": "alice",
+  "profile": "table/1",
+  "project_id": "p",
+  "publication_policy": "explicit destination required; upstream write unsupported",
+  "reader_identity": "f604d9f9d162d887cf7d288e8f8148b8c459d1745e8ff9ed821f8f3320c4a533",
+  "reference": {
+   "authority": "nlog",
+   "key": "lithology_log",
+   "profile": "table/1",
+   "revision": "e0d7a7b48d42b09080663287de71128547705210fa7ef3a768d59504e0fa700c"
+  },
+  "state": "current"
+ }
+}

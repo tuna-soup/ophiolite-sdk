@@ -1,0 +1,1046 @@
+{
+ "schema": "ophiolite.table-vectors/1",
+ "description": "ADR 0020 D2 and D4 digest fixtures. `formatter`: one value per row, the text each engine prints it as (null: the engine has no such value) and its one encoding. `payloads`: per engine, the DDL and rows a test creates, the declaration saved, the literal table/1 payload and the SHA-256 of its canonical JSON (sorted keys, no spaces, non-ASCII as \\uXXXX, UTF-8). Rows of a keyed table sort by the key tuple: integer and decimal numerically then by encoding, everything else by the UTF-8 bytes of the encoding; rows of an unkeyed table by the UTF-8 bytes of their canonical JSON array.",
+ "formatter": [
+  {
+   "logical": "integer",
+   "postgresql": "-9223372036854775808",
+   "sqlite": "-9223372036854775808",
+   "encoding": "-9223372036854775808"
+  },
+  {
+   "logical": "integer",
+   "postgresql": "9007199254740993",
+   "sqlite": "9007199254740993",
+   "encoding": "9007199254740993"
+  },
+  {
+   "logical": "decimal",
+   "postgresql": "1520.250",
+   "sqlite": null,
+   "encoding": "1520.250"
+  },
+  {
+   "logical": "float",
+   "postgresql": "0.30000000000000004",
+   "sqlite": "0.30000000000000004",
+   "encoding": 0.30000000000000004
+  },
+  {
+   "logical": "float",
+   "postgresql": "-0",
+   "sqlite": null,
+   "encoding": -0.0
+  },
+  {
+   "logical": "date",
+   "postgresql": "0044-03-15 BC",
+   "sqlite": null,
+   "encoding": "-0043-03-15"
+  },
+  {
+   "logical": "date",
+   "postgresql": "0001-01-01 BC",
+   "sqlite": null,
+   "encoding": "0000-01-01"
+  },
+  {
+   "logical": "date",
+   "postgresql": "10000-01-01",
+   "sqlite": null,
+   "encoding": "10000-01-01"
+  },
+  {
+   "logical": "date",
+   "postgresql": "infinity",
+   "sqlite": null,
+   "encoding": "infinity"
+  },
+  {
+   "logical": "date",
+   "postgresql": "2024-02-29",
+   "sqlite": "2024-02-29",
+   "encoding": "2024-02-29"
+  },
+  {
+   "logical": "timestamp",
+   "postgresql": "2026-01-01 10:00:00.12",
+   "sqlite": "2026-01-01T10:00:00.120",
+   "encoding": "2026-01-01T10:00:00.12"
+  },
+  {
+   "logical": "timestamp",
+   "postgresql": null,
+   "sqlite": "2026-01-01 10:00:00.123456789",
+   "encoding": "2026-01-01T10:00:00.123456789"
+  },
+  {
+   "logical": "timestamptz",
+   "postgresql": "2026-01-01 12:00:00.120+02",
+   "sqlite": null,
+   "encoding": "2026-01-01T10:00:00.12Z"
+  },
+  {
+   "logical": "timestamptz",
+   "postgresql": "-infinity",
+   "sqlite": null,
+   "encoding": "-infinity"
+  }
+ ],
+ "payloads": {
+  "postgresql/keyed-composite": {
+   "what": "ADR 0020 5a: a composite key sorts text by UTF-8 bytes and integers numerically (900 before 1000); a jsonb column is listed, not read, and absent from rows",
+   "ddl": [
+    "CREATE TABLE picks (well text NOT NULL, depth_m integer NOT NULL, formation text, porosity numeric(5,3), notes jsonb, PRIMARY KEY (well, depth_m))",
+    "COMMENT ON COLUMN picks.depth_m IS 'metres below the rotary table'"
+   ],
+   "inserts": [
+    "INSERT INTO picks VALUES ('B-2', 1000, 'Slochteren', 0.18, '{\"x\": 1}'), ('A-1', 1000, 'Slochteren', 0.21, NULL), ('A-1', 900, 'Ten Boer', 0.05, '[]'), ('B-2', 950, NULL, NULL, NULL)"
+   ],
+   "declaration": {
+    "profile": "table/1",
+    "key": [
+     "well",
+     "depth_m"
+    ],
+    "columns": {
+     "depth_m": {
+      "description": "Measured depth of the pick",
+      "unit": "m",
+      "missing": null
+     }
+    },
+    "coordinates": null
+   },
+   "payload": {
+    "schema": "ophiolite.table/1",
+    "encoding": "table-encoding/1",
+    "columns": [
+     {
+      "name": "well",
+      "db_type": "text",
+      "logical": "text",
+      "nullable": false,
+      "comment": null,
+      "read": true
+     },
+     {
+      "name": "depth_m",
+      "db_type": "integer",
+      "logical": "integer",
+      "nullable": false,
+      "comment": "metres below the rotary table",
+      "read": true
+     },
+     {
+      "name": "formation",
+      "db_type": "text",
+      "logical": "text",
+      "nullable": true,
+      "comment": null,
+      "read": true
+     },
+     {
+      "name": "porosity",
+      "db_type": "numeric(5,3)",
+      "logical": "decimal",
+      "nullable": true,
+      "comment": null,
+      "read": true
+     },
+     {
+      "name": "notes",
+      "db_type": "jsonb",
+      "logical": null,
+      "nullable": true,
+      "comment": null,
+      "read": false
+     }
+    ],
+    "key": [
+     "well",
+     "depth_m"
+    ],
+    "declarations": {
+     "columns": {
+      "depth_m": {
+       "description": "Measured depth of the pick",
+       "unit": "m",
+       "missing": null
+      }
+     },
+     "coordinates": null
+    },
+    "rows": [
+     [
+      "A-1",
+      "900",
+      "Ten Boer",
+      "0.050"
+     ],
+     [
+      "A-1",
+      "1000",
+      "Slochteren",
+      "0.210"
+     ],
+     [
+      "B-2",
+      "950",
+      null,
+      null
+     ],
+     [
+      "B-2",
+      "1000",
+      "Slochteren",
+      "0.180"
+     ]
+    ]
+   },
+   "sha256": "3728b469db75b355e96edb391e6d015fd6e2bb92a61ec5456c70aa9de2f99758"
+  },
+  "postgresql/unkeyed-duplicates": {
+   "what": "ADR 0020 5b: no key; rows sorted by the UTF-8 bytes of their canonical JSON arrays, duplicates kept with their multiplicity",
+   "ddl": [
+    "CREATE TABLE samples (lab text, grade text)"
+   ],
+   "inserts": [
+    "INSERT INTO samples VALUES ('x', 'soft'), ('a', 'firm'), ('x', 'soft')"
+   ],
+   "declaration": {
+    "profile": "table/1",
+    "key": null,
+    "columns": {},
+    "coordinates": null
+   },
+   "payload": {
+    "schema": "ophiolite.table/1",
+    "encoding": "table-encoding/1",
+    "columns": [
+     {
+      "name": "lab",
+      "db_type": "text",
+      "logical": "text",
+      "nullable": true,
+      "comment": null,
+      "read": true
+     },
+     {
+      "name": "grade",
+      "db_type": "text",
+      "logical": "text",
+      "nullable": true,
+      "comment": null,
+      "read": true
+     }
+    ],
+    "key": null,
+    "declarations": {
+     "columns": {},
+     "coordinates": null
+    },
+    "rows": [
+     [
+      "a",
+      "firm"
+     ],
+     [
+      "x",
+      "soft"
+     ],
+     [
+      "x",
+      "soft"
+     ]
+    ]
+   },
+   "sha256": "54e3107e429a3ac53ce004f5873295388243973917a415fde381bf13fb48614d"
+  },
+  "postgresql/int64-limits": {
+   "what": "both signed 64-bit limits and 2**53+1 as decimal strings, sorted numerically by the key",
+   "ddl": [
+    "CREATE TABLE limits (v bigint PRIMARY KEY)"
+   ],
+   "inserts": [
+    "INSERT INTO limits VALUES (9223372036854775807), (0), (-9223372036854775808), (9007199254740993), (-1)"
+   ],
+   "declaration": {
+    "profile": "table/1",
+    "key": [
+     "v"
+    ],
+    "columns": {},
+    "coordinates": null
+   },
+   "payload": {
+    "schema": "ophiolite.table/1",
+    "encoding": "table-encoding/1",
+    "columns": [
+     {
+      "name": "v",
+      "db_type": "bigint",
+      "logical": "integer",
+      "nullable": false,
+      "comment": null,
+      "read": true
+     }
+    ],
+    "key": [
+     "v"
+    ],
+    "declarations": {
+     "columns": {},
+     "coordinates": null
+    },
+    "rows": [
+     [
+      "-9223372036854775808"
+     ],
+     [
+      "-1"
+     ],
+     [
+      "0"
+     ],
+     [
+      "9007199254740993"
+     ],
+     [
+      "9223372036854775807"
+     ]
+    ]
+   },
+   "sha256": "012f6bbd7ff8321f0d5f564ff46651938a30da6fbf1a08a6ba1c7412d84c6928"
+  },
+  "postgresql/decimal-scales": {
+   "what": "numeric keeps its declared scale; an unconstrained numeric keeps the scale stored",
+   "ddl": [
+    "CREATE TABLE amounts (id integer PRIMARY KEY, amount numeric(12,3), plain numeric)"
+   ],
+   "inserts": [
+    "INSERT INTO amounts VALUES (3, -0.5, 12345678901234567.125), (1, 1520.25, 1.10), (2, 0, 100)"
+   ],
+   "declaration": {
+    "profile": "table/1",
+    "key": [
+     "id"
+    ],
+    "columns": {},
+    "coordinates": null
+   },
+   "payload": {
+    "schema": "ophiolite.table/1",
+    "encoding": "table-encoding/1",
+    "columns": [
+     {
+      "name": "id",
+      "db_type": "integer",
+      "logical": "integer",
+      "nullable": false,
+      "comment": null,
+      "read": true
+     },
+     {
+      "name": "amount",
+      "db_type": "numeric(12,3)",
+      "logical": "decimal",
+      "nullable": true,
+      "comment": null,
+      "read": true
+     },
+     {
+      "name": "plain",
+      "db_type": "numeric",
+      "logical": "decimal",
+      "nullable": true,
+      "comment": null,
+      "read": true
+     }
+    ],
+    "key": [
+     "id"
+    ],
+    "declarations": {
+     "columns": {},
+     "coordinates": null
+    },
+    "rows": [
+     [
+      "1",
+      "1520.250",
+      "1.10"
+     ],
+     [
+      "2",
+      "0.000",
+      "100"
+     ],
+     [
+      "3",
+      "-0.500",
+      "12345678901234567.125"
+     ]
+    ]
+   },
+   "sha256": "23abdb796f4b0385ad3b3f3930a5b818e3baef21e403adf4d8314c7866773144"
+  },
+  "postgresql/float-edges": {
+   "what": "shortest round trip: -0.0 kept, 1e300, the smallest subnormal, 0.1 + 0.2, and a real read as its own shortest text",
+   "ddl": [
+    "CREATE TABLE floats (id integer PRIMARY KEY, d double precision, r real)"
+   ],
+   "inserts": [
+    "INSERT INTO floats VALUES (1, '-0', 0.1), (2, 1e300, -2.5), (3, 5e-324, NULL), (4, 0.1::float8 + 0.2::float8, 3.4028235e38)"
+   ],
+   "declaration": {
+    "profile": "table/1",
+    "key": [
+     "id"
+    ],
+    "columns": {},
+    "coordinates": null
+   },
+   "payload": {
+    "schema": "ophiolite.table/1",
+    "encoding": "table-encoding/1",
+    "columns": [
+     {
+      "name": "id",
+      "db_type": "integer",
+      "logical": "integer",
+      "nullable": false,
+      "comment": null,
+      "read": true
+     },
+     {
+      "name": "d",
+      "db_type": "double precision",
+      "logical": "float",
+      "nullable": true,
+      "comment": null,
+      "read": true
+     },
+     {
+      "name": "r",
+      "db_type": "real",
+      "logical": "float",
+      "nullable": true,
+      "comment": null,
+      "read": true
+     }
+    ],
+    "key": [
+     "id"
+    ],
+    "declarations": {
+     "columns": {},
+     "coordinates": null
+    },
+    "rows": [
+     [
+      "1",
+      -0.0,
+      0.1
+     ],
+     [
+      "2",
+      1e+300,
+      -2.5
+     ],
+     [
+      "3",
+      5e-324,
+      null
+     ],
+     [
+      "4",
+      0.30000000000000004,
+      3.4028235e+38
+     ]
+    ]
+   },
+   "sha256": "baeb6ec61e4a60cb4f90dca9e3c8fb0478bb43f53352ca70ac7b9c4df7ab5f13"
+  },
+  "postgresql/temporal-edges": {
+   "what": "infinity tokens, 1 BC and 44 BC, year 10000, fractions without trailing zeros, a zone converted to UTC",
+   "ddl": [
+    "CREATE TABLE times (id integer PRIMARY KEY, day date, at timestamp, atz timestamp with time zone)"
+   ],
+   "inserts": [
+    "INSERT INTO times VALUES (1, 'infinity', '-infinity', 'infinity'), (2, '0044-03-15 BC', '0001-01-01 00:00:00 BC', '2026-01-01 12:00:00.120+02'), (3, '10000-01-01', '9999-12-31 23:59:59.999999', '0001-01-01 00:00:00+00'), (4, '2024-02-29', '2026-01-01 00:00:00.5', '1999-12-31 23:30:00-01:30')"
+   ],
+   "declaration": {
+    "profile": "table/1",
+    "key": [
+     "id"
+    ],
+    "columns": {},
+    "coordinates": null
+   },
+   "payload": {
+    "schema": "ophiolite.table/1",
+    "encoding": "table-encoding/1",
+    "columns": [
+     {
+      "name": "id",
+      "db_type": "integer",
+      "logical": "integer",
+      "nullable": false,
+      "comment": null,
+      "read": true
+     },
+     {
+      "name": "day",
+      "db_type": "date",
+      "logical": "date",
+      "nullable": true,
+      "comment": null,
+      "read": true
+     },
+     {
+      "name": "at",
+      "db_type": "timestamp without time zone",
+      "logical": "timestamp",
+      "nullable": true,
+      "comment": null,
+      "read": true
+     },
+     {
+      "name": "atz",
+      "db_type": "timestamp with time zone",
+      "logical": "timestamptz",
+      "nullable": true,
+      "comment": null,
+      "read": true
+     }
+    ],
+    "key": [
+     "id"
+    ],
+    "declarations": {
+     "columns": {},
+     "coordinates": null
+    },
+    "rows": [
+     [
+      "1",
+      "infinity",
+      "-infinity",
+      "infinity"
+     ],
+     [
+      "2",
+      "-0043-03-15",
+      "0000-01-01T00:00:00",
+      "2026-01-01T10:00:00.12Z"
+     ],
+     [
+      "3",
+      "10000-01-01",
+      "9999-12-31T23:59:59.999999",
+      "0001-01-01T00:00:00Z"
+     ],
+     [
+      "4",
+      "2024-02-29",
+      "2026-01-01T00:00:00.5",
+      "2000-01-01T01:00:00Z"
+     ]
+    ]
+   },
+   "sha256": "678ec6e71067bfed5798f0df99041d373b23b2c5fdc161db36dabf1f44b4d5c1"
+  },
+  "postgresql/unicode-text": {
+   "what": "text as stored, no normalisation (composed and decomposed e-acute stay two values); non-ASCII escaped by canonical JSON before sorting",
+   "ddl": [
+    "CREATE TABLE names (name text, flag boolean)"
+   ],
+   "inserts": [
+    "INSERT INTO names VALUES ('Zuid-Holland', true), ('Groningen ü', false), ('日本', NULL), ('café', true), ('café', true)"
+   ],
+   "declaration": {
+    "profile": "table/1",
+    "key": null,
+    "columns": {},
+    "coordinates": null
+   },
+   "payload": {
+    "schema": "ophiolite.table/1",
+    "encoding": "table-encoding/1",
+    "columns": [
+     {
+      "name": "name",
+      "db_type": "text",
+      "logical": "text",
+      "nullable": true,
+      "comment": null,
+      "read": true
+     },
+     {
+      "name": "flag",
+      "db_type": "boolean",
+      "logical": "boolean",
+      "nullable": true,
+      "comment": null,
+      "read": true
+     }
+    ],
+    "key": null,
+    "declarations": {
+     "columns": {},
+     "coordinates": null
+    },
+    "rows": [
+     [
+      "Groningen ü",
+      false
+     ],
+     [
+      "Zuid-Holland",
+      true
+     ],
+     [
+      "日本",
+      null
+     ],
+     [
+      "café",
+      true
+     ],
+     [
+      "café",
+      true
+     ]
+    ]
+   },
+   "sha256": "a2c7ffe000c5d2745e3c1ec8828223fc3e2f7e6194ad68d6c22f41cee380ae1e"
+  },
+  "sqlite/keyed-composite": {
+   "what": "ADR 0020 5a on SQLite: NUMERIC is not read; the key sorts integers numerically",
+   "ddl": [
+    "CREATE TABLE picks (well TEXT NOT NULL, depth_m INTEGER NOT NULL, formation TEXT, porosity REAL, notes NUMERIC, PRIMARY KEY (well, depth_m))"
+   ],
+   "inserts": [
+    "INSERT INTO picks VALUES ('B-2', 1000, 'Slochteren', 0.18, 1), ('A-1', 1000, 'Slochteren', 0.21, NULL), ('A-1', 900, 'Ten Boer', 0.05, 2), ('B-2', 950, NULL, NULL, NULL)"
+   ],
+   "declaration": {
+    "profile": "table/1",
+    "key": [
+     "well",
+     "depth_m"
+    ],
+    "columns": {
+     "depth_m": {
+      "description": "Measured depth of the pick",
+      "unit": "m",
+      "missing": null
+     }
+    },
+    "coordinates": null
+   },
+   "payload": {
+    "schema": "ophiolite.table/1",
+    "encoding": "table-encoding/1",
+    "columns": [
+     {
+      "name": "well",
+      "db_type": "TEXT",
+      "logical": "text",
+      "nullable": false,
+      "comment": null,
+      "read": true
+     },
+     {
+      "name": "depth_m",
+      "db_type": "INTEGER",
+      "logical": "integer",
+      "nullable": false,
+      "comment": null,
+      "read": true
+     },
+     {
+      "name": "formation",
+      "db_type": "TEXT",
+      "logical": "text",
+      "nullable": true,
+      "comment": null,
+      "read": true
+     },
+     {
+      "name": "porosity",
+      "db_type": "REAL",
+      "logical": "float",
+      "nullable": true,
+      "comment": null,
+      "read": true
+     },
+     {
+      "name": "notes",
+      "db_type": "NUMERIC",
+      "logical": null,
+      "nullable": true,
+      "comment": null,
+      "read": false
+     }
+    ],
+    "key": [
+     "well",
+     "depth_m"
+    ],
+    "declarations": {
+     "columns": {
+      "depth_m": {
+       "description": "Measured depth of the pick",
+       "unit": "m",
+       "missing": null
+      }
+     },
+     "coordinates": null
+    },
+    "rows": [
+     [
+      "A-1",
+      "900",
+      "Ten Boer",
+      0.05
+     ],
+     [
+      "A-1",
+      "1000",
+      "Slochteren",
+      0.21
+     ],
+     [
+      "B-2",
+      "950",
+      null,
+      null
+     ],
+     [
+      "B-2",
+      "1000",
+      "Slochteren",
+      0.18
+     ]
+    ]
+   },
+   "sha256": "091e52ef175d3f2b4ff449b72f4a9d16db0ff754a73b5c1477229891842190e4"
+  },
+  "sqlite/unkeyed-duplicates": {
+   "what": "ADR 0020 5b on SQLite",
+   "ddl": [
+    "CREATE TABLE samples (lab TEXT, grade TEXT)"
+   ],
+   "inserts": [
+    "INSERT INTO samples VALUES ('x', 'soft'), ('a', 'firm'), ('x', 'soft')"
+   ],
+   "declaration": {
+    "profile": "table/1",
+    "key": null,
+    "columns": {},
+    "coordinates": null
+   },
+   "payload": {
+    "schema": "ophiolite.table/1",
+    "encoding": "table-encoding/1",
+    "columns": [
+     {
+      "name": "lab",
+      "db_type": "TEXT",
+      "logical": "text",
+      "nullable": true,
+      "comment": null,
+      "read": true
+     },
+     {
+      "name": "grade",
+      "db_type": "TEXT",
+      "logical": "text",
+      "nullable": true,
+      "comment": null,
+      "read": true
+     }
+    ],
+    "key": null,
+    "declarations": {
+     "columns": {},
+     "coordinates": null
+    },
+    "rows": [
+     [
+      "a",
+      "firm"
+     ],
+     [
+      "x",
+      "soft"
+     ],
+     [
+      "x",
+      "soft"
+     ]
+    ]
+   },
+   "sha256": "fccdee4b445fff9c8dab56abac7d17ae2debfc39dbb1f991e092a654bbaefdde"
+  },
+  "sqlite/int64-limits": {
+   "what": "both signed 64-bit limits and 2**53+1 on SQLite",
+   "ddl": [
+    "CREATE TABLE limits (v INTEGER PRIMARY KEY)"
+   ],
+   "inserts": [
+    "INSERT INTO limits VALUES (9223372036854775807), (0), (-9223372036854775808), (9007199254740993), (-1)"
+   ],
+   "declaration": {
+    "profile": "table/1",
+    "key": [
+     "v"
+    ],
+    "columns": {},
+    "coordinates": null
+   },
+   "payload": {
+    "schema": "ophiolite.table/1",
+    "encoding": "table-encoding/1",
+    "columns": [
+     {
+      "name": "v",
+      "db_type": "INTEGER",
+      "logical": "integer",
+      "nullable": true,
+      "comment": null,
+      "read": true
+     }
+    ],
+    "key": [
+     "v"
+    ],
+    "declarations": {
+     "columns": {},
+     "coordinates": null
+    },
+    "rows": [
+     [
+      "-9223372036854775808"
+     ],
+     [
+      "-1"
+     ],
+     [
+      "0"
+     ],
+     [
+      "9007199254740993"
+     ],
+     [
+      "9223372036854775807"
+     ]
+    ]
+   },
+   "sha256": "baae15f7e7d673a3f1e48e0c5b5a08c1ce28c837b1be417201d96ef9bd92b7ac"
+  },
+  "sqlite/float-edges": {
+   "what": "shortest round trip on SQLite (REAL stores -0.0 as 0.0, so no -0.0 vector)",
+   "ddl": [
+    "CREATE TABLE floats (id INTEGER PRIMARY KEY, d REAL)"
+   ],
+   "inserts": [
+    "INSERT INTO floats VALUES (2, 1e300), (3, 5e-324), (4, 0.1 + 0.2), (1, 0.0)"
+   ],
+   "declaration": {
+    "profile": "table/1",
+    "key": [
+     "id"
+    ],
+    "columns": {},
+    "coordinates": null
+   },
+   "payload": {
+    "schema": "ophiolite.table/1",
+    "encoding": "table-encoding/1",
+    "columns": [
+     {
+      "name": "id",
+      "db_type": "INTEGER",
+      "logical": "integer",
+      "nullable": true,
+      "comment": null,
+      "read": true
+     },
+     {
+      "name": "d",
+      "db_type": "REAL",
+      "logical": "float",
+      "nullable": true,
+      "comment": null,
+      "read": true
+     }
+    ],
+    "key": [
+     "id"
+    ],
+    "declarations": {
+     "columns": {},
+     "coordinates": null
+    },
+    "rows": [
+     [
+      "1",
+      0.0
+     ],
+     [
+      "2",
+      1e+300
+     ],
+     [
+      "3",
+      5e-324
+     ],
+     [
+      "4",
+      0.30000000000000004
+     ]
+    ]
+   },
+   "sha256": "65d615071566c2bf016f18ac9f60bdbf3c758a9f67ace679ef24aa2e22c24979"
+  },
+  "sqlite/unicode-text": {
+   "what": "text as stored on SQLite; BOOLEAN 0 or 1",
+   "ddl": [
+    "CREATE TABLE names (name TEXT, flag BOOLEAN)"
+   ],
+   "inserts": [
+    "INSERT INTO names VALUES ('Zuid-Holland', 1), ('Groningen ü', 0), ('日本', NULL), ('café', 1), ('café', 1)"
+   ],
+   "declaration": {
+    "profile": "table/1",
+    "key": null,
+    "columns": {},
+    "coordinates": null
+   },
+   "payload": {
+    "schema": "ophiolite.table/1",
+    "encoding": "table-encoding/1",
+    "columns": [
+     {
+      "name": "name",
+      "db_type": "TEXT",
+      "logical": "text",
+      "nullable": true,
+      "comment": null,
+      "read": true
+     },
+     {
+      "name": "flag",
+      "db_type": "BOOLEAN",
+      "logical": "boolean",
+      "nullable": true,
+      "comment": null,
+      "read": true
+     }
+    ],
+    "key": null,
+    "declarations": {
+     "columns": {},
+     "coordinates": null
+    },
+    "rows": [
+     [
+      "Groningen ü",
+      false
+     ],
+     [
+      "Zuid-Holland",
+      true
+     ],
+     [
+      "日本",
+      null
+     ],
+     [
+      "café",
+      true
+     ],
+     [
+      "café",
+      true
+     ]
+    ]
+   },
+   "sha256": "e043091da3d97f3799016dee5595f1d9901d81b8c58d77a3fec84a8f341ce978"
+  },
+  "sqlite/temporal-sqlite-iso": {
+   "what": "ISO text with a space or T, up to nine fraction digits, written with T and without trailing zeros",
+   "ddl": [
+    "CREATE TABLE times (id INTEGER PRIMARY KEY, day DATE, at TIMESTAMP)"
+   ],
+   "inserts": [
+    "INSERT INTO times VALUES (1, '2024-02-29', '2026-01-01 10:00:00.120'), (2, '0001-01-01', '2026-01-01T10:00:00.123456789'), (3, '9999-12-31', '2026-01-01T00:00:00')"
+   ],
+   "declaration": {
+    "profile": "table/1",
+    "key": [
+     "id"
+    ],
+    "columns": {},
+    "coordinates": null
+   },
+   "payload": {
+    "schema": "ophiolite.table/1",
+    "encoding": "table-encoding/1",
+    "columns": [
+     {
+      "name": "id",
+      "db_type": "INTEGER",
+      "logical": "integer",
+      "nullable": true,
+      "comment": null,
+      "read": true
+     },
+     {
+      "name": "day",
+      "db_type": "DATE",
+      "logical": "date",
+      "nullable": true,
+      "comment": null,
+      "read": true
+     },
+     {
+      "name": "at",
+      "db_type": "TIMESTAMP",
+      "logical": "timestamp",
+      "nullable": true,
+      "comment": null,
+      "read": true
+     }
+    ],
+    "key": [
+     "id"
+    ],
+    "declarations": {
+     "columns": {},
+     "coordinates": null
+    },
+    "rows": [
+     [
+      "1",
+      "2024-02-29",
+      "2026-01-01T10:00:00.12"
+     ],
+     [
+      "2",
+      "0001-01-01",
+      "2026-01-01T10:00:00.123456789"
+     ],
+     [
+      "3",
+      "9999-12-31",
+      "2026-01-01T00:00:00"
+     ]
+    ]
+   },
+   "sha256": "abd506bf68835950f0fb140a50631bb7a3461887cfbfd35f2e1d79daaf7579bf"
+  }
+ }
+}

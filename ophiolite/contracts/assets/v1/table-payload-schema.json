@@ -1,0 +1,294 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/assets/v1/table-payload-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.table/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "title": "Table",
+  "description": "A table read from a connected SQL database as ADR 0020 section 3 states it: every column with its database and logical type, the declared key, the person's declarations and the rows of the columns read, in canonical order (D4). The revision is the SHA-256 of the canonical JSON of this object.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "encoding",
+    "columns",
+    "key",
+    "declarations",
+    "rows"
+  ],
+  "properties": {
+    "schema": {
+      "const": "ophiolite.table/1"
+    },
+    "encoding": {
+      "const": "table-encoding/1",
+      "description": "The serialisation policy version (ADR 0020 D2, D4); a change is a reviewed event."
+    },
+    "columns": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 128,
+      "description": "Every column, in table order; `read: false` columns are listed and absent from rows.",
+      "items": {
+        "$ref": "#/$defs/TableColumn"
+      }
+    },
+    "key": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 63
+          }
+        }
+      ],
+      "description": "The declared key, or null for an unkeyed table."
+    },
+    "declarations": {
+      "$ref": "#/$defs/TableDeclarations"
+    },
+    "rows": {
+      "type": "array",
+      "maxItems": 100000,
+      "description": "Arrays in the order of the columns with read true.",
+      "items": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/TableCell"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "TableColumn": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/TableReadColumn"
+        },
+        {
+          "$ref": "#/$defs/TableNotReadColumn"
+        }
+      ]
+    },
+    "TableReadColumn": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "db_type",
+        "logical",
+        "nullable",
+        "comment",
+        "read"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 63
+        },
+        "db_type": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "The database's own type, verbatim: numeric(12,3), timestamp(3) with time zone, a domain name, or a SQLite declaration (empty when none)."
+        },
+        "logical": {
+          "enum": [
+            "text",
+            "integer",
+            "float",
+            "decimal",
+            "boolean",
+            "date",
+            "timestamp",
+            "timestamptz"
+          ]
+        },
+        "nullable": {
+          "type": "boolean"
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "read": {
+          "const": true
+        }
+      },
+      "description": "A column read: its values are in rows, written as its logical type."
+    },
+    "TableNotReadColumn": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "db_type",
+        "logical",
+        "nullable",
+        "comment",
+        "read"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 63
+        },
+        "db_type": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "The database's own type, verbatim: numeric(12,3), timestamp(3) with time zone, a domain name, or a SQLite declaration (empty when none)."
+        },
+        "logical": {
+          "type": "null"
+        },
+        "nullable": {
+          "type": "boolean"
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "read": {
+          "const": false
+        }
+      },
+      "description": "A column of a type outside the eight (ADR 0020 D2): listed by name and type, its values absent from rows and from the digest."
+    },
+    "TableDeclarations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "columns",
+        "coordinates"
+      ],
+      "properties": {
+        "columns": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/TableAnnotation"
+          }
+        },
+        "coordinates": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "x",
+                "y",
+                "crs"
+              ],
+              "properties": {
+                "x": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 63
+                },
+                "y": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 63
+                },
+                "crs": {
+                  "type": "string",
+                  "pattern": "^EPSG:[0-9]{4,6}$"
+                }
+              }
+            }
+          ],
+          "description": "The x and y columns and the CRS they are stated in: a declaration about stored values, never applied or converted."
+        }
+      }
+    },
+    "TableAnnotation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "description",
+        "unit",
+        "missing"
+      ],
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            }
+          ]
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 32
+            }
+          ]
+        },
+        "missing": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            }
+          ],
+          "description": "A declared missing-value marker in the column's own encoding; values equal to it stay in rows (D3)."
+        }
+      }
+    },
+    "TableCell": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        }
+      ],
+      "description": "integer, decimal and temporal values as text, float as a JSON number, boolean, or null."
+    }
+  }
+}
