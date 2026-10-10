@@ -1849,7 +1849,7 @@
     },
     {
       "path": "tests/fixtures/views/decreasing.json",
-      "sha256": "ed7082c77508263d117335221e745cd37cdab2cc852c35442f4b120f797a9d07",
+      "sha256": "a50151276d28047e3ca4ee03a8f27d40bb6fb5918362dd6537c2e3b86109d282",
       "origin": "E4 original synthetic two-curve LAS and independently declared expected arrays/metadata",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1857,7 +1857,7 @@
     },
     {
       "path": "tests/fixtures/views/duplicates.json",
-      "sha256": "cfa73a4fbcd1c734b390bc5c98ed5341bd4510e7039356bda5ae6636f3c03997",
+      "sha256": "30d5c8dffbdab4fa04bce8bd602738acfc4164c4e9e3072845e873b05383852c",
       "origin": "E4 original synthetic two-curve LAS and independently declared expected arrays/metadata",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1865,7 +1865,7 @@
     },
     {
       "path": "tests/fixtures/views/increasing.json",
-      "sha256": "4f9d4871f99eaa656ee6b8b23f9670a7f956bdf6d6623db034f3784e0c123394",
+      "sha256": "f14ba0c52b2ec9147da5da43a68d142183a9770dbf137195024ec4f844f23c2a",
       "origin": "E4 original synthetic two-curve LAS and independently declared expected arrays/metadata",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",

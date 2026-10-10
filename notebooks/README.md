@@ -14,6 +14,7 @@ Without `OPHIOLITE_URL` they work on a synthetic log served on the reader's own 
 | `a-well-folder-in-one-report/` | A folder of logs uploaded in one step, one report per file, and the wellbores the logs name |
 | `grids-and-gis-files/` | Two field outlines drawn as a GIS file stores them (a hole kept empty), what the file leaves open, upload and read back |
 | `how-was-this-made/` | Two versions of one result, how each was made, what changed, what was made from the log, and making it again |
+| `open-it-here/` | A result shown by name and version, its exact version opened in the Workspace, and Send again run twice, then refused after a newer version |
 
 `gallery.json` lists every notebook (slug, title, sentence, modes, data); the documentation site's gallery page is
 generated from it. Each folder holds `notebook.py`, the percent script you edit, and `notebook.ipynb`, built from it:

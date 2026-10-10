@@ -65,6 +65,13 @@
       "data": "A synthetic five-sample gamma-ray log, or a log in your project; publishing creates a result only you can see until you share it."
     },
     {
+      "slug": "open-it-here",
+      "title": "Open it here",
+      "sentence": "Publish a result, open its exact version in the Workspace from the notebook, and add the next version with its Send again line, which refuses once someone else added one first.",
+      "modes": ["synthetic", "live"],
+      "data": "A synthetic five-sample gamma-ray log, or a log in your project; publishing creates a result only you can see until you share it."
+    },
+    {
       "slug": "a-spreadsheet-becomes-wells-and-tops",
       "title": "A spreadsheet becomes wells and tops",
       "sentence": "Say which column holds what, review what a table of formation tops would add, then add it and read one line per set.",

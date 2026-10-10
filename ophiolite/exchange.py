@@ -470,10 +470,12 @@ class Exchange:
 
     # send to project
 
-    def send(self, data, *, name, profile, how, based_on=(), of=None, declare=None, extra=None):
+    def send(self, data, *, name, profile, how, based_on=(), of=None, declare=None, extra=None, expected=None):
         """Publish `data` as a new item, or (with `of`, a held item) as its next version. The parent is the version
         this folder holds, never the project's head; `based_on` are held items. The complete request is saved before
-        it is sent, so running the same send again after a crash never publishes twice."""
+        it is sent, so running the same send again after a crash never publishes twice. `expected` (with `of`) is the
+        revision the caller built on: when this folder holds another one, nothing is sent (E104). It only refuses, is
+        not part of the saved request, and a retry of an unfinished send never reads it."""
         if isinstance(data, (str, Path)): data = Path(data).read_bytes()
         if not isinstance(data, (bytes, bytearray)) or not data: self._raise('not-valid', {'reasons': 'the file is empty'})
         data = bytes(data)
@@ -501,6 +503,10 @@ class Exchange:
                 missing = [i for i in ([of] if of is not None else []) + list(based_on) if i not in record['items']]
                 if missing:
                     self._raise('not-held', {'name': self._name(record['items'].get(missing[0]), 'that item')}, {'asset_id': missing[0]})
+                if expected is not None and of is None:
+                    self._raise('not-valid', {'reasons': 'name the item this is a new version of, together with the version it builds on'})
+                if expected is not None and expected != record['items'][of]['revision']:  # before same_content: identical bytes are still refused
+                    self._raise('newer-version-exists', {'name': self._name(record['items'][of])})
                 if of is not None and self.transport.same_content(record['items'][of], request):
                     held = record['items'][of]
                     self._raise('nothing-changed', {'name': self._name(held), 'number': held.get('number')})
