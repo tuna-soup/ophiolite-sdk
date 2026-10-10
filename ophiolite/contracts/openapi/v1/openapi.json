@@ -5,7 +5,7 @@
     "version": "1.0.0-pilot",
     "description": "One public API for every project operation. Three credential kinds reach it: the browser session (opaque HttpOnly cookie plus the X-CSRF-Token proof and, on non-GET requests, the exact Origin), a project-scoped delegate lasting at most five minutes (Bearer oph_api_..., parent session and current native permissions remain mandatory), and a browser-approved provider grant (Bearer provider token plus X-Ophiolite-Application-Grant; capability 1: the scientific read resources and the applications route within its read/write scopes; capability 3 adds reading wells, wellbores and lineage and the LAS upload routes). A request that carries an Authorization header is a machine request and is refused with MACHINE_AUTH_REQUIRED when a cookie or Origin travels with it. Scope and capability are ceilings; every operation runs the same native permission checks whoever calls it. Not a stable SDK or unattended service-account contract.",
     "x-ophiolite-contracts": {
-      "registry_version": "1.26.0",
+      "registry_version": "1.27.0",
       "index": "/api/v1/contracts",
       "served_profiles": [
         "las2/1",
@@ -23,7 +23,13 @@
         "wavelet-text/1",
         "model-section-text/1",
         "seismic-section-text/1",
-        "time-depth-csv/1"
+        "time-depth-csv/1",
+        "zmap-plus-grid/1",
+        "cps3-ascii-grid/1",
+        "irap-ascii-grid/1",
+        "esri-shapefile/1",
+        "ogc-geopackage/1",
+        "geojson/1"
       ]
     },
     "x-ophiolite-capabilities": {
@@ -14810,6 +14816,1179 @@
         }
       }
     },
+    "/api/v1/projects/{project}/checks/compare": {
+      "post": {
+        "summary": "Compare a result you can read with a file of yours; the comparison is kept for you (at most 20 for one version)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "x-ophiolite": {
+                    "id": "ophiolite.check/1",
+                    "version": "1.0.0",
+                    "lifecycle": "preview"
+                  },
+                  "additionalProperties": false,
+                  "description": "Your comparison, kept for you, with the words to show it.",
+                  "properties": {
+                    "schema": {
+                      "const": "ophiolite.check/1",
+                      "title": "Schema",
+                      "type": "string"
+                    },
+                    "subject": {
+                      "discriminator": {
+                        "mapping": {
+                          "implementation": "#/components/schemas/CheckImplementationSubject",
+                          "result": "#/components/schemas/CheckResultSubject"
+                        },
+                        "propertyName": "kind"
+                      },
+                      "oneOf": [
+                        {
+                          "$ref": "#/components/schemas/CheckImplementationSubject"
+                        },
+                        {
+                          "$ref": "#/components/schemas/CheckResultSubject"
+                        }
+                      ],
+                      "title": "Subject"
+                    },
+                    "fixture": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/CheckFixture"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "reference": {
+                      "$ref": "#/components/schemas/CheckReference"
+                    },
+                    "output_digest": {
+                      "pattern": "^[0-9a-f]{64}$",
+                      "title": "Output Digest",
+                      "type": "string"
+                    },
+                    "rules_id": {
+                      "enum": [
+                        "series-compare/1",
+                        "grid-compare/1"
+                      ],
+                      "title": "Rules Id",
+                      "type": "string"
+                    },
+                    "tolerance": {
+                      "anyOf": [
+                        {
+                          "discriminator": {
+                            "mapping": {
+                              "absolute": "#/components/schemas/AbsoluteTolerance",
+                              "relative": "#/components/schemas/RelativeTolerance"
+                            },
+                            "propertyName": "kind"
+                          },
+                          "oneOf": [
+                            {
+                              "$ref": "#/components/schemas/AbsoluteTolerance"
+                            },
+                            {
+                              "$ref": "#/components/schemas/RelativeTolerance"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Tolerance"
+                    },
+                    "request_digest": {
+                      "anyOf": [
+                        {
+                          "pattern": "^[0-9a-f]{64}$",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Request Digest"
+                    },
+                    "interpretation_digest": {
+                      "anyOf": [
+                        {
+                          "pattern": "^[0-9a-f]{64}$",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Interpretation Digest"
+                    },
+                    "outcome": {
+                      "enum": [
+                        "passed",
+                        "differed",
+                        "not_compared"
+                      ],
+                      "title": "Outcome",
+                      "type": "string"
+                    },
+                    "reason": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "axis_mismatch",
+                            "unit_mismatch",
+                            "context_mismatch",
+                            "shape_mismatch",
+                            "another_kind",
+                            "declarations_missing",
+                            "declarations_incompatible",
+                            "unreadable",
+                            "too_large",
+                            "empty",
+                            "no_such_curve"
+                          ],
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Reason"
+                    },
+                    "differences": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/CheckDifferences"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "witness": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "server",
+                            "claimed",
+                            "personal"
+                          ],
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Witness"
+                    },
+                    "recorded_by": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/CheckPrincipal"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "command_id": {
+                      "anyOf": [
+                        {
+                          "maxLength": 128,
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Command Id"
+                    },
+                    "at": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "At"
+                    },
+                    "server_output_digest": {
+                      "anyOf": [
+                        {
+                          "pattern": "^[0-9a-f]{64}$",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Server Output Digest"
+                    },
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "interpretation": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": {
+                            "type": "string"
+                          },
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "A grid: the confirmed envelope, whose digest is interpretation_digest",
+                      "title": "Interpretation"
+                    },
+                    "bound": {
+                      "description": "The allowed difference in words (\"Exactly equal\", \"Within 0.01 metres\")",
+                      "title": "Bound",
+                      "type": "string"
+                    },
+                    "sentence": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "Not compared because the file is another kind: the sentence to show",
+                      "title": "Sentence"
+                    },
+                    "fields": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "declarations_missing or declarations_incompatible: the declarations concerned",
+                      "title": "Fields"
+                    }
+                  },
+                  "required": [
+                    "schema",
+                    "subject",
+                    "fixture",
+                    "reference",
+                    "output_digest",
+                    "rules_id",
+                    "tolerance",
+                    "request_digest",
+                    "interpretation_digest",
+                    "outcome",
+                    "reason",
+                    "differences",
+                    "id",
+                    "bound"
+                  ],
+                  "title": "ComparedCheck",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "The same command id and body answer the same comparison",
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "description": "The result to compare with",
+                    "title": "Asset Id",
+                    "type": "string"
+                  },
+                  "revision": {
+                    "description": "Its exact version",
+                    "title": "Revision",
+                    "type": "string"
+                  },
+                  "curve": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "A well log: the curve to compare (its mnemonic in your file and in the result)",
+                    "title": "Curve"
+                  },
+                  "file_name": {
+                    "anyOf": [
+                      {
+                        "maxLength": 200,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Your file's name, used to recognise its kind",
+                    "title": "File Name"
+                  },
+                  "files": {
+                    "$ref": "#/components/schemas/CheckCompareFile"
+                  },
+                  "tolerance": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Absent: exactly equal. {kind: absolute, value, unit} in the compared unit, or {kind: relative, value}; a value is a finite number of at least 0 (refused tolerance otherwise)",
+                    "title": "Tolerance"
+                  },
+                  "interpretation": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "A grid result: your file's confirmed interpretation envelope (required; refused schema without it)",
+                    "title": "Interpretation"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "command_id",
+                  "asset_id",
+                  "revision",
+                  "files"
+                ],
+                "title": "CheckCompareRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/checks/list": {
+      "post": {
+        "summary": "The check records of an implementation or of a result you can read, grouped by key, with disagreements",
+        "description": "Scope read; accepted principals: session, delegate, workload; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session",
+          "workload"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "records": {
+                      "items": {
+                        "$ref": "#/components/schemas/StoredCheck"
+                      },
+                      "title": "Records",
+                      "type": "array"
+                    },
+                    "groups": {
+                      "items": {
+                        "$ref": "#/components/schemas/CheckGroup"
+                      },
+                      "title": "Groups",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "records",
+                    "groups"
+                  ],
+                  "title": "CheckList",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "subject": {
+                    "$ref": "#/components/schemas/CheckSubjectQuery"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "subject"
+                ],
+                "title": "CheckListRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/checks/publish": {
+      "post": {
+        "summary": "Publish a check record with its fixture, reference and output files; the server runs a registered implementation itself (witness server) or stores it claimed",
+        "description": "Scope write; accepted principals: session, delegate, workload; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session",
+          "workload"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "x-ophiolite": {
+                    "id": "ophiolite.check/1",
+                    "version": "1.0.0",
+                    "lifecycle": "preview"
+                  },
+                  "additionalProperties": false,
+                  "description": "A stored check record with its id.",
+                  "properties": {
+                    "schema": {
+                      "const": "ophiolite.check/1",
+                      "title": "Schema",
+                      "type": "string"
+                    },
+                    "subject": {
+                      "discriminator": {
+                        "mapping": {
+                          "implementation": "#/components/schemas/CheckImplementationSubject",
+                          "result": "#/components/schemas/CheckResultSubject"
+                        },
+                        "propertyName": "kind"
+                      },
+                      "oneOf": [
+                        {
+                          "$ref": "#/components/schemas/CheckImplementationSubject"
+                        },
+                        {
+                          "$ref": "#/components/schemas/CheckResultSubject"
+                        }
+                      ],
+                      "title": "Subject"
+                    },
+                    "fixture": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/CheckFixture"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "reference": {
+                      "$ref": "#/components/schemas/CheckReference"
+                    },
+                    "output_digest": {
+                      "pattern": "^[0-9a-f]{64}$",
+                      "title": "Output Digest",
+                      "type": "string"
+                    },
+                    "rules_id": {
+                      "enum": [
+                        "series-compare/1",
+                        "grid-compare/1"
+                      ],
+                      "title": "Rules Id",
+                      "type": "string"
+                    },
+                    "tolerance": {
+                      "anyOf": [
+                        {
+                          "discriminator": {
+                            "mapping": {
+                              "absolute": "#/components/schemas/AbsoluteTolerance",
+                              "relative": "#/components/schemas/RelativeTolerance"
+                            },
+                            "propertyName": "kind"
+                          },
+                          "oneOf": [
+                            {
+                              "$ref": "#/components/schemas/AbsoluteTolerance"
+                            },
+                            {
+                              "$ref": "#/components/schemas/RelativeTolerance"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Tolerance"
+                    },
+                    "request_digest": {
+                      "anyOf": [
+                        {
+                          "pattern": "^[0-9a-f]{64}$",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Request Digest"
+                    },
+                    "interpretation_digest": {
+                      "anyOf": [
+                        {
+                          "pattern": "^[0-9a-f]{64}$",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Interpretation Digest"
+                    },
+                    "outcome": {
+                      "enum": [
+                        "passed",
+                        "differed",
+                        "not_compared"
+                      ],
+                      "title": "Outcome",
+                      "type": "string"
+                    },
+                    "reason": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "axis_mismatch",
+                            "unit_mismatch",
+                            "context_mismatch",
+                            "shape_mismatch",
+                            "another_kind",
+                            "declarations_missing",
+                            "declarations_incompatible",
+                            "unreadable",
+                            "too_large",
+                            "empty",
+                            "no_such_curve"
+                          ],
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Reason"
+                    },
+                    "differences": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/CheckDifferences"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "witness": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "server",
+                            "claimed",
+                            "personal"
+                          ],
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Witness"
+                    },
+                    "recorded_by": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/CheckPrincipal"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "command_id": {
+                      "anyOf": [
+                        {
+                          "maxLength": 128,
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Command Id"
+                    },
+                    "at": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "At"
+                    },
+                    "server_output_digest": {
+                      "anyOf": [
+                        {
+                          "pattern": "^[0-9a-f]{64}$",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Server Output Digest"
+                    },
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "schema",
+                    "subject",
+                    "fixture",
+                    "reference",
+                    "output_digest",
+                    "rules_id",
+                    "tolerance",
+                    "request_digest",
+                    "interpretation_digest",
+                    "outcome",
+                    "reason",
+                    "differences",
+                    "id"
+                  ],
+                  "title": "StoredCheck",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "The same command id and body answer the same record; another body is refused (request)",
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "record": {
+                    "additionalProperties": true,
+                    "description": "An ophiolite.check/1 record (contracts/scientific/v1/check.json) without the server's fields (witness, recorded_by, command_id, at, server_output_digest); any other field is refused (schema)",
+                    "title": "Record",
+                    "type": "object"
+                  },
+                  "files": {
+                    "$ref": "#/components/schemas/CheckFiles"
+                  },
+                  "request": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "The executable request of the implementation (its parameters); its canonical sha256 is request_digest. Without it the record is stored claimed",
+                    "title": "Request"
+                  },
+                  "interpretation": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "A grid check: the confirmed interpretation envelope (crs, horizontal_unit, value_unit, value_meaning, direction, vertical_datum)",
+                    "title": "Interpretation"
+                  },
+                  "publisher": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "When sent, it must be the credential that sends it ({id, kind}); refused (publisher) otherwise",
+                    "title": "Publisher"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "command_id",
+                  "record",
+                  "files"
+                ],
+                "title": "CheckPublishRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/checks/publishers": {
+      "post": {
+        "summary": "Who may publish checks in this project: list, grant or revoke (project administrators)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "publishers": {
+                      "items": {
+                        "$ref": "#/components/schemas/CheckPublisher"
+                      },
+                      "title": "Publishers",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "publishers"
+                  ],
+                  "title": "CheckPublishers",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "action": {
+                    "default": "list",
+                    "enum": [
+                      "list",
+                      "grant",
+                      "revoke"
+                    ],
+                    "title": "Action",
+                    "type": "string"
+                  },
+                  "principal": {
+                    "anyOf": [
+                      {
+                        "maxLength": 200,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "grant and revoke: the person or workload client id",
+                    "title": "Principal"
+                  },
+                  "kind": {
+                    "default": "person",
+                    "enum": [
+                      "person",
+                      "workload"
+                    ],
+                    "title": "Kind",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "CheckPublishersRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/collections/delete": {
       "post": {
         "summary": "delete collection",
@@ -22593,7 +23772,13 @@
                       "model-section-text/1",
                       "seismic-section-text/1",
                       "geotiff/1",
-                      "time-depth-csv/1"
+                      "time-depth-csv/1",
+                      "zmap-plus-grid/1",
+                      "cps3-ascii-grid/1",
+                      "irap-ascii-grid/1",
+                      "esri-shapefile/1",
+                      "ogc-geopackage/1",
+                      "geojson/1"
                     ],
                     "title": "Profile",
                     "type": "string"
@@ -25432,7 +26617,13 @@
                       "model-section-text/1",
                       "seismic-section-text/1",
                       "geotiff/1",
-                      "time-depth-csv/1"
+                      "time-depth-csv/1",
+                      "zmap-plus-grid/1",
+                      "cps3-ascii-grid/1",
+                      "irap-ascii-grid/1",
+                      "esri-shapefile/1",
+                      "ogc-geopackage/1",
+                      "geojson/1"
                     ],
                     "title": "Profile",
                     "type": "string"
@@ -69940,7 +71131,7 @@
                 "schema": {
                   "x-ophiolite": {
                     "id": "ophiolite.scientific-asset/1",
-                    "version": "1.17.0",
+                    "version": "1.18.0",
                     "lifecycle": "preview"
                   },
                   "additionalProperties": false,
@@ -69949,7 +71140,7 @@
                       "anyOf": [
                         {
                           "additionalProperties": false,
-                          "description": "1.10.0 (E23a): the source package and recipe a recipe-read revision was read with. The manifest\nlists 'package' (the package manifest), 'interpretation' (recipe, decisions, evidence) and one\n'companion:<name>' row per companion member; each is readable as a representation.",
+                          "description": "1.10.0 (E23a): the source package and recipe a recipe-read revision was read with. The manifest\nlists 'package' (the package manifest), 'interpretation' (recipe, decisions, evidence) and one\n'companion:<name>' row per companion member; each is readable as a representation. 1.17.0 (E56): a package\nread without a recipe (a Shapefile) has no recipe pin.",
                           "properties": {
                             "package_digest": {
                               "pattern": "^[0-9a-f]{64}$",
@@ -70003,50 +71194,57 @@
                               "type": "array"
                             },
                             "recipe": {
-                              "additionalProperties": false,
-                              "properties": {
-                                "reference": {
-                                  "anyOf": [
-                                    {
-                                      "additionalProperties": false,
-                                      "description": "A recipe is a project-scoped asset, pinned by asset id and revision (never by a schema version).",
-                                      "properties": {
-                                        "asset_id": {
-                                          "maxLength": 512,
-                                          "minLength": 1,
-                                          "title": "Asset Id",
-                                          "type": "string"
+                              "anyOf": [
+                                {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "reference": {
+                                      "anyOf": [
+                                        {
+                                          "additionalProperties": false,
+                                          "description": "A recipe is a project-scoped asset, pinned by asset id and revision (never by a schema version).",
+                                          "properties": {
+                                            "asset_id": {
+                                              "maxLength": 512,
+                                              "minLength": 1,
+                                              "title": "Asset Id",
+                                              "type": "string"
+                                            },
+                                            "revision": {
+                                              "pattern": "^[0-9a-f]{64}$",
+                                              "title": "Revision",
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "asset_id",
+                                            "revision"
+                                          ],
+                                          "title": "RecipeReference",
+                                          "type": "object"
                                         },
-                                        "revision": {
-                                          "pattern": "^[0-9a-f]{64}$",
-                                          "title": "Revision",
-                                          "type": "string"
+                                        {
+                                          "type": "null"
                                         }
-                                      },
-                                      "required": [
-                                        "asset_id",
-                                        "revision"
-                                      ],
-                                      "title": "RecipeReference",
-                                      "type": "object"
+                                      ]
                                     },
-                                    {
-                                      "type": "null"
+                                    "sha256": {
+                                      "pattern": "^[0-9a-f]{64}$",
+                                      "title": "Sha256",
+                                      "type": "string"
                                     }
-                                  ]
+                                  },
+                                  "required": [
+                                    "reference",
+                                    "sha256"
+                                  ],
+                                  "title": "RecipePin",
+                                  "type": "object"
                                 },
-                                "sha256": {
-                                  "pattern": "^[0-9a-f]{64}$",
-                                  "title": "Sha256",
-                                  "type": "string"
+                                {
+                                  "type": "null"
                                 }
-                              },
-                              "required": [
-                                "reference",
-                                "sha256"
-                              ],
-                              "title": "RecipePin",
-                              "type": "object"
+                              ]
                             },
                             "status": {
                               "enum": [
@@ -74887,6 +76085,316 @@
                           ],
                           "title": "TimeDepthContext",
                           "type": "object"
+                        },
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "type": {
+                              "const": "feature-set",
+                              "title": "Type",
+                              "type": "string"
+                            },
+                            "crs": {
+                              "pattern": "^(EPSG:[0-9]{4,6}|OGC:CRS84|unknown)$",
+                              "title": "Crs",
+                              "type": "string"
+                            },
+                            "axes": {
+                              "enum": [
+                                "easting-northing",
+                                "northing-easting",
+                                "longitude-latitude",
+                                "latitude-longitude",
+                                "unknown"
+                              ],
+                              "title": "Axes",
+                              "type": "string"
+                            },
+                            "xy_unit": {
+                              "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+                              "title": "Xy Unit",
+                              "type": "string"
+                            },
+                            "z_unit": {
+                              "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+                              "title": "Z Unit",
+                              "type": "string"
+                            },
+                            "z_meaning": {
+                              "enum": [
+                                "depth",
+                                "elevation",
+                                "time",
+                                "unknown"
+                              ],
+                              "title": "Z Meaning",
+                              "type": "string"
+                            },
+                            "positive": {
+                              "enum": [
+                                "up",
+                                "down",
+                                "unknown"
+                              ],
+                              "title": "Positive",
+                              "type": "string"
+                            },
+                            "vertical_datum": {
+                              "maxLength": 128,
+                              "minLength": 1,
+                              "title": "Vertical Datum",
+                              "type": "string"
+                            },
+                            "encoding": {
+                              "maxLength": 128,
+                              "minLength": 1,
+                              "title": "Encoding",
+                              "type": "string"
+                            },
+                            "count": {
+                              "maximum": 50000,
+                              "minimum": 1,
+                              "title": "Count",
+                              "type": "integer"
+                            },
+                            "vertex_count": {
+                              "maximum": 500000,
+                              "minimum": 0,
+                              "title": "Vertex Count",
+                              "type": "integer"
+                            },
+                            "geometry_types": {
+                              "items": {
+                                "enum": [
+                                  "Point",
+                                  "MultiPoint",
+                                  "LineString",
+                                  "MultiLineString",
+                                  "Polygon",
+                                  "MultiPolygon"
+                                ],
+                                "type": "string"
+                              },
+                              "maxItems": 6,
+                              "title": "Geometry Types",
+                              "type": "array"
+                            },
+                            "has_z": {
+                              "title": "Has Z",
+                              "type": "boolean"
+                            },
+                            "null_geometry_count": {
+                              "maximum": 50000,
+                              "minimum": 0,
+                              "title": "Null Geometry Count",
+                              "type": "integer"
+                            },
+                            "x_range": {
+                              "anyOf": [
+                                {
+                                  "items": {
+                                    "type": "number"
+                                  },
+                                  "maxItems": 2,
+                                  "minItems": 2,
+                                  "type": "array"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "title": "X Range"
+                            },
+                            "y_range": {
+                              "anyOf": [
+                                {
+                                  "items": {
+                                    "type": "number"
+                                  },
+                                  "maxItems": 2,
+                                  "minItems": 2,
+                                  "type": "array"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "title": "Y Range"
+                            },
+                            "z_range": {
+                              "anyOf": [
+                                {
+                                  "items": {
+                                    "type": "number"
+                                  },
+                                  "maxItems": 2,
+                                  "minItems": 2,
+                                  "type": "array"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "title": "Z Range"
+                            },
+                            "fields": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "name": {
+                                    "maxLength": 128,
+                                    "minLength": 1,
+                                    "title": "Name",
+                                    "type": "string"
+                                  },
+                                  "source_name": {
+                                    "maxLength": 128,
+                                    "minLength": 1,
+                                    "title": "Source Name",
+                                    "type": "string"
+                                  },
+                                  "kind": {
+                                    "enum": [
+                                      "text",
+                                      "integer",
+                                      "number",
+                                      "date",
+                                      "boolean"
+                                    ],
+                                    "title": "Kind",
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "name",
+                                  "source_name",
+                                  "kind"
+                                ],
+                                "title": "FeatureField",
+                                "type": "object"
+                              },
+                              "maxItems": 64,
+                              "title": "Fields",
+                              "type": "array"
+                            },
+                            "layer": {
+                              "anyOf": [
+                                {
+                                  "maxLength": 128,
+                                  "minLength": 1,
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "default": null,
+                              "title": "Layer"
+                            },
+                            "layer_title": {
+                              "anyOf": [
+                                {
+                                  "maxLength": 128,
+                                  "minLength": 1,
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "default": null,
+                              "title": "Layer Title"
+                            },
+                            "fidelity": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "status": {
+                                  "const": "assessed",
+                                  "title": "Status",
+                                  "type": "string"
+                                },
+                                "preserved": {
+                                  "items": {
+                                    "maxLength": 512,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Preserved",
+                                  "type": "array"
+                                },
+                                "losses": {
+                                  "items": {
+                                    "maxLength": 512,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Losses",
+                                  "type": "array"
+                                },
+                                "unknown_context": {
+                                  "items": {
+                                    "maxLength": 128,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Unknown Context",
+                                  "type": "array"
+                                },
+                                "decisions": {
+                                  "anyOf": [
+                                    {
+                                      "items": {
+                                        "maxLength": 512,
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      "maxItems": 64,
+                                      "type": "array"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "default": null,
+                                  "title": "Decisions"
+                                }
+                              },
+                              "required": [
+                                "status",
+                                "preserved",
+                                "losses",
+                                "unknown_context"
+                              ],
+                              "title": "Fidelity",
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "crs",
+                            "axes",
+                            "xy_unit",
+                            "z_unit",
+                            "z_meaning",
+                            "positive",
+                            "vertical_datum",
+                            "encoding",
+                            "count",
+                            "vertex_count",
+                            "geometry_types",
+                            "has_z",
+                            "null_geometry_count",
+                            "x_range",
+                            "y_range",
+                            "z_range",
+                            "fields",
+                            "fidelity"
+                          ],
+                          "title": "FeatureContext",
+                          "type": "object"
                         }
                       ],
                       "title": "Scientific"
@@ -74937,10 +76445,13 @@
                         },
                         {
                           "additionalProperties": false,
-                          "description": "The executable identity of the typed reader (Connectors typed_reader).",
+                          "description": "The executable identity of the typed reader (Connectors typed_reader; E56: feature_files for feature sets).",
                           "properties": {
                             "reader": {
-                              "const": "asset_connectors.typed_reader/1",
+                              "enum": [
+                                "asset_connectors.typed_reader/1",
+                                "asset_connectors.feature_files/1"
+                              ],
                               "title": "Reader",
                               "type": "string"
                             },
@@ -74957,7 +76468,8 @@
                                 "wavelet/1",
                                 "model-section/1",
                                 "seismic-section/1",
-                                "time-depth/1"
+                                "time-depth/1",
+                                "feature-set/1"
                               ],
                               "title": "Mapping",
                               "type": "string"
@@ -75019,6 +76531,41 @@
                             "null_policy"
                           ],
                           "title": "RecipeInterpretation",
+                          "type": "object"
+                        },
+                        {
+                          "additionalProperties": false,
+                          "description": "E56: the executable identity of a package read without a recipe (a Shapefile and its companion members).",
+                          "properties": {
+                            "reader": {
+                              "const": "asset_connectors.feature_files/1",
+                              "title": "Reader",
+                              "type": "string"
+                            },
+                            "mapping": {
+                              "const": "feature-set/1",
+                              "title": "Mapping",
+                              "type": "string"
+                            },
+                            "parsing_policy": {
+                              "const": "package-strict/1",
+                              "title": "Parsing Policy",
+                              "type": "string"
+                            },
+                            "null_policy": {
+                              "maxLength": 512,
+                              "minLength": 1,
+                              "title": "Null Policy",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "reader",
+                            "mapping",
+                            "parsing_policy",
+                            "null_policy"
+                          ],
+                          "title": "PackageInterpretation",
                           "type": "object"
                         }
                       ],
@@ -75145,7 +76692,10 @@
                               "text/csv",
                               "text/plain",
                               "application/octet-stream",
-                              "image/tiff"
+                              "image/tiff",
+                              "application/x-esri-shapefile",
+                              "application/geopackage+sqlite3",
+                              "application/geo+json"
                             ],
                             "title": "Media Type",
                             "type": "string"
@@ -75877,10 +77427,13 @@
                     },
                     "interpretation": {
                       "additionalProperties": false,
-                      "description": "The executable identity of the typed reader (Connectors typed_reader).",
+                      "description": "The executable identity of the typed reader (Connectors typed_reader; E56: feature_files for feature sets).",
                       "properties": {
                         "reader": {
-                          "const": "asset_connectors.typed_reader/1",
+                          "enum": [
+                            "asset_connectors.typed_reader/1",
+                            "asset_connectors.feature_files/1"
+                          ],
                           "title": "Reader",
                           "type": "string"
                         },
@@ -75897,7 +77450,8 @@
                             "wavelet/1",
                             "model-section/1",
                             "seismic-section/1",
-                            "time-depth/1"
+                            "time-depth/1",
+                            "feature-set/1"
                           ],
                           "title": "Mapping",
                           "type": "string"
@@ -76078,6 +77632,1820 @@
                   ],
                   "title": "SeismicSlice",
                   "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Versioned error; see README",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error",
+                    "code",
+                    "message",
+                    "remedy",
+                    "docs",
+                    "request_id"
+                  ],
+                  "description": "Every refusal (E31): error is kept for existing clients and equals message; request_id equals the X-Request-Id header.",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "The stable machine-readable code; see docs"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "remedy": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "What the caller can do next"
+                    },
+                    "docs": {
+                      "type": "string",
+                      "description": "The code's anchor on the errors reference page, /docs/reference/errors/#<code>"
+                    },
+                    "request_id": {
+                      "type": "string",
+                      "description": "Equals the X-Request-Id response header; quote it when reporting a failure"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Busy: retry the same exact request after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error",
+                    "code",
+                    "message",
+                    "remedy",
+                    "docs",
+                    "request_id"
+                  ],
+                  "description": "Every refusal (E31): error is kept for existing clients and equals message; request_id equals the X-Request-Id header.",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "The stable machine-readable code; see docs"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "remedy": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "What the caller can do next"
+                    },
+                    "docs": {
+                      "type": "string",
+                      "description": "The code's anchor on the errors reference page, /docs/reference/errors/#<code>"
+                    },
+                    "request_id": {
+                      "type": "string",
+                      "description": "Equals the X-Request-Id response header; quote it when reporting a failure"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "grant",
+          "session"
+        ]
+      }
+    },
+    "/api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/windows": {
+      "get": {
+        "description": "One page of a depth window of a retained revision's stored well curve (ophiolite.curve-window/1): raw samples at level 0, or runs, blocks and missing stretches at levels 1 to 17; at most 2,048 items a page. Only increasing depth axes are windowed (422 incompatible-context otherwise; read the whole curve). A conditional request (If-None-Match with an earlier strong ETag) is authorised first and answers 304 when the ETag is current.",
+        "parameters": [
+          {
+            "name": "project",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "asset",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "revision",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "curve",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The stored value curve (mnemonic); no default is inferred."
+          },
+          {
+            "name": "top",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "description": "Top of the depth window, in the curve's depth unit."
+          },
+          {
+            "name": "base",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "description": "Base of the depth window, in the curve's depth unit."
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 17
+            },
+            "description": "0: raw samples; 1-17: blocks of up to 2^level samples. Exactly one of level and rows."
+          },
+          {
+            "name": "rows",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2048
+            },
+            "description": "Item budget: the server chooses the smallest level whose item count is at most rows (level 17 when none is). Exactly one of level and rows."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The previous page's next; refused with another revision, range, level, shape or reference."
+          },
+          {
+            "name": "reference",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "md",
+                "tvd",
+                "tvdss"
+              ]
+            },
+            "description": "Depth reference; only md is windowed (tvd and tvdss answer 422)."
+          }
+        ],
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authorised window page",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Strong; sha256 of every byte-determining input"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "private, no-cache"
+                }
+              },
+              "Vary": {
+                "schema": {
+                  "type": "string",
+                  "const": "Cookie, Authorization"
+                }
+              },
+              "X-Ophiolite-Access-Generation": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The asset's access generation (0 when never changed)"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "x-ophiolite": {
+                    "id": "ophiolite.curve-window/1",
+                    "version": "1.0.0",
+                    "lifecycle": "preview"
+                  },
+                  "title": "Curve window",
+                  "description": "One page of a depth window of a stored well curve: raw samples (level 0) or, at levels 1..17, runs of present samples, blocks of up to 2^level samples inside one run with their extrema, and the missing stretches. A page holds at most 2,048 items.",
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "schema",
+                    "shape",
+                    "identity",
+                    "unit",
+                    "reference",
+                    "depth_unit",
+                    "source",
+                    "request",
+                    "range",
+                    "level",
+                    "exact",
+                    "limit",
+                    "items",
+                    "rows_met",
+                    "next",
+                    "before",
+                    "after"
+                  ],
+                  "properties": {
+                    "schema": {
+                      "const": "ophiolite.curve-window/1"
+                    },
+                    "shape": {
+                      "enum": [
+                        "raw",
+                        "summary"
+                      ]
+                    },
+                    "identity": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "kind",
+                        "project_id",
+                        "asset_id",
+                        "revision",
+                        "curve"
+                      ],
+                      "properties": {
+                        "kind": {
+                          "enum": [
+                            "retained",
+                            "native"
+                          ]
+                        },
+                        "project_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 512
+                        },
+                        "asset_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 512
+                        },
+                        "revision": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 128
+                        },
+                        "curve": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 512
+                        },
+                        "native": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "well_id",
+                            "well_version",
+                            "curve_asset_revision",
+                            "curve_id"
+                          ],
+                          "properties": {
+                            "well_id": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 512
+                            },
+                            "well_version": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "curve_asset_revision": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 128
+                            },
+                            "curve_id": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 512
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "unit": {
+                      "type": "string",
+                      "maxLength": 128
+                    },
+                    "reference": {
+                      "const": "md"
+                    },
+                    "depth_unit": {
+                      "type": "string",
+                      "maxLength": 128
+                    },
+                    "source": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "algorithm",
+                        "algorithm_version",
+                        "source_digest"
+                      ],
+                      "properties": {
+                        "algorithm": {
+                          "const": "run-blocks"
+                        },
+                        "algorithm_version": {
+                          "const": 1
+                        },
+                        "source_digest": {
+                          "type": "string",
+                          "pattern": "^[0-9a-f]{64}$"
+                        }
+                      }
+                    },
+                    "request": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "top",
+                        "base",
+                        "level",
+                        "rows",
+                        "cursor"
+                      ],
+                      "properties": {
+                        "top": {
+                          "type": "number"
+                        },
+                        "base": {
+                          "type": "number"
+                        },
+                        "level": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "minimum": 0,
+                          "maximum": 17
+                        },
+                        "rows": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "minimum": 1,
+                          "maximum": 2048
+                        },
+                        "cursor": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "maxLength": 1024
+                        }
+                      }
+                    },
+                    "range": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "served_first_depth",
+                            "served_last_depth"
+                          ],
+                          "properties": {
+                            "served_first_depth": {
+                              "type": "number"
+                            },
+                            "served_last_depth": {
+                              "type": "number"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 17
+                    },
+                    "exact": {
+                      "type": "boolean"
+                    },
+                    "limit": {
+                      "const": 2048
+                    },
+                    "items": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "rows_met": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ]
+                    },
+                    "next": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "maxLength": 1024
+                    },
+                    "before": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "sample_index",
+                            "depth",
+                            "value"
+                          ],
+                          "properties": {
+                            "sample_index": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "depth": {
+                              "type": "number"
+                            },
+                            "value": {
+                              "type": [
+                                "number",
+                                "null"
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "after": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "sample_index",
+                            "depth",
+                            "value"
+                          ],
+                          "properties": {
+                            "sample_index": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "depth": {
+                              "type": "number"
+                            },
+                            "value": {
+                              "type": [
+                                "number",
+                                "null"
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "sample_index": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "maxItems": 2048
+                    },
+                    "depth": {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      },
+                      "maxItems": 2048
+                    },
+                    "value": {
+                      "type": "array",
+                      "items": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "maxItems": 2048
+                    },
+                    "runs": {
+                      "type": "array",
+                      "maxItems": 2048,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "run",
+                          "first_index",
+                          "last_index",
+                          "first_depth",
+                          "last_depth"
+                        ],
+                        "properties": {
+                          "run": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "first_index": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "last_index": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "first_depth": {
+                            "type": "number"
+                          },
+                          "last_depth": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    },
+                    "blocks": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "run",
+                        "first_index",
+                        "last_index",
+                        "first_depth",
+                        "last_depth",
+                        "first",
+                        "last",
+                        "min",
+                        "min_index",
+                        "min_depth",
+                        "max",
+                        "max_index",
+                        "max_depth",
+                        "count"
+                      ],
+                      "properties": {
+                        "run": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "first_index": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "last_index": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "first_depth": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "last_depth": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "first": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "last": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "min": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "min_index": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "min_depth": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "max": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "max_index": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "max_depth": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "count": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "maxItems": 2048
+                        }
+                      }
+                    },
+                    "missing": {
+                      "type": "array",
+                      "maxItems": 2048,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "from_index",
+                          "to_index",
+                          "from_depth",
+                          "to_depth"
+                        ],
+                        "properties": {
+                          "from_index": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "to_index": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "from_depth": {
+                            "type": "number"
+                          },
+                          "to_depth": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "if": {
+                    "type": "object"
+                  },
+                  "then": {
+                    "description": "The value rules: the shape discriminates the body (raw at level 0 and exact; summary at 1..17), and only a native identity carries native.",
+                    "allOf": [
+                      {
+                        "if": {
+                          "properties": {
+                            "shape": {
+                              "const": "raw"
+                            }
+                          }
+                        },
+                        "then": {
+                          "required": [
+                            "sample_index",
+                            "depth",
+                            "value"
+                          ],
+                          "properties": {
+                            "level": {
+                              "const": 0
+                            },
+                            "exact": {
+                              "const": true
+                            }
+                          },
+                          "not": {
+                            "anyOf": [
+                              {
+                                "required": [
+                                  "runs"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "blocks"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "missing"
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        "else": {
+                          "required": [
+                            "runs",
+                            "blocks",
+                            "missing"
+                          ],
+                          "properties": {
+                            "level": {
+                              "minimum": 1
+                            },
+                            "exact": {
+                              "const": false
+                            }
+                          },
+                          "not": {
+                            "anyOf": [
+                              {
+                                "required": [
+                                  "sample_index"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "depth"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "value"
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "identity": {
+                              "properties": {
+                                "kind": {
+                                  "const": "native"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "identity": {
+                              "required": [
+                                "native"
+                              ]
+                            }
+                          }
+                        },
+                        "else": {
+                          "properties": {
+                            "identity": {
+                              "not": {
+                                "required": [
+                                  "native"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "The If-None-Match ETag is current; no body",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Strong; sha256 of every byte-determining input"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "private, no-cache"
+                }
+              },
+              "Vary": {
+                "schema": {
+                  "type": "string",
+                  "const": "Cookie, Authorization"
+                }
+              },
+              "X-Ophiolite-Access-Generation": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The asset's access generation (0 when never changed)"
+              }
+            }
+          },
+          "default": {
+            "description": "Versioned error; see README",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error",
+                    "code",
+                    "message",
+                    "remedy",
+                    "docs",
+                    "request_id"
+                  ],
+                  "description": "Every refusal (E31): error is kept for existing clients and equals message; request_id equals the X-Request-Id header.",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "The stable machine-readable code; see docs"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "remedy": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "What the caller can do next"
+                    },
+                    "docs": {
+                      "type": "string",
+                      "description": "The code's anchor on the errors reference page, /docs/reference/errors/#<code>"
+                    },
+                    "request_id": {
+                      "type": "string",
+                      "description": "Equals the X-Request-Id response header; quote it when reporting a failure"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Busy: retry the same exact request after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error",
+                    "code",
+                    "message",
+                    "remedy",
+                    "docs",
+                    "request_id"
+                  ],
+                  "description": "Every refusal (E31): error is kept for existing clients and equals message; request_id equals the X-Request-Id header.",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "The stable machine-readable code; see docs"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "remedy": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "What the caller can do next"
+                    },
+                    "docs": {
+                      "type": "string",
+                      "description": "The code's anchor on the errors reference page, /docs/reference/errors/#<code>"
+                    },
+                    "request_id": {
+                      "type": "string",
+                      "description": "Equals the X-Request-Id response header; quote it when reporting a failure"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "grant",
+          "session"
+        ]
+      }
+    },
+    "/api/v1/projects/{project}/wells/{well}/versions/{version}/curve-assets/{asset}/revisions/{revision}/windows": {
+      "get": {
+        "description": "One page of a depth window of a native well curve asset (ophiolite.curve-window/1, identity.kind native), read through the caller\u2019s own GetCurveAsset; MD only (tvd and tvdss answer 422). A conditional request (If-None-Match) still reads the curve as the caller and answers 304 when the ETag is current.",
+        "parameters": [
+          {
+            "name": "project",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "well",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "asset",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "revision",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "An immutable curve-asset revision (1 or later)."
+          },
+          {
+            "name": "top",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "description": "Top of the depth window, in the curve's depth unit."
+          },
+          {
+            "name": "base",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "description": "Base of the depth window, in the curve's depth unit."
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 17
+            },
+            "description": "0: raw samples; 1-17: blocks of up to 2^level samples. Exactly one of level and rows."
+          },
+          {
+            "name": "rows",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2048
+            },
+            "description": "Item budget: the server chooses the smallest level whose item count is at most rows (level 17 when none is). Exactly one of level and rows."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The previous page's next; refused with another revision, range, level, shape or reference."
+          },
+          {
+            "name": "reference",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "md",
+                "tvd",
+                "tvdss"
+              ]
+            },
+            "description": "Depth reference; only md is windowed (tvd and tvdss answer 422)."
+          }
+        ],
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authorised window page",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Strong; sha256 of every byte-determining input"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "private, no-cache"
+                }
+              },
+              "Vary": {
+                "schema": {
+                  "type": "string",
+                  "const": "Cookie, Authorization"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "x-ophiolite": {
+                    "id": "ophiolite.curve-window/1",
+                    "version": "1.0.0",
+                    "lifecycle": "preview"
+                  },
+                  "title": "Curve window",
+                  "description": "One page of a depth window of a stored well curve: raw samples (level 0) or, at levels 1..17, runs of present samples, blocks of up to 2^level samples inside one run with their extrema, and the missing stretches. A page holds at most 2,048 items.",
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "schema",
+                    "shape",
+                    "identity",
+                    "unit",
+                    "reference",
+                    "depth_unit",
+                    "source",
+                    "request",
+                    "range",
+                    "level",
+                    "exact",
+                    "limit",
+                    "items",
+                    "rows_met",
+                    "next",
+                    "before",
+                    "after"
+                  ],
+                  "properties": {
+                    "schema": {
+                      "const": "ophiolite.curve-window/1"
+                    },
+                    "shape": {
+                      "enum": [
+                        "raw",
+                        "summary"
+                      ]
+                    },
+                    "identity": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "kind",
+                        "project_id",
+                        "asset_id",
+                        "revision",
+                        "curve"
+                      ],
+                      "properties": {
+                        "kind": {
+                          "enum": [
+                            "retained",
+                            "native"
+                          ]
+                        },
+                        "project_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 512
+                        },
+                        "asset_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 512
+                        },
+                        "revision": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 128
+                        },
+                        "curve": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 512
+                        },
+                        "native": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "well_id",
+                            "well_version",
+                            "curve_asset_revision",
+                            "curve_id"
+                          ],
+                          "properties": {
+                            "well_id": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 512
+                            },
+                            "well_version": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "curve_asset_revision": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 128
+                            },
+                            "curve_id": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 512
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "unit": {
+                      "type": "string",
+                      "maxLength": 128
+                    },
+                    "reference": {
+                      "const": "md"
+                    },
+                    "depth_unit": {
+                      "type": "string",
+                      "maxLength": 128
+                    },
+                    "source": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "algorithm",
+                        "algorithm_version",
+                        "source_digest"
+                      ],
+                      "properties": {
+                        "algorithm": {
+                          "const": "run-blocks"
+                        },
+                        "algorithm_version": {
+                          "const": 1
+                        },
+                        "source_digest": {
+                          "type": "string",
+                          "pattern": "^[0-9a-f]{64}$"
+                        }
+                      }
+                    },
+                    "request": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "top",
+                        "base",
+                        "level",
+                        "rows",
+                        "cursor"
+                      ],
+                      "properties": {
+                        "top": {
+                          "type": "number"
+                        },
+                        "base": {
+                          "type": "number"
+                        },
+                        "level": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "minimum": 0,
+                          "maximum": 17
+                        },
+                        "rows": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "minimum": 1,
+                          "maximum": 2048
+                        },
+                        "cursor": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "maxLength": 1024
+                        }
+                      }
+                    },
+                    "range": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "served_first_depth",
+                            "served_last_depth"
+                          ],
+                          "properties": {
+                            "served_first_depth": {
+                              "type": "number"
+                            },
+                            "served_last_depth": {
+                              "type": "number"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 17
+                    },
+                    "exact": {
+                      "type": "boolean"
+                    },
+                    "limit": {
+                      "const": 2048
+                    },
+                    "items": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "rows_met": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ]
+                    },
+                    "next": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "maxLength": 1024
+                    },
+                    "before": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "sample_index",
+                            "depth",
+                            "value"
+                          ],
+                          "properties": {
+                            "sample_index": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "depth": {
+                              "type": "number"
+                            },
+                            "value": {
+                              "type": [
+                                "number",
+                                "null"
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "after": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "sample_index",
+                            "depth",
+                            "value"
+                          ],
+                          "properties": {
+                            "sample_index": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "depth": {
+                              "type": "number"
+                            },
+                            "value": {
+                              "type": [
+                                "number",
+                                "null"
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "sample_index": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "maxItems": 2048
+                    },
+                    "depth": {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      },
+                      "maxItems": 2048
+                    },
+                    "value": {
+                      "type": "array",
+                      "items": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "maxItems": 2048
+                    },
+                    "runs": {
+                      "type": "array",
+                      "maxItems": 2048,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "run",
+                          "first_index",
+                          "last_index",
+                          "first_depth",
+                          "last_depth"
+                        ],
+                        "properties": {
+                          "run": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "first_index": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "last_index": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "first_depth": {
+                            "type": "number"
+                          },
+                          "last_depth": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    },
+                    "blocks": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "run",
+                        "first_index",
+                        "last_index",
+                        "first_depth",
+                        "last_depth",
+                        "first",
+                        "last",
+                        "min",
+                        "min_index",
+                        "min_depth",
+                        "max",
+                        "max_index",
+                        "max_depth",
+                        "count"
+                      ],
+                      "properties": {
+                        "run": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "first_index": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "last_index": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "first_depth": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "last_depth": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "first": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "last": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "min": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "min_index": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "min_depth": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "max": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "max_index": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "max_depth": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "count": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "maxItems": 2048
+                        }
+                      }
+                    },
+                    "missing": {
+                      "type": "array",
+                      "maxItems": 2048,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "from_index",
+                          "to_index",
+                          "from_depth",
+                          "to_depth"
+                        ],
+                        "properties": {
+                          "from_index": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "to_index": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "from_depth": {
+                            "type": "number"
+                          },
+                          "to_depth": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "if": {
+                    "type": "object"
+                  },
+                  "then": {
+                    "description": "The value rules: the shape discriminates the body (raw at level 0 and exact; summary at 1..17), and only a native identity carries native.",
+                    "allOf": [
+                      {
+                        "if": {
+                          "properties": {
+                            "shape": {
+                              "const": "raw"
+                            }
+                          }
+                        },
+                        "then": {
+                          "required": [
+                            "sample_index",
+                            "depth",
+                            "value"
+                          ],
+                          "properties": {
+                            "level": {
+                              "const": 0
+                            },
+                            "exact": {
+                              "const": true
+                            }
+                          },
+                          "not": {
+                            "anyOf": [
+                              {
+                                "required": [
+                                  "runs"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "blocks"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "missing"
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        "else": {
+                          "required": [
+                            "runs",
+                            "blocks",
+                            "missing"
+                          ],
+                          "properties": {
+                            "level": {
+                              "minimum": 1
+                            },
+                            "exact": {
+                              "const": false
+                            }
+                          },
+                          "not": {
+                            "anyOf": [
+                              {
+                                "required": [
+                                  "sample_index"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "depth"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "value"
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "identity": {
+                              "properties": {
+                                "kind": {
+                                  "const": "native"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "identity": {
+                              "required": [
+                                "native"
+                              ]
+                            }
+                          }
+                        },
+                        "else": {
+                          "properties": {
+                            "identity": {
+                              "not": {
+                                "required": [
+                                  "native"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "The If-None-Match ETag is current; no body",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Strong; sha256 of every byte-determining input"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "private, no-cache"
+                }
+              },
+              "Vary": {
+                "schema": {
+                  "type": "string",
+                  "const": "Cookie, Authorization"
                 }
               }
             }
@@ -78567,6 +81935,35 @@
         "title": "AIUseReader",
         "type": "object"
       },
+      "AbsoluteTolerance": {
+        "additionalProperties": false,
+        "description": "In the compared quantity's unit.",
+        "properties": {
+          "kind": {
+            "const": "absolute",
+            "title": "Kind",
+            "type": "string"
+          },
+          "value": {
+            "minimum": 0,
+            "title": "Value",
+            "type": "number"
+          },
+          "unit": {
+            "maxLength": 40,
+            "minLength": 1,
+            "title": "Unit",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "value",
+          "unit"
+        ],
+        "title": "AbsoluteTolerance",
+        "type": "object"
+      },
       "AccessKeyRefusal": {
         "additionalProperties": false,
         "properties": {
@@ -80350,6 +83747,103 @@
         "title": "CheckAsk",
         "type": "object"
       },
+      "CheckCompareFile": {
+        "additionalProperties": false,
+        "properties": {
+          "file": {
+            "description": "Your file, base64 (at most 2 MiB decoded)",
+            "maxLength": 2796204,
+            "title": "File",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "title": "CheckCompareFile",
+        "type": "object"
+      },
+      "CheckDifferences": {
+        "additionalProperties": false,
+        "properties": {
+          "count": {
+            "minimum": 0,
+            "title": "Count",
+            "type": "integer"
+          },
+          "total": {
+            "minimum": 0,
+            "title": "Total",
+            "type": "integer"
+          },
+          "largest": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Largest"
+          },
+          "value_to_missing": {
+            "minimum": 0,
+            "title": "Value To Missing",
+            "type": "integer"
+          },
+          "missing_to_value": {
+            "minimum": 0,
+            "title": "Missing To Value",
+            "type": "integer"
+          },
+          "first": {
+            "items": {
+              "$ref": "#/components/schemas/CheckSample"
+            },
+            "maxItems": 20,
+            "title": "First",
+            "type": "array"
+          },
+          "changed_range": {
+            "anyOf": [
+              {
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "items": {
+                        "type": "integer"
+                      },
+                      "type": "array"
+                    }
+                  ]
+                },
+                "maxItems": 2,
+                "minItems": 2,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Changed Range"
+          }
+        },
+        "required": [
+          "count",
+          "total",
+          "largest",
+          "value_to_missing",
+          "missing_to_value",
+          "first",
+          "changed_range"
+        ],
+        "title": "CheckDifferences",
+        "type": "object"
+      },
       "CheckFetched": {
         "additionalProperties": false,
         "description": "E85b: what was fetched from an address: start the run with this name, size and digest and the same address.",
@@ -80386,6 +83880,137 @@
         "title": "CheckFetched",
         "type": "object"
       },
+      "CheckFiles": {
+        "additionalProperties": false,
+        "properties": {
+          "fixture": {
+            "description": "The fixture file, base64 (at most 2 MiB decoded); its sha256 is fixture.digest",
+            "maxLength": 2796204,
+            "title": "Fixture",
+            "type": "string"
+          },
+          "reference": {
+            "description": "The reference file, base64; its sha256 is reference.digest",
+            "maxLength": 2796204,
+            "title": "Reference",
+            "type": "string"
+          },
+          "output": {
+            "description": "The output file (ophiolite.check-output/1), base64; its sha256 is output_digest",
+            "maxLength": 2796204,
+            "title": "Output",
+            "type": "string"
+          }
+        },
+        "required": [
+          "fixture",
+          "reference",
+          "output"
+        ],
+        "title": "CheckFiles",
+        "type": "object"
+      },
+      "CheckFixture": {
+        "additionalProperties": false,
+        "properties": {
+          "digest": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Digest",
+            "type": "string"
+          },
+          "display_name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Display Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "digest",
+          "display_name"
+        ],
+        "title": "CheckFixture",
+        "type": "object"
+      },
+      "CheckGroup": {
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "latest": {
+            "$ref": "#/components/schemas/StoredCheck"
+          },
+          "earlier": {
+            "items": {
+              "$ref": "#/components/schemas/StoredCheck"
+            },
+            "title": "Earlier",
+            "type": "array"
+          },
+          "disagreement": {
+            "description": "Records with this key give different outcomes",
+            "title": "Disagreement",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "latest",
+          "earlier",
+          "disagreement"
+        ],
+        "title": "CheckGroup",
+        "type": "object"
+      },
+      "CheckImplementationSubject": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "implementation",
+            "title": "Kind",
+            "type": "string"
+          },
+          "id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "version": {
+            "maxLength": 40,
+            "minLength": 1,
+            "title": "Version",
+            "type": "string"
+          },
+          "script_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Script Sha256",
+            "type": "string"
+          },
+          "release_number": {
+            "pattern": "^[0-9]{4}\\.[0-9]{1,2}\\.[0-9]{1,4}$",
+            "title": "Release Number",
+            "type": "string"
+          },
+          "release_digest": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Release Digest",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "id",
+          "version",
+          "script_sha256",
+          "release_number",
+          "release_digest"
+        ],
+        "title": "CheckImplementationSubject",
+        "type": "object"
+      },
       "CheckKind": {
         "additionalProperties": false,
         "properties": {
@@ -80405,6 +84030,31 @@
           "label"
         ],
         "title": "CheckKind",
+        "type": "object"
+      },
+      "CheckPrincipal": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "person",
+              "workload"
+            ],
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind"
+        ],
+        "title": "CheckPrincipal",
         "type": "object"
       },
       "CheckProposal": {
@@ -80431,6 +84081,39 @@
           "class"
         ],
         "title": "CheckProposal",
+        "type": "object"
+      },
+      "CheckPublisher": {
+        "additionalProperties": false,
+        "properties": {
+          "principal": {
+            "title": "Principal",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "person",
+              "workload"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "granted_by": {
+            "title": "Granted By",
+            "type": "string"
+          },
+          "at": {
+            "title": "At",
+            "type": "number"
+          }
+        },
+        "required": [
+          "principal",
+          "kind",
+          "granted_by",
+          "at"
+        ],
+        "title": "CheckPublisher",
         "type": "object"
       },
       "CheckRead": {
@@ -80543,6 +84226,56 @@
         "title": "CheckRead",
         "type": "object"
       },
+      "CheckReference": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "independent-computation",
+              "reference-file",
+              "external-package"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "version": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Version",
+            "type": "string"
+          },
+          "digest": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Digest",
+            "type": "string"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CheckRights"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "kind",
+          "name",
+          "version",
+          "digest"
+        ],
+        "title": "CheckReference",
+        "type": "object"
+      },
       "CheckRefusal": {
         "additionalProperties": false,
         "properties": {
@@ -80581,6 +84314,58 @@
         "title": "CheckRefusal",
         "type": "object"
       },
+      "CheckResultSubject": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "result",
+            "title": "Kind",
+            "type": "string"
+          },
+          "asset_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "revision": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Revision",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "asset_id",
+          "revision"
+        ],
+        "title": "CheckResultSubject",
+        "type": "object"
+      },
+      "CheckRights": {
+        "additionalProperties": false,
+        "properties": {
+          "licence": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Licence",
+            "type": "string"
+          },
+          "source": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "licence",
+          "source"
+        ],
+        "title": "CheckRights",
+        "type": "object"
+      },
       "CheckSame": {
         "additionalProperties": false,
         "properties": {
@@ -80598,6 +84383,54 @@
           "name"
         ],
         "title": "CheckSame",
+        "type": "object"
+      },
+      "CheckSample": {
+        "additionalProperties": false,
+        "properties": {
+          "at": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              }
+            ],
+            "title": "At"
+          },
+          "reference": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference"
+          },
+          "output": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Output"
+          }
+        },
+        "required": [
+          "at",
+          "reference",
+          "output"
+        ],
+        "title": "CheckSample",
         "type": "object"
       },
       "CheckStated": {
@@ -80645,6 +84478,72 @@
           "source"
         ],
         "title": "CheckStated",
+        "type": "object"
+      },
+      "CheckSubjectQuery": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "implementation",
+              "result"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Id"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Version"
+          },
+          "asset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Asset Id"
+          },
+          "revision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Revision"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "title": "CheckSubjectQuery",
         "type": "object"
       },
       "CheckSuggestion": {
@@ -82165,6 +86064,29 @@
               "type": "string"
             },
             "description": "E94: only with code audience-changed: who can read the new version now; confirm again"
+          },
+          "field": {
+            "type": "string",
+            "enum": [
+              "permission",
+              "schema",
+              "publisher",
+              "tolerance",
+              "interpretation",
+              "fixture.digest",
+              "reference.digest",
+              "output.digest",
+              "rights",
+              "release.digest",
+              "implementation.script_sha256",
+              "outcome",
+              "timeout",
+              "capacity",
+              "limit",
+              "size",
+              "request"
+            ],
+            "description": "E96: only with code check-refused: the one field the refusal names"
           }
         }
       },
@@ -83125,6 +87047,11 @@
           "max_inline_bytes": {
             "title": "Max Inline Bytes",
             "type": "integer"
+          },
+          "package_companion_bytes": {
+            "description": "E56: the companion files of a package read without a recipe, together",
+            "title": "Package Companion Bytes",
+            "type": "integer"
           }
         },
         "required": [
@@ -83141,7 +87068,8 @@
           "grid_cells",
           "max_traces",
           "max_samples",
-          "max_inline_bytes"
+          "max_inline_bytes",
+          "package_companion_bytes"
         ],
         "title": "Limits",
         "type": "object"
@@ -88983,6 +92911,28 @@
         "title": "Reference",
         "type": "object"
       },
+      "RelativeTolerance": {
+        "additionalProperties": false,
+        "description": "A dimensionless fraction of |reference|; a zero reference allows no difference.",
+        "properties": {
+          "kind": {
+            "const": "relative",
+            "title": "Kind",
+            "type": "string"
+          },
+          "value": {
+            "minimum": 0,
+            "title": "Value",
+            "type": "number"
+          }
+        },
+        "required": [
+          "kind",
+          "value"
+        ],
+        "title": "RelativeTolerance",
+        "type": "object"
+      },
       "ReleaseOnBoard": {
         "additionalProperties": false,
         "properties": {
@@ -90930,6 +94880,241 @@
         "title": "StageView",
         "type": "object"
       },
+      "StoredCheck": {
+        "additionalProperties": false,
+        "description": "A stored check record with its id.",
+        "properties": {
+          "schema": {
+            "const": "ophiolite.check/1",
+            "title": "Schema",
+            "type": "string"
+          },
+          "subject": {
+            "discriminator": {
+              "mapping": {
+                "implementation": "#/components/schemas/CheckImplementationSubject",
+                "result": "#/components/schemas/CheckResultSubject"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CheckImplementationSubject"
+              },
+              {
+                "$ref": "#/components/schemas/CheckResultSubject"
+              }
+            ],
+            "title": "Subject"
+          },
+          "fixture": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CheckFixture"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reference": {
+            "$ref": "#/components/schemas/CheckReference"
+          },
+          "output_digest": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Output Digest",
+            "type": "string"
+          },
+          "rules_id": {
+            "enum": [
+              "series-compare/1",
+              "grid-compare/1"
+            ],
+            "title": "Rules Id",
+            "type": "string"
+          },
+          "tolerance": {
+            "anyOf": [
+              {
+                "discriminator": {
+                  "mapping": {
+                    "absolute": "#/components/schemas/AbsoluteTolerance",
+                    "relative": "#/components/schemas/RelativeTolerance"
+                  },
+                  "propertyName": "kind"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/AbsoluteTolerance"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RelativeTolerance"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tolerance"
+          },
+          "request_digest": {
+            "anyOf": [
+              {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Digest"
+          },
+          "interpretation_digest": {
+            "anyOf": [
+              {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Interpretation Digest"
+          },
+          "outcome": {
+            "enum": [
+              "passed",
+              "differed",
+              "not_compared"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "enum": [
+                  "axis_mismatch",
+                  "unit_mismatch",
+                  "context_mismatch",
+                  "shape_mismatch",
+                  "another_kind",
+                  "declarations_missing",
+                  "declarations_incompatible",
+                  "unreadable",
+                  "too_large",
+                  "empty",
+                  "no_such_curve"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "differences": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CheckDifferences"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "witness": {
+            "anyOf": [
+              {
+                "enum": [
+                  "server",
+                  "claimed",
+                  "personal"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Witness"
+          },
+          "recorded_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CheckPrincipal"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "command_id": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Command Id"
+          },
+          "at": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "At"
+          },
+          "server_output_digest": {
+            "anyOf": [
+              {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Server Output Digest"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema",
+          "subject",
+          "fixture",
+          "reference",
+          "output_digest",
+          "rules_id",
+          "tolerance",
+          "request_digest",
+          "interpretation_digest",
+          "outcome",
+          "reason",
+          "differences",
+          "id"
+        ],
+        "title": "StoredCheck",
+        "type": "object"
+      },
       "StoredPoint": {
         "additionalProperties": false,
         "properties": {
@@ -90997,6 +95182,379 @@
           "name"
         ],
         "title": "StoryAgain",
+        "type": "object"
+      },
+      "StoryCheck": {
+        "additionalProperties": false,
+        "description": "E96: whether this calculation was checked against a reference, for its implementation, script and release.",
+        "properties": {
+          "state": {
+            "enum": [
+              "checked",
+              "reported",
+              "none",
+              "not_recorded"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "words": {
+            "description": "The headline sentences: the first line's words, or \"Not checked against a reference.\" and why",
+            "items": {
+              "type": "string"
+            },
+            "title": "Words",
+            "type": "array"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/StoryCheckLine"
+            },
+            "title": "Lines",
+            "type": "array"
+          }
+        },
+        "required": [
+          "state",
+          "words",
+          "lines"
+        ],
+        "title": "StoryCheck",
+        "type": "object"
+      },
+      "StoryCheckEarlier": {
+        "additionalProperties": false,
+        "properties": {
+          "words": {
+            "description": "The earlier record's first sentence",
+            "items": {
+              "type": "string"
+            },
+            "title": "Words",
+            "type": "array"
+          },
+          "technical": {
+            "$ref": "#/components/schemas/StoryCheckTechnical"
+          }
+        },
+        "required": [
+          "words",
+          "technical"
+        ],
+        "title": "StoryCheckEarlier",
+        "type": "object"
+      },
+      "StoryCheckLine": {
+        "additionalProperties": false,
+        "description": "One tested condition (a check key): its latest record, earlier ones newest first, and whether they disagree.",
+        "properties": {
+          "witness": {
+            "enum": [
+              "server",
+              "claimed"
+            ],
+            "title": "Witness",
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "passed",
+              "differed",
+              "not_compared"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "words": {
+            "description": "\"Checked against ...\" (the server repeated it) or \"Reported check by ...\" (it did not), with the bound or the difference",
+            "items": {
+              "type": "string"
+            },
+            "title": "Words",
+            "type": "array"
+          },
+          "disagreement": {
+            "title": "Disagreement",
+            "type": "boolean"
+          },
+          "earlier": {
+            "items": {
+              "$ref": "#/components/schemas/StoryCheckEarlier"
+            },
+            "title": "Earlier",
+            "type": "array"
+          },
+          "technical": {
+            "$ref": "#/components/schemas/StoryCheckTechnical"
+          }
+        },
+        "required": [
+          "witness",
+          "outcome",
+          "words",
+          "disagreement",
+          "earlier",
+          "technical"
+        ],
+        "title": "StoryCheckLine",
+        "type": "object"
+      },
+      "StoryCheckTechnical": {
+        "additionalProperties": false,
+        "description": "Raw values of one check record: Technical details only, never the default layer.",
+        "properties": {
+          "implementation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Implementation"
+          },
+          "implementation_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Implementation Version"
+          },
+          "release_digest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Release Digest"
+          },
+          "script_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Script Sha256"
+          },
+          "fixture": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fixture"
+          },
+          "fixture_digest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fixture Digest"
+          },
+          "reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference"
+          },
+          "reference_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Version"
+          },
+          "reference_digest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Digest"
+          },
+          "output_digest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Output Digest"
+          },
+          "server_output_digest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Server Output Digest"
+          },
+          "request_digest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Digest"
+          },
+          "rules_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rules Id"
+          },
+          "tolerance_kind": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tolerance Kind"
+          },
+          "tolerance_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tolerance Value"
+          },
+          "witness": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Witness"
+          },
+          "command_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Command Id"
+          },
+          "recorded_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recorded By"
+          }
+        },
+        "required": [
+          "implementation",
+          "implementation_version",
+          "release_digest",
+          "script_sha256",
+          "fixture",
+          "fixture_digest",
+          "reference",
+          "reference_version",
+          "reference_digest",
+          "output_digest",
+          "server_output_digest",
+          "request_digest",
+          "rules_id",
+          "tolerance_kind",
+          "tolerance_value",
+          "witness",
+          "command_id",
+          "recorded_by"
+        ],
+        "title": "StoryCheckTechnical",
+        "type": "object"
+      },
+      "StoryCompared": {
+        "additionalProperties": false,
+        "description": "E96: a person's own comparison of this version with a file; its author and administrators read it. Never a check.",
+        "properties": {
+          "outcome": {
+            "enum": [
+              "passed",
+              "differed",
+              "not_compared"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "words": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Words",
+            "type": "array"
+          },
+          "technical": {
+            "$ref": "#/components/schemas/StoryCheckTechnical"
+          }
+        },
+        "required": [
+          "outcome",
+          "words",
+          "technical"
+        ],
+        "title": "StoryCompared",
         "type": "object"
       },
       "StoryContinue": {
@@ -91364,9 +95922,30 @@
             "title": "Receipts"
           },
           "check": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StoryCheck"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "compared": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/StoryCompared"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "default": null,
-            "title": "Check",
-            "type": "null"
+            "title": "Compared"
           },
           "plan": {
             "anyOf": [
@@ -93031,6 +97610,51 @@
             "description": "E85: each declared field the person decided, with its class",
             "title": "Evidence",
             "type": "object"
+          },
+          "asks": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/CheckAsk"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E56: the declarations this file still needs (GeoPackage layer titles by key among them); only on a needs-decision row",
+            "title": "Asks"
+          },
+          "stated": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/CheckStated"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E56: what the file says about itself, read in the run; only on a needs-decision row",
+            "title": "Stated"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E56 (N5): the title of the GeoPackage layer this file landed as; the layer key stays in technical",
+            "title": "Title"
           }
         },
         "required": [

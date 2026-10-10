@@ -1,0 +1,637 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/assets/v1/feature-set-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.feature-set/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "Feature": {
+      "additionalProperties": false,
+      "properties": {
+        "index": {
+          "exclusiveMaximum": 50000,
+          "minimum": 0,
+          "title": "Index",
+          "type": "integer"
+        },
+        "geometry": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Geometry"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "maxLength": 10000,
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Properties"
+        }
+      },
+      "required": [
+        "index",
+        "geometry",
+        "properties"
+      ],
+      "title": "Feature",
+      "type": "object"
+    },
+    "FeatureContext": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "feature-set",
+          "title": "Type",
+          "type": "string"
+        },
+        "crs": {
+          "pattern": "^(EPSG:[0-9]{4,6}|OGC:CRS84|unknown)$",
+          "title": "Crs",
+          "type": "string"
+        },
+        "axes": {
+          "enum": [
+            "easting-northing",
+            "northing-easting",
+            "longitude-latitude",
+            "latitude-longitude",
+            "unknown"
+          ],
+          "title": "Axes",
+          "type": "string"
+        },
+        "xy_unit": {
+          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+          "title": "Xy Unit",
+          "type": "string"
+        },
+        "z_unit": {
+          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+          "title": "Z Unit",
+          "type": "string"
+        },
+        "z_meaning": {
+          "enum": [
+            "depth",
+            "elevation",
+            "time",
+            "unknown"
+          ],
+          "title": "Z Meaning",
+          "type": "string"
+        },
+        "positive": {
+          "enum": [
+            "up",
+            "down",
+            "unknown"
+          ],
+          "title": "Positive",
+          "type": "string"
+        },
+        "vertical_datum": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Vertical Datum",
+          "type": "string"
+        },
+        "encoding": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Encoding",
+          "type": "string"
+        },
+        "count": {
+          "maximum": 50000,
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        },
+        "vertex_count": {
+          "maximum": 500000,
+          "minimum": 0,
+          "title": "Vertex Count",
+          "type": "integer"
+        },
+        "geometry_types": {
+          "items": {
+            "enum": [
+              "Point",
+              "MultiPoint",
+              "LineString",
+              "MultiLineString",
+              "Polygon",
+              "MultiPolygon"
+            ],
+            "type": "string"
+          },
+          "maxItems": 6,
+          "title": "Geometry Types",
+          "type": "array"
+        },
+        "has_z": {
+          "title": "Has Z",
+          "type": "boolean"
+        },
+        "null_geometry_count": {
+          "maximum": 50000,
+          "minimum": 0,
+          "title": "Null Geometry Count",
+          "type": "integer"
+        },
+        "x_range": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "number"
+              },
+              "maxItems": 2,
+              "minItems": 2,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "X Range"
+        },
+        "y_range": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "number"
+              },
+              "maxItems": 2,
+              "minItems": 2,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Y Range"
+        },
+        "z_range": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "number"
+              },
+              "maxItems": 2,
+              "minItems": 2,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Z Range"
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/$defs/FeatureField"
+          },
+          "maxItems": 64,
+          "title": "Fields",
+          "type": "array"
+        },
+        "layer": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Layer"
+        },
+        "layer_title": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Layer Title"
+        },
+        "fidelity": {
+          "$ref": "#/$defs/Fidelity"
+        }
+      },
+      "required": [
+        "type",
+        "crs",
+        "axes",
+        "xy_unit",
+        "z_unit",
+        "z_meaning",
+        "positive",
+        "vertical_datum",
+        "encoding",
+        "count",
+        "vertex_count",
+        "geometry_types",
+        "has_z",
+        "null_geometry_count",
+        "x_range",
+        "y_range",
+        "z_range",
+        "fields",
+        "fidelity"
+      ],
+      "title": "FeatureContext",
+      "type": "object"
+    },
+    "FeatureField": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "source_name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Source Name",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "text",
+            "integer",
+            "number",
+            "date",
+            "boolean"
+          ],
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "source_name",
+        "kind"
+      ],
+      "title": "FeatureField",
+      "type": "object"
+    },
+    "Fidelity": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "const": "assessed",
+          "title": "Status",
+          "type": "string"
+        },
+        "preserved": {
+          "items": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Preserved",
+          "type": "array"
+        },
+        "losses": {
+          "items": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Losses",
+          "type": "array"
+        },
+        "unknown_context": {
+          "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Unknown Context",
+          "type": "array"
+        },
+        "decisions": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 512,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 64,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decisions"
+        }
+      },
+      "required": [
+        "status",
+        "preserved",
+        "losses",
+        "unknown_context"
+      ],
+      "title": "Fidelity",
+      "type": "object"
+    },
+    "Geometry": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "Point",
+            "MultiPoint",
+            "LineString",
+            "MultiLineString",
+            "Polygon",
+            "MultiPolygon"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "coordinates": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "number"
+              },
+              "maxItems": 3,
+              "minItems": 2,
+              "type": "array"
+            },
+            {
+              "items": {
+                "items": {
+                  "type": "number"
+                },
+                "maxItems": 3,
+                "minItems": 2,
+                "type": "array"
+              },
+              "type": "array"
+            },
+            {
+              "items": {
+                "items": {
+                  "items": {
+                    "type": "number"
+                  },
+                  "maxItems": 3,
+                  "minItems": 2,
+                  "type": "array"
+                },
+                "type": "array"
+              },
+              "type": "array"
+            },
+            {
+              "items": {
+                "items": {
+                  "items": {
+                    "items": {
+                      "type": "number"
+                    },
+                    "maxItems": 3,
+                    "minItems": 2,
+                    "type": "array"
+                  },
+                  "type": "array"
+                },
+                "type": "array"
+              },
+              "type": "array"
+            }
+          ],
+          "title": "Coordinates"
+        }
+      },
+      "required": [
+        "type",
+        "coordinates"
+      ],
+      "title": "Geometry",
+      "type": "object"
+    },
+    "PackageInterpretation": {
+      "additionalProperties": false,
+      "description": "E56: the executable identity of a package read without a recipe (a Shapefile and its companion members).",
+      "properties": {
+        "reader": {
+          "const": "asset_connectors.feature_files/1",
+          "title": "Reader",
+          "type": "string"
+        },
+        "mapping": {
+          "const": "feature-set/1",
+          "title": "Mapping",
+          "type": "string"
+        },
+        "parsing_policy": {
+          "const": "package-strict/1",
+          "title": "Parsing Policy",
+          "type": "string"
+        },
+        "null_policy": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Null Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reader",
+        "mapping",
+        "parsing_policy",
+        "null_policy"
+      ],
+      "title": "PackageInterpretation",
+      "type": "object"
+    },
+    "Reference": {
+      "additionalProperties": false,
+      "properties": {
+        "authority": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Authority",
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "profile": {
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+          "title": "Profile",
+          "type": "string"
+        }
+      },
+      "required": [
+        "authority",
+        "key",
+        "revision",
+        "profile"
+      ],
+      "title": "Reference",
+      "type": "object"
+    },
+    "TypedInterpretation": {
+      "additionalProperties": false,
+      "description": "The executable identity of the typed reader (Connectors typed_reader; E56: feature_files for feature sets).",
+      "properties": {
+        "reader": {
+          "enum": [
+            "asset_connectors.typed_reader/1",
+            "asset_connectors.feature_files/1"
+          ],
+          "title": "Reader",
+          "type": "string"
+        },
+        "mapping": {
+          "enum": [
+            "well-tops/1",
+            "trajectory/1",
+            "regular-grid-surface/1",
+            "triangulated-surface/1",
+            "point-set/1",
+            "polyline-set/1",
+            "seismic-volume/1",
+            "well-location/1",
+            "wavelet/1",
+            "model-section/1",
+            "seismic-section/1",
+            "time-depth/1",
+            "feature-set/1"
+          ],
+          "title": "Mapping",
+          "type": "string"
+        },
+        "parsing_policy": {
+          "const": "typed-strict/1",
+          "title": "Parsing Policy",
+          "type": "string"
+        },
+        "null_policy": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Null Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reader",
+        "mapping",
+        "parsing_policy",
+        "null_policy"
+      ],
+      "title": "TypedInterpretation",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "E56: every feature of one layer in file order with its stored coordinates and its attribute values by field name.",
+  "properties": {
+    "representation": {
+      "const": "normalized",
+      "title": "Representation",
+      "type": "string"
+    },
+    "source": {
+      "$ref": "#/$defs/Reference"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "interpretation": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TypedInterpretation"
+        },
+        {
+          "$ref": "#/$defs/PackageInterpretation"
+        }
+      ],
+      "title": "Interpretation"
+    },
+    "schema": {
+      "const": "ophiolite.feature-set/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "context": {
+      "$ref": "#/$defs/FeatureContext"
+    },
+    "features": {
+      "items": {
+        "$ref": "#/$defs/Feature"
+      },
+      "maxItems": 50000,
+      "minItems": 1,
+      "title": "Features",
+      "type": "array"
+    }
+  },
+  "required": [
+    "representation",
+    "source",
+    "source_sha256",
+    "interpretation",
+    "schema",
+    "context",
+    "features"
+  ],
+  "title": "FeatureSet",
+  "type": "object"
+}

@@ -72,9 +72,10 @@ class CurveSet:
 
 from .locations import LocationClient  # noqa: E402
 from .sources import SourceClient  # noqa: E402
+from .checks import CheckClient  # noqa: E402
 
 
-class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: wells() and extent(); E50a: sources()
+class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient):  # E29: wells() and extent(); E50a: sources(); E96: checks
     def __init__(self,url,project,credential=None,http=None):
         self.url=origin(url)
         if not isinstance(project,str) or not project:raise Refused('Choose a project.')
@@ -152,7 +153,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
                         kind,message=categories.get(response.status_code,(Unavailable,'Scientific read failed. Check service access and retry.'))
                         if kind is Busy:raise Busy(message,meta.get('remedy',''),status=response.status_code,retry_after=delay,code=meta.get('code'),**policy.carried(meta))
                         raise kind(message,meta.get('remedy',''),status=response.status_code,code=meta.get('code'),**policy.carried(meta))
-                    if answer is not None:answer.update({k.lower():v for k,v in response.headers.items() if k.lower() in ('content-range','x-content-sha256')})
+                    if answer is not None:answer.update({k.lower():v for k,v in response.headers.items() if k.lower() in ('content-range','x-content-sha256','etag','x-ophiolite-access-generation')})  # E100a: window validators
                     content=bytearray()
                     for chunk in response.iter_bytes():
                         content.extend(chunk)
@@ -206,6 +207,20 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient):  # E29: we
             descriptors.append(model);views.append(view)
             wire_descriptors.append(data);wire_curves.append(json.loads(body));wire_curve_bytes.append(body)
         return CurveSet(descriptors,views,artifact,url=self.url,project=self.project,wire_descriptors=wire_descriptors,wire_curves=wire_curves,wire_curve_bytes=wire_curve_bytes)
+
+    def curve_window(self,asset,revision,curve,top,base,*,level=None,rows=None,max_pages=64):
+        """E100a: the depth window top..base of one exact curve, for display (ophiolite.windows.CurveWindow).
+        Give exactly one of `level` (0 = every sample, exact; 1..17 = blocks of up to 2**level samples with
+        their extrema) or `rows` (the server picks the finest level that fits). Pages are followed until the
+        window is complete, at most `max_pages`; each is verified against this curve's descriptor."""
+        from .windows import Window,PAGE_BYTES
+        window=Window(self.project,asset,revision,curve,top,base,level,rows,max_pages)
+        path,query=self._path(asset,revision,curve)
+        data=self._json(path+query+PROFILES,256*1024)
+        _core.verify_descriptor(data,self.project,asset,revision,curve);window.bind(data)
+        while True:
+            answer={}
+            if not window.accept(self._get(window.path(path),PAGE_BYTES,answer=answer),answer):return window.result()
 
     def read_data(self,asset,revision):
         """E11: read well tops, a trajectory or a regular-grid surface at an exact revision."""
