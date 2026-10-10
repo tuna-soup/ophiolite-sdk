@@ -138,8 +138,15 @@ def test_how_was_this_made_reads_the_story_the_change_and_the_refusal_synthetic(
     assert 'Ophiolite did not run this calculation, so it cannot make it again.' in text and 'Nothing differs' not in text
 
 
+
+def test_open_it_here_opens_the_exact_version_and_sends_again_once_synthetic(tmp_path, monkeypatch):
+    text = run('open-it-here', tmp_path, monkeypatch)
+    assert 'Version 1 opens at http://127.0.0.1:' in text and '/project/p/data/m~' in text and '?revision=' in text
+    assert 'Sent again: version 2 - run twice, still version 2' in text
+    assert 'Version 3 arrived first; the line built on version 2 was refused: The result has a newer version; review it before adding another' in text
+
 def test_every_entry_is_listed_built_and_described():
-    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'grids-and-gis-files', 'how-was-this-made']
+    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'grids-and-gis-files', 'how-was-this-made', 'open-it-here']
     for entry in GALLERY['notebooks']:
         assert set(entry) == {'slug', 'title', 'sentence', 'modes', 'data'} and entry['modes'] == ['synthetic', 'live']
         script = (ROOT / 'notebooks' / entry['slug'] / 'notebook.py').read_text()

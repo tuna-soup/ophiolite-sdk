@@ -190,6 +190,81 @@ def test_duplicate_content_names_the_earlier_version(project, tmp_path):
     assert local.sentence == 'This is the same as version 3; nothing was sent.' and len([c for c in project.calls if c[0] == 'publish']) == 1
 
 
+# -- expected: the version a send builds on (E104 C1) --------------------------------------------------
+
+REFUSED_NEWER = ('A newer version was added first. Your change was not sent. Either get the latest version and look at it, '
+                 'or send yours as a new item.')
+
+
+def holding_v2(project, tmp_path):
+    e = ex(project, tmp_path / 'w'); e.get('poro', output=tmp_path / 'o')    # holds v1
+    project.add('poro', V2, name='Porosity'); e.get('poro', output=tmp_path / 'o')
+    assert e.held()['poro']['revision'] == sha(V2)
+    return e
+
+
+def test_expected_other_than_the_held_version_refuses_with_no_publish(project, tmp_path):
+    e = holding_v2(project, tmp_path)
+    caught = refused('newer-version-exists', lambda: send(e, V3, expected=sha(V1)))
+    assert caught.sentence == REFUSED_NEWER and exit_code(caught) == 4
+    assert not [c for c in project.calls if c[0] == 'publish']               # mutation: expected ignored -> a publish appears
+    assert e._load()['pending'] is None and e.held()['poro']['revision'] == sha(V2)
+
+
+@pytest.mark.parametrize('data', [V2, V1], ids=['bytes-of-the-held-version', 'bytes-of-an-older-version'])
+def test_a_stale_expected_is_refused_before_identical_content_is_named(project, tmp_path, data):
+    e = holding_v2(project, tmp_path)
+    caught = refused('newer-version-exists', lambda: send(e, data, expected=sha(V1)))  # mutation: checked after same_content -> nothing-changed
+    assert caught.sentence == REFUSED_NEWER and not [c for c in project.calls if c[0] == 'publish']
+
+
+def test_expected_equal_to_the_held_version_sends_on_that_parent(project, tmp_path):
+    e = holding_v2(project, tmp_path)
+    sent = send(e, V3, expected=sha(V2))
+    assert sent.outcome == 'sent-version' and sent.sentence == 'Sent Porosity as version 3. Version 2 is kept.'
+    assert [c[2] for c in project.calls if c[0] == 'publish'] == [sha(V2)]   # the transmitted parent
+    assert e.held()['poro']['revision'] == sha(V3) and 'expected' not in json.dumps(e._load())
+    assert refused('nothing-changed', lambda: send(e, V3, expected=sha(V3))).sentence == 'This is the same as version 3; nothing was sent.'
+
+
+def test_expected_without_of_is_not_valid(project, tmp_path):
+    e = ex(project, tmp_path / 'w'); e.get('poro', output=tmp_path / 'o')
+    caught = refused('not-valid', lambda: send(e, of=None, expected=sha(V1)))
+    assert caught.sentence == ('The project refused this: name the item this is a new version of, together with the version it builds on. '
+                               'Nothing was sent.') and not [c for c in project.calls if c[0] == 'publish']
+
+
+@pytest.mark.parametrize('move', ['record', 'get'], ids=['held-record-edited', 'got-through-get'])
+@pytest.mark.parametrize('again', [{'expected': sha(V1)}, {}], ids=['expected-passed-again', 'expected-left-out'])
+def test_a_retry_replays_the_saved_command_and_parent_whatever_is_held_now(project, tmp_path, again, move):
+    e = ex(project, tmp_path / 'w'); e.get('poro', output=tmp_path / 'o')    # holds v1
+    project.drop_after_commit = True
+    refused('outcome-unknown', lambda: send(e, V2, expected=sha(V1)))
+    command = e._load()['pending']['command_id']
+    project.drop_after_commit = False; project.add('poro', V3, name='Porosity')
+    if move == 'get':                                                        # the public path: get the newer version meanwhile
+        assert e.get('poro', output=tmp_path / 'o').outcome == 'got' and e._load()['pending']['command_id'] == command
+    else:
+        record = e._load(); record['items']['poro']['revision'] = sha(V3); e._save(record)  # the held record moved on meanwhile
+    assert e.held()['poro']['revision'] == sha(V3)
+    retried = send(ex(project, tmp_path / 'w'), V2, **again)
+    assert retried.outcome == 'sent-version' and retried.technical['command_id'] == command
+    # mutation: expected re-checked on replay -> newer-version-exists; resolved rebuilt from the held record -> parent sha(V3)
+    assert [c[1:] for c in project.calls if c[0] == 'publish'] == [(command, sha(V1)), (command, sha(V1))]
+
+
+def test_a_pending_record_saved_without_expected_is_replayed(project, tmp_path):
+    e = ex(project, tmp_path / 'w'); e.get('poro', output=tmp_path / 'o')
+    record = e._load()
+    record['pending'] = json.loads('''{"command_id": "%s", "owner": {"kind": "delegate", "fingerprint": "key-1"}, "started": 1300.0,
+        "request": {"name": "Porosity", "profile": "table/1", "how": "recomputed", "based_on": ["poro"], "of": "poro", "declare": {},
+                    "extra": {}, "sha256": "%s", "bytes": %d},
+        "resolved": {"parents": [{"asset_id": "poro", "revision": "%s"}], "expected_parent": "%s"}}''' % ('c' * 32, sha(V2), len(V2), sha(V1), sha(V1)))
+    e._save(record)
+    replayed = send(e, V2, expected=sha(V1))                                 # mutation: expected saved in request -> "unfinished"
+    assert replayed.outcome == 'sent-version' and replayed.technical['command_id'] == 'c' * 32
+
+
 # -- the pending command ------------------------------------------------------------------------------
 
 def send(e, data=V2, **changes):

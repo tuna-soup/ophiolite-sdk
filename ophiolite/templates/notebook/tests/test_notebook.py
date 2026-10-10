@@ -19,7 +19,7 @@ def test_execute_notebook_figure_descriptor_and_recovery(tmp_path,monkeypatch):
     outputs=[output for cell in executed.cells for output in cell.get('outputs',[])]
     html='\n'.join(output.get('data',{}).get('text/html','') for output in outputs)
     assert 'Technical details' in html and 'Samples' in html and 'Missing' in html
-    assert 'kind=scientific' in html and 'revision=' in html
+    assert '/data/m~' in html and 'revision=' in html
     visible=re.sub(r'<details>.*?</details>','',html,flags=re.S)
     visible=re.sub(r'<[^>]*>','',visible)
     assert not re.search(r'las2/1|synthetic-file|[0-9a-f]{64}|source-reference',visible)

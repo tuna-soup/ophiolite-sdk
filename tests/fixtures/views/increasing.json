@@ -254,7 +254,7 @@
       "GR": "9a04f61dce722a002ed4775e90fb7013049ca18658725ffb5d67bc81fc9fe66e",
       "RHOB": "62070a688d89d248032e3cb89fac4acf9a448991dff7bddd633d6b7916e4461d"
     },
-    "workspace_url": "https://workspace.example/project/synthetic-project/asset/sdk-view-fixture?revision=7730299fc435d7922e4e164d78f240848e9e758c847b2a3b0314a8c36a0f1e20&kind=scientific&curve=GR",
+    "workspace_url": "https://workspace.example/project/synthetic-project/data/m~sdk-view-fixture?revision=7730299fc435d7922e4e164d78f240848e9e758c847b2a3b0314a8c36a0f1e20",
     "contracts": {
       "registry_version": "1.17.0",
       "schema_ids": [
