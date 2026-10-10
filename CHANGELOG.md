@@ -5,6 +5,15 @@
 Supported 0.x client over preview contracts, installable from reviewed source.
 No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
 
+- Grids and GIS files (E56, preview API): `client.read_data` returns `FeatureSet` for map features from a Shapefile,
+  a GeoPackage layer or a GeoJSON file (`features` in file order with coordinates as stored, `fields`, `to_frame()`
+  with one row per feature), checked offline against the server's rules; ZMAP+, CPS-3 and IRAP grids read as
+  `GridSurface`. `upload` answers a question a file asks only once it is read (a GeoPackage layer, a grid's corners)
+  from `declare` and sends it again, at most three sends; `declare` also takes a file's path,
+  `{'a.gpkg': {'ogc-geopackage/1': {'layer': 'fields'}}}`, which wins over its kind field by field. An open file is
+  refused with a sentence; pass a path. Portable bundles carry GeoJSON and GeoPackage feature sets and the new grid
+  formats at 2.7.0; a Shapefile-read feature set is not exported yet (its companion files), and a CPS-3 grid is
+  imported by uploading its file again.
 - Organisation connections (E39, preview API): `client.org_connections(organization_id)` lists the organisation's
   database connections you use or administer (with an access key, only those you use, in the organisation of its
   project), each with your own access and readiness; it reads the projectless `/api/v1/org-connections/list` and

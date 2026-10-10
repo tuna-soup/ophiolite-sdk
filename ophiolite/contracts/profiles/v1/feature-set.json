@@ -1,0 +1,24 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "ophiolite.feature-set/1",
+  "kind": "normalized",
+  "lifecycle": "preview",
+  "display_name": "Normalized feature set",
+  "description": "Every feature of one map layer in file order with its stored coordinates (axes and ring orientation as stored), its attribute values by field and the stated or declared coordinate system; nothing is converted.",
+  "payload_schema": "ophiolite.feature-set/1",
+  "role": "normalized",
+  "media_types": [
+    "application/json"
+  ],
+  "interpretation": {
+    "reader": "asset_connectors.feature_files/1",
+    "parsing_policy": "typed-strict/1",
+    "mapping": "feature-set/1"
+  },
+  "mappings": [
+    "ophiolite.mapping/typed-standards/1"
+  ],
+  "table_target": {
+    "none": "not-a-table"
+  }
+}

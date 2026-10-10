@@ -40,12 +40,12 @@ def schemas():
     """Publish the Pydantic-generated schemas listed in the registry."""
     from project_gateway.scientific_assets import (Asset, AssetSummary, Curve, ScientificContext, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface,
                                                    PointSet, PolylineSet, SeismicVolume, SeismicSlice, ImportRecipe, PointSet2,
-                                                   WellLocationUpload, WellLocation, Wavelet, ModelSection, SeismicSection, TimeDepth)
+                                                   WellLocationUpload, WellLocation, Wavelet, ModelSection, SeismicSection, TimeDepth, FeatureSet)
     from project_gateway.domain import RelationshipRegistry, Entity, EntityAssets, Lineage
     from project_gateway.scientific_assets import DerivationRecord, Parameters  # E94
     for model in (DerivationRecord, Parameters, Asset, Curve, ScientificContext, AssetSummary, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface, PointSet, PolylineSet, SeismicVolume, SeismicSlice,
                   RelationshipRegistry, Entity, EntityAssets, Lineage, ImportRecipe, PointSet2, WellLocationUpload, WellLocation,
-                  Wavelet, ModelSection, SeismicSection, TimeDepth):  # E53; E57
+                  Wavelet, ModelSection, SeismicSection, TimeDepth, FeatureSet):  # E53; E57; E56
         write(CONTRACTS / model.CONTRACT['path'], model.model_json_schema())
 
 
@@ -132,6 +132,12 @@ TYPED = {
     # E57: PRW-06's first checkshot pairs (NLOG document/924335000); the datum is not stated, so it stays unknown.
     'time-depth': ('time-depth-csv/1', 'text/csv', b'depth,time,velocity\r\n0,0,0\r\n0.96,1,1913.18\r\n1.91,2,1913.18\r\n',
                    {'depth_type': 'tvd', 'depth_unit': 'm', 'time_kind': 'two-way', 'time_unit': 'ms'}),
+    # E56: two authored field outlines in the older GeoJSON form (crs EPSG:23031); the second has no geometry.
+    'feature-set': ('geojson/1', 'application/geo+json',
+                    b'{"type":"FeatureCollection","crs":{"type":"name","properties":{"name":"urn:ogc:def:crs:EPSG::23031"}},"features":['
+                    b'{"type":"Feature","geometry":{"type":"Polygon","coordinates":[[[547895.5,5818925.0],[554184.5,5818925.0],[554184.5,5824973.0],[547895.5,5818925.0]]]},'
+                    b'"properties":{"FIELD_CODE":"HORIZON","FIELD_NAME":"Horizon","WELLS":3}},'
+                    b'{"type":"Feature","geometry":null,"properties":{"FIELD_CODE":"SPG","FIELD_NAME":"Sprang","WELLS":null}}]}', {}),
 }
 
 
@@ -312,6 +318,8 @@ def ts_type(schema, path='$', indent=0):
         if 'properties' not in schema:
             if schema.get('additionalProperties') is True:  # a free-form JSON object (declared method parameters)
                 return 'Record<string, unknown>'
+            if isinstance(schema.get('additionalProperties'), dict):  # E56: a map of one value type (feature properties)
+                return 'Record<string, %s>' % ts_type(schema['additionalProperties'], f'{path}/additionalProperties', indent)
             raise Unsupported(f'{path}: object without properties')
         extra = schema.get('additionalProperties', None)
         if extra not in (None, False):

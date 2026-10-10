@@ -60,3 +60,10 @@ refuses 2.5 content by its asset types ([fixture](fixtures/manifest-sections.jso
 descriptor, `seismic_reference_elevation` as canonical decimal text; the wellbore
 association travels in the graph form. A 2.5 reader refuses 2.6 content by its asset types
 with "An asset has an unknown type."
+
+## 2.7 — feature sets
+
+2.7 adds `feature-set` for single-file feature sets (GeoJSON and GeoPackage: `original.geojson` or
+`original.gpkg`, `descriptor.json`, `data.json`, the served `ophiolite.feature-set/1`). A feature set read
+from a Shapefile package (its descriptor carries `package`) is refused, as other packages are, until E23c.
+A 2.6 reader refuses 2.7 content by its asset types with "An asset has an unknown type."

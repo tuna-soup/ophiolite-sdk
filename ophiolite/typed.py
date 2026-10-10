@@ -10,7 +10,7 @@ import math
 from .errors import Refused
 
 TYPES = ('well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-volume',
-         'wavelet', 'model-section', 'seismic-section', 'well-location', 'time-depth')
+         'wavelet', 'model-section', 'seismic-section', 'well-location', 'time-depth', 'feature-set')
 WAVELET_DT = (0.0005, 0.01)  # E53 D7: a bounded spectrum (at most 1001 bins of 1 Hz)
 WAVELET_SAMPLES = (3, 4095)
 
@@ -416,10 +416,44 @@ class TimeDepth(TypedData):
         return '<TimeDepth %d pairs, %s %s depth, %s %s time>' % (c['count'], c['depth_type'], c['depth_unit'], c['time_kind'], c['time_unit'])
 
 
+class FeatureSet(TypedData):
+    """Map features (E56): points, lines or polygons of one family from a Shapefile, a GeoPackage layer or a GeoJSON file,
+    in file order with their coordinates as stored (nothing reprojected, rings not reoriented) and their attribute values
+    by field. A feature without geometry keeps its row with `geometry` None."""
+    type = 'feature-set'
+    DTYPES = {'text': 'string', 'integer': 'Int64', 'number': 'Float64', 'date': 'string', 'boolean': 'boolean'}
+
+    @property
+    def features(self): return self.data['features']
+
+    @property
+    def fields(self):
+        """[{name, source_name, kind}] in file order."""
+        return [{k: f[k] for k in ('name', 'source_name', 'kind')} for f in self.context['fields']]
+
+    def __len__(self): return len(self.features)
+
+    def to_frame(self):
+        """One row per feature: `index`, `geometry_type` (missing when the feature has no geometry), then each field in
+        file order. Coordinates stay in `features`; the exact field labels travel in frame.attrs['source_names']."""
+        pd = self._pandas()
+        columns = {'index': pd.array([f['index'] for f in self.features], dtype='Int64'),
+                   'geometry_type': pd.array([(f['geometry'] or {}).get('type') for f in self.features], dtype='string')}
+        for field in self.fields:
+            columns[field['name']] = pd.array([f['properties'].get(field['name']) for f in self.features], dtype=self.DTYPES[field['kind']])
+        frame = pd.DataFrame(columns)
+        frame.attrs['source_names'] = {f['name']: f['source_name'] for f in self.fields}
+        return frame
+
+    def __repr__(self):
+        c = self.context
+        return '<FeatureSet %d features, %s, %s>' % (c['count'], '/'.join(c['geometry_types']) or 'no geometry', c['crs'])
+
+
 CLASSES = {'well-tops': WellTops, 'trajectory': Trajectory, 'regular-grid-surface': GridSurface,
            'triangulated-surface': TriangulatedSurface, 'point-set': PointSet, 'polyline-set': PolylineSet, 'seismic-volume': SeismicVolume,
            'wavelet': Wavelet, 'model-section': ModelSection, 'seismic-section': SeismicSection, 'well-location': WellLocation,
-           'time-depth': TimeDepth}
+           'time-depth': TimeDepth, 'feature-set': FeatureSet}
 
 
 def minimum_curvature(stations):
