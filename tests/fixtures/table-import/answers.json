@@ -1,0 +1,2221 @@
+{
+ "again": {
+  "preview": {
+   "audience": {
+    "allowed": [
+     "alice",
+     "bob",
+     "carol",
+     "dave"
+    ],
+    "initiator": "carol"
+   },
+   "counts": {
+    "already_here": 2,
+    "land": 0,
+    "rows": 61,
+    "skipped_rows": 0,
+    "skipped_units": 0,
+    "units": 2
+   },
+   "declared": {
+    "depth_unit": "m"
+   },
+   "input_id": "4c2eaee1a6bb9dce7e6643f62e0e52a96c6c70c72aff272635b9d432bfd14ffb",
+   "no_well": [],
+   "not_kept": [],
+   "origin": "file",
+   "preview_digest": "b38dc06534336d0c56c1377c29069279c5ae587a0f5968fd5ddc082f97749a11",
+   "profile": "well-tops-csv/1",
+   "room": {
+    "uploads": 98
+   },
+   "skipped": [],
+   "skipped_units": [],
+   "source_name": "nlog-tops.xlsx",
+   "target": "well-tops",
+   "units": [
+    {
+     "action": "reuse",
+     "code": null,
+     "first_row": 4,
+     "label": "nlog-tops - HON-GT-01",
+     "link": null,
+     "link_words": null,
+     "rows": 24,
+     "same_name": false,
+     "unit": 0,
+     "well": "HON-GT-01",
+     "wellbore": {
+      "entity_id": "wellbore-94429deb671c4aebaaeded64c3ec0c4b",
+      "name": "HON-GT-01"
+     },
+     "words": null
+    },
+    {
+     "action": "reuse",
+     "code": null,
+     "first_row": 28,
+     "label": "nlog-tops - NLW-GT-01",
+     "link": "unmatched",
+     "link_words": "No wellbore you can read has this name; not linked",
+     "rows": 37,
+     "same_name": false,
+     "unit": 1,
+     "well": "NLW-GT-01",
+     "wellbore": null,
+     "words": null
+    }
+   ]
+  },
+  "start": {
+   "approved_at": 1791626824.5426977,
+   "approved_by": "carol",
+   "audience": [
+    "carol"
+   ],
+   "connection_id": null,
+   "counts": {
+    "already_here": 0,
+    "created": 0,
+    "linked": 0,
+    "planned": 2,
+    "removed": 0,
+    "skipped": 0,
+    "units": 2
+   },
+   "created_at": 1791626824.5426977,
+   "id": "dc74afcfb03f6ae0b9ad538a474d0900259b50d77e2410ae026b8372c1f9e8ad",
+   "initiator": "carol",
+   "input_id": "4c2eaee1a6bb9dce7e6643f62e0e52a96c6c70c72aff272635b9d432bfd14ffb",
+   "key": "nlog-tops.xlsx",
+   "origin": "file",
+   "plan_digest": "b38dc06534336d0c56c1377c29069279c5ae587a0f5968fd5ddc082f97749a11",
+   "project_id": "p",
+   "reason": null,
+   "release_id": null,
+   "state": "importing",
+   "target": "well-tops",
+   "totals": {
+    "no_well": 0,
+    "rows": 61,
+    "skipped_rows": 0,
+    "skipped_units": 0,
+    "units": 2
+   },
+   "units": [
+    {
+     "asset_id": "e7e93f566ee84e436b149baa2ac61b66eda8b89d7a9ef5f568bc8a63284c80c8",
+     "association_id": null,
+     "label": "nlog-tops - HON-GT-01",
+     "outcome": "planned",
+     "reason": null,
+     "receipt": null,
+     "revision": "180381b95924e356c9a5742cf8cf73d1afbd93caeed0e1f20097d876e467f651",
+     "unit": 0,
+     "wellbore": {
+      "entity_id": "wellbore-94429deb671c4aebaaeded64c3ec0c4b",
+      "name": "HON-GT-01"
+     },
+     "words": null
+    },
+    {
+     "asset_id": "cde8db20b3b69416a3fd2097a5632d6dbc524a7bf423767fd038c68f8ad973dc",
+     "association_id": null,
+     "label": "nlog-tops - NLW-GT-01",
+     "outcome": "planned",
+     "reason": "unmatched",
+     "receipt": null,
+     "revision": "866cbc00873d32705e52b12117aa4437f8323dcbbc3cd6a70963d9d47d2b3488",
+     "unit": 1,
+     "wellbore": null,
+     "words": "No wellbore you can read has this name; not linked"
+    }
+   ],
+   "updated_at": 1791626824.5426977,
+   "words": "Importing"
+  },
+  "steps": [
+   {
+    "approved_at": 1791626824.5426977,
+    "approved_by": "carol",
+    "audience": [
+     "carol"
+    ],
+    "connection_id": null,
+    "counts": {
+     "already_here": 2,
+     "created": 0,
+     "linked": 1,
+     "planned": 0,
+     "removed": 0,
+     "skipped": 0,
+     "units": 2
+    },
+    "created_at": 1791626824.5426977,
+    "id": "dc74afcfb03f6ae0b9ad538a474d0900259b50d77e2410ae026b8372c1f9e8ad",
+    "initiator": "carol",
+    "input_id": "4c2eaee1a6bb9dce7e6643f62e0e52a96c6c70c72aff272635b9d432bfd14ffb",
+    "key": "nlog-tops.xlsx",
+    "origin": "file",
+    "plan_digest": "b38dc06534336d0c56c1377c29069279c5ae587a0f5968fd5ddc082f97749a11",
+    "project_id": "p",
+    "reason": null,
+    "release_id": null,
+    "state": "complete",
+    "target": "well-tops",
+    "totals": {
+     "no_well": 0,
+     "rows": 61,
+     "skipped_rows": 0,
+     "skipped_units": 0,
+     "units": 2
+    },
+    "units": [
+     {
+      "asset_id": "e7e93f566ee84e436b149baa2ac61b66eda8b89d7a9ef5f568bc8a63284c80c8",
+      "association_id": "assertion-9bee1bc34c104ad6ac6529d225885b18",
+      "label": "nlog-tops - HON-GT-01",
+      "outcome": "landed",
+      "reason": null,
+      "receipt": "reused",
+      "revision": "180381b95924e356c9a5742cf8cf73d1afbd93caeed0e1f20097d876e467f651",
+      "unit": 0,
+      "wellbore": {
+       "entity_id": "wellbore-94429deb671c4aebaaeded64c3ec0c4b",
+       "name": "HON-GT-01"
+      },
+      "words": null
+     },
+     {
+      "asset_id": "cde8db20b3b69416a3fd2097a5632d6dbc524a7bf423767fd038c68f8ad973dc",
+      "association_id": null,
+      "label": "nlog-tops - NLW-GT-01",
+      "outcome": "landed",
+      "reason": "unmatched",
+      "receipt": "reused",
+      "revision": "866cbc00873d32705e52b12117aa4437f8323dcbbc3cd6a70963d9d47d2b3488",
+      "unit": 1,
+      "wellbore": null,
+      "words": "No wellbore you can read has this name; not linked"
+     }
+    ],
+    "updated_at": 1791626824.6023893,
+    "words": "Finished"
+   }
+  ]
+ },
+ "cancel": {
+  "cancel": {
+   "approved_at": 1791626825.3521316,
+   "approved_by": "carol",
+   "audience": [
+    "carol"
+   ],
+   "connection_id": null,
+   "counts": {
+    "already_here": 0,
+    "created": 1,
+    "linked": 0,
+    "planned": 1,
+    "removed": 0,
+    "skipped": 0,
+    "units": 2
+   },
+   "created_at": 1791626825.3521316,
+   "id": "ed081e31917339e8e092daa57bf44a2cbe6d311c18927207f8c293d8d5abe8a4",
+   "initiator": "carol",
+   "input_id": "4c2eaee1a6bb9dce7e6643f62e0e52a96c6c70c72aff272635b9d432bfd14ffb",
+   "key": "nlog-tops.xlsx",
+   "origin": "file",
+   "plan_digest": "6bd2711378d8a3feb036a117bafaf15faa8ffbe90aa820e763d755e2b70f809a",
+   "project_id": "p",
+   "reason": "Cancelled by alice",
+   "release_id": null,
+   "state": "cancelled",
+   "target": "well-tops",
+   "totals": {
+    "no_well": 0,
+    "rows": 61,
+    "skipped_rows": 0,
+    "skipped_units": 0,
+    "units": 2
+   },
+   "units": [
+    {
+     "asset_id": null,
+     "association_id": null,
+     "label": "nlog-tops - HON-GT-01",
+     "outcome": "landed",
+     "reason": null,
+     "receipt": "created",
+     "revision": null,
+     "unit": 0,
+     "wellbore": null,
+     "words": null
+    },
+    {
+     "asset_id": null,
+     "association_id": null,
+     "label": "nlog-tops - NLW-GT-01",
+     "outcome": "planned",
+     "reason": "unmatched",
+     "receipt": null,
+     "revision": null,
+     "unit": 1,
+     "wellbore": null,
+     "words": "No wellbore you can read has this name; not linked"
+    }
+   ],
+   "updated_at": 1791626825.4075027,
+   "words": "Cancelled"
+  },
+  "first": {
+   "approved_at": 1791626825.3521316,
+   "approved_by": "carol",
+   "audience": [
+    "carol"
+   ],
+   "connection_id": null,
+   "counts": {
+    "already_here": 0,
+    "created": 1,
+    "linked": 1,
+    "planned": 1,
+    "removed": 0,
+    "skipped": 0,
+    "units": 2
+   },
+   "created_at": 1791626825.3521316,
+   "id": "ed081e31917339e8e092daa57bf44a2cbe6d311c18927207f8c293d8d5abe8a4",
+   "initiator": "carol",
+   "input_id": "4c2eaee1a6bb9dce7e6643f62e0e52a96c6c70c72aff272635b9d432bfd14ffb",
+   "key": "nlog-tops.xlsx",
+   "origin": "file",
+   "plan_digest": "6bd2711378d8a3feb036a117bafaf15faa8ffbe90aa820e763d755e2b70f809a",
+   "project_id": "p",
+   "reason": null,
+   "release_id": null,
+   "state": "importing",
+   "target": "well-tops",
+   "totals": {
+    "no_well": 0,
+    "rows": 61,
+    "skipped_rows": 0,
+    "skipped_units": 0,
+    "units": 2
+   },
+   "units": [
+    {
+     "asset_id": "e7e93f566ee84e436b149baa2ac61b66eda8b89d7a9ef5f568bc8a63284c80c8",
+     "association_id": "assertion-4896b16e1b39472f87ac7fbdd2669efe",
+     "label": "nlog-tops - HON-GT-01",
+     "outcome": "landed",
+     "reason": null,
+     "receipt": "created",
+     "revision": "180381b95924e356c9a5742cf8cf73d1afbd93caeed0e1f20097d876e467f651",
+     "unit": 0,
+     "wellbore": {
+      "entity_id": "wellbore-af720f928d884ea58a699279c5ab1ac3",
+      "name": "HON-GT-01"
+     },
+     "words": null
+    },
+    {
+     "asset_id": null,
+     "association_id": null,
+     "label": "nlog-tops - NLW-GT-01",
+     "outcome": "planned",
+     "reason": "unmatched",
+     "receipt": null,
+     "revision": null,
+     "unit": 1,
+     "wellbore": null,
+     "words": "No wellbore you can read has this name; not linked"
+    }
+   ],
+   "updated_at": 1791626825.3794456,
+   "words": "Importing"
+  },
+  "start": {
+   "approved_at": 1791626825.3521316,
+   "approved_by": "carol",
+   "audience": [
+    "carol"
+   ],
+   "connection_id": null,
+   "counts": {
+    "already_here": 0,
+    "created": 0,
+    "linked": 0,
+    "planned": 2,
+    "removed": 0,
+    "skipped": 0,
+    "units": 2
+   },
+   "created_at": 1791626825.3521316,
+   "id": "ed081e31917339e8e092daa57bf44a2cbe6d311c18927207f8c293d8d5abe8a4",
+   "initiator": "carol",
+   "input_id": "4c2eaee1a6bb9dce7e6643f62e0e52a96c6c70c72aff272635b9d432bfd14ffb",
+   "key": "nlog-tops.xlsx",
+   "origin": "file",
+   "plan_digest": "6bd2711378d8a3feb036a117bafaf15faa8ffbe90aa820e763d755e2b70f809a",
+   "project_id": "p",
+   "reason": null,
+   "release_id": null,
+   "state": "importing",
+   "target": "well-tops",
+   "totals": {
+    "no_well": 0,
+    "rows": 61,
+    "skipped_rows": 0,
+    "skipped_units": 0,
+    "units": 2
+   },
+   "units": [
+    {
+     "asset_id": null,
+     "association_id": null,
+     "label": "nlog-tops - HON-GT-01",
+     "outcome": "planned",
+     "reason": null,
+     "receipt": null,
+     "revision": null,
+     "unit": 0,
+     "wellbore": {
+      "entity_id": "wellbore-af720f928d884ea58a699279c5ab1ac3",
+      "name": "HON-GT-01"
+     },
+     "words": null
+    },
+    {
+     "asset_id": null,
+     "association_id": null,
+     "label": "nlog-tops - NLW-GT-01",
+     "outcome": "planned",
+     "reason": "unmatched",
+     "receipt": null,
+     "revision": null,
+     "unit": 1,
+     "wellbore": null,
+     "words": "No wellbore you can read has this name; not linked"
+    }
+   ],
+   "updated_at": 1791626825.3521316,
+   "words": "Importing"
+  },
+  "status": {
+   "approved_at": 1791626825.3521316,
+   "approved_by": "carol",
+   "audience": [
+    "carol"
+   ],
+   "connection_id": null,
+   "counts": {
+    "already_here": 0,
+    "created": 1,
+    "linked": 1,
+    "planned": 1,
+    "removed": 0,
+    "skipped": 0,
+    "units": 2
+   },
+   "created_at": 1791626825.3521316,
+   "id": "ed081e31917339e8e092daa57bf44a2cbe6d311c18927207f8c293d8d5abe8a4",
+   "initiator": "carol",
+   "input_id": "4c2eaee1a6bb9dce7e6643f62e0e52a96c6c70c72aff272635b9d432bfd14ffb",
+   "key": "nlog-tops.xlsx",
+   "origin": "file",
+   "plan_digest": "6bd2711378d8a3feb036a117bafaf15faa8ffbe90aa820e763d755e2b70f809a",
+   "project_id": "p",
+   "reason": "Cancelled by alice",
+   "release_id": null,
+   "state": "cancelled",
+   "target": "well-tops",
+   "totals": {
+    "no_well": 0,
+    "rows": 61,
+    "skipped_rows": 0,
+    "skipped_units": 0,
+    "units": 2
+   },
+   "units": [
+    {
+     "asset_id": "e7e93f566ee84e436b149baa2ac61b66eda8b89d7a9ef5f568bc8a63284c80c8",
+     "association_id": "assertion-4896b16e1b39472f87ac7fbdd2669efe",
+     "label": "nlog-tops - HON-GT-01",
+     "outcome": "landed",
+     "reason": null,
+     "receipt": "created",
+     "revision": "180381b95924e356c9a5742cf8cf73d1afbd93caeed0e1f20097d876e467f651",
+     "unit": 0,
+     "wellbore": {
+      "entity_id": "wellbore-af720f928d884ea58a699279c5ab1ac3",
+      "name": "HON-GT-01"
+     },
+     "words": null
+    },
+    {
+     "asset_id": null,
+     "association_id": null,
+     "label": "nlog-tops - NLW-GT-01",
+     "outcome": "planned",
+     "reason": "unmatched",
+     "receipt": null,
+     "revision": null,
+     "unit": 1,
+     "wellbore": null,
+     "words": "No wellbore you can read has this name; not linked"
+    }
+   ],
+   "updated_at": 1791626825.4075027,
+   "words": "Cancelled"
+  },
+  "step": {
+   "approved_at": 1791626825.3521316,
+   "approved_by": "carol",
+   "audience": [
+    "carol"
+   ],
+   "connection_id": null,
+   "counts": {
+    "already_here": 0,
+    "created": 1,
+    "linked": 1,
+    "planned": 1,
+    "removed": 0,
+    "skipped": 0,
+    "units": 2
+   },
+   "created_at": 1791626825.3521316,
+   "id": "ed081e31917339e8e092daa57bf44a2cbe6d311c18927207f8c293d8d5abe8a4",
+   "initiator": "carol",
+   "input_id": "4c2eaee1a6bb9dce7e6643f62e0e52a96c6c70c72aff272635b9d432bfd14ffb",
+   "key": "nlog-tops.xlsx",
+   "origin": "file",
+   "plan_digest": "6bd2711378d8a3feb036a117bafaf15faa8ffbe90aa820e763d755e2b70f809a",
+   "project_id": "p",
+   "reason": "Cancelled by alice",
+   "release_id": null,
+   "state": "cancelled",
+   "target": "well-tops",
+   "totals": {
+    "no_well": 0,
+    "rows": 61,
+    "skipped_rows": 0,
+    "skipped_units": 0,
+    "units": 2
+   },
+   "units": [
+    {
+     "asset_id": "e7e93f566ee84e436b149baa2ac61b66eda8b89d7a9ef5f568bc8a63284c80c8",
+     "association_id": "assertion-4896b16e1b39472f87ac7fbdd2669efe",
+     "label": "nlog-tops - HON-GT-01",
+     "outcome": "landed",
+     "reason": null,
+     "receipt": "created",
+     "revision": "180381b95924e356c9a5742cf8cf73d1afbd93caeed0e1f20097d876e467f651",
+     "unit": 0,
+     "wellbore": {
+      "entity_id": "wellbore-af720f928d884ea58a699279c5ab1ac3",
+      "name": "HON-GT-01"
+     },
+     "words": null
+    },
+    {
+     "asset_id": null,
+     "association_id": null,
+     "label": "nlog-tops - NLW-GT-01",
+     "outcome": "planned",
+     "reason": "unmatched",
+     "receipt": null,
+     "revision": null,
+     "unit": 1,
+     "wellbore": null,
+     "words": "No wellbore you can read has this name; not linked"
+    }
+   ],
+   "updated_at": 1791626825.4075027,
+   "words": "Cancelled"
+  }
+ },
+ "layout": {
+  "preview": {
+   "audience": {
+    "allowed": [
+     "alice",
+     "bob",
+     "carol",
+     "dave"
+    ],
+    "initiator": "carol"
+   },
+   "counts": {
+    "already_here": 0,
+    "land": 1,
+    "rows": 2,
+    "skipped_rows": 0,
+    "skipped_units": 0,
+    "units": 1
+   },
+   "declared": {},
+   "input_id": "0289eb1a1fb56135aa37c7889d87149b0aaed0a4591946c10bb0a92c6abece97",
+   "no_well": [],
+   "not_kept": [],
+   "origin": "file",
+   "preview_digest": "a10a0323cfe119c347cc38e5da12c9188bc322d13530d60c89c1f3973a5a7ad3",
+   "profile": "well-tops-csv/1",
+   "room": {
+    "uploads": 100
+   },
+   "skipped": [],
+   "skipped_units": [],
+   "source_name": "tops-standard.csv",
+   "target": "well-tops",
+   "units": [
+    {
+     "action": "land",
+     "code": null,
+     "first_row": 2,
+     "label": "tops-standard - HON-GT-01",
+     "link": null,
+     "link_words": null,
+     "rows": 2,
+     "same_name": false,
+     "unit": 0,
+     "well": "HON-GT-01",
+     "wellbore": {
+      "entity_id": "wellbore-d379d2d6331c4efdb08fcbe8eaab83cd",
+      "name": "HON-GT-01"
+     },
+     "words": null
+    }
+   ]
+  },
+  "read": {
+   "bytes": 45,
+   "columns": [
+    {
+     "name": "name",
+     "type": "text"
+    },
+    {
+     "name": "md",
+     "type": "integer"
+    },
+    {
+     "name": "well",
+     "type": "text"
+    }
+   ],
+   "context": {
+    "columns": 3,
+    "coverage": {
+     "not_read": [],
+     "read": [
+      "name",
+      "md",
+      "well"
+     ]
+    },
+    "decisions": [
+     {
+      "class": "inferred",
+      "field": "format",
+      "sentence": "Read as text with separated columns, from its content.",
+      "status": "decided",
+      "technical": {
+       "profile": "table-csv/1"
+      },
+      "value": "csv"
+     },
+     {
+      "class": "inferred",
+      "field": "encoding",
+      "sentence": "Encoding: UTF-8. Every byte is valid UTF-8. Check it.",
+      "status": "decided",
+      "technical": {},
+      "value": "utf-8"
+     },
+     {
+      "class": "inferred",
+      "field": "delimiter",
+      "sentence": "Columns are separated by commas. Guessed from the file. Check it.",
+      "status": "decided",
+      "technical": {
+       "lines_with_this_width": 3,
+       "width": 3
+      },
+      "value": ","
+     },
+     {
+      "class": "inferred",
+      "field": "header_row",
+      "sentence": "Column names on line 1. Guessed from the names or values. Check it.",
+      "status": "decided",
+      "technical": {
+       "preamble_lines": 0
+      },
+      "value": 1
+     },
+     {
+      "class": "inferred",
+      "field": "decimal_mark",
+      "sentence": "Decimal mark: point. Guessed from the numbers. Check it.",
+      "status": "decided",
+      "technical": {},
+      "value": "."
+     }
+    ],
+    "format": "csv",
+    "profile": "table-csv/1",
+    "rows": 2,
+    "type": "table"
+   },
+   "fidelity": {
+    "losses": [
+     "Text formatting (quoting, spacing, number spelling, line endings) is kept only in the exact original",
+     "An empty cell is read as a missing value",
+     "Columns that are not read are listed by name and type; their values are kept only in the exact original"
+    ],
+    "preserved": [
+     "every value of the columns read, as the table content writes it"
+    ],
+    "status": "assessed",
+    "unknown_context": []
+   },
+   "input_id": "0289eb1a1fb56135aa37c7889d87149b0aaed0a4591946c10bb0a92c6abece97",
+   "layouts": [
+    {
+     "declarations": {},
+     "fields": {
+      "md": "md",
+      "name": "name",
+      "well": "well"
+     },
+     "target": "well-tops"
+    }
+   ],
+   "name": "tops-standard.csv",
+   "schema_digest": "df2b260815a4af095390be90ba070eac34532a16e9cf0764a1134b9dddeed9e3",
+   "targets": [
+    "wells",
+    "well-tops",
+    "deviation-survey",
+    "point-set",
+    "time-depth"
+   ]
+  }
+ },
+ "list": {
+  "imports": [
+   {
+    "approved_at": 1791626824.5426977,
+    "approved_by": "carol",
+    "connection_id": null,
+    "counts": {
+     "already_here": 2,
+     "created": 0,
+     "linked": 1,
+     "planned": 0,
+     "removed": 0,
+     "skipped": 0,
+     "units": 2
+    },
+    "created_at": 1791626824.5426977,
+    "id": "dc74afcfb03f6ae0b9ad538a474d0900259b50d77e2410ae026b8372c1f9e8ad",
+    "initiator": "carol",
+    "input_id": "4c2eaee1a6bb9dce7e6643f62e0e52a96c6c70c72aff272635b9d432bfd14ffb",
+    "key": "nlog-tops.xlsx",
+    "origin": "file",
+    "plan_digest": "b38dc06534336d0c56c1377c29069279c5ae587a0f5968fd5ddc082f97749a11",
+    "project_id": "p",
+    "reason": null,
+    "release_id": null,
+    "state": "complete",
+    "target": "well-tops",
+    "updated_at": 1791626824.6023893,
+    "words": "Finished"
+   },
+   {
+    "approved_at": 1791626824.4055572,
+    "approved_by": "carol",
+    "connection_id": null,
+    "counts": {
+     "already_here": 0,
+     "created": 2,
+     "linked": 1,
+     "planned": 0,
+     "removed": 0,
+     "skipped": 0,
+     "units": 2
+    },
+    "created_at": 1791626824.4055572,
+    "id": "ed081e31917339e8e092daa57bf44a2cbe6d311c18927207f8c293d8d5abe8a4",
+    "initiator": "carol",
+    "input_id": "4c2eaee1a6bb9dce7e6643f62e0e52a96c6c70c72aff272635b9d432bfd14ffb",
+    "key": "nlog-tops.xlsx",
+    "origin": "file",
+    "plan_digest": "aac61fef6b4771db96587b7b496cf0503e0db6dff2c287bb2d02293d22e03708",
+    "project_id": "p",
+    "reason": null,
+    "release_id": null,
+    "state": "complete",
+    "target": "well-tops",
+    "updated_at": 1791626824.5060048,
+    "words": "Finished"
+   }
+  ]
+ },
+ "pause": {
+  "first": {
+   "approved_at": 1791626824.9120655,
+   "approved_by": "carol",
+   "audience": [
+    "carol"
+   ],
+   "connection_id": null,
+   "counts": {
+    "already_here": 0,
+    "created": 1,
+    "linked": 1,
+    "planned": 1,
+    "removed": 0,
+    "skipped": 0,
+    "units": 2
+   },
+   "created_at": 1791626824.9120655,
+   "id": "ed081e31917339e8e092daa57bf44a2cbe6d311c18927207f8c293d8d5abe8a4",
+   "initiator": "carol",
+   "input_id": "4c2eaee1a6bb9dce7e6643f62e0e52a96c6c70c72aff272635b9d432bfd14ffb",
+   "key": "nlog-tops.xlsx",
+   "origin": "file",
+   "plan_digest": "9d685f26c843f4c8c3bb066851d2c9c8474dabfd0fc8e4975e20179428eef3d5",
+   "project_id": "p",
+   "reason": null,
+   "release_id": null,
+   "state": "importing",
+   "target": "well-tops",
+   "totals": {
+    "no_well": 0,
+    "rows": 61,
+    "skipped_rows": 0,
+    "skipped_units": 0,
+    "units": 2
+   },
+   "units": [
+    {
+     "asset_id": "e7e93f566ee84e436b149baa2ac61b66eda8b89d7a9ef5f568bc8a63284c80c8",
+     "association_id": "assertion-6b93d71d8d2f4164b4e71d4627be11b8",
+     "label": "nlog-tops - HON-GT-01",
+     "outcome": "landed",
+     "reason": null,
+     "receipt": "created",
+     "revision": "180381b95924e356c9a5742cf8cf73d1afbd93caeed0e1f20097d876e467f651",
+     "unit": 0,
+     "wellbore": {
+      "entity_id": "wellbore-210c1bf23deb4120a8fd0deba6df4fe4",
+      "name": "HON-GT-01"
+     },
+     "words": null
+    },
+    {
+     "asset_id": null,
+     "association_id": null,
+     "label": "nlog-tops - NLW-GT-01",
+     "outcome": "planned",
+     "reason": "unmatched",
+     "receipt": null,
+     "revision": null,
+     "unit": 1,
+     "wellbore": null,
+     "words": "No wellbore you can read has this name; not linked"
+    }
+   ],
+   "updated_at": 1791626824.932405,
+   "words": "Importing"
+  },
+  "pause": {
+   "approved_at": 1791626824.9120655,
+   "approved_by": "carol",
+   "audience": [
+    "carol"
+   ],
+   "connection_id": null,
+   "counts": {
+    "already_here": 0,
+    "created": 1,
+    "linked": 1,
+    "planned": 1,
+    "removed": 0,
+    "skipped": 0,
+    "units": 2
+   },
+   "created_at": 1791626824.9120655,
+   "id": "ed081e31917339e8e092daa57bf44a2cbe6d311c18927207f8c293d8d5abe8a4",
+   "initiator": "carol",
+   "input_id": "4c2eaee1a6bb9dce7e6643f62e0e52a96c6c70c72aff272635b9d432bfd14ffb",
+   "key": "nlog-tops.xlsx",
+   "origin": "file",
+   "plan_digest": "9d685f26c843f4c8c3bb066851d2c9c8474dabfd0fc8e4975e20179428eef3d5",
+   "project_id": "p",
+   "reason": "Paused by carol",
+   "release_id": null,
+   "state": "paused",
+   "target": "well-tops",
+   "totals": {
+    "no_well": 0,
+    "rows": 61,
+    "skipped_rows": 0,
+    "skipped_units": 0,
+    "units": 2
+   },
+   "units": [
+    {
+     "asset_id": "e7e93f566ee84e436b149baa2ac61b66eda8b89d7a9ef5f568bc8a63284c80c8",
+     "association_id": "assertion-6b93d71d8d2f4164b4e71d4627be11b8",
+     "label": "nlog-tops - HON-GT-01",
+     "outcome": "landed",
+     "reason": null,
+     "receipt": "created",
+     "revision": "180381b95924e356c9a5742cf8cf73d1afbd93caeed0e1f20097d876e467f651",
+     "unit": 0,
+     "wellbore": {
+      "entity_id": "wellbore-210c1bf23deb4120a8fd0deba6df4fe4",
+      "name": "HON-GT-01"
+     },
+     "words": null
+    },
+    {
+     "asset_id": null,
+     "association_id": null,
+     "label": "nlog-tops - NLW-GT-01",
+     "outcome": "planned",
+     "reason": "unmatched",
+     "receipt": null,
+     "revision": null,
+     "unit": 1,
+     "wellbore": null,
+     "words": "No wellbore you can read has this name; not linked"
+    }
+   ],
+   "updated_at": 1791626824.9530225,
+   "words": "Paused; continue when you are ready"
+  },
+  "resumed": {
+   "approved_at": 1791626824.9120655,
+   "approved_by": "carol",
+   "audience": [
+    "carol"
+   ],
+   "connection_id": null,
+   "counts": {
+    "already_here": 0,
+    "created": 1,
+    "linked": 1,
+    "planned": 1,
+    "removed": 0,
+    "skipped": 0,
+    "units": 2
+   },
+   "created_at": 1791626824.9120655,
+   "id": "ed081e31917339e8e092daa57bf44a2cbe6d311c18927207f8c293d8d5abe8a4",
+   "initiator": "carol",
+   "input_id": "4c2eaee1a6bb9dce7e6643f62e0e52a96c6c70c72aff272635b9d432bfd14ffb",
+   "key": "nlog-tops.xlsx",
+   "origin": "file",
+   "plan_digest": "9d685f26c843f4c8c3bb066851d2c9c8474dabfd0fc8e4975e20179428eef3d5",
+   "project_id": "p",
+   "reason": null,
+   "release_id": null,
+   "state": "resumable",
+   "target": "well-tops",
+   "totals": {
+    "no_well": 0,
+    "rows": 61,
+    "skipped_rows": 0,
+    "skipped_units": 0,
+    "units": 2
+   },
+   "units": [
+    {
+     "asset_id": "e7e93f566ee84e436b149baa2ac61b66eda8b89d7a9ef5f568bc8a63284c80c8",
+     "association_id": "assertion-6b93d71d8d2f4164b4e71d4627be11b8",
+     "label": "nlog-tops - HON-GT-01",
+     "outcome": "landed",
+     "reason": null,
+     "receipt": "created",
+     "revision": "180381b95924e356c9a5742cf8cf73d1afbd93caeed0e1f20097d876e467f651",
+     "unit": 0,
+     "wellbore": {
+      "entity_id": "wellbore-210c1bf23deb4120a8fd0deba6df4fe4",
+      "name": "HON-GT-01"
+     },
+     "words": null
+    },
+    {
+     "asset_id": null,
+     "association_id": null,
+     "label": "nlog-tops - NLW-GT-01",
+     "outcome": "planned",
+     "reason": "unmatched",
+     "receipt": null,
+     "revision": null,
+     "unit": 1,
+     "wellbore": null,
+     "words": "No wellbore you can read has this name; not linked"
+    }
+   ],
+   "updated_at": 1791626824.95976,
+   "words": "Ready to resume"
+  },
+  "start": {
+   "approved_at": 1791626824.9120655,
+   "approved_by": "carol",
+   "audience": [
+    "carol"
+   ],
+   "connection_id": null,
+   "counts": {
+    "already_here": 0,
+    "created": 0,
+    "linked": 0,
+    "planned": 2,
+    "removed": 0,
+    "skipped": 0,
+    "units": 2
+   },
+   "created_at": 1791626824.9120655,
+   "id": "ed081e31917339e8e092daa57bf44a2cbe6d311c18927207f8c293d8d5abe8a4",
+   "initiator": "carol",
+   "input_id": "4c2eaee1a6bb9dce7e6643f62e0e52a96c6c70c72aff272635b9d432bfd14ffb",
+   "key": "nlog-tops.xlsx",
+   "origin": "file",
+   "plan_digest": "9d685f26c843f4c8c3bb066851d2c9c8474dabfd0fc8e4975e20179428eef3d5",
+   "project_id": "p",
+   "reason": null,
+   "release_id": null,
+   "state": "importing",
+   "target": "well-tops",
+   "totals": {
+    "no_well": 0,
+    "rows": 61,
+    "skipped_rows": 0,
+    "skipped_units": 0,
+    "units": 2
+   },
+   "units": [
+    {
+     "asset_id": null,
+     "association_id": null,
+     "label": "nlog-tops - HON-GT-01",
+     "outcome": "planned",
+     "reason": null,
+     "receipt": null,
+     "revision": null,
+     "unit": 0,
+     "wellbore": {
+      "entity_id": "wellbore-210c1bf23deb4120a8fd0deba6df4fe4",
+      "name": "HON-GT-01"
+     },
+     "words": null
+    },
+    {
+     "asset_id": null,
+     "association_id": null,
+     "label": "nlog-tops - NLW-GT-01",
+     "outcome": "planned",
+     "reason": "unmatched",
+     "receipt": null,
+     "revision": null,
+     "unit": 1,
+     "wellbore": null,
+     "words": "No wellbore you can read has this name; not linked"
+    }
+   ],
+   "updated_at": 1791626824.9120655,
+   "words": "Importing"
+  },
+  "status": {
+   "approved_at": 1791626824.9120655,
+   "approved_by": "carol",
+   "audience": [
+    "carol"
+   ],
+   "connection_id": null,
+   "counts": {
+    "already_here": 0,
+    "created": 2,
+    "linked": 1,
+    "planned": 0,
+    "removed": 0,
+    "skipped": 0,
+    "units": 2
+   },
+   "created_at": 1791626824.9120655,
+   "id": "ed081e31917339e8e092daa57bf44a2cbe6d311c18927207f8c293d8d5abe8a4",
+   "initiator": "carol",
+   "input_id": "4c2eaee1a6bb9dce7e6643f62e0e52a96c6c70c72aff272635b9d432bfd14ffb",
+   "key": "nlog-tops.xlsx",
+   "origin": "file",
+   "plan_digest": "9d685f26c843f4c8c3bb066851d2c9c8474dabfd0fc8e4975e20179428eef3d5",
+   "project_id": "p",
+   "reason": null,
+   "release_id": null,
+   "state": "complete",
+   "target": "well-tops",
+   "totals": {
+    "no_well": 0,
+    "rows": 61,
+    "skipped_rows": 0,
+    "skipped_units": 0,
+    "units": 2
+   },
+   "units": [
+    {
+     "asset_id": "e7e93f566ee84e436b149baa2ac61b66eda8b89d7a9ef5f568bc8a63284c80c8",
+     "association_id": "assertion-6b93d71d8d2f4164b4e71d4627be11b8",
+     "label": "nlog-tops - HON-GT-01",
+     "outcome": "landed",
+     "reason": null,
+     "receipt": "created",
+     "revision": "180381b95924e356c9a5742cf8cf73d1afbd93caeed0e1f20097d876e467f651",
+     "unit": 0,
+     "wellbore": {
+      "entity_id": "wellbore-210c1bf23deb4120a8fd0deba6df4fe4",
+      "name": "HON-GT-01"
+     },
+     "words": null
+    },
+    {
+     "asset_id": "cde8db20b3b69416a3fd2097a5632d6dbc524a7bf423767fd038c68f8ad973dc",
+     "association_id": null,
+     "label": "nlog-tops - NLW-GT-01",
+     "outcome": "landed",
+     "reason": "unmatched",
+     "receipt": "created",
+     "revision": "866cbc00873d32705e52b12117aa4437f8323dcbbc3cd6a70963d9d47d2b3488",
+     "unit": 1,
+     "wellbore": null,
+     "words": "No wellbore you can read has this name; not linked"
+    }
+   ],
+   "updated_at": 1791626825.0271404,
+   "words": "Finished"
+  },
+  "step": {
+   "approved_at": 1791626824.9120655,
+   "approved_by": "carol",
+   "audience": [
+    "carol"
+   ],
+   "connection_id": null,
+   "counts": {
+    "already_here": 0,
+    "created": 1,
+    "linked": 1,
+    "planned": 1,
+    "removed": 0,
+    "skipped": 0,
+    "units": 2
+   },
+   "created_at": 1791626824.9120655,
+   "id": "ed081e31917339e8e092daa57bf44a2cbe6d311c18927207f8c293d8d5abe8a4",
+   "initiator": "carol",
+   "input_id": "4c2eaee1a6bb9dce7e6643f62e0e52a96c6c70c72aff272635b9d432bfd14ffb",
+   "key": "nlog-tops.xlsx",
+   "origin": "file",
+   "plan_digest": "9d685f26c843f4c8c3bb066851d2c9c8474dabfd0fc8e4975e20179428eef3d5",
+   "project_id": "p",
+   "reason": "Paused by carol",
+   "release_id": null,
+   "state": "paused",
+   "target": "well-tops",
+   "totals": {
+    "no_well": 0,
+    "rows": 61,
+    "skipped_rows": 0,
+    "skipped_units": 0,
+    "units": 2
+   },
+   "units": [
+    {
+     "asset_id": "e7e93f566ee84e436b149baa2ac61b66eda8b89d7a9ef5f568bc8a63284c80c8",
+     "association_id": "assertion-6b93d71d8d2f4164b4e71d4627be11b8",
+     "label": "nlog-tops - HON-GT-01",
+     "outcome": "landed",
+     "reason": null,
+     "receipt": "created",
+     "revision": "180381b95924e356c9a5742cf8cf73d1afbd93caeed0e1f20097d876e467f651",
+     "unit": 0,
+     "wellbore": {
+      "entity_id": "wellbore-210c1bf23deb4120a8fd0deba6df4fe4",
+      "name": "HON-GT-01"
+     },
+     "words": null
+    },
+    {
+     "asset_id": null,
+     "association_id": null,
+     "label": "nlog-tops - NLW-GT-01",
+     "outcome": "planned",
+     "reason": "unmatched",
+     "receipt": null,
+     "revision": null,
+     "unit": 1,
+     "wellbore": null,
+     "words": "No wellbore you can read has this name; not linked"
+    }
+   ],
+   "updated_at": 1791626824.9530225,
+   "words": "Paused; continue when you are ready"
+  },
+  "steps": [
+   {
+    "approved_at": 1791626824.9120655,
+    "approved_by": "carol",
+    "audience": [
+     "carol"
+    ],
+    "connection_id": null,
+    "counts": {
+     "already_here": 0,
+     "created": 2,
+     "linked": 1,
+     "planned": 0,
+     "removed": 0,
+     "skipped": 0,
+     "units": 2
+    },
+    "created_at": 1791626824.9120655,
+    "id": "ed081e31917339e8e092daa57bf44a2cbe6d311c18927207f8c293d8d5abe8a4",
+    "initiator": "carol",
+    "input_id": "4c2eaee1a6bb9dce7e6643f62e0e52a96c6c70c72aff272635b9d432bfd14ffb",
+    "key": "nlog-tops.xlsx",
+    "origin": "file",
+    "plan_digest": "9d685f26c843f4c8c3bb066851d2c9c8474dabfd0fc8e4975e20179428eef3d5",
+    "project_id": "p",
+    "reason": null,
+    "release_id": null,
+    "state": "complete",
+    "target": "well-tops",
+    "totals": {
+     "no_well": 0,
+     "rows": 61,
+     "skipped_rows": 0,
+     "skipped_units": 0,
+     "units": 2
+    },
+    "units": [
+     {
+      "asset_id": "e7e93f566ee84e436b149baa2ac61b66eda8b89d7a9ef5f568bc8a63284c80c8",
+      "association_id": "assertion-6b93d71d8d2f4164b4e71d4627be11b8",
+      "label": "nlog-tops - HON-GT-01",
+      "outcome": "landed",
+      "reason": null,
+      "receipt": "created",
+      "revision": "180381b95924e356c9a5742cf8cf73d1afbd93caeed0e1f20097d876e467f651",
+      "unit": 0,
+      "wellbore": {
+       "entity_id": "wellbore-210c1bf23deb4120a8fd0deba6df4fe4",
+       "name": "HON-GT-01"
+      },
+      "words": null
+     },
+     {
+      "asset_id": "cde8db20b3b69416a3fd2097a5632d6dbc524a7bf423767fd038c68f8ad973dc",
+      "association_id": null,
+      "label": "nlog-tops - NLW-GT-01",
+      "outcome": "landed",
+      "reason": "unmatched",
+      "receipt": "created",
+      "revision": "866cbc00873d32705e52b12117aa4437f8323dcbbc3cd6a70963d9d47d2b3488",
+      "unit": 1,
+      "wellbore": null,
+      "words": "No wellbore you can read has this name; not linked"
+     }
+    ],
+    "updated_at": 1791626825.0271404,
+    "words": "Finished"
+   }
+  ]
+ },
+ "refusals": {
+  "capacity": {
+   "body": {
+    "code": "capacity-exceeded",
+    "error": "This would add 2 sets but this project has room for 1 more. Remove sets you no longer need, or ask your project administrator."
+   },
+   "status": 413
+  },
+  "changed": {
+   "body": {
+    "code": "CONFLICT",
+    "error": "This import changed since you reviewed it. Review it again."
+   },
+   "status": 409
+  },
+  "mixed-units": {
+   "body": {
+    "code": "INVALID_ARGUMENT",
+    "error": "The depths in this series use both metres and feet. Fix the file and add it again."
+   },
+   "status": 400
+  },
+  "not-administrator": {
+   "body": {
+    "code": "PERMISSION_DENIED",
+    "error": "Only a project administrator can add wells from a table. Ask one to do it."
+   },
+   "status": 403
+  },
+  "not-yet": {
+   "body": {
+    "code": "INVALID_ARGUMENT",
+    "error": "Ophiolite cannot add this kind of table yet. Keeping a table as it is comes with a later release. Nothing was added."
+   },
+   "status": 400
+  },
+  "unmapped": {
+   "body": {
+    "code": "INVALID_ARGUMENT",
+    "error": "Choose the column that holds the measured depth."
+   },
+   "status": 400
+  },
+  "unreadable": {
+   "body": {
+    "code": "INVALID_ARGUMENT",
+    "error": "This file is a damaged zip archive."
+   },
+   "status": 400
+  },
+  "viewer": {
+   "body": {
+    "code": "PERMISSION_DENIED",
+    "error": "Only contributors can add this. Ask the project owner for access."
+   },
+   "status": 403
+  }
+ },
+ "skipping": {
+  "preview": {
+   "audience": {
+    "allowed": [
+     "alice",
+     "bob",
+     "carol",
+     "dave"
+    ],
+    "initiator": "carol"
+   },
+   "counts": {
+    "already_here": 0,
+    "land": 1,
+    "rows": 4,
+    "skipped_rows": 2,
+    "skipped_units": 0,
+    "units": 1
+   },
+   "declared": {
+    "depth_unit": "m"
+   },
+   "input_id": "dc6e6c42f16a374f2847f41ac27c272b3dd6546d8897b57b13606ea86f7ab659",
+   "no_well": [
+    4
+   ],
+   "not_kept": [],
+   "origin": "file",
+   "preview_digest": "98d7da479a7fb9f2b30d389acb320dc4a4ec2bc4ea90b0bea4e4d6698b826767",
+   "profile": "well-tops-csv/1",
+   "room": {
+    "uploads": 100
+   },
+   "skipped": [
+    {
+     "code": "not-numeric",
+     "field": "md",
+     "row": 3,
+     "value": "17x9.0",
+     "well": "HON-GT-01"
+    }
+   ],
+   "skipped_units": [],
+   "source_name": "tops.csv",
+   "target": "well-tops",
+   "units": [
+    {
+     "action": "land",
+     "code": null,
+     "first_row": 2,
+     "label": "tops - HON-GT-01",
+     "link": null,
+     "link_words": null,
+     "rows": 2,
+     "same_name": false,
+     "unit": 0,
+     "well": "HON-GT-01",
+     "wellbore": {
+      "entity_id": "wellbore-d379d2d6331c4efdb08fcbe8eaab83cd",
+      "name": "HON-GT-01"
+     },
+     "words": null
+    }
+   ]
+  },
+  "read": {
+   "bytes": 86,
+   "columns": [
+    {
+     "name": "Well",
+     "type": "text"
+    },
+    {
+     "name": "Formation",
+     "type": "text"
+    },
+    {
+     "name": "Top MD (m)",
+     "type": "text"
+    }
+   ],
+   "context": {
+    "columns": 3,
+    "coverage": {
+     "not_read": [],
+     "read": [
+      "Well",
+      "Formation",
+      "Top MD (m)"
+     ]
+    },
+    "decisions": [
+     {
+      "class": "inferred",
+      "field": "format",
+      "sentence": "Read as text with separated columns, from its content.",
+      "status": "decided",
+      "technical": {
+       "profile": "table-csv/1"
+      },
+      "value": "csv"
+     },
+     {
+      "class": "inferred",
+      "field": "encoding",
+      "sentence": "Encoding: UTF-8. Every byte is valid UTF-8. Check it.",
+      "status": "decided",
+      "technical": {},
+      "value": "utf-8"
+     },
+     {
+      "class": "inferred",
+      "field": "delimiter",
+      "sentence": "Columns are separated by commas. Guessed from the file. Check it.",
+      "status": "decided",
+      "technical": {
+       "lines_with_this_width": 5,
+       "width": 3
+      },
+      "value": ","
+     },
+     {
+      "class": "inferred",
+      "field": "header_row",
+      "sentence": "Column names on line 1. Guessed from the names or values. Check it.",
+      "status": "decided",
+      "technical": {
+       "preamble_lines": 0
+      },
+      "value": 1
+     },
+     {
+      "class": "inferred",
+      "field": "decimal_mark",
+      "sentence": "Decimal mark: point. Guessed from the numbers. Check it.",
+      "status": "decided",
+      "technical": {},
+      "value": "."
+     }
+    ],
+    "format": "csv",
+    "profile": "table-csv/1",
+    "rows": 4,
+    "type": "table"
+   },
+   "fidelity": {
+    "losses": [
+     "Text formatting (quoting, spacing, number spelling, line endings) is kept only in the exact original",
+     "An empty cell is read as a missing value",
+     "Columns that are not read are listed by name and type; their values are kept only in the exact original"
+    ],
+    "preserved": [
+     "every value of the columns read, as the table content writes it"
+    ],
+    "status": "assessed",
+    "unknown_context": []
+   },
+   "input_id": "dc6e6c42f16a374f2847f41ac27c272b3dd6546d8897b57b13606ea86f7ab659",
+   "layouts": [],
+   "name": "tops.csv",
+   "schema_digest": "6214cff9f9046eb74bfb62a55515fa7e2bb3519273f1bd294d91f03a74e84eb2",
+   "targets": [
+    "wells",
+    "well-tops",
+    "deviation-survey",
+    "point-set",
+    "time-depth"
+   ]
+  }
+ },
+ "surveys": {
+  "preview": {
+   "audience": {
+    "allowed": [
+     "alice",
+     "bob",
+     "carol",
+     "dave"
+    ],
+    "initiator": "carol"
+   },
+   "counts": {
+    "already_here": 0,
+    "land": 1,
+    "rows": 4,
+    "skipped_rows": 0,
+    "skipped_units": 1,
+    "units": 1
+   },
+   "declared": {
+    "depth_unit": "m"
+   },
+   "input_id": "e17d0d1ba56fda2a3f248cef5ec1727655b9244eefeefa5c960293453f363c62",
+   "no_well": [],
+   "not_kept": [],
+   "origin": "file",
+   "preview_digest": "c1a0c830141750893647c3519b2c4fd1016395a42c12d6dcc7cd68ba90f42779",
+   "profile": "deviation-csv/1",
+   "room": {
+    "uploads": 100
+   },
+   "skipped": [],
+   "skipped_units": [
+    {
+     "code": "not-increasing",
+     "field": "md",
+     "row": 3,
+     "value": 90.0,
+     "well": "W-1"
+    }
+   ],
+   "source_name": "surveys.csv",
+   "target": "deviation-survey",
+   "units": [
+    {
+     "action": "land",
+     "code": null,
+     "first_row": 4,
+     "label": "surveys - W-2",
+     "link": "unmatched",
+     "link_words": "No wellbore you can read has this name; not linked",
+     "rows": 2,
+     "same_name": false,
+     "unit": 0,
+     "well": "W-2",
+     "wellbore": null,
+     "words": null
+    }
+   ]
+  },
+  "read": {
+   "bytes": 76,
+   "columns": [
+    {
+     "name": "Well",
+     "type": "text"
+    },
+    {
+     "name": "MD",
+     "type": "integer"
+    },
+    {
+     "name": "Inclination",
+     "type": "integer"
+    },
+    {
+     "name": "Azimuth",
+     "type": "integer"
+    }
+   ],
+   "context": {
+    "columns": 4,
+    "coverage": {
+     "not_read": [],
+     "read": [
+      "Well",
+      "MD",
+      "Inclination",
+      "Azimuth"
+     ]
+    },
+    "decisions": [
+     {
+      "class": "inferred",
+      "field": "format",
+      "sentence": "Read as text with separated columns, from its content.",
+      "status": "decided",
+      "technical": {
+       "profile": "table-csv/1"
+      },
+      "value": "csv"
+     },
+     {
+      "class": "inferred",
+      "field": "encoding",
+      "sentence": "Encoding: UTF-8. Every byte is valid UTF-8. Check it.",
+      "status": "decided",
+      "technical": {},
+      "value": "utf-8"
+     },
+     {
+      "class": "inferred",
+      "field": "delimiter",
+      "sentence": "Columns are separated by commas. Guessed from the file. Check it.",
+      "status": "decided",
+      "technical": {
+       "lines_with_this_width": 5,
+       "width": 4
+      },
+      "value": ","
+     },
+     {
+      "class": "inferred",
+      "field": "header_row",
+      "sentence": "Column names on line 1. Guessed from the names or values. Check it.",
+      "status": "decided",
+      "technical": {
+       "preamble_lines": 0
+      },
+      "value": 1
+     },
+     {
+      "class": "inferred",
+      "field": "decimal_mark",
+      "sentence": "Decimal mark: point. Guessed from the numbers. Check it.",
+      "status": "decided",
+      "technical": {},
+      "value": "."
+     }
+    ],
+    "format": "csv",
+    "profile": "table-csv/1",
+    "rows": 4,
+    "type": "table"
+   },
+   "fidelity": {
+    "losses": [
+     "Text formatting (quoting, spacing, number spelling, line endings) is kept only in the exact original",
+     "An empty cell is read as a missing value",
+     "Columns that are not read are listed by name and type; their values are kept only in the exact original"
+    ],
+    "preserved": [
+     "every value of the columns read, as the table content writes it"
+    ],
+    "status": "assessed",
+    "unknown_context": []
+   },
+   "input_id": "e17d0d1ba56fda2a3f248cef5ec1727655b9244eefeefa5c960293453f363c62",
+   "layouts": [],
+   "name": "surveys.csv",
+   "schema_digest": "3434104fc2fbc451d127a26a81761312b956992760056c358bb651095fdb5e24",
+   "targets": [
+    "wells",
+    "well-tops",
+    "deviation-survey",
+    "point-set",
+    "time-depth"
+   ]
+  }
+ },
+ "tops": {
+  "preview": {
+   "audience": {
+    "allowed": [
+     "alice",
+     "bob",
+     "carol",
+     "dave"
+    ],
+    "initiator": "carol"
+   },
+   "counts": {
+    "already_here": 0,
+    "land": 2,
+    "rows": 61,
+    "skipped_rows": 0,
+    "skipped_units": 0,
+    "units": 2
+   },
+   "declared": {
+    "depth_unit": "m"
+   },
+   "input_id": "4c2eaee1a6bb9dce7e6643f62e0e52a96c6c70c72aff272635b9d432bfd14ffb",
+   "no_well": [],
+   "not_kept": [],
+   "origin": "file",
+   "preview_digest": "aac61fef6b4771db96587b7b496cf0503e0db6dff2c287bb2d02293d22e03708",
+   "profile": "well-tops-csv/1",
+   "room": {
+    "uploads": 100
+   },
+   "skipped": [],
+   "skipped_units": [],
+   "source_name": "nlog-tops.xlsx",
+   "target": "well-tops",
+   "units": [
+    {
+     "action": "land",
+     "code": null,
+     "first_row": 4,
+     "label": "nlog-tops - HON-GT-01",
+     "link": null,
+     "link_words": null,
+     "rows": 24,
+     "same_name": false,
+     "unit": 0,
+     "well": "HON-GT-01",
+     "wellbore": {
+      "entity_id": "wellbore-94429deb671c4aebaaeded64c3ec0c4b",
+      "name": "HON-GT-01"
+     },
+     "words": null
+    },
+    {
+     "action": "land",
+     "code": null,
+     "first_row": 28,
+     "label": "nlog-tops - NLW-GT-01",
+     "link": "unmatched",
+     "link_words": "No wellbore you can read has this name; not linked",
+     "rows": 37,
+     "same_name": false,
+     "unit": 1,
+     "well": "NLW-GT-01",
+     "wellbore": null,
+     "words": null
+    }
+   ]
+  },
+  "read": {
+   "bytes": 3225,
+   "columns": [
+    {
+     "name": "Well",
+     "type": "text"
+    },
+    {
+     "name": "Formation",
+     "type": "text"
+    },
+    {
+     "name": "Top MD (m)",
+     "type": "float"
+    },
+    {
+     "name": "Source",
+     "type": "text"
+    }
+   ],
+   "context": {
+    "columns": 4,
+    "coverage": {
+     "not_read": [],
+     "read": [
+      "Well",
+      "Formation",
+      "Top MD (m)",
+      "Source"
+     ]
+    },
+    "decisions": [
+     {
+      "class": "declared",
+      "field": "format",
+      "sentence": "Read as an Excel workbook (.xlsx), from its content.",
+      "status": "decided",
+      "technical": {
+       "profile": "table-excel/1"
+      },
+      "value": "xlsx"
+     },
+     {
+      "class": "declared",
+      "field": "sheet",
+      "sentence": "Sheet \"Tops\", the only sheet in the workbook.",
+      "status": "decided",
+      "technical": {},
+      "value": "Tops"
+     },
+     {
+      "class": "inferred",
+      "field": "header_row",
+      "sentence": "Column names on row 3; the 2 rows above are kept only in the original file. Guessed from the names or values. Check it.",
+      "status": "decided",
+      "technical": {
+       "rows_above": 2
+      },
+      "value": 3
+     }
+    ],
+    "format": "xlsx",
+    "profile": "table-excel/1",
+    "rows": 61,
+    "sheet": "Tops",
+    "sheets": [
+     "Tops"
+    ],
+    "type": "table"
+   },
+   "fidelity": {
+    "losses": [
+     "Formulas, formatting, comments and the other sheets are kept only in the exact original",
+     "Columns that are not read are listed by name and type; their values are kept only in the exact original"
+    ],
+    "preserved": [
+     "every value of the columns read, as the table content writes it"
+    ],
+    "status": "assessed",
+    "unknown_context": []
+   },
+   "input_id": "4c2eaee1a6bb9dce7e6643f62e0e52a96c6c70c72aff272635b9d432bfd14ffb",
+   "layouts": [],
+   "name": "nlog-tops.xlsx",
+   "schema_digest": "b4cf16bb51f8b37a12d7699e6be0078902d49d093986aaa3ae43174be17c25a9",
+   "targets": [
+    "wells",
+    "well-tops",
+    "deviation-survey",
+    "point-set",
+    "time-depth"
+   ]
+  },
+  "start": {
+   "approved_at": 1791626824.4055572,
+   "approved_by": "carol",
+   "audience": [
+    "carol"
+   ],
+   "connection_id": null,
+   "counts": {
+    "already_here": 0,
+    "created": 0,
+    "linked": 0,
+    "planned": 2,
+    "removed": 0,
+    "skipped": 0,
+    "units": 2
+   },
+   "created_at": 1791626824.4055572,
+   "id": "ed081e31917339e8e092daa57bf44a2cbe6d311c18927207f8c293d8d5abe8a4",
+   "initiator": "carol",
+   "input_id": "4c2eaee1a6bb9dce7e6643f62e0e52a96c6c70c72aff272635b9d432bfd14ffb",
+   "key": "nlog-tops.xlsx",
+   "origin": "file",
+   "plan_digest": "aac61fef6b4771db96587b7b496cf0503e0db6dff2c287bb2d02293d22e03708",
+   "project_id": "p",
+   "reason": null,
+   "release_id": null,
+   "state": "importing",
+   "target": "well-tops",
+   "totals": {
+    "no_well": 0,
+    "rows": 61,
+    "skipped_rows": 0,
+    "skipped_units": 0,
+    "units": 2
+   },
+   "units": [
+    {
+     "asset_id": null,
+     "association_id": null,
+     "label": "nlog-tops - HON-GT-01",
+     "outcome": "planned",
+     "reason": null,
+     "receipt": null,
+     "revision": null,
+     "unit": 0,
+     "wellbore": {
+      "entity_id": "wellbore-94429deb671c4aebaaeded64c3ec0c4b",
+      "name": "HON-GT-01"
+     },
+     "words": null
+    },
+    {
+     "asset_id": null,
+     "association_id": null,
+     "label": "nlog-tops - NLW-GT-01",
+     "outcome": "planned",
+     "reason": "unmatched",
+     "receipt": null,
+     "revision": null,
+     "unit": 1,
+     "wellbore": null,
+     "words": "No wellbore you can read has this name; not linked"
+    }
+   ],
+   "updated_at": 1791626824.4055572,
+   "words": "Importing"
+  },
+  "steps": [
+   {
+    "approved_at": 1791626824.4055572,
+    "approved_by": "carol",
+    "audience": [
+     "carol"
+    ],
+    "connection_id": null,
+    "counts": {
+     "already_here": 0,
+     "created": 2,
+     "linked": 1,
+     "planned": 0,
+     "removed": 0,
+     "skipped": 0,
+     "units": 2
+    },
+    "created_at": 1791626824.4055572,
+    "id": "ed081e31917339e8e092daa57bf44a2cbe6d311c18927207f8c293d8d5abe8a4",
+    "initiator": "carol",
+    "input_id": "4c2eaee1a6bb9dce7e6643f62e0e52a96c6c70c72aff272635b9d432bfd14ffb",
+    "key": "nlog-tops.xlsx",
+    "origin": "file",
+    "plan_digest": "aac61fef6b4771db96587b7b496cf0503e0db6dff2c287bb2d02293d22e03708",
+    "project_id": "p",
+    "reason": null,
+    "release_id": null,
+    "state": "complete",
+    "target": "well-tops",
+    "totals": {
+     "no_well": 0,
+     "rows": 61,
+     "skipped_rows": 0,
+     "skipped_units": 0,
+     "units": 2
+    },
+    "units": [
+     {
+      "asset_id": "e7e93f566ee84e436b149baa2ac61b66eda8b89d7a9ef5f568bc8a63284c80c8",
+      "association_id": "assertion-9bee1bc34c104ad6ac6529d225885b18",
+      "label": "nlog-tops - HON-GT-01",
+      "outcome": "landed",
+      "reason": null,
+      "receipt": "created",
+      "revision": "180381b95924e356c9a5742cf8cf73d1afbd93caeed0e1f20097d876e467f651",
+      "unit": 0,
+      "wellbore": {
+       "entity_id": "wellbore-94429deb671c4aebaaeded64c3ec0c4b",
+       "name": "HON-GT-01"
+      },
+      "words": null
+     },
+     {
+      "asset_id": "cde8db20b3b69416a3fd2097a5632d6dbc524a7bf423767fd038c68f8ad973dc",
+      "association_id": null,
+      "label": "nlog-tops - NLW-GT-01",
+      "outcome": "landed",
+      "reason": "unmatched",
+      "receipt": "created",
+      "revision": "866cbc00873d32705e52b12117aa4437f8323dcbbc3cd6a70963d9d47d2b3488",
+      "unit": 1,
+      "wellbore": null,
+      "words": "No wellbore you can read has this name; not linked"
+     }
+    ],
+    "updated_at": 1791626824.5060048,
+    "words": "Finished"
+   }
+  ]
+ },
+ "wells": {
+  "final": {
+   "already_here": [],
+   "approved_at": 1791626825.7826667,
+   "approved_by": "alice",
+   "audience": [
+    "alice"
+   ],
+   "connection_id": null,
+   "counts": {
+    "accepted": 2,
+    "already_here": 0,
+    "created": 2,
+    "planned": 0,
+    "skipped": 1
+   },
+   "created_at": 1791626825.7826667,
+   "id": "4097787dac92d0915f56c3129853bfe231f7d2b78f0de3aef67fbd4017d835b1",
+   "identity_authority": "nlog",
+   "initiator": "alice",
+   "input_id": "2f37ce6c1a47025c8ce1b874b3ee2dfc6ca9095a5bcf404bcb99ff730f4f3259",
+   "input_revision": "76f54da0e365d4384ec78bef13afd67540091640ab959b41c4da68643666b395",
+   "key": "wells.csv",
+   "mapping": {
+    "crs": "EPSG:28992",
+    "depth_kind": "MD",
+    "depth_reference": "unknown",
+    "depth_unit": "m",
+    "entity": "well",
+    "fields": {
+     "id": "BOREHOLE_CODE",
+     "name": "BOREHOLE_NAME",
+     "x": "X",
+     "y": "Y"
+    },
+    "schema_digest": "6fbd8957437dcf4cd9d80eb08cf4e7731567477cb5afdf077a5b688847718686"
+   },
+   "origin": "file",
+   "plan_digest": "ded99bd4c0e3c5d56fa872751c67dd0bc962e6b2d18973bcfccca645a60495a7",
+   "possible_duplicates": [],
+   "preview_digest": "ded99bd4c0e3c5d56fa872751c67dd0bc962e6b2d18973bcfccca645a60495a7",
+   "project_id": "p",
+   "reason": null,
+   "release_id": "39c336e1-ecd8-4af3-b4b7-ecee19ffaa7e",
+   "skipped": [
+    {
+     "codes": [
+      "coordinate-missing"
+     ],
+     "ordinal": 1,
+     "reason": null,
+     "row_key": "AMR-01"
+    }
+   ],
+   "state": "complete-with-skipped",
+   "superseded": [],
+   "target": "wells",
+   "totals": {
+    "names_from_numbers": 0,
+    "rows": 3
+   },
+   "updated_at": 1791626825.9153879,
+   "words": "Finished with skipped rows"
+  },
+  "preview": {
+   "already_here": [],
+   "audience": {
+    "allowed": [
+     "alice",
+     "bob",
+     "carol",
+     "dave"
+    ],
+    "initiator": "alice"
+   },
+   "counts": {
+    "already_here": 0,
+    "create": 2,
+    "names_from_numbers": 0,
+    "possible_duplicates": 0,
+    "rows": 3,
+    "skipped": 1
+   },
+   "identifiers": {
+    "authority": "nlog",
+    "declared": true
+   },
+   "input_id": "2f37ce6c1a47025c8ce1b874b3ee2dfc6ca9095a5bcf404bcb99ff730f4f3259",
+   "input_revision": "76f54da0e365d4384ec78bef13afd67540091640ab959b41c4da68643666b395",
+   "origin": "file",
+   "possible_duplicates": [],
+   "preview_digest": "ded99bd4c0e3c5d56fa872751c67dd0bc962e6b2d18973bcfccca645a60495a7",
+   "skipped": [
+    {
+     "codes": [
+      "coordinate-missing"
+     ],
+     "fields": [
+      "x"
+     ],
+     "ordinal": 1,
+     "row_key": "AMR-01",
+     "source_row": 3
+    }
+   ],
+   "source_name": "wells.csv",
+   "target": "wells"
+  },
+  "read": {
+   "bytes": 137,
+   "columns": [
+    {
+     "name": "BOREHOLE_CODE",
+     "type": "text"
+    },
+    {
+     "name": "BOREHOLE_NAME",
+     "type": "text"
+    },
+    {
+     "name": "X",
+     "type": "float"
+    },
+    {
+     "name": "Y",
+     "type": "float"
+    }
+   ],
+   "context": {
+    "columns": 4,
+    "coverage": {
+     "not_read": [],
+     "read": [
+      "BOREHOLE_CODE",
+      "BOREHOLE_NAME",
+      "X",
+      "Y"
+     ]
+    },
+    "decisions": [
+     {
+      "class": "inferred",
+      "field": "format",
+      "sentence": "Read as text with separated columns, from its content.",
+      "status": "decided",
+      "technical": {
+       "profile": "table-csv/1"
+      },
+      "value": "csv"
+     },
+     {
+      "class": "inferred",
+      "field": "encoding",
+      "sentence": "Encoding: UTF-8. Every byte is valid UTF-8. Check it.",
+      "status": "decided",
+      "technical": {},
+      "value": "utf-8"
+     },
+     {
+      "class": "inferred",
+      "field": "delimiter",
+      "sentence": "Columns are separated by commas. Guessed from the file. Check it.",
+      "status": "decided",
+      "technical": {
+       "lines_with_this_width": 4,
+       "width": 4
+      },
+      "value": ","
+     },
+     {
+      "class": "inferred",
+      "field": "header_row",
+      "sentence": "Column names on line 1. Guessed from the names or values. Check it.",
+      "status": "decided",
+      "technical": {
+       "preamble_lines": 0
+      },
+      "value": 1
+     },
+     {
+      "class": "inferred",
+      "field": "decimal_mark",
+      "sentence": "Decimal mark: point. Guessed from the numbers. Check it.",
+      "status": "decided",
+      "technical": {},
+      "value": "."
+     }
+    ],
+    "format": "csv",
+    "profile": "table-csv/1",
+    "rows": 3,
+    "type": "table"
+   },
+   "fidelity": {
+    "losses": [
+     "Text formatting (quoting, spacing, number spelling, line endings) is kept only in the exact original",
+     "An empty cell is read as a missing value",
+     "Columns that are not read are listed by name and type; their values are kept only in the exact original"
+    ],
+    "preserved": [
+     "every value of the columns read, as the table content writes it"
+    ],
+    "status": "assessed",
+    "unknown_context": []
+   },
+   "input_id": "2f37ce6c1a47025c8ce1b874b3ee2dfc6ca9095a5bcf404bcb99ff730f4f3259",
+   "layouts": [],
+   "name": "wells.csv",
+   "schema_digest": "6fbd8957437dcf4cd9d80eb08cf4e7731567477cb5afdf077a5b688847718686",
+   "targets": [
+    "wells",
+    "well-tops",
+    "deviation-survey",
+    "point-set",
+    "time-depth"
+   ]
+  },
+  "start": {
+   "already_here": [],
+   "approved_at": 1791626825.7826667,
+   "approved_by": "alice",
+   "audience": [
+    "alice"
+   ],
+   "connection_id": null,
+   "counts": {
+    "accepted": 2,
+    "already_here": 0,
+    "created": 0,
+    "planned": 2,
+    "skipped": 1
+   },
+   "created_at": 1791626825.7826667,
+   "id": "4097787dac92d0915f56c3129853bfe231f7d2b78f0de3aef67fbd4017d835b1",
+   "identity_authority": "nlog",
+   "initiator": "alice",
+   "input_id": "2f37ce6c1a47025c8ce1b874b3ee2dfc6ca9095a5bcf404bcb99ff730f4f3259",
+   "input_revision": "76f54da0e365d4384ec78bef13afd67540091640ab959b41c4da68643666b395",
+   "key": "wells.csv",
+   "mapping": {
+    "crs": "EPSG:28992",
+    "depth_kind": "MD",
+    "depth_reference": "unknown",
+    "depth_unit": "m",
+    "entity": "well",
+    "fields": {
+     "id": "BOREHOLE_CODE",
+     "name": "BOREHOLE_NAME",
+     "x": "X",
+     "y": "Y"
+    },
+    "schema_digest": "6fbd8957437dcf4cd9d80eb08cf4e7731567477cb5afdf077a5b688847718686"
+   },
+   "origin": "file",
+   "plan_digest": "ded99bd4c0e3c5d56fa872751c67dd0bc962e6b2d18973bcfccca645a60495a7",
+   "possible_duplicates": [],
+   "preview_digest": "ded99bd4c0e3c5d56fa872751c67dd0bc962e6b2d18973bcfccca645a60495a7",
+   "project_id": "p",
+   "reason": null,
+   "release_id": "39c336e1-ecd8-4af3-b4b7-ecee19ffaa7e",
+   "skipped": [
+    {
+     "codes": [
+      "coordinate-missing"
+     ],
+     "ordinal": 1,
+     "reason": null,
+     "row_key": "AMR-01"
+    }
+   ],
+   "state": "importing",
+   "superseded": [],
+   "target": "wells",
+   "totals": {
+    "names_from_numbers": 0,
+    "rows": 3
+   },
+   "updated_at": 1791626825.7826667,
+   "words": "Importing"
+  }
+ }
+}

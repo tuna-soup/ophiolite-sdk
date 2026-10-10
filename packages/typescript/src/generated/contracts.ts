@@ -107,7 +107,7 @@ export type Acquisition = {
   identity: string;
   uploaded_at: number;
   rights: string;
-  origin?: ImportOrigin | null;
+  origin?: ImportOrigin | TableImportOrigin | null;
   via?: Via | null;
 };
 
@@ -660,6 +660,16 @@ export type SeismicSectionContext = {
 export type StringLeaf = {
   type: "string";
   value: string;
+};
+
+export type TableImportOrigin = {
+  kind: "table-file";
+  run: string;
+  unit: number;
+  original_sha256: string;
+  sheet: string | null;
+  header_row: number | null;
+  source_rows: number[][];
 };
 
 export type TimeDepthContext = {

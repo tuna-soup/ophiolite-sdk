@@ -472,6 +472,144 @@ class WellImportsPreviewAnswer(Contract):
     audience: dict
     input_revision: str
 
+# E87: tables to typed sets (table-imports/*), the fields the SDK and the command line read; other fields are kept.
+TableTargetName = Literal['wells', 'well-tops', 'deviation-survey', 'point-set', 'time-depth', 'table']
+TableImportState = Literal['importing', 'resumable', 'needs-review', 'paused', 'incomplete', 'complete', 'complete-with-skipped', 'cancelled']
+
+
+class TableColumn(Contract):
+    name: str
+    type: str
+
+
+class TableLayoutMatch(Contract):
+    target: TableTargetName
+    fields: dict
+    declarations: dict
+
+
+class TableImportRead(Contract):
+    input_id: str
+    name: str
+    bytes: int
+    context: dict
+    targets: list[TableTargetName]
+    columns: list[TableColumn] | None = None
+    schema_digest: str | None = None
+    sample_rows: list[dict] | None = None
+    layouts: list[TableLayoutMatch] | None = None
+
+
+class TableSetProblem(Contract):
+    well: str | None = None
+    row: int | None = None
+    field: str | None = None
+    code: str
+    value: object = None
+
+
+class TableSetPreview(Contract):
+    unit: int
+    label: str
+    well: str | None = None
+    rows: int
+    wellbore: WellImportWell | None = None
+    link: str | None = None
+    action: Literal['land', 'reuse', 'skip']
+    same_name: bool
+
+
+class TableSetPreviewCounts(Contract):
+    rows: int
+    units: int
+    land: int
+    already_here: int
+    skipped_units: int
+    skipped_rows: int
+
+
+class TableSetsPreviewAnswer(Contract):
+    preview_digest: str
+    target: TableTargetName
+    origin: Literal['file']
+    input_id: str
+    source_name: str
+    profile: str
+    declared: dict
+    counts: TableSetPreviewCounts
+    units: list[TableSetPreview]
+    skipped: list[TableSetProblem]
+    skipped_units: list[TableSetProblem]
+    no_well: list[int]
+    not_kept: list[dict]
+    room: dict
+    audience: dict
+
+
+class TableWellsPreviewAnswer(Contract):
+    preview_digest: str
+    target: Literal['wells']
+    origin: Literal['file', 'database']
+    source_name: str
+    counts: WellImportPreviewCounts
+    skipped: list[WellImportSkipped]
+    possible_duplicates: list[WellImportRowWell]
+    already_here: list[WellImportRowWell]
+    audience: dict
+
+
+class TableSetCounts(Contract):
+    units: int
+    planned: int
+    created: int
+    already_here: int
+    skipped: int
+    removed: int
+    linked: int
+
+
+class TableSetUnit(Contract):
+    unit: int
+    label: str
+    wellbore: WellImportWell | None = None
+    asset_id: str | None = None
+    revision: str | None = None
+    outcome: Literal['planned', 'landed', 'skipped']
+    receipt: Literal['created', 'reused', 'removed'] | None = None
+    reason: str | None = None
+
+
+class TableImportSummary(Contract):
+    id: str
+    project_id: str
+    state: TableImportState
+    words: str
+    reason: str | None = None
+    initiator: str
+    target: TableTargetName
+    origin: Literal['file', 'database']
+    created_at: Number
+    updated_at: Number
+    counts: dict
+
+
+class TableSetImport(TableImportSummary):
+    counts: TableSetCounts
+    totals: dict
+    audience: list[str]
+    units: list[TableSetUnit]
+
+
+class TableWellsImport(TableImportSummary):
+    counts: WellImportCounts
+    audience: list[str]
+    skipped: list[WellImportSkipped]
+    superseded: list[WellImportSuperseded]
+
+
+class TableImportsListAnswer(Contract):
+    imports: list[TableImportSummary]
+
 # E55: folder uploads (upload-runs/*), the fields the SDK and the command line read; other fields are kept.
 UploadRunFileState = Literal['waiting', 'reading', 'added', 'already-here', 'needs-decision', 'not-read', 'not-supported', 'cancelled']
 

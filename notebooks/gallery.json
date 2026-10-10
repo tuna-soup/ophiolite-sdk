@@ -63,6 +63,13 @@
       "sentence": "Publish a result and a second version, then read how each was made, what changed between them, what was made from the log, and whether it can be made again.",
       "modes": ["synthetic", "live"],
       "data": "A synthetic five-sample gamma-ray log, or a log in your project; publishing creates a result only you can see until you share it."
+    },
+    {
+      "slug": "a-spreadsheet-becomes-wells-and-tops",
+      "title": "A spreadsheet becomes wells and tops",
+      "sentence": "Say which column holds what, review what a table of formation tops would add, then add it and read one line per set.",
+      "modes": ["synthetic", "live"],
+      "data": "A synthetic six-row tops table made on your computer; adding it creates sets of tops only you can see until you share them."
     }
   ]
 }

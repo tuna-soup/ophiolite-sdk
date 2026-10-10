@@ -40,6 +40,12 @@ No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
   Breaking for approvers: `agents/approve` now needs `evidence` (an id or null) and `evidence_generation` and refuses
   a body without them, naming the field; there is no compatibility window. The SDK pin advances with the release that
   carries this change; an older gateway refuses the `evidence` field and the library does not retry without it.
+- Tables to typed sets (E87, preview API): `client.imports.from_table(path, target, mapping, dry_run=...)` reads a CSV or
+  Excel table (kept as your private input), previews what would be added and, unless `dry_run`, starts the reviewed
+  run and steps it to the end: wells, well tops, deviation surveys, point sets or time-depth pairs, one set per well.
+  `ophiolite import table FILE --target T --map FIELD=COLUMN [--dry-run]` does the same, and `import list|status|pause|
+  resume|cancel ID` reads and steers a run. The review and result are in the workspace's words, one line per set;
+  each refusal is said in its sentence with the service's own text as `server_message`.
 
 - Well files (E57, preview API): `client.read_data` returns `TimeDepth` for a time-depth table (`pairs` in file order,
   `context` with the declared depth type, time kind, units and datum, `to_frame()` with a nullable `Float64` velocity

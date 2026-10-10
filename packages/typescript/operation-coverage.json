@@ -1818,6 +1818,60 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/table-imports/cancel",
+    "function": "postProjectsProjectTableImportsCancel",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/table-imports/list",
+    "function": "postProjectsProjectTableImportsList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/table-imports/pause",
+    "function": "postProjectsProjectTableImportsPause",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/table-imports/preview",
+    "function": "postProjectsProjectTableImportsPreview",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/table-imports/read",
+    "function": "postProjectsProjectTableImportsRead",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/table-imports/resume",
+    "function": "postProjectsProjectTableImportsResume",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/table-imports/start",
+    "function": "postProjectsProjectTableImportsStart",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/table-imports/status",
+    "function": "postProjectsProjectTableImportsStatus",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/table-imports/step",
+    "function": "postProjectsProjectTableImportsStep",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/upload-runs/associate",
     "function": "postProjectsProjectUploadRunsAssociate",
     "request": "schema",

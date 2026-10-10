@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/schema.json",
   "x-ophiolite": {
     "id": "ophiolite.scientific-asset/1",
-    "version": "1.18.0",
+    "version": "1.19.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -54,10 +54,14 @@
               "$ref": "#/$defs/ImportOrigin"
             },
             {
+              "$ref": "#/$defs/TableImportOrigin"
+            },
+            {
               "type": "null"
             }
           ],
-          "default": null
+          "default": null,
+          "title": "Origin"
         },
         "via": {
           "anyOf": [
@@ -3862,6 +3866,84 @@
         "value"
       ],
       "title": "StringLeaf",
+      "type": "object"
+    },
+    "TableImportOrigin": {
+      "additionalProperties": false,
+      "description": "1.19.0 (E87): a set landed from a table file by a table import run \u2014 provenance, not authority. The run and its\nunit, the original file's sha256, its sheet and header row, and the source rows as inclusive [first, last] ranges.",
+      "properties": {
+        "kind": {
+          "const": "table-file",
+          "title": "Kind",
+          "type": "string"
+        },
+        "run": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Run",
+          "type": "string"
+        },
+        "unit": {
+          "minimum": 0,
+          "title": "Unit",
+          "type": "integer"
+        },
+        "original_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Original Sha256",
+          "type": "string"
+        },
+        "sheet": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sheet"
+        },
+        "header_row": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Header Row"
+        },
+        "source_rows": {
+          "items": {
+            "items": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          },
+          "maxItems": 10000,
+          "minItems": 1,
+          "title": "Source Rows",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "run",
+        "unit",
+        "original_sha256",
+        "sheet",
+        "header_row",
+        "source_rows"
+      ],
+      "title": "TableImportOrigin",
       "type": "object"
     },
     "TimeDepthContext": {

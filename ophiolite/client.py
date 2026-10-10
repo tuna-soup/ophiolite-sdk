@@ -119,6 +119,13 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         from .well_imports import WellImports
         return WellImports(self)
 
+    @property
+    def imports(self):
+        """E87: a table file to wells, well tops, deviation surveys, point sets or time-depth pairs in one call:
+        `client.imports.from_table(path, target, mapping, dry_run=...)` (ophiolite.imports.Imports)."""
+        from .imports import Imports
+        return Imports(self)
+
     def exchange(self,work,**options):
         """E70a: check for updates, get latest and send to project from a work folder (ophiolite.exchange.Exchange)."""
         from .exchange import Exchange,ClientTransport

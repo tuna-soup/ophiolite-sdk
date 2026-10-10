@@ -446,7 +446,7 @@ class Acquisition(Contract):
     identity: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     uploaded_at: float = Field(...)
     rights: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
-    origin: ImportOrigin | None = Field(None)
+    origin: ImportOrigin | TableImportOrigin | None = Field(None)
     via: Via | None = Field(None)
 
 class ArrayNode(Contract):
@@ -737,6 +737,15 @@ class SeismicSectionContext(Contract):
 class StringLeaf(Contract):
     type: Literal['string'] = Field(...)
     value: Annotated[str, Field(max_length=1024)] = Field(...)
+
+class TableImportOrigin(Contract):
+    kind: Literal['table-file'] = Field(...)
+    run: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    unit: Annotated[int, Field(ge=0)] = Field(...)
+    original_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    sheet: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(...)
+    header_row: Annotated[int, Field(ge=1)] | None = Field(...)
+    source_rows: Annotated[list[Annotated[list[Annotated[int, Field(ge=1)]], Field(min_length=2, max_length=2)]], Field(min_length=1, max_length=10000)] = Field(...)
 
 class TimeDepthContext(Contract):
     type: Literal['time-depth'] = Field(...)
@@ -1806,6 +1815,7 @@ RevisionManifestV3.model_rebuild()
 SeismicContext.model_rebuild()
 SeismicSectionContext.model_rebuild()
 StringLeaf.model_rebuild()
+TableImportOrigin.model_rebuild()
 TimeDepthContext.model_rebuild()
 TopsContext.model_rebuild()
 TrajectoryContext.model_rebuild()

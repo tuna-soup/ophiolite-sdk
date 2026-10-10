@@ -5,7 +5,7 @@
     "version": "1.0.0-pilot",
     "description": "One public API for every project operation. Three credential kinds reach it: the browser session (opaque HttpOnly cookie plus the X-CSRF-Token proof and, on non-GET requests, the exact Origin), a project-scoped delegate lasting at most five minutes (Bearer oph_api_..., parent session and current native permissions remain mandatory), and a browser-approved provider grant (Bearer provider token plus X-Ophiolite-Application-Grant; capability 1: the scientific read resources and the applications route within its read/write scopes; capability 3 adds reading wells, wellbores and lineage and the LAS upload routes). A request that carries an Authorization header is a machine request and is refused with MACHINE_AUTH_REQUIRED when a cookie or Origin travels with it. Scope and capability are ceilings; every operation runs the same native permission checks whoever calls it. Not a stable SDK or unattended service-account contract.",
     "x-ophiolite-contracts": {
-      "registry_version": "1.27.0",
+      "registry_version": "1.28.0",
       "index": "/api/v1/contracts",
       "served_profiles": [
         "las2/1",
@@ -63691,6 +63691,2724 @@
         }
       }
     },
+    "/api/v1/projects/{project}/table-imports/cancel": {
+      "post": {
+        "summary": "Stop an unfinished import for good; what it added stays",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/TableImport"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TableSetImport"
+                    }
+                  ],
+                  "description": "One run: wells, or sets.",
+                  "title": "TableImportRun"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "table-imports/*: preview and start name the input (from read) or, for wells, an approved database table, with the\ntarget and its mapping; start adds the reviewed preview digest, the audience and a command id; the others name the\nimport.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "step, status, cancel, pause, resume: the import.",
+                    "title": "Id"
+                  },
+                  "target": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "wells",
+                          "well-tops",
+                          "deviation-survey",
+                          "point-set",
+                          "time-depth"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: what the table holds (wells when omitted).",
+                    "title": "Target"
+                  },
+                  "input_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the input read answered.",
+                    "title": "Input Id"
+                  },
+                  "reading": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: how to read the file (sheet, header_row, delimiter, decimal_mark, encoding), as sent to read.",
+                    "title": "Reading"
+                  },
+                  "connection_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: an approved connection instead of a file (wells only).",
+                    "title": "Connection Id"
+                  },
+                  "key": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the table of that connection.",
+                    "title": "Key"
+                  },
+                  "mapping": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the column mapping; for wells the well-imports mapping, with the schema_digest read answered.",
+                    "title": "Mapping"
+                  },
+                  "authority": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the register that issued the identifiers (a file of wells); omitted: the wells are provisional and a rerun matches them by name.",
+                    "title": "Authority"
+                  },
+                  "audience": {
+                    "description": "start: who may read what the run adds (you are always included).",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Audience",
+                    "type": "array"
+                  },
+                  "preview_digest": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "start: the preview_digest of the review you confirmed (the plan digest).",
+                    "title": "Preview Digest"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "start: the same id returns the same run; another body with it is refused.",
+                    "title": "Command Id"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E44, a database table only: as well-imports.",
+                    "title": "Crs Choice"
+                  },
+                  "well": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start (C5): the well a table without a well column belongs to.",
+                    "title": "Well"
+                  },
+                  "separate": {
+                    "anyOf": [
+                      {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start (C5): labels of sets to add beside a set of the same name with other content.",
+                    "title": "Separate"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "TableImportsRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/table-imports/list": {
+      "post": {
+        "summary": "This project's imports from files and database tables, newest first",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "table-imports/list: at most 100, newest first, files and database tables.",
+                  "properties": {
+                    "imports": {
+                      "items": {
+                        "anyOf": [
+                          {
+                            "$ref": "#/components/schemas/TableImportSummary"
+                          },
+                          {
+                            "$ref": "#/components/schemas/TableSetSummary"
+                          }
+                        ]
+                      },
+                      "title": "Imports",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "imports"
+                  ],
+                  "title": "TableImportsListAnswer",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "table-imports/*: preview and start name the input (from read) or, for wells, an approved database table, with the\ntarget and its mapping; start adds the reviewed preview digest, the audience and a command id; the others name the\nimport.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "step, status, cancel, pause, resume: the import.",
+                    "title": "Id"
+                  },
+                  "target": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "wells",
+                          "well-tops",
+                          "deviation-survey",
+                          "point-set",
+                          "time-depth"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: what the table holds (wells when omitted).",
+                    "title": "Target"
+                  },
+                  "input_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the input read answered.",
+                    "title": "Input Id"
+                  },
+                  "reading": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: how to read the file (sheet, header_row, delimiter, decimal_mark, encoding), as sent to read.",
+                    "title": "Reading"
+                  },
+                  "connection_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: an approved connection instead of a file (wells only).",
+                    "title": "Connection Id"
+                  },
+                  "key": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the table of that connection.",
+                    "title": "Key"
+                  },
+                  "mapping": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the column mapping; for wells the well-imports mapping, with the schema_digest read answered.",
+                    "title": "Mapping"
+                  },
+                  "authority": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the register that issued the identifiers (a file of wells); omitted: the wells are provisional and a rerun matches them by name.",
+                    "title": "Authority"
+                  },
+                  "audience": {
+                    "description": "start: who may read what the run adds (you are always included).",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Audience",
+                    "type": "array"
+                  },
+                  "preview_digest": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "start: the preview_digest of the review you confirmed (the plan digest).",
+                    "title": "Preview Digest"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "start: the same id returns the same run; another body with it is refused.",
+                    "title": "Command Id"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E44, a database table only: as well-imports.",
+                    "title": "Crs Choice"
+                  },
+                  "well": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start (C5): the well a table without a well column belongs to.",
+                    "title": "Well"
+                  },
+                  "separate": {
+                    "anyOf": [
+                      {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start (C5): labels of sets to add beside a set of the same name with other content.",
+                    "title": "Separate"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "TableImportsRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/table-imports/pause": {
+      "post": {
+        "summary": "Pause an unfinished import before its next row; it keeps its rows and its place",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/TableImport"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TableSetImport"
+                    }
+                  ],
+                  "description": "One run: wells, or sets.",
+                  "title": "TableImportRun"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "table-imports/*: preview and start name the input (from read) or, for wells, an approved database table, with the\ntarget and its mapping; start adds the reviewed preview digest, the audience and a command id; the others name the\nimport.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "step, status, cancel, pause, resume: the import.",
+                    "title": "Id"
+                  },
+                  "target": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "wells",
+                          "well-tops",
+                          "deviation-survey",
+                          "point-set",
+                          "time-depth"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: what the table holds (wells when omitted).",
+                    "title": "Target"
+                  },
+                  "input_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the input read answered.",
+                    "title": "Input Id"
+                  },
+                  "reading": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: how to read the file (sheet, header_row, delimiter, decimal_mark, encoding), as sent to read.",
+                    "title": "Reading"
+                  },
+                  "connection_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: an approved connection instead of a file (wells only).",
+                    "title": "Connection Id"
+                  },
+                  "key": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the table of that connection.",
+                    "title": "Key"
+                  },
+                  "mapping": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the column mapping; for wells the well-imports mapping, with the schema_digest read answered.",
+                    "title": "Mapping"
+                  },
+                  "authority": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the register that issued the identifiers (a file of wells); omitted: the wells are provisional and a rerun matches them by name.",
+                    "title": "Authority"
+                  },
+                  "audience": {
+                    "description": "start: who may read what the run adds (you are always included).",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Audience",
+                    "type": "array"
+                  },
+                  "preview_digest": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "start: the preview_digest of the review you confirmed (the plan digest).",
+                    "title": "Preview Digest"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "start: the same id returns the same run; another body with it is refused.",
+                    "title": "Command Id"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E44, a database table only: as well-imports.",
+                    "title": "Crs Choice"
+                  },
+                  "well": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start (C5): the well a table without a well column belongs to.",
+                    "title": "Well"
+                  },
+                  "separate": {
+                    "anyOf": [
+                      {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start (C5): labels of sets to add beside a set of the same name with other content.",
+                    "title": "Separate"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "TableImportsRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/table-imports/preview": {
+      "post": {
+        "summary": "Say what an import of the input (or, for wells, an approved database table) would do with a target and a mapping; nothing is kept",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/TableImportsPreviewAnswer"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TableSetsPreviewAnswer"
+                    }
+                  ],
+                  "description": "table-imports/preview: wells (a file or a database table) or sets.",
+                  "title": "TableImportsPreview"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "table-imports/*: preview and start name the input (from read) or, for wells, an approved database table, with the\ntarget and its mapping; start adds the reviewed preview digest, the audience and a command id; the others name the\nimport.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "step, status, cancel, pause, resume: the import.",
+                    "title": "Id"
+                  },
+                  "target": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "wells",
+                          "well-tops",
+                          "deviation-survey",
+                          "point-set",
+                          "time-depth"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: what the table holds (wells when omitted).",
+                    "title": "Target"
+                  },
+                  "input_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the input read answered.",
+                    "title": "Input Id"
+                  },
+                  "reading": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: how to read the file (sheet, header_row, delimiter, decimal_mark, encoding), as sent to read.",
+                    "title": "Reading"
+                  },
+                  "connection_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: an approved connection instead of a file (wells only).",
+                    "title": "Connection Id"
+                  },
+                  "key": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the table of that connection.",
+                    "title": "Key"
+                  },
+                  "mapping": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the column mapping; for wells the well-imports mapping, with the schema_digest read answered.",
+                    "title": "Mapping"
+                  },
+                  "authority": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the register that issued the identifiers (a file of wells); omitted: the wells are provisional and a rerun matches them by name.",
+                    "title": "Authority"
+                  },
+                  "audience": {
+                    "description": "start: who may read what the run adds (you are always included).",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Audience",
+                    "type": "array"
+                  },
+                  "preview_digest": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "start: the preview_digest of the review you confirmed (the plan digest).",
+                    "title": "Preview Digest"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "start: the same id returns the same run; another body with it is refused.",
+                    "title": "Command Id"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E44, a database table only: as well-imports.",
+                    "title": "Crs Choice"
+                  },
+                  "well": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start (C5): the well a table without a well column belongs to.",
+                    "title": "Well"
+                  },
+                  "separate": {
+                    "anyOf": [
+                      {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start (C5): labels of sets to add beside a set of the same name with other content.",
+                    "title": "Separate"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "TableImportsRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/table-imports/read": {
+      "post": {
+        "summary": "E87: Read a table file for an import (application/octet-stream, X-Ophiolite-Upload with name, bytes and reading): kept as your private input; its reading decisions, its columns and the targets that can land now",
+        "description": "Scope write; accepted principals: session, delegate; project extractor hdr.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "table-imports/read: the file is kept as your private input; how it was read.",
+                  "properties": {
+                    "input_id": {
+                      "description": "Name this input in preview and start; it is yours alone, and goes a day after it was read unless a run names it.",
+                      "title": "Input Id",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "bytes": {
+                      "title": "Bytes",
+                      "type": "integer"
+                    },
+                    "context": {
+                      "additionalProperties": true,
+                      "description": "E58a's reading: format, decisions (each decided or asked), rows, columns, coverage.",
+                      "title": "Context",
+                      "type": "object"
+                    },
+                    "fidelity": {
+                      "additionalProperties": true,
+                      "title": "Fidelity",
+                      "type": "object"
+                    },
+                    "targets": {
+                      "description": "What this installation can add from a table now.",
+                      "items": {
+                        "enum": [
+                          "wells",
+                          "well-tops",
+                          "deviation-survey",
+                          "point-set",
+                          "time-depth"
+                        ],
+                        "type": "string"
+                      },
+                      "title": "Targets",
+                      "type": "array"
+                    },
+                    "columns": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "$ref": "#/components/schemas/TableColumn"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "Once every reading decision is made.",
+                      "title": "Columns"
+                    },
+                    "schema_digest": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "Send it in the mapping.",
+                      "title": "Schema Digest"
+                    },
+                    "sample_rows": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "The first 20 rows by column name.",
+                      "title": "Sample Rows"
+                    },
+                    "layouts": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "$ref": "#/components/schemas/TableLayoutMatch"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E87 D6: each target whose standard layout this table is, with the columns it names.",
+                      "title": "Layouts"
+                    }
+                  },
+                  "required": [
+                    "input_id",
+                    "name",
+                    "bytes",
+                    "context",
+                    "fidelity",
+                    "targets"
+                  ],
+                  "title": "TableImportRead",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Ophiolite-Upload",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "contentEncoding": "base64",
+              "contentMediaType": "application/json",
+              "contentSchema": {
+                "additionalProperties": false,
+                "description": "X-Ophiolite-Upload of `table-imports/read`: the file's name and size and how to read it (E58a's decisions).",
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "name": {
+                    "maxLength": 1024,
+                    "minLength": 1,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "bytes": {
+                    "minimum": 1,
+                    "title": "Bytes",
+                    "type": "integer"
+                  },
+                  "reading": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Reading"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "name",
+                  "bytes"
+                ],
+                "title": "ReadHeader",
+                "type": "object"
+              }
+            },
+            "description": "base64 of a UTF-8 JSON object with the shape contentSchema describes"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary",
+                "description": "LAS 2.0 bytes, 1 byte to 8 MiB, exact Content-Length"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/table-imports/resume": {
+      "post": {
+        "summary": "Make a paused import ready to continue",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/TableImport"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TableSetImport"
+                    }
+                  ],
+                  "description": "One run: wells, or sets.",
+                  "title": "TableImportRun"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "table-imports/*: preview and start name the input (from read) or, for wells, an approved database table, with the\ntarget and its mapping; start adds the reviewed preview digest, the audience and a command id; the others name the\nimport.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "step, status, cancel, pause, resume: the import.",
+                    "title": "Id"
+                  },
+                  "target": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "wells",
+                          "well-tops",
+                          "deviation-survey",
+                          "point-set",
+                          "time-depth"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: what the table holds (wells when omitted).",
+                    "title": "Target"
+                  },
+                  "input_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the input read answered.",
+                    "title": "Input Id"
+                  },
+                  "reading": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: how to read the file (sheet, header_row, delimiter, decimal_mark, encoding), as sent to read.",
+                    "title": "Reading"
+                  },
+                  "connection_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: an approved connection instead of a file (wells only).",
+                    "title": "Connection Id"
+                  },
+                  "key": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the table of that connection.",
+                    "title": "Key"
+                  },
+                  "mapping": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the column mapping; for wells the well-imports mapping, with the schema_digest read answered.",
+                    "title": "Mapping"
+                  },
+                  "authority": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the register that issued the identifiers (a file of wells); omitted: the wells are provisional and a rerun matches them by name.",
+                    "title": "Authority"
+                  },
+                  "audience": {
+                    "description": "start: who may read what the run adds (you are always included).",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Audience",
+                    "type": "array"
+                  },
+                  "preview_digest": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "start: the preview_digest of the review you confirmed (the plan digest).",
+                    "title": "Preview Digest"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "start: the same id returns the same run; another body with it is refused.",
+                    "title": "Command Id"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E44, a database table only: as well-imports.",
+                    "title": "Crs Choice"
+                  },
+                  "well": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start (C5): the well a table without a well column belongs to.",
+                    "title": "Well"
+                  },
+                  "separate": {
+                    "anyOf": [
+                      {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start (C5): labels of sets to add beside a set of the same name with other content.",
+                    "title": "Separate"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "TableImportsRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/table-imports/start": {
+      "post": {
+        "summary": "Start the reviewed import (preview_digest, command_id): wells need a project administrator",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/TableImport"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TableSetImport"
+                    }
+                  ],
+                  "description": "One run: wells, or sets.",
+                  "title": "TableImportRun"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "table-imports/*: preview and start name the input (from read) or, for wells, an approved database table, with the\ntarget and its mapping; start adds the reviewed preview digest, the audience and a command id; the others name the\nimport.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "step, status, cancel, pause, resume: the import.",
+                    "title": "Id"
+                  },
+                  "target": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "wells",
+                          "well-tops",
+                          "deviation-survey",
+                          "point-set",
+                          "time-depth"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: what the table holds (wells when omitted).",
+                    "title": "Target"
+                  },
+                  "input_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the input read answered.",
+                    "title": "Input Id"
+                  },
+                  "reading": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: how to read the file (sheet, header_row, delimiter, decimal_mark, encoding), as sent to read.",
+                    "title": "Reading"
+                  },
+                  "connection_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: an approved connection instead of a file (wells only).",
+                    "title": "Connection Id"
+                  },
+                  "key": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the table of that connection.",
+                    "title": "Key"
+                  },
+                  "mapping": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the column mapping; for wells the well-imports mapping, with the schema_digest read answered.",
+                    "title": "Mapping"
+                  },
+                  "authority": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the register that issued the identifiers (a file of wells); omitted: the wells are provisional and a rerun matches them by name.",
+                    "title": "Authority"
+                  },
+                  "audience": {
+                    "description": "start: who may read what the run adds (you are always included).",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Audience",
+                    "type": "array"
+                  },
+                  "preview_digest": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "start: the preview_digest of the review you confirmed (the plan digest).",
+                    "title": "Preview Digest"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "start: the same id returns the same run; another body with it is refused.",
+                    "title": "Command Id"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E44, a database table only: as well-imports.",
+                    "title": "Crs Choice"
+                  },
+                  "well": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start (C5): the well a table without a well column belongs to.",
+                    "title": "Well"
+                  },
+                  "separate": {
+                    "anyOf": [
+                      {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start (C5): labels of sets to add beside a set of the same name with other content.",
+                    "title": "Separate"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "TableImportsRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/table-imports/status": {
+      "post": {
+        "summary": "One import: its target, state, counts and skipped rows",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/TableImport"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TableSetImport"
+                    }
+                  ],
+                  "description": "One run: wells, or sets.",
+                  "title": "TableImportRun"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "table-imports/*: preview and start name the input (from read) or, for wells, an approved database table, with the\ntarget and its mapping; start adds the reviewed preview digest, the audience and a command id; the others name the\nimport.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "step, status, cancel, pause, resume: the import.",
+                    "title": "Id"
+                  },
+                  "target": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "wells",
+                          "well-tops",
+                          "deviation-survey",
+                          "point-set",
+                          "time-depth"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: what the table holds (wells when omitted).",
+                    "title": "Target"
+                  },
+                  "input_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the input read answered.",
+                    "title": "Input Id"
+                  },
+                  "reading": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: how to read the file (sheet, header_row, delimiter, decimal_mark, encoding), as sent to read.",
+                    "title": "Reading"
+                  },
+                  "connection_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: an approved connection instead of a file (wells only).",
+                    "title": "Connection Id"
+                  },
+                  "key": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the table of that connection.",
+                    "title": "Key"
+                  },
+                  "mapping": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the column mapping; for wells the well-imports mapping, with the schema_digest read answered.",
+                    "title": "Mapping"
+                  },
+                  "authority": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the register that issued the identifiers (a file of wells); omitted: the wells are provisional and a rerun matches them by name.",
+                    "title": "Authority"
+                  },
+                  "audience": {
+                    "description": "start: who may read what the run adds (you are always included).",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Audience",
+                    "type": "array"
+                  },
+                  "preview_digest": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "start: the preview_digest of the review you confirmed (the plan digest).",
+                    "title": "Preview Digest"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "start: the same id returns the same run; another body with it is refused.",
+                    "title": "Command Id"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E44, a database table only: as well-imports.",
+                    "title": "Crs Choice"
+                  },
+                  "well": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start (C5): the well a table without a well column belongs to.",
+                    "title": "Well"
+                  },
+                  "separate": {
+                    "anyOf": [
+                      {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start (C5): labels of sets to add beside a set of the same name with other content.",
+                    "title": "Separate"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "TableImportsRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/table-imports/step": {
+      "post": {
+        "summary": "Run the next rows as the person who started the import (id); a finished or paused import answers its status",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/TableImport"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TableSetImport"
+                    }
+                  ],
+                  "description": "One run: wells, or sets.",
+                  "title": "TableImportRun"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "table-imports/*: preview and start name the input (from read) or, for wells, an approved database table, with the\ntarget and its mapping; start adds the reviewed preview digest, the audience and a command id; the others name the\nimport.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "step, status, cancel, pause, resume: the import.",
+                    "title": "Id"
+                  },
+                  "target": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "wells",
+                          "well-tops",
+                          "deviation-survey",
+                          "point-set",
+                          "time-depth"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: what the table holds (wells when omitted).",
+                    "title": "Target"
+                  },
+                  "input_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the input read answered.",
+                    "title": "Input Id"
+                  },
+                  "reading": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: how to read the file (sheet, header_row, delimiter, decimal_mark, encoding), as sent to read.",
+                    "title": "Reading"
+                  },
+                  "connection_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: an approved connection instead of a file (wells only).",
+                    "title": "Connection Id"
+                  },
+                  "key": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the table of that connection.",
+                    "title": "Key"
+                  },
+                  "mapping": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the column mapping; for wells the well-imports mapping, with the schema_digest read answered.",
+                    "title": "Mapping"
+                  },
+                  "authority": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start: the register that issued the identifiers (a file of wells); omitted: the wells are provisional and a rerun matches them by name.",
+                    "title": "Authority"
+                  },
+                  "audience": {
+                    "description": "start: who may read what the run adds (you are always included).",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Audience",
+                    "type": "array"
+                  },
+                  "preview_digest": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "start: the preview_digest of the review you confirmed (the plan digest).",
+                    "title": "Preview Digest"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "start: the same id returns the same run; another body with it is refused.",
+                    "title": "Command Id"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E44, a database table only: as well-imports.",
+                    "title": "Crs Choice"
+                  },
+                  "well": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start (C5): the well a table without a well column belongs to.",
+                    "title": "Well"
+                  },
+                  "separate": {
+                    "anyOf": [
+                      {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "preview, start (C5): labels of sets to add beside a set of the same name with other content.",
+                    "title": "Separate"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "TableImportsRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/upload-runs/associate": {
       "post": {
         "summary": "E55: Link added files to the wellbores their headers name (at most 50 per call; the same link again adds nothing)",
@@ -66833,6 +69551,8 @@
                         "importing",
                         "resumable",
                         "needs-review",
+                        "paused",
+                        "incomplete",
                         "complete",
                         "complete-with-skipped",
                         "cancelled"
@@ -67732,6 +70452,8 @@
                         "importing",
                         "resumable",
                         "needs-review",
+                        "paused",
+                        "incomplete",
                         "complete",
                         "complete-with-skipped",
                         "cancelled"
@@ -68110,6 +70832,8 @@
                         "importing",
                         "resumable",
                         "needs-review",
+                        "paused",
+                        "incomplete",
                         "complete",
                         "complete-with-skipped",
                         "cancelled"
@@ -68488,6 +71212,8 @@
                         "importing",
                         "resumable",
                         "needs-review",
+                        "paused",
+                        "incomplete",
                         "complete",
                         "complete-with-skipped",
                         "cancelled"
@@ -70920,7 +73646,7 @@
                 "schema": {
                   "x-ophiolite": {
                     "id": "ophiolite.scientific-asset/1",
-                    "version": "1.18.0",
+                    "version": "1.19.0",
                     "lifecycle": "preview"
                   },
                   "additionalProperties": false,
@@ -72549,10 +75275,89 @@
                                   "type": "object"
                                 },
                                 {
+                                  "additionalProperties": false,
+                                  "description": "1.19.0 (E87): a set landed from a table file by a table import run \u2014 provenance, not authority. The run and its\nunit, the original file's sha256, its sheet and header row, and the source rows as inclusive [first, last] ranges.",
+                                  "properties": {
+                                    "kind": {
+                                      "const": "table-file",
+                                      "title": "Kind",
+                                      "type": "string"
+                                    },
+                                    "run": {
+                                      "maxLength": 512,
+                                      "minLength": 1,
+                                      "title": "Run",
+                                      "type": "string"
+                                    },
+                                    "unit": {
+                                      "minimum": 0,
+                                      "title": "Unit",
+                                      "type": "integer"
+                                    },
+                                    "original_sha256": {
+                                      "pattern": "^[0-9a-f]{64}$",
+                                      "title": "Original Sha256",
+                                      "type": "string"
+                                    },
+                                    "sheet": {
+                                      "anyOf": [
+                                        {
+                                          "maxLength": 512,
+                                          "minLength": 1,
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ],
+                                      "title": "Sheet"
+                                    },
+                                    "header_row": {
+                                      "anyOf": [
+                                        {
+                                          "minimum": 1,
+                                          "type": "integer"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ],
+                                      "title": "Header Row"
+                                    },
+                                    "source_rows": {
+                                      "items": {
+                                        "items": {
+                                          "minimum": 1,
+                                          "type": "integer"
+                                        },
+                                        "maxItems": 2,
+                                        "minItems": 2,
+                                        "type": "array"
+                                      },
+                                      "maxItems": 10000,
+                                      "minItems": 1,
+                                      "title": "Source Rows",
+                                      "type": "array"
+                                    }
+                                  },
+                                  "required": [
+                                    "kind",
+                                    "run",
+                                    "unit",
+                                    "original_sha256",
+                                    "sheet",
+                                    "header_row",
+                                    "source_rows"
+                                  ],
+                                  "title": "TableImportOrigin",
+                                  "type": "object"
+                                },
+                                {
                                   "type": "null"
                                 }
                               ],
-                              "default": null
+                              "default": null,
+                              "title": "Origin"
                             },
                             "via": {
                               "anyOf": [
@@ -96266,6 +99071,700 @@
         "title": "SubscriptionSummary",
         "type": "object"
       },
+      "TableColumn": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "type": {
+            "description": "What the values are, as the table reading found them (text, integer, float, ...).",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ],
+        "title": "TableColumn",
+        "type": "object"
+      },
+      "TableImport": {
+        "additionalProperties": false,
+        "description": "table-imports/start, step, status, cancel, pause, resume: one run.",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "project_id": {
+            "title": "Project Id",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "importing",
+              "resumable",
+              "needs-review",
+              "paused",
+              "incomplete",
+              "complete",
+              "complete-with-skipped",
+              "cancelled"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "words": {
+            "title": "Words",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "initiator": {
+            "title": "Initiator",
+            "type": "string"
+          },
+          "connection_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null for a file.",
+            "title": "Connection Id"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "release_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The release holding the kept rows.",
+            "title": "Release Id"
+          },
+          "approved_by": {
+            "title": "Approved By",
+            "type": "string"
+          },
+          "approved_at": {
+            "title": "Approved At",
+            "type": "number"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "number"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "number"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/WellImportCounts"
+          },
+          "target": {
+            "enum": [
+              "wells",
+              "well-tops",
+              "deviation-survey",
+              "point-set",
+              "time-depth"
+            ],
+            "title": "Target",
+            "type": "string"
+          },
+          "origin": {
+            "enum": [
+              "file",
+              "database"
+            ],
+            "title": "Origin",
+            "type": "string"
+          },
+          "plan_digest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The digest of the plan start confirmed; null for an import started before E87.",
+            "title": "Plan Digest"
+          },
+          "input_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The retained input of a file run.",
+            "title": "Input Id"
+          },
+          "identity_authority": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null: the wells are provisional.",
+            "title": "Identity Authority"
+          },
+          "audience": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Audience",
+            "type": "array"
+          },
+          "mapping": {
+            "additionalProperties": true,
+            "title": "Mapping",
+            "type": "object"
+          },
+          "input_revision": {
+            "title": "Input Revision",
+            "type": "string"
+          },
+          "preview_digest": {
+            "title": "Preview Digest",
+            "type": "string"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/WellImportTotals"
+          },
+          "skipped": {
+            "items": {
+              "$ref": "#/components/schemas/WellImportSkipped"
+            },
+            "title": "Skipped",
+            "type": "array"
+          },
+          "possible_duplicates": {
+            "items": {
+              "$ref": "#/components/schemas/WellImportDuplicate"
+            },
+            "title": "Possible Duplicates",
+            "type": "array"
+          },
+          "already_here": {
+            "items": {
+              "$ref": "#/components/schemas/WellImportHere"
+            },
+            "title": "Already Here",
+            "type": "array"
+          },
+          "superseded": {
+            "items": {
+              "$ref": "#/components/schemas/WellImportSuperseded"
+            },
+            "title": "Superseded",
+            "type": "array"
+          },
+          "column_basis": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ColumnBasis"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "state",
+          "words",
+          "reason",
+          "initiator",
+          "connection_id",
+          "key",
+          "release_id",
+          "approved_by",
+          "approved_at",
+          "created_at",
+          "updated_at",
+          "counts",
+          "target",
+          "origin",
+          "plan_digest",
+          "input_id",
+          "identity_authority",
+          "audience",
+          "mapping",
+          "input_revision",
+          "preview_digest",
+          "totals",
+          "skipped",
+          "possible_duplicates",
+          "already_here",
+          "superseded"
+        ],
+        "title": "TableImport",
+        "type": "object"
+      },
+      "TableImportSkipped": {
+        "additionalProperties": false,
+        "properties": {
+          "ordinal": {
+            "description": "The row's place in the table ordered by its content.",
+            "title": "Ordinal",
+            "type": "integer"
+          },
+          "row_key": {
+            "description": "The row's identifier as the table holds it; empty when it has none.",
+            "title": "Row Key",
+            "type": "string"
+          },
+          "codes": {
+            "items": {
+              "enum": [
+                "id-missing",
+                "id-repeated",
+                "name-missing",
+                "coordinate-missing",
+                "not-numeric",
+                "non-finite",
+                "longitude-out-of-range",
+                "latitude-out-of-range",
+                "name-too-long",
+                "name-not-text",
+                "identifier-not-accepted",
+                "identifier-in-use",
+                "no-longer-visible",
+                "name-ambiguous",
+                "name-repeated"
+              ],
+              "type": "string"
+            },
+            "title": "Codes",
+            "type": "array"
+          },
+          "fields": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Fields",
+            "type": "array"
+          },
+          "source_row": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The row's own line (CSV) or sheet row (workbook).",
+            "title": "Source Row"
+          }
+        },
+        "required": [
+          "ordinal",
+          "row_key",
+          "codes",
+          "fields",
+          "source_row"
+        ],
+        "title": "TableImportSkipped",
+        "type": "object"
+      },
+      "TableImportSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "project_id": {
+            "title": "Project Id",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "importing",
+              "resumable",
+              "needs-review",
+              "paused",
+              "incomplete",
+              "complete",
+              "complete-with-skipped",
+              "cancelled"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "words": {
+            "title": "Words",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "initiator": {
+            "title": "Initiator",
+            "type": "string"
+          },
+          "connection_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null for a file.",
+            "title": "Connection Id"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "release_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The release holding the kept rows.",
+            "title": "Release Id"
+          },
+          "approved_by": {
+            "title": "Approved By",
+            "type": "string"
+          },
+          "approved_at": {
+            "title": "Approved At",
+            "type": "number"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "number"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "number"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/WellImportCounts"
+          },
+          "target": {
+            "enum": [
+              "wells",
+              "well-tops",
+              "deviation-survey",
+              "point-set",
+              "time-depth"
+            ],
+            "title": "Target",
+            "type": "string"
+          },
+          "origin": {
+            "enum": [
+              "file",
+              "database"
+            ],
+            "title": "Origin",
+            "type": "string"
+          },
+          "plan_digest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The digest of the plan start confirmed; null for an import started before E87.",
+            "title": "Plan Digest"
+          },
+          "input_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The retained input of a file run.",
+            "title": "Input Id"
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "state",
+          "words",
+          "reason",
+          "initiator",
+          "connection_id",
+          "key",
+          "release_id",
+          "approved_by",
+          "approved_at",
+          "created_at",
+          "updated_at",
+          "counts",
+          "target",
+          "origin",
+          "plan_digest",
+          "input_id"
+        ],
+        "title": "TableImportSummary",
+        "type": "object"
+      },
+      "TableImportsPreviewAnswer": {
+        "additionalProperties": false,
+        "description": "table-imports/preview of a file: what start would do; nothing is kept. A database table answers well-imports/preview's\nfields with target and origin.",
+        "properties": {
+          "preview_digest": {
+            "title": "Preview Digest",
+            "type": "string"
+          },
+          "target": {
+            "enum": [
+              "wells",
+              "well-tops",
+              "deviation-survey",
+              "point-set",
+              "time-depth"
+            ],
+            "title": "Target",
+            "type": "string"
+          },
+          "origin": {
+            "enum": [
+              "file",
+              "database"
+            ],
+            "title": "Origin",
+            "type": "string"
+          },
+          "input_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Input Id"
+          },
+          "connection_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Connection Id"
+          },
+          "key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Key"
+          },
+          "source_name": {
+            "title": "Source Name",
+            "type": "string"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/WellImportPreviewCounts"
+          },
+          "skipped": {
+            "description": "At most 1,000, by ordinal.",
+            "items": {
+              "$ref": "#/components/schemas/TableImportSkipped"
+            },
+            "title": "Skipped",
+            "type": "array"
+          },
+          "possible_duplicates": {
+            "items": {
+              "$ref": "#/components/schemas/WellImportDuplicate"
+            },
+            "title": "Possible Duplicates",
+            "type": "array"
+          },
+          "already_here": {
+            "items": {
+              "$ref": "#/components/schemas/WellImportHere"
+            },
+            "title": "Already Here",
+            "type": "array"
+          },
+          "identifiers": {
+            "additionalProperties": true,
+            "description": "{authority, declared}: authority null for provisional wells.",
+            "title": "Identifiers",
+            "type": "object"
+          },
+          "warnings": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ImportWarning"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Warnings"
+          },
+          "audience": {
+            "$ref": "#/components/schemas/WellImportAudience"
+          },
+          "input_revision": {
+            "title": "Input Revision",
+            "type": "string"
+          },
+          "crs_basis": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CrsBasis"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "preview_digest",
+          "target",
+          "origin",
+          "source_name",
+          "counts",
+          "skipped",
+          "possible_duplicates",
+          "already_here",
+          "identifiers",
+          "audience",
+          "input_revision"
+        ],
+        "title": "TableImportsPreviewAnswer",
+        "type": "object"
+      },
+      "TableLayoutMatch": {
+        "additionalProperties": false,
+        "properties": {
+          "target": {
+            "enum": [
+              "wells",
+              "well-tops",
+              "deviation-survey",
+              "point-set",
+              "time-depth"
+            ],
+            "title": "Target",
+            "type": "string"
+          },
+          "fields": {
+            "additionalProperties": true,
+            "description": "{field: column}; a point set's attributes are a list of columns.",
+            "title": "Fields",
+            "type": "object"
+          },
+          "declarations": {
+            "additionalProperties": true,
+            "description": "What the layout states (a unit, a depth reference); the built-in layouts state nothing.",
+            "title": "Declarations",
+            "type": "object"
+          }
+        },
+        "required": [
+          "target",
+          "fields",
+          "declarations"
+        ],
+        "title": "TableLayoutMatch",
+        "type": "object"
+      },
+      "TableNotKept": {
+        "additionalProperties": false,
+        "properties": {
+          "column": {
+            "title": "Column",
+            "type": "string"
+          },
+          "reason": {
+            "enum": [
+              "not-mapped",
+              "text-attribute"
+            ],
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "column",
+          "reason"
+        ],
+        "title": "TableNotKept",
+        "type": "object"
+      },
       "TableSchema": {
         "additionalProperties": false,
         "description": "A SQL table: its inspected columns and sample, the suggested mapping, and the saved mappings.",
@@ -96400,6 +99899,893 @@
           "declared_crs"
         ],
         "title": "TableSchema",
+        "type": "object"
+      },
+      "TableSetCounts": {
+        "additionalProperties": false,
+        "properties": {
+          "units": {
+            "title": "Units",
+            "type": "integer"
+          },
+          "planned": {
+            "title": "Planned",
+            "type": "integer"
+          },
+          "created": {
+            "title": "Created",
+            "type": "integer"
+          },
+          "already_here": {
+            "title": "Already Here",
+            "type": "integer"
+          },
+          "skipped": {
+            "title": "Skipped",
+            "type": "integer"
+          },
+          "removed": {
+            "title": "Removed",
+            "type": "integer"
+          },
+          "linked": {
+            "title": "Linked",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "units",
+          "planned",
+          "created",
+          "already_here",
+          "skipped",
+          "removed",
+          "linked"
+        ],
+        "title": "TableSetCounts",
+        "type": "object"
+      },
+      "TableSetImport": {
+        "additionalProperties": false,
+        "description": "table-imports/start, step, status, cancel, pause, resume of sets (C5): one run, one row per set.",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "project_id": {
+            "title": "Project Id",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "importing",
+              "resumable",
+              "needs-review",
+              "paused",
+              "incomplete",
+              "complete",
+              "complete-with-skipped",
+              "cancelled"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "words": {
+            "title": "Words",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "initiator": {
+            "title": "Initiator",
+            "type": "string"
+          },
+          "connection_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null for a file.",
+            "title": "Connection Id"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "release_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The release holding the kept rows.",
+            "title": "Release Id"
+          },
+          "approved_by": {
+            "title": "Approved By",
+            "type": "string"
+          },
+          "approved_at": {
+            "title": "Approved At",
+            "type": "number"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "number"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "number"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/TableSetCounts"
+          },
+          "target": {
+            "enum": [
+              "wells",
+              "well-tops",
+              "deviation-survey",
+              "point-set",
+              "time-depth"
+            ],
+            "title": "Target",
+            "type": "string"
+          },
+          "origin": {
+            "enum": [
+              "file",
+              "database"
+            ],
+            "title": "Origin",
+            "type": "string"
+          },
+          "plan_digest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The digest of the plan start confirmed; null for an import started before E87.",
+            "title": "Plan Digest"
+          },
+          "input_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The retained input of a file run.",
+            "title": "Input Id"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/TableSetTotals"
+          },
+          "audience": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Audience",
+            "type": "array"
+          },
+          "units": {
+            "items": {
+              "$ref": "#/components/schemas/TableSetUnit"
+            },
+            "title": "Units",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "state",
+          "words",
+          "reason",
+          "initiator",
+          "connection_id",
+          "key",
+          "release_id",
+          "approved_by",
+          "approved_at",
+          "created_at",
+          "updated_at",
+          "counts",
+          "target",
+          "origin",
+          "plan_digest",
+          "input_id",
+          "totals",
+          "audience",
+          "units"
+        ],
+        "title": "TableSetImport",
+        "type": "object"
+      },
+      "TableSetPreview": {
+        "additionalProperties": false,
+        "description": "One set the run would land: one per well (D3), or one for the table.",
+        "properties": {
+          "unit": {
+            "title": "Unit",
+            "type": "integer"
+          },
+          "label": {
+            "description": "The set's name: the file's stem and the well.",
+            "title": "Label",
+            "type": "string"
+          },
+          "well": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The well as the table spells it.",
+            "title": "Well"
+          },
+          "rows": {
+            "title": "Rows",
+            "type": "integer"
+          },
+          "first_row": {
+            "title": "First Row",
+            "type": "integer"
+          },
+          "wellbore": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WellImportWell"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The wellbore it will be linked to; null when none (link says why)."
+          },
+          "link": {
+            "anyOf": [
+              {
+                "enum": [
+                  "ambiguous-wellbore",
+                  "no-wellbore",
+                  "unmatched",
+                  "no-longer-visible",
+                  "linked-elsewhere"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Link"
+          },
+          "link_words": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Link Words"
+          },
+          "action": {
+            "description": "land; reuse (Already here: the same set, read the same way, is yours); skip (a set of this name with other content; send its label in separate to add it beside).",
+            "enum": [
+              "land",
+              "reuse",
+              "skip"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "code": {
+            "anyOf": [
+              {
+                "const": "same-name-other-content",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Code"
+          },
+          "words": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Words"
+          },
+          "same_name": {
+            "title": "Same Name",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "unit",
+          "label",
+          "well",
+          "rows",
+          "first_row",
+          "wellbore",
+          "link",
+          "link_words",
+          "action",
+          "code",
+          "words",
+          "same_name"
+        ],
+        "title": "TableSetPreview",
+        "type": "object"
+      },
+      "TableSetPreviewCounts": {
+        "additionalProperties": false,
+        "properties": {
+          "rows": {
+            "title": "Rows",
+            "type": "integer"
+          },
+          "units": {
+            "title": "Units",
+            "type": "integer"
+          },
+          "land": {
+            "title": "Land",
+            "type": "integer"
+          },
+          "already_here": {
+            "title": "Already Here",
+            "type": "integer"
+          },
+          "skipped_units": {
+            "title": "Skipped Units",
+            "type": "integer"
+          },
+          "skipped_rows": {
+            "title": "Skipped Rows",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "rows",
+          "units",
+          "land",
+          "already_here",
+          "skipped_units",
+          "skipped_rows"
+        ],
+        "title": "TableSetPreviewCounts",
+        "type": "object"
+      },
+      "TableSetProblem": {
+        "additionalProperties": false,
+        "description": "A row (or a whole set) that does not land, by its own line or sheet row.",
+        "properties": {
+          "well": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The well the row names; null without a well column.",
+            "title": "Well"
+          },
+          "row": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The row's own line (CSV) or sheet row (workbook); null for a set over its reader's limit.",
+            "title": "Row"
+          },
+          "field": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Field"
+          },
+          "code": {
+            "description": "E86's code (comment-row, too-many-rows, a value check, ...).",
+            "title": "Code",
+            "type": "string"
+          },
+          "value": {
+            "default": null,
+            "title": "Value"
+          }
+        },
+        "required": [
+          "well",
+          "row",
+          "field",
+          "code"
+        ],
+        "title": "TableSetProblem",
+        "type": "object"
+      },
+      "TableSetRoom": {
+        "additionalProperties": false,
+        "properties": {
+          "uploads": {
+            "description": "How many more uploads this project has room for now (J6); start refuses a run that would add more.",
+            "title": "Uploads",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "uploads"
+        ],
+        "title": "TableSetRoom",
+        "type": "object"
+      },
+      "TableSetSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "project_id": {
+            "title": "Project Id",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "importing",
+              "resumable",
+              "needs-review",
+              "paused",
+              "incomplete",
+              "complete",
+              "complete-with-skipped",
+              "cancelled"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "words": {
+            "title": "Words",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "initiator": {
+            "title": "Initiator",
+            "type": "string"
+          },
+          "connection_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null for a file.",
+            "title": "Connection Id"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "release_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The release holding the kept rows.",
+            "title": "Release Id"
+          },
+          "approved_by": {
+            "title": "Approved By",
+            "type": "string"
+          },
+          "approved_at": {
+            "title": "Approved At",
+            "type": "number"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "number"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "number"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/TableSetCounts"
+          },
+          "target": {
+            "enum": [
+              "wells",
+              "well-tops",
+              "deviation-survey",
+              "point-set",
+              "time-depth"
+            ],
+            "title": "Target",
+            "type": "string"
+          },
+          "origin": {
+            "enum": [
+              "file",
+              "database"
+            ],
+            "title": "Origin",
+            "type": "string"
+          },
+          "plan_digest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The digest of the plan start confirmed; null for an import started before E87.",
+            "title": "Plan Digest"
+          },
+          "input_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The retained input of a file run.",
+            "title": "Input Id"
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "state",
+          "words",
+          "reason",
+          "initiator",
+          "connection_id",
+          "key",
+          "release_id",
+          "approved_by",
+          "approved_at",
+          "created_at",
+          "updated_at",
+          "counts",
+          "target",
+          "origin",
+          "plan_digest",
+          "input_id"
+        ],
+        "title": "TableSetSummary",
+        "type": "object"
+      },
+      "TableSetTotals": {
+        "additionalProperties": false,
+        "properties": {
+          "rows": {
+            "title": "Rows",
+            "type": "integer"
+          },
+          "units": {
+            "title": "Units",
+            "type": "integer"
+          },
+          "skipped_rows": {
+            "title": "Skipped Rows",
+            "type": "integer"
+          },
+          "skipped_units": {
+            "title": "Skipped Units",
+            "type": "integer"
+          },
+          "no_well": {
+            "title": "No Well",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "rows",
+          "units",
+          "skipped_rows",
+          "skipped_units",
+          "no_well"
+        ],
+        "title": "TableSetTotals",
+        "type": "object"
+      },
+      "TableSetUnit": {
+        "additionalProperties": false,
+        "properties": {
+          "unit": {
+            "title": "Unit",
+            "type": "integer"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "wellbore": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WellImportWell"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The wellbore it is linked to, while you may read it."
+          },
+          "asset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The landed set; null for anyone but the person who started the run.",
+            "title": "Asset Id"
+          },
+          "revision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revision"
+          },
+          "association_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Association Id"
+          },
+          "outcome": {
+            "enum": [
+              "planned",
+              "landed",
+              "skipped"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "receipt": {
+            "anyOf": [
+              {
+                "enum": [
+                  "created",
+                  "reused",
+                  "removed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "created; reused (Already here); removed (withdrawn after it was added; not added again).",
+            "title": "Receipt"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Why it is not linked or not added (a link code, a set code, or the reader's refusal).",
+            "title": "Reason"
+          },
+          "words": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Words"
+          }
+        },
+        "required": [
+          "unit",
+          "label",
+          "wellbore",
+          "asset_id",
+          "revision",
+          "association_id",
+          "outcome",
+          "receipt",
+          "reason",
+          "words"
+        ],
+        "title": "TableSetUnit",
+        "type": "object"
+      },
+      "TableSetsPreviewAnswer": {
+        "additionalProperties": false,
+        "description": "table-imports/preview of tops, a deviation survey, a point set or time-depth pairs (C5): the sets start would\nland; nothing is kept.",
+        "properties": {
+          "preview_digest": {
+            "title": "Preview Digest",
+            "type": "string"
+          },
+          "target": {
+            "enum": [
+              "wells",
+              "well-tops",
+              "deviation-survey",
+              "point-set",
+              "time-depth"
+            ],
+            "title": "Target",
+            "type": "string"
+          },
+          "origin": {
+            "const": "file",
+            "title": "Origin",
+            "type": "string"
+          },
+          "input_id": {
+            "title": "Input Id",
+            "type": "string"
+          },
+          "source_name": {
+            "title": "Source Name",
+            "type": "string"
+          },
+          "profile": {
+            "description": "The typed reader profile every set lands with.",
+            "title": "Profile",
+            "type": "string"
+          },
+          "declared": {
+            "additionalProperties": true,
+            "description": "The declarations every set carries (depth_unit, crs, ...).",
+            "title": "Declared",
+            "type": "object"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/TableSetPreviewCounts"
+          },
+          "units": {
+            "items": {
+              "$ref": "#/components/schemas/TableSetPreview"
+            },
+            "title": "Units",
+            "type": "array"
+          },
+          "skipped": {
+            "description": "At most 1,000.",
+            "items": {
+              "$ref": "#/components/schemas/TableSetProblem"
+            },
+            "title": "Skipped",
+            "type": "array"
+          },
+          "skipped_units": {
+            "description": "Sets that do not land (a series with a bad row, over the reader's limit); at most 1,000.",
+            "items": {
+              "$ref": "#/components/schemas/TableSetProblem"
+            },
+            "title": "Skipped Units",
+            "type": "array"
+          },
+          "no_well": {
+            "description": "Rows without a well, by their own row number; at most 1,000.",
+            "items": {
+              "type": "integer"
+            },
+            "title": "No Well",
+            "type": "array"
+          },
+          "not_kept": {
+            "items": {
+              "$ref": "#/components/schemas/TableNotKept"
+            },
+            "title": "Not Kept",
+            "type": "array"
+          },
+          "room": {
+            "$ref": "#/components/schemas/TableSetRoom"
+          },
+          "audience": {
+            "$ref": "#/components/schemas/WellImportAudience"
+          }
+        },
+        "required": [
+          "preview_digest",
+          "target",
+          "origin",
+          "input_id",
+          "source_name",
+          "profile",
+          "declared",
+          "counts",
+          "units",
+          "skipped",
+          "skipped_units",
+          "no_well",
+          "not_kept",
+          "room",
+          "audience"
+        ],
+        "title": "TableSetsPreviewAnswer",
         "type": "object"
       },
       "TimelineEvidence": {
@@ -98151,7 +102537,9 @@
                 "name-not-text",
                 "identifier-not-accepted",
                 "identifier-in-use",
-                "no-longer-visible"
+                "no-longer-visible",
+                "name-ambiguous",
+                "name-repeated"
               ],
               "type": "string"
             },
@@ -98201,7 +102589,9 @@
                 "name-not-text",
                 "identifier-not-accepted",
                 "identifier-in-use",
-                "no-longer-visible"
+                "no-longer-visible",
+                "name-ambiguous",
+                "name-repeated"
               ],
               "type": "string"
             },
@@ -98245,6 +102635,8 @@
               "importing",
               "resumable",
               "needs-review",
+              "paused",
+              "incomplete",
               "complete",
               "complete-with-skipped",
               "cancelled"

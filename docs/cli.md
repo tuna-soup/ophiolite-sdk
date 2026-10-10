@@ -34,6 +34,10 @@ Every verb accepts `--json`. The result is one JSON object on standard output:
 | `well-imports list` | `{"imports": [import summary]}` |
 | `well-imports status`, `start`, `resume`, `cancel` | `{"import": import}` (the documented `WellImport`: state, words, reason, counts, skipped, superseded, …) |
 | `well-imports start --dry-run` | `{"preview": preview}` (counts, skipped rows, possible duplicates, wells already here) |
+| `import table FILE --dry-run` | `{"preview": preview}` (the documented table-import preview: sets per well, skipped rows, sets not added, room) |
+| `import table FILE`, `import resume ID` | `{"import": run, "preview": preview}` (`preview` only for `table`; the run: state, words, reason, counts, one unit per set) |
+| `import list` | `{"imports": [run summary]}` |
+| `import status`, `pause`, `cancel` | `{"import": run}` |
 | `upload` | `{"upload": report}` (the documented `UploadRun`: state, label, counts, and every file with its state, kind, what was read, sentence and item) |
 | `publish-derived` | `{"published": receipt}` |
 | `share` | `{"shared", "recipients", "reuse_recipients"}` |

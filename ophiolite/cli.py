@@ -236,6 +236,21 @@ def parser():
     imports.add_argument('--audience',action='append',default=[],metavar='PERSON',help='start: a project member who may read the copy and the wells it creates (repeat); you are always included')
     imports.add_argument('--command-id',help='start: the same id returns the same import instead of starting another')
     imports.add_argument('--dry-run',action='store_true',help='start: show what the import would do; nothing is kept')
+    tables=project(sub.add_parser('import',help='Add a table file as wells, well tops, deviation surveys, point sets or time-depth pairs: table FILE --target T (--dry-run to review), list, status ID, pause ID, resume ID, cancel ID'))
+    tables.add_argument('action',choices=['table','list','status','pause','resume','cancel'])
+    tables.add_argument('what',nargs='?',help='table: the file (.csv, .xlsx, .xls); status/pause/resume/cancel: the run id from `import list`')
+    tables.add_argument('--target',choices=['wells','well-tops','deviation-survey','point-set','time-depth'],help='table: what the table holds')
+    tables.add_argument('--map',action='append',default=[],metavar='FIELD=COLUMN',help='table: which column holds each value, e.g. --map name=Formation,md="Top MD (m)" (repeat; a field given twice is a list). Omitted: the table must be in the standard layout')
+    tables.add_argument('--declare',action='append',default=[],metavar='KEY=VALUE',help='table: what the table does not say, e.g. depth_unit=m (repeat)')
+    tables.add_argument('--well',help='table: the well a table without a well column belongs to')
+    tables.add_argument('--authority',help='table --target wells: the register that issued the identifiers')
+    for flag,said in (('--sheet','the sheet of a workbook'),('--header-row','the row that holds the column names'),('--delimiter','the column separator of a text table'),
+                      ('--decimal-mark','the decimal mark of a text table'),('--encoding','the text encoding')):
+        tables.add_argument(flag,type=int if flag=='--header-row' else str,help='table: '+said)
+    tables.add_argument('--separate',action='append',default=[],metavar='LABEL',help='table: add this set beside a set of the same name with other content (repeat)')
+    tables.add_argument('--audience',action='append',default=[],metavar='PERSON',help='table: a project member who may read what is added (repeat); you are always included')
+    tables.add_argument('--command-id',help='table: the same id returns the same run instead of starting another')
+    tables.add_argument('--dry-run',action='store_true',help='table: show what would be added; nothing is added')
     upload=project(sub.add_parser('upload',help='Upload a file, a folder, a .zip or an https address: every file it can read is added, and one report says what became of each'))
     upload.add_argument('path',help='The file, folder or .zip file, or an https:// address the deployment fetches')
     upload.add_argument('--project',dest='upload_project',help='The project (default: the configuration\'s)')
@@ -519,6 +534,8 @@ def _journey(args,client):
                     or 'No organisation connection you use or administer.',{'organization_id':args.organization,'connections':rows})
     if args.command=='well-imports':
         return _well_imports(args,client)
+    if args.command=='import':
+        return _table_import(args,client)
     sync=client.sync()
     if args.action=='head':
         head=sync.head()
@@ -654,6 +671,49 @@ def _well_imports(args,client):
     if answer['state'] in PAUSED:
         raise IntegrityConflict('%s: %s Continue with: ophiolite well-imports resume %s' % (answer['words'],answer['reason'] or '',ident))
     return done(args,_result(answer),{'import':answer})
+
+
+def _table_import(args,client):
+    """E87: import table FILE --target T [--map F=C] [--dry-run] | list | status ID | pause ID | resume ID | cancel ID. A
+    start prints its id before the first step; a paused run exits 4 with who paused it."""
+    from .errors import IntegrityConflict
+    from .imports import STOPPED,parse_mapping,result_lines,review_lines
+    imports=client.imports
+    table_only=(args.target,args.map,args.declare,args.well,args.authority,args.sheet,args.header_row,args.delimiter,args.decimal_mark,args.encoding,args.separate,args.audience,args.command_id,args.dry_run)
+    if args.action!='table' and any(table_only):raise Refused('Only import table takes --target, --map, --declare, --well, the reading options, --audience, --command-id or --dry-run.')
+    if args.action=='list':
+        if args.what:raise Refused('import list takes no id.')
+        rows=imports.list()
+        return done(args,'\n'.join('%s  %s (%s): %s' % (r['id'],r.get('key') or '',r['target'],r['words']) for r in rows) or 'No table import in this project.',{'imports':rows})
+    if not args.what:raise Refused('Give the file: ophiolite import table FILE --target well-tops.' if args.action=='table' else 'Give the run id: ophiolite import %s ID (see `ophiolite import list`).' % args.action)
+    if args.action=='table':
+        if not args.target:raise Refused('Say what the table holds with --target: wells, well-tops, deviation-survey, point-set or time-depth.')
+        declared={}
+        for text in args.declare:
+            key,eq,value=text.partition('=')
+            if not (key and eq and value):raise Refused('Give each declaration as KEY=VALUE, for example depth_unit=m.')
+            declared[key.strip()]=value.strip()
+        reading={k:v for k,v in (('sheet',args.sheet),('header_row',args.header_row),('delimiter',args.delimiter),('decimal_mark',args.decimal_mark),('encoding',args.encoding)) if v is not None}
+        def started(answer):
+            if not args.json:print('Import %s started. If it stops, continue with: ophiolite import resume %s' % (answer['id'],answer['id']),flush=True)
+        path=Path(args.what)
+        if not path.is_file():raise Refused('%s is not a file.' % args.what)
+        result=imports.from_table(path,args.target,parse_mapping(args.map) if args.map else None,declarations=declared or None,reading=reading or None,well=args.well,
+                                  separate=args.separate,authority=args.authority,audience=args.audience,command_id=args.command_id,dry_run=args.dry_run,on_start=started)
+        review=result['preview']
+        if args.dry_run:
+            lines=['Dry run, nothing was added.']+(review_lines(review) if review['target']!='wells' else ['{:,} wells to create · {:,} already here · {:,} rows skipped'.format(
+                review['counts']['create'],review['counts']['already_here'],review['counts']['skipped'])])
+            return done(args,'\n'.join(lines),{'preview':review})
+        answer,ident=result['run'],result['run']['id']
+    else:
+        ident,review=args.what,None
+        if args.action in ('status','pause','cancel'):
+            answer=getattr(imports,args.action)(ident);return done(args,'\n'.join(result_lines(answer)),{'import':answer})
+        imports.resume(ident);answer=imports.run(ident)
+    if answer['state'] in STOPPED:
+        raise IntegrityConflict('%s Continue with: ophiolite import resume %s' % (' '.join(result_lines(answer,review)),ident))
+    return done(args,'\n'.join(result_lines(answer,review)),{'import':answer,**({'preview':review} if review else {})})
 
 
 def _exchange(args,client):
@@ -808,7 +868,7 @@ def _main(argv=None):
     if getattr(args,'upload_project',None):config={**config,'project':args.upload_project}  # E55: ophiolite upload --project
     path=args.credentials or credentials_path(config)
     if args.command=='run':return _local_run(config,args.work.resolve())
-    if getattr(args,'dry_run',False) and args.command!='well-imports':return _dry_run(args,config)  # E31: before any credential, network or file write (E42a: an import's dry run is its server preview, which keeps nothing)
+    if getattr(args,'dry_run',False) and args.command not in ('well-imports','import'):return _dry_run(args,config)  # E31: before any credential, network or file write (E42a: an import's dry run is its server preview, which keeps nothing)
     given=supplied_key(args) if args.command=='login' else None
     if given:
         # E25a: saved for later processes; nothing is sent now and the key is never printed.
@@ -844,7 +904,7 @@ def _main(argv=None):
             for item in items:print(json.dumps(item))
             return
         if args.command=='curves':return _curves(args,client)
-        if args.command in ('entities','wells','changes','sources','org-connections','well-imports','story','what-changed','dependents','remake'):return _journey(args,client)
+        if args.command in ('entities','wells','changes','sources','org-connections','well-imports','story','what-changed','dependents','remake','import'):return _journey(args,client)
         if args.command=='checks':return _checks(args,client)
         if args.command in ('check','get','send'):return _exchange(args,client)
         if args.command=='upload':return _upload(args,client)
