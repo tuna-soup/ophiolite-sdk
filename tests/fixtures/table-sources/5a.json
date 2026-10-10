@@ -1,0 +1,214 @@
+{
+ "export": {
+  "manifest": {
+   "bytes": 856,
+   "contract": {
+    "capabilities": {
+     "native_operation_telemetry": "not-assessed",
+     "read": true,
+     "write": "requires-separate-destination-grant"
+    },
+    "distribution": {
+     "audience": [],
+     "redistribution_permitted": false,
+     "retained": false,
+     "retention_permitted": false
+    },
+    "fidelity": {
+     "assessor": "ophiolite-connectors",
+     "limitations": [],
+     "losses": [],
+     "method": "connector-profile-assessment/1: the summary and preview this connector derives are compared with the exact representation read; the representation itself is retained byte for byte",
+     "schema": "ophiolite.fidelity/1",
+     "scope": "source-representation",
+     "state": "assessed-no-loss",
+     "version": "1"
+    },
+    "history": {
+     "guarantee": "Exact reads depend on continued source availability and authorization.",
+     "mode": "current-only",
+     "retained": false
+    },
+    "identity": {
+     "authority": "nlog",
+     "key": "production",
+     "profile": "table/1",
+     "revision": "338535d6d89adb761519d588407d7a876abde88a545f31bfa710c4fa218a5072"
+    },
+    "mapping": {
+     "destination_schema": null,
+     "scientific_profile": "ophiolite.table/1",
+     "source_schema": "f863efa9e08eddf19f58924a0cce6cdd2ad509affc6cd3c1ae44a310d1cb81e8",
+     "version": "1"
+    },
+    "representation": {
+     "media_type": "application/json",
+     "profile": "table/1",
+     "sha256": "338535d6d89adb761519d588407d7a876abde88a545f31bfa710c4fa218a5072"
+    },
+    "schema": "ophiolite.connector-semantics/1"
+   },
+   "interpretation": null,
+   "losses": [],
+   "media_type": "application/json",
+   "metadata": {
+    "columns": [
+     {
+      "comment": null,
+      "db_type": "text",
+      "logical": "text",
+      "name": "well_code",
+      "nullable": true,
+      "read": true
+     },
+     {
+      "comment": null,
+      "db_type": "date",
+      "logical": "date",
+      "name": "month",
+      "nullable": true,
+      "read": true
+     },
+     {
+      "comment": null,
+      "db_type": "numeric(12,3)",
+      "logical": "decimal",
+      "name": "oil_m3",
+      "nullable": true,
+      "read": true
+     },
+     {
+      "comment": null,
+      "db_type": "numeric",
+      "logical": "decimal",
+      "name": "gas_km3",
+      "nullable": true,
+      "read": true
+     },
+     {
+      "comment": null,
+      "db_type": "text",
+      "logical": "text",
+      "name": "remarks",
+      "nullable": true,
+      "read": true
+     }
+    ],
+    "declaration_version": 1,
+    "declarations": {
+     "columns": {
+      "oil_m3": {
+       "description": null,
+       "missing": null,
+       "unit": "m3"
+      }
+     },
+     "coordinates": null
+    },
+    "encoding": "table-encoding/1",
+    "key": [
+     "well_code",
+     "month"
+    ],
+    "kind": "table",
+    "name": "production",
+    "not_read": [],
+    "null_counts": {
+     "gas_km3": 1,
+     "month": 0,
+     "oil_m3": 0,
+     "remarks": 2,
+     "well_code": 0
+    },
+    "preview_rows": [
+     {
+      "gas_km3": "310.5",
+      "month": "2026-01-01",
+      "oil_m3": "1520.250",
+      "remarks": null,
+      "well_code": "NL-001"
+     },
+     {
+      "gas_km3": "305.0",
+      "month": "2026-02-01",
+      "oil_m3": "1498.000",
+      "remarks": "workover",
+      "well_code": "NL-001"
+     },
+     {
+      "gas_km3": null,
+      "month": "2026-01-01",
+      "oil_m3": "87.125",
+      "remarks": null,
+      "well_code": "NL-002"
+     }
+    ],
+    "quantities": {},
+    "representation_notes": [
+     "Values as table-encoding/1 writes them: integers and decimals as exact text, temporals as canonical text"
+    ],
+    "samples": 3,
+    "schema_digest": "f863efa9e08eddf19f58924a0cce6cdd2ad509affc6cd3c1ae44a310d1cb81e8",
+    "unresolved": []
+   },
+   "reference": {
+    "authority": "nlog",
+    "key": "production",
+    "profile": "table/1",
+    "revision": "338535d6d89adb761519d588407d7a876abde88a545f31bfa710c4fa218a5072"
+   },
+   "reviewed_meaning_digest": "5c22122f67a7c9e4686d3642cd408c2f04f9186cb084969c696aba786495c067",
+   "schema": "ophiolite.source-snapshot/1",
+   "scientific_validation": "source-declared; review required",
+   "sha256": "338535d6d89adb761519d588407d7a876abde88a545f31bfa710c4fa218a5072"
+  },
+  "payload_base64": "eyJjb2x1bW5zIjpbeyJjb21tZW50IjpudWxsLCJkYl90eXBlIjoidGV4dCIsImxvZ2ljYWwiOiJ0ZXh0IiwibmFtZSI6IndlbGxfY29kZSIsIm51bGxhYmxlIjp0cnVlLCJyZWFkIjp0cnVlfSx7ImNvbW1lbnQiOm51bGwsImRiX3R5cGUiOiJkYXRlIiwibG9naWNhbCI6ImRhdGUiLCJuYW1lIjoibW9udGgiLCJudWxsYWJsZSI6dHJ1ZSwicmVhZCI6dHJ1ZX0seyJjb21tZW50IjpudWxsLCJkYl90eXBlIjoibnVtZXJpYygxMiwzKSIsImxvZ2ljYWwiOiJkZWNpbWFsIiwibmFtZSI6Im9pbF9tMyIsIm51bGxhYmxlIjp0cnVlLCJyZWFkIjp0cnVlfSx7ImNvbW1lbnQiOm51bGwsImRiX3R5cGUiOiJudW1lcmljIiwibG9naWNhbCI6ImRlY2ltYWwiLCJuYW1lIjoiZ2FzX2ttMyIsIm51bGxhYmxlIjp0cnVlLCJyZWFkIjp0cnVlfSx7ImNvbW1lbnQiOm51bGwsImRiX3R5cGUiOiJ0ZXh0IiwibG9naWNhbCI6InRleHQiLCJuYW1lIjoicmVtYXJrcyIsIm51bGxhYmxlIjp0cnVlLCJyZWFkIjp0cnVlfV0sImRlY2xhcmF0aW9ucyI6eyJjb2x1bW5zIjp7Im9pbF9tMyI6eyJkZXNjcmlwdGlvbiI6bnVsbCwibWlzc2luZyI6bnVsbCwidW5pdCI6Im0zIn19LCJjb29yZGluYXRlcyI6bnVsbH0sImVuY29kaW5nIjoidGFibGUtZW5jb2RpbmcvMSIsImtleSI6WyJ3ZWxsX2NvZGUiLCJtb250aCJdLCJyb3dzIjpbWyJOTC0wMDEiLCIyMDI2LTAxLTAxIiwiMTUyMC4yNTAiLCIzMTAuNSIsbnVsbF0sWyJOTC0wMDEiLCIyMDI2LTAyLTAxIiwiMTQ5OC4wMDAiLCIzMDUuMCIsIndvcmtvdmVyIl0sWyJOTC0wMDIiLCIyMDI2LTAxLTAxIiwiODcuMTI1IixudWxsLG51bGxdXSwic2NoZW1hIjoib3BoaW9saXRlLnRhYmxlLzEifQ=="
+ },
+ "selection": {
+  "access_health": {
+   "checked": 1.0,
+   "message": "Access succeeded",
+   "state": "current"
+  },
+  "asset_identity": "fedbb149bd33dda058f782c74b3ece8f82681057145eafc3d5cff508f7e7483b",
+  "authority": "nlog",
+  "connection_fingerprint": "6515d2fafcb6f90b52b498e51d522092ba12ba3b8f9b75228b7d078e5659f5d5",
+  "connection_id": "nlog",
+  "display": {
+   "held_as": "Linked",
+   "last_checked": 1.0,
+   "source": "NLOG provinces",
+   "status": "Up to date",
+   "type": "Table from a SQL database",
+   "updates": "Keeps up to date",
+   "version": {
+    "at": null,
+    "by": null,
+    "of": null,
+    "ordinal": null,
+    "source_version": null
+   }
+  },
+  "failures": 0,
+  "generation": 1,
+  "id": "c51ee6089585420e8e3a7d01b4c59cf00b1aaca0fbae81f4f2043c6e3911e474",
+  "interpretation": null,
+  "key": "production",
+  "last_checked": 1.0,
+  "mode": "follow",
+  "name": "production",
+  "next_check": 1.0,
+  "owner": "alice",
+  "profile": "table/1",
+  "project_id": "p",
+  "publication_policy": "explicit destination required; upstream write unsupported",
+  "reader_identity": "f604d9f9d162d887cf7d288e8f8148b8c459d1745e8ff9ed821f8f3320c4a533",
+  "reference": {
+   "authority": "nlog",
+   "key": "production",
+   "profile": "table/1",
+   "revision": "338535d6d89adb761519d588407d7a876abde88a545f31bfa710c4fa218a5072"
+  },
+  "state": "current"
+ }
+}

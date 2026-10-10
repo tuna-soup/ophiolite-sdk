@@ -1,0 +1,20 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "table/1",
+  "kind": "source",
+  "lifecycle": "preview",
+  "display_name": "Table from a SQL database",
+  "description": "Any approved table read as its columns and rows, with the person's declarations; current values only (ADR 0020).",
+  "connector": {
+    "scientific_profile": "ophiolite.table/1",
+    "source_schema": "schema-digest",
+    "mapping_version": "table-declaration/1",
+    "history": "current-only"
+  },
+  "payload_schema": "ophiolite.table/1",
+  "role": "artifact",
+  "media_types": [
+    "application/json"
+  ],
+  "table_target": "ophiolite.table-target/table/1"
+}

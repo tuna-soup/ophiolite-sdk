@@ -312,6 +312,8 @@ def ts_type(schema, path='$', indent=0):
         if 'properties' not in schema:
             if schema.get('additionalProperties') is True:  # a free-form JSON object (declared method parameters)
                 return 'Record<string, unknown>'
+            if isinstance(schema.get('additionalProperties'), dict):  # E50b1: a map by name (a table's per-column declarations)
+                return 'Record<string, ' + ts_type(schema['additionalProperties'], f'{path}/additionalProperties', indent) + '>'
             raise Unsupported(f'{path}: object without properties')
         extra = schema.get('additionalProperties', None)
         if extra not in (None, False):

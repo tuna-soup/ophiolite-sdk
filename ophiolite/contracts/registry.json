@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.26.0",
+  "version": "1.27.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -188,6 +188,14 @@
       "description": "A well's location as read: the stored point and CRS, the exact revision (and row) it came from and the association tying it to the well (E29)."
     },
     {
+      "id": "ophiolite.table/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/table-payload-schema.json",
+      "title": "Table",
+      "description": "A table from a connected SQL database: every column with its database and logical type, the declared key, the person's declarations and the rows read, in canonical order (ADR 0020, E50b1)."
+    },
+    {
       "id": "ophiolite.wavelet/1",
       "version": "1.0.0",
       "lifecycle": "preview",
@@ -340,6 +348,14 @@
       "description": "Well records read through a reviewed customer mapping from a SQL table; current values only.",
       "lifecycle": "preview",
       "path": "profiles/v1/sql-wells.json"
+    },
+    {
+      "id": "table/1",
+      "kind": "source",
+      "display_name": "Table from a SQL database",
+      "description": "Any approved table read as its columns and rows, with the person's declarations; current values only (ADR 0020).",
+      "lifecycle": "preview",
+      "path": "profiles/v1/table.json"
     },
     {
       "id": "edited-wells/1",
@@ -654,6 +670,12 @@
       "schema": "ophiolite.scientific-asset/1"
     },
     {
+      "id": "ophiolite.fixture/tables/table-vectors.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/table-vectors.json",
+      "title": "ADR 0020 table/1 digest vectors: formatter goldens and per-engine payloads with their SHA-256 (E50b1)"
+    },
+    {
       "id": "ophiolite.fixture/assets/capture.json/1",
       "kind": "fixture",
       "path": "assets/v1/fixtures/capture.json",
@@ -863,6 +885,12 @@
       "title": "PostgreSQL well headers: types, directions, change detection, losses and qualification"
     },
     {
+      "id": "ophiolite.connector-capability/postgresql-tables/1",
+      "kind": "capability",
+      "path": "connectors/v1/capabilities/postgresql-tables.json",
+      "title": "PostgreSQL tables: types, directions, change detection, losses and qualification"
+    },
+    {
       "id": "ophiolite.connector-capability/qgis/1",
       "kind": "capability",
       "path": "connectors/v1/capabilities/qgis.json",
@@ -885,6 +913,12 @@
       "kind": "capability",
       "path": "connectors/v1/capabilities/sqlite-wells.json",
       "title": "SQLite well locations: types, directions, change detection, losses and qualification"
+    },
+    {
+      "id": "ophiolite.connector-capability/sqlite-tables/1",
+      "kind": "capability",
+      "path": "connectors/v1/capabilities/sqlite-tables.json",
+      "title": "SQLite tables: types, directions, change detection, losses and qualification"
     },
     {
       "id": "ophiolite.connector-capability/typed-upload/1",

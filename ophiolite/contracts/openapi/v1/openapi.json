@@ -5,7 +5,7 @@
     "version": "1.0.0-pilot",
     "description": "One public API for every project operation. Three credential kinds reach it: the browser session (opaque HttpOnly cookie plus the X-CSRF-Token proof and, on non-GET requests, the exact Origin), a project-scoped delegate lasting at most five minutes (Bearer oph_api_..., parent session and current native permissions remain mandatory), and a browser-approved provider grant (Bearer provider token plus X-Ophiolite-Application-Grant; capability 1: the scientific read resources and the applications route within its read/write scopes; capability 3 adds reading wells, wellbores and lineage and the LAS upload routes). A request that carries an Authorization header is a machine request and is refused with MACHINE_AUTH_REQUIRED when a cookie or Origin travels with it. Scope and capability are ceilings; every operation runs the same native permission checks whoever calls it. Not a stable SDK or unattended service-account contract.",
     "x-ophiolite-contracts": {
-      "registry_version": "1.26.0",
+      "registry_version": "1.27.0",
       "index": "/api/v1/contracts",
       "served_profiles": [
         "las2/1",
@@ -44339,6 +44339,18 @@
                       "title": "Asset Identity",
                       "type": "string"
                     },
+                    "reader_identity": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Reader Identity"
+                    },
                     "authority": {
                       "title": "Authority",
                       "type": "string"
@@ -44803,6 +44815,18 @@
                     "asset_identity": {
                       "title": "Asset Identity",
                       "type": "string"
+                    },
+                    "reader_identity": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Reader Identity"
                     },
                     "mode": {
                       "title": "Mode",
@@ -49733,6 +49757,18 @@
                       "title": "Asset Identity",
                       "type": "string"
                     },
+                    "reader_identity": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Reader Identity"
+                    },
                     "mode": {
                       "title": "Mode",
                       "type": "string"
@@ -50582,6 +50618,18 @@
                     "asset_identity": {
                       "title": "Asset Identity",
                       "type": "string"
+                    },
+                    "reader_identity": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Reader Identity"
                     },
                     "mode": {
                       "title": "Mode",
@@ -53933,6 +53981,18 @@
                       "title": "Asset Identity",
                       "type": "string"
                     },
+                    "reader_identity": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Reader Identity"
+                    },
                     "authority": {
                       "title": "Authority",
                       "type": "string"
@@ -55131,6 +55191,18 @@
                       "title": "Asset Identity",
                       "type": "string"
                     },
+                    "reader_identity": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Reader Identity"
+                    },
                     "mode": {
                       "title": "Mode",
                       "type": "string"
@@ -55624,6 +55696,18 @@
                     "asset_identity": {
                       "title": "Asset Identity",
                       "type": "string"
+                    },
+                    "reader_identity": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Reader Identity"
                     },
                     "authority": {
                       "title": "Authority",
@@ -56557,6 +56641,18 @@
                       "title": "Asset Identity",
                       "type": "string"
                     },
+                    "reader_identity": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Reader Identity"
+                    },
                     "authority": {
                       "title": "Authority",
                       "type": "string"
@@ -56998,6 +57094,18 @@
                     "asset_identity": {
                       "title": "Asset Identity",
                       "type": "string"
+                    },
+                    "reader_identity": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Reader Identity"
                     },
                     "authority": {
                       "title": "Authority",
@@ -57464,9 +57572,12 @@
                     },
                     {
                       "$ref": "#/components/schemas/TableSchema"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DataTableSchema"
                     }
                   ],
-                  "description": "sources/schema: a built-in profile's declared kinds, or a SQL table's inspected schema and mappings.",
+                  "description": "sources/schema: a built-in profile's declared kinds, a SQL table's inspected schema and mappings, or (profile\ntable/1) the table read as a table with the project's declarations.",
                   "title": "SourceSchema"
                 }
               }
@@ -81412,6 +81523,123 @@
         "title": "CurveInspection",
         "type": "object"
       },
+      "DataTableSchema": {
+        "additionalProperties": false,
+        "description": "E50b1: a SQL table read as `table/1` (ADR 0020): every column with its logical type or not read, a sample with\nintegers as text, the suggested key, and the project's saved declarations.",
+        "properties": {
+          "profile": {
+            "const": "table/1",
+            "title": "Profile",
+            "type": "string"
+          },
+          "columns": {
+            "description": "In table order: name, db_type, logical (null when not read), nullable, comment, read; domain_base for a PostgreSQL domain.",
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Columns",
+            "type": "array"
+          },
+          "suggested_key": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The primary key, only suggested; the person declares the key.",
+            "title": "Suggested Key"
+          },
+          "row_count": {
+            "title": "Row Count",
+            "type": "integer"
+          },
+          "sample_rows": {
+            "description": "The first ten rows by read column, as table-encoding/1 writes them (integers and decimals as text).",
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Sample Rows",
+            "type": "array"
+          },
+          "schema_digest": {
+            "title": "Schema Digest",
+            "type": "string"
+          },
+          "not_read": {
+            "description": "The columns outside the eight logical types: their values are not delivered and not in the revision.",
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Not Read",
+            "type": "array"
+          },
+          "limits": {
+            "title": "Limits",
+            "type": "string"
+          },
+          "declaration": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The project's latest table declaration, or null.",
+            "title": "Declaration"
+          },
+          "versions": {
+            "description": "Every saved version, newest first.",
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Versions",
+            "type": "array"
+          },
+          "coordinate_systems": {
+            "description": "The systems a declaration may name for an x and a y column.",
+            "items": {
+              "$ref": "#/components/schemas/CoordinateSystem"
+            },
+            "title": "Coordinate Systems",
+            "type": "array"
+          },
+          "target": {
+            "const": "table",
+            "description": "The table type the declaration screen renders (ophiolite.table-target/table/1).",
+            "title": "Target",
+            "type": "string"
+          }
+        },
+        "required": [
+          "profile",
+          "columns",
+          "suggested_key",
+          "row_count",
+          "sample_rows",
+          "schema_digest",
+          "not_read",
+          "limits",
+          "declaration",
+          "versions",
+          "coordinate_systems",
+          "target"
+        ],
+        "title": "DataTableSchema",
+        "type": "object"
+      },
       "DeclaredField": {
         "additionalProperties": false,
         "description": "E55: one context field a person states for an upload kind; nothing states it for them (\"Not stated\").",
@@ -90309,6 +90537,18 @@
           "asset_identity": {
             "title": "Asset Identity",
             "type": "string"
+          },
+          "reader_identity": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Reader Identity"
           },
           "mode": {
             "title": "Mode",

@@ -164,6 +164,11 @@
       "osdu": "none: a text format; its normalized profile is ophiolite.time-depth/1",
       "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
       "normalized_profile": "ophiolite.time-depth/1"
+    },
+    {
+      "profile": "table/1",
+      "osdu": "none: a generic table from a connected database; its meaning is the person's declarations, and no OSDU kind is a generic table",
+      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
     }
   ],
   "licences": "The standards are referenced by name only; no schema text is copied."

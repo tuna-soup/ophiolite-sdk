@@ -248,12 +248,12 @@ class AsyncSource:
 
     def __repr__(self):return 'AsyncSource(%r, %s, %s, revision %s)' % (self.name,self.profile,self.state,self.revision[:12])
 
-    async def _run(self,name,expect_revision):
+    async def _run(self,name,expect_revision,**options):
         from .sources import Source
-        def operation():return getattr(Source(_ApplicationDriver(self._client),self.document),name)(expect_revision)
+        def operation():return getattr(Source(_ApplicationDriver(self._client),self.document),name)(expect_revision,**options)
         return await _complete(anyio.to_thread.run_sync(operation,abandon_on_cancel=False))
 
-    async def read(self,expect_revision=None):return await self._run('read',expect_revision)
+    async def read(self,expect_revision=None,require_all_columns=False):return await self._run('read',expect_revision,require_all_columns=require_all_columns)
 
     async def describe(self,expect_revision=None):return await self._run('describe',expect_revision)
 

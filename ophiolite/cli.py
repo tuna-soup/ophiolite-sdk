@@ -9,6 +9,7 @@ from pathlib import Path
 import subprocess
 import uuid
 import sys
+import warnings
 from importlib.resources import files
 from .errors import Refused
 
@@ -204,6 +205,7 @@ def parser():
     sources.add_argument('--expect-revision',help='describe/read: refuse (exit 4, nothing written) unless this is the revision returned')
     sources.add_argument('--out',type=Path,help='read: write the rows to this .csv or .json file instead of standard output. The file is your own copy: it is not shared, kept up to date or checked again')
     sources.add_argument('--force',action='store_true',help='read --out: replace an existing file')
+    sources.add_argument('--require-all-columns',action='store_true',help='read: refuse (nothing written) when a column of the table is not read')
     orgs=project(sub.add_parser('org-connections',help="Your organisation's database connections that you use or administer, with your own readiness"))
     orgs.add_argument('action',choices=['list']);orgs.add_argument('--organization',required=True,help='The organisation id')
     # E94: how a result was made, what changed, what depends on it, and making it again
@@ -450,24 +452,30 @@ def _journey(args,client):
 def _sources(args,client):
     """E50a: sources list | describe ID | read ID (--original, --expect-revision, --out FILE [--force])."""
     if args.action=='list':
-        if args.id or args.original or args.expect_revision or args.out or args.force:raise Refused('sources list takes no id or read options.')
+        if args.id or args.original or args.expect_revision or args.out or args.force or args.require_all_columns:raise Refused('sources list takes no id or read options.')
         from .models.api import SourceSelectionsPage
         from .sources import _checked
         rows=_checked(SourceSelectionsPage,client._post('sources','list',{}),'source listing')['selections']
         return done(args,'\n'.join('%s  %s (%s): %s' % (r['id'],r['name'],r['profile'],r['state']) for r in rows) or 'No source selection of yours in this project.',{'selections':rows})
     if not args.id:raise Refused('Give the selection id: ophiolite sources %s ID (see `ophiolite sources list`).' % args.action)
     if args.action=='describe':
-        if args.original or args.out or args.force:raise Refused('describe takes only --expect-revision.')
-        described=client.source(args.id).describe(args.expect_revision).to_dict()
+        if args.original or args.out or args.force or args.require_all_columns:raise Refused('describe takes only --expect-revision.')
+        with warnings.catch_warnings():  # the coverage sentence below says it once
+            warnings.simplefilter('ignore',UserWarning)
+            described=client.source(args.id).describe(args.expect_revision).to_dict()
         text='%s: %d rows, %d columns (%s), %s, revision %s' % (described['name'],described['row_count'],len(described['columns']),
               ', '.join(c['name'] for c in described['columns']),described['crs'],described['revision'])
+        if 'coverage' in described:text+='\n'+described['coverage']
         return done(args,text,{'source':described})
     out=args.out
     if out is not None:
         if out.suffix.lower() not in ('.csv','.json'):raise Refused('Write --out to a .csv or .json file.')
         if out.exists() and not args.force:raise Refused('%s exists; add --force to replace it.' % out)
     elif args.force:raise Refused('--force is for --out.')
-    snapshot=client.source(args.id).read(args.expect_revision)
+    with warnings.catch_warnings(record=True) as said:  # E50b1: a partial read's line goes to standard error, never into the rows
+        warnings.simplefilter('always',UserWarning)
+        snapshot=client.source(args.id).read(args.expect_revision,require_all_columns=args.require_all_columns)
+    for warning in said:sys.stderr.write(str(warning.message)+'\n')
     columns=snapshot.columns if args.original else snapshot.mapped_columns()
     rows=snapshot.records(original=args.original)
     about={'id':snapshot.id,'name':snapshot.name,'profile':snapshot.profile,'revision':snapshot.revision,'sha256':snapshot.sha256,'crs':snapshot.crs,

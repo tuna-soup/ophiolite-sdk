@@ -1,0 +1,44 @@
+{
+  "schema": "ophiolite.connector-capability/1",
+  "id": "sqlite-tables",
+  "display_name": "SQLite tables",
+  "kind": "source",
+  "summary": "A gateway-readable SQLite file's approved tables read as they are, with the person's declarations; any table, not only wells.",
+  "host": {
+    "name": "SQLite",
+    "versions": [
+      "3"
+    ],
+    "os": [
+      "linux",
+      "macos"
+    ]
+  },
+  "routes": [
+    {
+      "profile": "table/1",
+      "data": "Any table, as its columns and rows",
+      "direction": "read",
+      "exact_old_revisions": "unavailable",
+      "change_detection": "polling",
+      "losses": [
+        "Columns of types outside the eight logical types are listed as not read; their values are not delivered and not in the revision",
+        "Declared units, descriptions, missing-value markers and coordinates are annotations; no value is converted",
+        "SQLite NUMERIC and DECIMAL columns, and columns without a declared type, are not read",
+        "A table is read once inside one read-only snapshot, up to 100,000 rows, 64 MiB and 128 columns"
+      ],
+      "unsupported": [
+        "writes",
+        "files outside the gateway allowlist"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    }
+  ],
+  "redistribution": "Ophiolite source in this repository; no third-party runtime needed.",
+  "example": null
+}

@@ -3,8 +3,11 @@
  "id": "ophiolite.table-target/table/1",
  "target": "table",
  "display_name": "Table",
- "description": "Any table kept as its columns, each with an optional unit, quantity and missing-value marker.",
+ "description": "Any table kept as its columns, each with an optional description, unit, quantity and missing-value marker, and optionally a key and its x and y columns.",
  "lands_on": [],
+ "connected_profiles": [
+  "table/1"
+ ],
  "pending": {
   "epic": "E58b",
   "profiles": []
@@ -17,13 +20,59 @@
   "missing_marker": false,
   "retain_extras": true,
   "unique_columns": true,
-  "other_columns": "retained"
+  "other_columns": "retained",
+  "key": true
  },
  "ui": {
   "captions": true
  },
- "fields": [],
+ "fields": [
+  {
+   "name": "x",
+   "label": "X coordinate",
+   "noun": "X",
+   "kind": "coordinate",
+   "axis": "x",
+   "required": false,
+   "blank": "null",
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "canonical": null,
+   "aliases": [
+    "x",
+    "easting",
+    "longitude"
+   ]
+  },
+  {
+   "name": "y",
+   "label": "Y coordinate",
+   "noun": "Y",
+   "kind": "coordinate",
+   "axis": "y",
+   "required": false,
+   "blank": "null",
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "canonical": null,
+   "aliases": [
+    "y",
+    "northing",
+    "latitude"
+   ]
+  }
+ ],
  "column_rows": [
+  {
+   "name": "description",
+   "label": "Description",
+   "kind": "text",
+   "max_length": 128
+  },
   {
    "name": "unit",
    "label": "Unit",
@@ -43,5 +92,28 @@
    "max_length": 40
   }
  ],
- "declarations": []
+ "declarations": [
+  {
+   "name": "crs",
+   "label": "Coordinate system of X and Y",
+   "noun": "coordinate reference",
+   "kind": "crs",
+   "accepts": "menu-only",
+   "required": false,
+   "default": null,
+   "prefill": [
+    "declared",
+    "previously-reviewed"
+   ],
+   "applies_to": [
+    "x",
+    "y"
+   ],
+   "required_when": [
+    "x",
+    "y"
+   ],
+   "values": []
+  }
+ ]
 }

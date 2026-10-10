@@ -69,6 +69,7 @@ class SourceRevisionUnavailable(Unavailable):code='SOURCE_REVISION_UNAVAILABLE'
 class SourceDetached(Unavailable):code='SOURCE_DETACHED'  # never retried: a detached selection stays detached until selected again
 class SourceChecksumMismatch(VerificationFailed):code='source-checksum-mismatch'
 class SourceNotSupported(Refused):code='source-not-supported'
+class SourceSignInRowsDiffer(IntegrityConflict):code='SOURCE_SIGN_IN_ROWS_DIFFER'  # E50b1: your sign-in returns other rows than the reviewed revision
 
 class SourceRevisionDiffers(IntegrityConflict):
     code='source-revision-differs'

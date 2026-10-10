@@ -33,7 +33,8 @@ class Generator:
         unknown = schema.keys()-KEYWORDS
         if unknown: raise ValueError(path+': unsupported keyword '+sorted(unknown)[0])
         if isinstance(schema.get('additionalProperties'), dict):
-            raise ValueError(path+': schema-valued additionalProperties unsupported')
+            if schema.get('properties'): raise ValueError(path+': schema-valued additionalProperties unsupported')
+            self.scan(schema['additionalProperties'],path+'/additionalProperties')  # E50b1: a map keyed by name (table/1 declarations)
         for key in ('$defs','properties'):
             for field, child in schema.get(key, {}).items(): self.scan(child,path+'/'+key+'/'+field)
         if 'items' in schema: self.scan(schema['items'],path+'/items')
@@ -57,7 +58,9 @@ class Generator:
             prefix = '#/$defs/'
             if not reference.startswith(prefix): raise ValueError('Unsupported model reference: '+reference)
             key = reference[len(prefix):].replace('~1','/').replace('~0','~')
-            return self.model(key,self.documents[document]['$defs'][key],document)
+            definition = self.documents[document]['$defs'][key]
+            if definition.get('type') != 'object': return self.expression(definition,name(key),document)  # E50b1: a named union is inlined
+            return self.model(key,definition,document)
         if 'const' in schema: expression = 'Literal['+repr(schema['const'])+']'
         elif 'enum' in schema: expression = 'Literal['+', '.join(repr(x) for x in schema['enum'])+']'
         elif 'anyOf' in schema or 'oneOf' in schema:
@@ -69,6 +72,8 @@ class Generator:
                 expression = ' | '.join(self.expression({**schema,'type':t},hint,document) for t in kind)
                 return expression
             if kind == 'object' and not schema.get('properties') and schema.get('additionalProperties') is True: expression = 'dict[str, Any]'  # a free-form JSON object
+            elif kind == 'object' and not schema.get('properties') and isinstance(schema.get('additionalProperties'), dict):
+                expression = 'dict[str, '+self.expression(schema['additionalProperties'],hint+'Value',document)+']'
             elif kind == 'object': expression = self.model(hint,schema,document)
             elif kind == 'array': expression = 'list['+self.expression(schema['items'],hint+'Item',document)+']'
             elif kind in ('string','number','integer','boolean','null'):
@@ -88,7 +93,8 @@ class Generator:
         for path, schema in documents.items():
             self.scan(schema,path)
             self.model(schema['title'],schema,path)
-            for key, definition in schema.get('$defs',{}).items(): self.model(key,definition,path)
+            for key, definition in schema.get('$defs',{}).items():
+                if definition.get('type') == 'object': self.model(key,definition,path)
         emitted = {}; pending = list(self.classes)
         while pending:
             model_name = pending.pop(0); schema = self.classes[model_name]; document = self.origins[model_name]

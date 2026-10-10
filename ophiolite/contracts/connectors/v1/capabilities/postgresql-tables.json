@@ -1,0 +1,44 @@
+{
+  "schema": "ophiolite.connector-capability/1",
+  "id": "postgresql-tables",
+  "display_name": "PostgreSQL tables",
+  "kind": "source",
+  "summary": "Operator-approved PostgreSQL tables read as they are, with the person's declarations; any table, not only wells.",
+  "host": {
+    "name": "PostgreSQL",
+    "versions": [
+      "16"
+    ],
+    "os": [
+      "linux"
+    ]
+  },
+  "routes": [
+    {
+      "profile": "table/1",
+      "data": "Any table, as its columns and rows",
+      "direction": "read",
+      "exact_old_revisions": "unavailable",
+      "change_detection": "polling",
+      "losses": [
+        "Columns of types outside the eight logical types are listed as not read; their values are not delivered and not in the revision",
+        "Declared units, descriptions, missing-value markers and coordinates are annotations; no value is converted",
+        "A table is read once inside one read-only snapshot, up to 100,000 rows, 64 MiB and 128 columns"
+      ],
+      "unsupported": [
+        "writes",
+        "change data capture",
+        "paging past the bounds",
+        "schema changes without a new reviewed declaration"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    }
+  ],
+  "redistribution": "Ophiolite source; the PostgreSQL server is customer-operated.",
+  "example": null
+}

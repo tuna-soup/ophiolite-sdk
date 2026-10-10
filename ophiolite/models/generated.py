@@ -808,6 +808,39 @@ class AssetSummary(Contract):
     allowed_operations: Annotated[list[Literal['read', 'export', 'use-as-input']], Field(max_length=3)] = Field(...)
     display: Display | None = Field(None)
 
+class Table(Contract):
+    schema_: Literal['ophiolite.table/1'] = Field(..., alias='schema')
+    encoding: Literal['table-encoding/1'] = Field(...)
+    columns: Annotated[list[TableReadColumn | TableNotReadColumn], Field(min_length=1, max_length=128)] = Field(...)
+    key: None | Annotated[list[Annotated[str, Field(min_length=1, max_length=63)]], Field(min_length=1, max_length=128)] = Field(...)
+    declarations: TableDeclarations = Field(...)
+    rows: Annotated[list[list[None | str | float | bool]], Field(max_length=100000)] = Field(...)
+
+class TableReadColumn(Contract):
+    name: Annotated[str, Field(min_length=1, max_length=63)] = Field(...)
+    db_type: Annotated[str, Field(max_length=256)] = Field(...)
+    logical: Literal['text', 'integer', 'float', 'decimal', 'boolean', 'date', 'timestamp', 'timestamptz'] = Field(...)
+    nullable: bool = Field(...)
+    comment: None | str = Field(...)
+    read: Literal[True] = Field(...)
+
+class TableNotReadColumn(Contract):
+    name: Annotated[str, Field(min_length=1, max_length=63)] = Field(...)
+    db_type: Annotated[str, Field(max_length=256)] = Field(...)
+    logical: None = Field(...)
+    nullable: bool = Field(...)
+    comment: None | str = Field(...)
+    read: Literal[False] = Field(...)
+
+class TableDeclarations(Contract):
+    columns: dict[str, TableAnnotation] = Field(...)
+    coordinates: None | TableDeclarationsCoordinates1 = Field(...)
+
+class TableAnnotation(Contract):
+    description: None | Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+    unit: None | Annotated[str, Field(min_length=1, max_length=32)] = Field(...)
+    missing: None | Annotated[str, Field(min_length=1, max_length=40)] = Field(...)
+
 class TimeDepth(Contract):
     representation: Literal['normalized'] = Field(...)
     source: Reference = Field(...)
@@ -1264,13 +1297,14 @@ class TableTarget(Contract):
     display_name: Annotated[str, Field(min_length=1, max_length=60)] = Field(...)
     description: Annotated[str, Field(min_length=1, max_length=240)] = Field(...)
     lands_on: list[Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$')]] = Field(...)
+    connected_profiles: list[Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$')]] = Field(None)
     pending: None | Pending = Field(...)
     standards: StandardsProfile | StandardsNone = Field(...)
     splits_by: None | Annotated[str, Field(pattern='^[a-z][a-z0-9_]{0,31}$')] = Field(...)
     settings: Settings = Field(...)
     ui: Ui = Field(...)
     fields: Annotated[list[TextField | ReferenceField | NumberField | CoordinateField], Field(max_length=16)] = Field(...)
-    column_rows: Annotated[list[ColumnRow], Field(max_length=3)] = Field(...)
+    column_rows: Annotated[list[ColumnRow], Field(max_length=4)] = Field(...)
     declarations: Annotated[list[Declaration], Field(max_length=8)] = Field(...)
 
 class Pending(Contract):
@@ -1288,6 +1322,7 @@ class Settings(Contract):
     retain_extras: bool = Field(...)
     unique_columns: bool = Field(...)
     other_columns: Literal['refused', 'not-read', 'retained'] = Field(...)
+    key: bool = Field(None)
 
 class Ui(Contract):
     captions: bool = Field(...)
@@ -1367,7 +1402,7 @@ class Multiple(Contract):
     name_pattern: Annotated[str, Field(min_length=1, max_length=120)] = Field(...)
 
 class ColumnRow(Contract):
-    name: Literal['unit', 'quantity', 'missing'] = Field(...)
+    name: Literal['description', 'unit', 'quantity', 'missing'] = Field(...)
     label: Annotated[str, Field(min_length=1, max_length=60)] = Field(...)
     kind: Literal['choice', 'text'] = Field(...)
     from_: Literal['ophiolite.quantities/1'] = Field(None, alias='from')
@@ -1390,8 +1425,14 @@ class Declaration(Contract):
     default: None | Annotated[str, Field(min_length=1, max_length=40)] = Field(...)
     prefill: Annotated[list[Literal['declared', 'previously-reviewed', 'project-default', 'inferred']], Field(max_length=4)] = Field(...)
     applies_to: list[Annotated[str, Field(pattern='^[a-z][a-z0-9_]{0,31}$')]] = Field(...)
+    required_when: Annotated[list[Annotated[str, Field(pattern='^[a-z][a-z0-9_]{0,31}$')]], Field(min_length=1)] = Field(None)
     values: Annotated[list[Value], Field(max_length=24)] = Field(...)
     osdu: Annotated[str, Field(min_length=1, max_length=120)] = Field(None)
+
+class TableDeclarationsCoordinates1(Contract):
+    x: Annotated[str, Field(min_length=1, max_length=63)] = Field(...)
+    y: Annotated[str, Field(min_length=1, max_length=63)] = Field(...)
+    crs: Annotated[str, Field(pattern='^EPSG:[0-9]{4,6}$')] = Field(...)
 
 class PortableBundleManifestExporter(Contract):
     name: Annotated[str, Field(max_length=64)] = Field(...)
@@ -1591,6 +1632,11 @@ SeismicVolume.model_rebuild()
 Chunk.model_rebuild()
 HeaderPositions.model_rebuild()
 AssetSummary.model_rebuild()
+Table.model_rebuild()
+TableReadColumn.model_rebuild()
+TableNotReadColumn.model_rebuild()
+TableDeclarations.model_rebuild()
+TableAnnotation.model_rebuild()
 TimeDepth.model_rebuild()
 Trajectory.model_rebuild()
 Station.model_rebuild()
@@ -1661,6 +1707,7 @@ Multiple.model_rebuild()
 ColumnRow.model_rebuild()
 Value.model_rebuild()
 Declaration.model_rebuild()
+TableDeclarationsCoordinates1.model_rebuild()
 PortableBundleManifestExporter.model_rebuild()
 PortableBundleManifestLimits.model_rebuild()
 PortableBundleManifestObservations.model_rebuild()

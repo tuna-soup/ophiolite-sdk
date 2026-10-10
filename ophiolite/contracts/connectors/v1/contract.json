@@ -8,6 +8,7 @@
     "geotiff/1": {"scientific_profile": "raster-source/1", "source_schema": "GeoTIFF/single-band", "mapping_version": "geotiff-source/1", "history": "current-only"},
     "edited-wells/1": {"scientific_profile": "well-location/1", "source_schema": "ophiolite.edited-wells/1", "mapping_version": "edited-wells/1", "history": "retained-exact-read"},
     "sql-wells/1": {"scientific_profile": "well-location/1", "source_schema": "schema-digest", "mapping_version": "customer-mapping", "history": "current-only"},
+    "table/1": {"scientific_profile": "ophiolite.table/1", "source_schema": "schema-digest", "mapping_version": "table-declaration/1", "history": "current-only"},
     "osdu-record/1": {"scientific_profile": "well-record-source/1", "source_schema": "exact-approved-kind", "mapping_version": "osdu-record-reader/1", "history": "upstream-exact-read"},
     "osdu-welllog-parquet/1": {"scientific_profile": "well-log-source/1", "source_schema": "exact-approved-kind", "mapping_version": "osdu-welllog-reader/1", "history": "upstream-exact-read"},
     "native-external/1": {"scientific_profile": "native-external-snapshot/1", "source_schema": "arraybridge.v1.ExternalSnapshot", "mapping_version": "caller-declared", "history": "not-assessed"},

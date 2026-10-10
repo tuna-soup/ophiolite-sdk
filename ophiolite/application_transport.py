@@ -4,7 +4,7 @@ import math
 import re
 from .errors import (AuthenticationRequired,PermissionRefused,Unavailable,IntegrityConflict,
                      CapacityExceeded,Refused,Busy,ShareOutcomeUnknown,VerificationFailed,
-                     SourceNeedsReview,SourceRevisionUnavailable,SourceDetached,SOURCE_GUIDE)
+                     SourceNeedsReview,SourceRevisionUnavailable,SourceDetached,SourceSignInRowsDiffer,SOURCE_GUIDE)
 
 MAX_RESPONSE=48*1024*1024  # bounded JSON envelope including a 32 MiB base64 artifact
 SHARE_RECOVERY='Read the current recipients first with client.grants(asset), then decide and call share again with the full intended audience and expected_generation from that snapshot.'
@@ -14,7 +14,7 @@ SHARE_RECOVERY='Read the current recipients first with client.grants(asset), the
 # is passed on verbatim (it states the bound when a table is over it); its remedy, docs and request id are kept.
 SOURCE_CODES={'SOURCE_NEEDS_REVIEW':SourceNeedsReview,'SOURCE_REVISION_UNAVAILABLE':SourceRevisionUnavailable,
               'SOURCE_DETACHED':SourceDetached,'SOURCE_ACCESS_DENIED':PermissionRefused,'SOURCE_MISSING':Unavailable,
-              'SOURCE_DELETED':Unavailable,'SOURCE_OFFLINE':Busy,'SOURCE_PENDING':Busy}
+              'SOURCE_DELETED':Unavailable,'SOURCE_OFFLINE':Busy,'SOURCE_PENDING':Busy,'SOURCE_SIGN_IN_ROWS_DIFFER':SourceSignInRowsDiffer}
 SOURCE_REMEDIES={'SOURCE_DETACHED':'This source was removed from the project. Ask a project administrator to resume it; selecting it again does not bring it back.'}
 FINAL_CODES={code for code,kind in SOURCE_CODES.items() if not getattr(kind,'retryable',False)}  # a 429/503 naming one is never retried
 
