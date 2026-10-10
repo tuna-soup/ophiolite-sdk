@@ -107,7 +107,7 @@ from .models.generated import ApplicationCurve
 READ_OPERATIONS={'list','get','read','original','download','options','inspect','result-list','result-preview','result-download','result-history','info','members'}
 WRITE_OPERATIONS={'configure','start','publish','upload','share'}
 GROUP_OPERATIONS={'list','diff'}  # E8: result groups and diffs are read operations
-AI_OPERATIONS={'ai-use':{'get','grant','corpus'},'search':{'query'},'publications':{'derive','info','share'}}  # E14; E30b publications
+AI_OPERATIONS={'ai-use':{'get','grant','corpus'},'search':{'query'},'publications':{'derive','info','share','transform-preview','transform'}}  # E14; E30b publications; E64 changes
 ENTITY_OPERATIONS={'entities':{'list','get','assets','associations','lineage','create','identify','share','associate','dissociate','extent'}}  # E20; E29 extent; H3 associations
 SOURCE_OPERATIONS={'sources':{'list','export'}}  # E50a: the source reads (not READ_OPERATIONS, which would also allow applications/export)
 MAP_OPERATIONS={'maps':{'export'},'catalog':{'history'}}  # E70a C4: `get` of a scalar map and its version numbers (existing read routes)
