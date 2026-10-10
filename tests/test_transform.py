@@ -1,12 +1,15 @@
 """E64 C5: vertical depth by minimum curvature with a stated origin. Expected values are geometry written as literals:
 a quarter circle of radius 1000 m (minimum curvature is exact on a circular arc), a vertical hole, a slant at 60
-degrees. The HON-GT-01 survey literals travel with the gateway test once its fixture is registered."""
+degrees; and HON-GT-01's survey from NLOG through `Trajectory.vertical_depth`, against the C5 literals."""
+import json
 import math
+from pathlib import Path
 
 import pytest
 
 from ophiolite.errors import Refused
 from ophiolite.transform import vertical_depth
+from ophiolite.typed import Trajectory
 
 ARC = 1000 * math.pi / 2  # a quarter circle of radius 1000 m: inclination 0 at MD 0, 90 degrees at its end
 
@@ -48,3 +51,24 @@ def test_a_plateau_reversal_units_and_single_station():
         vertical_depth(flat[:1], [0])
     with pytest.raises(Refused, match='do not increase'):
         vertical_depth([flat[1], flat[0]], [0])
+
+
+HON = json.loads((Path(__file__).parent / 'fixtures/e64/HON-GT-01_dirsurvey.json').read_text())['dirSurveys'][0]['dirSurveyPoints']
+TOPS = [1831.00, 2435.95, 2557.90, 3135.60, 3240]  # KNNSL, KNNSR, SLDND, ... and TD
+
+
+def hon_gt_01():
+    stations = [{'md': p['ahDepth'], 'inclination': p['devAngle'], 'azimuth': p['azimuth'], 'tvd': p['tvDepth']} for p in HON]
+    return Trajectory({}, {'context': {'type': 'trajectory', 'depth_unit': 'm', 'depth_datum': 'Rotary Table'}, 'stations': stations}, None)
+
+
+def test_hon_gt_01_through_the_trajectory():
+    survey = hon_gt_01()
+    assert [round(v, 3) for v in survey.vertical_depth(TOPS)] == [1759.017, 2261.491, 2364.171, 2855.663, 2943.961]
+    # The file's own vertical depth, interpolated linearly, differs from the calculation by at most 0.032 m: kept apart.
+    assert [round(v, 3) for v in survey.vertical_depth(TOPS[:3], source='file')] == [1759.011, 2261.459, 2364.183]
+    assert survey.vertical_depth([3241]) == [None] and survey.vertical_depth([3241], source='file') == [None]
+    with pytest.raises(Refused, match='"calculated" or "file"'):
+        survey.vertical_depth(TOPS, source='nap')
+    with pytest.raises(Refused, match='The survey is in m and the log in ft'):
+        survey.vertical_depth(TOPS, unit='ft')

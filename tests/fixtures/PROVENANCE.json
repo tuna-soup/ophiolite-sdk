@@ -1978,6 +1978,16 @@
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
       "evidence": "New isolated synthetic fixture from Platform16c1bb1 test_retained_applications.shared/test_applications.app, created by SDK gateway test on 26Sep. No owner deployment assets; no request authentication headers recorded. Four successful real create_app public GET responses; complete zero/null axis/unit/revision and frozen-reader equality verified. Pre-admission decoded scan found no private paths, provider tokens, delegate tokens or external URLs. E4 original SDK/contract licence decision; no external data acquisition. E94 C5: the descriptor request declares profiles /1,/2,/3; the recorded answer is unchanged (a revision without a derivation record is served identically, Platform test_manifest_transport)."
+    },
+    {
+      "path": "tests/fixtures/e64/HON-GT-01_dirsurvey.json",
+      "sha256": "b91e6a6d0df05f7bdbd2a7b815a98ddb048377817b5327b8e3832cfe06fdcb56",
+      "source_commit": null,
+      "origin": "NLOG.NL directional survey of well HONSELERSDIJK-GT-01 as NLOG serves it (67 stations, Rotary Table; 7,847 bytes), byte-identical to the cleared file",
+      "license": "LicenseRef-NLOG-Disclaimer-2016-08-09",
+      "disposition": "third-party-attribution",
+      "evidence": "Integration docs/release/rights/nlog-cleared-files-2026-09-28.json (owner review #13: NLOG terms, redistribution with source attribution) and docs/release/rights/e64-transform-fixtures-2026-10.json (E64: this copy, unmodified). Attribution in THIRD_PARTY.md.",
+      "attribution": "Source: NLOG.NL, Dutch subsurface portal (TNO / Geological Survey of the Netherlands), HON-GT-01 directional survey. Retrieved 2026-09-10/11; https://www.nlog.nl/disclaimer. Not modified."
     }
   ]
 }

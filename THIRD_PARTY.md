@@ -41,3 +41,14 @@ copying, distribution and editing with source attribution. The rights review is 
 median P-wave velocity (304800 / DT) and density (RHOB) of 2480-2557.9 m (4073 m/s, 2629 kg/m3; 779 rows) and of
 2557.9-2620.22 m (4024 m/s, 2379 kg/m3; 624 rows), rounded. Source: NLOG.NL (www.nlog.nl), used under the same
 disclaimer with source attribution; the notebooks are not in the wheel or the sdist.
+
+## Third-party data: the HON-GT-01 directional survey (E64)
+
+`tests/fixtures/e64/HON-GT-01_dirsurvey.json` (SHA-256 `b91e6a6d0df05f7bdbd2a7b815a98ddb048377817b5327b8e3832cfe06fdcb56`)
+is NLOG's directional survey of HONSELERSDIJK-GT-01, a test fixture for vertical depth; it is not original Ophiolite work
+and not Apache-2.0.
+
+Source: NLOG.NL, Dutch subsurface portal (TNO / Geological Survey of the Netherlands), HON-GT-01 directional survey. Retrieved 2026-09-10/11; https://www.nlog.nl/disclaimer. Not modified.
+
+Used under the NLOG disclaimer (<https://www.nlog.nl/disclaimer>, `LicenseRef-NLOG-Disclaimer-2016-08-09`; the Dutch
+text prevails), as above. The rights review is recorded in Ophiolite Integration `docs/release/rights/`.
