@@ -4,8 +4,8 @@
   "inputs": [
     {
       "path": "ophiolite/contracts/README.md",
-      "sha256": "5c45fc86314ed1ef83c513334f9aae0836bc6812a79e151dd38b6e3576c13bd2",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "sha256": "7d8239610b76cc50a45307dbb7723bdfbff5406407a7ce7561538320ea8e6ab8",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/README.md",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -14,7 +14,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/README.md",
       "sha256": "ddf0bdb37597d47e1b2a3371a2be9a6a082c930aded1dc0cb004b5d13043d496",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/README.md",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -23,7 +23,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/curve-context-schema.json",
       "sha256": "379f1ae3f976443ff9735d4e82d20c59b2fea0d34fd3659179861e4ed01397ff",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/curve-context-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -32,7 +32,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/curve-schema.json",
       "sha256": "937f4aa2cdec719eb520e2713872871c90e4d3cde69694d673baf9395be40dab",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/curve-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -41,7 +41,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/capture.json",
       "sha256": "3f114488d82f60fd084618e30a53350ceb385da5246312e33fdb09511caa2f51",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/capture.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -50,7 +50,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/curve.json",
       "sha256": "81992992a1a15daac792bebf5979c51e0f8c3c1869a75a125999e6466e38bfba",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/curve.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -59,7 +59,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/derived-curve.json",
       "sha256": "3b54d2d0436fbab49e467d3dac8cbd29c9e2747e3b2a6e0c69538d390e2c68a8",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/derived-curve.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -68,7 +68,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/derived.json",
       "sha256": "a496db9781c67092f650203fba777bf59f51e5002d40566141d3c50c0e858d6e",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/derived.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -77,7 +77,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/derived.las",
       "sha256": "2fdbfc25b866dc766f2c8a31b2c7dee178950f6a9e4f09cac623f67f51d9ba6d",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/derived.las",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -86,7 +86,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/expected.json",
       "sha256": "e6c2d7be8bb681cf2b6cf475b77b2ccf87304d941adba6e35cc09cb16d2baf44",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/expected.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -95,7 +95,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/faults-data.json",
       "sha256": "94ed84297e96cda60ea2481898e50946b81e93d9a45c7ef259574e244cb28da2",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/faults-data.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -104,7 +104,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/faults.json",
       "sha256": "b9948460670bfa22ebab3bf928bea0d7950b77366787c3bdc257176512954271",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/faults.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -113,7 +113,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/faults.original",
       "sha256": "937325c602a1a388ac2320f09e539a6b8d180d24ee12c29bd021c617543d9a04",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/faults.original",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -122,7 +122,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/frozen/pre-e1/capture.json",
       "sha256": "462413dfa5a94b02477eb6551c5662477c69e4865b0da4d2a0a26c8fb6d543ce",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/frozen/pre-e1/capture.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -131,7 +131,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/frozen/pre-e1/curve.json",
       "sha256": "254f1050a0d98e327037ca22b5faf8c860dbe03a9504b8df09f1289682942af7",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/frozen/pre-e1/curve.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -140,7 +140,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/frozen/pre-e1/derived-curve.json",
       "sha256": "507fc56a07d8aa1c7b9e467b17700c75b5e8ffbe7ea4c9817ae062aa65d5dbb1",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/frozen/pre-e1/derived-curve.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -149,7 +149,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/frozen/pre-e1/derived.json",
       "sha256": "f4b67431848646f328bb3ef087bbbe8b034fdad66fa4c54edf440247a5359c08",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/frozen/pre-e1/derived.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -158,7 +158,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/frozen/pre-e1/derived.las",
       "sha256": "2fdbfc25b866dc766f2c8a31b2c7dee178950f6a9e4f09cac623f67f51d9ba6d",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/frozen/pre-e1/derived.las",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -167,7 +167,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/frozen/pre-e1/expected.json",
       "sha256": "e6c2d7be8bb681cf2b6cf475b77b2ccf87304d941adba6e35cc09cb16d2baf44",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/frozen/pre-e1/expected.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -176,7 +176,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/frozen/pre-e1/original.las",
       "sha256": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/frozen/pre-e1/original.las",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -185,7 +185,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/frozen/pre-e1/source.json",
       "sha256": "bb290f59576ab708535a23a059eded5351dff94ed9f053c2fb654b41b075ff95",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/frozen/pre-e1/source.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -194,7 +194,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/grid-data.json",
       "sha256": "1df023c38be49107a88e8c63a8a11e9aeeae747ffd80c24f94a048e62739565b",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/grid-data.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -203,7 +203,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/grid.json",
       "sha256": "a3f98e52b963d2004535bbaae720ff2633ece092ca361bb9acf43fe12b8fc9e8",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/grid.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -212,7 +212,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/grid.original",
       "sha256": "e003a5f2db034f6c8bf82ef1df6dbcb751e43278718ace029829fc8cf92d0da7",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/grid.original",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -221,7 +221,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/mesh-data.json",
       "sha256": "b6fbfa251a5e2361023a4e842ba3fcb134491230e3ece71e3d9e1cc7610b82c4",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/mesh-data.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -230,7 +230,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/mesh.json",
       "sha256": "4e4a5e08aa2d0ba53f7cbbff356efb7c1f6ccb1278bbbf3b52b969c9c49c3877",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/mesh.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -239,7 +239,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/mesh.original",
       "sha256": "2428a0cef50c3e69bc8c970ac0d2327d1d5ffdab1b08e93984439b9b13278613",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/mesh.original",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -248,7 +248,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/model-section-data.json",
       "sha256": "d93bae33c73aeb84e44b73cc1ac063ca9b9f55c3da4de4d9fbe5c53d7a1238ab",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/model-section-data.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -257,7 +257,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/model-section.json",
       "sha256": "3eb3032445410a624f86afd6ba124becfb88be67536ac4f4fbb8938dec1e9e5c",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/model-section.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -266,7 +266,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/model-section.original",
       "sha256": "b10305e98dfd9febeaa6f0a85d7df9faec556912ca5c6f65758e9583e4558a2d",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/model-section.original",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -275,7 +275,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/original.las",
       "sha256": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/original.las",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -284,7 +284,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/point-set-2-data.json",
       "sha256": "8930eb160145033bbe5a461e790c066cdd025fda1127d85eb75b127e76ce25d9",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/point-set-2-data.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -293,7 +293,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/point-set-2-recipe.json",
       "sha256": "e4b3ee4cb1ea61bea1da2ad09fecab98309460c5e921b9b5ef40e32ce01d4af6",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/point-set-2-recipe.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -302,7 +302,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/point-set-2.crsmeta.xml",
       "sha256": "059fd3ba90975429682cc08221cafc55a48182a5da3d4cf651b5a3d9593e2549",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/point-set-2.crsmeta.xml",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -311,7 +311,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/point-set-2.json",
       "sha256": "e1941615a0452fe6e57dd90c6296e02b1d207ac53c02919169e758b96f06009a",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/point-set-2.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -320,7 +320,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/point-set-2.original",
       "sha256": "c3070963e51644452b9fbdcfed354579d03259a5ee20ad7dae5909bc908d2dfb",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/point-set-2.original",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -329,7 +329,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/point-set-2.readme.txt",
       "sha256": "7f90ca1184f3af05cae6bdb28499db5992ee3c7d9edcf00f95b8e6d629833905",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/point-set-2.readme.txt",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -338,7 +338,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/points-data.json",
       "sha256": "90acd93fb33b361e86d6d35a00fe54656f5e7efafe2f4c9acdff547f340b04ee",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/points-data.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -347,7 +347,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/points.json",
       "sha256": "5c4d540d62d4216dfa351e5db991a574ff9c0672887b9a23b5aff096e7a02c5f",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/points.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -356,7 +356,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/points.original",
       "sha256": "9f0095c2dfdc7fd26ad36f47c5c924bd6ea091848557168c9e6a31d0b50f753b",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/points.original",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -365,7 +365,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/seismic-data.json",
       "sha256": "0a3b8ac57559f0b286a52a753aab35dd621deea55a9536f761d7fbb30d1158f7",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/seismic-data.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -374,7 +374,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/seismic-section-data.json",
       "sha256": "65708d7d95ced7c090eb3f77f0614dd396d0cdeab60693d8065d499ba01ee28f",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/seismic-section-data.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -383,7 +383,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/seismic-section.json",
       "sha256": "a7cc1fa2fbc5166460e64a9c8215e3c37ba326b41e59ad25a68f9e3d12530106",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/seismic-section.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -392,7 +392,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/seismic-section.original",
       "sha256": "f42aea7c359c6e3ba696cc1a76c66b4084b6ff264ef4b11820650ad8c2aee6ba",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/seismic-section.original",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -401,7 +401,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/seismic.json",
       "sha256": "254345142ef071c32caf952ae0f996829ef887ae6487a4c8ad19e89107b955dd",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/seismic.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -410,7 +410,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/seismic.original",
       "sha256": "b42095c0c9aab74a659cfd8e70375a80994b2d24dd7c3b5ed6f10def06bb468e",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/seismic.original",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -419,7 +419,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/source.json",
       "sha256": "7bb6af90ffb90a754b3985f1679eaa16f2a32efa384aef028c6b5d0d0719145d",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/source.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -428,7 +428,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/time-depth-data.json",
       "sha256": "979d58a4364d3e6d976bb725ec179c50496ee74c4be94cbd7b3a1cc097bd9564",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/time-depth-data.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -437,7 +437,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/time-depth.json",
       "sha256": "72a6340977c22d20c80687db26ca9578b30a306f85cb3caaee7408e196bf01bb",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/time-depth.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -446,7 +446,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/time-depth.original",
       "sha256": "a30abdd45ee6439775469cb92e020fe6a1731003959f44c7c0fbef3cfcc6583b",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/time-depth.original",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -455,7 +455,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/tops-data.json",
       "sha256": "eae5778eca7ced6e1010cbe7ef342efb23298da1de5a634e9a4c9f3bb70e305b",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/tops-data.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -464,7 +464,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/tops.json",
       "sha256": "2dd7494de3d35cba7f7194759daefea7ad5692e618d0d93e4173f56b5e0917c1",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/tops.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -473,7 +473,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/tops.original",
       "sha256": "7bca6c523913b58113d3fa23aa97424ce907af3b27915c18ada91b845b71a594",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/tops.original",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -482,7 +482,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/trajectory-data.json",
       "sha256": "d7e1a2bfb6c952276c5568a82fe54e167f6f1436bd6ab5863131e514e14d34df",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/trajectory-data.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -491,7 +491,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/trajectory.json",
       "sha256": "d8a209a77ba44817cf589f9fc904763e6f8b719fb8ae963b3795f5ead0648693",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/trajectory.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -500,7 +500,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/trajectory.original",
       "sha256": "7d32d1cac27c05e0cce1e26d72d4dac409a9f9cd03feda0139944ba448aa9842",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/trajectory.original",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -509,7 +509,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/wavelet-data.json",
       "sha256": "675f4ed50f7c0ab849b2a4eadd297069d52c420e330e2ac9fed924d3abeb2134",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/wavelet-data.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -518,7 +518,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/wavelet.json",
       "sha256": "25372636160b51211e78550893815620a0214edf4ed3f3ca63da8deca17ec0f3",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/wavelet.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -527,7 +527,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/fixtures/wavelet.original",
       "sha256": "a3b2d7369010aa033155be3335b85382312cc498b5859ebd74289824d2eacb65",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/fixtures/wavelet.original",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -536,7 +536,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/grid-surface-schema.json",
       "sha256": "38ce526effd5bce6869f6ff4afd6e99c9c6afc04e35820eb91755b4ebbe3bc8f",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/grid-surface-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -545,7 +545,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/import-recipe-schema.json",
       "sha256": "5375f638f411f86833c140ab7613bcfb67c2e9be7856c5e18dce66545139cce2",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/import-recipe-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -554,7 +554,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/model-section-schema.json",
       "sha256": "1d2bc19f6bcdfb9479b1c7ef591e93bb3b37fbff94dfd5b50e78f04f237dce27",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/model-section-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -563,7 +563,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/point-set-2-schema.json",
       "sha256": "238b00d7f0c0f216b9b2390bccd40aaa5c42b762abf0a0cbee604b588a111673",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/point-set-2-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -572,7 +572,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/point-set-schema.json",
       "sha256": "c3ff4e5508c3909f446eb452baf64e3e65b850064952b4c9f53715f4402509ff",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/point-set-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -581,7 +581,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/polyline-set-schema.json",
       "sha256": "38ab05753c92f3c1cf93dd6c2f4dc1ac0729e9526a9e49c494b6c40a7f02a5ed",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/polyline-set-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -590,7 +590,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/schema.json",
       "sha256": "2abd5dc6e4cd40415eaf315e6ad20842f605a2cae363503c516030377a045865",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -599,7 +599,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/seismic-section-schema.json",
       "sha256": "1dddd385e8a34e769a440a0873a2c28448a638a36bbe47ee81cfebe75a130956",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/seismic-section-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -608,7 +608,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/seismic-slice-schema.json",
       "sha256": "8f5233be2a4060e1c90da25b8c9ddb555d4350d457abcf59cef33a59ad508360",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/seismic-slice-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -617,7 +617,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/seismic-volume-schema.json",
       "sha256": "2798960f62bed0fd6724471fe30fc3c794872e9c1e6347b9ca0c490d9ce98632",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/seismic-volume-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -626,7 +626,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/summary-schema.json",
       "sha256": "57cbcd4efedde3877f72fb191c79717a423d23ef4bc3c2bb9e41b8722dfd82e4",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/summary-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -635,7 +635,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/time-depth-schema.json",
       "sha256": "e3c592143905cf4b32458c986c02920dc10a0d3dadf4554dc951e580221f82a8",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/time-depth-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -644,7 +644,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/trajectory-schema.json",
       "sha256": "d35abfc0b0a8ea6818151dfdb29dede7b8fe488abce3878b5f1f17dc595e4be5",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/trajectory-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -653,7 +653,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/triangulated-surface-schema.json",
       "sha256": "d862bfc1f5bb86f7f59cd35b444b031019393ed6e2f917bd2375a2465ffd7944",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/triangulated-surface-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -662,7 +662,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/typed-context-schema.json",
       "sha256": "b338811d91f7ceafc64e97b80404abf70f5774d1123a09799d9cfc9089275a4c",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/typed-context-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -671,7 +671,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/wavelet-schema.json",
       "sha256": "b701f032f34cede99c8d030ac649d4ca072964aadac74601bed85c0861c589cb",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/wavelet-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -680,7 +680,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/well-location-schema.json",
       "sha256": "d5e9cb82853974f04230164f50d8977f4ab0bd08b0a943839497a7382d02a94c",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/README.md",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -689,7 +689,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/well-location-upload-schema.json",
       "sha256": "40ee44ef3e515ce31292d1c188305f38d6923fb52ba0d3ce82e2b911b634bf16",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/README.md",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -698,7 +698,7 @@
     {
       "path": "ophiolite/contracts/assets/v1/well-tops-schema.json",
       "sha256": "7900d2b3341666f82c2df3b5acbb61458ec533b184f4dffca1c83a858453970c",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/assets/v1/well-tops-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -707,7 +707,7 @@
     {
       "path": "ophiolite/contracts/bundles/v1/README.md",
       "sha256": "e2ed5fff6043069152d52ec7b09052f5841c298c863bf1d8734e5f8bb88ab0af",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/bundles/v1/README.md",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -716,7 +716,7 @@
     {
       "path": "ophiolite/contracts/bundles/v1/fixtures/manifest.json",
       "sha256": "8e15e66e2498cf28e2b648f8e0062836b1b514be97e74bc6f7e4609b1dbcd243",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/bundles/v1/fixtures/manifest.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -725,7 +725,7 @@
     {
       "path": "ophiolite/contracts/bundles/v1/manifest-schema.json",
       "sha256": "68c1cc94f57935e8687ef65250c1d1d486a16c0895fe268b0d27a4fddc12304b",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/bundles/v1/manifest-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -734,7 +734,7 @@
     {
       "path": "ophiolite/contracts/bundles/v2/README.md",
       "sha256": "6c896e0dcdd5f74f0c73974f0efd985751f8e19409156fbe44001ff78cd15d47",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/bundles/v2/README.md",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -743,7 +743,7 @@
     {
       "path": "ophiolite/contracts/bundles/v2/fixtures/manifest-sections.json",
       "sha256": "aec38c5d536b19abb70c6e49260a20f9df715818e3956d22464e9578be18f6d7",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/bundles/v2/fixtures/manifest-sections.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -752,7 +752,7 @@
     {
       "path": "ophiolite/contracts/bundles/v2/fixtures/manifest.json",
       "sha256": "60d8a983b749537c8218bb6452ee21b2c22220f20e165143d5e518ca5518952c",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/bundles/v2/fixtures/manifest.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -761,7 +761,7 @@
     {
       "path": "ophiolite/contracts/bundles/v2/manifest-schema.json",
       "sha256": "21a97b56b71c18a48de2bec27b48569072a4b60badabfe375c3440f429093781",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/bundles/v2/manifest-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -770,7 +770,7 @@
     {
       "path": "ophiolite/contracts/connectors/v1/README.md",
       "sha256": "93f7d3a5c9d0441f9012a696a5ad48e4a7c4f0064d591a36b95755367770b43a",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/connectors/v1/README.md",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -779,7 +779,7 @@
     {
       "path": "ophiolite/contracts/connectors/v1/capabilities/file-geotiff.json",
       "sha256": "d51b22a62281b408fa3972d3e346430f54843022a453471adc2f6738255a0214",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/connectors/v1/capabilities/file-geotiff.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -788,7 +788,7 @@
     {
       "path": "ophiolite/contracts/connectors/v1/capabilities/las-upload.json",
       "sha256": "f84b9fae7382fd9842da7de3da0bbe6c7efcb5875a53a984b512cef43e02f3f0",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/connectors/v1/capabilities/las-upload.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -797,7 +797,7 @@
     {
       "path": "ophiolite/contracts/connectors/v1/capabilities/opendtect.json",
       "sha256": "12b7c4292f4aeb5be2103b466caafb1994ed3f7bfdc6c95d024f6f54c90043e7",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/connectors/v1/capabilities/opendtect.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -806,7 +806,7 @@
     {
       "path": "ophiolite/contracts/connectors/v1/capabilities/osdu-record.json",
       "sha256": "a08d32e14295f7745341e4c8c53b9366811e03e40e0905a6e0cd353134582693",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/connectors/v1/capabilities/osdu-record.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -815,7 +815,7 @@
     {
       "path": "ophiolite/contracts/connectors/v1/capabilities/postgresql-wells.json",
       "sha256": "52bbd6d4f3b924426c3b1a850e0e7df8d787de2a7a93ecec412e82df6c4d2e8e",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/connectors/v1/capabilities/postgresql-wells.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -824,7 +824,7 @@
     {
       "path": "ophiolite/contracts/connectors/v1/capabilities/qgis.json",
       "sha256": "2eb9b13fa4b6e9076a45af91740da2cf45e2e078517f37507f8d4eb365e9cbdb",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/connectors/v1/capabilities/qgis.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -833,7 +833,7 @@
     {
       "path": "ophiolite/contracts/connectors/v1/capabilities/resinsight.json",
       "sha256": "3c4eac6d7d243343405a001b4cee45b9d210994cb336d1ff2f64a0e554149c0d",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/connectors/v1/capabilities/resinsight.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -842,7 +842,7 @@
     {
       "path": "ophiolite/contracts/connectors/v1/capabilities/schema.json",
       "sha256": "8bc50e5130f381361e35caf46fe74900bc4c034484f7c6c6b113772c304518d6",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/connectors/v1/capabilities/schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -851,7 +851,7 @@
     {
       "path": "ophiolite/contracts/connectors/v1/capabilities/section-upload.json",
       "sha256": "cda60ce02117d0e8101b69a38492474f22da8d750b07af18888d28d11d3554aa",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/connectors/v1/capabilities/section-upload.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -860,7 +860,7 @@
     {
       "path": "ophiolite/contracts/connectors/v1/capabilities/sqlite-wells.json",
       "sha256": "cc4a9799b17ec8cfa5cd3f49e9cdfea4347d90029c81bc9c845cc1c9d4c7ba5c",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/connectors/v1/capabilities/sqlite-wells.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -869,7 +869,7 @@
     {
       "path": "ophiolite/contracts/connectors/v1/capabilities/typed-upload.json",
       "sha256": "b54138189c0c19ecec5c1f294297254c544f2541faa7fe9eba94a28b632b554c",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/connectors/v1/capabilities/typed-upload.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -878,7 +878,7 @@
     {
       "path": "ophiolite/contracts/connectors/v1/contract.json",
       "sha256": "e3d5145a4fa5a132c9d016c9f252916991cec81e42a72edf0e5105715f4f6858",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/connectors/v1/contract.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -887,7 +887,7 @@
     {
       "path": "ophiolite/contracts/connectors/v1/readers.json",
       "sha256": "555f77f997933958a5efec3ef3886e28e22abae4654ef328b4d282a0bbceb920",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/connectors/v1/readers.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -896,7 +896,7 @@
     {
       "path": "ophiolite/contracts/docs/api-versioning.md",
       "sha256": "5bbb5e993c866533f5f80876289fa186965db515955e503aa6e8460c37840cfb",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/docs/api-versioning.md",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -905,7 +905,7 @@
     {
       "path": "ophiolite/contracts/entities/v1/entity-assets-schema.json",
       "sha256": "edccdcbd0d7fae50a25bb4762f8deb255fb7964713a266a3b601171f8d86f9f4",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/entities/v1/entity-assets-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -914,7 +914,7 @@
     {
       "path": "ophiolite/contracts/entities/v1/entity-schema.json",
       "sha256": "5888db3fe6dc7acdf17ae8792e82c91fca8385fa9ec146fbe8e096bf46febf89",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/entities/v1/entity-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -922,8 +922,8 @@
     },
     {
       "path": "ophiolite/contracts/generated/v1/ophiolite-contracts.ts",
-      "sha256": "f1e867df9707ebabc950e424a2ee9cdf7ac394097b9754e5bf50b3835c33b2e8",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "sha256": "f998fd31a4b16e92e0d562561c4f40f1476e411560d9b8fdb2e1f10822e10da1",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/generated/v1/ophiolite-contracts.ts",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -932,7 +932,7 @@
     {
       "path": "ophiolite/contracts/mappings/v1/application-curve-to-well-curve.json",
       "sha256": "aa2e1c1925f68aede0b3c5e7d8d7e7921ad69ea35733bc2e7d936a21c233c0dc",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/mappings/v1/application-curve-to-well-curve.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -941,7 +941,7 @@
     {
       "path": "ophiolite/contracts/mappings/v1/typed-standards.json",
       "sha256": "c7c48be846a1dda6727b4ff7eee6ad52238b131c58f0cadab773bde5c45e78e0",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/mappings/v1/typed-standards.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -949,8 +949,8 @@
     },
     {
       "path": "ophiolite/contracts/openapi/v1/openapi.json",
-      "sha256": "aad3c90a85b5a333ea47b635c6889f4248d8a45c4894d2d4fc2f1e1fd8e30033",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "sha256": "c6ef15bdf3f4bb2f21c0671972b91751b2499b2e4dd6d3726a9f43e0bd2da4f2",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/openapi/v1/openapi.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -959,7 +959,7 @@
     {
       "path": "ophiolite/contracts/openapi/v1/scientific-assets.paths.json",
       "sha256": "a4f84baf06bc04b48e009e76c25d8d24e9c5d1b874cd31bf2cf389a30dce68c6",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/openapi/v1/scientific-assets.paths.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -968,7 +968,7 @@
     {
       "path": "ophiolite/contracts/profile-schema.json",
       "sha256": "1e4dbd470f81591fe2e3274f0df779d8316c538d3a6e0b5e959ae2e2f865b6b7",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profile-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -977,7 +977,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/application-curve.json",
       "sha256": "5dab16bcf3b69523e754a02da8fb748c40e0074f5421d9463d27ab9d2583840a",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/application-curve.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -986,7 +986,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/deviation-csv.json",
       "sha256": "b8cbb019258e7a29f8fbbd3c2f62a702b00e3e3a106f3684f9749d6b4daef316",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/deviation-csv.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -995,7 +995,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/edited-wells.json",
       "sha256": "fcbb3c2391de24f97460a92188570e31e23abed253c822f90e8b0a9e74959588",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/edited-wells.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1004,7 +1004,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/esri-ascii-grid.json",
       "sha256": "b00b52142d22b786210f82d24749c55fc5a9e8a1b7f6ca3a4506686b42dac9b3",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/esri-ascii-grid.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1013,7 +1013,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/geotiff.json",
       "sha256": "ec6067b6c2e874cfc196d5eec22d9ce66dfce6e9f13f846e920c4073775fee04",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/geotiff.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1022,7 +1022,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/grid-surface.json",
       "sha256": "6b533a7e4b4c80928e9281a3da3471a75fd749d7ae1fb8e637c5621a28ff9cc8",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/grid-surface.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1031,7 +1031,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/import-recipe.json",
       "sha256": "b74dfee889194b1ad06d21aa5bcc99df698118e2ab746533859fc334802c9755",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/import-recipe.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1040,7 +1040,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/las2.json",
       "sha256": "571756c3999d1860c52f2985a6f892c567f6ca5297d16a2d4857c94788c573a4",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/las2.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1049,7 +1049,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/mesh-text.json",
       "sha256": "637df3684d7dde4042e390c34115926086a229d7727629f91f6e9f26dabfe917",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/mesh-text.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1058,7 +1058,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/model-section-text.json",
       "sha256": "27d790b8bd4dc6956613911896d65e0f3f89289cc5a1dd84eb221943cd7c9dc4",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/model-section-text.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1067,7 +1067,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/model-section.json",
       "sha256": "64a259d2c154809fade9ccf9f14a70a3df8f2b987693b7216783a3f2b1117e28",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/model-section.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1076,7 +1076,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/native-external.json",
       "sha256": "59c5faa435559aea544f72503a68b6480c01ace1c01297305aac0ea9ae7db0d4",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/native-external.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1085,7 +1085,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/opendtect-faultsticks.json",
       "sha256": "0056edf02def5b8c22f5d270c17084f63a441078201733bb71d59d4e56d8f598",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/opendtect-faultsticks.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1094,7 +1094,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/opendtect-horizon-ascii.json",
       "sha256": "04b8e85fa8fb19980c1531a58dee85c115b1878ed3a4817de8d17e9def57e05f",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/opendtect-horizon-ascii.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1103,7 +1103,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/osdu-record.json",
       "sha256": "f15e9f93fb554e7da1ee5eacc7e462438d7c1507b80acd096db30e83c4085012",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/osdu-record.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1112,7 +1112,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/osdu-welllog-parquet.json",
       "sha256": "a62d98b42cf1e2215a51b2b2d1b439ed64034bc3b397a33655d0c1c640d72031",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/osdu-welllog-parquet.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1121,7 +1121,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/petrel-points-attributes.json",
       "sha256": "6453065d0dab01e5ee61f00f585a5d300a52524bdcf42eae12daf89ac69c8b41",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/petrel-points-attributes.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1130,7 +1130,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/point-set-2.json",
       "sha256": "34278f634fe8162c2903f5d29a9988bf7c5bd3606fcd89fed44c87280f2b6357",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/point-set-2.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1139,7 +1139,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/point-set.json",
       "sha256": "dbba062339214986b8c4e14be56071a3157b787636d9e2ebeec9fa13493e575d",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/point-set.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1148,7 +1148,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/points-csv.json",
       "sha256": "370fb309a8d37c06776d4ab14b04fb9601ec022590e02d209bff5cd79bc3d209",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/points-csv.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1157,7 +1157,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/polyline-set.json",
       "sha256": "32c1048a149e327191a4e3cd2a5a963d5c86fe82dfc77462374cf18593426abc",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/polyline-set.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1166,7 +1166,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/scalar-map.json",
       "sha256": "0f92daf430823590ea445b57f470f2dfe5c11b8e4e8365848819e2173637d565",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/scalar-map.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1175,7 +1175,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/segy.json",
       "sha256": "fe5310e51d632e9bb4a861b671459d4b169c214fadf53cadfd7244d44ec56c63",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/segy.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1184,7 +1184,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/seismic-section-text.json",
       "sha256": "5cee8a16145d592d1704e85026394af6552424ad6a02ecd5b82af3a2b0830b08",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/seismic-section-text.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1193,7 +1193,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/seismic-section.json",
       "sha256": "14392df5b8939b8294ecce0da89c5b6daec1d0f3aeb900ca9d31819708f207ac",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/seismic-section.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1202,7 +1202,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/seismic-volume.json",
       "sha256": "76cea4bf54aeccfd3f30d48967061c05a9f0abd510f0af9ec22da8eb00b3676b",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/seismic-volume.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1211,7 +1211,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/sql-wells.json",
       "sha256": "769f7387ff918c4c28efdd5a4ec444a79448b910ecf3f107c252ccb20ec7d5c4",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/sql-wells.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1220,7 +1220,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/time-depth-csv.json",
       "sha256": "859d319f4594d4fe1f4f0cac59c2fcd219804cceb79b3c13b392649f222f2f12",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/time-depth-csv.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1229,7 +1229,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/time-depth.json",
       "sha256": "07fa2803179e206978a6090b0a520a3bfd1378f9428b4afa84956842c80ca212",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/time-depth.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1238,7 +1238,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/trajectory.json",
       "sha256": "c9bfc1e1215e9ba6c45183552c01a11b312280decea53fb464bc700e0603a827",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/trajectory.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1247,7 +1247,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/triangulated-surface.json",
       "sha256": "38907a51e5061fd41d5137c31c2ed4a5f79420217cdb27093b67fa1d4af31c52",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/triangulated-surface.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1256,7 +1256,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/wavelet-text.json",
       "sha256": "233157867a9748f529e88fa76d8d2e7880743077a7bda78a4ac3e30b53625df6",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/wavelet-text.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1265,7 +1265,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/wavelet.json",
       "sha256": "8a438c4b27779ad0b40e6ee481d25348cd777e94f7cb103466b6458ce09e8b6e",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/wavelet.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1274,7 +1274,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/well-curve.json",
       "sha256": "29d5024e8c7e92e77eeb156945ee696c04b61d85ea4be908d3ff451e83c4daa8",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/well-curve.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1283,7 +1283,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/well-location-upload.json",
       "sha256": "3b2188bee720eea537e524a2ffe45c0107ddab6e66e4b3188ee729c2ddd44ce9",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/README.md",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1292,7 +1292,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/well-location.json",
       "sha256": "4b981dc45d0601a52a5f13130373ee611332e71a10efd41a7e5cb873418d98f7",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/README.md",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1301,7 +1301,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/well-tops-csv.json",
       "sha256": "d698afb12742cc57cf835526e0413acb593a3441236e531c0529a7d1ea759fb9",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/well-tops-csv.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1310,7 +1310,7 @@
     {
       "path": "ophiolite/contracts/profiles/v1/well-tops.json",
       "sha256": "44aa76a65d04ea561a907667976b6e7dbfd774bf29b788788301bf798300eea1",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/profiles/v1/well-tops.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1318,8 +1318,8 @@
     },
     {
       "path": "ophiolite/contracts/registry-schema.json",
-      "sha256": "a9ffe715b9354d244f0fa2869fd4da10f5a75c3722f929e83f887ef5a406aded",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "sha256": "96e4bba1bf2047db63d0cffd73b0d9312de982f7323e19b9d1ec8f987bee4d2c",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/registry-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1327,8 +1327,8 @@
     },
     {
       "path": "ophiolite/contracts/registry.json",
-      "sha256": "21282d6d94f40d8eb2fbbca3c18c91585622bf68f9a1fd4c814e9a7e4712dd7b",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "sha256": "b8edc83233df9ecc0abd8f35e4b99dfa6500444d374be022708b408e3ac24661",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/registry.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1337,7 +1337,7 @@
     {
       "path": "ophiolite/contracts/relationships/v1/README.md",
       "sha256": "57c5c5aee0ca2df5193dbcf84c9d4b0c993dd231aa51216b43a8dfb24b1c5d6e",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/relationships/v1/README.md",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1346,7 +1346,7 @@
     {
       "path": "ophiolite/contracts/relationships/v1/lineage-schema.json",
       "sha256": "8cc2d5a05b49dc3df96a7b495d3952c55d6f3bbbb8530f9bbc032b770797b431",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/relationships/v1/lineage-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1355,7 +1355,7 @@
     {
       "path": "ophiolite/contracts/relationships/v1/registry-schema.json",
       "sha256": "b1d7fd76574a11e7ba74ff1fa4f877bde6c0ee8a287dfaf8083d9cda67f3fa91",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/relationships/v1/registry-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1364,7 +1364,7 @@
     {
       "path": "ophiolite/contracts/relationships/v1/registry.json",
       "sha256": "2e2f96b0807a660cd87882f1eb00b4a38eae4264e454b83224fa27a799096f7f",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/relationships/v1/registry.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1373,7 +1373,7 @@
     {
       "path": "ophiolite/contracts/scientific/v1/README.md",
       "sha256": "ac3dd879de274a7f7c97937ff124ed9fe0d072418a45c5975be760b5adc34ac8",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/scientific/v1/README.md",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1382,7 +1382,7 @@
     {
       "path": "ophiolite/contracts/scientific/v1/fixtures/README.md",
       "sha256": "cfce2b525a309762ff68aa14ec42ad3e18acc8ba9c335f1a6f1392515654c6d3",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/scientific/v1/fixtures/README.md",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1391,7 +1391,7 @@
     {
       "path": "ophiolite/contracts/scientific/v1/fixtures/hon-gt-01-gamma-ray-excerpt.las",
       "sha256": "8f7dce3351e8dba04479cb0b0714c49cb3a210f2b2b6e7279f07f37d7c222515",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "NLOG.NL composite log 5682_hongt01_2012_comp.las of well HONSELERSDIJK-GT-01 (SHA-256 cfa223bc...f537, 2,984,666 bytes), cropped to depth 2466.0-2621.0 m and the curves DEPTH and GR; copied by Ophiolite Platform contracts/scientific/v1/fixtures/hon-gt-01-gamma-ray-excerpt.las",
       "license": "LicenseRef-NLOG-Disclaimer-2016-08-09",
       "disposition": "third-party-attribution",
@@ -1401,7 +1401,7 @@
     {
       "path": "ophiolite/contracts/scientific/v1/fixtures/scalar-map.json",
       "sha256": "807e8653e9f7a0314475880541bf39ac11ff79e3453be243d7cf079492c43319",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/scientific/v1/fixtures/scalar-map.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1410,7 +1410,7 @@
     {
       "path": "ophiolite/contracts/scientific/v1/fixtures/well-curve.json",
       "sha256": "30be2d326017262b4eb5c4a3a3ad95e8a74f63d7aa931210110d98e3f94eaa7d",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/scientific/v1/fixtures/well-curve.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1419,7 +1419,7 @@
     {
       "path": "ophiolite/contracts/scientific/v1/scalar-map-schema.json",
       "sha256": "94df8c9470557d2ac9de4145eb6465945ea04a7c8b6efdfae24985627e27332d",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/scientific/v1/scalar-map-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1428,7 +1428,7 @@
     {
       "path": "ophiolite/contracts/scientific/v1/shale-volume-methods.json",
       "sha256": "8454fab9d1f4ab62e9e097042314bfe838bdf1353c6f50bb11ae53b23daf18f5",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/scientific/v1/shale-volume-methods.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1437,7 +1437,7 @@
     {
       "path": "ophiolite/contracts/scientific/v1/well-curve-schema.json",
       "sha256": "0e87a51188f5a59b9c8b841001fd0167b82966f33d8214ea2f68cf444411571f",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/scientific/v1/well-curve-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1446,7 +1446,7 @@
     {
       "path": "ophiolite/contracts/table-target-schema.json",
       "sha256": "b53812f9e2ef953c5befdf19825f67d18ff26130beb15b312a5cd3fc9e312d8a",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/table-target-schema.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1455,7 +1455,7 @@
     {
       "path": "ophiolite/contracts/targets/v1/deviation-survey.json",
       "sha256": "63c5153667a8b6199ee1158da4a14d91b1a647ed3a100800923fa182b1d7deba",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/targets/v1/deviation-survey.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1464,7 +1464,7 @@
     {
       "path": "ophiolite/contracts/targets/v1/point-set.json",
       "sha256": "1944e9cac2ddda161528dc6d53cabbf54fd548cb35925e2ed122034dd941494b",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/targets/v1/point-set.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1473,7 +1473,7 @@
     {
       "path": "ophiolite/contracts/targets/v1/table.json",
       "sha256": "9dd40245f54e1c0fc2db208c3bede8e9cc5856b5b56d8dc741d3f0e0ef7ff505",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/targets/v1/table.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1482,7 +1482,7 @@
     {
       "path": "ophiolite/contracts/targets/v1/time-depth.json",
       "sha256": "a08a1e9d1d510c71909b7712af15001f4c3dc7b59e41998c64c0a929f7997d3f",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/targets/v1/time-depth.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1491,7 +1491,7 @@
     {
       "path": "ophiolite/contracts/targets/v1/well-tops.json",
       "sha256": "f005b925af4d1ab7b0d5662764df57b61e848c12a4f352e7d933df9a707c3d9a",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/targets/v1/well-tops.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1500,7 +1500,7 @@
     {
       "path": "ophiolite/contracts/targets/v1/wells.json",
       "sha256": "944f91c8b69c216472d097a7294a413971d9cf42e1e71a50f9260a0102d9336a",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/targets/v1/wells.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1509,7 +1509,7 @@
     {
       "path": "ophiolite/contracts/tools/generate.py",
       "sha256": "aa891a6fedc8e02ecdb65d4c8c57fca6a093307a1390b1739f5016744fcf7caa",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/tools/generate.py",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1518,7 +1518,7 @@
     {
       "path": "ophiolite/contracts/vocabulary/v1/coordinate-systems.NOTICE",
       "sha256": "d24b92a1d2ea3ce26dc710c08bfed2462c0613b4e54a845ce1a39378d3f9e544",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/vocabulary/v1/coordinate-systems.NOTICE",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1527,7 +1527,7 @@
     {
       "path": "ophiolite/contracts/vocabulary/v1/coordinate-systems.json",
       "sha256": "a75a8e41e683add35614c5a41fbded03196879cb5e9fda0f0090d09a108aa55a",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/vocabulary/v1/coordinate-systems.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1536,7 +1536,7 @@
     {
       "path": "ophiolite/contracts/vocabulary/v1/mapping-check-words.json",
       "sha256": "19050b87e0df0fec6d128eb1476fa24943e0d3a8f63422737778d602dddf5f33",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/vocabulary/v1/mapping-check-words.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1545,7 +1545,7 @@
     {
       "path": "ophiolite/contracts/vocabulary/v1/quantities.json",
       "sha256": "308295d26f401fb315634de6874c9f1af933979b5d1974ed1adf8b96c18e5c3e",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/vocabulary/v1/quantities.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1554,7 +1554,7 @@
     {
       "path": "ophiolite/contracts/vocabulary/v1/vocabulary.json",
       "sha256": "6deb7e13f3e7a45fe9b57e70909a62d037f7d90fd826985a724fda457716eb2e",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/vocabulary/v1/vocabulary.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1811,7 +1811,7 @@
     {
       "path": "ophiolite/contracts/scientific/v1/derivation.json",
       "sha256": "3d69cf73ee9c4427fb0c71104cc8eccc761c3cf8c2d5556b4d8a7b92b2f46309",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/scientific/v1/derivation.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1820,7 +1820,7 @@
     {
       "path": "ophiolite/contracts/scientific/v1/parameter-labels.json",
       "sha256": "eb754ba7e1a7297af0d9134917d4d59ed81fec9befaf3db5648d122e7dbf1041",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/scientific/v1/parameter-labels.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1829,7 +1829,7 @@
     {
       "path": "ophiolite/contracts/scientific/v1/parameters.json",
       "sha256": "fff5ca13eb44de6a216ee1404aa509efd590c1f6c1402cc09ea349b52fee7aa7",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/scientific/v1/parameters.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
@@ -1865,11 +1865,686 @@
     {
       "path": "ophiolite/contracts/scientific/v1/check.json",
       "sha256": "9a0f56a08a665b4110de98d05badeffc37a5e782d597ac48dbc1a95e95b3dfc7",
-      "source_commit": "5e52b9009fe8cdb8363c5b46f49a2165712d51af",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
       "origin": "Ophiolite Platform contracts/scientific/v1/check.json",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
       "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/README.md",
+      "sha256": "899d058eb116379d390ebe013a7ea56e1d07e852a3f50a7975f190e62e48555d",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/README.md",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/bundles/depth-shift/procedure.json",
+      "sha256": "5549b9196f43cd5e6ec56424fc54a0aea1161c69b4e25fd8616cac28d9b0997f",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/bundles/depth-shift/procedure.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/bundles/depth-shift/procedure.py",
+      "sha256": "c0fb8e97d93b4f1122072c8308111d5c24032db371df6733291fadb71bf7a5a1",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/bundles/depth-shift/procedure.py",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/bundles/team-las/README.md",
+      "sha256": "44e6e5159430a1f3eab49bf2888ef3c78989f95f4c99786b883f5d09ec209286",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/bundles/team-las/README.md",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/bundles/team-las/procedure.json",
+      "sha256": "69afe2531c7934c02b0b2868767f21d1c070b8fe6d7a16a751846427a9c8ab48",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/bundles/team-las/procedure.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/bundles/team-las/reader/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/bundles/team-las/reader/__init__.py",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/bundles/team-las/reader/main.py",
+      "sha256": "e1f8e49a44dfd6bf3ff4d432b39bd69756d56ca3e0d9ec63cb9accce6a080903",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/bundles/team-las/reader/main.py",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/expected.json",
+      "sha256": "8d81c391ba95170f010c6d87ec347b3d30e828af7cead89a416c07d64b3ef6fd",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/expected.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/bad-name.json",
+      "sha256": "464a40af28b9498f16cced1dc057d047407762a2b995d5d2f55d059f9285c8f9",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/bad-name.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/boolean-default-text.json",
+      "sha256": "ab5f86266449a4c1306b53dc0ed2b02f3d38c0ac2cc17728178c3fe108cf8195",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/boolean-default-text.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/bounds-reversed.json",
+      "sha256": "e54042407b60dfed8b0ce230676b45176b4a15a02555ba938ff7e3953824b7ce",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/bounds-reversed.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/cardinality-some.json",
+      "sha256": "847c02bbc921f6ff9a50ae12ec780c60729c7ef4c6bdb15acf5ddf0759921455",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/cardinality-some.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/check-delivery-output.json",
+      "sha256": "21cf38bdbb9d6c20d56ca79274966ecb79e66e3c09fe2c86f788cc72a506e784",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/check-delivery-output.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/check-reference-url.json",
+      "sha256": "ae124e2f2c689f1d2467cdfde4f0da4986626d92291cad1a83f9496fb9dcdc4a",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/check-reference-url.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/check-two-versions.json",
+      "sha256": "72567370252764f121497a2e74e2e60b600828b6ac4bd47fc44636fb8eaa1db2",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/check-two-versions.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/choice-default-is-label.json",
+      "sha256": "2f860fda10cb8f310ef9fb3cedf126c46c8ebd555852ea29b750f738df7af8c0",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/choice-default-is-label.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/choice-label-engineering.json",
+      "sha256": "ced9b40da1d492ce527e09f7a73892f93450f3c8600c35d004432342b8da0a86",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/choice-label-engineering.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/choice-label-snake.json",
+      "sha256": "0327b1f1cfbb35a02030f4d585ba31ea37dba4b6d621431dcf0588be356353bf",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/choice-label-snake.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/choice-only-one.json",
+      "sha256": "cb1b389753395459c77945f9916f75598b33492126765b895bdb429c248a3fe9",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/choice-only-one.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/default-outside-bounds.json",
+      "sha256": "dae3a1989d6827ed4858ea2c3801cf6fe7aed0ef0107a1cb85a817a1b4f511c6",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/default-outside-bounds.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/delivery-with-kind.json",
+      "sha256": "761ea8f56c9cad436d728e55311f81240ee2b4dfada2f20b49df1ecc671f8106",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/delivery-with-kind.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/digest-typed.json",
+      "sha256": "0a1ab4edf0479f03784de0094c0aec5ad8b3f45b2cd658b4185b2f12483a14a7",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/digest-typed.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/duplicate-key.json",
+      "sha256": "e6265159c0ffe880e6d9d8d5d0531ce3e924a78479e89a95053c202594495048",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/duplicate-key.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/duplicate-role.json",
+      "sha256": "d09eb08a673032c1a33554cf769dbe3cc1859f031b0631a0b13789bc13e86e22",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/duplicate-role.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/duplicate-slot.json",
+      "sha256": "34ffce8c81d22cd2fc95d86913309938eb453035846c55e0674b7125c1f84e64",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/duplicate-slot.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/entry-missing-file.json",
+      "sha256": "88cf6d549eea558914224f3699b0c0b93b48c2d24d019c8ab10f5ee7fc39d059",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/entry-missing-file.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/entry-no-function.json",
+      "sha256": "702408bf800f1394a04fea1d1e4ad2b09bba0cc1452fc7fdbe2067be850e4d93",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/entry-no-function.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/extension-without-dot.json",
+      "sha256": "8bf9f185ad1bbd6d77605b4418492812000c2be6515499301e7c057c3f3c0650",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/extension-without-dot.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/head-pattern-double-anchor.json",
+      "sha256": "231cfc179bcb526de036b9d4eea3e9432bb14f747308fbbacaa6beba81014d83",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/head-pattern-double-anchor.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/head-pattern-regex.json",
+      "sha256": "6cb660825e125510f9ccc9ad1d412ca11b40f3cdef3c32e6479cff9d7540894b",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/head-pattern-regex.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/inputs-empty.json",
+      "sha256": "43bfa1778da764c1748af782673d253b6771f466864c71cccec2bbb6ba3b452c",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/inputs-empty.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/integer-default-fraction.json",
+      "sha256": "f576628e453e20c29e78ff22e7b9f82a1e701ece1a7d7a233299ae958982933f",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/integer-default-fraction.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/label-dotted.json",
+      "sha256": "d5c18bfc65dbc94a55215148c18e5074a6d519ca78b4fa393e256cfab2434fff",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/label-dotted.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/label-email.json",
+      "sha256": "09bdf2b5117221070c49b8ef66ca231e63691397b10bf0363f91fd6205ffe9e9",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/label-email.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/label-engineering.json",
+      "sha256": "d55427cd66159f76ab24a37ba9fd78dd9066e99373e44d4a63015f0f07c21f22",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/label-engineering.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/label-kebab.json",
+      "sha256": "05a83a2a5596b74316f9f41158b3e6359e9ee7b0d6ef36fd725e067b5b246564",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/label-kebab.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/max-head-bytes-65537.json",
+      "sha256": "6cadbd72757677c7d8518f4c94abb7c8e9846dbf999e1163dfefc0704630a8f3",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/max-head-bytes-65537.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/missing-label.json",
+      "sha256": "99be6334d1d6c5efa1c02ffa8e70aed9afff7804ec7c3a9f2ec509d9ef3d8e79",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/missing-label.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/nan-default.json",
+      "sha256": "da33d29683ab25a14504fc2447e8eff0e597e273573a71f90c87e4807ddfc089",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/nan-default.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/process-input-segy.json",
+      "sha256": "c83f2890672f20ad9a52e4b685ea079223247075feac9a30573721521739f13b",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/process-input-segy.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/process-output-segy.json",
+      "sha256": "d65b67d38c1c0e5af968e95849e4524827b4acc23d8d92251aa41ca709f8ba16",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/process-output-segy.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/process-with-file-input.json",
+      "sha256": "d3bc6821acb8cef7fde101c658648572db8ec4c6f9f1626ab6edae41a34c2e92",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/process-with-file-input.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/read-output-synthetic.json",
+      "sha256": "27ac1d367d6433d16a901f5679c9d72be9d6866499044bc62e7e2acfde3a49ed",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/read-output-synthetic.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/read-two-inputs.json",
+      "sha256": "2750fb507b0236724f9122dbcbf5681e727e8a0348b3bbdaa3ff11840a7feec5",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/read-two-inputs.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/read-with-version-input.json",
+      "sha256": "4d8f2b8594cda54b1ff95d67c7816d843b33058835ab44664e9dc57ef49db3ca",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/read-with-version-input.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/repeated-key.json",
+      "sha256": "77a4f2f9905750e1dbcdad98acfc910500ea154f43649ba921ab1fc75fcb1840",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/repeated-key.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/role-label-engineering.json",
+      "sha256": "721121572ca1aacbf460de02928dd5ae155c7a7a93d42ddb8dbe007efa3f86e2",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/role-label-engineering.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/send-input-volume.json",
+      "sha256": "55f947b5ab034b2185d851baa7872abd8307e3488c343d131a2f082de466ae24",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/send-input-volume.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/send-two-deliveries.json",
+      "sha256": "9af7f8a68a03706a64545c2b222394161c9a3f7a60abede19d75e1b3d2dc9561",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/send-two-deliveries.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/send-version-output.json",
+      "sha256": "1d1f90289e608d9e60e243acdabb369e7599524e79f10be5a2bea1bbe57bcc0d",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/send-version-output.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/setting-label-engineering.json",
+      "sha256": "b6800fbcbc3427dd44333fdbb5a4c02113d4df68a5a32320fb2802f6ddf3fafc",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/setting-label-engineering.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/setting-label-snake.json",
+      "sha256": "397790f0fba4e786d0077c3b6a5263a270340b44bf6378889d6611fe3c00e150",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/setting-label-snake.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/setting-unknown-field.json",
+      "sha256": "24e626b1a43d6c883c7ee679a3c7c74480dd083b3e6bda8db66dbae3f381e658",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/setting-unknown-field.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/slot-label-snake.json",
+      "sha256": "ba6ee22bae0c53839580ea0db3e4db99f058cc5f836a32be2cb8c2ebc81f0c25",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/slot-label-snake.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/source-config-key.json",
+      "sha256": "e338c963e8ea63c587b1556623d9531bb29747467d9bf33160a2f1555ded823b",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/source-config-key.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/source-label-credential.json",
+      "sha256": "875eaddf3f40c0606e0946dcae448ca2eb2cc75703d654fb072443751c705bd4",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/source-label-credential.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/step-unknown.json",
+      "sha256": "e0c31098e6a9ee0cd7f25ca2dc3f3069c72ee4ddcc290607fff2531b70eac5db",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/step-unknown.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/type-float.json",
+      "sha256": "e6d01a4af527e4f27bb98599bd9ef74569c754b2bc26d09d035893612391a521",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/type-float.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/unit-empty.json",
+      "sha256": "971e02d59c7645adeda221f120473e78046c1807e040d3887651f79e64e015c0",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/unit-empty.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/unit-outside-list.json",
+      "sha256": "341361539ae02ce87e575c44ba63a271621af8a82b6c9d39a1479a4d7605f1cc",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/unit-outside-list.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/unknown-field-runner.json",
+      "sha256": "4583f635f94f3f7524125431f3f1cafe85218239515f808658e7c704950d14bc",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/unknown-field-runner.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/version-boolean.json",
+      "sha256": "e467fa7857671d8f219afa96e55d4a11f73629201d6d904fed68ea0e9436974f",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/version-boolean.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/version-label-engineering.json",
+      "sha256": "73c9c6c8052995c7e4ce9d8d13bbf46bc14cbccc76bacdd19195f9cf3a032549",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/version-label-engineering.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/version-label-snake.json",
+      "sha256": "4c7f2c789960b9fc6a20a56b8cf3e883767981dc009e2a038b55af598c44a79a",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/version-label-snake.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/version-zero.json",
+      "sha256": "78f42c7ed14da5afc0e7ccf79d33a199d6a493db9ea04fa67c211419f57ffdbd",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/version-zero.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/invalid/wrong-schema.json",
+      "sha256": "baaf25f02cf4ed7b13583df9b94550c3734d9d4ae538a3cf59a556942f3d5613",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/invalid/wrong-schema.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/valid/check.json",
+      "sha256": "584dc17c21f6e4ec61b59a8c93c33c75d3d5ccbd25d118b8a05a9b93e7ec851b",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/valid/check.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/valid/process.json",
+      "sha256": "5549b9196f43cd5e6ec56424fc54a0aea1161c69b4e25fd8616cac28d9b0997f",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/valid/process.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/valid/read.json",
+      "sha256": "69afe2531c7934c02b0b2868767f21d1c070b8fe6d7a16a751846427a9c8ab48",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/valid/read.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/valid/send.json",
+      "sha256": "8e478c71f8a03a480f188731bcbed20856f90efebc8c1b9836f71bb6ed28a101",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/valid/send.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/fixtures/valid/source.json",
+      "sha256": "eea27998ddb3a2f1c2987395722767cb2fb2cf66904d2bbd7a1e1993a01e4b8a",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/fixtures/valid/source.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/procedure-schema.json",
+      "sha256": "02f5936a610d29ee049ecd0c7d6bb91613e2621223d918fb4708e88dcf25e6f5",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/procedure-schema.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/procedure.py",
+      "sha256": "aea8086c0f3574ea7dca428d54e60c151ee32def91a0ea5355705514cd980193",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/procedure.py",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/procedures/v1/rules.json",
+      "sha256": "8b605990b6669fa1b4ed438d404af9036345d1a4a4ad9d5a64c52b67d4e99832",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/procedures/v1/rules.json",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "ophiolite/contracts/vocabulary/v1/labels.py",
+      "sha256": "dcec61595492c0ef89a8061da5a6368522b79d55040041d84a4f1cf001ef3872",
+      "source_commit": "40c56dd8e3824592b0554a41622597b3188e68a8",
+      "origin": "Ophiolite Platform contracts/vocabulary/v1/labels.py",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
     }
   ]
 }

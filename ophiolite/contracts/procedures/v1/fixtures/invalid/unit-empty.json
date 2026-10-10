@@ -1,0 +1,79 @@
+{
+  "schema": "ophiolite.procedure/1",
+  "name": "depth-shift",
+  "label": "Shift tops by a fixed depth",
+  "version": 1,
+  "version_label": "First release",
+  "step": "process",
+  "inputs": [
+    {
+      "slot": "tops",
+      "label": "Tops to shift",
+      "class": "version",
+      "kinds": [
+        "well-tops-csv/1"
+      ],
+      "cardinality": "one"
+    }
+  ],
+  "outputs": [
+    {
+      "role": "shifted",
+      "label": "Shifted tops",
+      "class": "version",
+      "kind": "well-tops-csv/1"
+    }
+  ],
+  "settings": [
+    {
+      "key": "shift",
+      "label": "Depth shift",
+      "type": "number",
+      "unit": "",
+      "default": 0,
+      "minimum": -1000,
+      "maximum": 1000
+    },
+    {
+      "key": "mode",
+      "label": "How to shift",
+      "type": "choice",
+      "default": "add",
+      "choices": [
+        {
+          "value": "add",
+          "label": "Add the shift"
+        },
+        {
+          "value": "subtract",
+          "label": "Subtract the shift"
+        }
+      ]
+    },
+    {
+      "key": "count",
+      "label": "Number of passes",
+      "type": "integer",
+      "default": 1,
+      "minimum": 1,
+      "maximum": 10
+    },
+    {
+      "key": "note",
+      "label": "Note for the record",
+      "type": "string",
+      "default": ""
+    },
+    {
+      "key": "keep",
+      "label": "Keep empty tops",
+      "type": "boolean",
+      "default": false
+    }
+  ],
+  "entry": "procedure:shift",
+  "requires": [
+    "numpy>=1.24"
+  ],
+  "licence": "MIT"
+}

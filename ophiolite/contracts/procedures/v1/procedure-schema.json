@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/procedures/v1/procedure-schema.json",
+  "title": "Procedure",
+  "description": "The structure of procedure.json (ophiolite.procedure/1, E105a). Structure only: the per-step classes, the literal kind lists, the label rule and the sentences are applied by procedures/v1/procedure.py with rules.json, which is the validator of record.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "name", "label", "version", "step", "inputs", "outputs", "entry"],
+  "properties": {
+    "schema": {"const": "ophiolite.procedure/1"},
+    "name": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,62}(/[a-z0-9][a-z0-9-]{0,62})?$"},
+    "label": {"$ref": "#/$defs/text"},
+    "version": {"type": "integer", "minimum": 1, "maximum": 1000000},
+    "version_label": {"$ref": "#/$defs/text"},
+    "step": {"enum": ["read", "source", "process", "send", "check"]},
+    "inputs": {"type": "array", "minItems": 1, "maxItems": 16, "items": {"$ref": "#/$defs/input"}},
+    "outputs": {"type": "array", "minItems": 1, "maxItems": 16, "items": {"$ref": "#/$defs/output"}},
+    "settings": {"type": "array", "maxItems": 32, "items": {"$ref": "#/$defs/setting"}},
+    "entry": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)*:[A-Za-z_][A-Za-z0-9_]*$"},
+    "requires": {"type": "array", "maxItems": 32, "items": {"$ref": "#/$defs/text"}},
+    "licence": {"$ref": "#/$defs/text"}
+  },
+  "$defs": {
+    "text": {"type": "string", "minLength": 1, "maxLength": 100},
+    "identifier": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,31}$"},
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["slot", "label", "class"],
+      "properties": {
+        "slot": {"$ref": "#/$defs/identifier"},
+        "label": {"$ref": "#/$defs/text"},
+        "class": {"enum": ["file", "system", "version", "reference"]},
+        "signature": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["extensions", "head_patterns", "max_head_bytes"],
+          "properties": {
+            "extensions": {"type": "array", "minItems": 1, "maxItems": 16, "uniqueItems": true, "items": {"type": "string", "pattern": "^\\.[a-z0-9]{1,10}$"}},
+            "head_patterns": {"type": "array", "maxItems": 16, "items": {"$ref": "#/$defs/text"}},
+            "max_head_bytes": {"type": "integer", "minimum": 1, "maximum": 65536}
+          }
+        },
+        "config_keys": {"type": "array", "maxItems": 32, "uniqueItems": true, "items": {"$ref": "#/$defs/identifier"}},
+        "kinds": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+        "cardinality": {"enum": ["one", "many"]},
+        "from": {"enum": ["file", "version"]}
+      }
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "label", "class"],
+      "properties": {
+        "role": {"$ref": "#/$defs/identifier"},
+        "label": {"$ref": "#/$defs/text"},
+        "class": {"enum": ["version", "delivery", "comparison"]},
+        "kind": {"type": "string"}
+      }
+    },
+    "setting": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "label", "type"],
+      "properties": {
+        "key": {"$ref": "#/$defs/identifier"},
+        "label": {"$ref": "#/$defs/text"},
+        "type": {"enum": ["number", "integer", "string", "choice", "boolean"]},
+        "unit": {"type": "string"},
+        "default": {},
+        "minimum": {"type": "number"},
+        "maximum": {"type": "number"},
+        "choices": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 32,
+          "items": {"type": "object", "additionalProperties": false, "required": ["value", "label"],
+                    "properties": {"value": {"$ref": "#/$defs/identifier"}, "label": {"$ref": "#/$defs/text"}}}
+        }
+      }
+    }
+  }
+}

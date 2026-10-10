@@ -1,0 +1,33 @@
+{
+  "schema": "ophiolite.procedure/1",
+  "name": "team-las",
+  "label": "Read our team's LAS files",
+  "version": 3,
+  "step": "process",
+  "inputs": [
+    {
+      "slot": "file",
+      "label": "LAS file",
+      "class": "file",
+      "signature": {
+        "extensions": [
+          ".las"
+        ],
+        "head_patterns": [
+          "^~Version",
+          "VERS."
+        ],
+        "max_head_bytes": 4096
+      }
+    }
+  ],
+  "outputs": [
+    {
+      "role": "log",
+      "label": "Well log",
+      "class": "version",
+      "kind": "las2/1"
+    }
+  ],
+  "entry": "reader.main:read"
+}

@@ -1,0 +1,28 @@
+{
+  "schema": "ophiolite.procedure/1",
+  "name": "send-tops",
+  "label": "Send tops to the partner",
+  "version": 1,
+  "step": "send",
+  "inputs": [
+    {
+      "slot": "tops",
+      "label": "Tops to send",
+      "class": "version",
+      "kinds": [
+        "well-tops-csv/1",
+        "las2/1"
+      ],
+      "cardinality": "many"
+    }
+  ],
+  "outputs": [
+    {
+      "role": "copy",
+      "label": "Copy",
+      "class": "version",
+      "kind": "las2/1"
+    }
+  ],
+  "entry": "procedure:send"
+}

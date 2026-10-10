@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.27.0",
+  "version": "1.28.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -21,7 +21,7 @@
   "schemas": [
     {
       "id": "ophiolite.contracts-registry/1",
-      "version": "1.5.0",
+      "version": "1.6.0",
       "lifecycle": "preview",
       "path": "registry-schema.json",
       "title": "ContractsRegistry",
@@ -1056,6 +1056,30 @@
       "kind": "policy",
       "path": "docs/api-versioning.md",
       "title": "API versions and deprecation: what the version numbers mean, additive changes, and the transition every breaking change needs"
+    },
+    {
+      "id": "ophiolite.label-rule/1",
+      "kind": "vocabulary",
+      "path": "vocabulary/v1/labels.py",
+      "title": "The one rule for a label a person reads, and the words kept for technical details; standard-library Python loaded from its source text (E93, E96, E105a)"
+    },
+    {
+      "id": "ophiolite.procedure/1",
+      "kind": "procedure",
+      "path": "procedures/v1/procedure-schema.json",
+      "title": "The structure of a procedure's procedure.json: name, label, version, step, inputs, outputs, settings and entry (E105a)"
+    },
+    {
+      "id": "ophiolite.procedure-rules/1",
+      "kind": "procedure",
+      "path": "procedures/v1/rules.json",
+      "title": "What each procedure step may read and make, units, limits and every sentence of the procedure validator, under one rules_version (E105a)"
+    },
+    {
+      "id": "ophiolite.procedure-validator/1",
+      "kind": "procedure",
+      "path": "procedures/v1/procedure.py",
+      "title": "The one procedure validator, bundle digest and archive check, run alike by the Platform and the SDK; never imports a procedure (E105a)"
     },
     {
       "id": "ophiolite.quantities/1",

@@ -1,0 +1,32 @@
+{
+  "schema": "ophiolite.procedure/1",
+  "name": "compare-log",
+  "label": "Compare a log with the vendor's file",
+  "version": 1,
+  "step": "check",
+  "inputs": [
+    {
+      "slot": "log",
+      "label": "Our log",
+      "class": "version",
+      "kinds": [
+        "las2/1"
+      ],
+      "cardinality": "one"
+    },
+    {
+      "slot": "vendor",
+      "label": "Vendor file",
+      "class": "reference",
+      "from": "url"
+    }
+  ],
+  "outputs": [
+    {
+      "role": "result",
+      "label": "Comparison",
+      "class": "comparison"
+    }
+  ],
+  "entry": "procedure:compare"
+}
