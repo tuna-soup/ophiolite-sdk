@@ -86,9 +86,10 @@ def test_loading_writes_nothing_into_the_snapshot_and_it_stays_exact(tmp_path):
     out = subprocess.run([sys.executable, '-c', probe, str(FIXTURES / 'bundles/team-las')], env=env, capture_output=True, text=True, cwd=tmp_path)
     assert out.stdout.strip() == 'True', out.stderr
     assert state() == before
-    platform = REPO.parent / 'ophiolite-platform'
+    checkout = Path(__file__).resolve().parents[1]  # the SDK checkout these tests come from (REPO is site-packages when installed)
+    platform = checkout.parent / 'ophiolite-platform'
     if not (platform / 'contracts').is_dir(): pytest.skip('no Platform checkout beside the SDK to check the snapshot against')
-    check = subprocess.run([sys.executable, 'tools/sync_contracts.py', '--check', '--source', str(platform)], cwd=REPO, env=env, capture_output=True, text=True)
+    check = subprocess.run([sys.executable, 'tools/sync_contracts.py', '--check', '--source', str(platform)], cwd=checkout, env=env, capture_output=True, text=True)
     assert check.returncode == 0, check.stdout + check.stderr
 
 
