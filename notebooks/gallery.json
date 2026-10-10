@@ -65,6 +65,13 @@
       "data": "A synthetic five-sample gamma-ray log, or a log in your project; publishing creates a result only you can see until you share it."
     },
     {
+      "slug": "open-it-here",
+      "title": "Open it here",
+      "sentence": "Publish a result, open its exact version in the Workspace from the notebook, and add the next version with its Send again line, which refuses once someone else added one first.",
+      "modes": ["synthetic", "live"],
+      "data": "A synthetic five-sample gamma-ray log, or a log in your project; publishing creates a result only you can see until you share it."
+    },
+    {
       "slug": "layers-for-a-gis",
       "title": "Layers for a GIS",
       "sentence": "Read the layers QGIS opens from your project, every collection page by page, see why a path is not placed, and draw the wellbore paths in plan view.",

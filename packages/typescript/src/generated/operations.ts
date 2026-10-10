@@ -86,12 +86,13 @@ type WireEvidenceModel = { "provider": string; "id": string; "label"?: (string) 
 type WireExactRevision = { "asset_id": string; "revision": string };
 type WireExecution = { "plan": string; "agent": string; "delegator": string; "operation": string; "command_id": (string) | (null); "run_id": (string) | (null); "state": string; "response_sha256": (string) | (null); "reserved_at": number; "completed_at": (number) | (null); "approved_by": (string) | (null); "evidence"?: (string) | (null) };
 type WireFileIn = { "path": string; "bytes": number; "sha256": string; "decisions"?: (Record<string, unknown>) | (null); "suggested"?: Array<string>; "confirmed"?: Array<string>; "well_log"?: (WireWellLogRef) | (null) };
+type WireFoundInvitation = { "invitation": string; "organization": string; "sender": (string) | (null); "generation": string; "expires_at": string };
 type WireGroupMember = { "asset_id": string; "name": (string) | (null); "head_revision": string; "revision_count": number };
 type WireIdentity = { "authority"?: (string) | (null); "key"?: (string) | (null); "provisional": boolean };
 type WireIdentityChange = { "actor": string; "at": string; "before": WireIdentity; "after": WireIdentity };
 type WireImportWarning = { "sentence": string; "actor": "deployment-administrator" | "organisation-owner" | "project-administrator" | "connection-administrator" | "you"; "remedy": string; "docs": string; "reason"?: ("missing" | "not-a-file" | "insecure-mode" | "unreadable" | "malformed") | (null); "code": "identifiers-not-declared" };
 type WireInventoryItem = { "asset_id": string; "kind": (string) | (null); "authority": string; "revision": string; "name": (string) | (null); "can_reuse": (boolean) | (null); [key: string]: unknown };
-type WireInvitationRow = { "id": string; "email": string; "expires_at": string; "accepted_by": (string) | (null); "revoked": boolean; "delivery": (string) | (null); "error_code": (string) | (null) };
+type WireInvitationRow = { "id": string; "email": string; "expires_at": string; "accepted_by": (string) | (null); "revoked": boolean; "declined_at": (string) | (null); "delivery": (string) | (null); "error_code": (string) | (null) };
 type WireJob = { "id": string; "project": string; "submitter": string; "agent": (string) | (null); "plan": (string) | (null); "run_id": string; "state": string; "reason": (string) | (null); "exit_code": (number) | (null); "logs": (string) | (null); "attempts": number; "result"?: (Record<string, unknown>) | (null); "created_at": number; "started_at": (number) | (null); "finished_at": (number) | (null); "command_id": string; "script_sha256": string; "limits": Record<string, unknown> };
 type WireLASInspection = { "sha256": string; "bytes": number; "profile": "las2/1"; "well": string; "samples": number; "depth": Record<string, unknown>; "curves": Array<WireCurveInspection>; "warnings": Array<string> };
 type WireLeftOrganization = { "left": true; "members": Array<unknown> };
@@ -148,7 +149,7 @@ type WireOrgConnectionProjectUse = { "project_id": string; "selections": number 
 type WireOrgConnectionYou = { "use": boolean; "administer": boolean; "signed_in": boolean };
 type WireOrganizationDetail = { "id": string; "name": string; "role": "owner" | "member"; "members": Array<WireOrganizationMember> };
 type WireOrganizationEntry = { "id": string; "name": string; [key: string]: unknown };
-type WireOrganizationEvent = { "sequence": number; "actor_id": string; "action": string; "target_id": (string) | (null); "detail": (string) | (null); "recorded_at": string };
+type WireOrganizationEvent = { "sequence": number; "actor_id": (string) | (null); "action": string; "target_id": (string) | (null); "detail": (string) | (null); "recorded_at": string };
 type WireOrganizationMember = { "user_id": string; "name": string; "role": "owner" | "member" };
 type WireOrganizationRow = { "id": string; "name": string; "role": "owner" | "member"; "archived": boolean };
 type WirePackageMember = { "name": string; "role": "primary" | "crs-metadata" | "readme" | "companion"; "bytes": number; "sha256": string };
@@ -411,6 +412,14 @@ export function postOrganizationsDetail(transport: Transport, input: postOrganiz
 export type postOrganizationsHistoryInput = { body: { "organization_id": string; [key: string]: unknown }; options?: OperationOptions };
 export function postOrganizationsHistory(transport: Transport, input: postOrganizationsHistoryInput): Promise<{ "events": Array<WireOrganizationEvent> }> {
   return transport.request<{ "events": Array<WireOrganizationEvent> }>("POST", "/api/v1/organizations/history", {}, undefined, input.body, input.options, null, false);
+}
+export type postOrganizationsInvitationDeclineInput = { body: { "invitation": string; "generation": string; [key: string]: unknown }; options?: OperationOptions };
+export function postOrganizationsInvitationDecline(transport: Transport, input: postOrganizationsInvitationDeclineInput): Promise<{ "declined": boolean }> {
+  return transport.request<{ "declined": boolean }>("POST", "/api/v1/organizations/invitation-decline", {}, undefined, input.body, input.options, null, false);
+}
+export type postOrganizationsInvitationsForMeInput = { body: Record<string, never>; options?: OperationOptions };
+export function postOrganizationsInvitationsForMe(transport: Transport, input: postOrganizationsInvitationsForMeInput): Promise<{ "invitations": Array<WireFoundInvitation> }> {
+  return transport.request<{ "invitations": Array<WireFoundInvitation> }>("POST", "/api/v1/organizations/invitations-for-me", {}, undefined, input.body, input.options, null, false);
 }
 export type postOrganizationsInviteCreateInput = { body: { "organization_id": string; "email": string; [key: string]: unknown }; options?: OperationOptions };
 export function postOrganizationsInviteCreate(transport: Transport, input: postOrganizationsInviteCreateInput): Promise<{ "id": string; "email": string; "delivery": "queued" | "manual"; "url": string }> {
