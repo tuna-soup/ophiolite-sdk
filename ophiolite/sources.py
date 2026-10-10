@@ -23,7 +23,7 @@ import json
 
 from .errors import (Refused, SourceChecksumMismatch, SourceNotFound, SourceNotSupported, SourceRevisionDiffers, VerificationFailed,
                      SOURCE_GUIDE)
-from .models.api import SourceExportAnswer, SourceSelectionsPage
+from .models.api import OrgConnectionsPage, SourceExportAnswer, SourceSelectionsPage
 
 SUPPORTED = 'sql-wells/1'
 MAPPED = ('well_id', 'name', 'operator', 'x', 'y', 'depth')
@@ -175,6 +175,16 @@ class SourceDescription:
 
 
 class SourceClient:
+    def org_connections(self, organization):
+        """E39: the organisation's database connections you use or administer, each with your own readiness (with an
+        access key, only those you use, in the organisation of its project). Sign-ins and passwords are never answered."""
+        from .publish import json_bytes
+        if not isinstance(organization, str) or not organization: raise Refused('Name the organisation by its id.')
+        answer = self._post_bytes('org-connections', 'list', json_bytes({'organization_id': organization}), retry=True)
+        page = _checked(OrgConnectionsPage, answer, 'organisation connection listing')
+        if page['organization_id'] != organization: raise VerificationFailed('The organisation connection listing answered for another organisation.')
+        return page['connections']
+
     def sources(self):
         """The source selections you bound in this project (every profile), each with its state and exact revision.
         Selections other members bound are not listed."""

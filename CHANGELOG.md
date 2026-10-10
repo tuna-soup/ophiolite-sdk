@@ -14,6 +14,12 @@ No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
   refused with a sentence; pass a path. Portable bundles carry GeoJSON and GeoPackage feature sets and the new grid
   formats at 2.7.0; a Shapefile-read feature set is not exported yet (its companion files), and a CPS-3 grid is
   imported by uploading its file again.
+- Organisation connections (E39, preview API): `client.org_connections(organization_id)` lists the organisation's
+  database connections you use or administer (with an access key, only those you use, in the organisation of its
+  project), each with your own access and readiness; it reads the projectless `/api/v1/org-connections/list` and
+  refuses an answer outside its shape or for another organisation (`VerificationFailed`). Sign-ins and passwords are
+  never answered. Command line: `ophiolite org-connections list --organization ID [--json]`.
+
 - Agents on the record (E95): `AgentClient.propose(..., evidence={instruction, model, conversation, client})` records
   what the person asked, the model the agent reports and where its conversation lives; `execute(..., evidence=id)` sends
   the record's id as `X-Ophiolite-Evidence`; `wait(plan, evidence_id=id)` returns only once the approval names that

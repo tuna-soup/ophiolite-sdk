@@ -119,7 +119,14 @@ RELEASE_OPERATIONS={'releases':{'list','get','download','download-snapshot'}}  #
 SESSION_OPERATIONS={'las-uploads':{'begin','part','state','finish','cancel'},'capabilities':{'describe'}}  # E54: a file sent in parts; the served limits
 
 
+# E39: an organisation's connections are not a project's; their routes carry no project (/api/v1/<area>/<op>).
+ORGANIZATION_OPERATIONS={'org-connections':{'list'}}
+
+
 def operation_path(project,area,operation):
+    if area in ORGANIZATION_OPERATIONS:
+        if operation not in ORGANIZATION_OPERATIONS[area]:raise Refused('Unsupported application operation.')
+        return '/api/v1/'+area+'/'+operation
     allowed=(GROUP_OPERATIONS if area=='result-groups' else READ_OPERATIONS|WRITE_OPERATIONS if area in ('applications','las-uploads')
              else ENTITY_OPERATIONS.get(area) or SOURCE_OPERATIONS.get(area) or MAP_OPERATIONS.get(area) or REPORT_OPERATIONS.get(area) or RESULT_OPERATIONS.get(area) or IMPORT_OPERATIONS.get(area) or RELEASE_OPERATIONS.get(area) or AI_OPERATIONS.get(area,set()))
     allowed=allowed|SESSION_OPERATIONS.get(area,set())
