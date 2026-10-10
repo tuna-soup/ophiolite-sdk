@@ -41,8 +41,7 @@ def vertical_depth(stations, mds, origin_tvd=None, survey_unit='m', log_unit='m'
     STATIONS are {'md', 'inclination', 'azimuth'} with an optional 'tvd' (the survey's own). A depth outside the survey
     is None and, past its end, counted in 'beyond'."""
     if survey_unit != log_unit:
-        raise Refused('The log is in %s and the survey in %s, so vertical depth cannot be drawn. Nothing is converted here.'
-                      % (log_unit, survey_unit))
+        raise Refused('The survey is in %s and the log in %s; change one to match first.' % (survey_unit, log_unit))
     if len(stations) < 2: raise Refused('The survey has one station; vertical depth needs at least two.')
     md = [float(s['md']) for s in stations]
     if any(b <= a for a, b in zip(md, md[1:])): raise Refused('The survey\'s measured depths do not increase, so vertical depth cannot be calculated.')
@@ -53,8 +52,8 @@ def vertical_depth(stations, mds, origin_tvd=None, survey_unit='m', log_unit='m'
     elif supplied[0] is not None: start = float(supplied[0])
     elif md[0] == 0: start = 0.0
     else:
-        raise Refused('The survey starts at measured depth %g %s and states no vertical depth there, so vertical depth cannot be '
-                      'calculated. A start of 0 is never assumed.' % (md[0], survey_unit))
+        raise Refused('The survey starts at %g %s and gives no vertical depth there, so its starting depth is not known.'
+                      % (md[0], survey_unit))
     tangents = [_tangent(s['inclination'], s['azimuth']) for s in stations]
     positions = [(0.0, 0.0, start)]
     for k in range(1, len(md)):
