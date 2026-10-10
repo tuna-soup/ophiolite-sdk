@@ -147,6 +147,20 @@ def parser():
             whole.add_argument('--project',dest='project',action='store_const',const=True,help='Also share with everyone in this project, including people who join later (derived publications)')
             whole.add_argument('--no-project',dest='project',action='store_const',const=False,help='Stop sharing with everyone in this project; the people named still see it')
             p.add_argument('--dry-run',action='store_true',help='Print the change without sending it or writing anything')
+    procs=sub.add_parser('procedures',help='Write, check and run your own procedures on this computer (offline; nothing is published)')  # E105a
+    steps=procs.add_subparsers(dest='procedure_action',required=True)
+    made=steps.add_parser('new',parents=[common],help='Write a starting procedure folder')
+    made.add_argument('folder',type=Path);made.add_argument('--step',required=True,choices=['read','source','process','send','check'])
+    made.add_argument('--label',required=True,help='What the procedure does, in words a person reads')
+    checked=steps.add_parser('validate',parents=[common],help='Say whether Ophiolite would accept a procedure folder, and why not')
+    checked.add_argument('folder',type=Path)
+    ran=steps.add_parser('run',parents=[common],help='Run a procedure on local files; writes its outputs and run.json into a new folder')
+    ran.add_argument('folder',type=Path);ran.add_argument('--output',type=Path,required=True,help='A new folder for the outputs')
+    ran.add_argument('--input',action='append',default=[],help='SLOT=PATH; repeat for each file')
+    ran.add_argument('--kind',action='append',default=[],help='SLOT=KIND: the type of data of a file that is not an earlier run\'s output')
+    ran.add_argument('--declared',action='append',default=[],help='SLOT=PATH: a JSON file of that data\'s declarations')
+    ran.add_argument('--system',action='append',default=[],help='SLOT=PATH: a local JSON file with a source\'s connection settings (never recorded)')
+    ran.add_argument('--setting',action='append',default=[],help='NAME=VALUE; once per setting')
     tables=sub.add_parser('targets',help='What each type of table needs: its fields, which are required and the choices that describe it (offline)')  # E86
     tables.add_argument('name',nargs='?',help='One type, for example well-tops')
     bundle=sub.add_parser('bundle',help='Check or summarize a portable bundle offline (no server or account needed)')
@@ -753,6 +767,43 @@ def _targets(args):
     return done(args,'\n'.join(lines),targets.document(args.name))
 
 
+def _slots(texts,flag,many=False):
+    """SLOT=VALUE texts as a dict (lists with many=True); a slot given twice to a one-value flag is a usage error."""
+    found={}
+    for text in texts:
+        slot,sep,value=text.partition('=')
+        if not sep or not slot or not value:raise SystemExit('Give '+flag+' as SLOT=VALUE.')
+        if many:found.setdefault(slot,[]).append(value)
+        elif slot in found:raise SystemExit('Give '+flag+' once for each input.')
+        else:found[slot]=value
+    return found
+
+
+def _procedures(args):
+    """E105a: procedures new|validate|run. The default line is words only; identifiers, digests, field paths and
+    what the procedure printed are under --json (and in log.txt beside a run's outputs)."""
+    from . import procedures
+    if args.procedure_action in ('validate','new'):
+        try:verdict=procedures.validate(args.folder) if args.procedure_action=='validate' else procedures.new(args.folder,args.step,args.label)
+        except procedures.NotRun as error:verdict={'valid':False,'sentence':str(error),'code':error.code,'field':error.field,'rules_version':procedures.contract().RULES_VERSION}
+        manifest=verdict.pop('manifest',None) or {}
+        payload={**verdict,**({'name':manifest['name'],'version':manifest['version']} if manifest else {})}
+        text=verdict['sentence']
+        if args.procedure_action=='new' and verdict['valid']:
+            text='Created %s with procedure.json and procedure.py. Edit them, then run: ophiolite procedures validate %s' % (args.folder.name,args.folder)
+        done(args,text,payload)
+        if not verdict['valid']:raise SystemExit(EXIT['refused'])
+        return payload
+    try:
+        result=procedures.run(args.folder,args.output,_slots(args.input,'--input',many=True),kinds=_slots(args.kind,'--kind'),
+                              declared=_slots(args.declared,'--declared'),systems=_slots(args.system,'--system'),settings=args.setting)
+    except procedures.NotRun as error:
+        if args.json:print(json.dumps({'error':{'code':error.code,'message':str(error),'field':error.field,'details':error.details}},indent=2,default=str))
+        else:print(str(error),file=sys.stderr)
+        raise SystemExit(EXIT['refused'])
+    return done(args,result['sentence'],{'ran':True,**result})
+
+
 def main(argv=None):
     from . import _client_header
     token=_client_header._NAME.set('ophiolite-cli')  # E93: the command line names itself on every gateway request
@@ -767,6 +818,7 @@ def _main(argv=None):
     if args.command=='skills':
         return done(args,str(files('ophiolite').joinpath('skills')),{'path':str(files('ophiolite').joinpath('skills'))})
     if args.command=='targets':return _targets(args)  # E86: offline; reads the packaged contracts only
+    if args.command=='procedures':return _procedures(args)  # E105a: offline; reads and runs local files only
     if args.command=='bundle':
         # Offline: no configuration, credentials or network are read.
         from .bundle import open_bundle,pack

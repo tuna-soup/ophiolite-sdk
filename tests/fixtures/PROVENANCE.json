@@ -2545,6 +2545,15 @@
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
       "evidence": "Integration f28f9a1 E04 strategy licence decision (SDK/templates/extracted contracts); original Ophiolite contracts. Synthetic LAS provenance: contracts/tools/generate.py LAS literal and fixture generator; frozen fixtures are historical bytes, not regenerated. Formats and schema vocabulary do not imply complete third-party release qualification. E105a: original first-party procedure contract, rules, validator, display-label rule and synthetic sample procedures authored for the Platform (E105a strategy, Codex-reviewed); no third-party or customer data."
+    },
+    {
+      "path": "tests/fixtures/cli-subcommands-0.3.json",
+      "sha256": "e2dbea44a324685f25cbdc1c5eb6921ae0c9bb0d2e5ad117caf05dfd0a827f7e",
+      "source_commit": "c6a5760",
+      "origin": "Ophiolite SDK CLI subcommand names and help at c6a5760, captured from the parser without running an operation",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "E105a: original first-party command interface (the SDK's own parser); frozen before the procedures command was added; no credentials or customer data."
     }
   ]
 }
