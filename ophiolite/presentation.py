@@ -80,7 +80,7 @@ def _card(name, number, url, technical, hidden, recipe=None, note=''):
     text = lambda value: html.escape(str(value), quote=True)
     shown = _human(name, 'an item', technical_vocabulary() | {str(v) for v in hidden if v})
     link = ('<a href="' + text(url) + '">Open in Workspace</a><details><summary>Copy link</summary>'
-            '<input readonly aria-label="Link to this version" value="' + text(url) + '"></details>') if url else ''
+            '<pre>' + text(url) + '</pre></details>') if url else ''  # E104 C8: JupyterLab disables an input in an untrusted output
     return ('<section aria-label="Result"><strong>' + text(shown) + '</strong>' + ('<p>Version %d</p>' % number if isinstance(number, int) else '')
             + link + ('<details><summary>Send again</summary><p>' + note + '</p><pre>' + text(recipe) + '</pre></details>' if recipe else '')
             + '<details><summary>Technical details</summary><pre>' + text(json.dumps(technical, indent=2, allow_nan=False, default=str))

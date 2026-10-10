@@ -43,7 +43,8 @@ def test_outcome_shows_name_version_link_copy_and_details():
     raw = outcome()._repr_html_()
     assert '<strong>Porosity</strong><p>Version 2</p>' in raw
     assert '<a href="' + URL + '">Open in Workspace</a>' in raw              # mutation: drawer path /asset/, head revision
-    assert '<details><summary>Copy link</summary><input readonly aria-label="Link to this version" value="' + URL + '"></details>' in raw
+    # E104 C8: text to select, not an input; JupyterLab 4.6.4's sanitizer disables an input in an untrusted output
+    assert '<details><summary>Copy link</summary><pre>' + URL + '</pre></details>' in raw
     assert '<details><summary>Technical details</summary><pre>' in raw
     text = visible(raw)
     assert text == 'Result Porosity Version 2 Open in Workspace Copy link Technical details'   # mutation: details rendered open
@@ -82,7 +83,7 @@ def test_link_attributes_escaped():
     raw = outcome(context={**CONTEXT, 'origin': 'https://a&b"c.example'})._repr_html_()
     url = 'https://a&amp;b&quot;c.example/project/a%20project/data/m~x%2Fy%3F%23?revision=r%2F1%3F'
     assert '<a href="' + url + '">' in raw                                    # mutation: href not escaped
-    assert 'value="' + url + '"></details>' in raw                            # mutation: value not escaped
+    assert '<pre>' + url + '</pre></details>' in raw                          # mutation: copied text not escaped
 
 
 def test_identifier_shaped_name_falls_back():
