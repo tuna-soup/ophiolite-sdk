@@ -21,7 +21,8 @@ CODES = {'id-missing': 'it has no identifier', 'id-repeated': 'its identifier ap
          'longitude-out-of-range': 'the longitude is outside -180 to 180', 'latitude-out-of-range': 'the latitude is outside -90 to 90',
          'name-too-long': 'the name is longer than 160 characters', 'name-not-text': 'the name is not text',
          'identifier-not-accepted': 'the identifier is not one a well can have', 'identifier-in-use': 'its identifier is used by a well you cannot read',
-         'no-longer-visible': 'the well it matched is no longer visible to you'}
+         'no-longer-visible': 'the well it matched is no longer visible to you',
+         'identifier-names-another-well': 'its identifier belongs to an existing well under another name, so it was not imported'}
 
 
 def _checked(model, answer, what):
