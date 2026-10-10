@@ -1176,6 +1176,18 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/publications/transform",
+    "function": "postProjectsProjectPublicationsTransform",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/publications/transform-preview",
+    "function": "postProjectsProjectPublicationsTransformPreview",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/publications/version-contributors",
     "function": "postProjectsProjectPublicationsVersionContributors",
     "request": "schema",

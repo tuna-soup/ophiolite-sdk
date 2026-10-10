@@ -35447,6 +35447,431 @@
         }
       }
     },
+    "/api/v1/projects/{project}/publications/transform": {
+      "post": {
+        "summary": "E64: make that change as a derived version, under the method key the preview answered (command_id)",
+        "description": "Scope write; accepted principals: session, delegate, grant; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "grant",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "What publications/derive answers, and answers again for the same command.",
+                  "properties": {
+                    "asset_id": {
+                      "title": "Asset Id",
+                      "type": "string"
+                    },
+                    "revision": {
+                      "pattern": "^[0-9a-f]{64}$",
+                      "title": "Revision",
+                      "type": "string"
+                    },
+                    "revision_number": {
+                      "minimum": 1,
+                      "title": "Revision Number",
+                      "type": "integer"
+                    },
+                    "profile": {
+                      "enum": [
+                        "points-csv/1",
+                        "mesh-text/1",
+                        "esri-ascii-grid/1",
+                        "well-tops-csv/1",
+                        "deviation-csv/1",
+                        "opendtect-faultsticks/1",
+                        "las2/1",
+                        "well-location/1",
+                        "wavelet-text/1",
+                        "model-section-text/1",
+                        "seismic-section-text/1",
+                        "time-depth-csv/1"
+                      ],
+                      "title": "Profile",
+                      "type": "string"
+                    },
+                    "derived_from": {
+                      "items": {
+                        "$ref": "#/components/schemas/ParentReference"
+                      },
+                      "maxItems": 32,
+                      "minItems": 1,
+                      "title": "Derived From",
+                      "type": "array"
+                    },
+                    "method": {
+                      "$ref": "#/components/schemas/MethodRecord"
+                    },
+                    "command_id": {
+                      "title": "Command Id",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "asset_id",
+                    "revision",
+                    "revision_number",
+                    "profile",
+                    "derived_from",
+                    "method",
+                    "command_id"
+                  ],
+                  "title": "PublicationReceipt",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "description": "publications/transform: the change made as a derived version, under the method the preview showed.",
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Asset Id",
+                    "type": "string"
+                  },
+                  "revision": {
+                    "description": "The exact revision to change",
+                    "pattern": "^[0-9a-f]{64}$",
+                    "title": "Revision",
+                    "type": "string"
+                  },
+                  "change": {
+                    "discriminator": {
+                      "mapping": {
+                        "coordinates": "#/components/schemas/CoordinateChange",
+                        "units": "#/components/schemas/UnitChange"
+                      },
+                      "propertyName": "kind"
+                    },
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/CoordinateChange"
+                      },
+                      {
+                        "$ref": "#/components/schemas/UnitChange"
+                      }
+                    ],
+                    "title": "Change"
+                  },
+                  "name": {
+                    "description": "The new version's name",
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "The same command answers the same receipt",
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "previewed": {
+                    "description": "The preview's method_key; a different method refuses",
+                    "pattern": "^[0-9a-f]{64}$",
+                    "title": "Previewed",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "asset_id",
+                  "revision",
+                  "change",
+                  "name",
+                  "command_id",
+                  "previewed"
+                ],
+                "title": "Transform",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/publications/transform-preview": {
+      "post": {
+        "summary": "E64: what changing the coordinate system or units of an exact revision you may reuse would make: the method record, its key and samples (stores nothing)",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "grant",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "The method record the version would carry, its key, and up to five samples before and after.",
+                  "properties": {
+                    "profile": {
+                      "title": "Profile",
+                      "type": "string"
+                    },
+                    "method": {
+                      "additionalProperties": true,
+                      "title": "Method",
+                      "type": "object"
+                    },
+                    "method_key": {
+                      "pattern": "^[0-9a-f]{64}$",
+                      "title": "Method Key",
+                      "type": "string"
+                    },
+                    "samples": {
+                      "items": {
+                        "$ref": "#/components/schemas/Sample"
+                      },
+                      "maxItems": 5,
+                      "title": "Samples",
+                      "type": "array"
+                    },
+                    "declared": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": {
+                            "type": "string"
+                          },
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Declared"
+                    }
+                  },
+                  "required": [
+                    "profile",
+                    "method",
+                    "method_key",
+                    "samples",
+                    "declared"
+                  ],
+                  "title": "TransformPreviewAnswer",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "description": "publications/transform-preview: what a change of one exact revision would make. Nothing is stored.",
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Asset Id",
+                    "type": "string"
+                  },
+                  "revision": {
+                    "description": "The exact revision to change",
+                    "pattern": "^[0-9a-f]{64}$",
+                    "title": "Revision",
+                    "type": "string"
+                  },
+                  "change": {
+                    "discriminator": {
+                      "mapping": {
+                        "coordinates": "#/components/schemas/CoordinateChange",
+                        "units": "#/components/schemas/UnitChange"
+                      },
+                      "propertyName": "kind"
+                    },
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/CoordinateChange"
+                      },
+                      {
+                        "$ref": "#/components/schemas/UnitChange"
+                      }
+                    ],
+                    "title": "Change"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "asset_id",
+                  "revision",
+                  "change"
+                ],
+                "title": "TransformPreview",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/publications/version-contributors": {
       "post": {
         "summary": "E70c: the members this project lets add versions to each other's derived results",
@@ -84965,6 +85390,39 @@
           }
         }
       },
+      "CoordinateChange": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "coordinates",
+            "title": "Kind",
+            "type": "string"
+          },
+          "to": {
+            "description": "The target system, as the catalogue names it (EPSG:25831)",
+            "maxLength": 40,
+            "minLength": 1,
+            "title": "To",
+            "type": "string"
+          },
+          "values": {
+            "default": "bilinear",
+            "description": "A grid only: bilinear (smooth between cells) or nearest (keep original values)",
+            "enum": [
+              "bilinear",
+              "nearest"
+            ],
+            "title": "Values",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "to"
+        ],
+        "title": "CoordinateChange",
+        "type": "object"
+      },
       "CoordinateSystem": {
         "additionalProperties": false,
         "description": "E44: one system a table mapping may declare (Connectors' catalogue).",
@@ -93585,6 +94043,58 @@
         "title": "RunnerLimits",
         "type": "object"
       },
+      "Sample": {
+        "additionalProperties": false,
+        "properties": {
+          "curve": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Units: the curve; before and after are [depth, value]",
+            "title": "Curve"
+          },
+          "before": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "title": "Before",
+            "type": "array"
+          },
+          "after": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "title": "After",
+            "type": "array"
+          }
+        },
+        "required": [
+          "before",
+          "after"
+        ],
+        "title": "Sample",
+        "type": "object"
+      },
       "SearchResult": {
         "additionalProperties": false,
         "properties": {
@@ -96897,6 +97407,45 @@
           "subscription"
         ],
         "title": "UnavailableStream",
+        "type": "object"
+      },
+      "UnitChange": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "units",
+            "title": "Kind",
+            "type": "string"
+          },
+          "curves": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "{mnemonic: new unit}; the depth axis by its own mnemonic",
+            "maxProperties": 64,
+            "title": "Curves",
+            "type": "object"
+          },
+          "depth": {
+            "anyOf": [
+              {
+                "maxLength": 40,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The depth axis's new unit, without naming its mnemonic",
+            "title": "Depth"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "title": "UnitChange",
         "type": "object"
       },
       "UploadPolicy": {
