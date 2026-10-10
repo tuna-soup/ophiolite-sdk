@@ -2656,9 +2656,9 @@
     },
     {
       "path": "tests/fixtures/cli-subcommands-0.3.json",
-      "sha256": "e2dbea44a324685f25cbdc1c5eb6921ae0c9bb0d2e5ad117caf05dfd0a827f7e",
-      "source_commit": "c6a5760",
-      "origin": "Ophiolite SDK CLI subcommand names and help at c6a5760, captured from the parser without running an operation",
+      "sha256": "df03b506fe2d7297e709c63a559c4ac91bea45890712eadcd2bf01992d5c8be7",
+      "source_commit": "a497bd4",
+      "origin": "Ophiolite SDK CLI subcommand names and help at a497bd4 (train 2026-10-10-10), captured from the parser without running an operation",
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
       "evidence": "E105a: original first-party command interface (the SDK's own parser); frozen before the procedures command was added; no credentials or customer data."
