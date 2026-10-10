@@ -90,14 +90,18 @@ def asset(value):
     for parent in value['parents']: reference(parent)
     typed = 'type' in value['scientific']
     recipe = 'recipe_schema' in profiles.get(value['profile'], {})  # E23a: read through an import recipe
-    require(recipe == (value.get('package') is not None), 'A recipe-read file and its package go together')
+    packaged = profiles.get(value['profile'], {}).get('package') == 'without-recipe'  # E56: a Shapefile read from its members
+    require((recipe or packaged) == (value.get('package') is not None), 'A package is present exactly when the interpretation is recipe- or package-based')
+    require(packaged == (value['interpretation'].get('parsing_policy') == 'package-strict/1'), 'Interpretation is not the one this profile declares')
+    if value.get('package') is not None:
+        require((value['package']['recipe'] is None) == packaged, 'A recipe pin belongs to a recipe read and to nothing else')
     if typed and recipe:
         require(value['interpretation'].get('mapping') == profiles[value['profile']]['connector']['mapping_version'], 'Scientific context and interpretation disagree')
     elif typed:
         mapping = {'well-tops': 'well-tops/1', 'trajectory': 'trajectory/1', 'regular-grid-surface': 'regular-grid-surface/1',
                    'triangulated-surface': 'triangulated-surface/1', 'point-set': 'point-set/1', 'polyline-set': 'polyline-set/1', 'seismic-volume': 'seismic-volume/1',
                    'wavelet': 'wavelet/1', 'model-section': 'model-section/1', 'seismic-section': 'seismic-section/1',
-                   'well-location': 'well-location/1', 'time-depth': 'time-depth/1'}  # E53; E74b: a position file or a corrected position
+                   'well-location': 'well-location/1', 'time-depth': 'time-depth/1', 'feature-set': 'feature-set/1'}  # E53; E74b: a position file or a corrected position; E56
         require(value['interpretation'].get('mapping') == mapping.get(value['scientific']['type']), 'Scientific context and interpretation disagree')
     else:
         context(value['scientific'])
@@ -126,7 +130,7 @@ def asset(value):
     require(raw['profile']==value['profile'] and normalized['profile']==profile['normalized_profile'], 'Representation profiles must be the asset profile and its normalized profile')
     declared=profile['connector']['mapping_version'] if recipe else ((profiles.get(profile['normalized_profile']) or {}).get('interpretation') or {}).get('mapping')
     require(value['interpretation'].get('mapping')==declared, 'Interpretation is not the one this profile declares')
-    if recipe: package(value, raw)
+    if recipe or packaged: package(value, raw)
     if value['origin']=='managed-derived': require(value['revision']==raw['sha256'], 'Derived revision must identify the exact artifact')
     if value.get('manifest') is not None: manifest(value, raw, normalized)
     require(len(set(value['supported_operations']))==len(value['supported_operations']), 'Duplicate supported operations')
@@ -150,10 +154,14 @@ def _sha(text):
 def package(value, raw):
     """E23a: the package a recipe-read revision was read with: its primary is the exact artifact, its
     status is the decisions' status, and the revision manifest names every package row."""
-    p = value['package']; execution = value['scientific']['fidelity']['execution']
+    p = value['package']
     primaries = [m for m in p['members'] if m['role'] == 'primary']
     require(len(primaries) == 1 and (primaries[0]['sha256'], primaries[0]['bytes']) == (raw['sha256'], raw['bytes']), 'The package primary is not the exact artifact')
-    require((p['status'], p['unresolved'], p['package_digest']) == (execution['status'], execution['unresolved'], execution['package_digest']), 'The package record and the decisions disagree')
+    if p['recipe'] is None:  # E56: a package read without a recipe lands only when decided; it has no recipe execution
+        require((p['status'], p['unresolved']) == ('decided', []), 'A package read without a recipe lands only when decided')
+    else:
+        execution = value['scientific']['fidelity']['execution']
+        require((p['status'], p['unresolved'], p['package_digest']) == (execution['status'], execution['unresolved'], execution['package_digest']), 'The package record and the decisions disagree')
     if value.get('manifest') is not None:
         listed = {r['id']: (r['sha256'], r['bytes']) for r in value['manifest']['representations']}
         require({'package', 'interpretation'} <= set(listed), 'The revision manifest does not name the package and its interpretation')
@@ -284,11 +292,49 @@ def typed_payload(value):
     elif kind == 'seismic-section':
         grid = value['grid']; section_axes(c); grid_shape(c, grid)
         require([c['minimum'], c['maximum']] == [min(min(r) for r in grid), max(max(r) for r in grid)], 'Samples and their context disagree')
+    elif kind == 'feature-set':  # E56: features in file order; the context counts what they hold; properties by field and kind
+        feature_set(value, c)
     elif kind == 'time-depth':  # E57: pairs in file order, both strictly increasing; velocity as stated or absent
         depth, time, velocity = value['depth'], value['time'], value['velocity']
         require(len(depth) == len(time) == c['count'] >= 2 and (velocity is None) == (not c['velocity_provided']) and (velocity is None or len(velocity) == len(depth)), 'Pairs and their context disagree')
         require(all(a < b for a, b in zip(depth, depth[1:])) and all(a < b for a, b in zip(time, time[1:])), 'Depth and time must strictly increase')
         require(c['depth_range'] == [depth[0], depth[-1]] and c['time_range'] == [time[0], time[-1]], 'Pairs and their ranges disagree')
+
+
+GEOMETRY_DEPTH = {'Point': 0, 'MultiPoint': 1, 'LineString': 1, 'MultiLineString': 2, 'Polygon': 2, 'MultiPolygon': 3}
+GEOMETRY_FAMILY = {'Point': 'point', 'MultiPoint': 'point', 'LineString': 'line', 'MultiLineString': 'line', 'Polygon': 'polygon', 'MultiPolygon': 'polygon'}
+KIND_CHECK = {'text': lambda v: isinstance(v, str), 'date': lambda v: isinstance(v, str), 'boolean': lambda v: isinstance(v, bool),
+              'integer': lambda v: type(v) is int, 'number': lambda v: type(v) in (int, float)}
+
+
+def feature_set(value, c):
+    """E56: the rules of Platform's FeatureSet the schema cannot state."""
+    names = [f['name'] for f in c['fields']]
+    require(len(set(names)) == len(names), 'Field names repeat')
+    require(c['geometry_types'] == sorted(set(c['geometry_types'])) and len({GEOMETRY_FAMILY[g] for g in c['geometry_types']}) <= 1,
+            'Geometry types are listed once each, sorted, and of one family')
+    require(c['null_geometry_count'] <= c['count'] and (c.get('layer') is None) == (c.get('layer_title') is None), 'Feature context counts or layer disagree')
+    features = value['features']
+    require([f['index'] for f in features] == list(range(len(features))), 'Features are indexed in file order from 0')
+    def walk(item, depth):
+        if depth == 0:
+            require(isinstance(item, list) and 2 <= len(item) <= 3 and all(type(v) in (int, float) for v in item), 'Coordinates do not have the shape of their geometry type')
+            yield item; return
+        require(isinstance(item, list) and len(item) > 0, 'Coordinates do not have the shape of their geometry type')
+        for inner in item: yield from walk(inner, depth - 1)
+    positions = [p for f in features if f['geometry'] for p in walk(f['geometry']['coordinates'], GEOMETRY_DEPTH[f['geometry']['type']])]
+    require(len({len(p) for p in positions}) <= 1, 'Some positions have a height and some do not')
+    zs = [p[2] for p in positions if len(p) == 3]
+    observed = (len(features), sum(f['geometry'] is None for f in features), len(positions), sorted({f['geometry']['type'] for f in features if f['geometry']}), bool(zs),
+                [min(p[0] for p in positions), max(p[0] for p in positions)] if positions else None,
+                [min(p[1] for p in positions), max(p[1] for p in positions)] if positions else None, [min(zs), max(zs)] if zs else None)
+    require(observed == (c['count'], c['null_geometry_count'], c['vertex_count'], c['geometry_types'], c['has_z'], c['x_range'], c['y_range'], c['z_range']),
+            'Features and their context disagree')
+    kinds = {f['name']: f['kind'] for f in c['fields']}
+    for feature in features:
+        for name, item in feature['properties'].items():
+            require(name in kinds, 'A feature has a property its context does not list')
+            require(item is None or KIND_CHECK[kinds[name]](item), 'A property value is not of its field kind')
 
 
 def section_axes(c):

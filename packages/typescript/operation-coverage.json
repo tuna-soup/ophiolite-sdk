@@ -114,6 +114,54 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/org-connections/access",
+    "function": "postOrgConnectionsAccess",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/org-connections/create",
+    "function": "postOrgConnectionsCreate",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/org-connections/enable",
+    "function": "postOrgConnectionsEnable",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/org-connections/list",
+    "function": "postOrgConnectionsList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/org-connections/sign-in",
+    "function": "postOrgConnectionsSignIn",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/org-connections/sign-in-remove",
+    "function": "postOrgConnectionsSignInRemove",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/org-connections/test",
+    "function": "postOrgConnectionsTest",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/org-connections/uses",
+    "function": "postOrgConnectionsUses",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/organizations/access-preview",
     "function": "postOrganizationsAccessPreview",
     "request": "schema",
@@ -668,6 +716,12 @@
   {
     "operation": "POST /api/v1/projects/{project}/connection-admin/list",
     "function": "postProjectsProjectConnectionAdminList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/connection-admin/promote",
+    "function": "postProjectsProjectConnectionAdminPromote",
     "request": "schema",
     "response": "schema"
   },
@@ -1422,6 +1476,12 @@
     "response": "schema"
   },
   {
+    "operation": "GET /api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/windows",
+    "function": "getProjectsProjectScientificAssetsAssetRevisionsRevisionWindows",
+    "request": "explicitly-untyped",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/search/query",
     "function": "postProjectsProjectSearchQuery",
     "request": "schema",
@@ -1887,6 +1947,12 @@
     "operation": "POST /api/v1/projects/{project}/well-imports/step",
     "function": "postProjectsProjectWellImportsStep",
     "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "GET /api/v1/projects/{project}/wells/{well}/versions/{version}/curve-assets/{asset}/revisions/{revision}/windows",
+    "function": "getProjectsProjectWellsWellVersionsVersionCurveAssetsAssetRevisionsRevisionWindows",
+    "request": "explicitly-untyped",
     "response": "schema"
   }
 ]

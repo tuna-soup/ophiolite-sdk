@@ -151,6 +151,8 @@ def write_curves(depth, curves, *, depth_unit=None, well='DERIVED', null_marker=
     """LAS 2.0 text: one depth axis (never missing) and 1-63 curves {mnemonic: (unit, values)}; None is missing.
     A real sample equal to `null_marker` would read back as missing, so it is refused. `notes` (E52) are lines of an
     ~Other section, such as `petrophysics.calculation_record(...)`: one printable ASCII line each, written as the server writes them."""
+    from .windows import refuse_window  # E100a: blocks are not samples
+    refuse_window(depth, curves, *(v for item in (curves.values() if isinstance(curves, dict) else ()) for v in (item if isinstance(item, tuple) else (item,))))
     notes = list(notes)
     if any(not isinstance(n, str) or not n.strip() or not n.isascii() or not n.isprintable() or n.lstrip().startswith(('~', '#')) for n in notes):
         raise ValidationFailed(['Each note is one line of printable ASCII text that does not start with ~ or #.'])

@@ -2,7 +2,7 @@
 name: read-exact-data
 description: Discover permitted scientific assets and read exact curve revisions with their context.
 ---
-<!-- sdk-contract: {"routes":["/api/v1/projects/{project}/scientific-assets","/api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}","/api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/representations/{representation}"],"symbols":["ophiolite.Client.assets","ophiolite.Client.read","ophiolite.CurveSet.to_frame","ophiolite.CurveSet.to_numpy","ophiolite.CurveSet.workspace_url"],"errors":["verification-failed","axis-mismatch","incompatible-context","not-found"]} -->
+<!-- sdk-contract: {"routes":["/api/v1/projects/{project}/scientific-assets","/api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}","/api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/representations/{representation}","/api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/windows"],"symbols":["ophiolite.Client.curve_window","ophiolite.Client.assets","ophiolite.Client.read","ophiolite.CurveSet.to_frame","ophiolite.CurveSet.to_numpy","ophiolite.CurveSet.workspace_url"],"errors":["verification-failed","axis-mismatch","incompatible-context","not-found"]} -->
 
 Use the user's permitted selection. Discovery and exact reads need no application
 binding or run. Choose each curve explicitly; do not silently use a different
@@ -21,6 +21,8 @@ units, depth reference, missingness, reader interpretation and exact checksums.
 DataFrame metadata is separate until `descriptor.attach(frame)` is explicitly
 requested. Missing samples become NaN in numerical views; zero stays zero. The
 reader verifies the exact descriptor/body/artifact relation and full arrays.
+
+To show a long curve, `client.curve_window(asset_id, exact_revision, "GR", top, base, rows=2048)` reads only that depth window; above level 0 it holds blocks with their extrema, so analysis still reads the exact curve.
 
 Multiple curves require matching axes and scientific context. On `axis-mismatch`,
 read separately or explicitly choose and document an alignment/conversion; the

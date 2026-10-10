@@ -27,10 +27,14 @@ SCHEMA_2 = 'ophiolite.portable-bundle/2'
 VERSION_2 = '2.0.0'
 TYPED_ORIGINALS = {'well-tops-csv/1': 'original.csv', 'deviation-csv/1': 'original.csv', 'esri-ascii-grid/1': 'original.asc', 'mesh-text/1': 'original.txt', 'points-csv/1': 'original.csv',
                    'opendtect-faultsticks/1': 'original.txt', 'wavelet-text/1': 'original.txt', 'model-section-text/1': 'original.txt', 'seismic-section-text/1': 'original.txt',
-                   'time-depth-csv/1': 'original.csv'}
-NEWER_TYPES = {'triangulated-surface': 2, 'point-set': 2, 'polyline-set': 3, 'seismic-slice': 3, 'wavelet': 5, 'model-section': 5, 'seismic-section': 5, 'time-depth': 6}  # the 2.x minor that introduced them
+                   'time-depth-csv/1': 'original.csv', 'zmap-plus-grid/1': 'original.zmap', 'cps3-ascii-grid/1': 'original.cps3', 'irap-ascii-grid/1': 'original.irap',
+                   'geojson/1': 'original.geojson', 'ogc-geopackage/1': 'original.gpkg'}  # E56
+NEWER_TYPES = {'triangulated-surface': 2, 'point-set': 2, 'polyline-set': 3, 'seismic-slice': 3, 'wavelet': 5, 'model-section': 5, 'seismic-section': 5, 'time-depth': 6,
+               'feature-set': 7}  # the 2.x minor that introduced them
+# E56: grids of the new formats are a known type with an original an older reader cannot send back; they need 2.7 too
+NEWER_PROFILES = {'zmap-plus-grid/1': 7, 'cps3-ascii-grid/1': 7, 'irap-ascii-grid/1': 7}
 TYPES_2 = ('well-log', 'well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-slice',
-           'wavelet', 'model-section', 'seismic-section', 'time-depth')  # 2.5 (E53); 2.6 (E57)
+           'wavelet', 'model-section', 'seismic-section', 'time-depth', 'feature-set')  # 2.5 (E53); 2.6 (E57); 2.7 (E56)
 NOT_IMPORTED_SYNTHETIC = ('A synthetic section is not imported: its model and wavelet are not part of the project it would join. '
                           'Import them and compute it again.')
 SLICE_NAME = re.compile(r'^slice-(inline|crossline|sample)-(-?[0-9]{1,9})\.json$')
@@ -458,6 +462,8 @@ def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=
             if hasattr(read, '_wire_data_bytes'):  # E11 typed data: exact original, descriptor and data as served
                 first = read._wire_descriptor
                 if first.get('package') is not None:  # E23a: until E23c the package and its decisions have no bundle form
+                    if first['scientific']['type'] == 'feature-set':  # E56 (K9): a Shapefile is read from its members
+                        raise Refused('Portable export is not yet supported for this feature set: a Shapefile-read feature set carries its companion files, which a bundle cannot hold yet.')
                     raise Refused('Portable export is not yet supported for this type: a recipe-read point set carries its source package and decisions, which a bundle cannot hold yet.')
                 files = [put(folder + TYPED_ORIGINALS[first['profile']], read.original, 'original'),
                          put(folder + 'descriptor.json', (json.dumps(first, indent=2, allow_nan=False) + '\n').encode(), 'descriptor'),
@@ -486,7 +492,7 @@ def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=
                         **({'entities_omitted': entities_omitted} if entities_omitted else {})}  # E22b: why no wells travel
         # The lowest version that expresses this content: 1.x for well logs, 2.x for typed data;
         # the minor rises only for observations (1) or the newer types (2), so older readers keep working.
-        minor = max([1 if observations else 0, 4 if graph else 0] + [NEWER_TYPES.get(a.get('type'), 0) for a in assets])
+        minor = max([1 if observations else 0, 4 if graph else 0] + [max(NEWER_TYPES.get(a.get('type'), 0), NEWER_PROFILES.get(a.get('profile'), 0)) for a in assets])
         version = ('2' if typed_bundle else '1') + f'.{minor}.0'
         manifest = {'schema': SCHEMA_2 if typed_bundle else SCHEMA, 'bundle_version': version, 'created_at': datetime.now(timezone.utc).isoformat(timespec='seconds'),
                     'exporter': {'name': 'ophiolite-sdk', 'version': __version__}, 'scope': 'selection', 'selection': selection, 'assets': assets,
@@ -542,8 +548,20 @@ DECLARABLE = {'well-tops': ('depth_unit', 'depth_basis'), 'trajectory': ('depth_
               'triangulated-surface': ('crs', 'xy_unit', 'z_unit', 'z_meaning', 'positive', 'vertical_datum'),
               'point-set': ('crs', 'xy_unit', 'z_unit', 'z_meaning', 'positive', 'vertical_datum'),
               'polyline-set': ('crs', 'xy_unit', 'z_unit', 'z_meaning', 'positive', 'vertical_datum'),
-              'time-depth': ('depth_type', 'depth_unit', 'time_kind', 'time_unit', 'datum')}
+              'time-depth': ('depth_type', 'depth_unit', 'time_kind', 'time_unit', 'datum'),
+              'feature-set': ('crs', 'xy_unit', 'z_unit', 'z_meaning', 'positive', 'vertical_datum', 'encoding', 'layer')}  # E56: as its kind takes them
+REGISTRATION = {'center': 'centres', 'corner': 'edges'}  # E56: a grid's stored registration is the corners it was read with
+NOT_IMPORTED_CPS3 = ('A CPS-3 grid is imported by uploading its file again: where each column of the file starts is not kept with the grid. '
+                     'Upload the original and choose North end or South end.')
 DECLARABLE_NUMBERS = {'time-depth': ('seismic_reference_elevation',)}  # E57: served as a number, declared as its canonical decimal text
+
+
+def _declared_keys(profile):
+    """E56: the fields a kind of file takes, from the reader registry this SDK carries; None for the kinds before E56,
+    whose declarations are unchanged."""
+    if profile not in ('zmap-plus-grid/1', 'cps3-ascii-grid/1', 'irap-ascii-grid/1', 'geojson/1', 'ogc-geopackage/1'): return None
+    readers = json.loads((Path(__file__).parent / 'contracts/connectors/v1/readers.json').read_text())['readers']
+    return {f['key'] for e in readers if e['profile'] == profile for f in e['declared']}
 
 
 def import_plan(bundle, well_logs):
@@ -571,9 +589,12 @@ def import_plan(bundle, well_logs):
             profile = 'las2/1'
         else:
             profile = entry['profile']; context = asset.data.context
+            if profile == 'cps3-ascii-grid/1': refuse(NOT_IMPORTED_CPS3); continue
+            takes = _declared_keys(profile)
             for key in DECLARABLE.get(asset.type, ()):
                 value = context.get(key)
-                if isinstance(value, str) and value and value != 'unknown': declared[key] = value
+                if isinstance(value, str) and value and value != 'unknown' and (takes is None or key in takes): declared[key] = value
+            if takes is not None and 'corners' in takes: declared['corners'] = REGISTRATION[context['registration']]  # E56: ZMAP+ asks it
             for key in DECLARABLE_NUMBERS.get(asset.type, ()):
                 if context.get(key) is not None: declared[key] = _decimal(context[key], key)
             link = (entry.get('relationships') or {}).get('well_log')

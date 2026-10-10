@@ -23,7 +23,13 @@
         "wavelet-text/1",
         "model-section-text/1",
         "seismic-section-text/1",
-        "time-depth-csv/1"
+        "time-depth-csv/1",
+        "zmap-plus-grid/1",
+        "cps3-ascii-grid/1",
+        "irap-ascii-grid/1",
+        "esri-shapefile/1",
+        "ogc-geopackage/1",
+        "geojson/1"
       ]
     },
     "x-ophiolite-capabilities": {
@@ -17322,6 +17328,193 @@
         }
       }
     },
+    "/api/v1/projects/{project}/connection-admin/promote": {
+      "post": {
+        "summary": "E39: Make this project's connection an organisation connection in place (dry_run lists who needs their own sign-in; confirm_sign_ins applies)",
+        "description": "Scope write; accepted principals: session; project extractor top.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E39 connection-admin/promote: the plan (dry_run), or the plan with `promoted` and the new generation. `use` is\neveryone who keeps use; `need_sign_in` are those who must add their own sign-in (all but `sign_in_person`).",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "project_id": {
+                      "title": "Project Id",
+                      "type": "string"
+                    },
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "generation": {
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "sign_in_person": {
+                      "title": "Sign In Person",
+                      "type": "string"
+                    },
+                    "use": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Use",
+                      "type": "array"
+                    },
+                    "need_sign_in": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Need Sign In",
+                      "type": "array"
+                    },
+                    "promoted": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Promoted"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "project_id",
+                    "organization_id",
+                    "generation",
+                    "sign_in_person",
+                    "use",
+                    "need_sign_in"
+                  ],
+                  "title": "ConnectionAdminPromoteAnswer",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "maxLength": 80,
+                    "minLength": 1,
+                    "title": "Id",
+                    "type": "string"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "dry_run": {
+                    "default": false,
+                    "title": "Dry Run",
+                    "type": "boolean"
+                  },
+                  "confirm_sign_ins": {
+                    "default": false,
+                    "title": "Confirm Sign Ins",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "id"
+                ],
+                "title": "PromoteRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/connection-admin/rotate": {
       "post": {
         "summary": "rotate connection administration",
@@ -23579,7 +23772,13 @@
                       "model-section-text/1",
                       "seismic-section-text/1",
                       "geotiff/1",
-                      "time-depth-csv/1"
+                      "time-depth-csv/1",
+                      "zmap-plus-grid/1",
+                      "cps3-ascii-grid/1",
+                      "irap-ascii-grid/1",
+                      "esri-shapefile/1",
+                      "ogc-geopackage/1",
+                      "geojson/1"
                     ],
                     "title": "Profile",
                     "type": "string"
@@ -26418,7 +26617,13 @@
                       "model-section-text/1",
                       "seismic-section-text/1",
                       "geotiff/1",
-                      "time-depth-csv/1"
+                      "time-depth-csv/1",
+                      "zmap-plus-grid/1",
+                      "cps3-ascii-grid/1",
+                      "irap-ascii-grid/1",
+                      "esri-shapefile/1",
+                      "ogc-geopackage/1",
+                      "geojson/1"
                     ],
                     "title": "Profile",
                     "type": "string"
@@ -30023,6 +30228,1870 @@
                   }
                 },
                 "title": "Native_arraybridge_v1_ProjectMemberWrite",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/org-connections/access": {
+      "post": {
+        "summary": "E39: Say who may use and who may administer an organisation connection (the whole entry for one person)",
+        "description": "Scope write; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E39: one organisation connection. `readiness` only for a person who may use it; `access` and `member` (whether each\nlisted person is still a member) only for its administrators, in their own session. No address, no username.",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "enabled": {
+                      "title": "Enabled",
+                      "type": "boolean"
+                    },
+                    "generation": {
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "you": {
+                      "$ref": "#/components/schemas/OrgConnectionYou"
+                    },
+                    "readiness": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/ConnectionReadiness"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "access": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "$ref": "#/components/schemas/OrgConnectionAccess"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Access"
+                    },
+                    "member": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": {
+                            "type": "boolean"
+                          },
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Member"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organization_id",
+                    "name",
+                    "enabled",
+                    "generation",
+                    "you"
+                  ],
+                  "title": "OrgConnection",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "target": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Target",
+                    "type": "string"
+                  },
+                  "name": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "username": {
+                    "default": "",
+                    "maxLength": 128,
+                    "title": "Username",
+                    "type": "string"
+                  },
+                  "password": {
+                    "default": "",
+                    "maxLength": 4096,
+                    "title": "Password",
+                    "type": "string"
+                  },
+                  "person": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Person",
+                    "type": "string"
+                  },
+                  "use": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Use"
+                  },
+                  "administer": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Administer"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "enabled": {
+                    "default": true,
+                    "title": "Enabled",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "organization_id"
+                ],
+                "title": "OrgRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/org-connections/create": {
+      "post": {
+        "summary": "E39: Make an organisation connection to an approved database (organisation owners)",
+        "description": "Scope write; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E39: one organisation connection. `readiness` only for a person who may use it; `access` and `member` (whether each\nlisted person is still a member) only for its administrators, in their own session. No address, no username.",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "enabled": {
+                      "title": "Enabled",
+                      "type": "boolean"
+                    },
+                    "generation": {
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "you": {
+                      "$ref": "#/components/schemas/OrgConnectionYou"
+                    },
+                    "readiness": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/ConnectionReadiness"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "access": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "$ref": "#/components/schemas/OrgConnectionAccess"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Access"
+                    },
+                    "member": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": {
+                            "type": "boolean"
+                          },
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Member"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organization_id",
+                    "name",
+                    "enabled",
+                    "generation",
+                    "you"
+                  ],
+                  "title": "OrgConnection",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "target": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Target",
+                    "type": "string"
+                  },
+                  "name": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "username": {
+                    "default": "",
+                    "maxLength": 128,
+                    "title": "Username",
+                    "type": "string"
+                  },
+                  "password": {
+                    "default": "",
+                    "maxLength": 4096,
+                    "title": "Password",
+                    "type": "string"
+                  },
+                  "person": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Person",
+                    "type": "string"
+                  },
+                  "use": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Use"
+                  },
+                  "administer": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Administer"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "enabled": {
+                    "default": true,
+                    "title": "Enabled",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "organization_id"
+                ],
+                "title": "OrgRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/org-connections/enable": {
+      "post": {
+        "summary": "E39: Turn an organisation connection on or off",
+        "description": "Scope write; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E39: one organisation connection. `readiness` only for a person who may use it; `access` and `member` (whether each\nlisted person is still a member) only for its administrators, in their own session. No address, no username.",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "enabled": {
+                      "title": "Enabled",
+                      "type": "boolean"
+                    },
+                    "generation": {
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "you": {
+                      "$ref": "#/components/schemas/OrgConnectionYou"
+                    },
+                    "readiness": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/ConnectionReadiness"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "access": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "$ref": "#/components/schemas/OrgConnectionAccess"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Access"
+                    },
+                    "member": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": {
+                            "type": "boolean"
+                          },
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Member"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organization_id",
+                    "name",
+                    "enabled",
+                    "generation",
+                    "you"
+                  ],
+                  "title": "OrgConnection",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "target": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Target",
+                    "type": "string"
+                  },
+                  "name": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "username": {
+                    "default": "",
+                    "maxLength": 128,
+                    "title": "Username",
+                    "type": "string"
+                  },
+                  "password": {
+                    "default": "",
+                    "maxLength": 4096,
+                    "title": "Password",
+                    "type": "string"
+                  },
+                  "person": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Person",
+                    "type": "string"
+                  },
+                  "use": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Use"
+                  },
+                  "administer": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Administer"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "enabled": {
+                    "default": true,
+                    "title": "Enabled",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "organization_id"
+                ],
+                "title": "OrgRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/org-connections/list": {
+      "post": {
+        "summary": "E39: The organisation connections you use or administer (an owner also sees the approved databases)",
+        "description": "Scope read; accepted principals: session, delegate; project extractor org.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "org-connections/list: the connections the caller uses or administers; `targets` (approved databases, by id and\nname) only for an organisation owner in their own session.",
+                  "properties": {
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "connections": {
+                      "items": {
+                        "$ref": "#/components/schemas/OrgConnection"
+                      },
+                      "title": "Connections",
+                      "type": "array"
+                    },
+                    "scope": {
+                      "title": "Scope",
+                      "type": "string"
+                    },
+                    "targets": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Targets"
+                    }
+                  },
+                  "required": [
+                    "organization_id",
+                    "connections",
+                    "scope"
+                  ],
+                  "title": "OrgConnectionsListAnswer",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "target": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Target",
+                    "type": "string"
+                  },
+                  "name": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "username": {
+                    "default": "",
+                    "maxLength": 128,
+                    "title": "Username",
+                    "type": "string"
+                  },
+                  "password": {
+                    "default": "",
+                    "maxLength": 4096,
+                    "title": "Password",
+                    "type": "string"
+                  },
+                  "person": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Person",
+                    "type": "string"
+                  },
+                  "use": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Use"
+                  },
+                  "administer": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Administer"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "enabled": {
+                    "default": true,
+                    "title": "Enabled",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "organization_id"
+                ],
+                "title": "OrgRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/org-connections/sign-in": {
+      "post": {
+        "summary": "E39: Save your own database sign-in for an organisation connection you may use",
+        "description": "Scope write; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E39: one organisation connection. `readiness` only for a person who may use it; `access` and `member` (whether each\nlisted person is still a member) only for its administrators, in their own session. No address, no username.",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "enabled": {
+                      "title": "Enabled",
+                      "type": "boolean"
+                    },
+                    "generation": {
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "you": {
+                      "$ref": "#/components/schemas/OrgConnectionYou"
+                    },
+                    "readiness": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/ConnectionReadiness"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "access": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "$ref": "#/components/schemas/OrgConnectionAccess"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Access"
+                    },
+                    "member": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": {
+                            "type": "boolean"
+                          },
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Member"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organization_id",
+                    "name",
+                    "enabled",
+                    "generation",
+                    "you"
+                  ],
+                  "title": "OrgConnection",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "target": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Target",
+                    "type": "string"
+                  },
+                  "name": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "username": {
+                    "default": "",
+                    "maxLength": 128,
+                    "title": "Username",
+                    "type": "string"
+                  },
+                  "password": {
+                    "default": "",
+                    "maxLength": 4096,
+                    "title": "Password",
+                    "type": "string"
+                  },
+                  "person": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Person",
+                    "type": "string"
+                  },
+                  "use": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Use"
+                  },
+                  "administer": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Administer"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "enabled": {
+                    "default": true,
+                    "title": "Enabled",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "organization_id"
+                ],
+                "title": "OrgRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/org-connections/sign-in-remove": {
+      "post": {
+        "summary": "E39: Remove your own sign-in from an organisation connection",
+        "description": "Scope write; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E39: one organisation connection. `readiness` only for a person who may use it; `access` and `member` (whether each\nlisted person is still a member) only for its administrators, in their own session. No address, no username.",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "enabled": {
+                      "title": "Enabled",
+                      "type": "boolean"
+                    },
+                    "generation": {
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "you": {
+                      "$ref": "#/components/schemas/OrgConnectionYou"
+                    },
+                    "readiness": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/ConnectionReadiness"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "access": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "$ref": "#/components/schemas/OrgConnectionAccess"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Access"
+                    },
+                    "member": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": {
+                            "type": "boolean"
+                          },
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Member"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organization_id",
+                    "name",
+                    "enabled",
+                    "generation",
+                    "you"
+                  ],
+                  "title": "OrgConnection",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "target": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Target",
+                    "type": "string"
+                  },
+                  "name": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "username": {
+                    "default": "",
+                    "maxLength": 128,
+                    "title": "Username",
+                    "type": "string"
+                  },
+                  "password": {
+                    "default": "",
+                    "maxLength": 4096,
+                    "title": "Password",
+                    "type": "string"
+                  },
+                  "person": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Person",
+                    "type": "string"
+                  },
+                  "use": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Use"
+                  },
+                  "administer": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Administer"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "enabled": {
+                    "default": true,
+                    "title": "Enabled",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "organization_id"
+                ],
+                "title": "OrgRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/org-connections/test": {
+      "post": {
+        "summary": "E39: Test an organisation connection with your own sign-in",
+        "description": "Scope read; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "connection-admin/test. `state` is ready on success (E40), the source state otherwise; `rows` only on success.",
+                  "properties": {
+                    "ok": {
+                      "title": "Ok",
+                      "type": "boolean"
+                    },
+                    "state": {
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "message": {
+                      "title": "Message",
+                      "type": "string"
+                    },
+                    "rows": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Rows"
+                    },
+                    "readiness": {
+                      "$ref": "#/components/schemas/AccessTestReadiness"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "state",
+                    "message",
+                    "readiness"
+                  ],
+                  "title": "ConnectionAdminTestAnswer",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "target": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Target",
+                    "type": "string"
+                  },
+                  "name": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "username": {
+                    "default": "",
+                    "maxLength": 128,
+                    "title": "Username",
+                    "type": "string"
+                  },
+                  "password": {
+                    "default": "",
+                    "maxLength": 4096,
+                    "title": "Password",
+                    "type": "string"
+                  },
+                  "person": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Person",
+                    "type": "string"
+                  },
+                  "use": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Use"
+                  },
+                  "administer": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Administer"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "enabled": {
+                    "default": true,
+                    "title": "Enabled",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "organization_id"
+                ],
+                "title": "OrgRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/org-connections/uses": {
+      "post": {
+        "summary": "E39: Which projects use an organisation connection, and who in them",
+        "description": "Scope read; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "org-connections/uses: the projects whose selections read the connection, with how many.",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "projects": {
+                      "items": {
+                        "$ref": "#/components/schemas/OrgConnectionProjectUse"
+                      },
+                      "title": "Projects",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "projects"
+                  ],
+                  "title": "OrgConnectionsUsesAnswer",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "target": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Target",
+                    "type": "string"
+                  },
+                  "name": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "username": {
+                    "default": "",
+                    "maxLength": 128,
+                    "title": "Username",
+                    "type": "string"
+                  },
+                  "password": {
+                    "default": "",
+                    "maxLength": 4096,
+                    "title": "Password",
+                    "type": "string"
+                  },
+                  "person": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Person",
+                    "type": "string"
+                  },
+                  "use": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Use"
+                  },
+                  "administer": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Administer"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "enabled": {
+                    "default": true,
+                    "title": "Enabled",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "organization_id"
+                ],
+                "title": "OrgRequest",
                 "type": "object"
               }
             }
@@ -68851,7 +70920,7 @@
                 "schema": {
                   "x-ophiolite": {
                     "id": "ophiolite.scientific-asset/1",
-                    "version": "1.17.0",
+                    "version": "1.18.0",
                     "lifecycle": "preview"
                   },
                   "additionalProperties": false,
@@ -68860,7 +70929,7 @@
                       "anyOf": [
                         {
                           "additionalProperties": false,
-                          "description": "1.10.0 (E23a): the source package and recipe a recipe-read revision was read with. The manifest\nlists 'package' (the package manifest), 'interpretation' (recipe, decisions, evidence) and one\n'companion:<name>' row per companion member; each is readable as a representation.",
+                          "description": "1.10.0 (E23a): the source package and recipe a recipe-read revision was read with. The manifest\nlists 'package' (the package manifest), 'interpretation' (recipe, decisions, evidence) and one\n'companion:<name>' row per companion member; each is readable as a representation. 1.17.0 (E56): a package\nread without a recipe (a Shapefile) has no recipe pin.",
                           "properties": {
                             "package_digest": {
                               "pattern": "^[0-9a-f]{64}$",
@@ -68914,50 +70983,57 @@
                               "type": "array"
                             },
                             "recipe": {
-                              "additionalProperties": false,
-                              "properties": {
-                                "reference": {
-                                  "anyOf": [
-                                    {
-                                      "additionalProperties": false,
-                                      "description": "A recipe is a project-scoped asset, pinned by asset id and revision (never by a schema version).",
-                                      "properties": {
-                                        "asset_id": {
-                                          "maxLength": 512,
-                                          "minLength": 1,
-                                          "title": "Asset Id",
-                                          "type": "string"
+                              "anyOf": [
+                                {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "reference": {
+                                      "anyOf": [
+                                        {
+                                          "additionalProperties": false,
+                                          "description": "A recipe is a project-scoped asset, pinned by asset id and revision (never by a schema version).",
+                                          "properties": {
+                                            "asset_id": {
+                                              "maxLength": 512,
+                                              "minLength": 1,
+                                              "title": "Asset Id",
+                                              "type": "string"
+                                            },
+                                            "revision": {
+                                              "pattern": "^[0-9a-f]{64}$",
+                                              "title": "Revision",
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "asset_id",
+                                            "revision"
+                                          ],
+                                          "title": "RecipeReference",
+                                          "type": "object"
                                         },
-                                        "revision": {
-                                          "pattern": "^[0-9a-f]{64}$",
-                                          "title": "Revision",
-                                          "type": "string"
+                                        {
+                                          "type": "null"
                                         }
-                                      },
-                                      "required": [
-                                        "asset_id",
-                                        "revision"
-                                      ],
-                                      "title": "RecipeReference",
-                                      "type": "object"
+                                      ]
                                     },
-                                    {
-                                      "type": "null"
+                                    "sha256": {
+                                      "pattern": "^[0-9a-f]{64}$",
+                                      "title": "Sha256",
+                                      "type": "string"
                                     }
-                                  ]
+                                  },
+                                  "required": [
+                                    "reference",
+                                    "sha256"
+                                  ],
+                                  "title": "RecipePin",
+                                  "type": "object"
                                 },
-                                "sha256": {
-                                  "pattern": "^[0-9a-f]{64}$",
-                                  "title": "Sha256",
-                                  "type": "string"
+                                {
+                                  "type": "null"
                                 }
-                              },
-                              "required": [
-                                "reference",
-                                "sha256"
-                              ],
-                              "title": "RecipePin",
-                              "type": "object"
+                              ]
                             },
                             "status": {
                               "enum": [
@@ -73798,6 +75874,316 @@
                           ],
                           "title": "TimeDepthContext",
                           "type": "object"
+                        },
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "type": {
+                              "const": "feature-set",
+                              "title": "Type",
+                              "type": "string"
+                            },
+                            "crs": {
+                              "pattern": "^(EPSG:[0-9]{4,6}|OGC:CRS84|unknown)$",
+                              "title": "Crs",
+                              "type": "string"
+                            },
+                            "axes": {
+                              "enum": [
+                                "easting-northing",
+                                "northing-easting",
+                                "longitude-latitude",
+                                "latitude-longitude",
+                                "unknown"
+                              ],
+                              "title": "Axes",
+                              "type": "string"
+                            },
+                            "xy_unit": {
+                              "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+                              "title": "Xy Unit",
+                              "type": "string"
+                            },
+                            "z_unit": {
+                              "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+                              "title": "Z Unit",
+                              "type": "string"
+                            },
+                            "z_meaning": {
+                              "enum": [
+                                "depth",
+                                "elevation",
+                                "time",
+                                "unknown"
+                              ],
+                              "title": "Z Meaning",
+                              "type": "string"
+                            },
+                            "positive": {
+                              "enum": [
+                                "up",
+                                "down",
+                                "unknown"
+                              ],
+                              "title": "Positive",
+                              "type": "string"
+                            },
+                            "vertical_datum": {
+                              "maxLength": 128,
+                              "minLength": 1,
+                              "title": "Vertical Datum",
+                              "type": "string"
+                            },
+                            "encoding": {
+                              "maxLength": 128,
+                              "minLength": 1,
+                              "title": "Encoding",
+                              "type": "string"
+                            },
+                            "count": {
+                              "maximum": 50000,
+                              "minimum": 1,
+                              "title": "Count",
+                              "type": "integer"
+                            },
+                            "vertex_count": {
+                              "maximum": 500000,
+                              "minimum": 0,
+                              "title": "Vertex Count",
+                              "type": "integer"
+                            },
+                            "geometry_types": {
+                              "items": {
+                                "enum": [
+                                  "Point",
+                                  "MultiPoint",
+                                  "LineString",
+                                  "MultiLineString",
+                                  "Polygon",
+                                  "MultiPolygon"
+                                ],
+                                "type": "string"
+                              },
+                              "maxItems": 6,
+                              "title": "Geometry Types",
+                              "type": "array"
+                            },
+                            "has_z": {
+                              "title": "Has Z",
+                              "type": "boolean"
+                            },
+                            "null_geometry_count": {
+                              "maximum": 50000,
+                              "minimum": 0,
+                              "title": "Null Geometry Count",
+                              "type": "integer"
+                            },
+                            "x_range": {
+                              "anyOf": [
+                                {
+                                  "items": {
+                                    "type": "number"
+                                  },
+                                  "maxItems": 2,
+                                  "minItems": 2,
+                                  "type": "array"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "title": "X Range"
+                            },
+                            "y_range": {
+                              "anyOf": [
+                                {
+                                  "items": {
+                                    "type": "number"
+                                  },
+                                  "maxItems": 2,
+                                  "minItems": 2,
+                                  "type": "array"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "title": "Y Range"
+                            },
+                            "z_range": {
+                              "anyOf": [
+                                {
+                                  "items": {
+                                    "type": "number"
+                                  },
+                                  "maxItems": 2,
+                                  "minItems": 2,
+                                  "type": "array"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "title": "Z Range"
+                            },
+                            "fields": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "name": {
+                                    "maxLength": 128,
+                                    "minLength": 1,
+                                    "title": "Name",
+                                    "type": "string"
+                                  },
+                                  "source_name": {
+                                    "maxLength": 128,
+                                    "minLength": 1,
+                                    "title": "Source Name",
+                                    "type": "string"
+                                  },
+                                  "kind": {
+                                    "enum": [
+                                      "text",
+                                      "integer",
+                                      "number",
+                                      "date",
+                                      "boolean"
+                                    ],
+                                    "title": "Kind",
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "name",
+                                  "source_name",
+                                  "kind"
+                                ],
+                                "title": "FeatureField",
+                                "type": "object"
+                              },
+                              "maxItems": 64,
+                              "title": "Fields",
+                              "type": "array"
+                            },
+                            "layer": {
+                              "anyOf": [
+                                {
+                                  "maxLength": 128,
+                                  "minLength": 1,
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "default": null,
+                              "title": "Layer"
+                            },
+                            "layer_title": {
+                              "anyOf": [
+                                {
+                                  "maxLength": 128,
+                                  "minLength": 1,
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "default": null,
+                              "title": "Layer Title"
+                            },
+                            "fidelity": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "status": {
+                                  "const": "assessed",
+                                  "title": "Status",
+                                  "type": "string"
+                                },
+                                "preserved": {
+                                  "items": {
+                                    "maxLength": 512,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Preserved",
+                                  "type": "array"
+                                },
+                                "losses": {
+                                  "items": {
+                                    "maxLength": 512,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Losses",
+                                  "type": "array"
+                                },
+                                "unknown_context": {
+                                  "items": {
+                                    "maxLength": 128,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Unknown Context",
+                                  "type": "array"
+                                },
+                                "decisions": {
+                                  "anyOf": [
+                                    {
+                                      "items": {
+                                        "maxLength": 512,
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      "maxItems": 64,
+                                      "type": "array"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "default": null,
+                                  "title": "Decisions"
+                                }
+                              },
+                              "required": [
+                                "status",
+                                "preserved",
+                                "losses",
+                                "unknown_context"
+                              ],
+                              "title": "Fidelity",
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "crs",
+                            "axes",
+                            "xy_unit",
+                            "z_unit",
+                            "z_meaning",
+                            "positive",
+                            "vertical_datum",
+                            "encoding",
+                            "count",
+                            "vertex_count",
+                            "geometry_types",
+                            "has_z",
+                            "null_geometry_count",
+                            "x_range",
+                            "y_range",
+                            "z_range",
+                            "fields",
+                            "fidelity"
+                          ],
+                          "title": "FeatureContext",
+                          "type": "object"
                         }
                       ],
                       "title": "Scientific"
@@ -73848,10 +76234,13 @@
                         },
                         {
                           "additionalProperties": false,
-                          "description": "The executable identity of the typed reader (Connectors typed_reader).",
+                          "description": "The executable identity of the typed reader (Connectors typed_reader; E56: feature_files for feature sets).",
                           "properties": {
                             "reader": {
-                              "const": "asset_connectors.typed_reader/1",
+                              "enum": [
+                                "asset_connectors.typed_reader/1",
+                                "asset_connectors.feature_files/1"
+                              ],
                               "title": "Reader",
                               "type": "string"
                             },
@@ -73868,7 +76257,8 @@
                                 "wavelet/1",
                                 "model-section/1",
                                 "seismic-section/1",
-                                "time-depth/1"
+                                "time-depth/1",
+                                "feature-set/1"
                               ],
                               "title": "Mapping",
                               "type": "string"
@@ -73930,6 +76320,41 @@
                             "null_policy"
                           ],
                           "title": "RecipeInterpretation",
+                          "type": "object"
+                        },
+                        {
+                          "additionalProperties": false,
+                          "description": "E56: the executable identity of a package read without a recipe (a Shapefile and its companion members).",
+                          "properties": {
+                            "reader": {
+                              "const": "asset_connectors.feature_files/1",
+                              "title": "Reader",
+                              "type": "string"
+                            },
+                            "mapping": {
+                              "const": "feature-set/1",
+                              "title": "Mapping",
+                              "type": "string"
+                            },
+                            "parsing_policy": {
+                              "const": "package-strict/1",
+                              "title": "Parsing Policy",
+                              "type": "string"
+                            },
+                            "null_policy": {
+                              "maxLength": 512,
+                              "minLength": 1,
+                              "title": "Null Policy",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "reader",
+                            "mapping",
+                            "parsing_policy",
+                            "null_policy"
+                          ],
+                          "title": "PackageInterpretation",
                           "type": "object"
                         }
                       ],
@@ -74056,7 +76481,10 @@
                               "text/csv",
                               "text/plain",
                               "application/octet-stream",
-                              "image/tiff"
+                              "image/tiff",
+                              "application/x-esri-shapefile",
+                              "application/geopackage+sqlite3",
+                              "application/geo+json"
                             ],
                             "title": "Media Type",
                             "type": "string"
@@ -74788,10 +77216,13 @@
                     },
                     "interpretation": {
                       "additionalProperties": false,
-                      "description": "The executable identity of the typed reader (Connectors typed_reader).",
+                      "description": "The executable identity of the typed reader (Connectors typed_reader; E56: feature_files for feature sets).",
                       "properties": {
                         "reader": {
-                          "const": "asset_connectors.typed_reader/1",
+                          "enum": [
+                            "asset_connectors.typed_reader/1",
+                            "asset_connectors.feature_files/1"
+                          ],
                           "title": "Reader",
                           "type": "string"
                         },
@@ -74808,7 +77239,8 @@
                             "wavelet/1",
                             "model-section/1",
                             "seismic-section/1",
-                            "time-depth/1"
+                            "time-depth/1",
+                            "feature-set/1"
                           ],
                           "title": "Mapping",
                           "type": "string"
@@ -74989,6 +77421,1820 @@
                   ],
                   "title": "SeismicSlice",
                   "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Versioned error; see README",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error",
+                    "code",
+                    "message",
+                    "remedy",
+                    "docs",
+                    "request_id"
+                  ],
+                  "description": "Every refusal (E31): error is kept for existing clients and equals message; request_id equals the X-Request-Id header.",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "The stable machine-readable code; see docs"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "remedy": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "What the caller can do next"
+                    },
+                    "docs": {
+                      "type": "string",
+                      "description": "The code's anchor on the errors reference page, /docs/reference/errors/#<code>"
+                    },
+                    "request_id": {
+                      "type": "string",
+                      "description": "Equals the X-Request-Id response header; quote it when reporting a failure"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Busy: retry the same exact request after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error",
+                    "code",
+                    "message",
+                    "remedy",
+                    "docs",
+                    "request_id"
+                  ],
+                  "description": "Every refusal (E31): error is kept for existing clients and equals message; request_id equals the X-Request-Id header.",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "The stable machine-readable code; see docs"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "remedy": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "What the caller can do next"
+                    },
+                    "docs": {
+                      "type": "string",
+                      "description": "The code's anchor on the errors reference page, /docs/reference/errors/#<code>"
+                    },
+                    "request_id": {
+                      "type": "string",
+                      "description": "Equals the X-Request-Id response header; quote it when reporting a failure"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "grant",
+          "session"
+        ]
+      }
+    },
+    "/api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/windows": {
+      "get": {
+        "description": "One page of a depth window of a retained revision's stored well curve (ophiolite.curve-window/1): raw samples at level 0, or runs, blocks and missing stretches at levels 1 to 17; at most 2,048 items a page. Only increasing depth axes are windowed (422 incompatible-context otherwise; read the whole curve). A conditional request (If-None-Match with an earlier strong ETag) is authorised first and answers 304 when the ETag is current.",
+        "parameters": [
+          {
+            "name": "project",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "asset",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "revision",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "curve",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The stored value curve (mnemonic); no default is inferred."
+          },
+          {
+            "name": "top",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "description": "Top of the depth window, in the curve's depth unit."
+          },
+          {
+            "name": "base",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "description": "Base of the depth window, in the curve's depth unit."
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 17
+            },
+            "description": "0: raw samples; 1-17: blocks of up to 2^level samples. Exactly one of level and rows."
+          },
+          {
+            "name": "rows",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2048
+            },
+            "description": "Item budget: the server chooses the smallest level whose item count is at most rows (level 17 when none is). Exactly one of level and rows."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The previous page's next; refused with another revision, range, level, shape or reference."
+          },
+          {
+            "name": "reference",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "md",
+                "tvd",
+                "tvdss"
+              ]
+            },
+            "description": "Depth reference; only md is windowed (tvd and tvdss answer 422)."
+          }
+        ],
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authorised window page",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Strong; sha256 of every byte-determining input"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "private, no-cache"
+                }
+              },
+              "Vary": {
+                "schema": {
+                  "type": "string",
+                  "const": "Cookie, Authorization"
+                }
+              },
+              "X-Ophiolite-Access-Generation": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The asset's access generation (0 when never changed)"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "x-ophiolite": {
+                    "id": "ophiolite.curve-window/1",
+                    "version": "1.0.0",
+                    "lifecycle": "preview"
+                  },
+                  "title": "Curve window",
+                  "description": "One page of a depth window of a stored well curve: raw samples (level 0) or, at levels 1..17, runs of present samples, blocks of up to 2^level samples inside one run with their extrema, and the missing stretches. A page holds at most 2,048 items.",
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "schema",
+                    "shape",
+                    "identity",
+                    "unit",
+                    "reference",
+                    "depth_unit",
+                    "source",
+                    "request",
+                    "range",
+                    "level",
+                    "exact",
+                    "limit",
+                    "items",
+                    "rows_met",
+                    "next",
+                    "before",
+                    "after"
+                  ],
+                  "properties": {
+                    "schema": {
+                      "const": "ophiolite.curve-window/1"
+                    },
+                    "shape": {
+                      "enum": [
+                        "raw",
+                        "summary"
+                      ]
+                    },
+                    "identity": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "kind",
+                        "project_id",
+                        "asset_id",
+                        "revision",
+                        "curve"
+                      ],
+                      "properties": {
+                        "kind": {
+                          "enum": [
+                            "retained",
+                            "native"
+                          ]
+                        },
+                        "project_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 512
+                        },
+                        "asset_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 512
+                        },
+                        "revision": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 128
+                        },
+                        "curve": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 512
+                        },
+                        "native": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "well_id",
+                            "well_version",
+                            "curve_asset_revision",
+                            "curve_id"
+                          ],
+                          "properties": {
+                            "well_id": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 512
+                            },
+                            "well_version": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "curve_asset_revision": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 128
+                            },
+                            "curve_id": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 512
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "unit": {
+                      "type": "string",
+                      "maxLength": 128
+                    },
+                    "reference": {
+                      "const": "md"
+                    },
+                    "depth_unit": {
+                      "type": "string",
+                      "maxLength": 128
+                    },
+                    "source": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "algorithm",
+                        "algorithm_version",
+                        "source_digest"
+                      ],
+                      "properties": {
+                        "algorithm": {
+                          "const": "run-blocks"
+                        },
+                        "algorithm_version": {
+                          "const": 1
+                        },
+                        "source_digest": {
+                          "type": "string",
+                          "pattern": "^[0-9a-f]{64}$"
+                        }
+                      }
+                    },
+                    "request": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "top",
+                        "base",
+                        "level",
+                        "rows",
+                        "cursor"
+                      ],
+                      "properties": {
+                        "top": {
+                          "type": "number"
+                        },
+                        "base": {
+                          "type": "number"
+                        },
+                        "level": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "minimum": 0,
+                          "maximum": 17
+                        },
+                        "rows": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "minimum": 1,
+                          "maximum": 2048
+                        },
+                        "cursor": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "maxLength": 1024
+                        }
+                      }
+                    },
+                    "range": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "served_first_depth",
+                            "served_last_depth"
+                          ],
+                          "properties": {
+                            "served_first_depth": {
+                              "type": "number"
+                            },
+                            "served_last_depth": {
+                              "type": "number"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 17
+                    },
+                    "exact": {
+                      "type": "boolean"
+                    },
+                    "limit": {
+                      "const": 2048
+                    },
+                    "items": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "rows_met": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ]
+                    },
+                    "next": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "maxLength": 1024
+                    },
+                    "before": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "sample_index",
+                            "depth",
+                            "value"
+                          ],
+                          "properties": {
+                            "sample_index": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "depth": {
+                              "type": "number"
+                            },
+                            "value": {
+                              "type": [
+                                "number",
+                                "null"
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "after": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "sample_index",
+                            "depth",
+                            "value"
+                          ],
+                          "properties": {
+                            "sample_index": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "depth": {
+                              "type": "number"
+                            },
+                            "value": {
+                              "type": [
+                                "number",
+                                "null"
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "sample_index": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "maxItems": 2048
+                    },
+                    "depth": {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      },
+                      "maxItems": 2048
+                    },
+                    "value": {
+                      "type": "array",
+                      "items": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "maxItems": 2048
+                    },
+                    "runs": {
+                      "type": "array",
+                      "maxItems": 2048,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "run",
+                          "first_index",
+                          "last_index",
+                          "first_depth",
+                          "last_depth"
+                        ],
+                        "properties": {
+                          "run": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "first_index": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "last_index": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "first_depth": {
+                            "type": "number"
+                          },
+                          "last_depth": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    },
+                    "blocks": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "run",
+                        "first_index",
+                        "last_index",
+                        "first_depth",
+                        "last_depth",
+                        "first",
+                        "last",
+                        "min",
+                        "min_index",
+                        "min_depth",
+                        "max",
+                        "max_index",
+                        "max_depth",
+                        "count"
+                      ],
+                      "properties": {
+                        "run": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "first_index": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "last_index": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "first_depth": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "last_depth": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "first": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "last": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "min": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "min_index": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "min_depth": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "max": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "max_index": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "max_depth": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "count": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "maxItems": 2048
+                        }
+                      }
+                    },
+                    "missing": {
+                      "type": "array",
+                      "maxItems": 2048,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "from_index",
+                          "to_index",
+                          "from_depth",
+                          "to_depth"
+                        ],
+                        "properties": {
+                          "from_index": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "to_index": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "from_depth": {
+                            "type": "number"
+                          },
+                          "to_depth": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "if": {
+                    "type": "object"
+                  },
+                  "then": {
+                    "description": "The value rules: the shape discriminates the body (raw at level 0 and exact; summary at 1..17), and only a native identity carries native.",
+                    "allOf": [
+                      {
+                        "if": {
+                          "properties": {
+                            "shape": {
+                              "const": "raw"
+                            }
+                          }
+                        },
+                        "then": {
+                          "required": [
+                            "sample_index",
+                            "depth",
+                            "value"
+                          ],
+                          "properties": {
+                            "level": {
+                              "const": 0
+                            },
+                            "exact": {
+                              "const": true
+                            }
+                          },
+                          "not": {
+                            "anyOf": [
+                              {
+                                "required": [
+                                  "runs"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "blocks"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "missing"
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        "else": {
+                          "required": [
+                            "runs",
+                            "blocks",
+                            "missing"
+                          ],
+                          "properties": {
+                            "level": {
+                              "minimum": 1
+                            },
+                            "exact": {
+                              "const": false
+                            }
+                          },
+                          "not": {
+                            "anyOf": [
+                              {
+                                "required": [
+                                  "sample_index"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "depth"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "value"
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "identity": {
+                              "properties": {
+                                "kind": {
+                                  "const": "native"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "identity": {
+                              "required": [
+                                "native"
+                              ]
+                            }
+                          }
+                        },
+                        "else": {
+                          "properties": {
+                            "identity": {
+                              "not": {
+                                "required": [
+                                  "native"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "The If-None-Match ETag is current; no body",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Strong; sha256 of every byte-determining input"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "private, no-cache"
+                }
+              },
+              "Vary": {
+                "schema": {
+                  "type": "string",
+                  "const": "Cookie, Authorization"
+                }
+              },
+              "X-Ophiolite-Access-Generation": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The asset's access generation (0 when never changed)"
+              }
+            }
+          },
+          "default": {
+            "description": "Versioned error; see README",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error",
+                    "code",
+                    "message",
+                    "remedy",
+                    "docs",
+                    "request_id"
+                  ],
+                  "description": "Every refusal (E31): error is kept for existing clients and equals message; request_id equals the X-Request-Id header.",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "The stable machine-readable code; see docs"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "remedy": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "What the caller can do next"
+                    },
+                    "docs": {
+                      "type": "string",
+                      "description": "The code's anchor on the errors reference page, /docs/reference/errors/#<code>"
+                    },
+                    "request_id": {
+                      "type": "string",
+                      "description": "Equals the X-Request-Id response header; quote it when reporting a failure"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Busy: retry the same exact request after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error",
+                    "code",
+                    "message",
+                    "remedy",
+                    "docs",
+                    "request_id"
+                  ],
+                  "description": "Every refusal (E31): error is kept for existing clients and equals message; request_id equals the X-Request-Id header.",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "The stable machine-readable code; see docs"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "remedy": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "What the caller can do next"
+                    },
+                    "docs": {
+                      "type": "string",
+                      "description": "The code's anchor on the errors reference page, /docs/reference/errors/#<code>"
+                    },
+                    "request_id": {
+                      "type": "string",
+                      "description": "Equals the X-Request-Id response header; quote it when reporting a failure"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "grant",
+          "session"
+        ]
+      }
+    },
+    "/api/v1/projects/{project}/wells/{well}/versions/{version}/curve-assets/{asset}/revisions/{revision}/windows": {
+      "get": {
+        "description": "One page of a depth window of a native well curve asset (ophiolite.curve-window/1, identity.kind native), read through the caller\u2019s own GetCurveAsset; MD only (tvd and tvdss answer 422). A conditional request (If-None-Match) still reads the curve as the caller and answers 304 when the ETag is current.",
+        "parameters": [
+          {
+            "name": "project",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "well",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "asset",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "revision",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "An immutable curve-asset revision (1 or later)."
+          },
+          {
+            "name": "top",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "description": "Top of the depth window, in the curve's depth unit."
+          },
+          {
+            "name": "base",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "description": "Base of the depth window, in the curve's depth unit."
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 17
+            },
+            "description": "0: raw samples; 1-17: blocks of up to 2^level samples. Exactly one of level and rows."
+          },
+          {
+            "name": "rows",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2048
+            },
+            "description": "Item budget: the server chooses the smallest level whose item count is at most rows (level 17 when none is). Exactly one of level and rows."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The previous page's next; refused with another revision, range, level, shape or reference."
+          },
+          {
+            "name": "reference",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "md",
+                "tvd",
+                "tvdss"
+              ]
+            },
+            "description": "Depth reference; only md is windowed (tvd and tvdss answer 422)."
+          }
+        ],
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authorised window page",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Strong; sha256 of every byte-determining input"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "private, no-cache"
+                }
+              },
+              "Vary": {
+                "schema": {
+                  "type": "string",
+                  "const": "Cookie, Authorization"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "x-ophiolite": {
+                    "id": "ophiolite.curve-window/1",
+                    "version": "1.0.0",
+                    "lifecycle": "preview"
+                  },
+                  "title": "Curve window",
+                  "description": "One page of a depth window of a stored well curve: raw samples (level 0) or, at levels 1..17, runs of present samples, blocks of up to 2^level samples inside one run with their extrema, and the missing stretches. A page holds at most 2,048 items.",
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "schema",
+                    "shape",
+                    "identity",
+                    "unit",
+                    "reference",
+                    "depth_unit",
+                    "source",
+                    "request",
+                    "range",
+                    "level",
+                    "exact",
+                    "limit",
+                    "items",
+                    "rows_met",
+                    "next",
+                    "before",
+                    "after"
+                  ],
+                  "properties": {
+                    "schema": {
+                      "const": "ophiolite.curve-window/1"
+                    },
+                    "shape": {
+                      "enum": [
+                        "raw",
+                        "summary"
+                      ]
+                    },
+                    "identity": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "kind",
+                        "project_id",
+                        "asset_id",
+                        "revision",
+                        "curve"
+                      ],
+                      "properties": {
+                        "kind": {
+                          "enum": [
+                            "retained",
+                            "native"
+                          ]
+                        },
+                        "project_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 512
+                        },
+                        "asset_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 512
+                        },
+                        "revision": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 128
+                        },
+                        "curve": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 512
+                        },
+                        "native": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "well_id",
+                            "well_version",
+                            "curve_asset_revision",
+                            "curve_id"
+                          ],
+                          "properties": {
+                            "well_id": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 512
+                            },
+                            "well_version": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "curve_asset_revision": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 128
+                            },
+                            "curve_id": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 512
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "unit": {
+                      "type": "string",
+                      "maxLength": 128
+                    },
+                    "reference": {
+                      "const": "md"
+                    },
+                    "depth_unit": {
+                      "type": "string",
+                      "maxLength": 128
+                    },
+                    "source": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "algorithm",
+                        "algorithm_version",
+                        "source_digest"
+                      ],
+                      "properties": {
+                        "algorithm": {
+                          "const": "run-blocks"
+                        },
+                        "algorithm_version": {
+                          "const": 1
+                        },
+                        "source_digest": {
+                          "type": "string",
+                          "pattern": "^[0-9a-f]{64}$"
+                        }
+                      }
+                    },
+                    "request": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "top",
+                        "base",
+                        "level",
+                        "rows",
+                        "cursor"
+                      ],
+                      "properties": {
+                        "top": {
+                          "type": "number"
+                        },
+                        "base": {
+                          "type": "number"
+                        },
+                        "level": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "minimum": 0,
+                          "maximum": 17
+                        },
+                        "rows": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "minimum": 1,
+                          "maximum": 2048
+                        },
+                        "cursor": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "maxLength": 1024
+                        }
+                      }
+                    },
+                    "range": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "served_first_depth",
+                            "served_last_depth"
+                          ],
+                          "properties": {
+                            "served_first_depth": {
+                              "type": "number"
+                            },
+                            "served_last_depth": {
+                              "type": "number"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "level": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 17
+                    },
+                    "exact": {
+                      "type": "boolean"
+                    },
+                    "limit": {
+                      "const": 2048
+                    },
+                    "items": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "rows_met": {
+                      "type": [
+                        "boolean",
+                        "null"
+                      ]
+                    },
+                    "next": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "maxLength": 1024
+                    },
+                    "before": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "sample_index",
+                            "depth",
+                            "value"
+                          ],
+                          "properties": {
+                            "sample_index": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "depth": {
+                              "type": "number"
+                            },
+                            "value": {
+                              "type": [
+                                "number",
+                                "null"
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "after": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "sample_index",
+                            "depth",
+                            "value"
+                          ],
+                          "properties": {
+                            "sample_index": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "depth": {
+                              "type": "number"
+                            },
+                            "value": {
+                              "type": [
+                                "number",
+                                "null"
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "sample_index": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "maxItems": 2048
+                    },
+                    "depth": {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      },
+                      "maxItems": 2048
+                    },
+                    "value": {
+                      "type": "array",
+                      "items": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "maxItems": 2048
+                    },
+                    "runs": {
+                      "type": "array",
+                      "maxItems": 2048,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "run",
+                          "first_index",
+                          "last_index",
+                          "first_depth",
+                          "last_depth"
+                        ],
+                        "properties": {
+                          "run": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "first_index": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "last_index": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "first_depth": {
+                            "type": "number"
+                          },
+                          "last_depth": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    },
+                    "blocks": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "run",
+                        "first_index",
+                        "last_index",
+                        "first_depth",
+                        "last_depth",
+                        "first",
+                        "last",
+                        "min",
+                        "min_index",
+                        "min_depth",
+                        "max",
+                        "max_index",
+                        "max_depth",
+                        "count"
+                      ],
+                      "properties": {
+                        "run": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "first_index": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "last_index": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "first_depth": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "last_depth": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "first": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "last": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "min": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "min_index": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "min_depth": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "max": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "max_index": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "maxItems": 2048
+                        },
+                        "max_depth": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "maxItems": 2048
+                        },
+                        "count": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "maxItems": 2048
+                        }
+                      }
+                    },
+                    "missing": {
+                      "type": "array",
+                      "maxItems": 2048,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "from_index",
+                          "to_index",
+                          "from_depth",
+                          "to_depth"
+                        ],
+                        "properties": {
+                          "from_index": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "to_index": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "from_depth": {
+                            "type": "number"
+                          },
+                          "to_depth": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "if": {
+                    "type": "object"
+                  },
+                  "then": {
+                    "description": "The value rules: the shape discriminates the body (raw at level 0 and exact; summary at 1..17), and only a native identity carries native.",
+                    "allOf": [
+                      {
+                        "if": {
+                          "properties": {
+                            "shape": {
+                              "const": "raw"
+                            }
+                          }
+                        },
+                        "then": {
+                          "required": [
+                            "sample_index",
+                            "depth",
+                            "value"
+                          ],
+                          "properties": {
+                            "level": {
+                              "const": 0
+                            },
+                            "exact": {
+                              "const": true
+                            }
+                          },
+                          "not": {
+                            "anyOf": [
+                              {
+                                "required": [
+                                  "runs"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "blocks"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "missing"
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        "else": {
+                          "required": [
+                            "runs",
+                            "blocks",
+                            "missing"
+                          ],
+                          "properties": {
+                            "level": {
+                              "minimum": 1
+                            },
+                            "exact": {
+                              "const": false
+                            }
+                          },
+                          "not": {
+                            "anyOf": [
+                              {
+                                "required": [
+                                  "sample_index"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "depth"
+                                ]
+                              },
+                              {
+                                "required": [
+                                  "value"
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "identity": {
+                              "properties": {
+                                "kind": {
+                                  "const": "native"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "identity": {
+                              "required": [
+                                "native"
+                              ]
+                            }
+                          }
+                        },
+                        "else": {
+                          "properties": {
+                            "identity": {
+                              "not": {
+                                "required": [
+                                  "native"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "The If-None-Match ETag is current; no body",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "Strong; sha256 of every byte-determining input"
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "private, no-cache"
+                }
+              },
+              "Vary": {
+                "schema": {
+                  "type": "string",
+                  "const": "Cookie, Authorization"
                 }
               }
             }
@@ -77643,6 +81889,7 @@
               "deployment-administrator",
               "organisation-owner",
               "project-administrator",
+              "connection-administrator",
               "you"
             ],
             "title": "Actor",
@@ -77690,7 +81937,8 @@
               "sign-in-refused",
               "no-read-right",
               "table-missing",
-              "undetermined"
+              "undetermined",
+              "sign-in-needed"
             ],
             "title": "Code",
             "type": "string"
@@ -77942,6 +82190,7 @@
               "deployment-administrator",
               "organisation-owner",
               "project-administrator",
+              "connection-administrator",
               "you"
             ],
             "title": "Actor",
@@ -78047,6 +82296,7 @@
               "deployment-administrator",
               "organisation-owner",
               "project-administrator",
+              "connection-administrator",
               "you"
             ],
             "title": "Actor",
@@ -80423,6 +84673,7 @@
               "deployment-administrator",
               "organisation-owner",
               "project-administrator",
+              "connection-administrator",
               "you"
             ],
             "title": "Actor",
@@ -80464,7 +84715,8 @@
               "connection-disabled",
               "target-changed",
               "key-unavailable",
-              "key-mismatch"
+              "key-mismatch",
+              "sign-in-needed"
             ],
             "title": "Code",
             "type": "string"
@@ -81557,7 +85809,13 @@
                   "source-collision",
                   "not-found",
                   "test-limit",
-                  "copy-not-declared"
+                  "copy-not-declared",
+                  "no-use",
+                  "sign-in-needed",
+                  "use-organisation-connection",
+                  "ask-for-use",
+                  "ask-to-promote",
+                  "sign-in-owner-unknown"
                 ],
                 "title": "Code",
                 "type": "string"
@@ -81567,6 +85825,7 @@
                   "deployment-administrator",
                   "organisation-owner",
                   "project-administrator",
+                  "connection-administrator",
                   "you"
                 ],
                 "title": "Actor",
@@ -82048,6 +86307,7 @@
               "deployment-administrator",
               "organisation-owner",
               "project-administrator",
+              "connection-administrator",
               "you"
             ],
             "title": "Actor",
@@ -82522,6 +86782,11 @@
           "max_inline_bytes": {
             "title": "Max Inline Bytes",
             "type": "integer"
+          },
+          "package_companion_bytes": {
+            "description": "E56: the companion files of a package read without a recipe, together",
+            "title": "Package Companion Bytes",
+            "type": "integer"
           }
         },
         "required": [
@@ -82538,7 +86803,8 @@
           "grid_cells",
           "max_traces",
           "max_samples",
-          "max_inline_bytes"
+          "max_inline_bytes",
+          "package_companion_bytes"
         ],
         "title": "Limits",
         "type": "object"
@@ -87088,6 +91354,155 @@
           "recorded"
         ],
         "title": "OfferByItself",
+        "type": "object"
+      },
+      "OrgConnection": {
+        "additionalProperties": false,
+        "description": "E39: one organisation connection. `readiness` only for a person who may use it; `access` and `member` (whether each\nlisted person is still a member) only for its administrators, in their own session. No address, no username.",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "organization_id": {
+            "title": "Organization Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "generation": {
+            "title": "Generation",
+            "type": "integer"
+          },
+          "you": {
+            "$ref": "#/components/schemas/OrgConnectionYou"
+          },
+          "readiness": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConnectionReadiness"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "access": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/OrgConnectionAccess"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Access"
+          },
+          "member": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "boolean"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Member"
+          }
+        },
+        "required": [
+          "id",
+          "organization_id",
+          "name",
+          "enabled",
+          "generation",
+          "you"
+        ],
+        "title": "OrgConnection",
+        "type": "object"
+      },
+      "OrgConnectionAccess": {
+        "additionalProperties": false,
+        "description": "One person on an organisation connection's access list.",
+        "properties": {
+          "person": {
+            "title": "Person",
+            "type": "string"
+          },
+          "use": {
+            "title": "Use",
+            "type": "boolean"
+          },
+          "administer": {
+            "title": "Administer",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "person",
+          "use",
+          "administer"
+        ],
+        "title": "OrgConnectionAccess",
+        "type": "object"
+      },
+      "OrgConnectionProjectUse": {
+        "additionalProperties": false,
+        "properties": {
+          "project_id": {
+            "title": "Project Id",
+            "type": "string"
+          },
+          "selections": {
+            "title": "Selections",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "project_id",
+          "selections"
+        ],
+        "title": "OrgConnectionProjectUse",
+        "type": "object"
+      },
+      "OrgConnectionYou": {
+        "additionalProperties": false,
+        "description": "What the caller may do with an organisation connection, and whether their own sign-in is saved.",
+        "properties": {
+          "use": {
+            "title": "Use",
+            "type": "boolean"
+          },
+          "administer": {
+            "title": "Administer",
+            "type": "boolean"
+          },
+          "signed_in": {
+            "title": "Signed In",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "use",
+          "administer",
+          "signed_in"
+        ],
+        "title": "OrgConnectionYou",
         "type": "object"
       },
       "OrganizationDetail": {
@@ -92922,6 +97337,51 @@
             "description": "E85: each declared field the person decided, with its class",
             "title": "Evidence",
             "type": "object"
+          },
+          "asks": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/CheckAsk"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E56: the declarations this file still needs (GeoPackage layer titles by key among them); only on a needs-decision row",
+            "title": "Asks"
+          },
+          "stated": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/CheckStated"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E56: what the file says about itself, read in the run; only on a needs-decision row",
+            "title": "Stated"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E56 (N5): the title of the GeoPackage layer this file landed as; the layer key stays in technical",
+            "title": "Title"
           }
         },
         "required": [

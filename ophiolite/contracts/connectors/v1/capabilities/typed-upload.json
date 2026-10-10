@@ -248,6 +248,138 @@
         "date": null,
         "evidence": null
       }
+    },
+    {
+      "profile": "zmap-plus-grid/1",
+      "data": "Horizon grid",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "Text formatting is kept only in the exact original"
+      ],
+      "unsupported": [
+        "rotated grids",
+        "CRS transformation",
+        "interpolation",
+        "inferring corner registration"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    },
+    {
+      "profile": "cps3-ascii-grid/1",
+      "data": "Horizon grid",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "Text formatting is kept only in the exact original"
+      ],
+      "unsupported": [
+        "rotated grids",
+        "CRS transformation",
+        "interpolation",
+        "inferring corner registration or column direction"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    },
+    {
+      "profile": "irap-ascii-grid/1",
+      "data": "Horizon grid",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "Text formatting is kept only in the exact original"
+      ],
+      "unsupported": [
+        "rotated grids",
+        "CRS transformation",
+        "interpolation",
+        "IRAP binary"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    },
+    {
+      "profile": "esri-shapefile/1",
+      "data": "Map features",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "Formatting and anything the feature set does not hold are kept only in the exact original"
+      ],
+      "unsupported": [
+        "multipatch",
+        "CRS transformation",
+        "axis swapping",
+        "attribute types other than text, numbers, dates and true/false"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    },
+    {
+      "profile": "ogc-geopackage/1",
+      "data": "Map features",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "Formatting and anything the feature set does not hold are kept only in the exact original"
+      ],
+      "unsupported": [
+        "GeoPackage 1.0 and 1.1",
+        "curved geometries",
+        "more than one layer per upload",
+        "tiles and attributes-only tables"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    },
+    {
+      "profile": "geojson/1",
+      "data": "Map features",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "Formatting and anything the feature set does not hold are kept only in the exact original"
+      ],
+      "unsupported": [
+        "GeometryCollection",
+        "mixed geometry kinds",
+        "CRS transformation",
+        "nested property values"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
     }
   ],
   "redistribution": "Ophiolite source in this repository; no third-party runtime needed.",

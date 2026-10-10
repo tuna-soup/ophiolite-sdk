@@ -265,11 +265,11 @@
     "direction": "read"
    },
    "fixture": {
-    "class": "synthetic",
-    "path": "tests/fixtures/readers/horizon-grid.asc",
-    "sha256": "a478059e57f0ee96de5a84ece57feeabb6d1c2c08a9f322709545a5f28d7f415",
-    "bytes": 119,
-    "replaced_by": "E56"
+    "class": "real",
+    "path": "tests/fixtures/grids/11-ro-crop.asc",
+    "sha256": "ee3ab6bc79e5b2594b5a1481870c55aa3f881dd8d90cfa496c16829fc26d225e",
+    "bytes": 11396,
+    "rights": "docs/release/rights/grids-gis-2026-10.json"
    },
    "report": "{ncols:,} × {nrows:,} cells, {missing_count:,} missing",
    "type": "regular-grid-surface",
@@ -372,7 +372,7 @@
     "path": "tests/fixtures/readers/surface.mesh",
     "sha256": "3ab2e518f8555cff5d6500f6b6471101567d12b1739b1885e35a1b253a390f94",
     "bytes": 115,
-    "replaced_by": "E56"
+    "replaced_by": "E11"
    },
    "report": "{vertex_count:,} vertices, {triangle_count:,} triangles",
    "type": "triangulated-surface",
@@ -545,7 +545,7 @@
     "path": "tests/fixtures/readers/faults.fss",
     "sha256": "44d7121ba84a469f908af7b1e2a822920910f5c373674818dedaf14c629814e5",
     "bytes": 179,
-    "replaced_by": "E56"
+    "replaced_by": "E16"
    },
    "report": "{sticks:,} sticks, {points:,} points",
    "type": "polyline-set",
@@ -609,7 +609,7 @@
     "path": "tests/fixtures/readers/volume.sgy",
     "sha256": "fbdd6ea3d05076fa89c8327210d96579ff308d414d91c1cd7d1af83e463888cf",
     "bytes": 6624,
-    "replaced_by": "E56"
+    "replaced_by": "E16"
    },
    "report": "{traces:,} traces, {samples:,} samples per trace",
    "type": "seismic-volume",
@@ -1129,6 +1129,655 @@
    "states": {
     "function": null,
     "items": []
+   },
+   "landing": "retained"
+  },
+  {
+   "profile": "zmap-plus-grid/1",
+   "label": "Horizon grid (ZMAP+)",
+   "extensions": [
+    ".zmap",
+    ".dat",
+    ".grd"
+   ],
+   "detect": "zmap_header",
+   "limits": {
+    "names": [
+     "grid_cells"
+    ],
+    "template": "ZMAP+ grid (@ header, fixed-width values column by column) · up to {grid_cells} cells. Whether the corner values are cell centres or cell edges is asked; null values stay missing; nothing is interpolated."
+   },
+   "declared": [
+    {
+     "key": "crs",
+     "label": "Coordinate system",
+     "kind": "crs",
+     "hint": "EPSG code such as EPSG:28992"
+    },
+    {
+     "key": "xy_unit",
+     "label": "Map unit",
+     "kind": "unit",
+     "hint": "For example m"
+    },
+    {
+     "key": "z_meaning",
+     "label": "Values are",
+     "kind": "choice",
+     "choices": {
+      "depth": "Depth",
+      "elevation": "Elevation",
+      "time": "Time",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "z_unit",
+     "label": "Value unit",
+     "kind": "unit",
+     "hint": "For example m or ms"
+    },
+    {
+     "key": "positive",
+     "label": "Positive direction",
+     "kind": "choice",
+     "choices": {
+      "up": "Up",
+      "down": "Down",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "vertical_datum",
+     "label": "Vertical datum",
+     "kind": "text",
+     "hint": "For example NAP"
+    },
+    {
+     "key": "corners",
+     "label": "The corner values in the file are",
+     "kind": "choice",
+     "choices": {
+      "unknown": "Not stated",
+      "centres": "Cell centres",
+      "edges": "Cell edges"
+     }
+    }
+   ],
+   "companions": [],
+   "recipe": false,
+   "osdu": {
+    "kind": "work-product-component--SeismicHorizon",
+    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+   },
+   "route": {
+    "document": "typed-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "real",
+    "path": "tests/fixtures/grids/11-ro-crop.zmap",
+    "sha256": "63ae2d83fbb720cd3c5c9ca7adcae11befa964cc31e91528e04f1120e5f2cbfc",
+    "bytes": 18698,
+    "rights": "docs/release/rights/grids-gis-2026-10.json"
+   },
+   "report": "{ncols:,} × {nrows:,} cells, {missing_count:,} missing",
+   "type": "regular-grid-surface",
+   "mapping": "regular-grid-surface/1",
+   "states": {
+    "function": "zmap_grid",
+    "items": [
+     {
+      "key": "grid_size",
+      "label": "Grid size",
+      "from": "head"
+     },
+     {
+      "key": "missing_marker",
+      "label": "Missing value marker",
+      "from": "head"
+     }
+    ]
+   },
+   "landing": "retained"
+  },
+  {
+   "profile": "cps3-ascii-grid/1",
+   "label": "Horizon grid (CPS-3)",
+   "extensions": [
+    ".cps3",
+    ".cps",
+    ".dat",
+    ".grd"
+   ],
+   "detect": "cps3_header",
+   "limits": {
+    "names": [
+     "grid_cells"
+    ],
+    "template": "CPS-3 ASCII grid (FSASCI, FSATTR, FSLIMI, FSNROW, FSXINC) · up to {grid_cells} cells. Corner registration and where each column starts are asked; null values stay missing; nothing is interpolated."
+   },
+   "declared": [
+    {
+     "key": "crs",
+     "label": "Coordinate system",
+     "kind": "crs",
+     "hint": "EPSG code such as EPSG:28992"
+    },
+    {
+     "key": "xy_unit",
+     "label": "Map unit",
+     "kind": "unit",
+     "hint": "For example m"
+    },
+    {
+     "key": "z_meaning",
+     "label": "Values are",
+     "kind": "choice",
+     "choices": {
+      "depth": "Depth",
+      "elevation": "Elevation",
+      "time": "Time",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "z_unit",
+     "label": "Value unit",
+     "kind": "unit",
+     "hint": "For example m or ms"
+    },
+    {
+     "key": "positive",
+     "label": "Positive direction",
+     "kind": "choice",
+     "choices": {
+      "up": "Up",
+      "down": "Down",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "vertical_datum",
+     "label": "Vertical datum",
+     "kind": "text",
+     "hint": "For example NAP"
+    },
+    {
+     "key": "corners",
+     "label": "The corner values in the file are",
+     "kind": "choice",
+     "choices": {
+      "unknown": "Not stated",
+      "centres": "Cell centres",
+      "edges": "Cell edges"
+     }
+    },
+    {
+     "key": "column_start",
+     "label": "Each column of values starts at the",
+     "kind": "choice",
+     "choices": {
+      "unknown": "Not stated",
+      "north": "North end",
+      "south": "South end"
+     }
+    }
+   ],
+   "companions": [],
+   "recipe": false,
+   "osdu": {
+    "kind": "work-product-component--SeismicHorizon",
+    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+   },
+   "route": {
+    "document": "typed-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "synthetic",
+    "path": "tests/fixtures/grids/11-ro-crop-synthetic-north.cps3",
+    "sha256": "2fdd83c7209e87f3c080f7fce60dce7f1e85d976c4a25224770fbc7ce07c27eb",
+    "bytes": 11986,
+    "exception": "D13"
+   },
+   "report": "{ncols:,} × {nrows:,} cells, {missing_count:,} missing",
+   "type": "regular-grid-surface",
+   "mapping": "regular-grid-surface/1",
+   "states": {
+    "function": "cps3_grid",
+    "items": [
+     {
+      "key": "grid_size",
+      "label": "Grid size",
+      "from": "head"
+     },
+     {
+      "key": "cell_size",
+      "label": "Cell size",
+      "from": "head"
+     },
+     {
+      "key": "missing_marker",
+      "label": "Missing value marker",
+      "from": "head"
+     }
+    ]
+   },
+   "landing": "retained"
+  },
+  {
+   "profile": "irap-ascii-grid/1",
+   "label": "Horizon grid (IRAP classic ASCII)",
+   "extensions": [
+    ".irap",
+    ".dat",
+    ".grd"
+   ],
+   "detect": "irap_header",
+   "limits": {
+    "names": [
+     "grid_cells"
+    ],
+    "template": "IRAP classic ASCII grid (-996 header, unrotated) · up to {grid_cells} cells. Values of 9999900 or more stay missing; rotated grids are refused; nothing is interpolated."
+   },
+   "declared": [
+    {
+     "key": "crs",
+     "label": "Coordinate system",
+     "kind": "crs",
+     "hint": "EPSG code such as EPSG:28992"
+    },
+    {
+     "key": "xy_unit",
+     "label": "Map unit",
+     "kind": "unit",
+     "hint": "For example m"
+    },
+    {
+     "key": "z_meaning",
+     "label": "Values are",
+     "kind": "choice",
+     "choices": {
+      "depth": "Depth",
+      "elevation": "Elevation",
+      "time": "Time",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "z_unit",
+     "label": "Value unit",
+     "kind": "unit",
+     "hint": "For example m or ms"
+    },
+    {
+     "key": "positive",
+     "label": "Positive direction",
+     "kind": "choice",
+     "choices": {
+      "up": "Up",
+      "down": "Down",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "vertical_datum",
+     "label": "Vertical datum",
+     "kind": "text",
+     "hint": "For example NAP"
+    }
+   ],
+   "companions": [],
+   "recipe": false,
+   "osdu": {
+    "kind": "work-product-component--SeismicHorizon",
+    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+   },
+   "route": {
+    "document": "typed-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "synthetic",
+    "path": "tests/fixtures/grids/11-ro-crop-synthetic.irap",
+    "sha256": "18ec140f3a64a96d2b7adca3a142f748007c1658472c89de4cc91cfa967c356a",
+    "bytes": 16703,
+    "exception": "D13"
+   },
+   "report": "{ncols:,} × {nrows:,} cells, {missing_count:,} missing",
+   "type": "regular-grid-surface",
+   "mapping": "regular-grid-surface/1",
+   "states": {
+    "function": "irap_grid",
+    "items": [
+     {
+      "key": "grid_size",
+      "label": "Grid size",
+      "from": "head"
+     },
+     {
+      "key": "cell_size",
+      "label": "Cell size",
+      "from": "head"
+     }
+    ]
+   },
+   "landing": "retained"
+  },
+  {
+   "profile": "esri-shapefile/1",
+   "label": "Map features (Shapefile)",
+   "extensions": [
+    ".shp"
+   ],
+   "detect": "shapefile_header",
+   "limits": {
+    "names": [],
+    "template": "ESRI Shapefile: the .shp with its .dbf, and .shx, .prj, .cpg or .cst beside it · up to 50,000 features / 500,000 vertices / 64 fields. Coordinates, axes and ring order are kept as stored; nothing is converted."
+   },
+   "declared": [
+    {
+     "key": "crs",
+     "label": "Coordinate system",
+     "kind": "crs",
+     "hint": "EPSG code such as EPSG:28992"
+    },
+    {
+     "key": "encoding",
+     "label": "Text encoding of the attribute table",
+     "kind": "text",
+     "hint": "For example ISO-8859-1, Windows-1252 or UTF-8"
+    },
+    {
+     "key": "xy_unit",
+     "label": "Map unit",
+     "kind": "unit",
+     "hint": "For example m"
+    },
+    {
+     "key": "z_meaning",
+     "label": "Values are",
+     "kind": "choice",
+     "choices": {
+      "depth": "Depth",
+      "elevation": "Elevation",
+      "time": "Time",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "z_unit",
+     "label": "Value unit",
+     "kind": "unit",
+     "hint": "For example m or ms"
+    },
+    {
+     "key": "positive",
+     "label": "Positive direction",
+     "kind": "choice",
+     "choices": {
+      "up": "Up",
+      "down": "Down",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "vertical_datum",
+     "label": "Vertical datum",
+     "kind": "text",
+     "hint": "For example NAP"
+    }
+   ],
+   "companions": [
+    {
+     "pattern": "{stem}.shx",
+     "role": "companion"
+    },
+    {
+     "pattern": "{stem}.dbf",
+     "role": "companion"
+    },
+    {
+     "pattern": "{stem}.prj",
+     "role": "crs-metadata"
+    },
+    {
+     "pattern": "{stem}.cpg",
+     "role": "companion"
+    },
+    {
+     "pattern": "{stem}.cst",
+     "role": "companion"
+    }
+   ],
+   "recipe": false,
+   "osdu": {
+    "none": "A generic vector feature layer kept as a feature set; its OSDU correspondence is not assessed in E56."
+   },
+   "route": {
+    "document": "typed-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "real",
+    "path": "tests/fixtures/features/fields.shp",
+    "sha256": "583b39a5eb893df5bf11839730593826634e2279a158f27854d8f50122d52349",
+    "bytes": 5696,
+    "rights": "docs/release/rights/grids-gis-2026-10.json"
+   },
+   "report": "{count:,} features, {vertex_count:,} vertices",
+   "type": "feature-set",
+   "mapping": "feature-set/1",
+   "states": {
+    "function": "shapefile",
+    "items": [
+     {
+      "key": "geometry_type",
+      "label": "Geometry",
+      "from": "head"
+     },
+     {
+      "key": "count",
+      "label": "Features",
+      "from": "whole"
+     }
+    ]
+   },
+   "landing": "retained"
+  },
+  {
+   "profile": "ogc-geopackage/1",
+   "label": "Map features (GeoPackage)",
+   "extensions": [
+    ".gpkg"
+   ],
+   "detect": "geopackage_header",
+   "limits": {
+    "names": [],
+    "template": "OGC GeoPackage 1.2 to 1.4, one feature layer (table or view) at a time · up to 50,000 features / 500,000 vertices / 64 fields. Coordinates, axes and ring order are kept as stored; nothing is converted."
+   },
+   "declared": [
+    {
+     "key": "crs",
+     "label": "Coordinate system",
+     "kind": "crs",
+     "hint": "EPSG code such as EPSG:28992"
+    },
+    {
+     "key": "layer",
+     "label": "Map layer",
+     "kind": "text",
+     "hint": "One of the layers the file lists"
+    },
+    {
+     "key": "xy_unit",
+     "label": "Map unit",
+     "kind": "unit",
+     "hint": "For example m"
+    },
+    {
+     "key": "z_meaning",
+     "label": "Values are",
+     "kind": "choice",
+     "choices": {
+      "depth": "Depth",
+      "elevation": "Elevation",
+      "time": "Time",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "z_unit",
+     "label": "Value unit",
+     "kind": "unit",
+     "hint": "For example m or ms"
+    },
+    {
+     "key": "positive",
+     "label": "Positive direction",
+     "kind": "choice",
+     "choices": {
+      "up": "Up",
+      "down": "Down",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "vertical_datum",
+     "label": "Vertical datum",
+     "kind": "text",
+     "hint": "For example NAP"
+    }
+   ],
+   "companions": [],
+   "recipe": false,
+   "osdu": {
+    "none": "A generic vector feature layer kept as a feature set; its OSDU correspondence is not assessed in E56."
+   },
+   "route": {
+    "document": "typed-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "real",
+    "path": "tests/fixtures/features/fields.gpkg",
+    "sha256": "c2d518b1d8ff5d08412d342afbd2f94c2827aa93da8da0a853660d231b0e323b",
+    "bytes": 131072,
+    "rights": "docs/release/rights/grids-gis-2026-10.json"
+   },
+   "report": "{count:,} features, {vertex_count:,} vertices",
+   "type": "feature-set",
+   "mapping": "feature-set/1",
+   "states": {
+    "function": "geopackage",
+    "items": [
+     {
+      "key": "layers",
+      "label": "Map layers",
+      "from": "whole"
+     },
+     {
+      "key": "crs",
+      "label": "Coordinate system",
+      "from": "whole"
+     }
+    ]
+   },
+   "landing": "retained"
+  },
+  {
+   "profile": "geojson/1",
+   "label": "Map features (GeoJSON)",
+   "extensions": [
+    ".geojson",
+    ".json"
+   ],
+   "detect": "geojson_object",
+   "limits": {
+    "names": [],
+    "template": "GeoJSON (RFC 7946, or the older form with a crs member naming EPSG) · up to 50,000 features / 500,000 vertices / 64 fields. Coordinates, axes and ring order are kept as stored; nothing is converted."
+   },
+   "declared": [
+    {
+     "key": "crs",
+     "label": "Coordinate system",
+     "kind": "crs",
+     "hint": "EPSG code such as EPSG:28992"
+    },
+    {
+     "key": "xy_unit",
+     "label": "Map unit",
+     "kind": "unit",
+     "hint": "For example m"
+    },
+    {
+     "key": "z_meaning",
+     "label": "Values are",
+     "kind": "choice",
+     "choices": {
+      "depth": "Depth",
+      "elevation": "Elevation",
+      "time": "Time",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "z_unit",
+     "label": "Value unit",
+     "kind": "unit",
+     "hint": "For example m or ms"
+    },
+    {
+     "key": "positive",
+     "label": "Positive direction",
+     "kind": "choice",
+     "choices": {
+      "up": "Up",
+      "down": "Down",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "vertical_datum",
+     "label": "Vertical datum",
+     "kind": "text",
+     "hint": "For example NAP"
+    }
+   ],
+   "companions": [],
+   "recipe": false,
+   "osdu": {
+    "none": "A generic vector feature layer kept as a feature set; its OSDU correspondence is not assessed in E56."
+   },
+   "route": {
+    "document": "typed-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "real",
+    "path": "tests/fixtures/features/fields.geojson",
+    "sha256": "7147e53c6e832372b6c5c1b875ac6660413d722f0771ad805dfdefaa75d00b2e",
+    "bytes": 11673,
+    "rights": "docs/release/rights/grids-gis-2026-10.json"
+   },
+   "report": "{count:,} features, {vertex_count:,} vertices",
+   "type": "feature-set",
+   "mapping": "feature-set/1",
+   "states": {
+    "function": "geojson",
+    "items": [
+     {
+      "key": "crs",
+      "label": "Coordinate system",
+      "from": "whole"
+     },
+     {
+      "key": "count",
+      "label": "Features",
+      "from": "whole"
+     }
+    ]
    },
    "landing": "retained"
   }

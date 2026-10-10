@@ -1,0 +1,133 @@
+{
+  "schema": "ophiolite.scientific-asset/1",
+  "asset_id": "synthetic-feature-set",
+  "revision": "26c66c9fa30d2077262e218ee9108f84264bdaf0846a75443b601b5ec5974bcc",
+  "project_id": "synthetic-project",
+  "authority": "ophiolite:uploaded",
+  "origin": "retained-capture",
+  "custodian": "ophiolite:managed",
+  "source_reference": {
+    "authority": "ophiolite:uploaded",
+    "key": "synthetic-feature-set",
+    "revision": "26c66c9fa30d2077262e218ee9108f84264bdaf0846a75443b601b5ec5974bcc",
+    "profile": "geojson/1"
+  },
+  "profile": "geojson/1",
+  "scientific": {
+    "crs": "EPSG:23031",
+    "xy_unit": "unknown",
+    "z_unit": "unknown",
+    "z_meaning": "unknown",
+    "positive": "unknown",
+    "vertical_datum": "unknown",
+    "type": "feature-set",
+    "axes": "easting-northing",
+    "encoding": "utf-8",
+    "count": 2,
+    "vertex_count": 4,
+    "geometry_types": [
+      "Polygon"
+    ],
+    "has_z": false,
+    "null_geometry_count": 1,
+    "x_range": [
+      547895.5,
+      554184.5
+    ],
+    "y_range": [
+      5818925.0,
+      5824973.0
+    ],
+    "z_range": null,
+    "fields": [
+      {
+        "name": "FIELD_CODE",
+        "source_name": "FIELD_CODE",
+        "kind": "text"
+      },
+      {
+        "name": "FIELD_NAME",
+        "source_name": "FIELD_NAME",
+        "kind": "text"
+      },
+      {
+        "name": "WELLS",
+        "source_name": "WELLS",
+        "kind": "integer"
+      }
+    ],
+    "fidelity": {
+      "status": "assessed",
+      "preserved": [
+        "every feature in file order with its coordinates",
+        "property values of text, number and true/false kinds"
+      ],
+      "losses": [],
+      "unknown_context": [
+        "positive",
+        "vertical_datum",
+        "xy_unit",
+        "z_meaning",
+        "z_unit"
+      ],
+      "decisions": [
+        "Coordinate system EPSG:23031, as the file's crs member states (a member RFC 7946 removed; read as the older GeoJSON form)."
+      ]
+    }
+  },
+  "interpretation": {
+    "reader": "asset_connectors.feature_files/1",
+    "mapping": "feature-set/1",
+    "parsing_policy": "typed-strict/1",
+    "null_policy": "empty cell or declared NODATA value is missing; never zero-filled"
+  },
+  "interpretation_evidence": "live",
+  "recorded_interpretation": null,
+  "representations": [
+    {
+      "id": "artifact",
+      "kind": "original",
+      "media_type": "application/geo+json",
+      "profile": "geojson/1",
+      "bytes": 441,
+      "sha256": "26c66c9fa30d2077262e218ee9108f84264bdaf0846a75443b601b5ec5974bcc",
+      "available": true,
+      "losses": []
+    },
+    {
+      "id": "data",
+      "kind": "normalized",
+      "media_type": "application/json",
+      "profile": "ophiolite.feature-set/1",
+      "bytes": 2759,
+      "sha256": "33b2e0914114c2cf29ce40e875c51047279e0531f56e97dd85249e9b91fa4a15",
+      "available": true,
+      "losses": []
+    }
+  ],
+  "retention": {
+    "mode": "retained",
+    "policy": "until authorized lifecycle operation",
+    "historical_reads": "while-retained-and-authorized"
+  },
+  "relationships": {
+    "well_log": null
+  },
+  "parents": [],
+  "provenance": {
+    "evidence": "source-declared",
+    "method": null,
+    "code_reference": null,
+    "environment_reference": null,
+    "omissions": [
+      "Synthetic offline fixture, not a server publication"
+    ]
+  },
+  "supported_operations": [
+    "read",
+    "export"
+  ],
+  "authorization": {
+    "status": "not-evaluated"
+  }
+}

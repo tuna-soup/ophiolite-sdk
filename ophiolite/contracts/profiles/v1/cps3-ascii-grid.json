@@ -1,0 +1,35 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "cps3-ascii-grid/1",
+  "kind": "source",
+  "lifecycle": "preview",
+  "display_name": "Horizon grid (CPS-3 ASCII)",
+  "description": "A regular grid of surface values in the CPS-3 ASCII grid format, kept byte for byte; registration and the in-column direction are declared, never inferred.",
+  "serves": [
+    "ophiolite.scientific-asset/1"
+  ],
+  "connector": {
+    "scientific_profile": "regular-grid-surface-source/1",
+    "source_schema": "CPS-3-ASCII-grid",
+    "mapping_version": "regular-grid-surface/1",
+    "history": "retained-exact-read"
+  },
+  "role": "artifact",
+  "media_types": [
+    "text/plain"
+  ],
+  "normalized_profile": "ophiolite.regular-grid-surface/1",
+  "context_schema": "ophiolite.typed-context/1",
+  "representation_rules": {
+    "artifact_kind_by_origin": {
+      "source-reference": "original",
+      "retained-capture": "original",
+      "managed-derived": "derived-artifact"
+    },
+    "normalized": 1,
+    "total": 2
+  },
+  "table_target": {
+    "none": "not-a-table"
+  }
+}

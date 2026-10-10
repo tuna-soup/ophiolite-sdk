@@ -21,6 +21,8 @@ def validate_derived_curves(curves, *, source, sample_count):
     Raw duplicate source mnemonics are a deliberate SDK refusal; server readers
     may rename duplicates. No unit inference, resampling or value coercion occurs.
     """
+    from .windows import refuse_window  # E100a: blocks are not samples
+    refuse_window(curves,*(curves if isinstance(curves,list) else ()),*(c.get('values') for c in curves if isinstance(c,dict)) if isinstance(curves,list) else ())
     inventory=source_curves(source);marker=source_null_marker(source);violations=[]
     names=[curve.mnemonic.upper() for curve in inventory]
     if len(set(names))!=len(names):violations.append('Source curve names repeat, including case variants.')
@@ -120,7 +122,14 @@ RELEASE_OPERATIONS={'releases':{'list','get','download','download-snapshot'}}  #
 SESSION_OPERATIONS={'las-uploads':{'begin','part','state','finish','cancel'},'capabilities':{'describe'}}  # E54: a file sent in parts; the served limits
 
 
+# E39: an organisation's connections are not a project's; their routes carry no project (/api/v1/<area>/<op>).
+ORGANIZATION_OPERATIONS={'org-connections':{'list'}}
+
+
 def operation_path(project,area,operation):
+    if area in ORGANIZATION_OPERATIONS:
+        if operation not in ORGANIZATION_OPERATIONS[area]:raise Refused('Unsupported application operation.')
+        return '/api/v1/'+area+'/'+operation
     allowed=(GROUP_OPERATIONS if area=='result-groups' else READ_OPERATIONS|WRITE_OPERATIONS if area in ('applications','las-uploads')
              else ENTITY_OPERATIONS.get(area) or SOURCE_OPERATIONS.get(area) or MAP_OPERATIONS.get(area) or REPORT_OPERATIONS.get(area) or RESULT_OPERATIONS.get(area) or CHECK_OPERATIONS.get(area) or IMPORT_OPERATIONS.get(area) or RELEASE_OPERATIONS.get(area) or AI_OPERATIONS.get(area,set()))
     allowed=allowed|SESSION_OPERATIONS.get(area,set())

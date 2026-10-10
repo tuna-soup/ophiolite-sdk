@@ -1,0 +1,36 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "esri-shapefile/1",
+  "kind": "source",
+  "lifecycle": "preview",
+  "display_name": "Map features (Shapefile)",
+  "description": "An ESRI Shapefile: the .shp with its .dbf and the .shx, .prj, .cpg or .cst beside it, kept byte for byte and read without an import recipe; coordinates, axes and ring order as stored.",
+  "serves": [
+    "ophiolite.scientific-asset/1"
+  ],
+  "connector": {
+    "scientific_profile": "feature-set-source/1",
+    "source_schema": "ESRI-Shapefile",
+    "mapping_version": "feature-set/1",
+    "history": "retained-exact-read"
+  },
+  "role": "artifact",
+  "media_types": [
+    "application/x-esri-shapefile"
+  ],
+  "normalized_profile": "ophiolite.feature-set/1",
+  "context_schema": "ophiolite.typed-context/1",
+  "package": "without-recipe",
+  "representation_rules": {
+    "artifact_kind_by_origin": {
+      "source-reference": "original",
+      "retained-capture": "original",
+      "managed-derived": "derived-artifact"
+    },
+    "normalized": 1,
+    "total": 2
+  },
+  "table_target": {
+    "none": "not-a-table"
+  }
+}
