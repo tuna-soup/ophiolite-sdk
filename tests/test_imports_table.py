@@ -88,6 +88,14 @@ def test_skipped_rows_and_a_refused_series_in_words(tmp_path):
         'The points for this table have 120,000 rows, more than Ophiolite adds in one set. Split the file.'
 
 
+def test_a_wells_row_held_for_review_says_why_in_words():
+    """E87: the Groningen row whose identifier is another well's name (Platform's identifier-names-another-well)."""
+    review = {'target': 'wells', 'counts': {'create': 660, 'already_here': 0, 'skipped': 1},
+              'skipped': [{'ordinal': 0, 'row_key': 'ALO-01', 'codes': ['identifier-names-another-well'], 'fields': ['id'], 'source_row': 2}]}
+    assert review_lines(review) == ['660 wells to create · 0 already here · 1 rows skipped',
+                                    '  Row 2 (ALO-01): Its identifier belongs to an existing well under another name, so it was not imported']
+
+
 def test_a_standard_layout_needs_no_mapping_and_anything_else_names_the_columns(tmp_path):
     path = tmp_path / 'tops-standard.csv'; path.write_text('x')
     fake = Fake('layout')
