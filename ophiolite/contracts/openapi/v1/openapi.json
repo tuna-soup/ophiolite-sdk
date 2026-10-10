@@ -16149,6 +16149,193 @@
         }
       }
     },
+    "/api/v1/projects/{project}/connection-admin/promote": {
+      "post": {
+        "summary": "E39: Make this project's connection an organisation connection in place (dry_run lists who needs their own sign-in; confirm_sign_ins applies)",
+        "description": "Scope write; accepted principals: session; project extractor top.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E39 connection-admin/promote: the plan (dry_run), or the plan with `promoted` and the new generation. `use` is\neveryone who keeps use; `need_sign_in` are those who must add their own sign-in (all but `sign_in_person`).",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "project_id": {
+                      "title": "Project Id",
+                      "type": "string"
+                    },
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "generation": {
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "sign_in_person": {
+                      "title": "Sign In Person",
+                      "type": "string"
+                    },
+                    "use": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Use",
+                      "type": "array"
+                    },
+                    "need_sign_in": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Need Sign In",
+                      "type": "array"
+                    },
+                    "promoted": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Promoted"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "project_id",
+                    "organization_id",
+                    "generation",
+                    "sign_in_person",
+                    "use",
+                    "need_sign_in"
+                  ],
+                  "title": "ConnectionAdminPromoteAnswer",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "maxLength": 80,
+                    "minLength": 1,
+                    "title": "Id",
+                    "type": "string"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "dry_run": {
+                    "default": false,
+                    "title": "Dry Run",
+                    "type": "boolean"
+                  },
+                  "confirm_sign_ins": {
+                    "default": false,
+                    "title": "Confirm Sign Ins",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "id"
+                ],
+                "title": "PromoteRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/connection-admin/rotate": {
       "post": {
         "summary": "rotate connection administration",
@@ -28850,6 +29037,1870 @@
                   }
                 },
                 "title": "Native_arraybridge_v1_ProjectMemberWrite",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/org-connections/access": {
+      "post": {
+        "summary": "E39: Say who may use and who may administer an organisation connection (the whole entry for one person)",
+        "description": "Scope write; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E39: one organisation connection. `readiness` only for a person who may use it; `access` and `member` (whether each\nlisted person is still a member) only for its administrators, in their own session. No address, no username.",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "enabled": {
+                      "title": "Enabled",
+                      "type": "boolean"
+                    },
+                    "generation": {
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "you": {
+                      "$ref": "#/components/schemas/OrgConnectionYou"
+                    },
+                    "readiness": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/ConnectionReadiness"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "access": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "$ref": "#/components/schemas/OrgConnectionAccess"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Access"
+                    },
+                    "member": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": {
+                            "type": "boolean"
+                          },
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Member"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organization_id",
+                    "name",
+                    "enabled",
+                    "generation",
+                    "you"
+                  ],
+                  "title": "OrgConnection",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "target": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Target",
+                    "type": "string"
+                  },
+                  "name": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "username": {
+                    "default": "",
+                    "maxLength": 128,
+                    "title": "Username",
+                    "type": "string"
+                  },
+                  "password": {
+                    "default": "",
+                    "maxLength": 4096,
+                    "title": "Password",
+                    "type": "string"
+                  },
+                  "person": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Person",
+                    "type": "string"
+                  },
+                  "use": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Use"
+                  },
+                  "administer": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Administer"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "enabled": {
+                    "default": true,
+                    "title": "Enabled",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "organization_id"
+                ],
+                "title": "OrgRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/org-connections/create": {
+      "post": {
+        "summary": "E39: Make an organisation connection to an approved database (organisation owners)",
+        "description": "Scope write; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E39: one organisation connection. `readiness` only for a person who may use it; `access` and `member` (whether each\nlisted person is still a member) only for its administrators, in their own session. No address, no username.",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "enabled": {
+                      "title": "Enabled",
+                      "type": "boolean"
+                    },
+                    "generation": {
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "you": {
+                      "$ref": "#/components/schemas/OrgConnectionYou"
+                    },
+                    "readiness": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/ConnectionReadiness"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "access": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "$ref": "#/components/schemas/OrgConnectionAccess"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Access"
+                    },
+                    "member": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": {
+                            "type": "boolean"
+                          },
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Member"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organization_id",
+                    "name",
+                    "enabled",
+                    "generation",
+                    "you"
+                  ],
+                  "title": "OrgConnection",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "target": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Target",
+                    "type": "string"
+                  },
+                  "name": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "username": {
+                    "default": "",
+                    "maxLength": 128,
+                    "title": "Username",
+                    "type": "string"
+                  },
+                  "password": {
+                    "default": "",
+                    "maxLength": 4096,
+                    "title": "Password",
+                    "type": "string"
+                  },
+                  "person": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Person",
+                    "type": "string"
+                  },
+                  "use": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Use"
+                  },
+                  "administer": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Administer"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "enabled": {
+                    "default": true,
+                    "title": "Enabled",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "organization_id"
+                ],
+                "title": "OrgRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/org-connections/enable": {
+      "post": {
+        "summary": "E39: Turn an organisation connection on or off",
+        "description": "Scope write; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E39: one organisation connection. `readiness` only for a person who may use it; `access` and `member` (whether each\nlisted person is still a member) only for its administrators, in their own session. No address, no username.",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "enabled": {
+                      "title": "Enabled",
+                      "type": "boolean"
+                    },
+                    "generation": {
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "you": {
+                      "$ref": "#/components/schemas/OrgConnectionYou"
+                    },
+                    "readiness": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/ConnectionReadiness"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "access": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "$ref": "#/components/schemas/OrgConnectionAccess"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Access"
+                    },
+                    "member": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": {
+                            "type": "boolean"
+                          },
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Member"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organization_id",
+                    "name",
+                    "enabled",
+                    "generation",
+                    "you"
+                  ],
+                  "title": "OrgConnection",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "target": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Target",
+                    "type": "string"
+                  },
+                  "name": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "username": {
+                    "default": "",
+                    "maxLength": 128,
+                    "title": "Username",
+                    "type": "string"
+                  },
+                  "password": {
+                    "default": "",
+                    "maxLength": 4096,
+                    "title": "Password",
+                    "type": "string"
+                  },
+                  "person": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Person",
+                    "type": "string"
+                  },
+                  "use": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Use"
+                  },
+                  "administer": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Administer"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "enabled": {
+                    "default": true,
+                    "title": "Enabled",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "organization_id"
+                ],
+                "title": "OrgRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/org-connections/list": {
+      "post": {
+        "summary": "E39: The organisation connections you use or administer (an owner also sees the approved databases)",
+        "description": "Scope read; accepted principals: session, delegate; project extractor org.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "org-connections/list: the connections the caller uses or administers; `targets` (approved databases, by id and\nname) only for an organisation owner in their own session.",
+                  "properties": {
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "connections": {
+                      "items": {
+                        "$ref": "#/components/schemas/OrgConnection"
+                      },
+                      "title": "Connections",
+                      "type": "array"
+                    },
+                    "scope": {
+                      "title": "Scope",
+                      "type": "string"
+                    },
+                    "targets": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Targets"
+                    }
+                  },
+                  "required": [
+                    "organization_id",
+                    "connections",
+                    "scope"
+                  ],
+                  "title": "OrgConnectionsListAnswer",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "target": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Target",
+                    "type": "string"
+                  },
+                  "name": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "username": {
+                    "default": "",
+                    "maxLength": 128,
+                    "title": "Username",
+                    "type": "string"
+                  },
+                  "password": {
+                    "default": "",
+                    "maxLength": 4096,
+                    "title": "Password",
+                    "type": "string"
+                  },
+                  "person": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Person",
+                    "type": "string"
+                  },
+                  "use": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Use"
+                  },
+                  "administer": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Administer"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "enabled": {
+                    "default": true,
+                    "title": "Enabled",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "organization_id"
+                ],
+                "title": "OrgRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/org-connections/sign-in": {
+      "post": {
+        "summary": "E39: Save your own database sign-in for an organisation connection you may use",
+        "description": "Scope write; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E39: one organisation connection. `readiness` only for a person who may use it; `access` and `member` (whether each\nlisted person is still a member) only for its administrators, in their own session. No address, no username.",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "enabled": {
+                      "title": "Enabled",
+                      "type": "boolean"
+                    },
+                    "generation": {
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "you": {
+                      "$ref": "#/components/schemas/OrgConnectionYou"
+                    },
+                    "readiness": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/ConnectionReadiness"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "access": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "$ref": "#/components/schemas/OrgConnectionAccess"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Access"
+                    },
+                    "member": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": {
+                            "type": "boolean"
+                          },
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Member"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organization_id",
+                    "name",
+                    "enabled",
+                    "generation",
+                    "you"
+                  ],
+                  "title": "OrgConnection",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "target": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Target",
+                    "type": "string"
+                  },
+                  "name": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "username": {
+                    "default": "",
+                    "maxLength": 128,
+                    "title": "Username",
+                    "type": "string"
+                  },
+                  "password": {
+                    "default": "",
+                    "maxLength": 4096,
+                    "title": "Password",
+                    "type": "string"
+                  },
+                  "person": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Person",
+                    "type": "string"
+                  },
+                  "use": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Use"
+                  },
+                  "administer": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Administer"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "enabled": {
+                    "default": true,
+                    "title": "Enabled",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "organization_id"
+                ],
+                "title": "OrgRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/org-connections/sign-in-remove": {
+      "post": {
+        "summary": "E39: Remove your own sign-in from an organisation connection",
+        "description": "Scope write; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E39: one organisation connection. `readiness` only for a person who may use it; `access` and `member` (whether each\nlisted person is still a member) only for its administrators, in their own session. No address, no username.",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "enabled": {
+                      "title": "Enabled",
+                      "type": "boolean"
+                    },
+                    "generation": {
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "you": {
+                      "$ref": "#/components/schemas/OrgConnectionYou"
+                    },
+                    "readiness": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/ConnectionReadiness"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "access": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "$ref": "#/components/schemas/OrgConnectionAccess"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Access"
+                    },
+                    "member": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": {
+                            "type": "boolean"
+                          },
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Member"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organization_id",
+                    "name",
+                    "enabled",
+                    "generation",
+                    "you"
+                  ],
+                  "title": "OrgConnection",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "target": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Target",
+                    "type": "string"
+                  },
+                  "name": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "username": {
+                    "default": "",
+                    "maxLength": 128,
+                    "title": "Username",
+                    "type": "string"
+                  },
+                  "password": {
+                    "default": "",
+                    "maxLength": 4096,
+                    "title": "Password",
+                    "type": "string"
+                  },
+                  "person": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Person",
+                    "type": "string"
+                  },
+                  "use": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Use"
+                  },
+                  "administer": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Administer"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "enabled": {
+                    "default": true,
+                    "title": "Enabled",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "organization_id"
+                ],
+                "title": "OrgRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/org-connections/test": {
+      "post": {
+        "summary": "E39: Test an organisation connection with your own sign-in",
+        "description": "Scope read; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "connection-admin/test. `state` is ready on success (E40), the source state otherwise; `rows` only on success.",
+                  "properties": {
+                    "ok": {
+                      "title": "Ok",
+                      "type": "boolean"
+                    },
+                    "state": {
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "message": {
+                      "title": "Message",
+                      "type": "string"
+                    },
+                    "rows": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Rows"
+                    },
+                    "readiness": {
+                      "$ref": "#/components/schemas/AccessTestReadiness"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "state",
+                    "message",
+                    "readiness"
+                  ],
+                  "title": "ConnectionAdminTestAnswer",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "target": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Target",
+                    "type": "string"
+                  },
+                  "name": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "username": {
+                    "default": "",
+                    "maxLength": 128,
+                    "title": "Username",
+                    "type": "string"
+                  },
+                  "password": {
+                    "default": "",
+                    "maxLength": 4096,
+                    "title": "Password",
+                    "type": "string"
+                  },
+                  "person": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Person",
+                    "type": "string"
+                  },
+                  "use": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Use"
+                  },
+                  "administer": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Administer"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "enabled": {
+                    "default": true,
+                    "title": "Enabled",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "organization_id"
+                ],
+                "title": "OrgRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/org-connections/uses": {
+      "post": {
+        "summary": "E39: Which projects use an organisation connection, and who in them",
+        "description": "Scope read; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "org-connections/uses: the projects whose selections read the connection, with how many.",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "projects": {
+                      "items": {
+                        "$ref": "#/components/schemas/OrgConnectionProjectUse"
+                      },
+                      "title": "Projects",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "projects"
+                  ],
+                  "title": "OrgConnectionsUsesAnswer",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "target": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Target",
+                    "type": "string"
+                  },
+                  "name": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "username": {
+                    "default": "",
+                    "maxLength": 128,
+                    "title": "Username",
+                    "type": "string"
+                  },
+                  "password": {
+                    "default": "",
+                    "maxLength": 4096,
+                    "title": "Password",
+                    "type": "string"
+                  },
+                  "person": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Person",
+                    "type": "string"
+                  },
+                  "use": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Use"
+                  },
+                  "administer": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Administer"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "enabled": {
+                    "default": true,
+                    "title": "Enabled",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "organization_id"
+                ],
+                "title": "OrgRequest",
                 "type": "object"
               }
             }
@@ -78255,6 +80306,7 @@
               "deployment-administrator",
               "organisation-owner",
               "project-administrator",
+              "connection-administrator",
               "you"
             ],
             "title": "Actor",
@@ -78302,7 +80354,8 @@
               "sign-in-refused",
               "no-read-right",
               "table-missing",
-              "undetermined"
+              "undetermined",
+              "sign-in-needed"
             ],
             "title": "Code",
             "type": "string"
@@ -78554,6 +80607,7 @@
               "deployment-administrator",
               "organisation-owner",
               "project-administrator",
+              "connection-administrator",
               "you"
             ],
             "title": "Actor",
@@ -78659,6 +80713,7 @@
               "deployment-administrator",
               "organisation-owner",
               "project-administrator",
+              "connection-administrator",
               "you"
             ],
             "title": "Actor",
@@ -80533,6 +82588,7 @@
               "deployment-administrator",
               "organisation-owner",
               "project-administrator",
+              "connection-administrator",
               "you"
             ],
             "title": "Actor",
@@ -80574,7 +82630,8 @@
               "connection-disabled",
               "target-changed",
               "key-unavailable",
-              "key-mismatch"
+              "key-mismatch",
+              "sign-in-needed"
             ],
             "title": "Code",
             "type": "string"
@@ -81666,7 +83723,13 @@
                   "source-collision",
                   "not-found",
                   "test-limit",
-                  "copy-not-declared"
+                  "copy-not-declared",
+                  "no-use",
+                  "sign-in-needed",
+                  "use-organisation-connection",
+                  "ask-for-use",
+                  "ask-to-promote",
+                  "sign-in-owner-unknown"
                 ],
                 "title": "Code",
                 "type": "string"
@@ -81676,6 +83739,7 @@
                   "deployment-administrator",
                   "organisation-owner",
                   "project-administrator",
+                  "connection-administrator",
                   "you"
                 ],
                 "title": "Actor",
@@ -82134,6 +84198,7 @@
               "deployment-administrator",
               "organisation-owner",
               "project-administrator",
+              "connection-administrator",
               "you"
             ],
             "title": "Actor",
@@ -87174,6 +89239,155 @@
           "recorded"
         ],
         "title": "OfferByItself",
+        "type": "object"
+      },
+      "OrgConnection": {
+        "additionalProperties": false,
+        "description": "E39: one organisation connection. `readiness` only for a person who may use it; `access` and `member` (whether each\nlisted person is still a member) only for its administrators, in their own session. No address, no username.",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "organization_id": {
+            "title": "Organization Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "generation": {
+            "title": "Generation",
+            "type": "integer"
+          },
+          "you": {
+            "$ref": "#/components/schemas/OrgConnectionYou"
+          },
+          "readiness": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConnectionReadiness"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "access": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/OrgConnectionAccess"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Access"
+          },
+          "member": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "boolean"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Member"
+          }
+        },
+        "required": [
+          "id",
+          "organization_id",
+          "name",
+          "enabled",
+          "generation",
+          "you"
+        ],
+        "title": "OrgConnection",
+        "type": "object"
+      },
+      "OrgConnectionAccess": {
+        "additionalProperties": false,
+        "description": "One person on an organisation connection's access list.",
+        "properties": {
+          "person": {
+            "title": "Person",
+            "type": "string"
+          },
+          "use": {
+            "title": "Use",
+            "type": "boolean"
+          },
+          "administer": {
+            "title": "Administer",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "person",
+          "use",
+          "administer"
+        ],
+        "title": "OrgConnectionAccess",
+        "type": "object"
+      },
+      "OrgConnectionProjectUse": {
+        "additionalProperties": false,
+        "properties": {
+          "project_id": {
+            "title": "Project Id",
+            "type": "string"
+          },
+          "selections": {
+            "title": "Selections",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "project_id",
+          "selections"
+        ],
+        "title": "OrgConnectionProjectUse",
+        "type": "object"
+      },
+      "OrgConnectionYou": {
+        "additionalProperties": false,
+        "description": "What the caller may do with an organisation connection, and whether their own sign-in is saved.",
+        "properties": {
+          "use": {
+            "title": "Use",
+            "type": "boolean"
+          },
+          "administer": {
+            "title": "Administer",
+            "type": "boolean"
+          },
+          "signed_in": {
+            "title": "Signed In",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "use",
+          "administer",
+          "signed_in"
+        ],
+        "title": "OrgConnectionYou",
         "type": "object"
       },
       "OrganizationDetail": {

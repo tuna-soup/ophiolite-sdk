@@ -552,3 +552,38 @@ class UploadRunStep(Contract):
     send: dict | None = None
     file: UploadRunFile
     session: dict | None = None
+
+
+class OrgConnectionYou(Contract):
+    use: bool
+    administer: bool
+    signed_in: bool
+
+
+class OrgConnectionReadiness(Contract):
+    code: str
+    actor: str
+
+
+class OrgConnectionAccess(Contract):
+    person: str
+    use: bool
+    administer: bool
+
+
+class OrgConnectionDoc(Contract):
+    """E39: one organisation connection as its person may see it; access lists only for those who administer it."""
+    id: str
+    organization_id: str
+    name: str
+    enabled: bool
+    generation: int
+    you: OrgConnectionYou
+    readiness: OrgConnectionReadiness | None = None
+    access: list[OrgConnectionAccess] | None = None
+
+
+class OrgConnectionsPage(Contract):
+    organization_id: str
+    connections: list[OrgConnectionDoc]
+    scope: str

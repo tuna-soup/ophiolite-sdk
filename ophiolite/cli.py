@@ -210,6 +210,8 @@ def parser():
     sources.add_argument('--expect-revision',help='describe/read: refuse (exit 4, nothing written) unless this is the revision returned')
     sources.add_argument('--out',type=Path,help='read: write the rows to this .csv or .json file instead of standard output. The file is your own copy: it is not shared, kept up to date or checked again')
     sources.add_argument('--force',action='store_true',help='read --out: replace an existing file')
+    orgs=project(sub.add_parser('org-connections',help="Your organisation's database connections that you use or administer, with your own readiness"))
+    orgs.add_argument('action',choices=['list']);orgs.add_argument('--organization',required=True,help='The organisation id')
     # E94: how a result was made, what changed, what depends on it, and making it again
     story=project(sub.add_parser('story',help='How an exact result version was made: its inputs and their inputs, a page at a time'))
     story.add_argument('asset');story.add_argument('revision');story.add_argument('--cursor',help='The next_cursor of the previous page')
@@ -443,6 +445,10 @@ def _journey(args,client):
     if args.command=='remake':return _remake(args,client)
     if args.command=='sources':
         return _sources(args,client)
+    if args.command=='org-connections':  # E39: projectless; no sign-in or password is ever answered
+        rows=client.org_connections(args.organization)
+        return done(args,'\n'.join('%s  %s: %s' % (r['id'],r['name'],(r.get('readiness') or {}).get('code') or ('ready' if r['you']['use'] else 'administered')) for r in rows)
+                    or 'No organisation connection you use or administer.',{'organization_id':args.organization,'connections':rows})
     if args.command=='well-imports':
         return _well_imports(args,client)
     sync=client.sync()
@@ -770,7 +776,7 @@ def _main(argv=None):
             for item in items:print(json.dumps(item))
             return
         if args.command=='curves':return _curves(args,client)
-        if args.command in ('entities','wells','changes','sources','well-imports','story','what-changed','dependents','remake'):return _journey(args,client)
+        if args.command in ('entities','wells','changes','sources','org-connections','well-imports','story','what-changed','dependents','remake'):return _journey(args,client)
         if args.command in ('check','get','send'):return _exchange(args,client)
         if args.command=='upload':return _upload(args,client)
         if args.command=='publish-derived':  # E30b
