@@ -151,8 +151,16 @@ def test_a_spreadsheet_becomes_wells_and_tops_matches_its_columns_on_this_comput
     assert 'Synthetic mode: nothing is sent. In your project this table gives 2 sets of tops (3 rows and 2 rows), skips Row 6' in text
 
 
+def test_a_spreadsheet_and_a_database_joined_joins_on_the_well_name_and_sends_nothing_synthetic(tmp_path, monkeypatch):
+    text = run('a-spreadsheet-and-a-database-joined', tmp_path, monkeypatch)  # E58b
+    assert ': 6 samples; porosity in %, -888 means missing' in text and 'wells.sqlite: 3 wells' in text
+    assert 'Synthetic mode: nothing is sent. Both tables are read on this computer.' in text
+    assert 'Joined: 5 samples of 2 wells; left out: 1 sample(s) of a well not in the database' in text
+    assert 'Hydreco: mean porosity 25.00 %' in text and 'Wintershall Noordzee: mean porosity 19.75 %' in text  # -888 left out of the mean
+
+
 def test_every_entry_is_listed_built_and_described():
-    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'grids-and-gis-files', 'how-was-this-made', 'open-it-here', 'a-spreadsheet-becomes-wells-and-tops']
+    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'grids-and-gis-files', 'how-was-this-made', 'open-it-here', 'a-spreadsheet-becomes-wells-and-tops', 'a-spreadsheet-and-a-database-joined']
     for entry in GALLERY['notebooks']:
         assert set(entry) == {'slug', 'title', 'sentence', 'modes', 'data'} and entry['modes'] == ['synthetic', 'live']
         script = (ROOT / 'notebooks' / entry['slug'] / 'notebook.py').read_text()

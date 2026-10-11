@@ -77,6 +77,13 @@
       "sentence": "Say which column holds what, review what a table of formation tops would add, then add it and read one line per set.",
       "modes": ["synthetic", "live"],
       "data": "A synthetic six-row tops table made on your computer; adding it creates sets of tops only you can see until you share them."
+    },
+    {
+      "slug": "a-spreadsheet-and-a-database-joined",
+      "title": "A spreadsheet and a database, joined",
+      "sentence": "Keep a spreadsheet as it is with its units and missing-value marker, read a database table, and join the two on the well name.",
+      "modes": ["synthetic", "live"],
+      "data": "A synthetic six-sample spreadsheet and a three-well database made on your computer; keeping the spreadsheet creates a table only you can see until you share it."
     }
   ]
 }

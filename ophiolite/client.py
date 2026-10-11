@@ -15,6 +15,9 @@ from .errors import (AuthenticationRequired, PermissionRefused, IntegrityConflic
 MAX_BYTES=32*1024*1024
 # E94: every descriptor request declares the revision manifest profiles this library verifies (/3 carries how a result was made)
 PROFILES='&profiles=%2F1%2C%2F2%2C%2F3'
+FILE_BYTES=128*1024*1024  # E58b: a downloaded table file (a connected table is read up to 64 MiB; CSV is longer than Parquet)
+FILE_FORMATS=('parquet','geoparquet','csv')
+DOWNLOAD_MISMATCH='The download did not match the file the server holds; nothing was saved.'
 
 
 from ._core import origin
@@ -167,7 +170,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
                         kind,message=categories.get(response.status_code,(Unavailable,'Scientific read failed. Check service access and retry.'))
                         if kind is Busy:raise Busy(message,meta.get('remedy',''),status=response.status_code,retry_after=delay,code=meta.get('code'),**policy.carried(meta))
                         raise kind(message,meta.get('remedy',''),status=response.status_code,code=meta.get('code'),**policy.carried(meta))
-                    if answer is not None:answer.update({k.lower():v for k,v in response.headers.items() if k.lower() in ('content-range','x-content-sha256','etag','x-ophiolite-access-generation')})  # E100a: window validators
+                    if answer is not None:answer.update({k.lower():v for k,v in response.headers.items() if k.lower() in ('content-range','x-content-sha256','etag','x-ophiolite-access-generation','x-ophiolite-revision','content-disposition')})  # E100a: window validators; E58b: a file's revision and name
                     content=bytearray()
                     for chunk in response.iter_bytes():
                         content.extend(chunk)
@@ -247,7 +250,25 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         # E16: a seismic volume is described, never downloaded here; read_slice reads its samples.
         artifact=None if data['scientific'].get('type')=='seismic-volume' else self._get(path+'/representations/'+quote(raw['id'],safe=''),raw['bytes'])
         body=self._get(path+'/representations/'+quote(normalized['id'],safe=''),normalized['bytes'])
-        return _core.typed_result(data,body,artifact)
+        result=_core.typed_result(data,body,artifact)
+        result._client=self  # E58b: a kept table downloads itself as a file
+        return result
+
+    def export_file(self,asset,revision,destination,*,format='parquet',curves=None):
+        """E58b: save an exact revision as one Parquet, GeoParquet (point sets) or CSV file at `destination`, written by the
+        server from what it stored for that revision: a kept table, well tops, a trajectory, a point set or a LAS log
+        (`curves` chooses curves; omitted, every stored curve). The body is checked against its stated SHA-256 and must
+        say it was written from `revision`; otherwise nothing is saved. The file's own `ophiolite.export` metadata names
+        the revision, the units and the missing-value markers. No pyarrow is needed to download."""
+        if not all(isinstance(x,str) and x for x in (asset,revision)):raise Refused('Choose an asset and exact revision.')
+        if format not in FILE_FORMATS:raise Refused('Download as one of %s.' % ', '.join(FILE_FORMATS))
+        if curves is not None and (isinstance(curves,str) or not all(isinstance(c,str) and c for c in curves)):raise Refused('Give curves as a list of curve names.')
+        query='format='+format+''.join('&curves='+quote(c,safe='') for c in curves or ())
+        answer={}
+        raw=self._get(self.prefix+'/'+quote(asset,safe='')+'/revisions/'+quote(revision,safe='')+'/export?'+query,FILE_BYTES,answer=answer)
+        if answer.get('x-ophiolite-revision')!=revision:
+            raise VerificationFailed('The server wrote the file from another revision than the one asked for; nothing was saved.')
+        return save_verified(destination,written(raw,answer.get('x-content-sha256')))
 
     def read_slice(self,asset,revision,axis,label,*,volume=None):
         """E16: one slice of a seismic volume at an exact revision. `axis` is 'inline', 'crossline'
@@ -384,6 +405,30 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
                     return policy.decode(bytes(content))
             except httpx.HTTPError:
                 if attempt+1<attempts:continue
+                policy.disconnected(operation)
+
+    def _post_file(self,area,operation,body,answer):
+        """E58b: an operation that answers a file: its bytes (bounded), with its revision, digest and name in `answer`.
+        A refusal is raised exactly as for any operation, and no bytes are returned with it."""
+        from .publish import json_bytes,operation_path
+        from . import application_transport as policy
+        raw=json_bytes({'project_id':self.project,**body});path=self.url+operation_path(self.project,area,operation)
+        headers={**_client_header.stamp(self._headers()),'Content-Type':'application/json'}
+        for attempt in range(3):
+            try:
+                with self.http.stream('POST',path,content=raw,headers=headers,follow_redirects=False) as response:
+                    refusal=None if response.is_success else policy.head_bytes(response)
+                    if response.status_code in (429,503) and attempt<2 and policy.retried(response,refusal):
+                        time.sleep(policy.delay(response));continue
+                    policy.status(response,operation,refusal)
+                    answer.update({k.lower():v for k,v in response.headers.items() if k.lower() in ('x-content-sha256','x-ophiolite-revision','content-disposition','content-type')})
+                    content=bytearray()
+                    for chunk in response.iter_bytes():
+                        content.extend(chunk)
+                        if len(content)>FILE_BYTES:raise CapacityExceeded('The file exceeds its bounded size; nothing was saved.')
+                    return bytes(content)
+            except httpx.HTTPError:
+                if attempt<2:continue
                 policy.disconnected(operation)
 
     def _post(self,area,operation,body,**options):
@@ -670,28 +715,21 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
     def download_original(self,asset,revision,destination,*,part_bytes=8*1024*1024):
         """E54: save the exact original of a revision to `destination`, read by ranges and verified against the
         whole digest the deployment states; nothing is left at `destination` unless every byte matched."""
-        import hashlib,uuid
-        destination=Path(destination)
+        import hashlib
         path=self.prefix+'/'+quote(asset,safe='')+'/revisions/'+quote(revision,safe='')+'/representations/artifact'
-        partial=destination.with_name('.'+destination.name+'.'+uuid.uuid4().hex[:12]+'.partial')
-        whole,expected,at,size=hashlib.sha256(),None,0,None
-        try:
-            with partial.open('xb') as out:
-                while size is None or at<size:
-                    answer={}
-                    raw=self._get(path,part_bytes,ranged='bytes=%d-%d'%(at,at+part_bytes-1),answer=answer)
-                    first,total=_content_range(answer.get('content-range'))
-                    stated=answer.get('x-content-sha256')
-                    if first!=at or (size is not None and total!=size) or (expected is not None and stated!=expected) or not raw:
-                        raise VerificationFailed('The deployment answered another part of the file.')
-                    size,expected=total,stated
-                    out.write(raw);whole.update(raw);at+=len(raw)
-                out.flush();os.fsync(out.fileno())
-            if whole.hexdigest()!=expected:raise IntegrityConflict('The downloaded original does not match the file the deployment holds; nothing was saved.')
-            os.replace(partial,destination)
-        except BaseException:
-            partial.unlink(missing_ok=True);raise
-        return destination
+        def fill(out):
+            whole,expected,at,size=hashlib.sha256(),None,0,None
+            while size is None or at<size:
+                answer={}
+                raw=self._get(path,part_bytes,ranged='bytes=%d-%d'%(at,at+part_bytes-1),answer=answer)
+                first,total=_content_range(answer.get('content-range'))
+                stated=answer.get('x-content-sha256')
+                if first!=at or (size is not None and total!=size) or (expected is not None and stated!=expected) or not raw:
+                    raise VerificationFailed('The deployment answered another part of the file.')
+                size,expected=total,stated
+                out.write(raw);whole.update(raw);at+=len(raw)
+            return whole.hexdigest(),expected
+        return save_verified(destination,fill,mismatch='The downloaded original does not match the file the deployment holds; nothing was saved.')
 
     def publish_derived(self,written,*,name,from_,method,command_id,of_entity=None,new_version_of=None,expected_parent=None):
         """E30b: publish a file you derived (a `WrittenOriginal` from ophiolite.writers) from exact revisions you
@@ -798,6 +836,32 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         if receipt.asset!= {key:chosen[key] for key in ('asset_id','revision','authority')}:raise VerificationFailed('The download refers to a different exact result.')
         raw=planning.decode_payload(data,sha256=receipt.manifest.sha256,length=receipt.manifest.bytes)
         return raw,receipt,run
+
+
+def written(raw,stated):
+    """E58b: a `fill` for save_verified of a body already read whole, with the digest its response stated."""
+    def fill(out):
+        import hashlib
+        out.write(raw);return hashlib.sha256(raw).hexdigest(),stated
+    return fill
+
+
+def save_verified(destination,fill,*,mismatch=DOWNLOAD_MISMATCH):
+    """E54, E58b: the one way a downloaded file reaches `destination`. `fill(out)` writes it to a private partial file
+    beside `destination` and returns (the SHA-256 of what it wrote, the SHA-256 the deployment stated); the file
+    replaces `destination` only when the two are equal and it is fsynced. Otherwise, or on any error, nothing is left."""
+    import uuid
+    destination=Path(destination)
+    partial=destination.with_name('.'+destination.name+'.'+uuid.uuid4().hex[:12]+'.partial')
+    try:
+        with partial.open('xb') as out:
+            written,stated=fill(out)
+            out.flush();os.fsync(out.fileno())
+        if not stated or written!=stated:raise IntegrityConflict(mismatch)
+        os.replace(partial,destination)
+    except BaseException:
+        partial.unlink(missing_ok=True);raise
+    return destination
 
 
 def _public(step):

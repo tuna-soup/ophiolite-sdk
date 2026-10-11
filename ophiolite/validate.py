@@ -51,7 +51,7 @@ def typed_pair(descriptor, raw):
            'ophiolite.polyline-set/1':generated.PolylineSet,'ophiolite.seismic-volume/1':generated.SeismicVolume,
            'ophiolite.wavelet/1':generated.Wavelet,'ophiolite.model-section/1':generated.ModelSection,'ophiolite.seismic-section/1':generated.SeismicSection,
                'ophiolite.well-location-upload/1':generated.WellLocationUpload,'ophiolite.time-depth/1':generated.TimeDepth,
-               'ophiolite.feature-set/1':generated.FeatureSet}  # E53; E74b; E57; E56
+               'ophiolite.feature-set/1':generated.FeatureSet,'ophiolite.table-file/1':generated.TableFile}  # E53; E74b; E57; E56; E58b
     if rep['profile'] not in kinds:raise VerificationFailed('This kind of data is not supported by this SDK; update it.')
     rules.require(isinstance(value,dict) and value.get('schema')==rep['profile'], 'The normalized data is not the profile the descriptor names')
     payload=model(kinds[rep['profile']],value).model_dump(by_alias=True)
