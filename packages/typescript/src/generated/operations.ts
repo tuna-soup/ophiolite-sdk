@@ -314,6 +314,22 @@ export type postAccountActivityInput = { body: { "account_id"?: (string) | (null
 export function postAccountActivity(transport: Transport, input: postAccountActivityInput): Promise<{ "schema": "ophiolite.record-page/1"; "stream_id": string; "events": Array<WireActivityEvent>; "next_cursor": number }> {
   return transport.request<{ "schema": "ophiolite.record-page/1"; "stream_id": string; "events": Array<WireActivityEvent>; "next_cursor": number }>("POST", "/api/v1/account/activity", {}, undefined, input.body, input.options, null, false);
 }
+export type postAccountApplicationDecideInput = { body: { "request": string; "approve": boolean; "projects"?: (Array<string>) | (null) }; options?: OperationOptions };
+export function postAccountApplicationDecide(transport: Transport, input: postAccountApplicationDecideInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/account/application-decide", {}, undefined, input.body, input.options, null, false);
+}
+export type postAccountApplicationRequestInput = { body: { "request": string }; options?: OperationOptions };
+export function postAccountApplicationRequest(transport: Transport, input: postAccountApplicationRequestInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/account/application-request", {}, undefined, input.body, input.options, null, false);
+}
+export type postAccountApplicationRevokeInput = { body: { "application_id": string }; options?: OperationOptions };
+export function postAccountApplicationRevoke(transport: Transport, input: postAccountApplicationRevokeInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/account/application-revoke", {}, undefined, input.body, input.options, null, false);
+}
+export type postAccountApplicationsInput = { body: Record<string, unknown>; options?: OperationOptions };
+export function postAccountApplications(transport: Transport, input: postAccountApplicationsInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/account/applications", {}, undefined, input.body, input.options, null, false);
+}
 export type postAccountRevokeInput = { body: { "id": string; [key: string]: unknown }; options?: OperationOptions };
 export function postAccountRevoke(transport: Transport, input: postAccountRevokeInput): Promise<Record<string, never>> {
   return transport.request<Record<string, never>>("POST", "/api/v1/account/revoke", {}, undefined, input.body, input.options, null, false);
@@ -413,6 +429,34 @@ export function postOrganizationsAccessPreview(transport: Transport, input: post
 export type postOrganizationsActivityInput = { body: { "organization_id": string; "after"?: number; "limit"?: number; "request_id"?: (string) | (null); [key: string]: unknown }; options?: OperationOptions };
 export function postOrganizationsActivity(transport: Transport, input: postOrganizationsActivityInput): Promise<{ "schema": "ophiolite.record-page/1"; "stream_id": string; "events": Array<WireActivityEvent>; "next_cursor": number }> {
   return transport.request<{ "schema": "ophiolite.record-page/1"; "stream_id": string; "events": Array<WireActivityEvent>; "next_cursor": number }>("POST", "/api/v1/organizations/activity", {}, undefined, input.body, input.options, null, false);
+}
+export type postOrganizationsApplicationActivateInput = { body: { "organization_id": string; "id": string; "row_version": number }; options?: OperationOptions };
+export function postOrganizationsApplicationActivate(transport: Transport, input: postOrganizationsApplicationActivateInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/organizations/application-activate", {}, undefined, input.body, input.options, null, false);
+}
+export type postOrganizationsApplicationListInput = { body: { "organization_id": string }; options?: OperationOptions };
+export function postOrganizationsApplicationList(transport: Transport, input: postOrganizationsApplicationListInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/organizations/application-list", {}, undefined, input.body, input.options, null, false);
+}
+export type postOrganizationsApplicationProvisionInput = { body: { "organization_id": string; "id": string; "row_version": number }; options?: OperationOptions };
+export function postOrganizationsApplicationProvision(transport: Transport, input: postOrganizationsApplicationProvisionInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/organizations/application-provision", {}, undefined, input.body, input.options, null, false);
+}
+export type postOrganizationsApplicationReactivateInput = { body: { "organization_id": string; "id": string; "row_version": number }; options?: OperationOptions };
+export function postOrganizationsApplicationReactivate(transport: Transport, input: postOrganizationsApplicationReactivateInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/organizations/application-reactivate", {}, undefined, input.body, input.options, null, false);
+}
+export type postOrganizationsApplicationRegisterInput = { body: { "organization_id": string; "name": string; "redirect_uris": Array<string>; "scopes": Array<string>; "client_type"?: string }; options?: OperationOptions };
+export function postOrganizationsApplicationRegister(transport: Transport, input: postOrganizationsApplicationRegisterInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/organizations/application-register", {}, undefined, input.body, input.options, null, false);
+}
+export type postOrganizationsApplicationRotateInput = { body: { "organization_id": string; "id": string; "row_version": number }; options?: OperationOptions };
+export function postOrganizationsApplicationRotate(transport: Transport, input: postOrganizationsApplicationRotateInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/organizations/application-rotate", {}, undefined, input.body, input.options, null, false);
+}
+export type postOrganizationsApplicationSuspendInput = { body: { "organization_id": string; "id": string; "row_version": number }; options?: OperationOptions };
+export function postOrganizationsApplicationSuspend(transport: Transport, input: postOrganizationsApplicationSuspendInput): Promise<unknown> {
+  return transport.request<unknown>("POST", "/api/v1/organizations/application-suspend", {}, undefined, input.body, input.options, null, false);
 }
 export type postOrganizationsArchiveInput = { body: { "organization_id": string; "project_id": string; "archived": boolean; [key: string]: unknown }; options?: OperationOptions };
 export function postOrganizationsArchive(transport: Transport, input: postOrganizationsArchiveInput): Promise<{ "project_id": string; "archived": boolean; "access_changed": false }> {

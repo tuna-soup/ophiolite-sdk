@@ -24,6 +24,30 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/account/application-decide",
+    "function": "postAccountApplicationDecide",
+    "request": "schema",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/account/application-request",
+    "function": "postAccountApplicationRequest",
+    "request": "schema",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/account/application-revoke",
+    "function": "postAccountApplicationRevoke",
+    "request": "schema",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/account/applications",
+    "function": "postAccountApplications",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
     "operation": "POST /api/v1/account/revoke",
     "function": "postAccountRevoke",
     "request": "schema",
@@ -172,6 +196,48 @@
     "function": "postOrganizationsActivity",
     "request": "schema",
     "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/organizations/application-activate",
+    "function": "postOrganizationsApplicationActivate",
+    "request": "schema",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/organizations/application-list",
+    "function": "postOrganizationsApplicationList",
+    "request": "schema",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/organizations/application-provision",
+    "function": "postOrganizationsApplicationProvision",
+    "request": "schema",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/organizations/application-reactivate",
+    "function": "postOrganizationsApplicationReactivate",
+    "request": "schema",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/organizations/application-register",
+    "function": "postOrganizationsApplicationRegister",
+    "request": "schema",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/organizations/application-rotate",
+    "function": "postOrganizationsApplicationRotate",
+    "request": "schema",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/organizations/application-suspend",
+    "function": "postOrganizationsApplicationSuspend",
+    "request": "schema",
+    "response": "explicitly-untyped"
   },
   {
     "operation": "POST /api/v1/organizations/archive",
