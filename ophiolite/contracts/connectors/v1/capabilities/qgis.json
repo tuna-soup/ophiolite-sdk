@@ -3,7 +3,7 @@
   "id": "qgis",
   "display_name": "QGIS",
   "kind": "application",
-  "summary": "Check Ophiolite project maps for newer versions in QGIS, get one when you choose, go back one step, and send a QGIS result to the project.",
+  "summary": "Check Ophiolite project maps and surfaces for newer versions in QGIS, get one when you choose, go back one step, and send a QGIS result to the project.",
   "host": {
     "name": "QGIS",
     "versions": [
@@ -63,13 +63,38 @@
       "data": "Horizon grid",
       "direction": "read",
       "exact_old_revisions": "retained",
-      "change_detection": "none",
+      "change_detection": "polling",
       "losses": [
-        "Not yet exercised in QGIS"
+        "Drawn as a 64-bit raster with missing cells left empty; display styling is QGIS-side and not returned",
+        "A newer version is shown only when the person chooses Get latest; a check never changes the map"
       ],
       "unsupported": [
-        "editing",
-        "sending a horizon grid from QGIS"
+        "editing in place",
+        "sending a horizon grid from QGIS",
+        "a grid whose coordinate system is not stated"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    },
+    {
+      "profile": "mesh-text/1",
+      "data": "Triangulated surface",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "polling",
+      "losses": [
+        "Opened as a mesh: values are exact at the points and interpolated linearly in each triangle",
+        "Display styling is QGIS-side and not returned"
+      ],
+      "unsupported": [
+        "editing in place",
+        "sending a surface from QGIS",
+        "points without a value (the surface is not drawn)",
+        "a surface whose coordinate system is not stated"
       ],
       "qualification": {
         "status": "unverified",

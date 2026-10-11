@@ -13,6 +13,7 @@ Without `OPHIOLITE_URL` they work on a synthetic log served on the reader's own 
 | `large-files/` | A seismic volume sent in parts, continued after an interruption, read back by ranges and compared byte for byte |
 | `a-well-folder-in-one-report/` | A folder of logs uploaded in one step, one report per file, and the wellbores the logs name |
 | `grids-and-gis-files/` | Two field outlines drawn as a GIS file stores them (a hole kept empty), what the file leaves open, upload and read back |
+| `layers-for-a-gis/` | The layers QGIS opens, read page by page, a path that cannot be placed and why, the paths in plan view |
 | `how-was-this-made/` | Two versions of one result, how each was made, what changed, what was made from the log, and making it again |
 | `open-it-here/` | A result shown by name and version, its exact version opened in the Workspace, and Send again run twice, then refused after a newer version |
 | `well-logs-in-a-bucket/` | A storage folder of logs browsed, added read from your storage each time, and a changed file reported because no copy was kept |

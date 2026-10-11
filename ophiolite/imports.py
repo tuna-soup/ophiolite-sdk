@@ -219,12 +219,13 @@ class Imports:
         headers = {'Content-Type': 'application/octet-stream', 'X-Ophiolite-Upload': base64.b64encode(json_bytes(meta)).decode()}
         return _checked(TableImportRead, _said(lambda: self.client._post_bytes('table-imports', 'read', raw, extra_headers=headers), reading=True), 'table import read')
 
-    def _body(self, read, target, mapping, *, reading=None, well=None, separate=None, authority=None):
+    def _body(self, read, target, mapping, *, reading=None, well=None, separate=None, authority=None, layout=None):
         if target not in TARGETS: raise Refused('Say what the table holds: one of %s.' % ', '.join(TARGETS))
         mapping = {**mapping, 'schema_digest': read['schema_digest']}
         if target == 'wells': mapping.setdefault('entity', 'well')
         return {'target': target, 'input_id': read['input_id'], 'mapping': mapping, **({'reading': reading} if reading else {}),
-                **({'well': well} if well else {}), **({'separate': list(separate)} if separate else {}), **({'authority': authority} if authority else {})}
+                **({'well': well} if well else {}), **({'separate': list(separate)} if separate else {}), **({'authority': authority} if authority else {}),
+                **({'layout': layout} if layout else {})}
 
     def preview(self, read, target, mapping, **options):
         """What a start would add (sets per well, rows skipped with their reasons, wells found); nothing is kept."""
@@ -264,27 +265,46 @@ class Imports:
             if answer['state'] in FINAL or answer['state'] in STOPPED: return answer
         raise VerificationFailed('The import did not finish in %d steps; run it again to continue.' % max_steps)
 
-    def from_table(self, source, target, mapping=None, *, declarations=None, columns=None, name=None, reading=None, well=None, separate=None,
-                   authority=None, audience=(), command_id=None, dry_run=False, progress=None, on_start=None):
+    def from_table(self, source, target=None, mapping=None, *, declarations=None, columns=None, name=None, reading=None, well=None, separate=None,
+                   authority=None, audience=(), command_id=None, dry_run=False, progress=None, on_start=None, layout=None):
         """Read, preview and (unless dry_run) start and run: returns {'read', 'preview', 'run'} ('run' is None for a dry
         run, which adds nothing). `mapping` is {field: column}; omitted, the table must be in the target's standard layout.
+        E89: `layout` names a project layout these columns are; its mapping is used and the landing records it (the target
+        is the layout's). A project layout is never used unless named: a table that matches one without a mapping or
+        `layout` is refused with the layout's name.
         E58b: `target="table"` keeps the file as it is (no mapping needed); `columns` gives what each column holds,
         {column: {'unit', 'quantity', 'missing', 'description'}}; read it back with client.read_data(asset, revision)."""
-        if target == 'table' and mapping is None: mapping = {}
+        from .layouts import Layouts, needs_decision
         notes = dict(columns or {})  # `columns` below is the table's own column names
         read = self.read(source, name=name, reading=reading)
         if read.get('columns') is None: raise Refused('Answer the questions about how to read this table first: give reading=%s.' % sorted(
             d['field'] for d in read['context'].get('decisions', []) if d.get('status') == 'needs-decision'))
         columns = [c['name'] for c in read['columns']]
-        layout = next((l for l in read.get('layouts') or [] if l['target'] == target), None)
-        if mapping is None and layout is None:
+        chosen = None
+        if layout is not None:
+            if mapping is not None: raise Refused('Give a mapping or a layout, not both.')
+            layouts = Layouts(self.client)
+            named = layouts.find(layout)  # J7-11 when the project has no layout of that name
+            chosen = next((m for m in layouts.match(columns) if m['asset_id'] == named['asset_id']), None)
+            if chosen is None: raise Refused('This layout no longer fits this table: the columns differ. Choose the mapping again.', code='does-not-fit')
+            if target is not None and target != chosen['target']: raise Refused('The layout "%s" holds %s, not %s.' % (chosen['name'], chosen['target'], target))
+            target = chosen['target']
+        if target is None: raise Refused('Say what the table holds: one of %s.' % ', '.join(TARGETS))
+        if target == 'table' and mapping is None and chosen is None: mapping = {}
+        standard = next((l for l in read.get('layouts') or [] if l['target'] == target), None) if chosen is None else None
+        if mapping is None and standard is None and chosen is None:
+            offered = [m for m in Layouts(self.client).match(columns, target)]
+            if offered: raise needs_decision(offered)
             raise Refused('Say which column holds each value (mapping={field: column}); this table is not in the standard layout. Its columns: %s.' % ', '.join(columns))
-        fields = dict(layout['fields']) if mapping is None else dict(mapping)
+        given = chosen or standard
+        fields = dict(given['fields']) if mapping is None else dict(mapping)
         for column in [c for v in fields.values() for c in (v if isinstance(v, list) else [v])]:
             if column not in columns: raise Refused('This table has no column named %r. Its columns: %s.' % (column, ', '.join(columns)))
-        declared = {**((layout or {}).get('declarations') or {}), **(declarations or {})}
+        kept = (chosen['layout'].get('declarations') if chosen else (standard or {}).get('declarations')) or {}
+        declared = {**kept, **(declarations or {})}
         body = {'fields': fields, **(declared if target == 'wells' else {'declarations': declared}), **({'columns': notes} if notes else {})}
-        options = {'reading': reading, 'well': well, 'separate': separate, 'authority': authority}
+        options = {'reading': reading, 'well': well, 'separate': separate, 'authority': authority,
+                   'layout': {'id': chosen['asset_id'], 'version': chosen['version'], 'generation': chosen['generation']} if chosen else None}
         review = self.preview(read, target, body, **options)
         if dry_run: return {'read': read, 'preview': review, 'run': None}
         started = self.start(read, target, body, preview_digest=review['preview_digest'], audience=audience, command_id=command_id, **options)
