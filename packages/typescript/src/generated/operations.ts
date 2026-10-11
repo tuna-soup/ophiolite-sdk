@@ -228,6 +228,8 @@ type WireRunnerLimits = { "memory_mb"?: (number) | (null); "seconds"?: (number) 
 type WireSample = { "curve"?: (string) | (null); "before": Array<(number) | (null)>; "after": Array<(number) | (null)> };
 type WireSearchResult = { "asset_id": string; "revision": string; "name": (string) | (null); "origin": (string) | (null); "display": (Record<string, unknown>) | (null); "score": number };
 type WireSendAudience = { "told": (number) | (null) };
+type WireServiceAccount = { "id": string; "name": string; "scope": "read" | "write"; "permission": string; "state": "active" | "disabled" | "unmanaged"; "state_label": string; "administrators": Array<WireServiceAccountAdministrator>; "created_at": string; "created_by_name": (string) | (null); "disabled_at": (string) | (null); "can_manage": boolean };
+type WireServiceAccountAdministrator = { "user_id": string; "name": (string) | (null); "effective": boolean };
 type WireShaleVolumePreview = { "curve": string; "unit": string; "axis": Array<number>; "values": Array<(number) | (null)>; "picks": WirePicks; "samples": number; "missing": number; "at_one": number; "at_zero": number; "record": string };
 type WireSignal = { "id": string; "kind": string; "at": number; "read": boolean; "asset": (WireSignalAsset) | (null); "by": (string) | (null); "display": WireSignalDisplay; "technical"?: (Record<string, unknown>) | (null) };
 type WireSignalAsset = { "asset_id": string; "revision": (string) | (null); "name": (string) | (null); "agent"?: (string) | (null); "technical"?: (Record<string, unknown>) | (null) };
@@ -1502,6 +1504,38 @@ export function getProjectsProjectScientificAssetsAssetRevisionsRevisionWindows(
 export type postProjectsProjectSearchQueryInput = { path: { "project": string }; body: { "project_id": string; "text": string; "limit"?: number; "method"?: ("words" | "embedding") | (null); [key: string]: unknown }; options?: OperationOptions };
 export function postProjectsProjectSearchQuery(transport: Transport, input: postProjectsProjectSearchQueryInput): Promise<{ "method": string; "not_searched_by_meaning": number; "results": Array<WireSearchResult> }> {
   return transport.request<{ "method": string; "not_searched_by_meaning": number; "results": Array<WireSearchResult> }>("POST", "/api/v1/projects/{project}/search/query", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectServiceAccountsAdministratorsInput = { path: { "project": string }; body: { "project_id": string; "account_id": string; "user_id": string; "action": "add" | "remove"; [key: string]: unknown }; options?: OperationOptions };
+export function postProjectsProjectServiceAccountsAdministrators(transport: Transport, input: postProjectsProjectServiceAccountsAdministratorsInput): Promise<{ "account": WireServiceAccount; "changed": boolean }> {
+  return transport.request<{ "account": WireServiceAccount; "changed": boolean }>("POST", "/api/v1/projects/{project}/service-accounts/administrators", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectServiceAccountsAdoptInput = { path: { "project": string }; body: { "project_id": string; "account_id": string; [key: string]: unknown }; options?: OperationOptions };
+export function postProjectsProjectServiceAccountsAdopt(transport: Transport, input: postProjectsProjectServiceAccountsAdoptInput): Promise<{ "account": WireServiceAccount; "changed": boolean }> {
+  return transport.request<{ "account": WireServiceAccount; "changed": boolean }>("POST", "/api/v1/projects/{project}/service-accounts/adopt", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectServiceAccountsCreateInput = { path: { "project": string }; body: { "project_id": string; "command_id": string; "name": string; "scope": "read" | "write"; [key: string]: unknown }; options?: OperationOptions };
+export function postProjectsProjectServiceAccountsCreate(transport: Transport, input: postProjectsProjectServiceAccountsCreateInput): Promise<{ "account": WireServiceAccount; "replayed": boolean }> {
+  return transport.request<{ "account": WireServiceAccount; "replayed": boolean }>("POST", "/api/v1/projects/{project}/service-accounts/create", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectServiceAccountsDisableInput = { path: { "project": string }; body: { "project_id": string; "account_id": string; [key: string]: unknown }; options?: OperationOptions };
+export function postProjectsProjectServiceAccountsDisable(transport: Transport, input: postProjectsProjectServiceAccountsDisableInput): Promise<{ "account": WireServiceAccount; "changed": boolean }> {
+  return transport.request<{ "account": WireServiceAccount; "changed": boolean }>("POST", "/api/v1/projects/{project}/service-accounts/disable", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectServiceAccountsKeyCreateInput = { path: { "project": string }; body: { "project_id": string; "account_id": string; "command_id": string; "label": string; "scope": "read" | "write"; "days": number; [key: string]: unknown }; options?: OperationOptions };
+export function postProjectsProjectServiceAccountsKeyCreate(transport: Transport, input: postProjectsProjectServiceAccountsKeyCreateInput): Promise<{ "id": string; "key": (string) | (null); "label": string; "account_id": string; "project_id": string; "scope": "read" | "write"; "created_at": string; "expires_at": string; "replayed": boolean; "message": (string) | (null) }> {
+  return transport.request<{ "id": string; "key": (string) | (null); "label": string; "account_id": string; "project_id": string; "scope": "read" | "write"; "created_at": string; "expires_at": string; "replayed": boolean; "message": (string) | (null) }>("POST", "/api/v1/projects/{project}/service-accounts/key-create", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectServiceAccountsKeyListInput = { path: { "project": string }; body: { "project_id": string; "account_id": string; [key: string]: unknown }; options?: OperationOptions };
+export function postProjectsProjectServiceAccountsKeyList(transport: Transport, input: postProjectsProjectServiceAccountsKeyListInput): Promise<{ "account_id": string; "keys": Array<WireAccessKeyRow>; "limit": number }> {
+  return transport.request<{ "account_id": string; "keys": Array<WireAccessKeyRow>; "limit": number }>("POST", "/api/v1/projects/{project}/service-accounts/key-list", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectServiceAccountsKeyRemoveInput = { path: { "project": string }; body: { "project_id": string; "account_id": string; "key_id": string; [key: string]: unknown }; options?: OperationOptions };
+export function postProjectsProjectServiceAccountsKeyRemove(transport: Transport, input: postProjectsProjectServiceAccountsKeyRemoveInput): Promise<{ "id": string; "removed": true }> {
+  return transport.request<{ "id": string; "removed": true }>("POST", "/api/v1/projects/{project}/service-accounts/key-remove", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectServiceAccountsListInput = { path: { "project": string }; body: { "project_id": string; [key: string]: unknown }; options?: OperationOptions };
+export function postProjectsProjectServiceAccountsList(transport: Transport, input: postProjectsProjectServiceAccountsListInput): Promise<{ "accounts": Array<WireServiceAccount>; "limit": number; "can_create": boolean }> {
+  return transport.request<{ "accounts": Array<WireServiceAccount>; "limit": number; "can_create": boolean }>("POST", "/api/v1/projects/{project}/service-accounts/list", input.path, undefined, input.body, input.options, null, false);
 }
 export type postProjectsProjectSourcesAdvanceInput = { path: { "project": string }; body: { "project_id": string; "connection_id"?: (string) | (null); "key"?: (string) | (null); "profile"?: (string) | (null); "kind"?: (string) | (null); "offset"?: number; "prefix"?: (string) | (null); "cursor"?: (string) | (null); "limit"?: number; "id"?: (string) | (null); "mode"?: "follow" | "pin"; "revision"?: (string) | (null); "preview_digest"?: (string) | (null); "acknowledge_unknowns"?: boolean; "mapping"?: (Record<string, unknown>) | (null); "context"?: (Record<string, unknown>) | (null); "context_policy_revision"?: (number) | (null); "expected_generation"?: number; "scope"?: ("all" | "sample") | (null); "crs_choice"?: (WireCrsChoice) | (null) }; options?: OperationOptions };
 export function postProjectsProjectSourcesAdvance(transport: Transport, input: postProjectsProjectSourcesAdvanceInput): Promise<{ "asset_identity": string; "reader_identity"?: (string) | (null); "authority": string; "connection_fingerprint": string; "connection_id": string; "failures": number; "generation": number; "id": string; "interpretation": null; "key": string; "last_checked": number; "manifest": Record<string, unknown>; "meaning_digest": string; "mode": string; "name": string; "next_check": number; "owner": string; "pinned_available": boolean; "profile": string; "project_id": string; "publication_policy": string; "reference": Record<string, unknown>; "state": string; "previous": Array<Record<string, unknown>>; "taken": Record<string, unknown> }> {

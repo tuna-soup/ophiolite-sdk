@@ -57746,6 +57746,1131 @@
         }
       }
     },
+    "/api/v1/projects/{project}/service-accounts/administrators": {
+      "post": {
+        "summary": "E25b: add or remove a person who manages a service account (its administrators only)",
+        "description": "Scope write; accepted principals: session; project extractor top.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "account": {
+                      "$ref": "#/components/schemas/ServiceAccount"
+                    },
+                    "changed": {
+                      "description": "False when the account was already in the asked state (nothing was written)",
+                      "title": "Changed",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "account",
+                    "changed"
+                  ],
+                  "title": "ServiceAccountChanged",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "account_id": {
+                    "title": "Account Id",
+                    "type": "string"
+                  },
+                  "user_id": {
+                    "description": "The person to add or remove; one added must be a project administrator whose access has no end date",
+                    "title": "User Id",
+                    "type": "string"
+                  },
+                  "action": {
+                    "enum": [
+                      "add",
+                      "remove"
+                    ],
+                    "title": "Action",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "account_id",
+                  "user_id",
+                  "action"
+                ],
+                "title": "ServiceAccountAdministratorChange",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/service-accounts/adopt": {
+      "post": {
+        "summary": "E25b: take over a service account that has no administrator left (project administrators)",
+        "description": "Scope write; accepted principals: session; project extractor top.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "account": {
+                      "$ref": "#/components/schemas/ServiceAccount"
+                    },
+                    "changed": {
+                      "description": "False when the account was already in the asked state (nothing was written)",
+                      "title": "Changed",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "account",
+                    "changed"
+                  ],
+                  "title": "ServiceAccountChanged",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "account_id": {
+                    "title": "Account Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "account_id"
+                ],
+                "title": "ServiceAccountById",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/service-accounts/create": {
+      "post": {
+        "summary": "E25b: create a service account for shared jobs (a named administrator: you); command_id makes a retry safe",
+        "description": "Scope write; accepted principals: session; project extractor top.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "account": {
+                      "$ref": "#/components/schemas/ServiceAccount"
+                    },
+                    "replayed": {
+                      "description": "True when this command id had already created the account (nothing new was written)",
+                      "title": "Replayed",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "account",
+                    "replayed"
+                  ],
+                  "title": "ServiceAccountCreated",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "E25b: a new service account; you become its first named administrator.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "Your id for this request: the same id and body return the same account (replayed); a different body is refused (409)",
+                    "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "A name people recognise, such as \"Nightly import\" (identifier-shaped names are refused)",
+                    "maxLength": 80,
+                    "minLength": 1,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "scope": {
+                    "description": "read: \"Can read\"; write: \"Can read and publish\". Never administration or compute",
+                    "enum": [
+                      "read",
+                      "write"
+                    ],
+                    "title": "Scope",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "command_id",
+                  "name",
+                  "scope"
+                ],
+                "title": "ServiceAccountCreate",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/service-accounts/disable": {
+      "post": {
+        "summary": "E25b: disable a service account for good: its keys stop at once, its record stays",
+        "description": "Scope write; accepted principals: session; project extractor top.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "account": {
+                      "$ref": "#/components/schemas/ServiceAccount"
+                    },
+                    "changed": {
+                      "description": "False when the account was already in the asked state (nothing was written)",
+                      "title": "Changed",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "account",
+                    "changed"
+                  ],
+                  "title": "ServiceAccountChanged",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "account_id": {
+                    "title": "Account Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "account_id"
+                ],
+                "title": "ServiceAccountById",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/service-accounts/key-create": {
+      "post": {
+        "summary": "E25b: an access key the service account owns, shown once; command_id makes a retry safe (its administrators)",
+        "description": "Scope write; accepted principals: session; project extractor top.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "key": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "The access key itself, shown once; null on a replay after the key was used",
+                      "title": "Key"
+                    },
+                    "label": {
+                      "title": "Label",
+                      "type": "string"
+                    },
+                    "account_id": {
+                      "title": "Account Id",
+                      "type": "string"
+                    },
+                    "project_id": {
+                      "title": "Project Id",
+                      "type": "string"
+                    },
+                    "scope": {
+                      "enum": [
+                        "read",
+                        "write"
+                      ],
+                      "title": "Scope",
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "title": "Created At",
+                      "type": "string"
+                    },
+                    "expires_at": {
+                      "title": "Expires At",
+                      "type": "string"
+                    },
+                    "replayed": {
+                      "title": "Replayed",
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "On a replay without the key: what to do if it is lost",
+                      "title": "Message"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "key",
+                    "label",
+                    "account_id",
+                    "project_id",
+                    "scope",
+                    "created_at",
+                    "expires_at",
+                    "replayed",
+                    "message"
+                  ],
+                  "title": "ServiceAccountKeyCreated",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "E25b: an access key the service account owns, for one job; shown once.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "account_id": {
+                    "title": "Account Id",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "Your id for this request: the same id and body replay (a key never used is replaced and shown again; a used one is not); a different body is refused (409)",
+                    "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "label": {
+                    "description": "A name people recognise, such as \"Nightly import server\" (identifier-shaped labels are refused)",
+                    "maxLength": 80,
+                    "minLength": 1,
+                    "title": "Label",
+                    "type": "string"
+                  },
+                  "scope": {
+                    "description": "write only for an account that can read and publish",
+                    "enum": [
+                      "read",
+                      "write"
+                    ],
+                    "title": "Scope",
+                    "type": "string"
+                  },
+                  "days": {
+                    "maximum": 366,
+                    "minimum": 1,
+                    "title": "Days",
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "account_id",
+                  "command_id",
+                  "label",
+                  "scope",
+                  "days"
+                ],
+                "title": "ServiceAccountKeyCreate",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/service-accounts/key-list": {
+      "post": {
+        "summary": "E25b: a service account's access keys, never the key itself (its administrators)",
+        "description": "Scope read; accepted principals: session; project extractor top.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E25b service-accounts/key-list: as access-keys/list; a label that does not read as a name is \"Unnamed key\".",
+                  "properties": {
+                    "account_id": {
+                      "title": "Account Id",
+                      "type": "string"
+                    },
+                    "keys": {
+                      "items": {
+                        "$ref": "#/components/schemas/AccessKeyRow"
+                      },
+                      "title": "Keys",
+                      "type": "array"
+                    },
+                    "limit": {
+                      "title": "Limit",
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "account_id",
+                    "keys",
+                    "limit"
+                  ],
+                  "title": "ServiceAccountKeyList",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "account_id": {
+                    "title": "Account Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "account_id"
+                ],
+                "title": "ServiceAccountById",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/service-accounts/key-remove": {
+      "post": {
+        "summary": "E25b: remove one of a service account's access keys; it stops at once (its administrators)",
+        "description": "Scope write; accepted principals: session; project extractor top.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "removed": {
+                      "const": true,
+                      "title": "Removed",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "removed"
+                  ],
+                  "title": "AccessKeyRemoved",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "account_id": {
+                    "title": "Account Id",
+                    "type": "string"
+                  },
+                  "key_id": {
+                    "title": "Key Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "account_id",
+                  "key_id"
+                ],
+                "title": "ServiceAccountKeyById",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/service-accounts/list": {
+      "post": {
+        "summary": "E25b: the project's service accounts, their permission and who manages them (project members)",
+        "description": "Scope read; accepted principals: session; project extractor top.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E25b service-accounts/list: every service account of the project, live first (at most 20 live).",
+                  "properties": {
+                    "accounts": {
+                      "items": {
+                        "$ref": "#/components/schemas/ServiceAccount"
+                      },
+                      "title": "Accounts",
+                      "type": "array"
+                    },
+                    "limit": {
+                      "title": "Limit",
+                      "type": "integer"
+                    },
+                    "can_create": {
+                      "description": "You may create one (a project administrator whose access has no end date)",
+                      "title": "Can Create",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "accounts",
+                    "limit",
+                    "can_create"
+                  ],
+                  "title": "ServiceAccountList",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "ProjectOnly",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/sources/advance": {
       "post": {
         "summary": "advance upstream source (write scope)",
@@ -114118,6 +115243,131 @@
           "told"
         ],
         "title": "SendAudience",
+        "type": "object"
+      },
+      "ServiceAccount": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "scope": {
+            "enum": [
+              "read",
+              "write"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
+          "permission": {
+            "description": "What it can do, in words: \"Can read\" or \"Can read and publish\"",
+            "title": "Permission",
+            "type": "string"
+          },
+          "state": {
+            "description": "unmanaged: no effective administrator is left; a project administrator can adopt it",
+            "enum": [
+              "active",
+              "disabled",
+              "unmanaged"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "state_label": {
+            "title": "State Label",
+            "type": "string"
+          },
+          "administrators": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceAccountAdministrator"
+            },
+            "title": "Administrators",
+            "type": "array"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "created_by_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By Name"
+          },
+          "disabled_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Disabled At"
+          },
+          "can_manage": {
+            "description": "You are one of its effective administrators",
+            "title": "Can Manage",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "scope",
+          "permission",
+          "state",
+          "state_label",
+          "administrators",
+          "created_at",
+          "created_by_name",
+          "disabled_at",
+          "can_manage"
+        ],
+        "title": "ServiceAccount",
+        "type": "object"
+      },
+      "ServiceAccountAdministrator": {
+        "additionalProperties": false,
+        "properties": {
+          "user_id": {
+            "title": "User Id",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "effective": {
+            "description": "False while this person cannot manage it (no longer an undated project administrator, blocked or disabled)",
+            "title": "Effective",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "user_id",
+          "name",
+          "effective"
+        ],
+        "title": "ServiceAccountAdministrator",
         "type": "object"
       },
       "ShaleVolumePreview": {

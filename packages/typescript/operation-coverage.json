@@ -1806,6 +1806,54 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/service-accounts/administrators",
+    "function": "postProjectsProjectServiceAccountsAdministrators",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/service-accounts/adopt",
+    "function": "postProjectsProjectServiceAccountsAdopt",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/service-accounts/create",
+    "function": "postProjectsProjectServiceAccountsCreate",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/service-accounts/disable",
+    "function": "postProjectsProjectServiceAccountsDisable",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/service-accounts/key-create",
+    "function": "postProjectsProjectServiceAccountsKeyCreate",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/service-accounts/key-list",
+    "function": "postProjectsProjectServiceAccountsKeyList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/service-accounts/key-remove",
+    "function": "postProjectsProjectServiceAccountsKeyRemove",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/service-accounts/list",
+    "function": "postProjectsProjectServiceAccountsList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/sources/advance",
     "function": "postProjectsProjectSourcesAdvance",
     "request": "schema",
