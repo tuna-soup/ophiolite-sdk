@@ -145,8 +145,15 @@ def test_open_it_here_opens_the_exact_version_and_sends_again_once_synthetic(tmp
     assert 'Sent again: version 2 - run twice, still version 2' in text
     assert 'Version 3 arrived first; the line built on version 2 was refused: The result has a newer version; review it before adding another' in text
 
+
+def test_share_a_procedure_checks_and_runs_it_locally_and_adds_nothing_synthetic(tmp_path, monkeypatch):
+    text = run('share-a-procedure', tmp_path, monkeypatch)
+    assert 'Valid: Shift tops by a fixed depth, version 1. It reads Well tops (CSV) and makes Well tops (CSV).' in text
+    assert 'Measured depth before: [1000.5, 1200.0] after: [1003.0, 1202.5]' in text
+    assert 'Synthetic mode: nothing is added to a project.' in text and 'Added ' not in text and 'trusts' not in text
+
 def test_every_entry_is_listed_built_and_described():
-    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'grids-and-gis-files', 'how-was-this-made', 'open-it-here']
+    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'grids-and-gis-files', 'how-was-this-made', 'open-it-here', 'share-a-procedure']
     for entry in GALLERY['notebooks']:
         assert set(entry) == {'slug', 'title', 'sentence', 'modes', 'data'} and entry['modes'] == ['synthetic', 'live']
         script = (ROOT / 'notebooks' / entry['slug'] / 'notebook.py').read_text()

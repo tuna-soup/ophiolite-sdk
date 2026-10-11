@@ -70,6 +70,13 @@
       "sentence": "Publish a result, open its exact version in the Workspace from the notebook, and add the next version with its Send again line, which refuses once someone else added one first.",
       "modes": ["synthetic", "live"],
       "data": "A synthetic five-sample gamma-ray log, or a log in your project; publishing creates a result only you can see until you share it."
+    },
+    {
+      "slug": "share-a-procedure",
+      "title": "Share a procedure with your project",
+      "sentence": "Check a procedure and run it on your computer, add it to your project privately, enable it, and run it as a colleague who is asked once to trust it.",
+      "modes": ["synthetic", "live"],
+      "data": "Two synthetic formation tops and the SDK's sample depth-shift procedure; in your project it adds a private procedure only you and the administrators see until one enables it."
     }
   ]
 }

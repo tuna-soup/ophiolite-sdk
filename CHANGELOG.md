@@ -13,6 +13,8 @@ No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
   version is read again (a withdrawal ends it) and the local copy is checked by digest; `procedures.run` takes
   `expected_digest=` and refuses `changed-before-run` when the copy that would run is another. `Client.procedure_*`
   give the same from Python; a refusal keeps the server's sentence and its closed `reason`.
+  The gallery notebook `share-a-procedure` shows both sides; `ophiolite.gallery.colleague()` gives a notebook a
+  second member's client (`gallery.use(client, colleague=...)`, or `OPHIOLITE_COLLEAGUE_ACCESS_KEY`).
 - Grids and GIS files (E56, preview API): `client.read_data` returns `FeatureSet` for map features from a Shapefile,
   a GeoPackage layer or a GeoJSON file (`features` in file order with coordinates as stored, `fields`, `to_frame()`
   with one row per feature), checked offline against the server's rules; ZMAP+, CPS-3 and IRAP grids read as
