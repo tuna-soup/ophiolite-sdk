@@ -5,7 +5,7 @@
     "version": "1.0.0-pilot",
     "description": "One public API for every project operation. Three credential kinds reach it: the browser session (opaque HttpOnly cookie plus the X-CSRF-Token proof and, on non-GET requests, the exact Origin), a project-scoped delegate lasting at most five minutes (Bearer oph_api_..., parent session and current native permissions remain mandatory), and a browser-approved provider grant (Bearer provider token plus X-Ophiolite-Application-Grant; capability 1: the scientific read resources and the applications route within its read/write scopes; capability 3 adds reading wells, wellbores and lineage and the LAS upload routes). A request that carries an Authorization header is a machine request and is refused with MACHINE_AUTH_REQUIRED when a cookie or Origin travels with it. Scope and capability are ceilings; every operation runs the same native permission checks whoever calls it. Not a stable SDK or unattended service-account contract.",
     "x-ophiolite-contracts": {
-      "registry_version": "1.28.0",
+      "registry_version": "1.29.0",
       "index": "/api/v1/contracts",
       "served_profiles": [
         "las2/1",
@@ -32967,6 +32967,217 @@
         }
       }
     },
+    "/api/v1/organizations/invitation-decline": {
+      "post": {
+        "summary": "invitation-decline organisation administration",
+        "description": "Scope write; accepted principals: session; project extractor none.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "declined": {
+                      "description": "False when it was already declined",
+                      "title": "Declined",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "declined"
+                  ],
+                  "title": "InvitationDeclined",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "invitation": {
+                    "pattern": "^[A-Za-z0-9-]{1,64}$",
+                    "title": "Invitation",
+                    "type": "string"
+                  },
+                  "generation": {
+                    "description": "The link generation the person was shown; a resend changes it",
+                    "pattern": "^[0-9a-f]{16}$",
+                    "title": "Generation",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "invitation",
+                  "generation"
+                ],
+                "title": "InvitationDecline",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/invitations-for-me": {
+      "post": {
+        "summary": "invitations-for-me organisation administration",
+        "description": "Scope read; accepted principals: session; project extractor none.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "invitations": {
+                      "description": "E48: pending invitations to organisations you are not a member of, for the address your provider verified in this sign-in, under the operator's trust rule",
+                      "items": {
+                        "$ref": "#/components/schemas/FoundInvitation"
+                      },
+                      "title": "Invitations",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "invitations"
+                  ],
+                  "title": "InvitationsForMe",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "This operation reads no fields from its body; send an empty object.",
+                "properties": {},
+                "title": "NoFields",
+                "type": "object",
+                "x-ophiolite-no-fields": true
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/organizations/invite-create": {
       "post": {
         "summary": "invite-create organisation administration",
@@ -45530,6 +45741,18 @@
                       "title": "Asset Identity",
                       "type": "string"
                     },
+                    "reader_identity": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Reader Identity"
+                    },
                     "authority": {
                       "title": "Authority",
                       "type": "string"
@@ -45994,6 +46217,18 @@
                     "asset_identity": {
                       "title": "Asset Identity",
                       "type": "string"
+                    },
+                    "reader_identity": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Reader Identity"
                     },
                     "mode": {
                       "title": "Mode",
@@ -50924,6 +51159,18 @@
                       "title": "Asset Identity",
                       "type": "string"
                     },
+                    "reader_identity": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Reader Identity"
+                    },
                     "mode": {
                       "title": "Mode",
                       "type": "string"
@@ -51773,6 +52020,18 @@
                     "asset_identity": {
                       "title": "Asset Identity",
                       "type": "string"
+                    },
+                    "reader_identity": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Reader Identity"
                     },
                     "mode": {
                       "title": "Mode",
@@ -55124,6 +55383,18 @@
                       "title": "Asset Identity",
                       "type": "string"
                     },
+                    "reader_identity": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Reader Identity"
+                    },
                     "authority": {
                       "title": "Authority",
                       "type": "string"
@@ -56322,6 +56593,18 @@
                       "title": "Asset Identity",
                       "type": "string"
                     },
+                    "reader_identity": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Reader Identity"
+                    },
                     "mode": {
                       "title": "Mode",
                       "type": "string"
@@ -56815,6 +57098,18 @@
                     "asset_identity": {
                       "title": "Asset Identity",
                       "type": "string"
+                    },
+                    "reader_identity": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Reader Identity"
                     },
                     "authority": {
                       "title": "Authority",
@@ -57748,6 +58043,18 @@
                       "title": "Asset Identity",
                       "type": "string"
                     },
+                    "reader_identity": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Reader Identity"
+                    },
                     "authority": {
                       "title": "Authority",
                       "type": "string"
@@ -58189,6 +58496,18 @@
                     "asset_identity": {
                       "title": "Asset Identity",
                       "type": "string"
+                    },
+                    "reader_identity": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Reader Identity"
                     },
                     "authority": {
                       "title": "Authority",
@@ -58655,9 +58974,12 @@
                     },
                     {
                       "$ref": "#/components/schemas/TableSchema"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DataTableSchema"
                     }
                   ],
-                  "description": "sources/schema: a built-in profile's declared kinds, or a SQL table's inspected schema and mappings.",
+                  "description": "sources/schema: a built-in profile's declared kinds, a SQL table's inspected schema and mappings, or (profile\ntable/1) the table read as a table with the project's declarations.",
                   "title": "SourceSchema"
                 }
               }
@@ -88817,6 +89139,123 @@
         "title": "CurveInspection",
         "type": "object"
       },
+      "DataTableSchema": {
+        "additionalProperties": false,
+        "description": "E50b1: a SQL table read as `table/1` (ADR 0020): every column with its logical type or not read, a sample with\nintegers as text, the suggested key, and the project's saved declarations.",
+        "properties": {
+          "profile": {
+            "const": "table/1",
+            "title": "Profile",
+            "type": "string"
+          },
+          "columns": {
+            "description": "In table order: name, db_type, logical (null when not read), nullable, comment, read; domain_base for a PostgreSQL domain.",
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Columns",
+            "type": "array"
+          },
+          "suggested_key": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The primary key, only suggested; the person declares the key.",
+            "title": "Suggested Key"
+          },
+          "row_count": {
+            "title": "Row Count",
+            "type": "integer"
+          },
+          "sample_rows": {
+            "description": "The first ten rows by read column, as table-encoding/1 writes them (integers and decimals as text).",
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Sample Rows",
+            "type": "array"
+          },
+          "schema_digest": {
+            "title": "Schema Digest",
+            "type": "string"
+          },
+          "not_read": {
+            "description": "The columns outside the eight logical types: their values are not delivered and not in the revision.",
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Not Read",
+            "type": "array"
+          },
+          "limits": {
+            "title": "Limits",
+            "type": "string"
+          },
+          "declaration": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The project's latest table declaration, or null.",
+            "title": "Declaration"
+          },
+          "versions": {
+            "description": "Every saved version, newest first.",
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Versions",
+            "type": "array"
+          },
+          "coordinate_systems": {
+            "description": "The systems a declaration may name for an x and a y column.",
+            "items": {
+              "$ref": "#/components/schemas/CoordinateSystem"
+            },
+            "title": "Coordinate Systems",
+            "type": "array"
+          },
+          "target": {
+            "const": "table",
+            "description": "The table type the declaration screen renders (ophiolite.table-target/table/1).",
+            "title": "Target",
+            "type": "string"
+          }
+        },
+        "required": [
+          "profile",
+          "columns",
+          "suggested_key",
+          "row_count",
+          "sample_rows",
+          "schema_digest",
+          "not_read",
+          "limits",
+          "declaration",
+          "versions",
+          "coordinate_systems",
+          "target"
+        ],
+        "title": "DataTableSchema",
+        "type": "object"
+      },
       "DeclaredField": {
         "additionalProperties": false,
         "description": "E55: one context field a person states for an upload kind; nothing states it for them (\"Not stated\").",
@@ -89691,6 +90130,48 @@
         "title": "FileIn",
         "type": "object"
       },
+      "FoundInvitation": {
+        "additionalProperties": false,
+        "properties": {
+          "invitation": {
+            "title": "Invitation",
+            "type": "string"
+          },
+          "organization": {
+            "title": "Organization",
+            "type": "string"
+          },
+          "sender": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sender"
+          },
+          "generation": {
+            "description": "Name it to accept or decline; a resend changes it",
+            "title": "Generation",
+            "type": "string"
+          },
+          "expires_at": {
+            "title": "Expires At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "invitation",
+          "organization",
+          "sender",
+          "generation",
+          "expires_at"
+        ],
+        "title": "FoundInvitation",
+        "type": "object"
+      },
       "GroupMember": {
         "additionalProperties": false,
         "properties": {
@@ -89952,6 +90433,18 @@
             "title": "Revoked",
             "type": "boolean"
           },
+          "declined_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "ISO 8601; E48: when the invited person declined",
+            "title": "Declined At"
+          },
           "delivery": {
             "anyOf": [
               {
@@ -89981,6 +90474,7 @@
           "expires_at",
           "accepted_by",
           "revoked",
+          "declined_at",
           "delivery",
           "error_code"
         ],
@@ -95072,8 +95566,16 @@
             "type": "integer"
           },
           "actor_id": {
-            "title": "Actor Id",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "None: an invited person without an account (E48 decline)",
+            "title": "Actor Id"
           },
           "action": {
             "title": "Action",
@@ -97765,6 +98267,18 @@
           "asset_identity": {
             "title": "Asset Identity",
             "type": "string"
+          },
+          "reader_identity": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Reader Identity"
           },
           "mode": {
             "title": "Mode",
