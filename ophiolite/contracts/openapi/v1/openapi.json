@@ -17809,6 +17809,36 @@
                     },
                     "readiness": {
                       "$ref": "#/components/schemas/AccessTestReadiness"
+                    },
+                    "tables": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E41, a database added in the browser: whether the sign-in can read any table it offers",
+                      "title": "Tables"
+                    },
+                    "warnings": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "const": "sign-in-can-write",
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E41: the sign-in could change the database (a warning, never a refusal)",
+                      "title": "Warnings"
                     }
                   },
                   "required": [
@@ -30328,6 +30358,42 @@
                       ],
                       "default": null,
                       "title": "Member"
+                    },
+                    "origin": {
+                      "anyOf": [
+                        {
+                          "const": "browser",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E41: added in the browser",
+                      "title": "Origin"
+                    },
+                    "destination": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/OrgDestination"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "restriction": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/OrgRestriction"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
                     }
                   },
                   "required": [
@@ -30470,6 +30536,407 @@
                   "enabled": {
                     "default": true,
                     "title": "Enabled",
+                    "type": "boolean"
+                  },
+                  "host": {
+                    "default": "",
+                    "maxLength": 253,
+                    "title": "Host",
+                    "type": "string"
+                  },
+                  "port": {
+                    "default": 5432,
+                    "maximum": 65535,
+                    "minimum": 1,
+                    "title": "Port",
+                    "type": "integer"
+                  },
+                  "dbname": {
+                    "default": "",
+                    "maxLength": 63,
+                    "title": "Dbname",
+                    "type": "string"
+                  },
+                  "sslmode": {
+                    "default": "verify-full",
+                    "enum": [
+                      "verify-full",
+                      "verify-ca",
+                      "disable"
+                    ],
+                    "title": "Sslmode",
+                    "type": "string"
+                  },
+                  "trust": {
+                    "default": "system",
+                    "maxLength": 255,
+                    "title": "Trust",
+                    "type": "string"
+                  },
+                  "restriction": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Restriction"
+                  },
+                  "copy": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Copy"
+                  },
+                  "grant": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Grant"
+                  },
+                  "project_id": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "default": "postgresql",
+                    "maxLength": 40,
+                    "title": "Kind",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "reason": {
+                    "default": "",
+                    "maxLength": 1000,
+                    "title": "Reason",
+                    "type": "string"
+                  },
+                  "grant_use": {
+                    "default": false,
+                    "title": "Grant Use",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "organization_id"
+                ],
+                "title": "OrgRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/org-connections/capability": {
+      "post": {
+        "summary": "E39: Grant or revoke \"add databases\" for a member (organisation owners; E41)",
+        "description": "Scope write; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E41 org-connections/capability: who holds \"add databases\" now (owners hold it without a grant).",
+                  "properties": {
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "holders": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Holders",
+                      "type": "array"
+                    },
+                    "generation": {
+                      "title": "Generation",
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "organization_id",
+                    "holders",
+                    "generation"
+                  ],
+                  "title": "OrgCapabilityAnswer",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "target": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Target",
+                    "type": "string"
+                  },
+                  "name": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "username": {
+                    "default": "",
+                    "maxLength": 128,
+                    "title": "Username",
+                    "type": "string"
+                  },
+                  "password": {
+                    "default": "",
+                    "maxLength": 4096,
+                    "title": "Password",
+                    "type": "string"
+                  },
+                  "person": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Person",
+                    "type": "string"
+                  },
+                  "use": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Use"
+                  },
+                  "administer": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Administer"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "enabled": {
+                    "default": true,
+                    "title": "Enabled",
+                    "type": "boolean"
+                  },
+                  "host": {
+                    "default": "",
+                    "maxLength": 253,
+                    "title": "Host",
+                    "type": "string"
+                  },
+                  "port": {
+                    "default": 5432,
+                    "maximum": 65535,
+                    "minimum": 1,
+                    "title": "Port",
+                    "type": "integer"
+                  },
+                  "dbname": {
+                    "default": "",
+                    "maxLength": 63,
+                    "title": "Dbname",
+                    "type": "string"
+                  },
+                  "sslmode": {
+                    "default": "verify-full",
+                    "enum": [
+                      "verify-full",
+                      "verify-ca",
+                      "disable"
+                    ],
+                    "title": "Sslmode",
+                    "type": "string"
+                  },
+                  "trust": {
+                    "default": "system",
+                    "maxLength": 255,
+                    "title": "Trust",
+                    "type": "string"
+                  },
+                  "restriction": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Restriction"
+                  },
+                  "copy": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Copy"
+                  },
+                  "grant": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Grant"
+                  },
+                  "project_id": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "default": "postgresql",
+                    "maxLength": 40,
+                    "title": "Kind",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "reason": {
+                    "default": "",
+                    "maxLength": 1000,
+                    "title": "Reason",
+                    "type": "string"
+                  },
+                  "grant_use": {
+                    "default": false,
+                    "title": "Grant Use",
                     "type": "boolean"
                   }
                 },
@@ -30577,6 +31044,42 @@
                       ],
                       "default": null,
                       "title": "Member"
+                    },
+                    "origin": {
+                      "anyOf": [
+                        {
+                          "const": "browser",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E41: added in the browser",
+                      "title": "Origin"
+                    },
+                    "destination": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/OrgDestination"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "restriction": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/OrgRestriction"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
                     }
                   },
                   "required": [
@@ -30719,6 +31222,882 @@
                   "enabled": {
                     "default": true,
                     "title": "Enabled",
+                    "type": "boolean"
+                  },
+                  "host": {
+                    "default": "",
+                    "maxLength": 253,
+                    "title": "Host",
+                    "type": "string"
+                  },
+                  "port": {
+                    "default": 5432,
+                    "maximum": 65535,
+                    "minimum": 1,
+                    "title": "Port",
+                    "type": "integer"
+                  },
+                  "dbname": {
+                    "default": "",
+                    "maxLength": 63,
+                    "title": "Dbname",
+                    "type": "string"
+                  },
+                  "sslmode": {
+                    "default": "verify-full",
+                    "enum": [
+                      "verify-full",
+                      "verify-ca",
+                      "disable"
+                    ],
+                    "title": "Sslmode",
+                    "type": "string"
+                  },
+                  "trust": {
+                    "default": "system",
+                    "maxLength": 255,
+                    "title": "Trust",
+                    "type": "string"
+                  },
+                  "restriction": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Restriction"
+                  },
+                  "copy": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Copy"
+                  },
+                  "grant": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Grant"
+                  },
+                  "project_id": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "default": "postgresql",
+                    "maxLength": 40,
+                    "title": "Kind",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "reason": {
+                    "default": "",
+                    "maxLength": 1000,
+                    "title": "Reason",
+                    "type": "string"
+                  },
+                  "grant_use": {
+                    "default": false,
+                    "title": "Grant Use",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "organization_id"
+                ],
+                "title": "OrgRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/org-connections/destination-create": {
+      "post": {
+        "summary": "E39: Add a database by its address, inside the operator's destination rule (owners and holders of \"add databases\"; E41)",
+        "description": "Scope write; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E39: one organisation connection. `readiness` only for a person who may use it; `access` and `member` (whether each\nlisted person is still a member) only for its administrators, in their own session. No address, no username.",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "enabled": {
+                      "title": "Enabled",
+                      "type": "boolean"
+                    },
+                    "generation": {
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "you": {
+                      "$ref": "#/components/schemas/OrgConnectionYou"
+                    },
+                    "readiness": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/ConnectionReadiness"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "access": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "$ref": "#/components/schemas/OrgConnectionAccess"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Access"
+                    },
+                    "member": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": {
+                            "type": "boolean"
+                          },
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Member"
+                    },
+                    "origin": {
+                      "anyOf": [
+                        {
+                          "const": "browser",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E41: added in the browser",
+                      "title": "Origin"
+                    },
+                    "destination": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/OrgDestination"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "restriction": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/OrgRestriction"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organization_id",
+                    "name",
+                    "enabled",
+                    "generation",
+                    "you"
+                  ],
+                  "title": "OrgConnection",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "target": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Target",
+                    "type": "string"
+                  },
+                  "name": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "username": {
+                    "default": "",
+                    "maxLength": 128,
+                    "title": "Username",
+                    "type": "string"
+                  },
+                  "password": {
+                    "default": "",
+                    "maxLength": 4096,
+                    "title": "Password",
+                    "type": "string"
+                  },
+                  "person": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Person",
+                    "type": "string"
+                  },
+                  "use": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Use"
+                  },
+                  "administer": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Administer"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "enabled": {
+                    "default": true,
+                    "title": "Enabled",
+                    "type": "boolean"
+                  },
+                  "host": {
+                    "default": "",
+                    "maxLength": 253,
+                    "title": "Host",
+                    "type": "string"
+                  },
+                  "port": {
+                    "default": 5432,
+                    "maximum": 65535,
+                    "minimum": 1,
+                    "title": "Port",
+                    "type": "integer"
+                  },
+                  "dbname": {
+                    "default": "",
+                    "maxLength": 63,
+                    "title": "Dbname",
+                    "type": "string"
+                  },
+                  "sslmode": {
+                    "default": "verify-full",
+                    "enum": [
+                      "verify-full",
+                      "verify-ca",
+                      "disable"
+                    ],
+                    "title": "Sslmode",
+                    "type": "string"
+                  },
+                  "trust": {
+                    "default": "system",
+                    "maxLength": 255,
+                    "title": "Trust",
+                    "type": "string"
+                  },
+                  "restriction": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Restriction"
+                  },
+                  "copy": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Copy"
+                  },
+                  "grant": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Grant"
+                  },
+                  "project_id": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "default": "postgresql",
+                    "maxLength": 40,
+                    "title": "Kind",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "reason": {
+                    "default": "",
+                    "maxLength": 1000,
+                    "title": "Reason",
+                    "type": "string"
+                  },
+                  "grant_use": {
+                    "default": false,
+                    "title": "Grant Use",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "organization_id"
+                ],
+                "title": "OrgRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/org-connections/destination-restrict": {
+      "post": {
+        "summary": "E39: Say which schemas and tables the organisation offers from a database added in the browser (E41)",
+        "description": "Scope write; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E39: one organisation connection. `readiness` only for a person who may use it; `access` and `member` (whether each\nlisted person is still a member) only for its administrators, in their own session. No address, no username.",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "enabled": {
+                      "title": "Enabled",
+                      "type": "boolean"
+                    },
+                    "generation": {
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "you": {
+                      "$ref": "#/components/schemas/OrgConnectionYou"
+                    },
+                    "readiness": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/ConnectionReadiness"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "access": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "$ref": "#/components/schemas/OrgConnectionAccess"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Access"
+                    },
+                    "member": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": {
+                            "type": "boolean"
+                          },
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Member"
+                    },
+                    "origin": {
+                      "anyOf": [
+                        {
+                          "const": "browser",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E41: added in the browser",
+                      "title": "Origin"
+                    },
+                    "destination": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/OrgDestination"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "restriction": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/OrgRestriction"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organization_id",
+                    "name",
+                    "enabled",
+                    "generation",
+                    "you"
+                  ],
+                  "title": "OrgConnection",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "target": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Target",
+                    "type": "string"
+                  },
+                  "name": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "username": {
+                    "default": "",
+                    "maxLength": 128,
+                    "title": "Username",
+                    "type": "string"
+                  },
+                  "password": {
+                    "default": "",
+                    "maxLength": 4096,
+                    "title": "Password",
+                    "type": "string"
+                  },
+                  "person": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Person",
+                    "type": "string"
+                  },
+                  "use": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Use"
+                  },
+                  "administer": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Administer"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "enabled": {
+                    "default": true,
+                    "title": "Enabled",
+                    "type": "boolean"
+                  },
+                  "host": {
+                    "default": "",
+                    "maxLength": 253,
+                    "title": "Host",
+                    "type": "string"
+                  },
+                  "port": {
+                    "default": 5432,
+                    "maximum": 65535,
+                    "minimum": 1,
+                    "title": "Port",
+                    "type": "integer"
+                  },
+                  "dbname": {
+                    "default": "",
+                    "maxLength": 63,
+                    "title": "Dbname",
+                    "type": "string"
+                  },
+                  "sslmode": {
+                    "default": "verify-full",
+                    "enum": [
+                      "verify-full",
+                      "verify-ca",
+                      "disable"
+                    ],
+                    "title": "Sslmode",
+                    "type": "string"
+                  },
+                  "trust": {
+                    "default": "system",
+                    "maxLength": 255,
+                    "title": "Trust",
+                    "type": "string"
+                  },
+                  "restriction": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Restriction"
+                  },
+                  "copy": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Copy"
+                  },
+                  "grant": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Grant"
+                  },
+                  "project_id": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "default": "postgresql",
+                    "maxLength": 40,
+                    "title": "Kind",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "reason": {
+                    "default": "",
+                    "maxLength": 1000,
+                    "title": "Reason",
+                    "type": "string"
+                  },
+                  "grant_use": {
+                    "default": false,
+                    "title": "Grant Use",
                     "type": "boolean"
                   }
                 },
@@ -30826,6 +32205,42 @@
                       ],
                       "default": null,
                       "title": "Member"
+                    },
+                    "origin": {
+                      "anyOf": [
+                        {
+                          "const": "browser",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E41: added in the browser",
+                      "title": "Origin"
+                    },
+                    "destination": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/OrgDestination"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "restriction": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/OrgRestriction"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
                     }
                   },
                   "required": [
@@ -30969,6 +32384,108 @@
                     "default": true,
                     "title": "Enabled",
                     "type": "boolean"
+                  },
+                  "host": {
+                    "default": "",
+                    "maxLength": 253,
+                    "title": "Host",
+                    "type": "string"
+                  },
+                  "port": {
+                    "default": 5432,
+                    "maximum": 65535,
+                    "minimum": 1,
+                    "title": "Port",
+                    "type": "integer"
+                  },
+                  "dbname": {
+                    "default": "",
+                    "maxLength": 63,
+                    "title": "Dbname",
+                    "type": "string"
+                  },
+                  "sslmode": {
+                    "default": "verify-full",
+                    "enum": [
+                      "verify-full",
+                      "verify-ca",
+                      "disable"
+                    ],
+                    "title": "Sslmode",
+                    "type": "string"
+                  },
+                  "trust": {
+                    "default": "system",
+                    "maxLength": 255,
+                    "title": "Trust",
+                    "type": "string"
+                  },
+                  "restriction": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Restriction"
+                  },
+                  "copy": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Copy"
+                  },
+                  "grant": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Grant"
+                  },
+                  "project_id": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "default": "postgresql",
+                    "maxLength": 40,
+                    "title": "Kind",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "reason": {
+                    "default": "",
+                    "maxLength": 1000,
+                    "title": "Reason",
+                    "type": "string"
+                  },
+                  "grant_use": {
+                    "default": false,
+                    "title": "Grant Use",
+                    "type": "boolean"
                   }
                 },
                 "required": [
@@ -31046,6 +32563,17 @@
                       ],
                       "default": null,
                       "title": "Targets"
+                    },
+                    "add_databases": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/OrgAddDatabases"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
                     }
                   },
                   "required": [
@@ -31186,6 +32714,1687 @@
                     "default": true,
                     "title": "Enabled",
                     "type": "boolean"
+                  },
+                  "host": {
+                    "default": "",
+                    "maxLength": 253,
+                    "title": "Host",
+                    "type": "string"
+                  },
+                  "port": {
+                    "default": 5432,
+                    "maximum": 65535,
+                    "minimum": 1,
+                    "title": "Port",
+                    "type": "integer"
+                  },
+                  "dbname": {
+                    "default": "",
+                    "maxLength": 63,
+                    "title": "Dbname",
+                    "type": "string"
+                  },
+                  "sslmode": {
+                    "default": "verify-full",
+                    "enum": [
+                      "verify-full",
+                      "verify-ca",
+                      "disable"
+                    ],
+                    "title": "Sslmode",
+                    "type": "string"
+                  },
+                  "trust": {
+                    "default": "system",
+                    "maxLength": 255,
+                    "title": "Trust",
+                    "type": "string"
+                  },
+                  "restriction": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Restriction"
+                  },
+                  "copy": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Copy"
+                  },
+                  "grant": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Grant"
+                  },
+                  "project_id": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "default": "postgresql",
+                    "maxLength": 40,
+                    "title": "Kind",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "reason": {
+                    "default": "",
+                    "maxLength": 1000,
+                    "title": "Reason",
+                    "type": "string"
+                  },
+                  "grant_use": {
+                    "default": false,
+                    "title": "Grant Use",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "organization_id"
+                ],
+                "title": "OrgRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/org-connections/request": {
+      "post": {
+        "summary": "E39: Ask for a database to be added, without a sign-in (administrators of the organisation's projects; E41)",
+        "description": "Scope write; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E41 org-connections/request and its decisions. `request-sent` is the same whether the database is new or already\nread by a connection the requester may not see; `attached` and `use_granted` only for an approval.",
+                  "properties": {
+                    "outcome": {
+                      "enum": [
+                        "request-sent",
+                        "approved",
+                        "declined",
+                        "withdrawn"
+                      ],
+                      "title": "Outcome",
+                      "type": "string"
+                    },
+                    "request": {
+                      "$ref": "#/components/schemas/OrgDatabaseRequest"
+                    },
+                    "attached": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Attached"
+                    },
+                    "use_granted": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Use Granted"
+                    }
+                  },
+                  "required": [
+                    "outcome",
+                    "request"
+                  ],
+                  "title": "OrgRequestAnswer",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "target": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Target",
+                    "type": "string"
+                  },
+                  "name": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "username": {
+                    "default": "",
+                    "maxLength": 128,
+                    "title": "Username",
+                    "type": "string"
+                  },
+                  "password": {
+                    "default": "",
+                    "maxLength": 4096,
+                    "title": "Password",
+                    "type": "string"
+                  },
+                  "person": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Person",
+                    "type": "string"
+                  },
+                  "use": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Use"
+                  },
+                  "administer": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Administer"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "enabled": {
+                    "default": true,
+                    "title": "Enabled",
+                    "type": "boolean"
+                  },
+                  "host": {
+                    "default": "",
+                    "maxLength": 253,
+                    "title": "Host",
+                    "type": "string"
+                  },
+                  "port": {
+                    "default": 5432,
+                    "maximum": 65535,
+                    "minimum": 1,
+                    "title": "Port",
+                    "type": "integer"
+                  },
+                  "dbname": {
+                    "default": "",
+                    "maxLength": 63,
+                    "title": "Dbname",
+                    "type": "string"
+                  },
+                  "sslmode": {
+                    "default": "verify-full",
+                    "enum": [
+                      "verify-full",
+                      "verify-ca",
+                      "disable"
+                    ],
+                    "title": "Sslmode",
+                    "type": "string"
+                  },
+                  "trust": {
+                    "default": "system",
+                    "maxLength": 255,
+                    "title": "Trust",
+                    "type": "string"
+                  },
+                  "restriction": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Restriction"
+                  },
+                  "copy": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Copy"
+                  },
+                  "grant": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Grant"
+                  },
+                  "project_id": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "default": "postgresql",
+                    "maxLength": 40,
+                    "title": "Kind",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "reason": {
+                    "default": "",
+                    "maxLength": 1000,
+                    "title": "Reason",
+                    "type": "string"
+                  },
+                  "grant_use": {
+                    "default": false,
+                    "title": "Grant Use",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "organization_id"
+                ],
+                "title": "OrgRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/org-connections/request-approve": {
+      "post": {
+        "summary": "E39: Approve a request, with or without use for the person who asked (E41)",
+        "description": "Scope write; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E41 org-connections/request and its decisions. `request-sent` is the same whether the database is new or already\nread by a connection the requester may not see; `attached` and `use_granted` only for an approval.",
+                  "properties": {
+                    "outcome": {
+                      "enum": [
+                        "request-sent",
+                        "approved",
+                        "declined",
+                        "withdrawn"
+                      ],
+                      "title": "Outcome",
+                      "type": "string"
+                    },
+                    "request": {
+                      "$ref": "#/components/schemas/OrgDatabaseRequest"
+                    },
+                    "attached": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Attached"
+                    },
+                    "use_granted": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Use Granted"
+                    }
+                  },
+                  "required": [
+                    "outcome",
+                    "request"
+                  ],
+                  "title": "OrgRequestAnswer",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "target": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Target",
+                    "type": "string"
+                  },
+                  "name": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "username": {
+                    "default": "",
+                    "maxLength": 128,
+                    "title": "Username",
+                    "type": "string"
+                  },
+                  "password": {
+                    "default": "",
+                    "maxLength": 4096,
+                    "title": "Password",
+                    "type": "string"
+                  },
+                  "person": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Person",
+                    "type": "string"
+                  },
+                  "use": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Use"
+                  },
+                  "administer": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Administer"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "enabled": {
+                    "default": true,
+                    "title": "Enabled",
+                    "type": "boolean"
+                  },
+                  "host": {
+                    "default": "",
+                    "maxLength": 253,
+                    "title": "Host",
+                    "type": "string"
+                  },
+                  "port": {
+                    "default": 5432,
+                    "maximum": 65535,
+                    "minimum": 1,
+                    "title": "Port",
+                    "type": "integer"
+                  },
+                  "dbname": {
+                    "default": "",
+                    "maxLength": 63,
+                    "title": "Dbname",
+                    "type": "string"
+                  },
+                  "sslmode": {
+                    "default": "verify-full",
+                    "enum": [
+                      "verify-full",
+                      "verify-ca",
+                      "disable"
+                    ],
+                    "title": "Sslmode",
+                    "type": "string"
+                  },
+                  "trust": {
+                    "default": "system",
+                    "maxLength": 255,
+                    "title": "Trust",
+                    "type": "string"
+                  },
+                  "restriction": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Restriction"
+                  },
+                  "copy": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Copy"
+                  },
+                  "grant": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Grant"
+                  },
+                  "project_id": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "default": "postgresql",
+                    "maxLength": 40,
+                    "title": "Kind",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "reason": {
+                    "default": "",
+                    "maxLength": 1000,
+                    "title": "Reason",
+                    "type": "string"
+                  },
+                  "grant_use": {
+                    "default": false,
+                    "title": "Grant Use",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "organization_id"
+                ],
+                "title": "OrgRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/org-connections/request-decline": {
+      "post": {
+        "summary": "E39: Decline a request with a reason (E41)",
+        "description": "Scope write; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E41 org-connections/request and its decisions. `request-sent` is the same whether the database is new or already\nread by a connection the requester may not see; `attached` and `use_granted` only for an approval.",
+                  "properties": {
+                    "outcome": {
+                      "enum": [
+                        "request-sent",
+                        "approved",
+                        "declined",
+                        "withdrawn"
+                      ],
+                      "title": "Outcome",
+                      "type": "string"
+                    },
+                    "request": {
+                      "$ref": "#/components/schemas/OrgDatabaseRequest"
+                    },
+                    "attached": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Attached"
+                    },
+                    "use_granted": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Use Granted"
+                    }
+                  },
+                  "required": [
+                    "outcome",
+                    "request"
+                  ],
+                  "title": "OrgRequestAnswer",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "target": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Target",
+                    "type": "string"
+                  },
+                  "name": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "username": {
+                    "default": "",
+                    "maxLength": 128,
+                    "title": "Username",
+                    "type": "string"
+                  },
+                  "password": {
+                    "default": "",
+                    "maxLength": 4096,
+                    "title": "Password",
+                    "type": "string"
+                  },
+                  "person": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Person",
+                    "type": "string"
+                  },
+                  "use": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Use"
+                  },
+                  "administer": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Administer"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "enabled": {
+                    "default": true,
+                    "title": "Enabled",
+                    "type": "boolean"
+                  },
+                  "host": {
+                    "default": "",
+                    "maxLength": 253,
+                    "title": "Host",
+                    "type": "string"
+                  },
+                  "port": {
+                    "default": 5432,
+                    "maximum": 65535,
+                    "minimum": 1,
+                    "title": "Port",
+                    "type": "integer"
+                  },
+                  "dbname": {
+                    "default": "",
+                    "maxLength": 63,
+                    "title": "Dbname",
+                    "type": "string"
+                  },
+                  "sslmode": {
+                    "default": "verify-full",
+                    "enum": [
+                      "verify-full",
+                      "verify-ca",
+                      "disable"
+                    ],
+                    "title": "Sslmode",
+                    "type": "string"
+                  },
+                  "trust": {
+                    "default": "system",
+                    "maxLength": 255,
+                    "title": "Trust",
+                    "type": "string"
+                  },
+                  "restriction": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Restriction"
+                  },
+                  "copy": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Copy"
+                  },
+                  "grant": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Grant"
+                  },
+                  "project_id": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "default": "postgresql",
+                    "maxLength": 40,
+                    "title": "Kind",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "reason": {
+                    "default": "",
+                    "maxLength": 1000,
+                    "title": "Reason",
+                    "type": "string"
+                  },
+                  "grant_use": {
+                    "default": false,
+                    "title": "Grant Use",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "organization_id"
+                ],
+                "title": "OrgRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/org-connections/request-withdraw": {
+      "post": {
+        "summary": "E39: Withdraw your own request (E41)",
+        "description": "Scope write; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E41 org-connections/request and its decisions. `request-sent` is the same whether the database is new or already\nread by a connection the requester may not see; `attached` and `use_granted` only for an approval.",
+                  "properties": {
+                    "outcome": {
+                      "enum": [
+                        "request-sent",
+                        "approved",
+                        "declined",
+                        "withdrawn"
+                      ],
+                      "title": "Outcome",
+                      "type": "string"
+                    },
+                    "request": {
+                      "$ref": "#/components/schemas/OrgDatabaseRequest"
+                    },
+                    "attached": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Attached"
+                    },
+                    "use_granted": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Use Granted"
+                    }
+                  },
+                  "required": [
+                    "outcome",
+                    "request"
+                  ],
+                  "title": "OrgRequestAnswer",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "target": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Target",
+                    "type": "string"
+                  },
+                  "name": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "username": {
+                    "default": "",
+                    "maxLength": 128,
+                    "title": "Username",
+                    "type": "string"
+                  },
+                  "password": {
+                    "default": "",
+                    "maxLength": 4096,
+                    "title": "Password",
+                    "type": "string"
+                  },
+                  "person": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Person",
+                    "type": "string"
+                  },
+                  "use": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Use"
+                  },
+                  "administer": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Administer"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "enabled": {
+                    "default": true,
+                    "title": "Enabled",
+                    "type": "boolean"
+                  },
+                  "host": {
+                    "default": "",
+                    "maxLength": 253,
+                    "title": "Host",
+                    "type": "string"
+                  },
+                  "port": {
+                    "default": 5432,
+                    "maximum": 65535,
+                    "minimum": 1,
+                    "title": "Port",
+                    "type": "integer"
+                  },
+                  "dbname": {
+                    "default": "",
+                    "maxLength": 63,
+                    "title": "Dbname",
+                    "type": "string"
+                  },
+                  "sslmode": {
+                    "default": "verify-full",
+                    "enum": [
+                      "verify-full",
+                      "verify-ca",
+                      "disable"
+                    ],
+                    "title": "Sslmode",
+                    "type": "string"
+                  },
+                  "trust": {
+                    "default": "system",
+                    "maxLength": 255,
+                    "title": "Trust",
+                    "type": "string"
+                  },
+                  "restriction": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Restriction"
+                  },
+                  "copy": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Copy"
+                  },
+                  "grant": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Grant"
+                  },
+                  "project_id": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "default": "postgresql",
+                    "maxLength": 40,
+                    "title": "Kind",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "reason": {
+                    "default": "",
+                    "maxLength": 1000,
+                    "title": "Reason",
+                    "type": "string"
+                  },
+                  "grant_use": {
+                    "default": false,
+                    "title": "Grant Use",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "organization_id"
+                ],
+                "title": "OrgRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/org-connections/requests": {
+      "post": {
+        "summary": "E39: The requests you may see: all of them for owners and holders of \"add databases\", else your own (E41)",
+        "description": "Scope read; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E41 org-connections/requests: the organisation's to owners and holders of \"add databases\", else the caller's own.",
+                  "properties": {
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "requests": {
+                      "items": {
+                        "$ref": "#/components/schemas/OrgDatabaseRequest"
+                      },
+                      "title": "Requests",
+                      "type": "array"
+                    },
+                    "open_limit": {
+                      "title": "Open Limit",
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "organization_id",
+                    "requests",
+                    "open_limit"
+                  ],
+                  "title": "OrgRequestsListAnswer",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "target": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Target",
+                    "type": "string"
+                  },
+                  "name": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "username": {
+                    "default": "",
+                    "maxLength": 128,
+                    "title": "Username",
+                    "type": "string"
+                  },
+                  "password": {
+                    "default": "",
+                    "maxLength": 4096,
+                    "title": "Password",
+                    "type": "string"
+                  },
+                  "person": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Person",
+                    "type": "string"
+                  },
+                  "use": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Use"
+                  },
+                  "administer": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Administer"
+                  },
+                  "generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Generation",
+                    "type": "integer"
+                  },
+                  "enabled": {
+                    "default": true,
+                    "title": "Enabled",
+                    "type": "boolean"
+                  },
+                  "host": {
+                    "default": "",
+                    "maxLength": 253,
+                    "title": "Host",
+                    "type": "string"
+                  },
+                  "port": {
+                    "default": 5432,
+                    "maximum": 65535,
+                    "minimum": 1,
+                    "title": "Port",
+                    "type": "integer"
+                  },
+                  "dbname": {
+                    "default": "",
+                    "maxLength": 63,
+                    "title": "Dbname",
+                    "type": "string"
+                  },
+                  "sslmode": {
+                    "default": "verify-full",
+                    "enum": [
+                      "verify-full",
+                      "verify-ca",
+                      "disable"
+                    ],
+                    "title": "Sslmode",
+                    "type": "string"
+                  },
+                  "trust": {
+                    "default": "system",
+                    "maxLength": 255,
+                    "title": "Trust",
+                    "type": "string"
+                  },
+                  "restriction": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Restriction"
+                  },
+                  "copy": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Copy"
+                  },
+                  "grant": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Grant"
+                  },
+                  "project_id": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "default": "postgresql",
+                    "maxLength": 40,
+                    "title": "Kind",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "reason": {
+                    "default": "",
+                    "maxLength": 1000,
+                    "title": "Reason",
+                    "type": "string"
+                  },
+                  "grant_use": {
+                    "default": false,
+                    "title": "Grant Use",
+                    "type": "boolean"
                   }
                 },
                 "required": [
@@ -31292,6 +34501,42 @@
                       ],
                       "default": null,
                       "title": "Member"
+                    },
+                    "origin": {
+                      "anyOf": [
+                        {
+                          "const": "browser",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E41: added in the browser",
+                      "title": "Origin"
+                    },
+                    "destination": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/OrgDestination"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "restriction": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/OrgRestriction"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
                     }
                   },
                   "required": [
@@ -31434,6 +34679,108 @@
                   "enabled": {
                     "default": true,
                     "title": "Enabled",
+                    "type": "boolean"
+                  },
+                  "host": {
+                    "default": "",
+                    "maxLength": 253,
+                    "title": "Host",
+                    "type": "string"
+                  },
+                  "port": {
+                    "default": 5432,
+                    "maximum": 65535,
+                    "minimum": 1,
+                    "title": "Port",
+                    "type": "integer"
+                  },
+                  "dbname": {
+                    "default": "",
+                    "maxLength": 63,
+                    "title": "Dbname",
+                    "type": "string"
+                  },
+                  "sslmode": {
+                    "default": "verify-full",
+                    "enum": [
+                      "verify-full",
+                      "verify-ca",
+                      "disable"
+                    ],
+                    "title": "Sslmode",
+                    "type": "string"
+                  },
+                  "trust": {
+                    "default": "system",
+                    "maxLength": 255,
+                    "title": "Trust",
+                    "type": "string"
+                  },
+                  "restriction": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Restriction"
+                  },
+                  "copy": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Copy"
+                  },
+                  "grant": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Grant"
+                  },
+                  "project_id": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "default": "postgresql",
+                    "maxLength": 40,
+                    "title": "Kind",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "reason": {
+                    "default": "",
+                    "maxLength": 1000,
+                    "title": "Reason",
+                    "type": "string"
+                  },
+                  "grant_use": {
+                    "default": false,
+                    "title": "Grant Use",
                     "type": "boolean"
                   }
                 },
@@ -31541,6 +34888,42 @@
                       ],
                       "default": null,
                       "title": "Member"
+                    },
+                    "origin": {
+                      "anyOf": [
+                        {
+                          "const": "browser",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E41: added in the browser",
+                      "title": "Origin"
+                    },
+                    "destination": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/OrgDestination"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "restriction": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/OrgRestriction"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
                     }
                   },
                   "required": [
@@ -31684,6 +35067,108 @@
                     "default": true,
                     "title": "Enabled",
                     "type": "boolean"
+                  },
+                  "host": {
+                    "default": "",
+                    "maxLength": 253,
+                    "title": "Host",
+                    "type": "string"
+                  },
+                  "port": {
+                    "default": 5432,
+                    "maximum": 65535,
+                    "minimum": 1,
+                    "title": "Port",
+                    "type": "integer"
+                  },
+                  "dbname": {
+                    "default": "",
+                    "maxLength": 63,
+                    "title": "Dbname",
+                    "type": "string"
+                  },
+                  "sslmode": {
+                    "default": "verify-full",
+                    "enum": [
+                      "verify-full",
+                      "verify-ca",
+                      "disable"
+                    ],
+                    "title": "Sslmode",
+                    "type": "string"
+                  },
+                  "trust": {
+                    "default": "system",
+                    "maxLength": 255,
+                    "title": "Trust",
+                    "type": "string"
+                  },
+                  "restriction": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Restriction"
+                  },
+                  "copy": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Copy"
+                  },
+                  "grant": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Grant"
+                  },
+                  "project_id": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "default": "postgresql",
+                    "maxLength": 40,
+                    "title": "Kind",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "reason": {
+                    "default": "",
+                    "maxLength": 1000,
+                    "title": "Reason",
+                    "type": "string"
+                  },
+                  "grant_use": {
+                    "default": false,
+                    "title": "Grant Use",
+                    "type": "boolean"
                   }
                 },
                 "required": [
@@ -31753,6 +35238,36 @@
                     },
                     "readiness": {
                       "$ref": "#/components/schemas/AccessTestReadiness"
+                    },
+                    "tables": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E41, a database added in the browser: whether the sign-in can read any table it offers",
+                      "title": "Tables"
+                    },
+                    "warnings": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "const": "sign-in-can-write",
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E41: the sign-in could change the database (a warning, never a refusal)",
+                      "title": "Warnings"
                     }
                   },
                   "required": [
@@ -31893,6 +35408,108 @@
                   "enabled": {
                     "default": true,
                     "title": "Enabled",
+                    "type": "boolean"
+                  },
+                  "host": {
+                    "default": "",
+                    "maxLength": 253,
+                    "title": "Host",
+                    "type": "string"
+                  },
+                  "port": {
+                    "default": 5432,
+                    "maximum": 65535,
+                    "minimum": 1,
+                    "title": "Port",
+                    "type": "integer"
+                  },
+                  "dbname": {
+                    "default": "",
+                    "maxLength": 63,
+                    "title": "Dbname",
+                    "type": "string"
+                  },
+                  "sslmode": {
+                    "default": "verify-full",
+                    "enum": [
+                      "verify-full",
+                      "verify-ca",
+                      "disable"
+                    ],
+                    "title": "Sslmode",
+                    "type": "string"
+                  },
+                  "trust": {
+                    "default": "system",
+                    "maxLength": 255,
+                    "title": "Trust",
+                    "type": "string"
+                  },
+                  "restriction": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Restriction"
+                  },
+                  "copy": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Copy"
+                  },
+                  "grant": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Grant"
+                  },
+                  "project_id": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "default": "postgresql",
+                    "maxLength": 40,
+                    "title": "Kind",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "reason": {
+                    "default": "",
+                    "maxLength": 1000,
+                    "title": "Reason",
+                    "type": "string"
+                  },
+                  "grant_use": {
+                    "default": false,
+                    "title": "Grant Use",
                     "type": "boolean"
                   }
                 },
@@ -32085,6 +35702,108 @@
                   "enabled": {
                     "default": true,
                     "title": "Enabled",
+                    "type": "boolean"
+                  },
+                  "host": {
+                    "default": "",
+                    "maxLength": 253,
+                    "title": "Host",
+                    "type": "string"
+                  },
+                  "port": {
+                    "default": 5432,
+                    "maximum": 65535,
+                    "minimum": 1,
+                    "title": "Port",
+                    "type": "integer"
+                  },
+                  "dbname": {
+                    "default": "",
+                    "maxLength": 63,
+                    "title": "Dbname",
+                    "type": "string"
+                  },
+                  "sslmode": {
+                    "default": "verify-full",
+                    "enum": [
+                      "verify-full",
+                      "verify-ca",
+                      "disable"
+                    ],
+                    "title": "Sslmode",
+                    "type": "string"
+                  },
+                  "trust": {
+                    "default": "system",
+                    "maxLength": 255,
+                    "title": "Trust",
+                    "type": "string"
+                  },
+                  "restriction": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Restriction"
+                  },
+                  "copy": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Copy"
+                  },
+                  "grant": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Grant"
+                  },
+                  "project_id": {
+                    "default": "",
+                    "maxLength": 160,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "default": "postgresql",
+                    "maxLength": 40,
+                    "title": "Kind",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "default": "",
+                    "maxLength": 80,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "reason": {
+                    "default": "",
+                    "maxLength": 1000,
+                    "title": "Reason",
+                    "type": "string"
+                  },
+                  "grant_use": {
+                    "default": false,
+                    "title": "Grant Use",
                     "type": "boolean"
                   }
                 },
@@ -82259,8 +85978,10 @@
               "sign-in-refused",
               "no-read-right",
               "table-missing",
+              "destination-refused",
               "undetermined",
-              "sign-in-needed"
+              "sign-in-needed",
+              "browser-approval-off"
             ],
             "title": "Code",
             "type": "string"
@@ -85038,7 +88759,8 @@
               "target-changed",
               "key-unavailable",
               "key-mismatch",
-              "sign-in-needed"
+              "sign-in-needed",
+              "browser-approval-off"
             ],
             "title": "Code",
             "type": "string"
@@ -86253,7 +89975,13 @@
                   "use-organisation-connection",
                   "ask-for-use",
                   "ask-to-promote",
-                  "sign-in-owner-unknown"
+                  "sign-in-owner-unknown",
+                  "browser-approval-off",
+                  "request-needed",
+                  "outside-restriction",
+                  "destination-refused",
+                  "unreachable",
+                  "command-reused"
                 ],
                 "title": "Code",
                 "type": "string"
@@ -91849,6 +95577,57 @@
         "title": "OfferByItself",
         "type": "object"
       },
+      "OrgAddDatabases": {
+        "additionalProperties": false,
+        "description": "E41: whether the caller may add a database in the browser; `holders` and `generation` only for an owner.",
+        "properties": {
+          "mode": {
+            "enum": [
+              "operator",
+              "organisation"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "you": {
+            "title": "You",
+            "type": "boolean"
+          },
+          "holders": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Holders"
+          },
+          "generation": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Generation"
+          }
+        },
+        "required": [
+          "mode",
+          "you"
+        ],
+        "title": "OrgAddDatabases",
+        "type": "object"
+      },
       "OrgConnection": {
         "additionalProperties": false,
         "description": "E39: one organisation connection. `readiness` only for a person who may use it; `access` and `member` (whether each\nlisted person is still a member) only for its administrators, in their own session. No address, no username.",
@@ -91916,6 +95695,42 @@
             ],
             "default": null,
             "title": "Member"
+          },
+          "origin": {
+            "anyOf": [
+              {
+                "const": "browser",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E41: added in the browser",
+            "title": "Origin"
+          },
+          "destination": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OrgDestination"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "restriction": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OrgRestriction"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
           }
         },
         "required": [
@@ -91996,6 +95811,196 @@
           "signed_in"
         ],
         "title": "OrgConnectionYou",
+        "type": "object"
+      },
+      "OrgDatabaseRequest": {
+        "additionalProperties": false,
+        "description": "E41: a request to add a database. `reason` only when declined; `connection_id` to a holder, or to the requester\nonce they may use it. Never a sign-in.",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "organization_id": {
+            "title": "Organization Id",
+            "type": "string"
+          },
+          "requester": {
+            "title": "Requester",
+            "type": "string"
+          },
+          "project_id": {
+            "title": "Project Id",
+            "type": "string"
+          },
+          "kind": {
+            "const": "postgresql",
+            "title": "Kind",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "destination": {
+            "$ref": "#/components/schemas/OrgDestination"
+          },
+          "restriction": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OrgRestriction"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "state": {
+            "enum": [
+              "pending",
+              "approved",
+              "declined",
+              "withdrawn"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "generation": {
+            "title": "Generation",
+            "type": "integer"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "number"
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Decided At"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Reason"
+          },
+          "connection_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Connection Id"
+          }
+        },
+        "required": [
+          "id",
+          "organization_id",
+          "requester",
+          "project_id",
+          "kind",
+          "name",
+          "destination",
+          "restriction",
+          "state",
+          "generation",
+          "created_at"
+        ],
+        "title": "OrgDatabaseRequest",
+        "type": "object"
+      },
+      "OrgDestination": {
+        "additionalProperties": false,
+        "description": "E41: where a database added in the browser is. Never a sign-in.",
+        "properties": {
+          "kind": {
+            "const": "postgresql",
+            "title": "Kind",
+            "type": "string"
+          },
+          "host": {
+            "title": "Host",
+            "type": "string"
+          },
+          "port": {
+            "title": "Port",
+            "type": "integer"
+          },
+          "dbname": {
+            "title": "Dbname",
+            "type": "string"
+          },
+          "sslmode": {
+            "enum": [
+              "verify-full",
+              "verify-ca",
+              "disable"
+            ],
+            "title": "Sslmode",
+            "type": "string"
+          },
+          "trust": {
+            "description": "system, or the name of a certificate authority kept with ophiolite-ops configure connection-ca",
+            "title": "Trust",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "host",
+          "port",
+          "dbname",
+          "sslmode",
+          "trust"
+        ],
+        "title": "OrgDestination",
+        "type": "object"
+      },
+      "OrgRestriction": {
+        "additionalProperties": false,
+        "description": "E41: what the organisation offers from a database added in the browser; absent offers everything the sign-in reads.",
+        "properties": {
+          "schemas": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Schemas",
+            "type": "array"
+          },
+          "tables": {
+            "description": "[schema, table] pairs",
+            "items": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "Tables",
+            "type": "array"
+          }
+        },
+        "required": [
+          "schemas",
+          "tables"
+        ],
+        "title": "OrgRestriction",
         "type": "object"
       },
       "OrganizationDetail": {
