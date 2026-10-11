@@ -1011,6 +1011,12 @@
       "title": "PostgreSQL tables: types, directions, change detection, losses and qualification"
     },
     {
+      "id": "ophiolite.connector-capability/table-upload/1",
+      "kind": "capability",
+      "path": "connectors/v1/capabilities/table-upload.json",
+      "title": "Table file upload (CSV, Excel, Parquet): types, directions, change detection, losses and qualification"
+    },
+    {
       "id": "ophiolite.connector-capability/sqlserver-wells/1",
       "kind": "capability",
       "path": "connectors/v1/capabilities/sqlserver-wells.json",

@@ -50478,6 +50478,23 @@
                       }
                     ],
                     "default": null
+                  },
+                  "format": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "parquet",
+                          "geoparquet",
+                          "csv"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Format"
                   }
                 },
                 "required": [
@@ -50958,6 +50975,23 @@
                       }
                     ],
                     "default": null
+                  },
+                  "format": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "parquet",
+                          "geoparquet",
+                          "csv"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Format"
                   }
                 },
                 "required": [
@@ -51327,6 +51361,23 @@
                       }
                     ],
                     "default": null
+                  },
+                  "format": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "parquet",
+                          "geoparquet",
+                          "csv"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Format"
                   }
                 },
                 "required": [
@@ -51677,6 +51728,23 @@
                       }
                     ],
                     "default": null
+                  },
+                  "format": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "parquet",
+                          "geoparquet",
+                          "csv"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Format"
                   }
                 },
                 "required": [
@@ -52088,6 +52156,23 @@
                       }
                     ],
                     "default": null
+                  },
+                  "format": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "parquet",
+                          "geoparquet",
+                          "csv"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Format"
                   }
                 },
                 "required": [
@@ -55604,6 +55689,370 @@
                       }
                     ],
                     "default": null
+                  },
+                  "format": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "parquet",
+                          "geoparquet",
+                          "csv"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Format"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "Request",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/sources/export-file": {
+      "post": {
+        "summary": "export-file upstream source (read scope)",
+        "description": "Scope read; accepted principals: session, delegate, grant; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "grant",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/vnd.apache.parquet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "connection_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Connection Id"
+                  },
+                  "key": {
+                    "anyOf": [
+                      {
+                        "maxLength": 512,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Key"
+                  },
+                  "profile": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Profile"
+                  },
+                  "kind": {
+                    "anyOf": [
+                      {
+                        "maxLength": 256,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Kind"
+                  },
+                  "offset": {
+                    "default": 0,
+                    "maximum": 100000,
+                    "minimum": 0,
+                    "title": "Offset",
+                    "type": "integer"
+                  },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
+                  "limit": {
+                    "default": 100,
+                    "maximum": 1000,
+                    "minimum": 1,
+                    "title": "Limit",
+                    "type": "integer"
+                  },
+                  "id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Id"
+                  },
+                  "mode": {
+                    "default": "follow",
+                    "enum": [
+                      "follow",
+                      "pin"
+                    ],
+                    "title": "Mode",
+                    "type": "string"
+                  },
+                  "revision": {
+                    "anyOf": [
+                      {
+                        "maxLength": 128,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Revision"
+                  },
+                  "preview_digest": {
+                    "anyOf": [
+                      {
+                        "pattern": "^[a-f0-9]{64}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Preview Digest"
+                  },
+                  "acknowledge_unknowns": {
+                    "default": false,
+                    "title": "Acknowledge Unknowns",
+                    "type": "boolean"
+                  },
+                  "mapping": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Mapping"
+                  },
+                  "context": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Context"
+                  },
+                  "context_policy_revision": {
+                    "anyOf": [
+                      {
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Context Policy Revision"
+                  },
+                  "expected_generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Expected Generation",
+                    "type": "integer"
+                  },
+                  "scope": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "all",
+                          "sample"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Scope"
+                  },
+                  "crs_choice": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/CrsChoice"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "format": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "parquet",
+                          "geoparquet",
+                          "csv"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Format"
                   }
                 },
                 "required": [
@@ -56168,6 +56617,23 @@
                       }
                     ],
                     "default": null
+                  },
+                  "format": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "parquet",
+                          "geoparquet",
+                          "csv"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Format"
                   }
                 },
                 "required": [
@@ -56518,6 +56984,23 @@
                       }
                     ],
                     "default": null
+                  },
+                  "format": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "parquet",
+                          "geoparquet",
+                          "csv"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Format"
                   }
                 },
                 "required": [
@@ -57082,6 +57565,23 @@
                       }
                     ],
                     "default": null
+                  },
+                  "format": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "parquet",
+                          "geoparquet",
+                          "csv"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Format"
                   }
                 },
                 "required": [
@@ -57430,6 +57930,23 @@
                       }
                     ],
                     "default": null
+                  },
+                  "format": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "parquet",
+                          "geoparquet",
+                          "csv"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Format"
                   }
                 },
                 "required": [
@@ -57820,6 +58337,23 @@
                       }
                     ],
                     "default": null
+                  },
+                  "format": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "parquet",
+                          "geoparquet",
+                          "csv"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Format"
                   }
                 },
                 "required": [
@@ -58183,6 +58717,23 @@
                       }
                     ],
                     "default": null
+                  },
+                  "format": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "parquet",
+                          "geoparquet",
+                          "csv"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Format"
                   }
                 },
                 "required": [
@@ -58589,6 +59140,23 @@
                       }
                     ],
                     "default": null
+                  },
+                  "format": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "parquet",
+                          "geoparquet",
+                          "csv"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Format"
                   }
                 },
                 "required": [
@@ -58967,6 +59535,23 @@
                       }
                     ],
                     "default": null
+                  },
+                  "format": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "parquet",
+                          "geoparquet",
+                          "csv"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Format"
                   }
                 },
                 "required": [
@@ -59373,6 +59958,23 @@
                       }
                     ],
                     "default": null
+                  },
+                  "format": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "parquet",
+                          "geoparquet",
+                          "csv"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Format"
                   }
                 },
                 "required": [
@@ -59774,6 +60376,23 @@
                       }
                     ],
                     "default": null
+                  },
+                  "format": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "parquet",
+                          "geoparquet",
+                          "csv"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Format"
                   }
                 },
                 "required": [
@@ -60146,6 +60765,23 @@
                       }
                     ],
                     "default": null
+                  },
+                  "format": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "parquet",
+                          "geoparquet",
+                          "csv"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Format"
                   }
                 },
                 "required": [
@@ -60651,6 +61287,23 @@
                       }
                     ],
                     "default": null
+                  },
+                  "format": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "parquet",
+                          "geoparquet",
+                          "csv"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Format"
                   }
                 },
                 "required": [
@@ -61026,6 +61679,23 @@
                       }
                     ],
                     "default": null
+                  },
+                  "format": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "parquet",
+                          "geoparquet",
+                          "csv"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Format"
                   }
                 },
                 "required": [
@@ -61398,6 +62068,23 @@
                       }
                     ],
                     "default": null
+                  },
+                  "format": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "parquet",
+                          "geoparquet",
+                          "csv"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Format"
                   }
                 },
                 "required": [
@@ -61966,6 +62653,23 @@
                       }
                     ],
                     "default": null
+                  },
+                  "format": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "parquet",
+                          "geoparquet",
+                          "csv"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Format"
                   }
                 },
                 "required": [
@@ -62471,6 +63175,23 @@
                       }
                     ],
                     "default": null
+                  },
+                  "format": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "parquet",
+                          "geoparquet",
+                          "csv"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Format"
                   }
                 },
                 "required": [
@@ -63416,6 +64137,23 @@
                       }
                     ],
                     "default": null
+                  },
+                  "format": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "parquet",
+                          "geoparquet",
+                          "csv"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Format"
                   }
                 },
                 "required": [
@@ -63916,6 +64654,23 @@
                       }
                     ],
                     "default": null
+                  },
+                  "format": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "parquet",
+                          "geoparquet",
+                          "csv"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Format"
                   }
                 },
                 "required": [
@@ -64257,6 +65012,23 @@
                       }
                     ],
                     "default": null
+                  },
+                  "format": {
+                    "anyOf": [
+                      {
+                        "enum": [
+                          "parquet",
+                          "geoparquet",
+                          "csv"
+                        ],
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Format"
                   }
                 },
                 "required": [
@@ -88501,6 +89273,213 @@
                 "schema": {
                   "type": "string",
                   "const": "Cookie, Authorization"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Versioned error; see README",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error",
+                    "code",
+                    "message",
+                    "remedy",
+                    "docs",
+                    "request_id"
+                  ],
+                  "description": "Every refusal (E31): error is kept for existing clients and equals message; request_id equals the X-Request-Id header.",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "The stable machine-readable code; see docs"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "remedy": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "What the caller can do next"
+                    },
+                    "docs": {
+                      "type": "string",
+                      "description": "The code's anchor on the errors reference page, /docs/reference/errors/#<code>"
+                    },
+                    "request_id": {
+                      "type": "string",
+                      "description": "Equals the X-Request-Id response header; quote it when reporting a failure"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Busy: retry the same exact request after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "error",
+                    "code",
+                    "message",
+                    "remedy",
+                    "docs",
+                    "request_id"
+                  ],
+                  "description": "Every refusal (E31): error is kept for existing clients and equals message; request_id equals the X-Request-Id header.",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "The stable machine-readable code; see docs"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "remedy": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "What the caller can do next"
+                    },
+                    "docs": {
+                      "type": "string",
+                      "description": "The code's anchor on the errors reference page, /docs/reference/errors/#<code>"
+                    },
+                    "request_id": {
+                      "type": "string",
+                      "description": "Equals the X-Request-Id response header; quote it when reporting a failure"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "grant",
+          "session"
+        ]
+      }
+    },
+    "/api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/export": {
+      "get": {
+        "description": "E58b: an exact revision as a Parquet, GeoParquet or CSV file, written from its stored representations",
+        "parameters": [
+          {
+            "name": "project",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "asset",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "revision",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "parquet",
+                "geoparquet",
+                "csv"
+              ],
+              "default": "parquet"
+            },
+            "description": "GeoParquet 1.1.0 for point sets only."
+          },
+          {
+            "name": "curves",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "A LAS log: the curves to export (repeat the parameter); every stored curve when omitted."
+          }
+        ],
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The file",
+            "headers": {
+              "Content-Disposition": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Content-SHA256": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "SHA-256 of the body"
+              },
+              "X-Ophiolite-Revision": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The exact revision the file was written from"
+              }
+            },
+            "content": {
+              "application/vnd.apache.parquet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
                 }
               }
             }
