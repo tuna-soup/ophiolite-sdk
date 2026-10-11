@@ -227,8 +227,16 @@ def parser():
     curves.add_argument('--level',type=int,help='0 = every sample (exact); 1 to 17 = blocks of up to 2^level samples');curves.add_argument('--rows',type=int,help='Instead of --level: at most this many rows (1 to 2048)')
     curves.add_argument('--max-pages',type=int,default=64);curves.add_argument('--output',type=Path,help='Write the window as JSON to this new file')
     sources=project(sub.add_parser('sources',help='Your upstream source selections: list them, describe one (costs one full read), or read its rows'))
-    sources.add_argument('action',choices=['list','describe','read'])
-    sources.add_argument('id',nargs='?',help='describe/read: the selection id from `sources list`')
+    sources.add_argument('action',choices=['list','describe','read','browse','import'])
+    sources.add_argument('id',nargs='?',help='describe/read: the selection id from `sources list`; browse/import: the storage connection id')
+    # E59: a storage connection's folder, read with your own sign-in (the deployment holds it; no key is taken here)
+    sources.add_argument('--prefix',help='browse/import: the folder, for example nlog/tubbergen-mander-2/ (default: the folder the connection may read)')
+    sources.add_argument('--cursor',help='browse: the next_cursor of the previous page')
+    sources.add_argument('--keep-copy',action='store_true',help='import: add each file as a copy (the organisation must allow it) instead of reading it from your storage each time')
+    sources.add_argument('--attribution',help='import: where these files come from (shown with every file)')
+    sources.add_argument('--audience',action='append',default=[],metavar='PERSON',help='import --keep-copy: a project member who may later be given access (repeat)')
+    sources.add_argument('--rights-confirmed',action='store_true',help='import: I have permission to use these files, derive results and share within this audience')
+    sources.add_argument('--report',type=Path,help='import: write the report to this .csv (or .json) file')
     sources.add_argument('--original',action='store_true',help='read: every source column as given, not the mapped view')
     sources.add_argument('--expect-revision',help='describe/read: refuse (exit 4, nothing written) unless this is the revision returned')
     sources.add_argument('--out',type=Path,help='read: write the rows to this .csv or .json file instead of standard output. The file is your own copy: it is not shared, kept up to date or checked again')
@@ -577,7 +585,10 @@ def _journey(args,client):
 
 
 def _sources(args,client):
-    """E50a: sources list | describe ID | read ID (--original, --expect-revision, --out FILE [--force])."""
+    """E50a: sources list | describe ID | read ID (--original, --expect-revision, --out FILE [--force]); E59: browse | import CONNECTION."""
+    storage=(args.prefix,args.cursor,args.keep_copy,args.attribution,args.audience,args.rights_confirmed,args.report)
+    if args.action in ('browse','import'):return _storage(args,client)
+    if any(storage):raise Refused('Only browse and import take --prefix, --cursor, --keep-copy, --attribution, --audience, --rights-confirmed or --report.')
     if args.action=='list':
         if args.id or args.original or args.expect_revision or args.out or args.force or args.require_all_columns:raise Refused('sources list takes no id or read options.')
         from .models.api import SourceSelectionsPage
@@ -613,6 +624,34 @@ def _sources(args,client):
     _write_atomic(out,_csv(columns,rows) if out.suffix.lower()=='.csv' else json.dumps({'source':about,'rows':rows},indent=2,default=str)+'\n',args.force)
     return done(args,'Wrote %d rows of %s (revision %s, %s) to %s. This copy is yours; it is not shared or kept up to date.' % (len(rows),snapshot.name,snapshot.revision,snapshot.crs,out),
                 {'source':about,'out':str(out)})
+
+
+def _storage(args,client):
+    """E59: sources browse CONNECTION [--prefix P] [--cursor C] | import CONNECTION [--prefix P] [--keep-copy] --attribution A
+    --rights-confirmed [--report FILE]. An import exits as upload does: 0 when every file is added or already here (and none
+    was left out), 4 otherwise, with the report written."""
+    if not args.id:raise Refused('Give the storage connection id: ophiolite sources %s CONNECTION.' % args.action)
+    if args.original or args.expect_revision or args.out or args.force or args.require_all_columns:raise Refused('%s takes none of the read options.' % args.action)
+    if args.action=='browse':
+        if args.keep_copy or args.attribution or args.audience or args.rights_confirmed or args.report:raise Refused('browse takes only --prefix and --cursor.')
+        page=client.browse(args.id,args.prefix,args.cursor)
+        lines=['%s/' % f.rstrip('/') for f in page['folders']]+['%s  %d bytes  %s%s' % (i['key'],i['size'],i['profile'] or 'not a kind Ophiolite reads',
+               '' if i['read_in_place'] or not i['profile'] else ' (copy only)') for i in page['items']]
+        if page.get('left_out_sentence'):lines.append(page['left_out_sentence'])
+        if page['next_cursor']:lines.append('More files: --cursor %s' % page['next_cursor'])
+        return done(args,'\n'.join(lines) or 'This folder is empty.',{'connection_id':args.id,'prefix':args.prefix,'page':page})
+    if args.cursor:raise Refused('import reads every page itself; it takes no --cursor.')
+    if not args.attribution:raise Refused('Give --attribution: where these files come from.')
+    if not args.rights_confirmed:raise Refused('Confirm with --rights-confirmed that you may use these files, derive results and share them within the audience.')
+    def progress(report):
+        if not args.json:print('Adding files... %d of %d.' % (sum(v for k,v in report.counts.items() if k!='not-sent'),report.view['files']),file=sys.stderr,flush=True)
+    report=client.upload_runs.import_storage(args.id,args.prefix,keep_copy=args.keep_copy,attribution=args.attribution,audience=args.audience,rights_confirmed=True,progress=progress)
+    if args.report:report.save(args.report)
+    left=['Not read from your storage: %s: %s' % (key,sentence) for key,sentence in report.left_out]
+    done(args,'\n'.join([report.text()]+left)+('\nReport written to %s' % args.report if args.report else ''),
+         {'upload':report.view,'left_out':[{'key':k,'sentence':s} for k,s in report.left_out]})
+    report.exit_code=0 if report.ok and not report.left_out else EXIT['conflict']
+    return report
 
 
 def _counted(counts):
