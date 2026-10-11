@@ -88287,7 +88287,7 @@
       "ContractsRegistry": {
         "x-ophiolite": {
           "id": "ophiolite.contracts-registry/1",
-          "version": "1.5.0",
+          "version": "1.6.0",
           "lifecycle": "preview"
         },
         "title": "ContractsRegistry",
@@ -88497,7 +88497,8 @@
                     "policy",
                     "calculation",
                     "reader-registry",
-                    "table-target"
+                    "table-target",
+                    "procedure"
                   ]
                 },
                 "path": {

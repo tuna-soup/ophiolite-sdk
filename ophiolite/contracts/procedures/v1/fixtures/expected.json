@@ -1,0 +1,433 @@
+{
+  "members": {
+    "process": [
+      "procedure.json",
+      "procedure.py"
+    ],
+    "read": [
+      "procedure.json",
+      "reader/__init__.py",
+      "reader/main.py"
+    ],
+    "source": [
+      "procedure.json",
+      "procedure.py"
+    ],
+    "send": [
+      "procedure.json",
+      "procedure.py"
+    ],
+    "check": [
+      "procedure.json",
+      "procedure.py"
+    ]
+  },
+  "cases": {
+    "unknown-field-runner": {
+      "base": "process",
+      "code": "unknown-field",
+      "field": "/runner",
+      "structural": true,
+      "sentence": "Not valid: the procedure has a field Ophiolite does not know; check its spelling."
+    },
+    "digest-typed": {
+      "base": "process",
+      "code": "digest-field",
+      "field": "/digest",
+      "structural": true,
+      "sentence": "Not valid: Ophiolite works out the code's fingerprint itself; remove it from procedure.json."
+    },
+    "missing-label": {
+      "base": "process",
+      "code": "missing-field",
+      "field": "/label",
+      "structural": true,
+      "sentence": "Not valid: the procedure is missing a required field."
+    },
+    "wrong-schema": {
+      "base": "process",
+      "code": "wrong-schema",
+      "field": "/schema",
+      "structural": true,
+      "sentence": "Not valid: procedure.json must say it is an Ophiolite procedure, version 1."
+    },
+    "bad-name": {
+      "base": "process",
+      "code": "bad-name",
+      "field": "/name",
+      "structural": true,
+      "sentence": "Not valid: the procedure's technical name may use lowercase letters, digits and hyphens only."
+    },
+    "label-kebab": {
+      "base": "process",
+      "code": "unreadable-label",
+      "field": "/label",
+      "structural": false,
+      "sentence": "Not valid: the procedure needs a readable label, for example \"Depth shift\"."
+    },
+    "label-email": {
+      "base": "process",
+      "code": "unreadable-label",
+      "field": "/label",
+      "structural": false,
+      "sentence": "Not valid: the procedure needs a readable label, for example \"Depth shift\"."
+    },
+    "label-dotted": {
+      "base": "process",
+      "code": "unreadable-label",
+      "field": "/label",
+      "structural": false,
+      "sentence": "Not valid: the procedure needs a readable label, for example \"Depth shift\"."
+    },
+    "label-engineering": {
+      "base": "process",
+      "code": "engineering-word",
+      "field": "/label",
+      "structural": false,
+      "sentence": "Not valid: the procedure uses a word meant for technical details; describe it in everyday words."
+    },
+    "version-zero": {
+      "base": "process",
+      "code": "bad-version",
+      "field": "/version",
+      "structural": true,
+      "sentence": "Not valid: the version must be a whole number from 1 to 1000000."
+    },
+    "version-boolean": {
+      "base": "process",
+      "code": "bad-version",
+      "field": "/version",
+      "structural": true,
+      "sentence": "Not valid: the version must be a whole number from 1 to 1000000."
+    },
+    "version-label-snake": {
+      "base": "process",
+      "code": "unreadable-label",
+      "field": "/version_label",
+      "structural": false,
+      "sentence": "Not valid: the version label needs a readable label, for example \"Depth shift\"."
+    },
+    "version-label-engineering": {
+      "base": "process",
+      "code": "engineering-word",
+      "field": "/version_label",
+      "structural": false,
+      "sentence": "Not valid: the version label uses a word meant for technical details; describe it in everyday words."
+    },
+    "step-unknown": {
+      "base": "process",
+      "code": "bad-step",
+      "field": "/step",
+      "structural": true,
+      "sentence": "Not valid: the step must be one of read, source, process, send or check."
+    },
+    "inputs-empty": {
+      "base": "process",
+      "code": "bad-list",
+      "field": "/inputs",
+      "structural": true,
+      "sentence": "Not valid: the procedure must be a list within its limit."
+    },
+    "read-with-version-input": {
+      "base": "process",
+      "code": "wrong-input-class",
+      "field": "/inputs/0/class",
+      "structural": false,
+      "sentence": "Not valid: input 1 is not an input this step can read."
+    },
+    "process-with-file-input": {
+      "base": "read",
+      "code": "wrong-input-class",
+      "field": "/inputs/0/class",
+      "structural": false,
+      "sentence": "Not valid: input 1 is not an input this step can read."
+    },
+    "read-two-inputs": {
+      "base": "read",
+      "code": "wrong-input-count",
+      "field": "/inputs",
+      "structural": false,
+      "sentence": "Not valid: this step reads a different number of inputs."
+    },
+    "process-output-segy": {
+      "base": "process",
+      "code": "kind-not-allowed",
+      "field": "/outputs/0/kind",
+      "structural": false,
+      "sentence": "Not valid: output 1 names a type of data this step cannot use."
+    },
+    "read-output-synthetic": {
+      "base": "read",
+      "code": "kind-not-allowed",
+      "field": "/outputs/0/kind",
+      "structural": false,
+      "sentence": "Not valid: output 1 names a type of data this step cannot use."
+    },
+    "process-input-segy": {
+      "base": "process",
+      "code": "kind-not-allowed",
+      "field": "/inputs/0/kinds",
+      "structural": false,
+      "sentence": "Not valid: input 1 names a type of data this step cannot use."
+    },
+    "send-input-volume": {
+      "base": "send",
+      "code": "kind-not-allowed",
+      "field": "/inputs/0/kinds",
+      "structural": false,
+      "sentence": "Not valid: input 1 names a type of data this step cannot use."
+    },
+    "send-version-output": {
+      "base": "send",
+      "code": "wrong-output-class",
+      "field": "/outputs/0/class",
+      "structural": false,
+      "sentence": "Not valid: output 1 is not something this step can make."
+    },
+    "check-delivery-output": {
+      "base": "check",
+      "code": "wrong-output-class",
+      "field": "/outputs/0/class",
+      "structural": false,
+      "sentence": "Not valid: output 1 is not something this step can make."
+    },
+    "check-two-versions": {
+      "base": "check",
+      "code": "wrong-input-count",
+      "field": "/inputs",
+      "structural": false,
+      "sentence": "Not valid: this step reads a different number of inputs."
+    },
+    "check-reference-url": {
+      "base": "check",
+      "code": "wrong-input-class",
+      "field": "/inputs/1/from",
+      "structural": true,
+      "sentence": "Not valid: input 2 is not an input this step can read."
+    },
+    "send-two-deliveries": {
+      "base": "send",
+      "code": "wrong-output-count",
+      "field": "/outputs",
+      "structural": false,
+      "sentence": "Not valid: this step makes a different number of outputs."
+    },
+    "delivery-with-kind": {
+      "base": "send",
+      "code": "unknown-field",
+      "field": "/outputs/0/kind",
+      "structural": false,
+      "sentence": "Not valid: output 1 has a field Ophiolite does not know; check its spelling."
+    },
+    "cardinality-some": {
+      "base": "process",
+      "code": "bad-cardinality",
+      "field": "/inputs/0/cardinality",
+      "structural": true,
+      "sentence": "Not valid: input 1 must say whether it takes one item or many."
+    },
+    "head-pattern-regex": {
+      "base": "read",
+      "code": "regex-pattern",
+      "field": "/inputs/0/signature/head_patterns/0",
+      "structural": false,
+      "sentence": "Not valid: input 1 gives a pattern that is not plain text; patterns are literal text, optionally starting with ^."
+    },
+    "head-pattern-double-anchor": {
+      "base": "read",
+      "code": "regex-pattern",
+      "field": "/inputs/0/signature/head_patterns/0",
+      "structural": false,
+      "sentence": "Not valid: input 1 gives a pattern that is not plain text; patterns are literal text, optionally starting with ^."
+    },
+    "max-head-bytes-65537": {
+      "base": "read",
+      "code": "bad-signature",
+      "field": "/inputs/0/signature/max_head_bytes",
+      "structural": true,
+      "sentence": "Not valid: input 1 needs file extensions such as \".las\", text the file starts with, and how many bytes to look at (at most 65536)."
+    },
+    "extension-without-dot": {
+      "base": "read",
+      "code": "bad-signature",
+      "field": "/inputs/0/signature/extensions",
+      "structural": true,
+      "sentence": "Not valid: input 1 needs file extensions such as \".las\", text the file starts with, and how many bytes to look at (at most 65536)."
+    },
+    "source-label-credential": {
+      "base": "source",
+      "code": "secret-in-label",
+      "field": "/inputs/0/label",
+      "structural": false,
+      "sentence": "Not valid: input 1 must name the system in words, without an address or credentials."
+    },
+    "source-config-key": {
+      "base": "source",
+      "code": "bad-identifier",
+      "field": "/inputs/0/config_keys/0",
+      "structural": true,
+      "sentence": "Not valid: input 1 needs a technical name of lowercase letters, digits and underscores, starting with a letter."
+    },
+    "slot-label-snake": {
+      "base": "process",
+      "code": "unreadable-label",
+      "field": "/inputs/0/label",
+      "structural": false,
+      "sentence": "Not valid: input 1 needs a readable label, for example \"Depth shift\"."
+    },
+    "role-label-engineering": {
+      "base": "process",
+      "code": "engineering-word",
+      "field": "/outputs/0/label",
+      "structural": false,
+      "sentence": "Not valid: output 1 uses a word meant for technical details; describe it in everyday words."
+    },
+    "setting-label-snake": {
+      "base": "process",
+      "code": "unreadable-label",
+      "field": "/settings/0/label",
+      "structural": false,
+      "sentence": "Not valid: setting 1 needs a readable label, for example \"Depth shift\"."
+    },
+    "setting-label-engineering": {
+      "base": "process",
+      "code": "engineering-word",
+      "field": "/settings/0/label",
+      "structural": false,
+      "sentence": "Not valid: setting 1 uses a word meant for technical details; describe it in everyday words."
+    },
+    "choice-label-snake": {
+      "base": "process",
+      "code": "unreadable-label",
+      "field": "/settings/1/choices/0/label",
+      "structural": false,
+      "sentence": "Not valid: choice 1 of setting 2 needs a readable label, for example \"Depth shift\"."
+    },
+    "choice-label-engineering": {
+      "base": "process",
+      "code": "engineering-word",
+      "field": "/settings/1/choices/1/label",
+      "structural": false,
+      "sentence": "Not valid: choice 2 of setting 2 uses a word meant for technical details; describe it in everyday words."
+    },
+    "unit-outside-list": {
+      "base": "process",
+      "code": "bad-unit",
+      "field": "/settings/0/unit",
+      "structural": false,
+      "sentence": "Not valid: setting 1 has a unit Ophiolite does not list; leave the unit out when it is unknown."
+    },
+    "unit-empty": {
+      "base": "process",
+      "code": "bad-unit",
+      "field": "/settings/0/unit",
+      "structural": false,
+      "sentence": "Not valid: setting 1 has a unit Ophiolite does not list; leave the unit out when it is unknown."
+    },
+    "default-outside-bounds": {
+      "base": "process",
+      "code": "bad-default",
+      "field": "/settings/0/default",
+      "structural": false,
+      "sentence": "Not valid: setting 1 has a default value that does not fit it."
+    },
+    "bounds-reversed": {
+      "base": "process",
+      "code": "bad-bounds",
+      "field": "/settings/0/maximum",
+      "structural": false,
+      "sentence": "Not valid: setting 1 has limits that are not numbers in order."
+    },
+    "choice-default-is-label": {
+      "base": "process",
+      "code": "bad-default",
+      "field": "/settings/1/default",
+      "structural": false,
+      "sentence": "Not valid: setting 2 has a default value that does not fit it."
+    },
+    "choice-only-one": {
+      "base": "process",
+      "code": "bad-choices",
+      "field": "/settings/1/choices",
+      "structural": true,
+      "sentence": "Not valid: setting 2 needs at least two choices, each with a distinct value and a readable label."
+    },
+    "integer-default-fraction": {
+      "base": "process",
+      "code": "bad-default",
+      "field": "/settings/2/default",
+      "structural": false,
+      "sentence": "Not valid: setting 3 has a default value that does not fit it."
+    },
+    "boolean-default-text": {
+      "base": "process",
+      "code": "bad-default",
+      "field": "/settings/4/default",
+      "structural": false,
+      "sentence": "Not valid: setting 5 has a default value that does not fit it."
+    },
+    "type-float": {
+      "base": "process",
+      "code": "bad-type",
+      "field": "/settings/0/type",
+      "structural": true,
+      "sentence": "Not valid: setting 1 needs a type: number, integer, text, choice or yes/no."
+    },
+    "setting-unknown-field": {
+      "base": "process",
+      "code": "unknown-field",
+      "field": "/settings/0/units",
+      "structural": true,
+      "sentence": "Not valid: setting 1 has a field Ophiolite does not know; check its spelling."
+    },
+    "duplicate-slot": {
+      "base": "process",
+      "code": "duplicate-identifier",
+      "field": "/inputs/1/slot",
+      "structural": false,
+      "sentence": "Not valid: input 2 repeats a technical name used earlier."
+    },
+    "duplicate-role": {
+      "base": "process",
+      "code": "duplicate-identifier",
+      "field": "/outputs/1/role",
+      "structural": false,
+      "sentence": "Not valid: output 2 repeats a technical name used earlier."
+    },
+    "duplicate-key": {
+      "base": "process",
+      "code": "duplicate-identifier",
+      "field": "/settings/1/key",
+      "structural": false,
+      "sentence": "Not valid: setting 2 repeats a technical name used earlier."
+    },
+    "entry-missing-file": {
+      "base": "process",
+      "code": "missing-file",
+      "field": "/entry",
+      "structural": false,
+      "sentence": "Not valid: the entry names a Python file that is not in this folder."
+    },
+    "entry-no-function": {
+      "base": "process",
+      "code": "bad-entry",
+      "field": "/entry",
+      "structural": true,
+      "sentence": "Not valid: the entry must name a Python file of this folder and a function in it, as module:function."
+    },
+    "nan-default": {
+      "base": "process",
+      "code": "not-json",
+      "field": "",
+      "structural": false,
+      "sentence": "Not valid: procedure.json is not readable JSON."
+    },
+    "repeated-key": {
+      "base": "process",
+      "code": "not-json",
+      "field": "",
+      "structural": false,
+      "sentence": "Not valid: procedure.json is not readable JSON."
+    }
+  }
+}

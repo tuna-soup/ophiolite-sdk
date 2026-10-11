@@ -161,3 +161,47 @@ SECTION = dict(domain='time', first_sample=0, sample_interval=0.001, horizontal=
 def test_each_missing_declaration_is_refused_with_its_sentence(call, sentence):
     with pytest.raises(ValidationFailed) as error: call()
     assert error.value.violations == (sentence,)
+
+
+# E105a C3: a well location, the twelfth kind a procedure may make (R24)
+
+def test_a_well_location_is_written_as_the_reader_reads_it():
+    from ophiolite.typed import WellLocation
+    written = WellLocation.write(155000.5, 463000, crs='EPSG:28992', elevation_reference='KB')
+    assert written.bytes == b'{"crs":"EPSG:28992","elevation_reference":"KB","x":155000.5,"y":463000}\n'
+    assert (written.profile, written.declared, written.filename) == ('well-location/1', {}, 'location.json')
+    context, data, _ = read_back(written)
+    assert (context['crs'], context['elevation_reference'], data) == ('EPSG:28992', 'KB', {'x': 155000.5, 'y': 463000.0})
+    unknown = writers.write_location(-0.1, 1e-7, crs='unknown', elevation_reference='unknown')
+    assert unknown.bytes == b'{"crs":"unknown","elevation_reference":"unknown","x":-0.1,"y":1e-07}\n' and read_back(unknown)[1] == {'x': -0.1, 'y': 1e-07}
+
+
+@pytest.mark.parametrize('crs', ['OGC:CRS84', 'EPSG:4326'])
+@pytest.mark.parametrize('x,y', [(-180, -90), (180, 90), (-180, 90), (180, -90), (0, 0)])
+def test_geographic_bounds_are_accepted_up_to_the_edge(crs, x, y):
+    written = writers.write_location(x, y, crs=crs, elevation_reference='MSL')
+    assert read_back(written)[1] == {'x': float(x), 'y': float(y)}
+
+
+@pytest.mark.parametrize('crs', ['OGC:CRS84', 'EPSG:4326'])
+@pytest.mark.parametrize('x,y', [(180.000001, 0), (-180.000001, 0), (0, 90.000001), (0, -90.000001)])
+def test_geographic_bounds_are_refused_just_outside(crs, x, y):
+    with pytest.raises(ValidationFailed) as error: writers.write_location(x, y, crs=crs, elevation_reference='MSL')
+    assert error.value.violations == ('Longitude and latitude are outside their range for this coordinate reference system.',)
+    from asset_connectors.typed_reader import read_typed  # the reader refuses the same file
+    with pytest.raises(Exception, match='outside their range'):
+        read_typed('well-location/1', ('{"crs":"%s","elevation_reference":"MSL","x":%r,"y":%r}' % (crs, x, y)).encode(), {})
+
+
+@pytest.mark.parametrize('call,sentence', [
+    (lambda: writers.write_location(1, 2, elevation_reference='KB'), 'Declare the crs (write "unknown" when it is not known); nothing is inferred.'),
+    (lambda: writers.write_location(1, 2, crs='EPSG:28992'), 'Declare the elevation reference (write "unknown" when it is not known); nothing is inferred.'),
+    (lambda: writers.write_location(float('nan'), 2, crs='EPSG:28992', elevation_reference='KB'), 'A coordinate must be finite.'),
+    (lambda: writers.write_location(1, float('inf'), crs='EPSG:28992', elevation_reference='KB'), 'A coordinate must be finite.'),
+    (lambda: writers.write_location(True, 2, crs='EPSG:28992', elevation_reference='KB'), 'A coordinate must be a number.'),
+    (lambda: writers.write_location('1', 2, crs='RD New', elevation_reference='KB'), 'State the coordinate reference system as EPSG:<code>, OGC:CRS84 or unknown.'),
+    (lambda: writers.write_location(1, 2, crs='EPSG:28992', elevation_reference='DF'), 'Choose the elevation reference from: unknown, GL, KB, MSL.'),
+])
+def test_a_location_the_reader_would_refuse_is_refused_with_its_sentence(call, sentence):
+    with pytest.raises(ValidationFailed) as error: call()
+    assert error.value.violations == (sentence,)
