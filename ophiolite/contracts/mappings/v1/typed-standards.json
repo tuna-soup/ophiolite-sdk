@@ -216,6 +216,16 @@
       "osdu": "none: a file format; its normalized profile is ophiolite.feature-set/1",
       "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
       "normalized_profile": "ophiolite.feature-set/1"
+    },
+    {
+      "profile": "ophiolite.series-declaration/1",
+      "osdu": "work-product-component--ProductionValues 2.0.0 (a volume or a rate: ProductionMetricValues with PropertyID Volume or Rate, UnitOfMeasureID, NominalPeriodID Month; the table stays the bulk data)",
+      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+    },
+    {
+      "profile": "ophiolite.series-view/1",
+      "osdu": "work-product-component--ProductionValues 2.0.0 (StartDateTime, EndDateTime and NominalPeriodID Month over ProductionMetricValues; read through the table, never stored)",
+      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
     }
   ],
   "licences": "The standards are referenced by name only; no schema text is copied."

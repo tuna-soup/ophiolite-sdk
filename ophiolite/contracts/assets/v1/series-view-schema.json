@@ -1,0 +1,380 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/assets/v1/series-view-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.series-view/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "AssetSubject": {
+      "additionalProperties": false,
+      "description": "A kept table file (E58b), read through an exact revision of the asset.",
+      "properties": {
+        "kind": {
+          "const": "asset",
+          "title": "Kind",
+          "type": "string"
+        },
+        "asset_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "asset_id"
+      ],
+      "title": "AssetSubject",
+      "type": "object"
+    },
+    "EntityAbout": {
+      "additionalProperties": false,
+      "description": "A label naming a project well or wellbore; not an association (E66, E62b).",
+      "properties": {
+        "kind": {
+          "enum": [
+            "well",
+            "wellbore"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "entity_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Entity Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "entity_id"
+      ],
+      "title": "EntityAbout",
+      "type": "object"
+    },
+    "NameAbout": {
+      "additionalProperties": false,
+      "description": "A declared name for a field or a group of wells.",
+      "properties": {
+        "kind": {
+          "const": "name",
+          "title": "Kind",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "text"
+      ],
+      "title": "NameAbout",
+      "type": "object"
+    },
+    "Point": {
+      "additionalProperties": false,
+      "description": "One calendar month: `v` with no `s` is a figure (zero included); `s` says why there is none.",
+      "properties": {
+        "t": {
+          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-01$",
+          "title": "T",
+          "type": "string"
+        },
+        "v": {
+          "anyOf": [
+            {
+              "maxLength": 42,
+              "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "V"
+        },
+        "s": {
+          "anyOf": [
+            {
+              "enum": [
+                "reported-gap",
+                "absent"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "S"
+        }
+      },
+      "required": [
+        "t"
+      ],
+      "title": "Point",
+      "type": "object"
+    },
+    "PointCounts": {
+      "additionalProperties": false,
+      "properties": {
+        "figures": {
+          "minimum": 0,
+          "title": "Figures",
+          "type": "integer"
+        },
+        "reported_gaps": {
+          "minimum": 0,
+          "title": "Reported Gaps",
+          "type": "integer"
+        },
+        "absent": {
+          "minimum": 0,
+          "title": "Absent",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "figures",
+        "reported_gaps",
+        "absent"
+      ],
+      "title": "PointCounts",
+      "type": "object"
+    },
+    "Range": {
+      "additionalProperties": false,
+      "description": "Inclusive calendar months: FROM and TO are both in the series; rows outside are left out and counted.",
+      "properties": {
+        "from": {
+          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$",
+          "title": "From",
+          "type": "string"
+        },
+        "to": {
+          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$",
+          "title": "To",
+          "type": "string"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "title": "Range",
+      "type": "object"
+    },
+    "RowCounts": {
+      "additionalProperties": false,
+      "properties": {
+        "read": {
+          "minimum": 0,
+          "title": "Read",
+          "type": "integer"
+        },
+        "kept": {
+          "minimum": 0,
+          "title": "Kept",
+          "type": "integer"
+        },
+        "outside_range": {
+          "minimum": 0,
+          "title": "Outside Range",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "read",
+        "kept",
+        "outside_range"
+      ],
+      "title": "RowCounts",
+      "type": "object"
+    },
+    "TableSubject": {
+      "additionalProperties": false,
+      "description": "A connected table (E50b1): its connection and key in the project.",
+      "properties": {
+        "kind": {
+          "const": "table",
+          "title": "Kind",
+          "type": "string"
+        },
+        "connection_id": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Connection Id",
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "connection_id",
+        "key"
+      ],
+      "title": "TableSubject",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "A series read through the table at TABLE_REVISION: one point per month of RANGE, sorted, each month once.",
+  "properties": {
+    "schema": {
+      "const": "ophiolite.series-view/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "subject": {
+      "discriminator": {
+        "mapping": {
+          "asset": "#/$defs/AssetSubject",
+          "table": "#/$defs/TableSubject"
+        },
+        "propertyName": "kind"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/TableSubject"
+        },
+        {
+          "$ref": "#/$defs/AssetSubject"
+        }
+      ],
+      "title": "Subject"
+    },
+    "table_revision": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Table Revision",
+      "type": "string"
+    },
+    "declaration_version": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Declaration Version"
+    },
+    "declaration_digest": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Declaration Digest",
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "volume",
+        "rate"
+      ],
+      "title": "Kind",
+      "type": "string"
+    },
+    "unit": {
+      "maxLength": 32,
+      "minLength": 1,
+      "title": "Unit",
+      "type": "string"
+    },
+    "zone": {
+      "enum": [
+        "UTC",
+        "Not stated"
+      ],
+      "title": "Zone",
+      "type": "string"
+    },
+    "period": {
+      "const": "month",
+      "title": "Period",
+      "type": "string"
+    },
+    "about": {
+      "discriminator": {
+        "mapping": {
+          "name": "#/$defs/NameAbout",
+          "well": "#/$defs/EntityAbout",
+          "wellbore": "#/$defs/EntityAbout"
+        },
+        "propertyName": "kind"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/EntityAbout"
+        },
+        {
+          "$ref": "#/$defs/NameAbout"
+        }
+      ],
+      "title": "About"
+    },
+    "column": {
+      "maxLength": 1024,
+      "minLength": 1,
+      "title": "Column",
+      "type": "string"
+    },
+    "range": {
+      "$ref": "#/$defs/Range"
+    },
+    "rows": {
+      "$ref": "#/$defs/RowCounts"
+    },
+    "counts": {
+      "$ref": "#/$defs/PointCounts"
+    },
+    "points": {
+      "items": {
+        "$ref": "#/$defs/Point"
+      },
+      "maxItems": 10000,
+      "title": "Points",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema",
+    "name",
+    "subject",
+    "table_revision",
+    "declaration_version",
+    "declaration_digest",
+    "kind",
+    "unit",
+    "zone",
+    "period",
+    "about",
+    "column",
+    "range",
+    "rows",
+    "counts",
+    "points"
+  ],
+  "title": "SeriesView",
+  "type": "object"
+}

@@ -121,6 +121,27 @@ class Source:
         not read and the coverage sentence ("The revision covers only the columns read; ...")."""
         return SourceDescription(self.read(expect_revision))
 
+    def _series_subject(self):
+        if self.profile != TABLE:
+            raise _refuse(SourceNotSupported, 'Only a SQL table read as a table (%s) is read as a series; this source is %s.' % (TABLE, self.profile),
+                          'Read it with source.read() instead.', 'source-not-supported')
+        return {'kind': 'table', 'connection_id': self.document['connection_id'], 'key': self.document['key']}
+
+    def series(self, name):
+        """E62a: the series NAME described on this table, read through this selection of yours at its reviewed revision
+        (ophiolite.series.Series); nothing is copied. A series another member described is read here with your own rows."""
+        from .series import Series, read
+        if not isinstance(name, str) or not name: raise Refused('Name the series (see source.series_list()).')
+        return Series(read(self._client, 'view', {'subject': self._series_subject(), 'name': name, 'selection_id': self.id}))
+
+    def series_list(self):
+        """E62a: the series described on this table (name, version and declaration of each), as this selection of yours
+        may read them."""
+        from .series import read
+        answer = read(self._client, 'list', {'subject': self._series_subject(), 'selection_id': self.id})
+        if not isinstance(answer, dict) or not isinstance(answer.get('series'), list): raise VerificationFailed('The series listing answered outside its documented shape.')
+        return [{'name': s['name'], 'version': s['version'], 'declaration': s['declaration']} for s in answer['series']]
+
 
 def verified_table(data):
     """(source_schema, source_rows, wells, mapping) of a decoded sql-wells/1 document, after the table checks: the

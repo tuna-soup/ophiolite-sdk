@@ -1638,6 +1638,36 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/series/list",
+    "function": "postProjectsProjectSeriesList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/series/preview",
+    "function": "postProjectsProjectSeriesPreview",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/series/retire",
+    "function": "postProjectsProjectSeriesRetire",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/series/save",
+    "function": "postProjectsProjectSeriesSave",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/series/view",
+    "function": "postProjectsProjectSeriesView",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/sources/advance",
     "function": "postProjectsProjectSourcesAdvance",
     "request": "schema",

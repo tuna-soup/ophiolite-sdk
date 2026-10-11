@@ -920,6 +920,96 @@ class HeaderPositions(Contract):
     cdp_x_byte: Annotated[int, Field(ge=1, le=237)] = Field(...)
     cdp_y_byte: Annotated[int, Field(ge=1, le=237)] = Field(...)
 
+class SeriesDeclaration(Contract):
+    name: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+    subject: Annotated[TableSubject | AssetSubject, Field(discriminator='kind')] = Field(...)
+    confirmed: Confirmed = Field(...)
+    rows: RowFilter | None = Field(...)
+    range: Range | None = Field(...)
+    when: ColumnWhen | YearMonthWhen = Field(...)
+    measure: Measure = Field(...)
+    zone: Literal['UTC', 'Not stated'] = Field(...)
+    about: Annotated[EntityAbout | NameAbout, Field(discriminator='kind')] = Field(...)
+    version: Annotated[int, Field(ge=1)] | None = Field(None)
+
+class AssetSubject(Contract):
+    kind: Literal['asset'] = Field(...)
+    asset_id: Annotated[str, Field(min_length=1, max_length=64)] = Field(...)
+
+class ColumnWhen(Contract):
+    from_: Literal['column'] = Field(..., alias='from')
+    column: Annotated[str, Field(min_length=1, max_length=1024)] = Field(...)
+    period: Literal['month'] = Field(...)
+
+class Confirmed(Contract):
+    columns_digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    schema_digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] | None = Field(None)
+    interpretation_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] | None = Field(None)
+
+class EntityAbout(Contract):
+    kind: Literal['well', 'wellbore'] = Field(...)
+    entity_id: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+
+class Measure(Contract):
+    column: Annotated[str, Field(min_length=1, max_length=1024)] = Field(...)
+    kind: Literal['volume', 'rate'] = Field(...)
+    unit: Annotated[str, Field(min_length=1, max_length=32)] = Field(...)
+
+class NameAbout(Contract):
+    kind: Literal['name'] = Field(...)
+    text: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+
+class Range(Contract):
+    from_: Annotated[str, Field(pattern='^[0-9]{4}-(0[1-9]|1[0-2])$')] = Field(..., alias='from')
+    to: Annotated[str, Field(pattern='^[0-9]{4}-(0[1-9]|1[0-2])$')] = Field(...)
+
+class RowFilter(Contract):
+    column: Annotated[str, Field(min_length=1, max_length=1024)] = Field(...)
+    equals: Annotated[str, Field(max_length=1024)] = Field(...)
+
+class TableSubject(Contract):
+    kind: Literal['table'] = Field(...)
+    connection_id: Annotated[str, Field(min_length=1, max_length=80)] = Field(...)
+    key: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+
+class YearMonthWhen(Contract):
+    from_: Literal['year-month'] = Field(..., alias='from')
+    year: Annotated[str, Field(min_length=1, max_length=1024)] = Field(...)
+    month: Annotated[str, Field(min_length=1, max_length=1024)] = Field(...)
+
+class SeriesView(Contract):
+    schema_: Literal['ophiolite.series-view/1'] = Field(..., alias='schema')
+    name: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+    subject: Annotated[TableSubject | AssetSubject, Field(discriminator='kind')] = Field(...)
+    table_revision: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+    declaration_version: Annotated[int, Field(ge=1)] | None = Field(...)
+    declaration_digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    kind: Literal['volume', 'rate'] = Field(...)
+    unit: Annotated[str, Field(min_length=1, max_length=32)] = Field(...)
+    zone: Literal['UTC', 'Not stated'] = Field(...)
+    period: Literal['month'] = Field(...)
+    about: Annotated[EntityAbout | NameAbout, Field(discriminator='kind')] = Field(...)
+    column: Annotated[str, Field(min_length=1, max_length=1024)] = Field(...)
+    range: Range = Field(...)
+    rows: RowCounts = Field(...)
+    counts: PointCounts = Field(...)
+    points: Annotated[list[Point], Field(max_length=10000)] = Field(...)
+
+class Point(Contract):
+    t: Annotated[str, Field(pattern='^[0-9]{4}-(0[1-9]|1[0-2])-01$')] = Field(...)
+    v: Annotated[str, Field(pattern='^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$', max_length=42)] | None = Field(None)
+    s: Literal['reported-gap', 'absent'] | None = Field(None)
+
+class PointCounts(Contract):
+    figures: Annotated[int, Field(ge=0)] = Field(...)
+    reported_gaps: Annotated[int, Field(ge=0)] = Field(...)
+    absent: Annotated[int, Field(ge=0)] = Field(...)
+
+class RowCounts(Contract):
+    read: Annotated[int, Field(ge=0)] = Field(...)
+    kept: Annotated[int, Field(ge=0)] = Field(...)
+    outside_range: Annotated[int, Field(ge=0)] = Field(...)
+
 class AssetSummary(Contract):
     asset_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
@@ -1954,6 +2044,21 @@ SliceAxis.model_rebuild()
 SeismicVolume.model_rebuild()
 Chunk.model_rebuild()
 HeaderPositions.model_rebuild()
+SeriesDeclaration.model_rebuild()
+AssetSubject.model_rebuild()
+ColumnWhen.model_rebuild()
+Confirmed.model_rebuild()
+EntityAbout.model_rebuild()
+Measure.model_rebuild()
+NameAbout.model_rebuild()
+Range.model_rebuild()
+RowFilter.model_rebuild()
+TableSubject.model_rebuild()
+YearMonthWhen.model_rebuild()
+SeriesView.model_rebuild()
+Point.model_rebuild()
+PointCounts.model_rebuild()
+RowCounts.model_rebuild()
 AssetSummary.model_rebuild()
 TableFile.model_rebuild()
 TableFileAnnotation.model_rebuild()

@@ -2,6 +2,7 @@
 against the installed SDK (never this checkout) in synthetic mode; its built form equals its script; the listing and
 the folders agree; and the notebooks stay out of the wheel and the sdist while `ophiolite/gallery.py` ships in the wheel."""
 import json
+import math
 import os
 from pathlib import Path
 import shutil
@@ -167,8 +168,42 @@ def test_a_spreadsheet_and_a_database_joined_joins_on_the_well_name_and_sends_no
     assert 'Hydreco: mean porosity 25.00 %' in text and 'Wintershall Noordzee: mean porosity 19.75 %' in text  # -888 left out of the mean
 
 
+DECLINE = {'qi': 27766.9, 'D': 0.02598, 'RMSE': 643.3, 'q(2025-12)': 1261.1}
+
+
+def declined(text):
+    """The fitted numbers the notebook prints, by name (exponential, log-linear; the synthetic field declines 2.6 % a month)."""
+    import re
+    fit = re.search(r'Exponential \(log-linear\): qi ([\d,.]+), D ([\d.]+)/month, RMSE ([\d,.]+), q\(2025-12\) ([\d,.]+)', text).groups()
+    return dict(zip(DECLINE, [float(v.replace(',', '')) for v in fit]))
+
+
+def assert_decline(text):
+    assert "116 of 120 months fitted; left out (zero): ['2018-09', '2019-05', '2019-06', '2025-05']" in text
+    assert "Gaps: [('2014-01', 'reported-gap')]" in text and 'Total of the months with figures: 1896095 unit not stated (partial' in text
+    assert "2014: '2014: incomplete (11 of 12 months)', 2015: '399182'" in text
+    got = declined(text)
+    assert all(abs(got[k] - v) <= 1e-3 * v for k, v in DECLINE.items()), got
+    assert abs(got['D'] - 0.026) < 5e-4 and abs(got['qi'] - 52000 * math.exp(-0.026 * 24)) < 0.01 * got['qi']  # the stated decline is recovered
+
+
+def test_production_decline_reads_the_series_and_fits_the_stated_window_synthetic(tmp_path, monkeypatch):
+    assert_decline(run('production-decline', tmp_path, monkeypatch))
+
+
+def test_production_decline_script_prints_the_evidence_fit_on_this_computer(tmp_path, monkeypatch, capsys):
+    """The percent script itself, in this environment (the template lane runs the notebook from the installed wheel)."""
+    pytest.importorskip('pandas'); pytest.importorskip('matplotlib')
+    import runpy
+    for name in [k for k in os.environ if k.startswith('OPHIOLITE_')]: monkeypatch.delenv(name)
+    monkeypatch.chdir(tmp_path)
+    runpy.run_path(str(ROOT / 'notebooks' / 'production-decline' / 'notebook.py'), run_name='__main__')
+    assert_decline(capsys.readouterr().out)
+    assert sorted(p.name for p in tmp_path.iterdir()) == ['production-decline.png']
+
+
 def test_every_entry_is_listed_built_and_described():
-    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'grids-and-gis-files', 'how-was-this-made', 'open-it-here', 'a-spreadsheet-becomes-wells-and-tops', 'layers-for-a-gis', 'a-spreadsheet-and-a-database-joined']
+    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'grids-and-gis-files', 'how-was-this-made', 'open-it-here', 'a-spreadsheet-becomes-wells-and-tops', 'layers-for-a-gis', 'a-spreadsheet-and-a-database-joined', 'production-decline']
     for entry in GALLERY['notebooks']:
         assert set(entry) == {'slug', 'title', 'sentence', 'modes', 'data'} and entry['modes'] == ['synthetic', 'live']
         script = (ROOT / 'notebooks' / entry['slug'] / 'notebook.py').read_text()

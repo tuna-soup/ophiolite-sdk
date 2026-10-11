@@ -7,7 +7,7 @@ are the declared ones and "unknown" stays unknown. Importing this module does
 not contact a server.
 """
 import math
-from .errors import Refused
+from .errors import Refused, VerificationFailed
 from .transform import vertical_depth as _vertical_depth
 from . import sources as _sources  # E58b: a kept table is read with the frame code of tables read as tables
 
@@ -515,6 +515,17 @@ class Table(TypedData):
         client = getattr(self, '_client', None)
         if client is None: raise Refused('This table was not read from a server; read it with client.read_data(asset, revision).')
         return client.export_file(self.asset_id, self.revision, destination, format=format)
+
+    def series(self, name):
+        """E62a: the series NAME described on this kept table, read at this exact revision (ophiolite.series.Series)."""
+        from .series import Series, read
+        client = getattr(self, '_client', None)
+        if client is None: raise Refused('This table was not read from a server; read it with client.read_data(asset, revision).')
+        if not isinstance(name, str) or not name: raise Refused('Name the series.')
+        answer = read(client, 'view', {'subject': {'kind': 'asset', 'asset_id': self.asset_id}, 'name': name, 'revision': self.revision})
+        series = Series(answer)
+        if series.revision != self.revision: raise VerificationFailed('The series was read at another revision than this table; nothing was read.')
+        return series
 
     def __repr__(self):
         return '<Table %d rows, %d columns read%s, %s>' % (len(self.rows), len(self.read_columns),

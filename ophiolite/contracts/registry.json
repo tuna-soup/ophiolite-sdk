@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.31.0",
+  "version": "1.32.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -210,6 +210,22 @@
       "path": "assets/v1/table-file-schema.json",
       "title": "TableFile",
       "description": "A table file kept as it is (E58b): the normalized content read from the exact original under its table-interpretation.json, whose SHA-256 it names: every column, the key, the declarations and the rows in file order with their source rows."
+    },
+    {
+      "id": "ophiolite.series-declaration/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/series-declaration-schema.json",
+      "title": "SeriesDeclaration",
+      "description": "How a table reads as measurements over time (E62a): the table, the row filter, the month column or year and month columns, the measured column with its kind (volume or rate) and unit, the inclusive range and what the series is about; shared per table and project."
+    },
+    {
+      "id": "ophiolite.series-view/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/series-view-schema.json",
+      "title": "SeriesView",
+      "description": "A series read through its table, never stored (E62a): one point per month, each a figure as canonical decimal text, a reported gap or an absent month, with the counts of rows kept, filtered and outside the range."
     },
     {
       "id": "ophiolite.wavelet/1",
@@ -770,6 +786,18 @@
       "kind": "vocabulary",
       "path": "connectors/v1/contract.json",
       "title": "Connector semantics vocabulary; copied byte for byte into Connectors and pinned there by digest"
+    },
+    {
+      "id": "ophiolite.series-rules/1",
+      "kind": "vocabulary",
+      "path": "series/v1/series-rules.json",
+      "title": "Time series rules: kinds, operations, refusal sentences, bounds and OSDU names (E62a)"
+    },
+    {
+      "id": "ophiolite.fixture/series/series-vectors.json/1",
+      "kind": "fixture",
+      "path": "series/v1/series-vectors.json",
+      "title": "E62a series vectors: canonical decimal text, exact sums, day-weighted averages, day counts, the operations matrix and year cases"
     },
     {
       "id": "ophiolite.fixture/scientific/well-curve.json/1",

@@ -236,6 +236,12 @@ def parser():
     sources.add_argument('--out',type=Path,help='read: write the rows to this .csv or .json file instead of standard output. The file is your own copy: it is not shared, kept up to date or checked again')
     sources.add_argument('--force',action='store_true',help='read --out: replace an existing file')
     sources.add_argument('--require-all-columns',action='store_true',help='read: refuse (nothing written) when a column of the table is not read')
+    series=project(sub.add_parser('series',help='A table read as measurements over time: list the series described on one of your source selections, or read one month by month'))  # E62a
+    series.add_argument('action',choices=['list','read'])
+    series.add_argument('id',help='the selection id from `sources list`')
+    series.add_argument('name',nargs='?',help='read: the name of the series (see `series list ID`)')
+    series.add_argument('--out',type=Path,help='read: write month,value,state to this .csv file instead of standard output. The file is your own copy: it is not shared or kept up to date')
+    series.add_argument('--force',action='store_true',help='read --out: replace an existing file')
     orgs=project(sub.add_parser('org-connections',help="Your organisation's database connections that you use or administer, with your own readiness"))
     orgs.add_argument('action',choices=['list']);orgs.add_argument('--organization',required=True,help='The organisation id')
     # E94: how a result was made, what changed, what depends on it, and making it again
@@ -565,6 +571,8 @@ def _journey(args,client):
     if args.command=='remake':return _remake(args,client)
     if args.command=='sources':
         return _sources(args,client)
+    if args.command=='series':
+        return _series(args,client)
     if args.command=='org-connections':  # E39: projectless; no sign-in or password is ever answered
         rows=client.org_connections(args.organization)
         return done(args,'\n'.join('%s  %s: %s' % (r['id'],r['name'],(r.get('readiness') or {}).get('code') or ('ready' if r['you']['use'] else 'administered')) for r in rows)
@@ -624,6 +632,29 @@ def _sources(args,client):
     _write_atomic(out,_csv(columns,rows) if out.suffix.lower()=='.csv' else json.dumps({'source':about,'rows':rows},indent=2,default=str)+'\n',args.force)
     return done(args,'Wrote %d rows of %s (revision %s, %s) to %s. This copy is yours; it is not shared or kept up to date.' % (len(rows),snapshot.name,snapshot.revision,snapshot.crs,out),
                 {'source':about,'out':str(out)})
+
+
+def _series(args,client):
+    """E62a: series list ID | read ID NAME (--out FILE [--force]); the figures are written exactly as the series gives them."""
+    source=client.source(args.id)
+    if args.action=='list':
+        if args.name or args.out or args.force:raise Refused('series list takes only the selection id.')
+        rows=source.series_list()
+        return done(args,'\n'.join('%s (version %d)' % (r['name'],r['version']) for r in rows) or 'No series is described on this table yet.',{'series':rows})
+    if not args.name:raise Refused('Name the series: ophiolite series read ID NAME (see `ophiolite series list ID`).')
+    out=args.out
+    if out is not None:
+        if out.suffix.lower()!='.csv':raise Refused('Write --out to a .csv file.')
+        if out.exists() and not args.force:raise Refused('%s exists; add --force to replace it.' % out)
+    elif args.force:raise Refused('--force is for --out.')
+    read=source.series(args.name)
+    about={'name':read.name,'kind':read.kind,'unit':read.unit,'zone':read.zone,'revision':read.revision,'declaration_version':read.declaration_version,'counts':read.counts}
+    if out is None:
+        if args.json:return done(args,None,{'series':about,'points':read.points})
+        sys.stdout.write(read.rows_csv());return {'series':about,'points':read.points}
+    _write_atomic(out,read.rows_csv(),args.force)
+    return done(args,'Wrote %d months of %s (%s, %s; revision %s) to %s. This copy is yours; it is not shared or kept up to date.' % (len(read),read.name,read.kind,read.unit,read.revision,out),
+                {'series':about,'out':str(out)})
 
 
 def _counted(counts):
@@ -1111,7 +1142,7 @@ def _main(argv=None):
             for item in items:print(json.dumps(item))
             return
         if args.command=='curves':return _curves(args,client)
-        if args.command in ('entities','wells','changes','sources','org-connections','well-imports','story','what-changed','dependents','remake','import'):return _journey(args,client)
+        if args.command in ('entities','wells','changes','sources','series','org-connections','well-imports','story','what-changed','dependents','remake','import'):return _journey(args,client)
         if args.command=='checks':return _checks(args,client)
         if args.command in ('check','get','send'):return _exchange(args,client)
         if args.command=='upload':return _upload(args,client)

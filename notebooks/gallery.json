@@ -91,6 +91,13 @@
       "sentence": "Keep a spreadsheet as it is with its units and missing-value marker, read a database table, and join the two on the well name.",
       "modes": ["synthetic", "live"],
       "data": "A synthetic six-sample spreadsheet and a three-well database made on your computer; keeping the spreadsheet creates a table only you can see until you share it."
+    },
+    {
+      "slug": "production-decline",
+      "title": "Production decline of one field",
+      "sentence": "Read a field's monthly oil production as a series, with its gaps and exact figures, and fit an exponential decline over a stated window.",
+      "modes": ["synthetic", "live"],
+      "data": "A synthetic field's monthly oil figures made on your computer, or a series described on a table in your project; nothing is published."
     }
   ]
 }

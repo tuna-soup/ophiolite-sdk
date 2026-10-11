@@ -1,0 +1,410 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/assets/v1/series-declaration-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.series-declaration/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "AssetSubject": {
+      "additionalProperties": false,
+      "description": "A kept table file (E58b), read through an exact revision of the asset.",
+      "properties": {
+        "kind": {
+          "const": "asset",
+          "title": "Kind",
+          "type": "string"
+        },
+        "asset_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "asset_id"
+      ],
+      "title": "AssetSubject",
+      "type": "object"
+    },
+    "ColumnWhen": {
+      "additionalProperties": false,
+      "description": "One `date`, `timestamp` or `timestamptz` column holds the first of each month.",
+      "properties": {
+        "from": {
+          "const": "column",
+          "title": "From",
+          "type": "string"
+        },
+        "column": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Column",
+          "type": "string"
+        },
+        "period": {
+          "const": "month",
+          "title": "Period",
+          "type": "string"
+        }
+      },
+      "required": [
+        "from",
+        "column",
+        "period"
+      ],
+      "title": "ColumnWhen",
+      "type": "object"
+    },
+    "Confirmed": {
+      "additionalProperties": false,
+      "description": "What the declaration was confirmed against: the read columns (names and logical types) and the table's meaning:\nthe schema digest of a connected table, the interpretation of a kept one (finding 6).",
+      "properties": {
+        "columns_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Columns Digest",
+          "type": "string"
+        },
+        "schema_digest": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Schema Digest"
+        },
+        "interpretation_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Interpretation Sha256"
+        }
+      },
+      "required": [
+        "columns_digest"
+      ],
+      "title": "Confirmed",
+      "type": "object"
+    },
+    "EntityAbout": {
+      "additionalProperties": false,
+      "description": "A label naming a project well or wellbore; not an association (E66, E62b).",
+      "properties": {
+        "kind": {
+          "enum": [
+            "well",
+            "wellbore"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "entity_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Entity Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "entity_id"
+      ],
+      "title": "EntityAbout",
+      "type": "object"
+    },
+    "Measure": {
+      "additionalProperties": false,
+      "description": "One measurement column: what the number covers, and its unit (the text 'Not stated' when none is).",
+      "properties": {
+        "column": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Column",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "volume",
+            "rate"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "unit": {
+          "maxLength": 32,
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "column",
+        "kind",
+        "unit"
+      ],
+      "title": "Measure",
+      "type": "object"
+    },
+    "NameAbout": {
+      "additionalProperties": false,
+      "description": "A declared name for a field or a group of wells.",
+      "properties": {
+        "kind": {
+          "const": "name",
+          "title": "Kind",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "text"
+      ],
+      "title": "NameAbout",
+      "type": "object"
+    },
+    "Range": {
+      "additionalProperties": false,
+      "description": "Inclusive calendar months: FROM and TO are both in the series; rows outside are left out and counted.",
+      "properties": {
+        "from": {
+          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$",
+          "title": "From",
+          "type": "string"
+        },
+        "to": {
+          "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$",
+          "title": "To",
+          "type": "string"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "title": "Range",
+      "type": "object"
+    },
+    "RowFilter": {
+      "additionalProperties": false,
+      "description": "Use only rows whose COLUMN holds EQUALS (compared as the cell's text).",
+      "properties": {
+        "column": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Column",
+          "type": "string"
+        },
+        "equals": {
+          "maxLength": 1024,
+          "title": "Equals",
+          "type": "string"
+        }
+      },
+      "required": [
+        "column",
+        "equals"
+      ],
+      "title": "RowFilter",
+      "type": "object"
+    },
+    "TableSubject": {
+      "additionalProperties": false,
+      "description": "A connected table (E50b1): its connection and key in the project.",
+      "properties": {
+        "kind": {
+          "const": "table",
+          "title": "Kind",
+          "type": "string"
+        },
+        "connection_id": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Connection Id",
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "connection_id",
+        "key"
+      ],
+      "title": "TableSubject",
+      "type": "object"
+    },
+    "YearMonthWhen": {
+      "additionalProperties": false,
+      "description": "An integer year column and an integer month column.",
+      "properties": {
+        "from": {
+          "const": "year-month",
+          "title": "From",
+          "type": "string"
+        },
+        "year": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Year",
+          "type": "string"
+        },
+        "month": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Month",
+          "type": "string"
+        }
+      },
+      "required": [
+        "from",
+        "year",
+        "month"
+      ],
+      "title": "YearMonthWhen",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "How one table is read as one series. Shared per table and project; saved by an administrator (C3a).",
+  "properties": {
+    "name": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "subject": {
+      "discriminator": {
+        "mapping": {
+          "asset": "#/$defs/AssetSubject",
+          "table": "#/$defs/TableSubject"
+        },
+        "propertyName": "kind"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/TableSubject"
+        },
+        {
+          "$ref": "#/$defs/AssetSubject"
+        }
+      ],
+      "title": "Subject"
+    },
+    "confirmed": {
+      "$ref": "#/$defs/Confirmed"
+    },
+    "rows": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RowFilter"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "range": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Range"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "when": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ColumnWhen"
+        },
+        {
+          "$ref": "#/$defs/YearMonthWhen"
+        }
+      ],
+      "title": "When"
+    },
+    "measure": {
+      "$ref": "#/$defs/Measure"
+    },
+    "zone": {
+      "enum": [
+        "UTC",
+        "Not stated"
+      ],
+      "title": "Zone",
+      "type": "string"
+    },
+    "about": {
+      "discriminator": {
+        "mapping": {
+          "name": "#/$defs/NameAbout",
+          "well": "#/$defs/EntityAbout",
+          "wellbore": "#/$defs/EntityAbout"
+        },
+        "propertyName": "kind"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/EntityAbout"
+        },
+        {
+          "$ref": "#/$defs/NameAbout"
+        }
+      ],
+      "title": "About"
+    },
+    "version": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Version"
+    }
+  },
+  "required": [
+    "name",
+    "subject",
+    "confirmed",
+    "rows",
+    "range",
+    "when",
+    "measure",
+    "zone",
+    "about"
+  ],
+  "title": "SeriesDeclaration",
+  "type": "object"
+}

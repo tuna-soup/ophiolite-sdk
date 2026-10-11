@@ -1,0 +1,57 @@
+{
+  "schema": "ophiolite.series-rules/1",
+  "description": "E62a: what a series of each kind may do, the sentences of every refusal, the bounds and the OSDU names. Copied byte for byte into the Connectors, the SDK and the Workspace and pinned there by digest; Python and the browser execute series-vectors.json against it.",
+  "kinds": {
+    "volume": {"words": "A volume over a period", "osdu": "work-product-component--ProductionValues 2.0.0 (property type Volume)"},
+    "rate": {"words": "A rate", "osdu": "work-product-component--ProductionValues 2.0.0 (property type Rate)"},
+    "instant": {"words": "A reading at one instant", "supported": false, "osdu": "none: no instantaneous kind in the data definitions (TimeSeries is a time index only)"}
+  },
+  "operations": {
+    "volume": {"total": "allowed", "average": "volume-average", "compare": "allowed", "year": "allowed"},
+    "rate": {"total": "rate-total", "average": "allowed", "compare": "allowed", "year": "allowed"}
+  },
+  "year": {
+    "volume": "total of the 12 months; a year with a month absent or reported as a gap is incomplete and has no total",
+    "rate": "average weighted by the days of each month that has a figure; a year with fewer than 12 figures is labelled partial"
+  },
+  "bounds": {"input_digits": 40, "context_digits": 80, "periods": 10000, "years": [1900, 2100]},
+  "range": "Inclusive: the months FROM and TO are both in the series. Rows dated outside the range are left out of the view and counted as outside the range. Without a range the series runs from the first to the last month that has a row after the filter.",
+  "zones": ["UTC", "Not stated"],
+  "unit_not_stated": "Not stated",
+  "sentences": {
+    "rate-total": "A rate cannot be added up. Add volumes, or ask for an average.",
+    "volume-average": "A volume is added up over a period, not averaged. Ask for the total.",
+    "units-differ": "These series use different units ({first} and {second}). Ophiolite does not convert them here; declare one unit or convert the numbers yourself.",
+    "unit-not-stated": "The unit of one series is not stated, so it cannot be combined with a series that states one.",
+    "gaps": "{count} months have no figure ({first} to {last}). Ask for the total of the months that have figures, or fill them yourself.",
+    "zones": "The time zones differ or are not stated, so these readings cannot be lined up.",
+    "duplicate": "Two rows describe {month} (data rows {first} and {second}).",
+    "too-long": "This series would need {count} periods; the limit is {limit}.",
+    "too-large": "This number is too large to add up exactly.",
+    "not-canonical": "The value {value} is not a decimal number written in full.",
+    "not-exact": "This result needs more than 80 digits, so it cannot be given exactly.",
+    "not-finite": "This average is {fraction}, which has no exact decimal form; it is not rounded.",
+    "no-figures": "No month in this period has a figure, so there is no average.",
+    "incomplete": "{year}: incomplete ({count} of 12 months)",
+    "instant": "A reading at one instant is not supported yet.",
+    "kind-missing": "Choose what this number covers; a volume and a rate are not the same thing.",
+    "no-date": "Row {row} has no date.",
+    "infinite-date": "Row {row} has the date {value}, which cannot be placed on a calendar.",
+    "year-range": "Row {row} is in the year {year}; years 1900 to 2100 are supported.",
+    "not-month-start": "Row {row} has the date {value}; a monthly figure is dated the first of its month.",
+    "month-number": "Row {row} has the month {value}; months are 1 to 12.",
+    "not-a-date": "Row {row} has the value {value} (the first value that is not a date). Dates must be written year-month-day (2020-02-13), or the year and month must be in separate columns.",
+    "empty-filter": "No rows have {column} {value}.",
+    "column-missing": "The column {column} is not read from this table.",
+    "column-type": "The column {column} cannot be used here: a time column holds dates, or whole numbers for a year and a month; a measurement column holds numbers.",
+    "zone-utc": "This column holds times in UTC, so its time zone is UTC.",
+    "marker-unreadable": "The missing-value marker {marker} of {column} is not a number, so it cannot match a figure.",
+    "changed": "The table changed while you were describing it. Reload to see the current figures.",
+    "meaning-changed": "The meaning of this table changed (units or missing values). Describe it again to confirm.",
+    "connect-first": "Connect to this table first."
+  },
+  "osdu": {
+    "commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+    "product": ["Oil", "Gas", "Condensate", "Nonhydrocarbon Gas", "Steam", "Water"]
+  }
+}

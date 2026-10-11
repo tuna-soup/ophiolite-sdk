@@ -5,7 +5,7 @@
     "version": "1.0.0-pilot",
     "description": "One public API for every project operation. Three credential kinds reach it: the browser session (opaque HttpOnly cookie plus the X-CSRF-Token proof and, on non-GET requests, the exact Origin), a project-scoped delegate lasting at most five minutes (Bearer oph_api_..., parent session and current native permissions remain mandatory), and a browser-approved provider grant (Bearer provider token plus X-Ophiolite-Application-Grant; capability 1: the scientific read resources and the applications route within its read/write scopes; capability 3 adds reading wells, wellbores and lineage and the LAS upload routes). A request that carries an Authorization header is a machine request and is refused with MACHINE_AUTH_REQUIRED when a cookie or Origin travels with it. Scope and capability are ceilings; every operation runs the same native permission checks whoever calls it. Not a stable SDK or unattended service-account contract.",
     "x-ophiolite-contracts": {
-      "registry_version": "1.31.0",
+      "registry_version": "1.32.0",
       "index": "/api/v1/contracts",
       "served_profiles": [
         "las2/1",
@@ -52573,6 +52573,1261 @@
         }
       }
     },
+    "/api/v1/projects/{project}/series/list": {
+      "post": {
+        "summary": "E62a: The series described on a table you can read (subject; selection_id or revision)",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "series": {
+                      "items": {
+                        "$ref": "#/components/schemas/SeriesVersion"
+                      },
+                      "title": "Series",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "series"
+                  ],
+                  "title": "SeriesList",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "description": "Every `series/*` call. A connected table is read through the caller's own SELECTION_ID (no REVISION: the\nselection's reviewed revision is read); a kept table through its asset at REVISION, with no selection.",
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "subject": {
+                    "anyOf": [
+                      {
+                        "discriminator": {
+                          "mapping": {
+                            "asset": "#/components/schemas/AssetSubject",
+                            "table": "#/components/schemas/TableSubject"
+                          },
+                          "propertyName": "kind"
+                        },
+                        "oneOf": [
+                          {
+                            "$ref": "#/components/schemas/TableSubject"
+                          },
+                          {
+                            "$ref": "#/components/schemas/AssetSubject"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Subject"
+                  },
+                  "selection_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Selection Id"
+                  },
+                  "revision": {
+                    "anyOf": [
+                      {
+                        "maxLength": 128,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Revision"
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "maxLength": 128,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Name"
+                  },
+                  "declaration": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/SeriesDeclaration"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "preview_token": {
+                    "anyOf": [
+                      {
+                        "pattern": "^[0-9a-f]{64}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Preview Token"
+                  },
+                  "expected_generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Expected Generation",
+                    "type": "integer"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 128,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Command Id"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "SeriesRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/series/preview": {
+      "post": {
+        "summary": "E62a: A candidate series over your own read of the table, and the token a save names; writes nothing (declaration)",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "view": {
+                      "$ref": "#/components/schemas/SeriesView"
+                    },
+                    "preview_token": {
+                      "description": "What a save names: the table revision, its interpretation, the declaration and your selection as you read them",
+                      "title": "Preview Token",
+                      "type": "string"
+                    },
+                    "generation": {
+                      "description": "The latest version of a series of this name on this table (0 for none): the expected_generation of a save",
+                      "title": "Generation",
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "view",
+                    "preview_token",
+                    "generation"
+                  ],
+                  "title": "SeriesPreview",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "description": "Every `series/*` call. A connected table is read through the caller's own SELECTION_ID (no REVISION: the\nselection's reviewed revision is read); a kept table through its asset at REVISION, with no selection.",
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "subject": {
+                    "anyOf": [
+                      {
+                        "discriminator": {
+                          "mapping": {
+                            "asset": "#/components/schemas/AssetSubject",
+                            "table": "#/components/schemas/TableSubject"
+                          },
+                          "propertyName": "kind"
+                        },
+                        "oneOf": [
+                          {
+                            "$ref": "#/components/schemas/TableSubject"
+                          },
+                          {
+                            "$ref": "#/components/schemas/AssetSubject"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Subject"
+                  },
+                  "selection_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Selection Id"
+                  },
+                  "revision": {
+                    "anyOf": [
+                      {
+                        "maxLength": 128,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Revision"
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "maxLength": 128,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Name"
+                  },
+                  "declaration": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/SeriesDeclaration"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "preview_token": {
+                    "anyOf": [
+                      {
+                        "pattern": "^[0-9a-f]{64}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Preview Token"
+                  },
+                  "expected_generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Expected Generation",
+                    "type": "integer"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 128,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Command Id"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "SeriesRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/series/retire": {
+      "post": {
+        "summary": "E62a: Stop listing a series; its versions are kept, administrators only (name, expected_generation, command_id)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "One series at a version: its declaration (`ophiolite.series-declaration/1`) and the token a change names.",
+                  "properties": {
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "version": {
+                      "title": "Version",
+                      "type": "integer"
+                    },
+                    "generation": {
+                      "description": "The concurrency token a change names (expected_generation)",
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "state": {
+                      "enum": [
+                        "active",
+                        "retired"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "declaration": {
+                      "$ref": "#/components/schemas/SeriesDeclaration"
+                    },
+                    "message": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "Said when the series was retired after its table was removed",
+                      "title": "Message"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "version",
+                    "generation",
+                    "state",
+                    "declaration"
+                  ],
+                  "title": "SeriesVersion",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "description": "Every `series/*` call. A connected table is read through the caller's own SELECTION_ID (no REVISION: the\nselection's reviewed revision is read); a kept table through its asset at REVISION, with no selection.",
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "subject": {
+                    "anyOf": [
+                      {
+                        "discriminator": {
+                          "mapping": {
+                            "asset": "#/components/schemas/AssetSubject",
+                            "table": "#/components/schemas/TableSubject"
+                          },
+                          "propertyName": "kind"
+                        },
+                        "oneOf": [
+                          {
+                            "$ref": "#/components/schemas/TableSubject"
+                          },
+                          {
+                            "$ref": "#/components/schemas/AssetSubject"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Subject"
+                  },
+                  "selection_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Selection Id"
+                  },
+                  "revision": {
+                    "anyOf": [
+                      {
+                        "maxLength": 128,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Revision"
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "maxLength": 128,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Name"
+                  },
+                  "declaration": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/SeriesDeclaration"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "preview_token": {
+                    "anyOf": [
+                      {
+                        "pattern": "^[0-9a-f]{64}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Preview Token"
+                  },
+                  "expected_generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Expected Generation",
+                    "type": "integer"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 128,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Command Id"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "SeriesRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/series/save": {
+      "post": {
+        "summary": "E62a: Save a series as the next version, administrators only (declaration, preview_token, expected_generation, command_id)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "One series at a version: its declaration (`ophiolite.series-declaration/1`) and the token a change names.",
+                  "properties": {
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "version": {
+                      "title": "Version",
+                      "type": "integer"
+                    },
+                    "generation": {
+                      "description": "The concurrency token a change names (expected_generation)",
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "state": {
+                      "enum": [
+                        "active",
+                        "retired"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "declaration": {
+                      "$ref": "#/components/schemas/SeriesDeclaration"
+                    },
+                    "message": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "Said when the series was retired after its table was removed",
+                      "title": "Message"
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "version",
+                    "generation",
+                    "state",
+                    "declaration"
+                  ],
+                  "title": "SeriesVersion",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "description": "Every `series/*` call. A connected table is read through the caller's own SELECTION_ID (no REVISION: the\nselection's reviewed revision is read); a kept table through its asset at REVISION, with no selection.",
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "subject": {
+                    "anyOf": [
+                      {
+                        "discriminator": {
+                          "mapping": {
+                            "asset": "#/components/schemas/AssetSubject",
+                            "table": "#/components/schemas/TableSubject"
+                          },
+                          "propertyName": "kind"
+                        },
+                        "oneOf": [
+                          {
+                            "$ref": "#/components/schemas/TableSubject"
+                          },
+                          {
+                            "$ref": "#/components/schemas/AssetSubject"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Subject"
+                  },
+                  "selection_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Selection Id"
+                  },
+                  "revision": {
+                    "anyOf": [
+                      {
+                        "maxLength": 128,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Revision"
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "maxLength": 128,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Name"
+                  },
+                  "declaration": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/SeriesDeclaration"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "preview_token": {
+                    "anyOf": [
+                      {
+                        "pattern": "^[0-9a-f]{64}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Preview Token"
+                  },
+                  "expected_generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Expected Generation",
+                    "type": "integer"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 128,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Command Id"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "SeriesRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/series/view": {
+      "post": {
+        "summary": "E62a: A saved series read through your own read of the table, nothing copied (subject, name; selection_id or revision)",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "view": {
+                      "$ref": "#/components/schemas/SeriesView"
+                    },
+                    "revision": {
+                      "description": "The revision read: the kept table revision you asked for, or your selection's reviewed revision",
+                      "title": "Revision",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "view",
+                    "revision"
+                  ],
+                  "title": "SeriesRead",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "description": "Every `series/*` call. A connected table is read through the caller's own SELECTION_ID (no REVISION: the\nselection's reviewed revision is read); a kept table through its asset at REVISION, with no selection.",
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "subject": {
+                    "anyOf": [
+                      {
+                        "discriminator": {
+                          "mapping": {
+                            "asset": "#/components/schemas/AssetSubject",
+                            "table": "#/components/schemas/TableSubject"
+                          },
+                          "propertyName": "kind"
+                        },
+                        "oneOf": [
+                          {
+                            "$ref": "#/components/schemas/TableSubject"
+                          },
+                          {
+                            "$ref": "#/components/schemas/AssetSubject"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Subject"
+                  },
+                  "selection_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Selection Id"
+                  },
+                  "revision": {
+                    "anyOf": [
+                      {
+                        "maxLength": 128,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Revision"
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "maxLength": 128,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Name"
+                  },
+                  "declaration": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/SeriesDeclaration"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "preview_token": {
+                    "anyOf": [
+                      {
+                        "pattern": "^[0-9a-f]{64}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Preview Token"
+                  },
+                  "expected_generation": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Expected Generation",
+                    "type": "integer"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 128,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Command Id"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "SeriesRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/sources/advance": {
       "post": {
         "summary": "advance upstream source (write scope)",
@@ -95680,6 +96935,29 @@
         "title": "ArrayNode",
         "type": "object"
       },
+      "AssetSubject": {
+        "additionalProperties": false,
+        "description": "A kept table file (E58b), read through an exact revision of the asset.",
+        "properties": {
+          "kind": {
+            "const": "asset",
+            "title": "Kind",
+            "type": "string"
+          },
+          "asset_id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Asset Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "asset_id"
+        ],
+        "title": "AssetSubject",
+        "type": "object"
+      },
       "AssociatedEntityRevision": {
         "additionalProperties": false,
         "properties": {
@@ -97461,6 +98739,35 @@
         "title": "ColumnBasisRow",
         "type": "object"
       },
+      "ColumnWhen": {
+        "additionalProperties": false,
+        "description": "One `date`, `timestamp` or `timestamptz` column holds the first of each month.",
+        "properties": {
+          "from": {
+            "const": "column",
+            "title": "From",
+            "type": "string"
+          },
+          "column": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "title": "Column",
+            "type": "string"
+          },
+          "period": {
+            "const": "month",
+            "title": "Period",
+            "type": "string"
+          }
+        },
+        "required": [
+          "from",
+          "column",
+          "period"
+        ],
+        "title": "ColumnWhen",
+        "type": "object"
+      },
       "Comparison": {
         "additionalProperties": false,
         "properties": {
@@ -97523,6 +98830,48 @@
           "release"
         ],
         "title": "Comparison",
+        "type": "object"
+      },
+      "Confirmed": {
+        "additionalProperties": false,
+        "description": "What the declaration was confirmed against: the read columns (names and logical types) and the table's meaning:\nthe schema digest of a connected table, the interpretation of a kept one (finding 6).",
+        "properties": {
+          "columns_digest": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Columns Digest",
+            "type": "string"
+          },
+          "schema_digest": {
+            "anyOf": [
+              {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Schema Digest"
+          },
+          "interpretation_sha256": {
+            "anyOf": [
+              {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Interpretation Sha256"
+          }
+        },
+        "required": [
+          "columns_digest"
+        ],
+        "title": "Confirmed",
         "type": "object"
       },
       "ConnectionAdminConnection": {
@@ -98745,6 +100094,32 @@
           "generation"
         ],
         "title": "Entity",
+        "type": "object"
+      },
+      "EntityAbout": {
+        "additionalProperties": false,
+        "description": "A label naming a project well or wellbore; not an association (E66, E62b).",
+        "properties": {
+          "kind": {
+            "enum": [
+              "well",
+              "wellbore"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "entity_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Entity Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "entity_id"
+        ],
+        "title": "EntityAbout",
         "type": "object"
       },
       "EntityIdentityIn": {
@@ -100899,6 +102274,39 @@
         "title": "MappingCheckReport",
         "type": "object"
       },
+      "Measure": {
+        "additionalProperties": false,
+        "description": "One measurement column: what the number covers, and its unit (the text 'Not stated' when none is).",
+        "properties": {
+          "column": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "title": "Column",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "volume",
+              "rate"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "unit": {
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Unit",
+            "type": "string"
+          }
+        },
+        "required": [
+          "column",
+          "kind",
+          "unit"
+        ],
+        "title": "Measure",
+        "type": "object"
+      },
       "MethodRecord": {
         "additionalProperties": false,
         "description": "1.11.0 (E30a): how a derived revision was made, as its publishing request declared it \u2014 the projection of\nits interpretation record (E23a's decision family: selected by declaration).",
@@ -100949,6 +102357,29 @@
           "name"
         ],
         "title": "MethodRecord",
+        "type": "object"
+      },
+      "NameAbout": {
+        "additionalProperties": false,
+        "description": "A declared name for a field or a group of wells.",
+        "properties": {
+          "kind": {
+            "const": "name",
+            "title": "Kind",
+            "type": "string"
+          },
+          "text": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "text"
+        ],
+        "title": "NameAbout",
         "type": "object"
       },
       "Native_arraybridge_v1_ArchieParameters": {
@@ -106001,6 +107432,79 @@
         "title": "PlanAgent",
         "type": "object"
       },
+      "Point": {
+        "additionalProperties": false,
+        "description": "One calendar month: `v` with no `s` is a figure (zero included); `s` says why there is none.",
+        "properties": {
+          "t": {
+            "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-01$",
+            "title": "T",
+            "type": "string"
+          },
+          "v": {
+            "anyOf": [
+              {
+                "maxLength": 42,
+                "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "V"
+          },
+          "s": {
+            "anyOf": [
+              {
+                "enum": [
+                  "reported-gap",
+                  "absent"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "S"
+          }
+        },
+        "required": [
+          "t"
+        ],
+        "title": "Point",
+        "type": "object"
+      },
+      "PointCounts": {
+        "additionalProperties": false,
+        "properties": {
+          "figures": {
+            "minimum": 0,
+            "title": "Figures",
+            "type": "integer"
+          },
+          "reported_gaps": {
+            "minimum": 0,
+            "title": "Reported Gaps",
+            "type": "integer"
+          },
+          "absent": {
+            "minimum": 0,
+            "title": "Absent",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "figures",
+          "reported_gaps",
+          "absent"
+        ],
+        "title": "PointCounts",
+        "type": "object"
+      },
       "Policy": {
         "additionalProperties": false,
         "properties": {
@@ -106405,6 +107909,28 @@
           "command_id"
         ],
         "title": "PublicationReceipt",
+        "type": "object"
+      },
+      "Range": {
+        "additionalProperties": false,
+        "description": "Inclusive calendar months: FROM and TO are both in the series; rows outside are left out and counted.",
+        "properties": {
+          "from": {
+            "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$",
+            "title": "From",
+            "type": "string"
+          },
+          "to": {
+            "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$",
+            "title": "To",
+            "type": "string"
+          }
+        },
+        "required": [
+          "from",
+          "to"
+        ],
+        "title": "Range",
         "type": "object"
       },
       "ReaderKind": {
@@ -107519,6 +109045,56 @@
         "title": "ReturnedUnchanged",
         "type": "object"
       },
+      "RowCounts": {
+        "additionalProperties": false,
+        "properties": {
+          "read": {
+            "minimum": 0,
+            "title": "Read",
+            "type": "integer"
+          },
+          "kept": {
+            "minimum": 0,
+            "title": "Kept",
+            "type": "integer"
+          },
+          "outside_range": {
+            "minimum": 0,
+            "title": "Outside Range",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "read",
+          "kept",
+          "outside_range"
+        ],
+        "title": "RowCounts",
+        "type": "object"
+      },
+      "RowFilter": {
+        "additionalProperties": false,
+        "description": "Use only rows whose COLUMN holds EQUALS (compared as the cell's text).",
+        "properties": {
+          "column": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "title": "Column",
+            "type": "string"
+          },
+          "equals": {
+            "maxLength": 1024,
+            "title": "Equals",
+            "type": "string"
+          }
+        },
+        "required": [
+          "column",
+          "equals"
+        ],
+        "title": "RowFilter",
+        "type": "object"
+      },
       "RunnerLimits": {
         "additionalProperties": false,
         "properties": {
@@ -107696,6 +109272,325 @@
           "told"
         ],
         "title": "SendAudience",
+        "type": "object"
+      },
+      "SeriesDeclaration": {
+        "additionalProperties": false,
+        "description": "How one table is read as one series. Shared per table and project; saved by an administrator (C3a).",
+        "properties": {
+          "name": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "subject": {
+            "discriminator": {
+              "mapping": {
+                "asset": "#/components/schemas/AssetSubject",
+                "table": "#/components/schemas/TableSubject"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TableSubject"
+              },
+              {
+                "$ref": "#/components/schemas/AssetSubject"
+              }
+            ],
+            "title": "Subject"
+          },
+          "confirmed": {
+            "$ref": "#/components/schemas/Confirmed"
+          },
+          "rows": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RowFilter"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "range": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Range"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "when": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ColumnWhen"
+              },
+              {
+                "$ref": "#/components/schemas/YearMonthWhen"
+              }
+            ],
+            "title": "When"
+          },
+          "measure": {
+            "$ref": "#/components/schemas/Measure"
+          },
+          "zone": {
+            "enum": [
+              "UTC",
+              "Not stated"
+            ],
+            "title": "Zone",
+            "type": "string"
+          },
+          "about": {
+            "discriminator": {
+              "mapping": {
+                "name": "#/components/schemas/NameAbout",
+                "well": "#/components/schemas/EntityAbout",
+                "wellbore": "#/components/schemas/EntityAbout"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/EntityAbout"
+              },
+              {
+                "$ref": "#/components/schemas/NameAbout"
+              }
+            ],
+            "title": "About"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Version"
+          }
+        },
+        "required": [
+          "name",
+          "subject",
+          "confirmed",
+          "rows",
+          "range",
+          "when",
+          "measure",
+          "zone",
+          "about"
+        ],
+        "title": "SeriesDeclaration",
+        "type": "object"
+      },
+      "SeriesVersion": {
+        "additionalProperties": false,
+        "description": "One series at a version: its declaration (`ophiolite.series-declaration/1`) and the token a change names.",
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          },
+          "generation": {
+            "description": "The concurrency token a change names (expected_generation)",
+            "title": "Generation",
+            "type": "integer"
+          },
+          "state": {
+            "enum": [
+              "active",
+              "retired"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "declaration": {
+            "$ref": "#/components/schemas/SeriesDeclaration"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Said when the series was retired after its table was removed",
+            "title": "Message"
+          }
+        },
+        "required": [
+          "name",
+          "version",
+          "generation",
+          "state",
+          "declaration"
+        ],
+        "title": "SeriesVersion",
+        "type": "object"
+      },
+      "SeriesView": {
+        "additionalProperties": false,
+        "description": "A series read through the table at TABLE_REVISION: one point per month of RANGE, sorted, each month once.",
+        "properties": {
+          "schema": {
+            "const": "ophiolite.series-view/1",
+            "title": "Schema",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "subject": {
+            "discriminator": {
+              "mapping": {
+                "asset": "#/components/schemas/AssetSubject",
+                "table": "#/components/schemas/TableSubject"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TableSubject"
+              },
+              {
+                "$ref": "#/components/schemas/AssetSubject"
+              }
+            ],
+            "title": "Subject"
+          },
+          "table_revision": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Table Revision",
+            "type": "string"
+          },
+          "declaration_version": {
+            "anyOf": [
+              {
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Declaration Version"
+          },
+          "declaration_digest": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Declaration Digest",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "volume",
+              "rate"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "unit": {
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Unit",
+            "type": "string"
+          },
+          "zone": {
+            "enum": [
+              "UTC",
+              "Not stated"
+            ],
+            "title": "Zone",
+            "type": "string"
+          },
+          "period": {
+            "const": "month",
+            "title": "Period",
+            "type": "string"
+          },
+          "about": {
+            "discriminator": {
+              "mapping": {
+                "name": "#/components/schemas/NameAbout",
+                "well": "#/components/schemas/EntityAbout",
+                "wellbore": "#/components/schemas/EntityAbout"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/EntityAbout"
+              },
+              {
+                "$ref": "#/components/schemas/NameAbout"
+              }
+            ],
+            "title": "About"
+          },
+          "column": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "title": "Column",
+            "type": "string"
+          },
+          "range": {
+            "$ref": "#/components/schemas/Range"
+          },
+          "rows": {
+            "$ref": "#/components/schemas/RowCounts"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/PointCounts"
+          },
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/Point"
+            },
+            "maxItems": 10000,
+            "title": "Points",
+            "type": "array"
+          }
+        },
+        "required": [
+          "schema",
+          "name",
+          "subject",
+          "table_revision",
+          "declaration_version",
+          "declaration_digest",
+          "kind",
+          "unit",
+          "zone",
+          "period",
+          "about",
+          "column",
+          "range",
+          "rows",
+          "counts",
+          "points"
+        ],
+        "title": "SeriesView",
         "type": "object"
       },
       "ShaleVolumePreview": {
@@ -112161,6 +114056,36 @@
         "title": "TableSetsPreviewAnswer",
         "type": "object"
       },
+      "TableSubject": {
+        "additionalProperties": false,
+        "description": "A connected table (E50b1): its connection and key in the project.",
+        "properties": {
+          "kind": {
+            "const": "table",
+            "title": "Kind",
+            "type": "string"
+          },
+          "connection_id": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Connection Id",
+            "type": "string"
+          },
+          "key": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "connection_id",
+          "key"
+        ],
+        "title": "TableSubject",
+        "type": "object"
+      },
       "TimelineEvidence": {
         "additionalProperties": false,
         "properties": {
@@ -114802,6 +116727,36 @@
           "label_readable"
         ],
         "title": "WordedModel",
+        "type": "object"
+      },
+      "YearMonthWhen": {
+        "additionalProperties": false,
+        "description": "An integer year column and an integer month column.",
+        "properties": {
+          "from": {
+            "const": "year-month",
+            "title": "From",
+            "type": "string"
+          },
+          "year": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "title": "Year",
+            "type": "string"
+          },
+          "month": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "title": "Month",
+            "type": "string"
+          }
+        },
+        "required": [
+          "from",
+          "year",
+          "month"
+        ],
+        "title": "YearMonthWhen",
         "type": "object"
       }
     }
