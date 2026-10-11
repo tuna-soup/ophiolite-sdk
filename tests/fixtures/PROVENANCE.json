@@ -2059,6 +2059,16 @@
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
       "evidence": "Original synthetic rows written for ADR 0020 (no third-party data); recorded by tests/fixtures/table-sources/record.py with fixed clocks; no credentials or private data."
+    },
+    {
+      "path": "tests/fixtures/e64/HON-GT-01_dirsurvey.json",
+      "sha256": "b91e6a6d0df05f7bdbd2a7b815a98ddb048377817b5327b8e3832cfe06fdcb56",
+      "source_commit": null,
+      "origin": "NLOG.NL directional survey of well HONSELERSDIJK-GT-01 as NLOG serves it (67 stations, Rotary Table; 7,847 bytes), byte-identical to the cleared file",
+      "license": "LicenseRef-NLOG-Disclaimer-2016-08-09",
+      "disposition": "third-party-attribution",
+      "evidence": "Integration docs/release/rights/nlog-cleared-files-2026-09-28.json (owner review #13: NLOG terms, redistribution with source attribution) and docs/release/rights/e64-transform-fixtures-2026-10.json (E64: this copy, unmodified). Attribution in THIRD_PARTY.md.",
+      "attribution": "Source: NLOG.NL, Dutch subsurface portal (TNO / Geological Survey of the Netherlands), HON-GT-01 directional survey. Retrieved 2026-09-10/11; https://www.nlog.nl/disclaimer. Not modified."
     }
   ]
 }
