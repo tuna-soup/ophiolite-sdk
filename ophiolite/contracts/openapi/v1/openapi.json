@@ -17839,6 +17839,39 @@
                       "default": null,
                       "description": "E41: the sign-in could change the database (a warning, never a refusal)",
                       "title": "Warnings"
+                    },
+                    "names": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E59, a storage bucket: at most 21 names in the allowed folder, as the key lists them",
+                      "title": "Names"
+                    },
+                    "mode": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "conditional",
+                            "single"
+                          ],
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E59: whether the storage honours If-Match (conditional) or each file is read in one request (single)",
+                      "title": "Mode"
                     }
                   },
                   "required": [
@@ -31526,6 +31559,7 @@
             "application/json": {
               "schema": {
                 "additionalProperties": false,
+                "description": "E59 (K6): a storage bucket named in the browser or in a request. A separate model, chosen by `kind` before\nvalidation, so OrgRequest and the command digests of every E41 database request stay exactly as they were. The\naccess key travels as `username`, the secret key as `password` (E39's one sign-in per person).",
                 "properties": {
                   "organization_id": {
                     "maxLength": 160,
@@ -31692,7 +31726,10 @@
                   },
                   "kind": {
                     "default": "postgresql",
-                    "maxLength": 40,
+                    "enum": [
+                      "postgresql",
+                      "bucket"
+                    ],
                     "title": "Kind",
                     "type": "string"
                   },
@@ -31712,12 +31749,36 @@
                     "default": false,
                     "title": "Grant Use",
                     "type": "boolean"
+                  },
+                  "endpoint": {
+                    "default": "",
+                    "maxLength": 300,
+                    "title": "Endpoint",
+                    "type": "string"
+                  },
+                  "region": {
+                    "default": "",
+                    "maxLength": 64,
+                    "title": "Region",
+                    "type": "string"
+                  },
+                  "bucket": {
+                    "default": "",
+                    "maxLength": 63,
+                    "title": "Bucket",
+                    "type": "string"
+                  },
+                  "folder": {
+                    "default": "",
+                    "maxLength": 1024,
+                    "title": "Folder",
+                    "type": "string"
                   }
                 },
                 "required": [
                   "organization_id"
                 ],
-                "title": "OrgRequest",
+                "title": "BucketRequest",
                 "type": "object"
               }
             }
@@ -32950,6 +33011,7 @@
             "application/json": {
               "schema": {
                 "additionalProperties": false,
+                "description": "E59 (K6): a storage bucket named in the browser or in a request. A separate model, chosen by `kind` before\nvalidation, so OrgRequest and the command digests of every E41 database request stay exactly as they were. The\naccess key travels as `username`, the secret key as `password` (E39's one sign-in per person).",
                 "properties": {
                   "organization_id": {
                     "maxLength": 160,
@@ -33116,7 +33178,10 @@
                   },
                   "kind": {
                     "default": "postgresql",
-                    "maxLength": 40,
+                    "enum": [
+                      "postgresql",
+                      "bucket"
+                    ],
                     "title": "Kind",
                     "type": "string"
                   },
@@ -33136,12 +33201,36 @@
                     "default": false,
                     "title": "Grant Use",
                     "type": "boolean"
+                  },
+                  "endpoint": {
+                    "default": "",
+                    "maxLength": 300,
+                    "title": "Endpoint",
+                    "type": "string"
+                  },
+                  "region": {
+                    "default": "",
+                    "maxLength": 64,
+                    "title": "Region",
+                    "type": "string"
+                  },
+                  "bucket": {
+                    "default": "",
+                    "maxLength": 63,
+                    "title": "Bucket",
+                    "type": "string"
+                  },
+                  "folder": {
+                    "default": "",
+                    "maxLength": 1024,
+                    "title": "Folder",
+                    "type": "string"
                   }
                 },
                 "required": [
                   "organization_id"
                 ],
-                "title": "OrgRequest",
+                "title": "BucketRequest",
                 "type": "object"
               }
             }
@@ -35268,6 +35357,39 @@
                       "default": null,
                       "description": "E41: the sign-in could change the database (a warning, never a refusal)",
                       "title": "Warnings"
+                    },
+                    "names": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E59, a storage bucket: at most 21 names in the allowed folder, as the key lists them",
+                      "title": "Names"
+                    },
+                    "mode": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "conditional",
+                            "single"
+                          ],
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E59: whether the storage honours If-Match (conditional) or each file is read in one request (single)",
+                      "title": "Mode"
                     }
                   },
                   "required": [
@@ -50148,6 +50270,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -50602,6 +50750,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -50945,6 +51119,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -51269,6 +51469,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -51468,6 +51694,61 @@
                         }
                       ],
                       "title": "Next Offset"
+                    },
+                    "folders": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E59: the folders one level below, for a storage bucket.",
+                      "title": "Folders"
+                    },
+                    "next_cursor": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E59: the opaque next page of a storage bucket; send it back as `cursor`.",
+                      "title": "Next Cursor"
+                    },
+                    "left_out": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E59: files whose names cannot be shown safely, counted, never named.",
+                      "title": "Left Out"
+                    },
+                    "left_out_sentence": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E59: the sentence saying how many were left out.",
+                      "title": "Left Out Sentence"
                     }
                   },
                   "required": [
@@ -51598,6 +51879,32 @@
                     "minimum": 0,
                     "title": "Offset",
                     "type": "integer"
+                  },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
                   },
                   "limit": {
                     "default": 100,
@@ -55089,6 +55396,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -55627,6 +55960,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -55950,6 +56309,32 @@
                     "minimum": 0,
                     "title": "Offset",
                     "type": "integer"
+                  },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
                   },
                   "limit": {
                     "default": 100,
@@ -56489,6 +56874,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -56810,6 +57221,32 @@
                     "minimum": 0,
                     "title": "Offset",
                     "type": "integer"
+                  },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
                   },
                   "limit": {
                     "default": 100,
@@ -57175,6 +57612,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -57511,6 +57974,32 @@
                     "minimum": 0,
                     "title": "Offset",
                     "type": "integer"
+                  },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
                   },
                   "limit": {
                     "default": 100,
@@ -57892,6 +58381,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -58243,6 +58758,32 @@
                     "minimum": 0,
                     "title": "Offset",
                     "type": "integer"
+                  },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
                   },
                   "limit": {
                     "default": 100,
@@ -58624,6 +59165,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -58999,6 +59566,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -59344,6 +59937,32 @@
                     "minimum": 0,
                     "title": "Offset",
                     "type": "integer"
+                  },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
                   },
                   "limit": {
                     "default": 100,
@@ -59824,6 +60443,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -60173,6 +60818,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -60518,6 +61189,32 @@
                     "minimum": 0,
                     "title": "Offset",
                     "type": "integer"
+                  },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
                   },
                   "limit": {
                     "default": 100,
@@ -61061,6 +61758,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -61539,6 +62262,32 @@
                     "minimum": 0,
                     "title": "Offset",
                     "type": "integer"
+                  },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
                   },
                   "limit": {
                     "default": 100,
@@ -62459,6 +63208,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -62933,6 +63708,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -63247,6 +64048,32 @@
                     "minimum": 0,
                     "title": "Offset",
                     "type": "integer"
+                  },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
                   },
                   "limit": {
                     "default": 100,
@@ -68831,6 +69658,18 @@
                     "default": null,
                     "description": "E85b: an https address instead of bytes (mode whole, no name or size, no body); the gateway fetches and reads it, and the answer's `fetched` names what was read",
                     "title": "Address"
+                  },
+                  "bucket": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/BucketObject"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E59: a storage bucket's object instead of bytes (mode whole, no name or size, no body); the gateway reads it with the person's own key, and the answer's `fetched` names what was read"
                   }
                 },
                 "required": [
@@ -69301,6 +70140,12 @@
                     "default": null,
                     "description": "E85b: the address the run was started with, query included; the server fetches it again (no body is sent) and adds the file only if its bytes are the ones read",
                     "title": "Address"
+                  },
+                  "bucket": {
+                    "default": false,
+                    "description": "E59: the row is a storage bucket's object; the server reads it again (no body is sent) and adds or selects it only if its bytes are the ones read",
+                    "title": "Bucket",
+                    "type": "boolean"
                   }
                 },
                 "required": [
@@ -70095,6 +70940,18 @@
                     "default": null,
                     "description": "E85b: the https address of the run's one file; kept without its query string",
                     "title": "Address"
+                  },
+                  "bucket": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/BucketRun"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E59: the files are objects of a storage bucket, read with the person's own key and either copied into the project or read where they live"
                   }
                 },
                 "required": [
@@ -86406,7 +87263,15 @@
               "destination-refused",
               "undetermined",
               "sign-in-needed",
-              "browser-approval-off"
+              "browser-approval-off",
+              "no-list-right",
+              "bucket-missing",
+              "wrong-region",
+              "object-missing",
+              "object-changed",
+              "throttled",
+              "unreadable",
+              "no-consistent-read"
             ],
             "title": "Code",
             "type": "string"
@@ -87540,6 +88405,66 @@
           "organization_id"
         ],
         "title": "Binding",
+        "type": "object"
+      },
+      "BucketObject": {
+        "additionalProperties": false,
+        "description": "E59: one object of a storage bucket the person may read: the organisation connection and the exact key.",
+        "properties": {
+          "connection_id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Connection Id",
+            "type": "string"
+          },
+          "key": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "title": "Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "connection_id",
+          "key"
+        ],
+        "title": "BucketObject",
+        "type": "object"
+      },
+      "BucketRun": {
+        "additionalProperties": false,
+        "properties": {
+          "connection_id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Connection Id",
+            "type": "string"
+          },
+          "custody": {
+            "description": "read-in-place: a pinned source selection per file; copy: a retained upload, as a dropped file",
+            "enum": [
+              "read-in-place",
+              "copy"
+            ],
+            "title": "Custody",
+            "type": "string"
+          },
+          "keys": {
+            "description": "the exact object key of each file, in the order of `files`",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Keys",
+            "type": "array"
+          }
+        },
+        "required": [
+          "connection_id",
+          "custody",
+          "keys"
+        ],
+        "title": "BucketRun",
         "type": "object"
       },
       "BuiltInSchema": {
