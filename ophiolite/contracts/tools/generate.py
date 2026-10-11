@@ -409,6 +409,7 @@ TARGETS = {'table-target-schema.json': 'targets/table-target-schema.json',  # E8
            'vocabulary/v1/mapping-check-words.json': 'targets/mapping-check-words.json',
            'vocabulary/v1/coordinate-systems.json': 'coordinate_systems.json',
            'vocabulary/v1/coordinate-systems.NOTICE': 'coordinate_systems.NOTICE',
+           'vocabulary/v1/qgis-reach.json': 'reach/v1/qgis-reach.json',  # E91: what QGIS can open, read by the What's next card
            **{'targets/v1/%s.json' % name: 'targets/v1/%s.json' % name
               for name in ('wells', 'well-tops', 'deviation-survey', 'point-set', 'time-depth', 'table')}}
 
