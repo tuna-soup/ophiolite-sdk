@@ -1,0 +1,2684 @@
+{
+ "again": {
+  "asset_id": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+  "by": "header",
+  "changed_at": 1791659853.824212,
+  "changed_by": "carol",
+  "content_digest": "2db260dcf689cc8dfa24a01a5c1eefd373e9966cc014cdd1d67788b7a2ec3fbd",
+  "generation": 4,
+  "head_version": 4,
+  "last_used": {
+   "at": 1791659853.765785,
+   "person": "carol",
+   "run_id": "9aa25d54dcad8f8d9724a4fc81f415c4fc1f933c13f4b740801537c8a7178c7d",
+   "version": 1
+  },
+  "layout": {
+   "declarations": {
+    "depth_unit": "m"
+   },
+   "layout_kind": "table-mapping",
+   "mapping": {
+    "fields": {
+     "md": "MD (m)",
+     "name": "Top",
+     "tvd": "TVD (m)",
+     "well": "Well Name"
+    }
+   },
+   "match": {
+    "by": "header",
+    "columns": [
+     "well name",
+     "top",
+     "md (m)",
+     "tvd (m)"
+    ],
+    "order_digest": "47930c7e8e00074686cd972a14fd22f178cce3a5a56ab4ef95ede43e89701893",
+    "set_digest": "9c7b8291be39c67cd54e97b97a2c5347fa78a8cb203db2abef54d6d221570fc6"
+   },
+   "name": "Tubbergen tops 2026",
+   "reading": {
+    "header_row": 1
+   },
+   "schema": "ophiolite.layout/1",
+   "state": "active",
+   "target": "well-tops"
+  },
+  "made_at": 1791659853.7548132,
+  "made_by": "carol",
+  "name": "Tubbergen tops 2026",
+  "needs_connection": false,
+  "state": "active",
+  "target": "well-tops",
+  "version": 4
+ },
+ "changed": {
+  "body": {
+   "code": "changed",
+   "error": "This layout changed after you opened it. Open it again to see the new version.",
+   "refusal": 6
+  },
+  "status": 409
+ },
+ "empty": {
+  "active": 0,
+  "layouts": [],
+  "most": 100
+ },
+ "export_all": {
+  "document_digest": "aec593b943119e78130c7c6d2b50b954ee20529f1780f98ffeac49aa3aaebbbd",
+  "layouts": [
+   {
+    "declarations": {
+     "depth_unit": "m"
+    },
+    "layout_kind": "table-mapping",
+    "mapping": {
+     "fields": {
+      "md": "MD (m)",
+      "name": "Top",
+      "tvd": "TVD (m)",
+      "well": "Well Name"
+     }
+    },
+    "match": {
+     "by": "header",
+     "columns": [
+      "well name",
+      "top",
+      "md (m)",
+      "tvd (m)"
+     ],
+     "order_digest": "47930c7e8e00074686cd972a14fd22f178cce3a5a56ab4ef95ede43e89701893",
+     "set_digest": "9c7b8291be39c67cd54e97b97a2c5347fa78a8cb203db2abef54d6d221570fc6"
+    },
+    "name": "Other tops",
+    "reading": {
+     "header_row": 1
+    },
+    "schema": "ophiolite.layout/1",
+    "target": "well-tops"
+   },
+   {
+    "declarations": {
+     "depth_unit": "m"
+    },
+    "layout_kind": "table-mapping",
+    "mapping": {
+     "fields": {
+      "md": "MD (m)",
+      "name": "Top",
+      "tvd": "TVD (m)",
+      "well": "Well Name"
+     }
+    },
+    "match": {
+     "by": "header",
+     "columns": [
+      "well name",
+      "top",
+      "md (m)",
+      "tvd (m)"
+     ],
+     "order_digest": "47930c7e8e00074686cd972a14fd22f178cce3a5a56ab4ef95ede43e89701893",
+     "set_digest": "9c7b8291be39c67cd54e97b97a2c5347fa78a8cb203db2abef54d6d221570fc6"
+    },
+    "name": "Tubbergen tops 2026",
+    "reading": {
+     "header_row": 1
+    },
+    "schema": "ophiolite.layout/1",
+    "target": "well-tops"
+   }
+  ],
+  "schema": "ophiolite.layout-export/1"
+ },
+ "export_one": {
+  "document_digest": "f4d2dc9b0bf0115ea08d9fd2a89479e3f3d170653f7840609b0849bff00a318a",
+  "layouts": [
+   {
+    "declarations": {
+     "depth_unit": "m"
+    },
+    "layout_kind": "table-mapping",
+    "mapping": {
+     "fields": {
+      "md": "MD (m)",
+      "name": "Top",
+      "tvd": "TVD (m)",
+      "well": "Well Name"
+     }
+    },
+    "match": {
+     "by": "header",
+     "columns": [
+      "well name",
+      "top",
+      "md (m)",
+      "tvd (m)"
+     ],
+     "order_digest": "47930c7e8e00074686cd972a14fd22f178cce3a5a56ab4ef95ede43e89701893",
+     "set_digest": "9c7b8291be39c67cd54e97b97a2c5347fa78a8cb203db2abef54d6d221570fc6"
+    },
+    "name": "Other tops",
+    "reading": {
+     "header_row": 1
+    },
+    "schema": "ophiolite.layout/1",
+    "target": "well-tops"
+   }
+  ],
+  "schema": "ophiolite.layout-export/1"
+ },
+ "import_file": {
+  "document_digest": "62845556b2a399f1975156f941848dc32ec56f8d4323c708a61060f46e15fd48",
+  "layouts": [
+   {
+    "declarations": {
+     "depth_unit": "m"
+    },
+    "layout_kind": "table-mapping",
+    "mapping": {
+     "fields": {
+      "md": "MD (m)",
+      "name": "Top",
+      "tvd": "TVD (m)",
+      "well": "Well Name"
+     }
+    },
+    "match": {
+     "by": "header",
+     "columns": [
+      "well name",
+      "top",
+      "md (m)",
+      "tvd (m)"
+     ],
+     "order_digest": "47930c7e8e00074686cd972a14fd22f178cce3a5a56ab4ef95ede43e89701893",
+     "set_digest": "9c7b8291be39c67cd54e97b97a2c5347fa78a8cb203db2abef54d6d221570fc6"
+    },
+    "name": "Other tops",
+    "reading": {
+     "header_row": 1
+    },
+    "schema": "ophiolite.layout/1",
+    "target": "well-tops"
+   },
+   {
+    "declarations": {
+     "depth_unit": "m"
+    },
+    "layout_kind": "table-mapping",
+    "mapping": {
+     "fields": {
+      "md": "MD (m)",
+      "name": "Top",
+      "tvd": "TVD (m)",
+      "well": "Well Name"
+     }
+    },
+    "match": {
+     "by": "header",
+     "columns": [
+      "well name",
+      "top",
+      "md (m)",
+      "tvd (m)"
+     ],
+     "order_digest": "47930c7e8e00074686cd972a14fd22f178cce3a5a56ab4ef95ede43e89701893",
+     "set_digest": "9c7b8291be39c67cd54e97b97a2c5347fa78a8cb203db2abef54d6d221570fc6"
+    },
+    "name": "Imported tops",
+    "reading": {
+     "header_row": 1
+    },
+    "schema": "ophiolite.layout/1",
+    "target": "well-tops"
+   },
+   {
+    "declarations": {
+     "depth_unit": "m"
+    },
+    "layout_kind": "table-mapping",
+    "mapping": {
+     "fields": {
+      "md": "MD (m)",
+      "name": "Top",
+      "tvd": "TVD (m)",
+      "well": "Well Name"
+     }
+    },
+    "match": {
+     "by": "header",
+     "columns": [
+      "well name",
+      "top",
+      "md (m)",
+      "tvd (m)"
+     ],
+     "order_digest": "47930c7e8e00074686cd972a14fd22f178cce3a5a56ab4ef95ede43e89701893",
+     "set_digest": "9c7b8291be39c67cd54e97b97a2c5347fa78a8cb203db2abef54d6d221570fc6"
+    },
+    "name": "Bad tops",
+    "reading": {
+     "header_row": 1
+    },
+    "schema": "ophiolite.layout/1",
+    "target": "casing"
+   }
+  ],
+  "schema": "ophiolite.layout-export/1"
+ },
+ "imported": {
+  "outcomes": [
+   {
+    "asset_id": "55c7c81fd0e470fd53938d67987c08365e019d20c8eb987aaa0b9ecfd3964854",
+    "name": "Other tops",
+    "result": "already-here"
+   },
+   {
+    "asset_id": "7c003e70b2404d0432a68833565af41831a79da521606f350380a7ed0edc96ca",
+    "name": "Imported tops",
+    "result": "added"
+   },
+   {
+    "name": "Bad tops",
+    "problem": {
+     "code": "target",
+     "path": "target"
+    },
+    "result": "not-added",
+    "sentence": "A layout in this file is not valid: the table kind is not supported. It was not added."
+   }
+  ]
+ },
+ "keep_full": {
+  "body": {
+   "code": "capacity",
+   "error": "This project keeps up to 100 layouts. Retire layouts you no longer use, or ask a project administrator.",
+   "refusal": 4
+  },
+  "status": 409
+ },
+ "keep_nothing": {
+  "body": {
+   "code": "no-saved-mapping",
+   "error": "You have not saved a mapping for this table yet. Save it first, then keep it as a project layout.",
+   "refusal": 13
+  },
+  "status": 409
+ },
+ "kept": {
+  "asset_id": "db9b139089a9d7ca01987e2c6962f60131aaf38a01d610de25827dbf34c5701c",
+  "by": "table",
+  "changed_at": 1791659854.1838603,
+  "changed_by": "bob",
+  "content_digest": "7284384184eb5a2356f08368cfa42c81ac7a3ec2fb6c7cc6c218835ef3f84882",
+  "generation": 1,
+  "head_version": 1,
+  "last_used": null,
+  "layout": {
+   "declarations": {},
+   "layout_kind": "table-mapping",
+   "mapping": {
+    "crs": "EPSG:32631",
+    "entity": "well",
+    "extras": [
+     "operator"
+    ],
+    "fields": {
+     "id": "id",
+     "name": "name",
+     "x": "x",
+     "y": "y"
+    },
+    "schema_digest": "8f5dd06ebaebfc9b6e92c466a1e46e44c86a119b5102a761332b76e412e39001"
+   },
+   "match": {
+    "by": "table",
+    "connection_id": "sql",
+    "key": "w",
+    "schema_digest": "8f5dd06ebaebfc9b6e92c466a1e46e44c86a119b5102a761332b76e412e39001"
+   },
+   "name": "Groningen wells",
+   "reading": {},
+   "schema": "ophiolite.layout/1",
+   "state": "active",
+   "target": "wells"
+  },
+  "made_at": 1791659854.1838603,
+  "made_by": "bob",
+  "name": "Groningen wells",
+  "needs_connection": false,
+  "state": "active",
+  "target": "wells",
+  "version": 1
+ },
+ "listed": {
+  "active": 1,
+  "layouts": [
+   {
+    "asset_id": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+    "by": "header",
+    "changed_at": 1791659853.7548132,
+    "changed_by": "carol",
+    "content_digest": "10bfab4fcdc41274d876dafb2322c3a5680366d233349779c6467585af859b55",
+    "generation": 1,
+    "head_version": 1,
+    "last_used": {
+     "at": 1791659853.765785,
+     "person": "carol",
+     "run_id": "9aa25d54dcad8f8d9724a4fc81f415c4fc1f933c13f4b740801537c8a7178c7d",
+     "version": 1
+    },
+    "layout": {
+     "declarations": {
+      "depth_unit": "m"
+     },
+     "layout_kind": "table-mapping",
+     "mapping": {
+      "fields": {
+       "md": "MD (m)",
+       "name": "Top",
+       "tvd": "TVD (m)",
+       "well": "Well Name"
+      }
+     },
+     "match": {
+      "by": "header",
+      "columns": [
+       "well name",
+       "top",
+       "md (m)",
+       "tvd (m)"
+      ],
+      "order_digest": "47930c7e8e00074686cd972a14fd22f178cce3a5a56ab4ef95ede43e89701893",
+      "set_digest": "9c7b8291be39c67cd54e97b97a2c5347fa78a8cb203db2abef54d6d221570fc6"
+     },
+     "name": "Tubbergen tops",
+     "reading": {
+      "header_row": 1
+     },
+     "schema": "ophiolite.layout/1",
+     "state": "active",
+     "target": "well-tops"
+    },
+    "made_at": 1791659853.7548132,
+    "made_by": "carol",
+    "name": "Tubbergen tops",
+    "needs_connection": false,
+    "state": "active",
+    "target": "well-tops",
+    "version": 1
+   }
+  ],
+  "most": 100
+ },
+ "listed_retired": {
+  "active": 0,
+  "layouts": [
+   {
+    "asset_id": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+    "by": "header",
+    "changed_at": 1791659853.8172674,
+    "changed_by": "bob",
+    "content_digest": "650c394261541d1de323a40d3e6334a0ff8c5f06e5e6115d398567342158be34",
+    "generation": 3,
+    "head_version": 3,
+    "last_used": {
+     "at": 1791659853.765785,
+     "person": "carol",
+     "run_id": "9aa25d54dcad8f8d9724a4fc81f415c4fc1f933c13f4b740801537c8a7178c7d",
+     "version": 1
+    },
+    "layout": {
+     "declarations": {
+      "depth_unit": "m"
+     },
+     "layout_kind": "table-mapping",
+     "mapping": {
+      "fields": {
+       "md": "MD (m)",
+       "name": "Top",
+       "tvd": "TVD (m)",
+       "well": "Well Name"
+      }
+     },
+     "match": {
+      "by": "header",
+      "columns": [
+       "well name",
+       "top",
+       "md (m)",
+       "tvd (m)"
+      ],
+      "order_digest": "47930c7e8e00074686cd972a14fd22f178cce3a5a56ab4ef95ede43e89701893",
+      "set_digest": "9c7b8291be39c67cd54e97b97a2c5347fa78a8cb203db2abef54d6d221570fc6"
+     },
+     "name": "Tubbergen tops 2026",
+     "reading": {
+      "header_row": 1
+     },
+     "schema": "ophiolite.layout/1",
+     "state": "retired",
+     "target": "well-tops"
+    },
+    "made_at": 1791659853.7548132,
+    "made_by": "carol",
+    "name": "Tubbergen tops 2026",
+    "needs_connection": false,
+    "state": "retired",
+    "target": "well-tops",
+    "version": 3
+   }
+  ],
+  "most": 100
+ },
+ "match_none": {
+  "matches": [],
+  "retired_ignored": 0
+ },
+ "match_one": {
+  "matches": [
+   {
+    "asset_id": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+    "class": "previously-reviewed",
+    "fields": {
+     "md": "MD (m)",
+     "name": "Top",
+     "tvd": "TVD (m)",
+     "well": "Well Name"
+    },
+    "generation": 1,
+    "how": "exact",
+    "last_used": null,
+    "layout": {
+     "declarations": {
+      "depth_unit": "m"
+     },
+     "layout_kind": "table-mapping",
+     "mapping": {
+      "fields": {
+       "md": "MD (m)",
+       "name": "Top",
+       "tvd": "TVD (m)",
+       "well": "Well Name"
+      }
+     },
+     "match": {
+      "by": "header",
+      "columns": [
+       "well name",
+       "top",
+       "md (m)",
+       "tvd (m)"
+      ],
+      "order_digest": "47930c7e8e00074686cd972a14fd22f178cce3a5a56ab4ef95ede43e89701893",
+      "set_digest": "9c7b8291be39c67cd54e97b97a2c5347fa78a8cb203db2abef54d6d221570fc6"
+     },
+     "name": "Tubbergen tops",
+     "reading": {
+      "header_row": 1
+     },
+     "schema": "ophiolite.layout/1",
+     "state": "active",
+     "target": "well-tops"
+    },
+    "made_by": "carol",
+    "name": "Tubbergen tops",
+    "target": "well-tops",
+    "version": 1
+   }
+  ],
+  "retired_ignored": 0
+ },
+ "match_reordered": {
+  "matches": [
+   {
+    "asset_id": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+    "class": "previously-reviewed",
+    "fields": {
+     "md": "MD (m)",
+     "name": "Top",
+     "tvd": "TVD (m)",
+     "well": "Well Name"
+    },
+    "generation": 1,
+    "how": "reordered",
+    "last_used": null,
+    "layout": {
+     "declarations": {
+      "depth_unit": "m"
+     },
+     "layout_kind": "table-mapping",
+     "mapping": {
+      "fields": {
+       "md": "MD (m)",
+       "name": "Top",
+       "tvd": "TVD (m)",
+       "well": "Well Name"
+      }
+     },
+     "match": {
+      "by": "header",
+      "columns": [
+       "well name",
+       "top",
+       "md (m)",
+       "tvd (m)"
+      ],
+      "order_digest": "47930c7e8e00074686cd972a14fd22f178cce3a5a56ab4ef95ede43e89701893",
+      "set_digest": "9c7b8291be39c67cd54e97b97a2c5347fa78a8cb203db2abef54d6d221570fc6"
+     },
+     "name": "Tubbergen tops",
+     "reading": {
+      "header_row": 1
+     },
+     "schema": "ophiolite.layout/1",
+     "state": "active",
+     "target": "well-tops"
+    },
+    "made_by": "carol",
+    "name": "Tubbergen tops",
+    "target": "well-tops",
+    "version": 1
+   }
+  ],
+  "retired_ignored": 0
+ },
+ "match_two": {
+  "matches": [
+   {
+    "asset_id": "55c7c81fd0e470fd53938d67987c08365e019d20c8eb987aaa0b9ecfd3964854",
+    "class": "previously-reviewed",
+    "fields": {
+     "md": "MD (m)",
+     "name": "Top",
+     "tvd": "TVD (m)",
+     "well": "Well Name"
+    },
+    "generation": 1,
+    "how": "exact",
+    "last_used": null,
+    "layout": {
+     "declarations": {
+      "depth_unit": "m"
+     },
+     "layout_kind": "table-mapping",
+     "mapping": {
+      "fields": {
+       "md": "MD (m)",
+       "name": "Top",
+       "tvd": "TVD (m)",
+       "well": "Well Name"
+      }
+     },
+     "match": {
+      "by": "header",
+      "columns": [
+       "well name",
+       "top",
+       "md (m)",
+       "tvd (m)"
+      ],
+      "order_digest": "47930c7e8e00074686cd972a14fd22f178cce3a5a56ab4ef95ede43e89701893",
+      "set_digest": "9c7b8291be39c67cd54e97b97a2c5347fa78a8cb203db2abef54d6d221570fc6"
+     },
+     "name": "Other tops",
+     "reading": {
+      "header_row": 1
+     },
+     "schema": "ophiolite.layout/1",
+     "state": "active",
+     "target": "well-tops"
+    },
+    "made_by": "carol",
+    "name": "Other tops",
+    "target": "well-tops",
+    "version": 1
+   },
+   {
+    "asset_id": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+    "class": "previously-reviewed",
+    "fields": {
+     "md": "MD (m)",
+     "name": "Top",
+     "tvd": "TVD (m)",
+     "well": "Well Name"
+    },
+    "generation": 4,
+    "how": "exact",
+    "last_used": {
+     "at": 1791659853.765785,
+     "person": "carol",
+     "run_id": "9aa25d54dcad8f8d9724a4fc81f415c4fc1f933c13f4b740801537c8a7178c7d",
+     "version": 1
+    },
+    "layout": {
+     "declarations": {
+      "depth_unit": "m"
+     },
+     "layout_kind": "table-mapping",
+     "mapping": {
+      "fields": {
+       "md": "MD (m)",
+       "name": "Top",
+       "tvd": "TVD (m)",
+       "well": "Well Name"
+      }
+     },
+     "match": {
+      "by": "header",
+      "columns": [
+       "well name",
+       "top",
+       "md (m)",
+       "tvd (m)"
+      ],
+      "order_digest": "47930c7e8e00074686cd972a14fd22f178cce3a5a56ab4ef95ede43e89701893",
+      "set_digest": "9c7b8291be39c67cd54e97b97a2c5347fa78a8cb203db2abef54d6d221570fc6"
+     },
+     "name": "Tubbergen tops 2026",
+     "reading": {
+      "header_row": 1
+     },
+     "schema": "ophiolite.layout/1",
+     "state": "active",
+     "target": "well-tops"
+    },
+    "made_by": "carol",
+    "name": "Tubbergen tops 2026",
+    "target": "well-tops",
+    "version": 4
+   }
+  ],
+  "retired_ignored": 0
+ },
+ "missing": {
+  "body": {
+   "code": "not-found",
+   "error": "This project does not have this layout.",
+   "refusal": 11
+  },
+  "status": 404
+ },
+ "name_taken": {
+  "body": {
+   "code": "name-taken",
+   "error": "A layout called \"tubbergen TOPS\" already exists in this project. Choose another name, or open that layout to change it.",
+   "refusal": 2
+  },
+  "status": 409
+ },
+ "needs_connection": {
+  "active": 1,
+  "layouts": [
+   {
+    "asset_id": "db9b139089a9d7ca01987e2c6962f60131aaf38a01d610de25827dbf34c5701c",
+    "by": "table",
+    "changed_at": 1791659854.1838603,
+    "changed_by": "bob",
+    "content_digest": "7284384184eb5a2356f08368cfa42c81ac7a3ec2fb6c7cc6c218835ef3f84882",
+    "generation": 1,
+    "head_version": 1,
+    "last_used": null,
+    "layout": {
+     "declarations": {},
+     "layout_kind": "table-mapping",
+     "mapping": {
+      "crs": "EPSG:32631",
+      "entity": "well",
+      "extras": [
+       "operator"
+      ],
+      "fields": {
+       "id": "id",
+       "name": "name",
+       "x": "x",
+       "y": "y"
+      },
+      "schema_digest": "8f5dd06ebaebfc9b6e92c466a1e46e44c86a119b5102a761332b76e412e39001"
+     },
+     "match": {
+      "by": "table",
+      "connection_id": "sql",
+      "key": "w",
+      "schema_digest": "8f5dd06ebaebfc9b6e92c466a1e46e44c86a119b5102a761332b76e412e39001"
+     },
+     "name": "Groningen wells",
+     "reading": {},
+     "schema": "ophiolite.layout/1",
+     "state": "active",
+     "target": "wells"
+    },
+    "made_at": 1791659854.1838603,
+    "made_by": "bob",
+    "name": "Groningen wells",
+    "needs_connection": true,
+    "state": "active",
+    "target": "wells",
+    "version": 1
+   }
+  ],
+  "most": 100
+ },
+ "not_a_file": {
+  "body": {
+   "code": "not-a-layouts-file",
+   "error": "This is not a layouts file from Ophiolite. Choose a file made with \"Download\".",
+   "refusal": 10
+  },
+  "status": 422
+ },
+ "opened": {
+  "asset_id": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+  "by": "header",
+  "changed_at": 1791659853.808432,
+  "changed_by": "bob",
+  "content_digest": "88bb0a60d282d894b1477fa058ac89ab5414f72ab57fc830d196e77b1b7880e6",
+  "generation": 2,
+  "head_version": 2,
+  "history": [
+   {
+    "actor": "carol",
+    "at": 1791659853.7548132,
+    "name": "Tubbergen tops",
+    "state": "active",
+    "version": 1
+   },
+   {
+    "actor": "bob",
+    "at": 1791659853.808432,
+    "name": "Tubbergen tops 2026",
+    "state": "active",
+    "version": 2
+   }
+  ],
+  "last_used": {
+   "at": 1791659853.765785,
+   "person": "carol",
+   "run_id": "9aa25d54dcad8f8d9724a4fc81f415c4fc1f933c13f4b740801537c8a7178c7d",
+   "version": 1
+  },
+  "layout": {
+   "declarations": {
+    "depth_unit": "m"
+   },
+   "layout_kind": "table-mapping",
+   "mapping": {
+    "fields": {
+     "md": "MD (m)",
+     "name": "Top",
+     "tvd": "TVD (m)",
+     "well": "Well Name"
+    }
+   },
+   "match": {
+    "by": "header",
+    "columns": [
+     "well name",
+     "top",
+     "md (m)",
+     "tvd (m)"
+    ],
+    "order_digest": "47930c7e8e00074686cd972a14fd22f178cce3a5a56ab4ef95ede43e89701893",
+    "set_digest": "9c7b8291be39c67cd54e97b97a2c5347fa78a8cb203db2abef54d6d221570fc6"
+   },
+   "name": "Tubbergen tops 2026",
+   "reading": {
+    "header_row": 1
+   },
+   "schema": "ophiolite.layout/1",
+   "state": "active",
+   "target": "well-tops"
+  },
+  "made_at": 1791659853.7548132,
+  "made_by": "carol",
+  "name": "Tubbergen tops 2026",
+  "needs_connection": false,
+  "state": "active",
+  "target": "well-tops",
+  "version": 2
+ },
+ "opened_v1": {
+  "asset_id": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+  "by": "header",
+  "changed_at": 1791659853.808432,
+  "changed_by": "bob",
+  "content_digest": "10bfab4fcdc41274d876dafb2322c3a5680366d233349779c6467585af859b55",
+  "generation": 2,
+  "head_version": 2,
+  "history": [
+   {
+    "actor": "carol",
+    "at": 1791659853.7548132,
+    "name": "Tubbergen tops",
+    "state": "active",
+    "version": 1
+   },
+   {
+    "actor": "bob",
+    "at": 1791659853.808432,
+    "name": "Tubbergen tops 2026",
+    "state": "active",
+    "version": 2
+   }
+  ],
+  "last_used": {
+   "at": 1791659853.765785,
+   "person": "carol",
+   "run_id": "9aa25d54dcad8f8d9724a4fc81f415c4fc1f933c13f4b740801537c8a7178c7d",
+   "version": 1
+  },
+  "layout": {
+   "declarations": {
+    "depth_unit": "m"
+   },
+   "layout_kind": "table-mapping",
+   "mapping": {
+    "fields": {
+     "md": "MD (m)",
+     "name": "Top",
+     "tvd": "TVD (m)",
+     "well": "Well Name"
+    }
+   },
+   "match": {
+    "by": "header",
+    "columns": [
+     "well name",
+     "top",
+     "md (m)",
+     "tvd (m)"
+    ],
+    "order_digest": "47930c7e8e00074686cd972a14fd22f178cce3a5a56ab4ef95ede43e89701893",
+    "set_digest": "9c7b8291be39c67cd54e97b97a2c5347fa78a8cb203db2abef54d6d221570fc6"
+   },
+   "name": "Tubbergen tops",
+   "reading": {
+    "header_row": 1
+   },
+   "schema": "ophiolite.layout/1",
+   "state": "active",
+   "target": "well-tops"
+  },
+  "made_at": 1791659853.7548132,
+  "made_by": "carol",
+  "name": "Tubbergen tops",
+  "needs_connection": false,
+  "state": "active",
+  "target": "well-tops",
+  "version": 1
+ },
+ "preview": {
+  "audience": {
+   "allowed": [
+    "alice",
+    "bob",
+    "carol",
+    "dave"
+   ],
+   "initiator": "carol"
+  },
+  "counts": {
+   "already_here": 0,
+   "land": 1,
+   "rows": 3,
+   "skipped_rows": 0,
+   "skipped_units": 0,
+   "units": 1
+  },
+  "declared": {
+   "depth_unit": "m"
+  },
+  "input_id": "759f862fef45092a97ebe9dcd27e0c7bf690e3baace59ea41b8bc301724e41cc",
+  "layout": {
+   "declarations": [
+    {
+     "class": "previously-reviewed",
+     "declaration": "depth_unit",
+     "supported_by": {
+      "layout": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+      "version": 1
+     }
+    }
+   ],
+   "fields": [
+    {
+     "class": "previously-reviewed",
+     "field": "md",
+     "how": "exact",
+     "reuse": "layout",
+     "supported_by": {
+      "layout": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+      "version": 1
+     }
+    },
+    {
+     "class": "previously-reviewed",
+     "field": "name",
+     "how": "exact",
+     "reuse": "layout",
+     "supported_by": {
+      "layout": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+      "version": 1
+     }
+    },
+    {
+     "class": "previously-reviewed",
+     "field": "tvd",
+     "how": "exact",
+     "reuse": "layout",
+     "supported_by": {
+      "layout": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+      "version": 1
+     }
+    },
+    {
+     "class": "previously-reviewed",
+     "field": "well",
+     "how": "exact",
+     "reuse": "layout",
+     "supported_by": {
+      "layout": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+      "version": 1
+     }
+    }
+   ],
+   "generation": 1,
+   "how": "exact",
+   "layout": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+   "name": "Tubbergen tops",
+   "version": 1
+  },
+  "no_well": [],
+  "not_kept": [],
+  "origin": "file",
+  "preview_digest": "7b7b6589ef4dd9a5202cad921ec8652348d559c88f6ad2354548a769503196a5",
+  "profile": "well-tops-csv/1",
+  "room": {
+   "uploads": 100
+  },
+  "skipped": [],
+  "skipped_units": [],
+  "source_name": "NLOG-tops-2.csv",
+  "target": "well-tops",
+  "units": [
+   {
+    "action": "land",
+    "code": null,
+    "first_row": 2,
+    "label": "NLOG-tops-2 - HON-GT-01",
+    "link": "unmatched",
+    "link_words": "No wellbore you can read has this name; not linked",
+    "rows": 3,
+    "same_name": false,
+    "unit": 0,
+    "well": "HON-GT-01",
+    "wellbore": null,
+    "words": null
+   }
+  ]
+ },
+ "preview_bad": {
+  "audience": {
+   "allowed": [
+    "alice",
+    "bob",
+    "carol",
+    "dave"
+   ],
+   "initiator": "carol"
+  },
+  "counts": {
+   "already_here": 0,
+   "land": 1,
+   "rows": 4,
+   "skipped_rows": 1,
+   "skipped_units": 0,
+   "units": 1
+  },
+  "declared": {
+   "depth_unit": "m"
+  },
+  "input_id": "43a22c3168e4c56783ea84f62b4daacaa7a8bf7dc5aaaa30f507639094bbbab0",
+  "layout": {
+   "declarations": [
+    {
+     "class": "previously-reviewed",
+     "declaration": "depth_unit",
+     "supported_by": {
+      "layout": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+      "version": 1
+     }
+    }
+   ],
+   "fields": [
+    {
+     "class": "previously-reviewed",
+     "field": "md",
+     "how": "exact",
+     "reuse": "layout",
+     "supported_by": {
+      "layout": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+      "version": 1
+     }
+    },
+    {
+     "class": "previously-reviewed",
+     "field": "name",
+     "how": "exact",
+     "reuse": "layout",
+     "supported_by": {
+      "layout": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+      "version": 1
+     }
+    },
+    {
+     "class": "previously-reviewed",
+     "field": "tvd",
+     "how": "exact",
+     "reuse": "layout",
+     "supported_by": {
+      "layout": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+      "version": 1
+     }
+    },
+    {
+     "class": "previously-reviewed",
+     "field": "well",
+     "how": "exact",
+     "reuse": "layout",
+     "supported_by": {
+      "layout": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+      "version": 1
+     }
+    }
+   ],
+   "generation": 1,
+   "how": "exact",
+   "layout": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+   "name": "Tubbergen tops",
+   "version": 1
+  },
+  "no_well": [],
+  "not_kept": [],
+  "origin": "file",
+  "preview_digest": "36a8e9f89fb9dff5a83f5a7bb5a169ecb562a48e8589b9dc9e9447d2b34bea93",
+  "profile": "well-tops-csv/1",
+  "room": {
+   "uploads": 99
+  },
+  "skipped": [
+   {
+    "code": "not-numeric",
+    "field": "md",
+    "row": 5,
+    "value": "x",
+    "well": "HON-GT-01"
+   }
+  ],
+  "skipped_units": [],
+  "source_name": "NLOG-tops-3.csv",
+  "target": "well-tops",
+  "units": [
+   {
+    "action": "land",
+    "code": null,
+    "first_row": 2,
+    "label": "NLOG-tops-3 - HON-GT-01",
+    "link": "unmatched",
+    "link_words": "No wellbore you can read has this name; not linked",
+    "rows": 3,
+    "same_name": false,
+    "unit": 0,
+    "well": "HON-GT-01",
+    "wellbore": null,
+    "words": null
+   }
+  ]
+ },
+ "read": {
+  "bytes": 141,
+  "columns": [
+   {
+    "name": "Well Name",
+    "type": "text"
+   },
+   {
+    "name": "Top",
+    "type": "text"
+   },
+   {
+    "name": "MD (m)",
+    "type": "float"
+   },
+   {
+    "name": "TVD (m)",
+    "type": "float"
+   }
+  ],
+  "context": {
+   "columns": 4,
+   "coverage": {
+    "not_read": [],
+    "read": [
+     "Well Name",
+     "Top",
+     "MD (m)",
+     "TVD (m)"
+    ]
+   },
+   "decisions": [
+    {
+     "class": "inferred",
+     "field": "format",
+     "sentence": "Read as text with separated columns, from its content.",
+     "status": "decided",
+     "technical": {
+      "profile": "table-csv/1"
+     },
+     "value": "csv"
+    },
+    {
+     "class": "inferred",
+     "field": "encoding",
+     "sentence": "Encoding: UTF-8. Every byte is valid UTF-8. Check it.",
+     "status": "decided",
+     "technical": {},
+     "value": "utf-8"
+    },
+    {
+     "class": "inferred",
+     "field": "delimiter",
+     "sentence": "Columns are separated by commas. Guessed from the file. Check it.",
+     "status": "decided",
+     "technical": {
+      "lines_with_this_width": 4,
+      "width": 4
+     },
+     "value": ","
+    },
+    {
+     "class": "inferred",
+     "field": "header_row",
+     "sentence": "Column names on line 1. Guessed from the names or values. Check it.",
+     "status": "decided",
+     "technical": {
+      "preamble_lines": 0
+     },
+     "value": 1
+    },
+    {
+     "class": "inferred",
+     "field": "decimal_mark",
+     "sentence": "Decimal mark: point. Guessed from the numbers. Check it.",
+     "status": "decided",
+     "technical": {},
+     "value": "."
+    }
+   ],
+   "format": "csv",
+   "profile": "table-csv/1",
+   "rows": 3,
+   "type": "table"
+  },
+  "fidelity": {
+   "losses": [
+    "Text formatting (quoting, spacing, number spelling, line endings) is kept only in the exact original",
+    "An empty cell is read as a missing value",
+    "Columns that are not read are listed by name and type; their values are kept only in the exact original"
+   ],
+   "preserved": [
+    "every value of the columns read, as the table content writes it"
+   ],
+   "status": "assessed",
+   "unknown_context": []
+  },
+  "input_id": "759f862fef45092a97ebe9dcd27e0c7bf690e3baace59ea41b8bc301724e41cc",
+  "layouts": [],
+  "name": "NLOG-tops-2.csv",
+  "sample_rows": [
+   {
+    "MD (m)": 0.0,
+    "TVD (m)": 0.0,
+    "Top": "North Sea Supergroup",
+    "Well Name": "HON-GT-01"
+   },
+   {
+    "MD (m)": 512.5,
+    "TVD (m)": 511.9,
+    "Top": "Chalk Group",
+    "Well Name": "HON-GT-01"
+   },
+   {
+    "MD (m)": 1204.0,
+    "TVD (m)": 1198.2,
+    "Top": "Rijnland Group",
+    "Well Name": "HON-GT-01"
+   }
+  ],
+  "schema_digest": "22c97ae9a3531420e054e5f8f4e08284915de5d163dde42a026359d5a45be1c2",
+  "targets": [
+   "wells",
+   "well-tops",
+   "deviation-survey",
+   "point-set",
+   "time-depth"
+  ]
+ },
+ "read_bad": {
+  "bytes": 167,
+  "columns": [
+   {
+    "name": "Well Name",
+    "type": "text"
+   },
+   {
+    "name": "Top",
+    "type": "text"
+   },
+   {
+    "name": "MD (m)",
+    "type": "text"
+   },
+   {
+    "name": "TVD (m)",
+    "type": "float"
+   }
+  ],
+  "context": {
+   "columns": 4,
+   "coverage": {
+    "not_read": [],
+    "read": [
+     "Well Name",
+     "Top",
+     "MD (m)",
+     "TVD (m)"
+    ]
+   },
+   "decisions": [
+    {
+     "class": "inferred",
+     "field": "format",
+     "sentence": "Read as text with separated columns, from its content.",
+     "status": "decided",
+     "technical": {
+      "profile": "table-csv/1"
+     },
+     "value": "csv"
+    },
+    {
+     "class": "inferred",
+     "field": "encoding",
+     "sentence": "Encoding: UTF-8. Every byte is valid UTF-8. Check it.",
+     "status": "decided",
+     "technical": {},
+     "value": "utf-8"
+    },
+    {
+     "class": "inferred",
+     "field": "delimiter",
+     "sentence": "Columns are separated by commas. Guessed from the file. Check it.",
+     "status": "decided",
+     "technical": {
+      "lines_with_this_width": 5,
+      "width": 4
+     },
+     "value": ","
+    },
+    {
+     "class": "inferred",
+     "field": "header_row",
+     "sentence": "Column names on line 1. Guessed from the names or values. Check it.",
+     "status": "decided",
+     "technical": {
+      "preamble_lines": 0
+     },
+     "value": 1
+    },
+    {
+     "class": "inferred",
+     "field": "decimal_mark",
+     "sentence": "Decimal mark: point. Guessed from the numbers. Check it.",
+     "status": "decided",
+     "technical": {},
+     "value": "."
+    }
+   ],
+   "format": "csv",
+   "profile": "table-csv/1",
+   "rows": 4,
+   "type": "table"
+  },
+  "fidelity": {
+   "losses": [
+    "Text formatting (quoting, spacing, number spelling, line endings) is kept only in the exact original",
+    "An empty cell is read as a missing value",
+    "Columns that are not read are listed by name and type; their values are kept only in the exact original"
+   ],
+   "preserved": [
+    "every value of the columns read, as the table content writes it"
+   ],
+   "status": "assessed",
+   "unknown_context": []
+  },
+  "input_id": "43a22c3168e4c56783ea84f62b4daacaa7a8bf7dc5aaaa30f507639094bbbab0",
+  "layouts": [],
+  "name": "NLOG-tops-3.csv",
+  "sample_rows": [
+   {
+    "MD (m)": "0.0",
+    "TVD (m)": 0.0,
+    "Top": "North Sea Supergroup",
+    "Well Name": "HON-GT-01"
+   },
+   {
+    "MD (m)": "512.5",
+    "TVD (m)": 511.9,
+    "Top": "Chalk Group",
+    "Well Name": "HON-GT-01"
+   },
+   {
+    "MD (m)": "1204.0",
+    "TVD (m)": 1198.2,
+    "Top": "Rijnland Group",
+    "Well Name": "HON-GT-01"
+   },
+   {
+    "MD (m)": "x",
+    "TVD (m)": 1300.0,
+    "Top": "Broken",
+    "Well Name": "HON-GT-01"
+   }
+  ],
+  "schema_digest": "1ee2b61641211e3a67f512cdc940b9454f6b91c25a5eacbc61596941bb1b47e8",
+  "targets": [
+   "wells",
+   "well-tops",
+   "deviation-survey",
+   "point-set",
+   "time-depth"
+  ]
+ },
+ "renamed": {
+  "asset_id": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+  "by": "header",
+  "changed_at": 1791659853.808432,
+  "changed_by": "bob",
+  "content_digest": "88bb0a60d282d894b1477fa058ac89ab5414f72ab57fc830d196e77b1b7880e6",
+  "generation": 2,
+  "head_version": 2,
+  "last_used": {
+   "at": 1791659853.765785,
+   "person": "carol",
+   "run_id": "9aa25d54dcad8f8d9724a4fc81f415c4fc1f933c13f4b740801537c8a7178c7d",
+   "version": 1
+  },
+  "layout": {
+   "declarations": {
+    "depth_unit": "m"
+   },
+   "layout_kind": "table-mapping",
+   "mapping": {
+    "fields": {
+     "md": "MD (m)",
+     "name": "Top",
+     "tvd": "TVD (m)",
+     "well": "Well Name"
+    }
+   },
+   "match": {
+    "by": "header",
+    "columns": [
+     "well name",
+     "top",
+     "md (m)",
+     "tvd (m)"
+    ],
+    "order_digest": "47930c7e8e00074686cd972a14fd22f178cce3a5a56ab4ef95ede43e89701893",
+    "set_digest": "9c7b8291be39c67cd54e97b97a2c5347fa78a8cb203db2abef54d6d221570fc6"
+   },
+   "name": "Tubbergen tops 2026",
+   "reading": {
+    "header_row": 1
+   },
+   "schema": "ophiolite.layout/1",
+   "state": "active",
+   "target": "well-tops"
+  },
+  "made_at": 1791659853.7548132,
+  "made_by": "carol",
+  "name": "Tubbergen tops 2026",
+  "needs_connection": false,
+  "state": "active",
+  "target": "well-tops",
+  "version": 2
+ },
+ "retired": {
+  "asset_id": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+  "by": "header",
+  "changed_at": 1791659853.8172674,
+  "changed_by": "bob",
+  "content_digest": "650c394261541d1de323a40d3e6334a0ff8c5f06e5e6115d398567342158be34",
+  "generation": 3,
+  "head_version": 3,
+  "last_used": {
+   "at": 1791659853.765785,
+   "person": "carol",
+   "run_id": "9aa25d54dcad8f8d9724a4fc81f415c4fc1f933c13f4b740801537c8a7178c7d",
+   "version": 1
+  },
+  "layout": {
+   "declarations": {
+    "depth_unit": "m"
+   },
+   "layout_kind": "table-mapping",
+   "mapping": {
+    "fields": {
+     "md": "MD (m)",
+     "name": "Top",
+     "tvd": "TVD (m)",
+     "well": "Well Name"
+    }
+   },
+   "match": {
+    "by": "header",
+    "columns": [
+     "well name",
+     "top",
+     "md (m)",
+     "tvd (m)"
+    ],
+    "order_digest": "47930c7e8e00074686cd972a14fd22f178cce3a5a56ab4ef95ede43e89701893",
+    "set_digest": "9c7b8291be39c67cd54e97b97a2c5347fa78a8cb203db2abef54d6d221570fc6"
+   },
+   "name": "Tubbergen tops 2026",
+   "reading": {
+    "header_row": 1
+   },
+   "schema": "ophiolite.layout/1",
+   "state": "retired",
+   "target": "well-tops"
+  },
+  "made_at": 1791659853.7548132,
+  "made_by": "carol",
+  "name": "Tubbergen tops 2026",
+  "needs_connection": false,
+  "state": "retired",
+  "target": "well-tops",
+  "version": 3
+ },
+ "saved": {
+  "asset_id": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+  "by": "header",
+  "changed_at": 1791659853.7548132,
+  "changed_by": "carol",
+  "content_digest": "10bfab4fcdc41274d876dafb2322c3a5680366d233349779c6467585af859b55",
+  "generation": 1,
+  "head_version": 1,
+  "last_used": null,
+  "layout": {
+   "declarations": {
+    "depth_unit": "m"
+   },
+   "layout_kind": "table-mapping",
+   "mapping": {
+    "fields": {
+     "md": "MD (m)",
+     "name": "Top",
+     "tvd": "TVD (m)",
+     "well": "Well Name"
+    }
+   },
+   "match": {
+    "by": "header",
+    "columns": [
+     "well name",
+     "top",
+     "md (m)",
+     "tvd (m)"
+    ],
+    "order_digest": "47930c7e8e00074686cd972a14fd22f178cce3a5a56ab4ef95ede43e89701893",
+    "set_digest": "9c7b8291be39c67cd54e97b97a2c5347fa78a8cb203db2abef54d6d221570fc6"
+   },
+   "name": "Tubbergen tops",
+   "reading": {
+    "header_row": 1
+   },
+   "schema": "ophiolite.layout/1",
+   "state": "active",
+   "target": "well-tops"
+  },
+  "made_at": 1791659853.7548132,
+  "made_by": "carol",
+  "name": "Tubbergen tops",
+  "needs_connection": false,
+  "state": "active",
+  "target": "well-tops",
+  "version": 1
+ },
+ "saved_new": {
+  "asset_id": "ec3465ec0ff2fafa5ef1c312a8f392cf9821e0c75a2165c70f7d0f545578e928",
+  "by": "header",
+  "changed_at": 1791659853.8458614,
+  "changed_by": "carol",
+  "content_digest": "12e88e5968221667dec0d6296b46bf83e4c8a1376fd82576ffd2d22bcfb8f747",
+  "generation": 1,
+  "head_version": 1,
+  "last_used": null,
+  "layout": {
+   "declarations": {
+    "depth_unit": "m"
+   },
+   "layout_kind": "table-mapping",
+   "mapping": {
+    "fields": {
+     "md": "MD (m)",
+     "name": "Top",
+     "tvd": "TVD (m)",
+     "well": "Well Name"
+    }
+   },
+   "match": {
+    "by": "header",
+    "columns": [
+     "well name",
+     "top",
+     "md (m)",
+     "tvd (m)"
+    ],
+    "order_digest": "47930c7e8e00074686cd972a14fd22f178cce3a5a56ab4ef95ede43e89701893",
+    "set_digest": "9c7b8291be39c67cd54e97b97a2c5347fa78a8cb203db2abef54d6d221570fc6"
+   },
+   "name": "NLOG-tops-2",
+   "reading": {
+    "header_row": 1
+   },
+   "schema": "ophiolite.layout/1",
+   "state": "active",
+   "target": "well-tops"
+  },
+  "made_at": 1791659853.8458614,
+  "made_by": "carol",
+  "name": "NLOG-tops-2",
+  "needs_connection": false,
+  "state": "active",
+  "target": "well-tops",
+  "version": 1
+ },
+ "schema_bob": {
+  "column_suggestions": {
+   "declarations": {
+    "crs": {
+     "class": "none",
+     "value": null
+    },
+    "depth_kind": {
+     "class": "none",
+     "value": null
+    },
+    "depth_reference": {
+     "class": "none",
+     "value": null
+    },
+    "depth_unit": {
+     "class": "none",
+     "value": null
+    }
+   },
+   "fields": {
+    "depth": {
+     "class": "none",
+     "column": null
+    },
+    "id": {
+     "apply": "prefilled",
+     "class": "previously-reviewed",
+     "column": "id",
+     "reuse": "same-table",
+     "supported_by": {
+      "mapping_version": 1
+     }
+    },
+    "name": {
+     "apply": "prefilled",
+     "class": "previously-reviewed",
+     "column": "name",
+     "reuse": "same-table",
+     "supported_by": {
+      "mapping_version": 1
+     }
+    },
+    "operator": {
+     "apply": "prefilled",
+     "by": "names",
+     "class": "inferred",
+     "column": "operator"
+    },
+    "x": {
+     "apply": "prefilled",
+     "class": "previously-reviewed",
+     "column": "x",
+     "reuse": "same-table",
+     "supported_by": {
+      "mapping_version": 1
+     }
+    },
+    "y": {
+     "apply": "prefilled",
+     "class": "previously-reviewed",
+     "column": "y",
+     "reuse": "same-table",
+     "supported_by": {
+      "mapping_version": 1
+     }
+    }
+   },
+   "schema": "ophiolite.mapping-suggestions/1",
+   "target": "wells",
+   "unused": []
+  },
+  "columns": [
+   {
+    "name": "id",
+    "nullable": true,
+    "primary_key": false,
+    "type": "TEXT"
+   },
+   {
+    "name": "name",
+    "nullable": true,
+    "primary_key": false,
+    "type": "TEXT"
+   },
+   {
+    "name": "x",
+    "nullable": true,
+    "primary_key": false,
+    "type": "REAL"
+   },
+   {
+    "name": "y",
+    "nullable": true,
+    "primary_key": false,
+    "type": "REAL"
+   },
+   {
+    "name": "operator",
+    "nullable": true,
+    "primary_key": false,
+    "type": "TEXT"
+   }
+  ],
+  "coordinate_systems": [
+   {
+    "area_of_use": [
+     -180,
+     -90,
+     180,
+     90
+    ],
+    "code": "EPSG:4326",
+    "geographic": true,
+    "name": "WGS 84 (longitude, latitude)",
+    "unit": "degrees"
+   },
+   {
+    "area_of_use": [
+     3.2,
+     50.75,
+     7.22,
+     53.7
+    ],
+    "code": "EPSG:28992",
+    "geographic": false,
+    "name": "Amersfoort / RD New",
+    "unit": "metres"
+   },
+   {
+    "area_of_use": [
+     0,
+     0,
+     6,
+     84
+    ],
+    "code": "EPSG:32631",
+    "geographic": false,
+    "name": "WGS 84 / UTM zone 31N",
+    "unit": "metres"
+   },
+   {
+    "area_of_use": [
+     0,
+     38.56,
+     6,
+     82.45
+    ],
+    "code": "EPSG:23031",
+    "geographic": false,
+    "name": "ED50 / UTM zone 31N",
+    "unit": "metres"
+   },
+   {
+    "area_of_use": [
+     -16.1,
+     33.26,
+     38.01,
+     84.73
+    ],
+    "code": "EPSG:4258",
+    "geographic": true,
+    "name": "ETRS89 (longitude, latitude)",
+    "unit": "degrees"
+   },
+   {
+    "area_of_use": [
+     -16.1,
+     25.71,
+     48.61,
+     84.73
+    ],
+    "code": "EPSG:4230",
+    "geographic": true,
+    "name": "ED50 (longitude, latitude)",
+    "unit": "degrees"
+   },
+   {
+    "area_of_use": [
+     3.2,
+     50.75,
+     7.22,
+     53.7
+    ],
+    "code": "EPSG:4289",
+    "geographic": true,
+    "name": "Amersfoort (longitude, latitude)",
+    "unit": "degrees"
+   },
+   {
+    "area_of_use": [
+     -6.0,
+     35.26,
+     0.01,
+     80.49
+    ],
+    "code": "EPSG:25830",
+    "geographic": false,
+    "name": "ETRS89 / UTM zone 30N",
+    "unit": "metres"
+   },
+   {
+    "area_of_use": [
+     0.0,
+     37.0,
+     6.01,
+     82.45
+    ],
+    "code": "EPSG:25831",
+    "geographic": false,
+    "name": "ETRS89 / UTM zone 31N",
+    "unit": "metres"
+   },
+   {
+    "area_of_use": [
+     6.0,
+     36.53,
+     12.01,
+     84.01
+    ],
+    "code": "EPSG:25832",
+    "geographic": false,
+    "name": "ETRS89 / UTM zone 32N",
+    "unit": "metres"
+   },
+   {
+    "area_of_use": [
+     -6.0,
+     0.0,
+     0.0,
+     84.0
+    ],
+    "code": "EPSG:32630",
+    "geographic": false,
+    "name": "WGS 84 / UTM zone 30N",
+    "unit": "metres"
+   },
+   {
+    "area_of_use": [
+     6.0,
+     0.0,
+     12.0,
+     84.0
+    ],
+    "code": "EPSG:32632",
+    "geographic": false,
+    "name": "WGS 84 / UTM zone 32N",
+    "unit": "metres"
+   },
+   {
+    "area_of_use": [
+     -6.0,
+     35.26,
+     0.01,
+     80.49
+    ],
+    "code": "EPSG:23030",
+    "geographic": false,
+    "name": "ED50 / UTM zone 30N",
+    "unit": "metres"
+   },
+   {
+    "area_of_use": [
+     5.99,
+     36.53,
+     12.0,
+     84.33
+    ],
+    "code": "EPSG:23032",
+    "geographic": false,
+    "name": "ED50 / UTM zone 32N",
+    "unit": "metres"
+   },
+   {
+    "area_of_use": [
+     -35.58,
+     24.6,
+     44.83,
+     84.73
+    ],
+    "code": "EPSG:3035",
+    "geographic": false,
+    "name": "ETRS89 / LAEA Europe",
+    "unit": "metres"
+   },
+   {
+    "area_of_use": [
+     2.5,
+     49.5,
+     6.4,
+     51.51
+    ],
+    "code": "EPSG:31370",
+    "geographic": false,
+    "name": "BD72 / Belgian Lambert 72",
+    "unit": "metres"
+   },
+   {
+    "area_of_use": [
+     -9.01,
+     49.75,
+     2.01,
+     61.01
+    ],
+    "code": "EPSG:27700",
+    "geographic": false,
+    "name": "OSGB36 / British National Grid",
+    "unit": "metres"
+   }
+  ],
+  "declared_crs": null,
+  "fields": {
+   "depth": "Depth",
+   "id": "Well identifier",
+   "name": "Well name",
+   "operator": "Operating organization",
+   "x": "Surface X",
+   "y": "Surface Y"
+  },
+  "limits": "up to 100,000 rows read in pages of 1,000 inside one read-only snapshot once the identity column is mapped; no upstream write or retained history",
+  "mapping": {
+   "crs": "EPSG:32631",
+   "entity": "well",
+   "extras": [
+    "operator"
+   ],
+   "fields": {
+    "id": "id",
+    "name": "name",
+    "x": "x",
+    "y": "y"
+   },
+   "schema_digest": "8f5dd06ebaebfc9b6e92c466a1e46e44c86a119b5102a761332b76e412e39001",
+   "version": 1
+  },
+  "representation": "well",
+  "row_count": 5,
+  "sample_rows": [
+   {
+    "id": "W-1",
+    "name": "Well 1",
+    "operator": "Op",
+    "x": 250010.0,
+    "y": 580010.0
+   },
+   {
+    "id": "W-2",
+    "name": "Well 2",
+    "operator": "Op",
+    "x": 250020.0,
+    "y": 580020.0
+   },
+   {
+    "id": "W-3",
+    "name": "Well 3",
+    "operator": "Op",
+    "x": 250030.0,
+    "y": 580030.0
+   },
+   {
+    "id": "W-4",
+    "name": "Well 4",
+    "operator": "Op",
+    "x": 250040.0,
+    "y": 580040.0
+   },
+   {
+    "id": "W-5",
+    "name": "Well 5",
+    "operator": "Op",
+    "x": 250050.0,
+    "y": 580050.0
+   }
+  ],
+  "schema_digest": "8f5dd06ebaebfc9b6e92c466a1e46e44c86a119b5102a761332b76e412e39001",
+  "suggested_fields": {
+   "depth": "",
+   "id": "id",
+   "name": "name",
+   "operator": "operator",
+   "x": "x",
+   "y": "y"
+  },
+  "target": "wells",
+  "versions": [
+   {
+    "crs": "EPSG:32631",
+    "entity": "well",
+    "extras": [
+     "operator"
+    ],
+    "fields": {
+     "id": "id",
+     "name": "name",
+     "x": "x",
+     "y": "y"
+    },
+    "schema_digest": "8f5dd06ebaebfc9b6e92c466a1e46e44c86a119b5102a761332b76e412e39001",
+    "version": 1
+   }
+  ]
+ },
+ "schema_offer": {
+  "column_suggestions": {
+   "declarations": {
+    "crs": {
+     "class": "none",
+     "value": null
+    },
+    "depth_kind": {
+     "class": "none",
+     "value": null
+    },
+    "depth_reference": {
+     "class": "none",
+     "value": null
+    },
+    "depth_unit": {
+     "class": "none",
+     "value": null
+    }
+   },
+   "fields": {
+    "depth": {
+     "class": "none",
+     "column": null
+    },
+    "id": {
+     "apply": "prefilled",
+     "by": "names",
+     "class": "inferred",
+     "column": "id"
+    },
+    "name": {
+     "apply": "prefilled",
+     "by": "names",
+     "class": "inferred",
+     "column": "name"
+    },
+    "operator": {
+     "apply": "prefilled",
+     "by": "names",
+     "class": "inferred",
+     "column": "operator"
+    },
+    "x": {
+     "apply": "prefilled",
+     "by": "names",
+     "class": "inferred",
+     "column": "x"
+    },
+    "y": {
+     "apply": "prefilled",
+     "by": "names",
+     "class": "inferred",
+     "column": "y"
+    }
+   },
+   "schema": "ophiolite.mapping-suggestions/1",
+   "target": "wells",
+   "unused": []
+  },
+  "columns": [
+   {
+    "name": "id",
+    "nullable": true,
+    "primary_key": false,
+    "type": "TEXT"
+   },
+   {
+    "name": "name",
+    "nullable": true,
+    "primary_key": false,
+    "type": "TEXT"
+   },
+   {
+    "name": "x",
+    "nullable": true,
+    "primary_key": false,
+    "type": "REAL"
+   },
+   {
+    "name": "y",
+    "nullable": true,
+    "primary_key": false,
+    "type": "REAL"
+   },
+   {
+    "name": "operator",
+    "nullable": true,
+    "primary_key": false,
+    "type": "TEXT"
+   }
+  ],
+  "coordinate_systems": [
+   {
+    "area_of_use": [
+     -180,
+     -90,
+     180,
+     90
+    ],
+    "code": "EPSG:4326",
+    "geographic": true,
+    "name": "WGS 84 (longitude, latitude)",
+    "unit": "degrees"
+   },
+   {
+    "area_of_use": [
+     3.2,
+     50.75,
+     7.22,
+     53.7
+    ],
+    "code": "EPSG:28992",
+    "geographic": false,
+    "name": "Amersfoort / RD New",
+    "unit": "metres"
+   },
+   {
+    "area_of_use": [
+     0,
+     0,
+     6,
+     84
+    ],
+    "code": "EPSG:32631",
+    "geographic": false,
+    "name": "WGS 84 / UTM zone 31N",
+    "unit": "metres"
+   },
+   {
+    "area_of_use": [
+     0,
+     38.56,
+     6,
+     82.45
+    ],
+    "code": "EPSG:23031",
+    "geographic": false,
+    "name": "ED50 / UTM zone 31N",
+    "unit": "metres"
+   },
+   {
+    "area_of_use": [
+     -16.1,
+     33.26,
+     38.01,
+     84.73
+    ],
+    "code": "EPSG:4258",
+    "geographic": true,
+    "name": "ETRS89 (longitude, latitude)",
+    "unit": "degrees"
+   },
+   {
+    "area_of_use": [
+     -16.1,
+     25.71,
+     48.61,
+     84.73
+    ],
+    "code": "EPSG:4230",
+    "geographic": true,
+    "name": "ED50 (longitude, latitude)",
+    "unit": "degrees"
+   },
+   {
+    "area_of_use": [
+     3.2,
+     50.75,
+     7.22,
+     53.7
+    ],
+    "code": "EPSG:4289",
+    "geographic": true,
+    "name": "Amersfoort (longitude, latitude)",
+    "unit": "degrees"
+   },
+   {
+    "area_of_use": [
+     -6.0,
+     35.26,
+     0.01,
+     80.49
+    ],
+    "code": "EPSG:25830",
+    "geographic": false,
+    "name": "ETRS89 / UTM zone 30N",
+    "unit": "metres"
+   },
+   {
+    "area_of_use": [
+     0.0,
+     37.0,
+     6.01,
+     82.45
+    ],
+    "code": "EPSG:25831",
+    "geographic": false,
+    "name": "ETRS89 / UTM zone 31N",
+    "unit": "metres"
+   },
+   {
+    "area_of_use": [
+     6.0,
+     36.53,
+     12.01,
+     84.01
+    ],
+    "code": "EPSG:25832",
+    "geographic": false,
+    "name": "ETRS89 / UTM zone 32N",
+    "unit": "metres"
+   },
+   {
+    "area_of_use": [
+     -6.0,
+     0.0,
+     0.0,
+     84.0
+    ],
+    "code": "EPSG:32630",
+    "geographic": false,
+    "name": "WGS 84 / UTM zone 30N",
+    "unit": "metres"
+   },
+   {
+    "area_of_use": [
+     6.0,
+     0.0,
+     12.0,
+     84.0
+    ],
+    "code": "EPSG:32632",
+    "geographic": false,
+    "name": "WGS 84 / UTM zone 32N",
+    "unit": "metres"
+   },
+   {
+    "area_of_use": [
+     -6.0,
+     35.26,
+     0.01,
+     80.49
+    ],
+    "code": "EPSG:23030",
+    "geographic": false,
+    "name": "ED50 / UTM zone 30N",
+    "unit": "metres"
+   },
+   {
+    "area_of_use": [
+     5.99,
+     36.53,
+     12.0,
+     84.33
+    ],
+    "code": "EPSG:23032",
+    "geographic": false,
+    "name": "ED50 / UTM zone 32N",
+    "unit": "metres"
+   },
+   {
+    "area_of_use": [
+     -35.58,
+     24.6,
+     44.83,
+     84.73
+    ],
+    "code": "EPSG:3035",
+    "geographic": false,
+    "name": "ETRS89 / LAEA Europe",
+    "unit": "metres"
+   },
+   {
+    "area_of_use": [
+     2.5,
+     49.5,
+     6.4,
+     51.51
+    ],
+    "code": "EPSG:31370",
+    "geographic": false,
+    "name": "BD72 / Belgian Lambert 72",
+    "unit": "metres"
+   },
+   {
+    "area_of_use": [
+     -9.01,
+     49.75,
+     2.01,
+     61.01
+    ],
+    "code": "EPSG:27700",
+    "geographic": false,
+    "name": "OSGB36 / British National Grid",
+    "unit": "metres"
+   }
+  ],
+  "declared_crs": null,
+  "fields": {
+   "depth": "Depth",
+   "id": "Well identifier",
+   "name": "Well name",
+   "operator": "Operating organization",
+   "x": "Surface X",
+   "y": "Surface Y"
+  },
+  "layouts": [
+   {
+    "asset_id": "db9b139089a9d7ca01987e2c6962f60131aaf38a01d610de25827dbf34c5701c",
+    "fits": true,
+    "generation": 1,
+    "mapping": {
+     "crs": "EPSG:32631",
+     "entity": "well",
+     "extras": [
+      "operator"
+     ],
+     "fields": {
+      "id": "id",
+      "name": "name",
+      "x": "x",
+      "y": "y"
+     },
+     "schema_digest": "8f5dd06ebaebfc9b6e92c466a1e46e44c86a119b5102a761332b76e412e39001"
+    },
+    "name": "Groningen wells",
+    "version": 1
+   }
+  ],
+  "limits": "up to 100,000 rows read in pages of 1,000 inside one read-only snapshot once the identity column is mapped; no upstream write or retained history",
+  "mapping": null,
+  "representation": "well",
+  "row_count": 5,
+  "sample_rows": [
+   {
+    "id": "W-1",
+    "name": "Well 1",
+    "operator": "Op",
+    "x": 250010.0,
+    "y": 580010.0
+   },
+   {
+    "id": "W-2",
+    "name": "Well 2",
+    "operator": "Op",
+    "x": 250020.0,
+    "y": 580020.0
+   },
+   {
+    "id": "W-3",
+    "name": "Well 3",
+    "operator": "Op",
+    "x": 250030.0,
+    "y": 580030.0
+   },
+   {
+    "id": "W-4",
+    "name": "Well 4",
+    "operator": "Op",
+    "x": 250040.0,
+    "y": 580040.0
+   },
+   {
+    "id": "W-5",
+    "name": "Well 5",
+    "operator": "Op",
+    "x": 250050.0,
+    "y": 580050.0
+   }
+  ],
+  "schema_digest": "8f5dd06ebaebfc9b6e92c466a1e46e44c86a119b5102a761332b76e412e39001",
+  "suggested_fields": {
+   "depth": "",
+   "id": "id",
+   "name": "name",
+   "operator": "operator",
+   "x": "x",
+   "y": "y"
+  },
+  "target": "wells",
+  "versions": []
+ },
+ "second": {
+  "asset_id": "55c7c81fd0e470fd53938d67987c08365e019d20c8eb987aaa0b9ecfd3964854",
+  "by": "header",
+  "changed_at": 1791659853.8315852,
+  "changed_by": "carol",
+  "content_digest": "c86fc4daa7c25592add61715ebe9a47c77a8ce11aa2b3a005c4c12fc15a94ddc",
+  "generation": 1,
+  "head_version": 1,
+  "last_used": null,
+  "layout": {
+   "declarations": {
+    "depth_unit": "m"
+   },
+   "layout_kind": "table-mapping",
+   "mapping": {
+    "fields": {
+     "md": "MD (m)",
+     "name": "Top",
+     "tvd": "TVD (m)",
+     "well": "Well Name"
+    }
+   },
+   "match": {
+    "by": "header",
+    "columns": [
+     "well name",
+     "top",
+     "md (m)",
+     "tvd (m)"
+    ],
+    "order_digest": "47930c7e8e00074686cd972a14fd22f178cce3a5a56ab4ef95ede43e89701893",
+    "set_digest": "9c7b8291be39c67cd54e97b97a2c5347fa78a8cb203db2abef54d6d221570fc6"
+   },
+   "name": "Other tops",
+   "reading": {
+    "header_row": 1
+   },
+   "schema": "ophiolite.layout/1",
+   "state": "active",
+   "target": "well-tops"
+  },
+  "made_at": 1791659853.8315852,
+  "made_by": "carol",
+  "name": "Other tops",
+  "needs_connection": false,
+  "state": "active",
+  "target": "well-tops",
+  "version": 1
+ },
+ "stale_start": {
+  "body": {
+   "code": "changed",
+   "error": "This layout changed after you reviewed it. Look at it again.",
+   "refusal": 16
+  },
+  "status": 409
+ },
+ "started": {
+  "approved_at": 1791659853.76511,
+  "approved_by": "carol",
+  "audience": [
+   "carol"
+  ],
+  "connection_id": null,
+  "counts": {
+   "already_here": 0,
+   "created": 0,
+   "linked": 0,
+   "planned": 1,
+   "removed": 0,
+   "skipped": 0,
+   "units": 1
+  },
+  "created_at": 1791659853.76511,
+  "id": "9aa25d54dcad8f8d9724a4fc81f415c4fc1f933c13f4b740801537c8a7178c7d",
+  "initiator": "carol",
+  "input_id": "759f862fef45092a97ebe9dcd27e0c7bf690e3baace59ea41b8bc301724e41cc",
+  "key": "NLOG-tops-2.csv",
+  "layout": {
+   "declarations": [
+    {
+     "class": "previously-reviewed",
+     "declaration": "depth_unit",
+     "supported_by": {
+      "layout": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+      "version": 1
+     }
+    }
+   ],
+   "fields": [
+    {
+     "class": "previously-reviewed",
+     "field": "md",
+     "how": "exact",
+     "reuse": "layout",
+     "supported_by": {
+      "layout": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+      "version": 1
+     }
+    },
+    {
+     "class": "previously-reviewed",
+     "field": "name",
+     "how": "exact",
+     "reuse": "layout",
+     "supported_by": {
+      "layout": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+      "version": 1
+     }
+    },
+    {
+     "class": "previously-reviewed",
+     "field": "tvd",
+     "how": "exact",
+     "reuse": "layout",
+     "supported_by": {
+      "layout": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+      "version": 1
+     }
+    },
+    {
+     "class": "previously-reviewed",
+     "field": "well",
+     "how": "exact",
+     "reuse": "layout",
+     "supported_by": {
+      "layout": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+      "version": 1
+     }
+    }
+   ],
+   "generation": 1,
+   "how": "exact",
+   "layout": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+   "name": "Tubbergen tops",
+   "version": 1
+  },
+  "origin": "file",
+  "plan_digest": "7b7b6589ef4dd9a5202cad921ec8652348d559c88f6ad2354548a769503196a5",
+  "project_id": "p",
+  "reason": null,
+  "release_id": null,
+  "state": "importing",
+  "target": "well-tops",
+  "totals": {
+   "no_well": 0,
+   "rows": 3,
+   "skipped_rows": 0,
+   "skipped_units": 0,
+   "units": 1
+  },
+  "units": [
+   {
+    "asset_id": null,
+    "association_id": null,
+    "label": "NLOG-tops-2 - HON-GT-01",
+    "outcome": "planned",
+    "reason": "unmatched",
+    "receipt": null,
+    "revision": null,
+    "unit": 0,
+    "wellbore": null,
+    "words": "No wellbore you can read has this name; not linked"
+   }
+  ],
+  "updated_at": 1791659853.76511,
+  "words": "Importing"
+ },
+ "stepped": {
+  "approved_at": 1791659853.76511,
+  "approved_by": "carol",
+  "audience": [
+   "carol"
+  ],
+  "connection_id": null,
+  "counts": {
+   "already_here": 0,
+   "created": 1,
+   "linked": 0,
+   "planned": 0,
+   "removed": 0,
+   "skipped": 0,
+   "units": 1
+  },
+  "created_at": 1791659853.76511,
+  "id": "9aa25d54dcad8f8d9724a4fc81f415c4fc1f933c13f4b740801537c8a7178c7d",
+  "initiator": "carol",
+  "input_id": "759f862fef45092a97ebe9dcd27e0c7bf690e3baace59ea41b8bc301724e41cc",
+  "key": "NLOG-tops-2.csv",
+  "layout": {
+   "declarations": [
+    {
+     "class": "previously-reviewed",
+     "declaration": "depth_unit",
+     "supported_by": {
+      "layout": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+      "version": 1
+     }
+    }
+   ],
+   "fields": [
+    {
+     "class": "previously-reviewed",
+     "field": "md",
+     "how": "exact",
+     "reuse": "layout",
+     "supported_by": {
+      "layout": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+      "version": 1
+     }
+    },
+    {
+     "class": "previously-reviewed",
+     "field": "name",
+     "how": "exact",
+     "reuse": "layout",
+     "supported_by": {
+      "layout": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+      "version": 1
+     }
+    },
+    {
+     "class": "previously-reviewed",
+     "field": "tvd",
+     "how": "exact",
+     "reuse": "layout",
+     "supported_by": {
+      "layout": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+      "version": 1
+     }
+    },
+    {
+     "class": "previously-reviewed",
+     "field": "well",
+     "how": "exact",
+     "reuse": "layout",
+     "supported_by": {
+      "layout": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+      "version": 1
+     }
+    }
+   ],
+   "generation": 1,
+   "how": "exact",
+   "layout": "9c4ee074a48b6ca404dbbe05f79d6af7aea901e00b0989225c0a9fa1d0cf4c4a",
+   "name": "Tubbergen tops",
+   "version": 1
+  },
+  "origin": "file",
+  "plan_digest": "7b7b6589ef4dd9a5202cad921ec8652348d559c88f6ad2354548a769503196a5",
+  "project_id": "p",
+  "reason": null,
+  "release_id": null,
+  "state": "complete",
+  "target": "well-tops",
+  "totals": {
+   "no_well": 0,
+   "rows": 3,
+   "skipped_rows": 0,
+   "skipped_units": 0,
+   "units": 1
+  },
+  "units": [
+   {
+    "asset_id": "88916bacca75af6c0689d503b40e0d1dcaaf27fbfc5ddf3e7fe776c8cf160052",
+    "association_id": null,
+    "label": "NLOG-tops-2 - HON-GT-01",
+    "outcome": "landed",
+    "reason": "unmatched",
+    "receipt": "created",
+    "revision": "f4bdc6b937d498f0e4677101b5779cb998c1ad70e9ed4a64dc53f316605e1816",
+    "unit": 0,
+    "wellbore": null,
+    "words": "No wellbore you can read has this name; not linked"
+   }
+  ],
+  "updated_at": 1791659853.8008862,
+  "words": "Finished"
+ },
+ "viewer": {
+  "body": {
+   "code": "edit-required",
+   "error": "Only people who can edit this project can change layouts. Ask a project administrator for edit access.",
+   "refusal": 1
+  },
+  "status": 403
+ }
+}

@@ -58,3 +58,25 @@ axis.set_xlabel('Rows'); axis.set_title(f'{table.name}: one import')
 fig.savefig('a-spreadsheet-becomes-wells-and-tops.png', bbox_inches='tight')
 plt.close(fig)
 print('Wrote a-spreadsheet-becomes-wells-and-tops.png')
+# %% [markdown]
+# ## Keep the layout for the next table
+# Remember how this table's columns were mapped as a project layout. The next table with the same columns is added by
+# naming the layout; a layout is never used unless you name it. Download the layout to a file: imported into another
+# project it is added there, and imported into the project it came from it is already here.
+# %%
+if synthetic():
+    print('Synthetic mode: nothing is sent. In your project the layout "Gallery tops" is remembered, the next table with '
+          'these columns is added by naming it, and its download imported again says: Already here.')
+else:
+    from ophiolite.layouts import import_lines
+    layouts = client.layouts()
+    name = f'Gallery tops {TAG}'
+    layouts.save('well-tops', name, ['Well', 'Formation', 'Top MD (m)'], mapping, declarations={'depth_unit': 'm'})
+    later = table.with_name(f'tops-{TAG}-later.csv')
+    with later.open('w', newline='') as out:
+        writer = csv.writer(out); writer.writerow(['Well', 'Formation', 'Top MD (m)'])
+        writer.writerows([(f'GALLERY-{TAG} 3', 'North Sea Group', 0.0), (f'GALLERY-{TAG} 3', 'Chalk Group', 790.0)])
+    kept = client.imports.from_table(later, layout=name, audience=[])
+    print('\n'.join(result_lines(kept['run'], kept['preview'])))
+    downloaded = layouts.export_to(table.with_name(name + '.layout.json'), [name])
+    print('\n'.join(import_lines(layouts.import_(downloaded))))
