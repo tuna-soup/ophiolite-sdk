@@ -822,6 +822,18 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/context/new-data",
+    "function": "postProjectsProjectContextNewData",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/context/new-data-save",
+    "function": "postProjectsProjectContextNewDataSave",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/context/policy",
     "function": "postProjectsProjectContextPolicy",
     "request": "schema",
@@ -992,6 +1004,24 @@
   {
     "operation": "POST /api/v1/projects/{project}/inbox/mark-read",
     "function": "postProjectsProjectInboxMarkRead",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/las-uploads/audience",
+    "function": "postProjectsProjectLasUploadsAudience",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/las-uploads/audience-preview",
+    "function": "postProjectsProjectLasUploadsAudiencePreview",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/las-uploads/audience-save",
+    "function": "postProjectsProjectLasUploadsAudienceSave",
     "request": "schema",
     "response": "schema"
   },
