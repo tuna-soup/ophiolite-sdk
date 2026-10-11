@@ -893,6 +893,25 @@
                   "type": "string"
                 }
               }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "redirect": {
+                      "description": "The application's redirect address with consent and state, or error=access_denied",
+                      "title": "Redirect",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "redirect"
+                  ],
+                  "title": "ConsentDecision",
+                  "type": "object"
+                }
+              }
             }
           },
           "400": {
@@ -1001,6 +1020,49 @@
                   "type": "string"
                 }
               }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "application": {
+                      "$ref": "#/components/schemas/Named"
+                    },
+                    "organization": {
+                      "$ref": "#/components/schemas/Named"
+                    },
+                    "scopes": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Scopes",
+                      "type": "array"
+                    },
+                    "redirect_uri": {
+                      "title": "Redirect Uri",
+                      "type": "string"
+                    },
+                    "projects": {
+                      "description": "The projects you may limit the approval to",
+                      "items": {
+                        "$ref": "#/components/schemas/Named"
+                      },
+                      "title": "Projects",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "application",
+                    "organization",
+                    "scopes",
+                    "redirect_uri",
+                    "projects"
+                  ],
+                  "title": "ConsentRequestView",
+                  "type": "object"
+                }
+              }
             }
           },
           "400": {
@@ -1086,6 +1148,24 @@
                 "description": "This request's id; every response carries it, and an error body repeats it as request_id",
                 "schema": {
                   "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "revoked": {
+                      "title": "Revoked",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "revoked"
+                  ],
+                  "title": "ConsentRevoked",
+                  "type": "object"
                 }
               }
             }
@@ -1175,6 +1255,27 @@
                   "type": "string"
                 }
               }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "applications": {
+                      "items": {
+                        "$ref": "#/components/schemas/ApprovedApplication"
+                      },
+                      "title": "Applications",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "applications"
+                  ],
+                  "title": "ApprovedApplications",
+                  "type": "object"
+                }
+              }
             }
           },
           "400": {
@@ -1220,9 +1321,11 @@
             "application/json": {
               "schema": {
                 "additionalProperties": false,
+                "description": "No fields; send an empty object.",
                 "properties": {},
                 "title": "ConsentList",
-                "type": "object"
+                "type": "object",
+                "x-ophiolite-no-fields": true
               }
             }
           }
@@ -32756,6 +32859,136 @@
                   "type": "string"
                 }
               }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "An organisation's registered application (never its secret).",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "owner": {
+                      "title": "Owner",
+                      "type": "string"
+                    },
+                    "row_version": {
+                      "title": "Row Version",
+                      "type": "integer"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "redirect_uris": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Redirect Uris",
+                      "type": "array"
+                    },
+                    "capability": {
+                      "const": 3,
+                      "title": "Capability",
+                      "type": "integer"
+                    },
+                    "scopes": {
+                      "items": {
+                        "enum": [
+                          "read",
+                          "write"
+                        ],
+                        "type": "string"
+                      },
+                      "title": "Scopes",
+                      "type": "array"
+                    },
+                    "client_type": {
+                      "enum": [
+                        "confidential",
+                        "public"
+                      ],
+                      "title": "Client Type",
+                      "type": "string"
+                    },
+                    "provisioning_state": {
+                      "enum": [
+                        "pending",
+                        "provisioned",
+                        "error"
+                      ],
+                      "title": "Provisioning State",
+                      "type": "string"
+                    },
+                    "access_state": {
+                      "enum": [
+                        "active",
+                        "suspended",
+                        "pending_activation"
+                      ],
+                      "title": "Access State",
+                      "type": "string"
+                    },
+                    "client_id": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Client Id"
+                    },
+                    "created_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Created At"
+                    },
+                    "rotated_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Rotated At"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organization_id",
+                    "owner",
+                    "row_version",
+                    "name",
+                    "redirect_uris",
+                    "capability",
+                    "scopes",
+                    "client_type",
+                    "provisioning_state",
+                    "access_state",
+                    "client_id",
+                    "created_at",
+                    "rotated_at"
+                  ],
+                  "title": "RegisteredApplication",
+                  "type": "object"
+                }
+              }
             }
           },
           "400": {
@@ -32855,6 +33088,27 @@
                   "type": "string"
                 }
               }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "applications": {
+                      "items": {
+                        "$ref": "#/components/schemas/RegisteredApplication"
+                      },
+                      "title": "Applications",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "applications"
+                  ],
+                  "title": "RegisteredApplications",
+                  "type": "object"
+                }
+              }
             }
           },
           "400": {
@@ -32939,6 +33193,148 @@
                 "description": "This request's id; every response carries it, and an error body repeats it as request_id",
                 "schema": {
                   "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "owner": {
+                      "title": "Owner",
+                      "type": "string"
+                    },
+                    "row_version": {
+                      "title": "Row Version",
+                      "type": "integer"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "redirect_uris": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Redirect Uris",
+                      "type": "array"
+                    },
+                    "capability": {
+                      "const": 3,
+                      "title": "Capability",
+                      "type": "integer"
+                    },
+                    "scopes": {
+                      "items": {
+                        "enum": [
+                          "read",
+                          "write"
+                        ],
+                        "type": "string"
+                      },
+                      "title": "Scopes",
+                      "type": "array"
+                    },
+                    "client_type": {
+                      "enum": [
+                        "confidential",
+                        "public"
+                      ],
+                      "title": "Client Type",
+                      "type": "string"
+                    },
+                    "provisioning_state": {
+                      "enum": [
+                        "pending",
+                        "provisioned",
+                        "error"
+                      ],
+                      "title": "Provisioning State",
+                      "type": "string"
+                    },
+                    "access_state": {
+                      "enum": [
+                        "active",
+                        "suspended",
+                        "pending_activation"
+                      ],
+                      "title": "Access State",
+                      "type": "string"
+                    },
+                    "client_id": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Client Id"
+                    },
+                    "created_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Created At"
+                    },
+                    "rotated_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Rotated At"
+                    },
+                    "client_secret": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "The provider client secret, answered this once (confidential clients)",
+                      "title": "Client Secret"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organization_id",
+                    "owner",
+                    "row_version",
+                    "name",
+                    "redirect_uris",
+                    "capability",
+                    "scopes",
+                    "client_type",
+                    "provisioning_state",
+                    "access_state",
+                    "client_id",
+                    "created_at",
+                    "rotated_at"
+                  ],
+                  "title": "RegisteredApplicationSecret",
+                  "type": "object"
                 }
               }
             }
@@ -33040,6 +33436,136 @@
                   "type": "string"
                 }
               }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "An organisation's registered application (never its secret).",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "owner": {
+                      "title": "Owner",
+                      "type": "string"
+                    },
+                    "row_version": {
+                      "title": "Row Version",
+                      "type": "integer"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "redirect_uris": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Redirect Uris",
+                      "type": "array"
+                    },
+                    "capability": {
+                      "const": 3,
+                      "title": "Capability",
+                      "type": "integer"
+                    },
+                    "scopes": {
+                      "items": {
+                        "enum": [
+                          "read",
+                          "write"
+                        ],
+                        "type": "string"
+                      },
+                      "title": "Scopes",
+                      "type": "array"
+                    },
+                    "client_type": {
+                      "enum": [
+                        "confidential",
+                        "public"
+                      ],
+                      "title": "Client Type",
+                      "type": "string"
+                    },
+                    "provisioning_state": {
+                      "enum": [
+                        "pending",
+                        "provisioned",
+                        "error"
+                      ],
+                      "title": "Provisioning State",
+                      "type": "string"
+                    },
+                    "access_state": {
+                      "enum": [
+                        "active",
+                        "suspended",
+                        "pending_activation"
+                      ],
+                      "title": "Access State",
+                      "type": "string"
+                    },
+                    "client_id": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Client Id"
+                    },
+                    "created_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Created At"
+                    },
+                    "rotated_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Rotated At"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organization_id",
+                    "owner",
+                    "row_version",
+                    "name",
+                    "redirect_uris",
+                    "capability",
+                    "scopes",
+                    "client_type",
+                    "provisioning_state",
+                    "access_state",
+                    "client_id",
+                    "created_at",
+                    "rotated_at"
+                  ],
+                  "title": "RegisteredApplication",
+                  "type": "object"
+                }
+              }
             }
           },
           "400": {
@@ -33137,6 +33663,148 @@
                 "description": "This request's id; every response carries it, and an error body repeats it as request_id",
                 "schema": {
                   "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "owner": {
+                      "title": "Owner",
+                      "type": "string"
+                    },
+                    "row_version": {
+                      "title": "Row Version",
+                      "type": "integer"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "redirect_uris": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Redirect Uris",
+                      "type": "array"
+                    },
+                    "capability": {
+                      "const": 3,
+                      "title": "Capability",
+                      "type": "integer"
+                    },
+                    "scopes": {
+                      "items": {
+                        "enum": [
+                          "read",
+                          "write"
+                        ],
+                        "type": "string"
+                      },
+                      "title": "Scopes",
+                      "type": "array"
+                    },
+                    "client_type": {
+                      "enum": [
+                        "confidential",
+                        "public"
+                      ],
+                      "title": "Client Type",
+                      "type": "string"
+                    },
+                    "provisioning_state": {
+                      "enum": [
+                        "pending",
+                        "provisioned",
+                        "error"
+                      ],
+                      "title": "Provisioning State",
+                      "type": "string"
+                    },
+                    "access_state": {
+                      "enum": [
+                        "active",
+                        "suspended",
+                        "pending_activation"
+                      ],
+                      "title": "Access State",
+                      "type": "string"
+                    },
+                    "client_id": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Client Id"
+                    },
+                    "created_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Created At"
+                    },
+                    "rotated_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Rotated At"
+                    },
+                    "client_secret": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "The provider client secret, answered this once (confidential clients)",
+                      "title": "Client Secret"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organization_id",
+                    "owner",
+                    "row_version",
+                    "name",
+                    "redirect_uris",
+                    "capability",
+                    "scopes",
+                    "client_type",
+                    "provisioning_state",
+                    "access_state",
+                    "client_id",
+                    "created_at",
+                    "rotated_at"
+                  ],
+                  "title": "RegisteredApplicationSecret",
+                  "type": "object"
                 }
               }
             }
@@ -33257,6 +33925,148 @@
                   "type": "string"
                 }
               }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "owner": {
+                      "title": "Owner",
+                      "type": "string"
+                    },
+                    "row_version": {
+                      "title": "Row Version",
+                      "type": "integer"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "redirect_uris": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Redirect Uris",
+                      "type": "array"
+                    },
+                    "capability": {
+                      "const": 3,
+                      "title": "Capability",
+                      "type": "integer"
+                    },
+                    "scopes": {
+                      "items": {
+                        "enum": [
+                          "read",
+                          "write"
+                        ],
+                        "type": "string"
+                      },
+                      "title": "Scopes",
+                      "type": "array"
+                    },
+                    "client_type": {
+                      "enum": [
+                        "confidential",
+                        "public"
+                      ],
+                      "title": "Client Type",
+                      "type": "string"
+                    },
+                    "provisioning_state": {
+                      "enum": [
+                        "pending",
+                        "provisioned",
+                        "error"
+                      ],
+                      "title": "Provisioning State",
+                      "type": "string"
+                    },
+                    "access_state": {
+                      "enum": [
+                        "active",
+                        "suspended",
+                        "pending_activation"
+                      ],
+                      "title": "Access State",
+                      "type": "string"
+                    },
+                    "client_id": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Client Id"
+                    },
+                    "created_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Created At"
+                    },
+                    "rotated_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Rotated At"
+                    },
+                    "client_secret": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "The provider client secret, answered this once (confidential clients)",
+                      "title": "Client Secret"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organization_id",
+                    "owner",
+                    "row_version",
+                    "name",
+                    "redirect_uris",
+                    "capability",
+                    "scopes",
+                    "client_type",
+                    "provisioning_state",
+                    "access_state",
+                    "client_id",
+                    "created_at",
+                    "rotated_at"
+                  ],
+                  "title": "RegisteredApplicationSecret",
+                  "type": "object"
+                }
+              }
             }
           },
           "400": {
@@ -33354,6 +34164,136 @@
                 "description": "This request's id; every response carries it, and an error body repeats it as request_id",
                 "schema": {
                   "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "An organisation's registered application (never its secret).",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "owner": {
+                      "title": "Owner",
+                      "type": "string"
+                    },
+                    "row_version": {
+                      "title": "Row Version",
+                      "type": "integer"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "redirect_uris": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Redirect Uris",
+                      "type": "array"
+                    },
+                    "capability": {
+                      "const": 3,
+                      "title": "Capability",
+                      "type": "integer"
+                    },
+                    "scopes": {
+                      "items": {
+                        "enum": [
+                          "read",
+                          "write"
+                        ],
+                        "type": "string"
+                      },
+                      "title": "Scopes",
+                      "type": "array"
+                    },
+                    "client_type": {
+                      "enum": [
+                        "confidential",
+                        "public"
+                      ],
+                      "title": "Client Type",
+                      "type": "string"
+                    },
+                    "provisioning_state": {
+                      "enum": [
+                        "pending",
+                        "provisioned",
+                        "error"
+                      ],
+                      "title": "Provisioning State",
+                      "type": "string"
+                    },
+                    "access_state": {
+                      "enum": [
+                        "active",
+                        "suspended",
+                        "pending_activation"
+                      ],
+                      "title": "Access State",
+                      "type": "string"
+                    },
+                    "client_id": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Client Id"
+                    },
+                    "created_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Created At"
+                    },
+                    "rotated_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Rotated At"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organization_id",
+                    "owner",
+                    "row_version",
+                    "name",
+                    "redirect_uris",
+                    "capability",
+                    "scopes",
+                    "client_type",
+                    "provisioning_state",
+                    "access_state",
+                    "client_id",
+                    "created_at",
+                    "rotated_at"
+                  ],
+                  "title": "RegisteredApplication",
+                  "type": "object"
                 }
               }
             }
@@ -85909,6 +86849,393 @@
         }
       }
     },
+    "/api/v1/applications/exchange": {
+      "post": {
+        "summary": "E33: exchange a provider access token and a consent handle for an application credential",
+        "description": "Machine only: from the application's server, with no cookie, Origin or Authorization header. The provider token is introspected (issuer, audience, client); the consent must be current. 503 when registered applications are not configured.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "access_token": {
+                    "maxLength": 16383,
+                    "minLength": 21,
+                    "title": "Access Token",
+                    "type": "string"
+                  },
+                  "consent": {
+                    "maxLength": 4096,
+                    "minLength": 20,
+                    "title": "Consent",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "access_token",
+                  "consent"
+                ],
+                "title": "Exchange",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "An opaque oph_app_ credential",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "applications/exchange: an opaque application credential (oph_app_...).",
+                  "properties": {
+                    "access_token": {
+                      "title": "Access Token",
+                      "type": "string"
+                    },
+                    "token_type": {
+                      "const": "Bearer",
+                      "title": "Token Type",
+                      "type": "string"
+                    },
+                    "expires_in": {
+                      "title": "Expires In",
+                      "type": "integer"
+                    },
+                    "scopes": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Scopes",
+                      "type": "array"
+                    },
+                    "projects": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Projects"
+                    }
+                  },
+                  "required": [
+                    "access_token",
+                    "token_type",
+                    "expires_in",
+                    "scopes",
+                    "projects"
+                  ],
+                  "title": "ApplicationCredential",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        }
+      }
+    },
+    "/api/v1/applications/register": {
+      "post": {
+        "summary": "E33: RFC 7591 dynamic client registration (off unless the deployment enables it)",
+        "description": "Machine only: from the application's server, with no cookie, Origin or Authorization header. The application is created pending activation by an owner of the receiving organisation; 404 when registration is not enabled.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "C5: the RFC 7591 client metadata this deployment honours; other metadata is ignored (RFC 7591 \u00a72).",
+                "properties": {
+                  "client_name": {
+                    "maxLength": 120,
+                    "minLength": 1,
+                    "title": "Client Name",
+                    "type": "string"
+                  },
+                  "redirect_uris": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 10,
+                    "minItems": 1,
+                    "title": "Redirect Uris",
+                    "type": "array"
+                  },
+                  "token_endpoint_auth_method": {
+                    "default": "client_secret_basic",
+                    "title": "Token Endpoint Auth Method",
+                    "type": "string"
+                  },
+                  "scope": {
+                    "default": "read",
+                    "maxLength": 40,
+                    "title": "Scope",
+                    "type": "string"
+                  },
+                  "grant_types": {
+                    "default": [
+                      "authorization_code"
+                    ],
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 2,
+                    "title": "Grant Types",
+                    "type": "array"
+                  },
+                  "response_types": {
+                    "default": [
+                      "code"
+                    ],
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 1,
+                    "title": "Response Types",
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "client_name",
+                  "redirect_uris"
+                ],
+                "title": "ClientRegistration",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "RFC 7591 section 3.2.2",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "RFC 7591 section 3.2.2.",
+                  "properties": {
+                    "error": {
+                      "enum": [
+                        "invalid_redirect_uri",
+                        "invalid_client_metadata"
+                      ],
+                      "title": "Error",
+                      "type": "string"
+                    },
+                    "error_description": {
+                      "title": "Error Description",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "error_description"
+                  ],
+                  "title": "ClientRegistrationError",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          },
+          "201": {
+            "description": "The registered client (RFC 7591 section 3.2.1)",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "applications/register (RFC 7591 section 3.2.1); the application awaits an administrator's activation.",
+                  "properties": {
+                    "client_id": {
+                      "title": "Client Id",
+                      "type": "string"
+                    },
+                    "client_id_issued_at": {
+                      "title": "Client Id Issued At",
+                      "type": "integer"
+                    },
+                    "client_name": {
+                      "title": "Client Name",
+                      "type": "string"
+                    },
+                    "redirect_uris": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Redirect Uris",
+                      "type": "array"
+                    },
+                    "token_endpoint_auth_method": {
+                      "title": "Token Endpoint Auth Method",
+                      "type": "string"
+                    },
+                    "grant_types": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Grant Types",
+                      "type": "array"
+                    },
+                    "response_types": {
+                      "items": {
+                        "const": "code",
+                        "type": "string"
+                      },
+                      "title": "Response Types",
+                      "type": "array"
+                    },
+                    "scope": {
+                      "title": "Scope",
+                      "type": "string"
+                    },
+                    "ophiolite_application_id": {
+                      "title": "Ophiolite Application Id",
+                      "type": "string"
+                    },
+                    "ophiolite_access_state": {
+                      "title": "Ophiolite Access State",
+                      "type": "string"
+                    },
+                    "client_secret": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Client Secret"
+                    },
+                    "client_secret_expires_at": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Client Secret Expires At"
+                    }
+                  },
+                  "required": [
+                    "client_id",
+                    "client_id_issued_at",
+                    "client_name",
+                    "redirect_uris",
+                    "token_endpoint_auth_method",
+                    "grant_types",
+                    "response_types",
+                    "scope",
+                    "ophiolite_application_id",
+                    "ophiolite_access_state"
+                  ],
+                  "title": "ClientRegistered",
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/contracts": {
       "get": {
         "summary": "Contracts registry index",
@@ -87213,6 +88540,64 @@
           "capability"
         ],
         "title": "ApplicationGrant",
+        "type": "object"
+      },
+      "ApprovedApplication": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "organization": {
+            "title": "Organization",
+            "type": "string"
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Scopes",
+            "type": "array"
+          },
+          "projects": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "None: every project you can reach",
+            "title": "Projects"
+          },
+          "approved_at": {
+            "title": "Approved At",
+            "type": "string"
+          },
+          "deadline": {
+            "title": "Deadline",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "organization",
+          "scopes",
+          "projects",
+          "approved_at",
+          "deadline"
+        ],
+        "title": "ApprovedApplication",
         "type": "object"
       },
       "ArrayNode": {
@@ -92072,6 +93457,25 @@
           "name"
         ],
         "title": "MethodRecord",
+        "type": "object"
+      },
+      "Named": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "Named",
         "type": "object"
       },
       "Native_arraybridge_v1_ArchieParameters": {
@@ -97458,6 +98862,132 @@
           "profile"
         ],
         "title": "Reference",
+        "type": "object"
+      },
+      "RegisteredApplication": {
+        "additionalProperties": false,
+        "description": "An organisation's registered application (never its secret).",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "organization_id": {
+            "title": "Organization Id",
+            "type": "string"
+          },
+          "owner": {
+            "title": "Owner",
+            "type": "string"
+          },
+          "row_version": {
+            "title": "Row Version",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "redirect_uris": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Redirect Uris",
+            "type": "array"
+          },
+          "capability": {
+            "const": 3,
+            "title": "Capability",
+            "type": "integer"
+          },
+          "scopes": {
+            "items": {
+              "enum": [
+                "read",
+                "write"
+              ],
+              "type": "string"
+            },
+            "title": "Scopes",
+            "type": "array"
+          },
+          "client_type": {
+            "enum": [
+              "confidential",
+              "public"
+            ],
+            "title": "Client Type",
+            "type": "string"
+          },
+          "provisioning_state": {
+            "enum": [
+              "pending",
+              "provisioned",
+              "error"
+            ],
+            "title": "Provisioning State",
+            "type": "string"
+          },
+          "access_state": {
+            "enum": [
+              "active",
+              "suspended",
+              "pending_activation"
+            ],
+            "title": "Access State",
+            "type": "string"
+          },
+          "client_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Id"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "rotated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rotated At"
+          }
+        },
+        "required": [
+          "id",
+          "organization_id",
+          "owner",
+          "row_version",
+          "name",
+          "redirect_uris",
+          "capability",
+          "scopes",
+          "client_type",
+          "provisioning_state",
+          "access_state",
+          "client_id",
+          "created_at",
+          "rotated_at"
+        ],
+        "title": "RegisteredApplication",
         "type": "object"
       },
       "RelativeTolerance": {
