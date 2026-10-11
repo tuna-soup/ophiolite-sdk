@@ -11,6 +11,7 @@
   "export": "Export exact revisions into a new portable bundle",
   "fetch": "Read an exact revision into a new local folder",
   "get": "Get the latest version of an item into a new or held folder; you then hold it",
+  "import": "Add a table file as wells, well tops, deviation surveys, point sets or time-depth pairs: table FILE --target T (--dry-run to review), list, status ID, pause ID, resume ID, cancel ID",
   "init": "Start an application from a packaged template (map-application, derive-and-publish, sync-worker, notebook, agent-workflow)",
   "list": "List permitted scientific assets without a run",
   "login": "Approve this project in your browser",
@@ -34,6 +35,6 @@
   "targets": "What each type of table needs: its fields, which are required and the choices that describe it (offline)",
   "upload": "Upload a file, a folder, a .zip or an https address: every file it can read is added, and one report says what became of each",
   "well-imports": "Import a copy of an approved well table as wells: list, status ID, start (--dry-run to preview), resume ID, cancel ID",
-  "wells": "The wells you may read, located (list), or their extent",
+  "wells": "The wells you may read, located (list), or their extent; from-run RUN...: the wells your files name (E88)",
   "what-changed": "What differs in how two exact result versions were made"
 }
