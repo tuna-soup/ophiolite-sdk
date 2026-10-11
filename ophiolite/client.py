@@ -114,6 +114,12 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         return self.upload_runs.upload(path_or_address,attribution=attribution,rights_confirmed=rights_confirmed,audience=audience,well_notes=well_notes,
                                        declare=declare,skip_decisions=skip_decisions,associate_matches=link_wellbore,new=new,progress=progress)
 
+    @property
+    def well_names(self):
+        """E88: the wells your uploads and imports name: proposals, accept, aliases and go back (ophiolite.well_names.WellNames)."""
+        from .well_names import WellNames
+        return WellNames(self)
+
     def well_imports(self):
         """E42a: import a copy of an approved well table as wells (ophiolite.well_imports.WellImports)."""
         from .well_imports import WellImports

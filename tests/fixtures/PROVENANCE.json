@@ -2753,6 +2753,15 @@
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
       "evidence": "E105a: original first-party command interface (the SDK's own parser); frozen before the procedures command was added; no credentials or customer data."
+    },
+    {
+      "path": "tests/fixtures/well-names/answers.json",
+      "sha256": "61bc565fee7620e0c88a56bc8455446132d2a8c822b145fe0ec5ccad77b0364c",
+      "source_commit": "835432d1dbb48ec449bd5a723befed8925060628",
+      "origin": "Ophiolite Workspace app/tests/fixtures/well-names/answers.json (the Platform's answers to the E88 well-names journey over the F-MIX files, written by its generate_answers.py), copied byte-identically",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "Integration E88 strategy C6: the SDK's words and refusals are tested on the answers the workspace test replays. The F-MIX files are synthetic (Integration conformance/fixtures/well-names/build_fixtures.py); what is recorded is the service's own answers (identifiers, counts, states, sentences), the synthetic test people alice, bob and viewer, the test display name Ana and the synthetic well names HON-GT-01 and Honselersdijk-GT-1."
     }
   ]
 }

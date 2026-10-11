@@ -725,3 +725,88 @@ class OrgConnectionsPage(Contract):
     organization_id: str
     connections: list[OrgConnectionDoc]
     scope: str
+
+
+class WellMention(Contract):
+    """E88: one place a file names a well or wellbore."""
+    value: str
+    level: Literal['well', 'wellbore']
+    asset_id: str
+    revision: str
+    origin: dict
+
+
+class WellCandidate(Contract):
+    entity_id: str
+    generation: int
+
+
+class WellNameGroup(Contract):
+    gid: str
+    level: Literal['well', 'wellbore']
+    answer: Literal['listed', 'link', 'choose']
+    previously_reviewed: bool
+    candidates: list[WellCandidate]
+    mentions: list[WellMention]
+    audience: list[str]
+
+
+class WellNameRow(Contract):
+    normalised: str
+    name: str
+    groups: list[WellNameGroup]
+
+
+class WellNamesProposal(Contract):
+    """E88 well-names/propose: the list over a set of runs and the digest accept binds."""
+    runs: list[str]
+    rows: list[WellNameRow]
+    digest: str
+
+
+class WellCounts(Contract):
+    wells: int
+    wellbores: int
+
+
+class WellAliasAdded(Contract):
+    as_written: str
+    level: Literal['well', 'wellbore']
+    entity_id: str
+
+
+class WellNamesAccepted(Contract):
+    runs: list[str]
+    created: WellCounts
+    linked: int
+    unlinked: int
+    aliases: list[WellAliasAdded]
+    entities: list[str]
+    skipped: list[str]
+    state: Literal['accepted']
+    accepted_by: str
+    accepted_at: float
+
+
+class WellAlias(Contract):
+    as_written: str
+    level: Literal['well', 'wellbore']
+    accepted_by: str
+    accepted_by_name: str | None = None
+    accepted_at: float
+
+
+class WellAliases(Contract):
+    entity_id: str
+    aliases: list[WellAlias]
+
+
+class WellNamesWentBack(Contract):
+    runs: list[str]
+    removed: WellCounts
+    revoked: int
+    aliases: int
+    entities: list[str]
+    state: Literal['removed', 'nothing']
+    removed_by: str
+    removed_at: float
