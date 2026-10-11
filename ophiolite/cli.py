@@ -226,7 +226,7 @@ def parser():
     curves.add_argument('--top',type=float,required=True);curves.add_argument('--base',type=float,required=True)
     curves.add_argument('--level',type=int,help='0 = every sample (exact); 1 to 17 = blocks of up to 2^level samples');curves.add_argument('--rows',type=int,help='Instead of --level: at most this many rows (1 to 2048)')
     curves.add_argument('--max-pages',type=int,default=64);curves.add_argument('--output',type=Path,help='Write the window as JSON to this new file')
-    sources=project(sub.add_parser('sources',help='Your upstream source selections: list them, describe one (costs one full read), or read its rows; browse or import a storage folder'))
+    sources=project(sub.add_parser('sources',help='Your upstream source selections: list them, describe one (costs one full read), or read its rows'))
     sources.add_argument('action',choices=['list','describe','read','browse','import'])
     sources.add_argument('id',nargs='?',help='describe/read: the selection id from `sources list`; browse/import: the storage connection id')
     # E59: a storage connection's folder, read with your own sign-in (the deployment holds it; no key is taken here)
