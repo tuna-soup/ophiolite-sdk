@@ -89,18 +89,22 @@ type WireEvidenceModel = { "provider": string; "id": string; "label"?: (string) 
 type WireExactRevision = { "asset_id": string; "revision": string };
 type WireExecution = { "plan": string; "agent": string; "delegator": string; "operation": string; "command_id": (string) | (null); "run_id": (string) | (null); "state": string; "response_sha256": (string) | (null); "reserved_at": number; "completed_at": (number) | (null); "approved_by": (string) | (null); "evidence"?: (string) | (null) };
 type WireFileIn = { "path": string; "bytes": number; "sha256": string; "decisions"?: (Record<string, unknown>) | (null); "suggested"?: Array<string>; "confirmed"?: Array<string>; "well_log"?: (WireWellLogRef) | (null) };
-type WireFoundInvitation = { "invitation": string; "organization": string; "sender": (string) | (null); "generation": string; "expires_at": string };
+type WireFoundInvitation = { "invitation": string; "organization": string; "sender": (string) | (null); "generation": string; "expires_at": string; "project"?: (WireFoundProject) | (null) };
+type WireFoundProject = { "name": (string) | (null); "role": "member" | "viewer"; "ends_on": (string) | (null) };
 type WireGroupMember = { "asset_id": string; "name": (string) | (null); "head_revision": string; "revision_count": number };
 type WireIdentity = { "authority"?: (string) | (null); "key"?: (string) | (null); "provisional": boolean };
 type WireIdentityChange = { "actor": string; "at": string; "before": WireIdentity; "after": WireIdentity };
 type WireImportWarning = { "sentence": string; "actor": "deployment-administrator" | "organisation-owner" | "project-administrator" | "connection-administrator" | "you"; "remedy": string; "docs": string; "reason"?: ("missing" | "not-a-file" | "insecure-mode" | "unreadable" | "malformed") | (null); "code": "identifiers-not-declared" };
 type WireInventoryItem = { "asset_id": string; "kind": (string) | (null); "authority": string; "revision": string; "name": (string) | (null); "can_reuse": (boolean) | (null); [key: string]: unknown };
-type WireInvitationRow = { "id": string; "email": string; "expires_at": string; "accepted_by": (string) | (null); "revoked": boolean; "declined_at": (string) | (null); "delivery": (string) | (null); "error_code": (string) | (null) };
+type WireInvitationRow = { "id": string; "email": string; "expires_at": string; "accepted_by": (string) | (null); "revoked": boolean; "declined_at": (string) | (null); "delivery": (string) | (null); "error_code": (string) | (null); "project"?: (WireListedProject) | (null) };
+type WireInviteProject = { "id": string; "role": string; "can_compute": boolean; "ends_on": (string) | (null) };
+type WireInvitedProject = { "id": string; "name": (string) | (null); "role": "member" | "viewer"; "can_compute": boolean; "ends_on": (string) | (null) };
 type WireJob = { "id": string; "project": string; "submitter": string; "agent": (string) | (null); "plan": (string) | (null); "run_id": string; "state": string; "reason": (string) | (null); "exit_code": (number) | (null); "logs": (string) | (null); "attempts": number; "result"?: (Record<string, unknown>) | (null); "created_at": number; "started_at": (number) | (null); "finished_at": (number) | (null); "command_id": string; "script_sha256": string; "limits": Record<string, unknown> };
 type WireLASInspection = { "sha256": string; "bytes": number; "profile": "las2/1"; "well": string; "samples": number; "depth": Record<string, unknown>; "curves": Array<WireCurveInspection>; "warnings": Array<string> };
 type WireLeftOrganization = { "left": true; "members": Array<unknown> };
 type WireLimits = { "upload_bytes": number; "result_bytes": number; "agent_response_bytes": number; "file_bytes": number; "upload_total_bytes": number; "retained_bytes": number; "uploads_per_project": number; "concurrent_uploads": number; "finish_jobs": number; "session_seconds": number; "grid_cells": number; "max_traces": number; "max_samples": number; "max_inline_bytes": number; "package_companion_bytes": number };
 type WireLink = { "ordinal": number; "entity_id": string };
+type WireListedProject = { "id": string; "name": (string) | (null); "role": "member" | "viewer"; "can_compute": boolean; "ends_on": (string) | (null); "outcome": ("applied" | "already_has_access" | "ended_before_acceptance" | "inviter_not_administrator" | "project_moved" | "blocked") | (null) };
 type WireLocationProvenance = { "assertion_id": string; "predicate": "of-entity"; "asserted_by": string; "asserted_at": string };
 type WireLocationSource = { "asset_id": string; "revision": string; "profile": "well-location/1" | "sql-wells/1"; "row"?: (string) | (null) };
 type WireManagedReference = { "authority": string; "key": string; "revision": string; "profile"?: (string) | (null) };
@@ -170,6 +174,7 @@ type WirePreviewGrant = { "user_id": string; "name"?: (string) | (null); "role"?
 type WirePreviewProject = { "project_id": string; "inspectable": boolean; "grants"?: (Array<WirePreviewGrant>) | (null) };
 type WirePrincipal = { "kind": string; "scopes": (Array<string>) | (null); "agent": (Record<string, unknown>) | (null); "capability"?: (number) | (null) };
 type WireProjectEntry = { "id": string; "name": (string) | (null); "role": (string) | (null); "can_administer": boolean; "organization_id": (string) | (null); "access_ends_at"?: (string) | (null); [key: string]: unknown };
+type WireProjectNameChange = { "sequence": number; "old_name": (string) | (null); "new_name": string; "actor_id": string; "actor_name": (string) | (null); "at": string };
 type WirePublicationReceipt = { "asset_id": string; "revision": string; "revision_number": number; "profile": "points-csv/1" | "mesh-text/1" | "esri-ascii-grid/1" | "well-tops-csv/1" | "deviation-csv/1" | "opendtect-faultsticks/1" | "las2/1" | "well-location/1" | "wavelet-text/1" | "model-section-text/1" | "seismic-section-text/1" | "time-depth-csv/1"; "derived_from": Array<WireParentReference>; "method": WireMethodRecord; "command_id": string };
 type WireReaderKind = { "profile": string; "label": string; "accept": string; "limits": string; "declared": Array<WireDeclaredField>; "recipe": boolean };
 type WireRecipeReference = { "asset_id": string; "revision": string };
@@ -426,17 +431,17 @@ export type postOrganizationsInvitationsForMeInput = { body: Record<string, neve
 export function postOrganizationsInvitationsForMe(transport: Transport, input: postOrganizationsInvitationsForMeInput): Promise<{ "invitations": Array<WireFoundInvitation> }> {
   return transport.request<{ "invitations": Array<WireFoundInvitation> }>("POST", "/api/v1/organizations/invitations-for-me", {}, undefined, input.body, input.options, null, false);
 }
-export type postOrganizationsInviteCreateInput = { body: { "organization_id": string; "email": string; [key: string]: unknown }; options?: OperationOptions };
-export function postOrganizationsInviteCreate(transport: Transport, input: postOrganizationsInviteCreateInput): Promise<{ "id": string; "email": string; "delivery": "queued" | "manual"; "url": string }> {
-  return transport.request<{ "id": string; "email": string; "delivery": "queued" | "manual"; "url": string }>("POST", "/api/v1/organizations/invite-create", {}, undefined, input.body, input.options, null, false);
+export type postOrganizationsInviteCreateInput = { body: { "organization_id": string; "email": string; "project"?: (WireInviteProject) | (null); [key: string]: unknown }; options?: OperationOptions };
+export function postOrganizationsInviteCreate(transport: Transport, input: postOrganizationsInviteCreateInput): Promise<{ "id": string; "email": string; "delivery": "queued" | "manual"; "url": string; "project"?: (WireInvitedProject) | (null) }> {
+  return transport.request<{ "id": string; "email": string; "delivery": "queued" | "manual"; "url": string; "project"?: (WireInvitedProject) | (null) }>("POST", "/api/v1/organizations/invite-create", {}, undefined, input.body, input.options, null, false);
 }
 export type postOrganizationsInviteListInput = { body: { "organization_id": string; [key: string]: unknown }; options?: OperationOptions };
 export function postOrganizationsInviteList(transport: Transport, input: postOrganizationsInviteListInput): Promise<{ "invitations": Array<WireInvitationRow> }> {
   return transport.request<{ "invitations": Array<WireInvitationRow> }>("POST", "/api/v1/organizations/invite-list", {}, undefined, input.body, input.options, null, false);
 }
 export type postOrganizationsInviteResendInput = { body: { "organization_id": string; "id": string; [key: string]: unknown }; options?: OperationOptions };
-export function postOrganizationsInviteResend(transport: Transport, input: postOrganizationsInviteResendInput): Promise<{ "id": string; "email": string; "delivery": "queued" | "manual"; "url": string }> {
-  return transport.request<{ "id": string; "email": string; "delivery": "queued" | "manual"; "url": string }>("POST", "/api/v1/organizations/invite-resend", {}, undefined, input.body, input.options, null, false);
+export function postOrganizationsInviteResend(transport: Transport, input: postOrganizationsInviteResendInput): Promise<{ "id": string; "email": string; "delivery": "queued" | "manual"; "url": string; "project"?: (WireInvitedProject) | (null) }> {
+  return transport.request<{ "id": string; "email": string; "delivery": "queued" | "manual"; "url": string; "project"?: (WireInvitedProject) | (null) }>("POST", "/api/v1/organizations/invite-resend", {}, undefined, input.body, input.options, null, false);
 }
 export type postOrganizationsInviteRevokeInput = { body: { "organization_id": string; "id": string; [key: string]: unknown }; options?: OperationOptions };
 export function postOrganizationsInviteRevoke(transport: Transport, input: postOrganizationsInviteRevokeInput): Promise<Record<string, never>> {
@@ -789,6 +794,14 @@ export function postProjectsProjectContextReturnPreview(transport: Transport, in
 export type postProjectsProjectContextSaveInput = { path: { "project": string }; body: { "project_id": string; "expected_revision": number; "policy": WirePolicy }; options?: OperationOptions };
 export function postProjectsProjectContextSave(transport: Transport, input: postProjectsProjectContextSaveInput): Promise<{ "revision": number; "policy": Record<string, unknown>; "declared_by": string; "options": (Record<string, unknown>) | (Array<unknown>) }> {
   return transport.request<{ "revision": number; "policy": Record<string, unknown>; "declared_by": string; "options": (Record<string, unknown>) | (Array<unknown>) }>("POST", "/api/v1/projects/{project}/context/save", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectDetailsHistoryInput = { path: { "project": string }; body: { "project_id": string; [key: string]: unknown }; options?: OperationOptions };
+export function postProjectsProjectDetailsHistory(transport: Transport, input: postProjectsProjectDetailsHistoryInput): Promise<{ "project_id": string; "name": (string) | (null); "renames": Array<WireProjectNameChange> }> {
+  return transport.request<{ "project_id": string; "name": (string) | (null); "renames": Array<WireProjectNameChange> }>("POST", "/api/v1/projects/{project}/details/history", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectDetailsRenameInput = { path: { "project": string }; body: { "project_id": string; "name": string; [key: string]: unknown }; options?: OperationOptions };
+export function postProjectsProjectDetailsRename(transport: Transport, input: postProjectsProjectDetailsRenameInput): Promise<{ "changed": boolean; "project_id": string; "name": string; "previous_name": (string) | (null) }> {
+  return transport.request<{ "changed": boolean; "project_id": string; "name": string; "previous_name": (string) | (null) }>("POST", "/api/v1/projects/{project}/details/rename", input.path, undefined, input.body, input.options, null, false);
 }
 export type postProjectsProjectEntitiesAssetsInput = { path: { "project": string }; body: { "project_id": string; "entity_id": string; "profile"?: (string) | (null); "cursor"?: (string) | (null); "limit"?: (number) | (null); [key: string]: unknown }; options?: OperationOptions };
 export function postProjectsProjectEntitiesAssets(transport: Transport, input: postProjectsProjectEntitiesAssetsInput): Promise<{ "schema": "ophiolite.entity-assets/1"; "entity": WireEntityRef; "items": Array<WireAssociatedRevision>; "next_cursor"?: (string) | (null) }> {
