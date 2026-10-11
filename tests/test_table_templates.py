@@ -11,8 +11,8 @@ from ophiolite.errors import Refused
 
 # A workbook's first bytes (a zip) and bytes that are not UTF-8: decoding either as text or JSON fails or changes them
 WORKBOOK = b'PK\x03\x04\x14\x00\x06\x00\x08\x00\xff\xfe\x00[Content_Types].xml\x00\x80\x81'
-REFUSED = {'error': 'Choose what the depths are measured from: KB, GL, MSL, or not known.', 'code': 'needs-reference',
-           'message': 'Choose what the depths are measured from: KB, GL, MSL, or not known.', 'request_id': 'r-1'}
+REFUSED = {'error': 'Choose what the depths are measured from: kelly bushing, ground level, mean sea level, or not known.', 'code': 'needs-reference',
+           'message': 'Choose what the depths are measured from: kelly bushing, ground level, mean sea level, or not known.', 'request_id': 'r-1'}
 
 
 def served(answers):
@@ -41,7 +41,7 @@ def test_a_refusal_keeps_the_deployments_sentence():
     # mutation: drop said() around the template call (the transport's generic words reach the person)
     client, _ = served({'templates/csv': httpx.Response(400, json=REFUSED, headers={'X-Request-Id': 'r-1'})})
     with pytest.raises(Refused) as refused: client.template('wells', crs='EPSG:28992')
-    assert str(refused.value) == 'Choose what the depths are measured from: KB, GL, MSL, or not known.'
+    assert str(refused.value) == 'Choose what the depths are measured from: kelly bushing, ground level, mean sea level, or not known.'
 
 
 def test_an_unknown_format_is_refused_before_anything_is_sent():
