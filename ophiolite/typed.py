@@ -8,6 +8,7 @@ not contact a server.
 """
 import math
 from .errors import Refused
+from .transform import vertical_depth as _vertical_depth
 
 TYPES = ('well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-volume',
          'wavelet', 'model-section', 'seismic-section', 'well-location', 'time-depth', 'feature-set')
@@ -66,6 +67,16 @@ class Trajectory(TypedData):
         missing angles. A provided TVD column is never replaced by this result.
         """
         return minimum_curvature(self.stations)
+
+    def vertical_depth(self, mds, source='calculated', origin_tvd=None, unit=None):
+        """E64: vertical depth at each measured depth in MDS (in UNIT, default the survey's): `calculated` by minimum
+        curvature from the angles, or `file`, the survey's own vertical depth (None where a station does not state it).
+        The two are never substituted for each other; past the last station is None. The start is never assumed:
+        see `ophiolite.transform.vertical_depth`, which also returns the count beyond the survey."""
+        if source not in ('calculated', 'file'): raise Refused('Vertical depth is "calculated" or "file".')
+        unit = unit or self.context.get('depth_unit')
+        out = _vertical_depth(self.stations, mds, origin_tvd, survey_unit=self.context.get('depth_unit'), log_unit=unit)
+        return out['calculated' if source == 'calculated' else 'from_file']
 
 
 class GridSurface(TypedData):

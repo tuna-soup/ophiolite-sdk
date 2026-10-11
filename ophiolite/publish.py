@@ -109,7 +109,7 @@ from .models.generated import ApplicationCurve
 READ_OPERATIONS={'list','get','read','original','download','options','inspect','result-list','result-preview','result-download','result-history','info','members'}
 WRITE_OPERATIONS={'configure','start','publish','upload','share'}
 GROUP_OPERATIONS={'list','diff'}  # E8: result groups and diffs are read operations
-AI_OPERATIONS={'ai-use':{'get','grant','corpus'},'search':{'query'},'publications':{'derive','info','share'}}  # E14; E30b publications
+AI_OPERATIONS={'ai-use':{'get','grant','corpus'},'search':{'query'},'publications':{'derive','info','share','transform-preview','transform'}}  # E14; E30b publications; E64 changes
 ENTITY_OPERATIONS={'entities':{'list','get','assets','associations','lineage','create','identify','share','associate','dissociate','extent'}}  # E20; E29 extent; H3 associations
 SOURCE_OPERATIONS={'sources':{'list','export'}}  # E50a: the source reads (not READ_OPERATIONS, which would also allow applications/export)
 MAP_OPERATIONS={'maps':{'export'},'catalog':{'history'}}  # E70a C4: `get` of a scalar map and its version numbers (existing read routes)
@@ -118,7 +118,9 @@ CHECK_OPERATIONS={'checks':{'publish','list','compare','publishers'}}  # E96: ch
 PROCEDURE_OPERATIONS={'procedures':{'register','list','get','bundle','enable','withdraw','trust'}}  # E105b: the project catalogue
 REPORT_OPERATIONS={'activity':{'report'}}  # E70b: a confirmed `get` reports which version this holder received
 IMPORT_OPERATIONS={'well-imports':{'preview','start','step','status','list','cancel'},  # E42a: import a copy of an approved well table
-                   'upload-runs':{'start','file','check','file-parts','status','list','cancel','associate','decide','share'}}  # E55: a folder upload; E85: check
+                   'upload-runs':{'start','file','check','file-parts','status','list','cancel','associate','decide','share'},  # E55: a folder upload; E85: check
+                   'table-imports':{'read','preview','start','step','status','pause','resume','cancel','list'},  # E87: a table becomes typed data
+                   'well-names':{'propose','accept','aliases','go-back'}}  # E88: the wells a set of runs names
 RELEASE_OPERATIONS={'releases':{'list','get','download','download-snapshot'}}  # E50c: the kept copies Wells.with_source reads (read routes only)
 SESSION_OPERATIONS={'las-uploads':{'begin','part','state','finish','cancel'},'capabilities':{'describe'}}  # E54: a file sent in parts; the served limits
 

@@ -120,8 +120,26 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/org-connections/capability",
+    "function": "postOrgConnectionsCapability",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/org-connections/create",
     "function": "postOrgConnectionsCreate",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/org-connections/destination-create",
+    "function": "postOrgConnectionsDestinationCreate",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/org-connections/destination-restrict",
+    "function": "postOrgConnectionsDestinationRestrict",
     "request": "schema",
     "response": "schema"
   },
@@ -134,6 +152,36 @@
   {
     "operation": "POST /api/v1/org-connections/list",
     "function": "postOrgConnectionsList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/org-connections/request",
+    "function": "postOrgConnectionsRequest",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/org-connections/request-approve",
+    "function": "postOrgConnectionsRequestApprove",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/org-connections/request-decline",
+    "function": "postOrgConnectionsRequestDecline",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/org-connections/request-withdraw",
+    "function": "postOrgConnectionsRequestWithdraw",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/org-connections/requests",
+    "function": "postOrgConnectionsRequests",
     "request": "schema",
     "response": "schema"
   },
@@ -1230,6 +1278,18 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/publications/transform",
+    "function": "postProjectsProjectPublicationsTransform",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/publications/transform-preview",
+    "function": "postProjectsProjectPublicationsTransformPreview",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/publications/version-contributors",
     "function": "postProjectsProjectPublicationsVersionContributors",
     "request": "schema",
@@ -1872,6 +1932,60 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/table-imports/cancel",
+    "function": "postProjectsProjectTableImportsCancel",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/table-imports/list",
+    "function": "postProjectsProjectTableImportsList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/table-imports/pause",
+    "function": "postProjectsProjectTableImportsPause",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/table-imports/preview",
+    "function": "postProjectsProjectTableImportsPreview",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/table-imports/read",
+    "function": "postProjectsProjectTableImportsRead",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/table-imports/resume",
+    "function": "postProjectsProjectTableImportsResume",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/table-imports/start",
+    "function": "postProjectsProjectTableImportsStart",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/table-imports/status",
+    "function": "postProjectsProjectTableImportsStatus",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/table-imports/step",
+    "function": "postProjectsProjectTableImportsStep",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/upload-runs/associate",
     "function": "postProjectsProjectUploadRunsAssociate",
     "request": "schema",
@@ -2000,6 +2114,30 @@
   {
     "operation": "POST /api/v1/projects/{project}/well-imports/step",
     "function": "postProjectsProjectWellImportsStep",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/well-names/accept",
+    "function": "postProjectsProjectWellNamesAccept",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/well-names/aliases",
+    "function": "postProjectsProjectWellNamesAliases",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/well-names/go-back",
+    "function": "postProjectsProjectWellNamesGoBack",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/well-names/propose",
+    "function": "postProjectsProjectWellNamesPropose",
     "request": "schema",
     "response": "schema"
   },
