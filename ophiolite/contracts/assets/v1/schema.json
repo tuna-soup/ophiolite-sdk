@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/schema.json",
   "x-ophiolite": {
     "id": "ophiolite.scientific-asset/1",
-    "version": "1.19.0",
+    "version": "1.20.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -3868,6 +3868,281 @@
       "title": "StringLeaf",
       "type": "object"
     },
+    "TableFileContext": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "table",
+          "title": "Type",
+          "type": "string"
+        },
+        "format": {
+          "enum": [
+            "csv",
+            "xls",
+            "xlsx",
+            "parquet"
+          ],
+          "title": "Format",
+          "type": "string"
+        },
+        "profile": {
+          "enum": [
+            "table-csv/1",
+            "table-excel/1",
+            "table-parquet/1"
+          ],
+          "title": "Profile",
+          "type": "string"
+        },
+        "decisions": {
+          "items": {
+            "$ref": "#/$defs/TableFileDecision"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "title": "Decisions",
+          "type": "array"
+        },
+        "sheet": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sheet"
+        },
+        "sheets": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 1000,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sheets"
+        },
+        "preamble": {
+          "anyOf": [
+            {
+              "items": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "maxItems": 1000,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Preamble"
+        },
+        "geo": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Geo"
+        },
+        "rows": {
+          "maximum": 100000,
+          "minimum": 0,
+          "title": "Rows",
+          "type": "integer"
+        },
+        "columns": {
+          "maximum": 128,
+          "minimum": 1,
+          "title": "Columns",
+          "type": "integer"
+        },
+        "coverage": {
+          "$ref": "#/$defs/TableFileCoverage"
+        },
+        "quantities": {
+          "additionalProperties": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Quantities",
+          "type": "object"
+        },
+        "fidelity": {
+          "$ref": "#/$defs/Fidelity"
+        }
+      },
+      "required": [
+        "type",
+        "format",
+        "profile",
+        "decisions",
+        "rows",
+        "columns",
+        "coverage",
+        "quantities",
+        "fidelity"
+      ],
+      "title": "TableFileContext",
+      "type": "object"
+    },
+    "TableFileCoverage": {
+      "additionalProperties": false,
+      "properties": {
+        "read": {
+          "items": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 128,
+          "title": "Read",
+          "type": "array"
+        },
+        "not_read": {
+          "items": {
+            "$ref": "#/$defs/TableFileNotRead"
+          },
+          "maxItems": 128,
+          "title": "Not Read",
+          "type": "array"
+        }
+      },
+      "required": [
+        "read",
+        "not_read"
+      ],
+      "title": "TableFileCoverage",
+      "type": "object"
+    },
+    "TableFileDecision": {
+      "additionalProperties": false,
+      "description": "One reading decision of the file, as E58a states it (all decided: a table is kept only once every one is).",
+      "properties": {
+        "field": {
+          "enum": [
+            "format",
+            "encoding",
+            "delimiter",
+            "decimal_mark",
+            "sheet",
+            "header_row",
+            "not_read",
+            "formulas",
+            "merged_cells",
+            "positions"
+          ],
+          "title": "Field",
+          "type": "string"
+        },
+        "status": {
+          "const": "decided",
+          "title": "Status",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        },
+        "class": {
+          "enum": [
+            "declared",
+            "previously-reviewed",
+            "project-default",
+            "inferred",
+            "none"
+          ],
+          "title": "Class",
+          "type": "string"
+        },
+        "sentence": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Sentence",
+          "type": "string"
+        },
+        "technical": {
+          "additionalProperties": true,
+          "title": "Technical",
+          "type": "object"
+        }
+      },
+      "required": [
+        "field",
+        "status",
+        "value",
+        "class",
+        "sentence",
+        "technical"
+      ],
+      "title": "TableFileDecision",
+      "type": "object"
+    },
+    "TableFileNotRead": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "db_type": {
+          "maxLength": 256,
+          "title": "Db Type",
+          "type": "string"
+        },
+        "reason": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "db_type",
+        "reason"
+      ],
+      "title": "TableFileNotRead",
+      "type": "object"
+    },
     "TableImportOrigin": {
       "additionalProperties": false,
       "description": "1.19.0 (E87): a set landed from a table file by a table import run \u2014 provenance, not authority. The run and its\nunit, the original file's sha256, its sheet and header row, and the source rows as inclusive [first, last] ranges.",
@@ -3932,6 +4207,19 @@
           "minItems": 1,
           "title": "Source Rows",
           "type": "array"
+        },
+        "interpretation_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Interpretation Sha256"
         }
       },
       "required": [
@@ -3944,6 +4232,41 @@
         "source_rows"
       ],
       "title": "TableImportOrigin",
+      "type": "object"
+    },
+    "TableInterpretation": {
+      "additionalProperties": false,
+      "description": "E58b: the executable identity of the table-file reader (Connectors `table_files.read_table` + `kept_table`).",
+      "properties": {
+        "reader": {
+          "const": "asset_connectors.table_files/1",
+          "title": "Reader",
+          "type": "string"
+        },
+        "mapping": {
+          "const": "table/1",
+          "title": "Mapping",
+          "type": "string"
+        },
+        "parsing_policy": {
+          "const": "table-file/1",
+          "title": "Parsing Policy",
+          "type": "string"
+        },
+        "null_policy": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Null Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reader",
+        "mapping",
+        "parsing_policy",
+        "null_policy"
+      ],
+      "title": "TableInterpretation",
       "type": "object"
     },
     "TimeDepthContext": {
@@ -4756,6 +5079,9 @@
         },
         {
           "$ref": "#/$defs/FeatureContext"
+        },
+        {
+          "$ref": "#/$defs/TableFileContext"
         }
       ],
       "title": "Scientific"
@@ -4773,6 +5099,9 @@
         },
         {
           "$ref": "#/$defs/PackageInterpretation"
+        },
+        {
+          "$ref": "#/$defs/TableInterpretation"
         }
       ],
       "title": "Interpretation"

@@ -44,9 +44,10 @@ def schemas():
     from project_gateway.domain import RelationshipRegistry, Entity, EntityAssets, Lineage
     from project_gateway.scientific_assets import DerivationRecord, Parameters  # E94
     from project_gateway.scientific_assets import CheckRecord  # E96
+    from project_gateway.scientific_assets import TableFile  # E58b
     for model in (CheckRecord, DerivationRecord, Parameters, Asset, Curve, ScientificContext, AssetSummary, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface, PointSet, PolylineSet, SeismicVolume, SeismicSlice,
                   RelationshipRegistry, Entity, EntityAssets, Lineage, ImportRecipe, PointSet2, WellLocationUpload, WellLocation,
-                  Wavelet, ModelSection, SeismicSection, TimeDepth, FeatureSet):  # E53; E57; E56
+                  Wavelet, ModelSection, SeismicSection, TimeDepth, FeatureSet, TableFile):  # E53; E57; E56; E58b
         write(CONTRACTS / model.CONTRACT['path'], model.model_json_schema())
 
 

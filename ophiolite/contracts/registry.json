@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.30.0",
+  "version": "1.31.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -37,7 +37,7 @@
     },
     {
       "id": "ophiolite.scientific-asset/1",
-      "version": "1.19.0",
+      "version": "1.20.0",
       "lifecycle": "preview",
       "path": "assets/v1/schema.json",
       "title": "ScientificAsset",
@@ -202,6 +202,14 @@
       "path": "assets/v1/table-payload-schema.json",
       "title": "Table",
       "description": "A table from a connected SQL database: every column with its database and logical type, the declared key, the person's declarations and the rows read, in canonical order (ADR 0020, E50b1)."
+    },
+    {
+      "id": "ophiolite.table-file/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/table-file-schema.json",
+      "title": "TableFile",
+      "description": "A table file kept as it is (E58b): the normalized content read from the exact original under its table-interpretation.json, whose SHA-256 it names: every column, the key, the declarations and the rows in file order with their source rows."
     },
     {
       "id": "ophiolite.wavelet/1",
@@ -692,6 +700,38 @@
       "description": "Every feature of one map layer in file order with its stored coordinates (axes and ring orientation as stored), its attribute values by field and the stated or declared coordinate system; nothing is converted.",
       "lifecycle": "preview",
       "path": "profiles/v1/feature-set.json"
+    },
+    {
+      "id": "table-csv/1",
+      "kind": "source",
+      "display_name": "Table (separated text)",
+      "description": "A table file of separated text columns (CSV, tab-separated, ...), kept byte for byte as the person added it, with its reading choices and declarations beside it.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/table-csv.json"
+    },
+    {
+      "id": "table-excel/1",
+      "kind": "source",
+      "display_name": "Table (Excel workbook)",
+      "description": "One sheet of an Excel workbook (.xls or .xlsx), kept byte for byte as the person added it, with its reading choices and declarations beside it.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/table-excel.json"
+    },
+    {
+      "id": "table-parquet/1",
+      "kind": "source",
+      "display_name": "Table (Parquet)",
+      "description": "A Parquet file, kept byte for byte as the person added it, with its declarations beside it.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/table-parquet.json"
+    },
+    {
+      "id": "ophiolite.table-file/1",
+      "kind": "normalized",
+      "display_name": "Kept table",
+      "description": "Every column of a kept table (read or not, with its type), its declarations and the rows of the columns read in file order with each row's own line or sheet row; values as ADR 0020 writes them, a declared missing-value marker kept as a value.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/table-file.json"
     }
   ],
   "documents": [
