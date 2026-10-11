@@ -79,6 +79,13 @@
       "data": "A synthetic six-row tops table made on your computer; adding it creates sets of tops only you can see until you share them."
     },
     {
+      "slug": "layers-for-a-gis",
+      "title": "Layers for a GIS",
+      "sentence": "Read the layers QGIS opens from your project, every collection page by page, see why a path is not placed, and draw the wellbore paths in plan view.",
+      "modes": ["synthetic", "live"],
+      "data": "Two pages written in the notebook, or the layers you may read in your project; reading changes nothing."
+    },
+    {
       "slug": "who-has-access-until-when",
       "title": "Who has access, and until when",
       "sentence": "Read the projects you reach and the last day your access to each lasts, then who has access to this project, through what, and until when.",

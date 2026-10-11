@@ -811,3 +811,87 @@ class WellNamesWentBack(Contract):
     state: Literal['removed', 'nothing']
     removed_by: str
     removed_at: float
+
+
+class LayoutUse(Contract):
+    """E89: the last landing that used a layout."""
+    person: str
+    at: float
+    run_id: str
+    version: int
+
+
+class LayoutViewAnswer(Contract):
+    """E89 layouts/save, rename, retire, use-again, keep, update and reconnect: one layout at a version."""
+    asset_id: str
+    name: str
+    target: str
+    state: Literal['active', 'retired']
+    by: Literal['header', 'table']
+    version: int
+    head_version: int
+    generation: int
+    content_digest: str
+    made_by: str
+    made_at: float
+    changed_by: str
+    changed_at: float
+    last_used: LayoutUse | None
+    needs_connection: bool = False
+    layout: dict | None = None
+
+
+class LayoutHistoryRow(Contract):
+    version: int
+    name: str
+    state: Literal['active', 'retired']
+    actor: str
+    at: float
+
+
+class LayoutRead(LayoutViewAnswer):
+    """E89 layouts/get: a layout with its history."""
+    history: list[LayoutHistoryRow]
+
+
+class LayoutList(Contract):
+    layouts: list[LayoutViewAnswer]
+    active: int
+    most: int
+
+
+class LayoutMatchAnswer(Contract):
+    asset_id: str
+    name: str
+    target: str
+    version: int
+    generation: int
+    made_by: str
+    last_used: LayoutUse | None
+    how: Literal['exact', 'reordered']
+    layout: dict
+    fields: dict
+    class_: Literal['previously-reviewed'] = Field(alias='class')
+
+
+class LayoutMatches(Contract):
+    matches: list[LayoutMatchAnswer]
+    retired_ignored: int
+
+
+class LayoutExport(Contract):
+    schema_: Literal['ophiolite.layout-export/1'] = Field(alias='schema')
+    layouts: list[dict]
+    document_digest: str
+
+
+class LayoutImportOutcome(Contract):
+    name: str
+    result: Literal['added', 'already-here', 'not-added']
+    asset_id: str | None = None
+    sentence: str | None = None
+    problem: dict | None = None
+
+
+class LayoutImported(Contract):
+    outcomes: list[LayoutImportOutcome]
