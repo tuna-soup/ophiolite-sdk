@@ -5,7 +5,7 @@ import pytest
 
 from ophiolite import application_transport, procedures
 from ophiolite.errors import IntegrityConflict, Refused
-from tests.test_procedures_run import SHIFTED, depth_shift, refused, run_shift
+from test_procedures_run import SHIFTED, depth_shift, refused, run_shift
 
 DEPTH_SHIFT = procedures.digest(procedures.CONTRACT.parent / 'fixtures/bundles/depth-shift')
 
