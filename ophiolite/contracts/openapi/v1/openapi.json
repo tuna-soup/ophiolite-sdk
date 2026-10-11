@@ -38366,7 +38366,10 @@
                         "wavelet-text/1",
                         "model-section-text/1",
                         "seismic-section-text/1",
-                        "time-depth-csv/1"
+                        "time-depth-csv/1",
+                        "ogc-geopackage/1",
+                        "geojson/1",
+                        "esri-shapefile/1"
                       ],
                       "title": "Profile",
                       "type": "string"
@@ -39442,7 +39445,10 @@
                         "wavelet-text/1",
                         "model-section-text/1",
                         "seismic-section-text/1",
-                        "time-depth-csv/1"
+                        "time-depth-csv/1",
+                        "ogc-geopackage/1",
+                        "geojson/1",
+                        "esri-shapefile/1"
                       ],
                       "title": "Profile",
                       "type": "string"
@@ -100868,7 +100874,10 @@
               "wavelet-text/1",
               "model-section-text/1",
               "seismic-section-text/1",
-              "time-depth-csv/1"
+              "time-depth-csv/1",
+              "ogc-geopackage/1",
+              "geojson/1",
+              "esri-shapefile/1"
             ],
             "title": "Profile",
             "type": "string"
