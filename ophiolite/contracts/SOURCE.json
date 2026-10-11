@@ -1,6 +1,6 @@
 {
-  "platform_commit": "6370504b0f71f44fc92d3773b83e117f5c3b6035",
-  "contracts_tree": "934bfd84da4d7debb11bfb3f12f51e82ef013c86",
+  "platform_commit": "0744f74b737c737aa174f0bf232a6a1af3a3f6ae",
+  "contracts_tree": "95869a3dd94cac802d4173e6e27eec4849f96c07",
   "registry_version": "1.32.0",
   "files": {
     "README.md": "7d8239610b76cc50a45307dbb7723bdfbff5406407a7ce7561538320ea8e6ab8",
@@ -100,7 +100,7 @@
     "connectors/v1/capabilities/file-geotiff.json": "d51b22a62281b408fa3972d3e346430f54843022a453471adc2f6738255a0214",
     "connectors/v1/capabilities/las-upload.json": "f84b9fae7382fd9842da7de3da0bbe6c7efcb5875a53a984b512cef43e02f3f0",
     "connectors/v1/capabilities/opendtect.json": "12b7c4292f4aeb5be2103b466caafb1994ed3f7bfdc6c95d024f6f54c90043e7",
-    "connectors/v1/capabilities/oracle-wells.json": "ac4c08e6dbfb8bedc5764cdc5d66378e638c67285275cea85a8d45ddbd2e827f",
+    "connectors/v1/capabilities/oracle-wells.json": "a3c572300561f245a3a3be5cd67b211f00980d10e357b971dac7ee1bfec6c4d2",
     "connectors/v1/capabilities/osdu-record.json": "a08d32e14295f7745341e4c8c53b9366811e03e40e0905a6e0cd353134582693",
     "connectors/v1/capabilities/postgresql-tables.json": "71dd94c3b62ad88ddcf031d7757a945d33438428a6834b3498c0791e69c8adc6",
     "connectors/v1/capabilities/postgresql-wells.json": "52bbd6d4f3b924426c3b1a850e0e7df8d787de2a7a93ecec412e82df6c4d2e8e",

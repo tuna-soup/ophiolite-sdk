@@ -59,7 +59,7 @@
       "exact_old_revisions": "unavailable",
       "change_detection": "polling",
       "losses": [
-        "Columns of types outside the eight logical types (SDO_GEOMETRY, XMLTYPE, BLOB, CLOB, RAW and others) are listed as not read; their values are not delivered and a change in them is not detected",
+        "Columns of types outside the eight logical types (spatial geometry, XMLTYPE, BLOB, CLOB, RAW and others) are listed as not read; their values are not delivered and a change in them is not detected",
         "Declared units, descriptions, missing-value markers and coordinates are annotations; no value is converted",
         "A table is read once inside one read-only transaction, up to 100,000 rows, 64 MiB and 128 columns",
         "DATE is a timestamp with its time of day; TIMESTAMP WITH TIME ZONE values are delivered in UTC without their original offset",
