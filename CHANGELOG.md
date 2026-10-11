@@ -5,6 +5,14 @@
 Supported 0.x client over preview contracts, installable from reviewed source.
 No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
 
+- A project's catalogue of procedures (E105b): `ophiolite procedures register <folder>` keeps a private version
+  (`list`, `show NAME [--version N]`; administrators `enable` and `withdraw`; `trust NAME --version N`), and
+  `procedures run --from-project NAME [--version N]` runs the highest enabled version, or the numbered one you can
+  see, on this computer. A version someone else registered asks once, with who registered it, the date and the
+  exact digest, before anything runs (`--yes` answers it); the answer is recorded as your trust. Before every run the
+  version is read again (a withdrawal ends it) and the local copy is checked by digest; `procedures.run` takes
+  `expected_digest=` and refuses `changed-before-run` when the copy that would run is another. `Client.procedure_*`
+  give the same from Python; a refusal keeps the server's sentence and its closed `reason`.
 - Grids and GIS files (E56, preview API): `client.read_data` returns `FeatureSet` for map features from a Shapefile,
   a GeoPackage layer or a GeoJSON file (`features` in file order with coordinates as stored, `fields`, `to_frame()`
   with one row per feature), checked offline against the server's rules; ZMAP+, CPS-3 and IRAP grids read as

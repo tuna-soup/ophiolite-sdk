@@ -91,13 +91,17 @@ def envelope(response,raw=None):
     if isinstance(body.get('code'),str) and CODE.match(body['code']):meta['code']=body['code']
     if isinstance(body.get('stage'),str) and STAGE.match(body['stage']):meta['stage']=body['stage']  # E51a
     if isinstance(body.get('field'),str) and FIELD.match(body['field']):meta['field']=body['field']  # E96: the one field a check refusal names
+    if meta.get('code')=='procedure-refused':  # E105b: the closed reason, and E105a's rule and path when the contract refused
+        for key in ('reason','rule'):
+            if isinstance(body.get(key),str) and CODE.match(body[key]):meta[key]=body[key]
+        if isinstance(body.get('path'),str) and len(body['path'])<=300:meta['path']=body['path']
     return meta
 
 
 def carried(meta):
     """The error keyword arguments a parsed envelope supplies (E51a: also the server's own sentence and a credential's stage)."""
     return {'remedy':meta.get('remedy'),'docs':meta.get('docs'),'request_id':meta.get('request_id'),'stage':meta.get('stage'),'server_message':meta.get('message'),
-            'details':{'field':meta['field']} if 'field' in meta else None}
+            'details':{'field':meta['field']} if 'field' in meta else ({k:meta[k] for k in ('reason','rule','path') if k in meta} or None)}
 
 
 def status(response,operation,raw=None):
@@ -127,6 +131,7 @@ def status(response,operation,raw=None):
     if kind is Busy:raise Busy(message,recovery,status=code,retry_after=delay(response),code=meta.get('code'),**carried(meta))
     if code==413:message=upload_limit(meta) or message
     if meta.get('code') in UPLOAD_CODES and meta.get('message'):message=meta['message']  # E54: the server's sentence for a file sent in parts
+    if meta.get('code')=='procedure-refused' and meta.get('message'):message=meta['message']  # E105b: the server's closed sentence
     raise kind(message,recovery,status=code,code=meta.get('code'),**carried(meta))
 
 
