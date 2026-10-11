@@ -19344,7 +19344,7 @@
                 "schema": {
                   "x-ophiolite": {
                     "id": "ophiolite.entity-assets/1",
-                    "version": "1.1.0",
+                    "version": "1.2.0",
                     "lifecycle": "preview"
                   },
                   "additionalProperties": false,
@@ -19358,12 +19358,23 @@
                       "$ref": "#/components/schemas/EntityRef"
                     },
                     "items": {
-                      "items": {
-                        "$ref": "#/components/schemas/AssociatedRevision"
-                      },
-                      "maxItems": 100,
-                      "title": "Items",
-                      "type": "array"
+                      "anyOf": [
+                        {
+                          "items": {
+                            "$ref": "#/components/schemas/AssociatedRevision"
+                          },
+                          "maxItems": 100,
+                          "type": "array"
+                        },
+                        {
+                          "items": {
+                            "$ref": "#/components/schemas/AssociatedEntityRevision"
+                          },
+                          "maxItems": 100,
+                          "type": "array"
+                        }
+                      ],
+                      "title": "Items"
                     },
                     "next_cursor": {
                       "anyOf": [
@@ -19489,6 +19500,12 @@
                     ],
                     "default": null,
                     "title": "Limit"
+                  },
+                  "include_parts": {
+                    "default": false,
+                    "description": "E66: a well's items together with its readable wellbores' items, each naming its entity, in one assertion-id order",
+                    "title": "Include Parts",
+                    "type": "boolean"
                   }
                 },
                 "required": [
@@ -21334,6 +21351,21 @@
                     ],
                     "default": null,
                     "title": "Limit"
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "maxLength": 80,
+                        "minLength": 2,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E66: only entities whose name contains this text, ignoring case; literal (no wildcards), applied before paging",
+                    "title": "Name"
                   },
                   "bbox": {
                     "anyOf": [
@@ -94340,6 +94372,7 @@
       },
       "AssociatedEntityRevision": {
         "additionalProperties": false,
+        "description": "An `entities/assets` item with the entity it is associated with (H3 associations; E66 a well read with its wellbores).",
         "properties": {
           "asset_id": {
             "maxLength": 512,

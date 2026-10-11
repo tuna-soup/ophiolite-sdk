@@ -1629,6 +1629,16 @@ export type Entity = {
   location?: WellLocation | null;
 };
 
+export type AssociatedEntityRevision = {
+  asset_id: string;
+  revision: string;
+  row?: string | null;
+  profile: string;
+  name: string;
+  association: Association;
+  entity: EntityRef;
+};
+
 export type AssociatedRevision = {
   asset_id: string;
   revision: string;
@@ -1660,7 +1670,7 @@ export type SourceRevision = {
 export type EntityAssets = {
   schema: "ophiolite.entity-assets/1";
   entity: EntityRef;
-  items: AssociatedRevision[];
+  items: AssociatedRevision[] | AssociatedEntityRevision[];
   next_cursor?: string | null;
 };
 
