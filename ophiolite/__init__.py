@@ -21,6 +21,9 @@ def __getattr__(name):
     if name in ('Sync', 'Checkpoint', 'ResyncRequired'):  # E28
         from . import sync
         return getattr(sync, name)
+    if name == 'procedure':  # E105a: the decorator that marks a procedure's entry function
+        from .procedures import procedure
+        return procedure
     if name == 'WrittenOriginal':  # E30b
         from .writers import WrittenOriginal
         return WrittenOriginal

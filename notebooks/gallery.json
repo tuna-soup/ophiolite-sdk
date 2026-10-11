@@ -72,6 +72,13 @@
       "data": "A synthetic five-sample gamma-ray log, or a log in your project; publishing creates a result only you can see until you share it."
     },
     {
+      "slug": "a-spreadsheet-becomes-wells-and-tops",
+      "title": "A spreadsheet becomes wells and tops",
+      "sentence": "Say which column holds what, review what a table of formation tops would add, then add it and read one line per set.",
+      "modes": ["synthetic", "live"],
+      "data": "A synthetic six-row tops table made on your computer; adding it creates sets of tops only you can see until you share them."
+    },
+    {
       "slug": "well-logs-in-a-bucket",
       "title": "Well logs in a bucket",
       "sentence": "Browse a folder of well logs in your organisation's storage bucket, add it read from your storage each time, and see why a file that later changes is reported instead of read.",
