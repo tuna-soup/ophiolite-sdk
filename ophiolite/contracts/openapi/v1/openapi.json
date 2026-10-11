@@ -75102,6 +75102,19 @@
                       ],
                       "default": null,
                       "description": "E85b: present when an address was read"
+                    },
+                    "defaults_revision": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E90: the project defaults revision this answer offered; `upload-runs/start` names it",
+                      "title": "Defaults Revision"
                     }
                   },
                   "required": [
@@ -76475,10 +76488,17 @@
                     "type": "array"
                   },
                   "attribution": {
-                    "maxLength": 500,
-                    "minLength": 1,
-                    "title": "Attribution",
-                    "type": "string"
+                    "anyOf": [
+                      {
+                        "maxLength": 500,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Attribution"
                   },
                   "well_notes": {
                     "default": "",
@@ -76487,12 +76507,20 @@
                     "type": "string"
                   },
                   "audience": {
-                    "items": {
-                      "type": "string"
-                    },
-                    "maxItems": 100,
-                    "title": "Audience",
-                    "type": "array"
+                    "anyOf": [
+                      {
+                        "items": {
+                          "type": "string"
+                        },
+                        "maxItems": 100,
+                        "type": "array"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Audience"
                   },
                   "rights_confirmed": {
                     "const": true,
@@ -76512,6 +76540,20 @@
                     "default": null,
                     "description": "E85b: the https address of the run's one file; kept without its query string",
                     "title": "Address"
+                  },
+                  "defaults_revision": {
+                    "anyOf": [
+                      {
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E90: the project defaults revision the check answered",
+                    "title": "Defaults Revision"
                   }
                 },
                 "required": [
@@ -76519,7 +76561,6 @@
                   "command_id",
                   "folder_name",
                   "files",
-                  "attribution",
                   "rights_confirmed"
                 ],
                 "title": "Start",
@@ -95262,6 +95303,19 @@
             "const": "none",
             "type": "string",
             "title": "Default"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E90: why the project's default is not offered for this field (a coordinate system this kind of file cannot use)",
+            "title": "Note"
           }
         },
         "required": [
@@ -111762,6 +111816,38 @@
         "title": "UploadRunCounts",
         "type": "object"
       },
+      "UploadRunDefaults": {
+        "additionalProperties": false,
+        "description": "E90: the project defaults a run used: their revision, who accepted them, and the run's own settings taken from them\n(a file's kept defaults are in its evidence, class project-default).",
+        "properties": {
+          "revision": {
+            "title": "Revision",
+            "type": "integer"
+          },
+          "accepted_by": {
+            "title": "Accepted By",
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "enum": [
+                "attribution",
+                "audience"
+              ],
+              "type": "string"
+            },
+            "title": "Fields",
+            "type": "array"
+          }
+        },
+        "required": [
+          "revision",
+          "accepted_by",
+          "fields"
+        ],
+        "title": "UploadRunDefaults",
+        "type": "object"
+      },
       "UploadRunEvidence": {
         "additionalProperties": false,
         "description": "E85: one decided field and where it came from; the server derives the class.",
@@ -112212,6 +112298,32 @@
             ],
             "default": null,
             "description": "E85b: present when the run's file was fetched from an address"
+          },
+          "project_audience": {
+            "anyOf": [
+              {
+                "const": "read",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E90: everyone in the project can see each file the run adds (the default \"Everyone in this project\")",
+            "title": "Project Audience"
+          },
+          "defaults": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UploadRunDefaults"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E90: present when the run used a project default"
           }
         },
         "required": [
