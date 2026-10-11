@@ -8,7 +8,7 @@ type WireAbsoluteTolerance = { "kind": "absolute"; "value": number; "unit": stri
 type WireAccessKeyRefusal = { "reason": "expired" | "native" | "scope" | "project" | "access"; "at": string; "client": "qgis" | "python-sdk" | "browser" | "other" };
 type WireAccessKeyRow = { "id": string; "label": string; "project_id": string; "scope": "read" | "write"; "created_at": string; "expires_at": string; "last_used_at": (string) | (null); "last_used_origin": (string) | (null); "expired"?: boolean; "last_refused"?: (WireAccessKeyRefusal) | (null) };
 type WireAccessTestReadiness = { "sentence": string; "actor": "deployment-administrator" | "organisation-owner" | "project-administrator" | "connection-administrator" | "you"; "remedy": string; "docs": string; "reason"?: ("missing" | "not-a-file" | "insecure-mode" | "unreadable" | "malformed") | (null); "code": "ready" | "credential-unreadable" | "credential-context-mismatch" | "connection-disabled" | "target-changed" | "key-unavailable" | "key-mismatch" | "unreachable" | "tls-refused" | "sign-in-refused" | "no-read-right" | "table-missing" | "undetermined" | "sign-in-needed" };
-type WireAccountProject = { "id": string; "name"?: (string) | (null); "role"?: (string) | (null); "can_compute"?: (boolean) | (null); "can_administer"?: (boolean) | (null); "archived": boolean };
+type WireAccountProject = { "id": string; "name"?: (string) | (null); "role"?: (string) | (null); "can_compute"?: (boolean) | (null); "can_administer"?: (boolean) | (null); "archived": boolean; "access_ends_at"?: (string) | (null) };
 type WireAccountSession = { "id": string; "expires_at": string; "current": boolean };
 type WireActivityEvent = { "schema": "ophiolite.activity/1"; "event_id": string; "project_id": string; "actor_id": (string) | (null); "kind": string; "evidence": string; "coverage_profile": string; "data": Record<string, unknown>; "recorded_at": (number) | (string); "cursor"?: (number) | (null); "trace_id"?: (string) | (null); "run_id"?: (string) | (null); "via"?: (WireVia) | (null); "trace_context"?: (WireTraceCarrier) | (null) };
 type WireAdministrationBlocker = { "sentence": string; "actor": "deployment-administrator" | "organisation-owner" | "project-administrator" | "connection-administrator" | "you"; "remedy": string; "docs": string; "reason"?: ("missing" | "not-a-file" | "insecure-mode" | "unreadable" | "malformed") | (null); "code": "not-configured" | "key-unavailable" | "key-mismatch" | "no-approved-database" };
@@ -75,9 +75,10 @@ type WireDataTableSchema = { "profile": "table/1"; "columns": Array<Record<strin
 type WireDeclaredField = { "key": string; "label": string; "kind": "unit" | "text" | "crs" | "choice"; "hint"?: (string) | (null); "choices"?: (Record<string, unknown>) | (null) };
 type WireDisplay = { "member_names": Record<string, unknown> };
 type WireDraftRef = { "id": string; "generation": number };
-type WireEffectiveGrant = { "role": string; "can_compute": boolean; "via": string };
-type WireEffectiveMember = { "user_id": string; "name": string; "enabled": boolean; "blocked": boolean; "can_edit": (boolean) | (null); "can_compute": boolean; "can_administer": boolean; "has_access": boolean; "grants": Array<WireEffectiveGrant> };
+type WireEffectiveGrant = { "role": string; "can_compute": boolean; "via": string; "team_name"?: (string) | (null); "ends_at"?: (string) | (null); "ends_on"?: (string) | (null); "ended"?: boolean; "role_label"?: string; "source_label"?: string };
+type WireEffectiveMember = { "user_id": string; "name": string; "enabled": boolean; "blocked": boolean; "can_edit": (boolean) | (null); "can_compute": boolean; "can_administer": boolean; "has_access": boolean; "grants": Array<WireEffectiveGrant>; "ends_on"?: (string) | (null); "ended"?: boolean };
 type WireEligibility = { "area": string; "operation": string; "scope": string; "allowed": boolean; "reason": (string) | (null); "requires_plan": boolean };
+type WireEndedProject = { "project_id": string; "name": (string) | (null); "ended_on": string };
 type WireEntity = { "schema": "ophiolite.entity/1"; "entity_id": string; "project_id": string; "kind": "well" | "wellbore"; "name": string; "identity": WireIdentity; "part_of"?: (WireEntityRef) | (null); "parts"?: Array<WireEntityRef>; "owner": string; "generation": number; "history"?: Array<WireIdentityChange>; "location"?: (WireWellLocation) | (null) };
 type WireEntityIdentityIn = { "authority"?: (string) | (null); "key"?: (string) | (null); "provisional"?: (boolean) | (null) };
 type WireEntityRef = { "entity_id": string; "kind": "well" | "wellbore"; "name": string };
@@ -168,7 +169,7 @@ type WirePolicyResult = { "asset_id": string; "name": (string) | (null); "newly_
 type WirePreviewGrant = { "user_id": string; "name"?: (string) | (null); "role"?: (string) | (null); "can_compute"?: (boolean) | (null); "can_administer"?: (boolean) | (null); "via"?: (string) | (null) };
 type WirePreviewProject = { "project_id": string; "inspectable": boolean; "grants"?: (Array<WirePreviewGrant>) | (null) };
 type WirePrincipal = { "kind": string; "scopes": (Array<string>) | (null); "agent": (Record<string, unknown>) | (null); "capability"?: (number) | (null) };
-type WireProjectEntry = { "id": string; "name": (string) | (null); "role": (string) | (null); "can_administer": boolean; "organization_id": (string) | (null); [key: string]: unknown };
+type WireProjectEntry = { "id": string; "name": (string) | (null); "role": (string) | (null); "can_administer": boolean; "organization_id": (string) | (null); "access_ends_at"?: (string) | (null); [key: string]: unknown };
 type WirePublicationReceipt = { "asset_id": string; "revision": string; "revision_number": number; "profile": "points-csv/1" | "mesh-text/1" | "esri-ascii-grid/1" | "well-tops-csv/1" | "deviation-csv/1" | "opendtect-faultsticks/1" | "las2/1" | "well-location/1" | "wavelet-text/1" | "model-section-text/1" | "seismic-section-text/1" | "time-depth-csv/1"; "derived_from": Array<WireParentReference>; "method": WireMethodRecord; "command_id": string };
 type WireReaderKind = { "profile": string; "label": string; "accept": string; "limits": string; "declared": Array<WireDeclaredField>; "recipe": boolean };
 type WireRecipeReference = { "asset_id": string; "revision": string };
@@ -461,6 +462,10 @@ export type postOrganizationsRenameInput = { body: { "organization_id": string; 
 export function postOrganizationsRename(transport: Transport, input: postOrganizationsRenameInput): Promise<{ "id": string; "name": string; "role": "owner" | "member"; "members": Array<WireOrganizationMember> }> {
   return transport.request<{ "id": string; "name": string; "role": "owner" | "member"; "members": Array<WireOrganizationMember> }>("POST", "/api/v1/organizations/rename", {}, undefined, input.body, input.options, null, false);
 }
+export type postProjectsEndedInput = { body: Record<string, never>; options?: OperationOptions };
+export function postProjectsEnded(transport: Transport, input: postProjectsEndedInput): Promise<{ "projects": Array<WireEndedProject> }> {
+  return transport.request<{ "projects": Array<WireEndedProject> }>("POST", "/api/v1/projects/ended", {}, undefined, input.body, input.options, null, false);
+}
 export type postProjectsListInput = { body: { "limit"?: number; "cursor"?: (string) | (null); [key: string]: unknown }; options?: OperationOptions };
 export function postProjectsList(transport: Transport, input: postProjectsListInput): Promise<{ "projects": Array<WireProjectEntry>; "next_cursor": (string) | (null); [key: string]: unknown }> {
   return transport.request<{ "projects": Array<WireProjectEntry>; "next_cursor": (string) | (null); [key: string]: unknown }>("POST", "/api/v1/projects/list", {}, undefined, input.body, input.options, null, false);
@@ -476,6 +481,10 @@ export function postProjectsProjectAccessBlock(transport: Transport, input: post
 export type postProjectsProjectAccessEffectiveInput = { path: { "project": string }; body: { "project_id": string; [key: string]: unknown }; options?: OperationOptions };
 export function postProjectsProjectAccessEffective(transport: Transport, input: postProjectsProjectAccessEffectiveInput): Promise<{ "members": Array<WireEffectiveMember> }> {
   return transport.request<{ "members": Array<WireEffectiveMember> }>("POST", "/api/v1/projects/{project}/access/effective", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectAccessEndDateInput = { path: { "project": string }; body: { "project_id": string; "user_id": string; "ends_on": (string) | (null); [key: string]: unknown }; options?: OperationOptions };
+export function postProjectsProjectAccessEndDate(transport: Transport, input: postProjectsProjectAccessEndDateInput): Promise<{ "changed": boolean; "project_id": string; "user_id": string; "ends_on": (string) | (null); "expires_at": (string) | (null) }> {
+  return transport.request<{ "changed": boolean; "project_id": string; "user_id": string; "ends_on": (string) | (null); "expires_at": (string) | (null) }>("POST", "/api/v1/projects/{project}/access/end-date", input.path, undefined, input.body, input.options, null, false);
 }
 export type postProjectsProjectActivityInput = { path: { "project": string }; body: { "project_id": string; "after"?: number; "limit"?: number; "request_id"?: (string) | (null) }; options?: OperationOptions };
 export function postProjectsProjectActivity(transport: Transport, input: postProjectsProjectActivityInput): Promise<{ "stream_id": string; "schema": "ophiolite.activity-page/1"; "events": Array<Record<string, unknown>>; "next_cursor": (number) | (string) | (null); "consumers": Array<Record<string, unknown>>; "coverage": (Record<string, unknown>) | (Array<unknown>); "observed_at": number; "trace_viewer_base": (string) | (null); "consumer_retention_days": number; "pruned_through": number; "display"?: (WireDisplay) | (null) }> {

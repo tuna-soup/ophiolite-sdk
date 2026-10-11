@@ -340,6 +340,173 @@
         }
       }
     },
+    "/api/v1/projects/{project}/access/end-date": {
+      "post": {
+        "summary": "E67a: set, change or remove the last day of a person's direct grant (project administrators)",
+        "description": "Scope write; accepted principals: session; project extractor top.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "changed": {
+                      "description": "False when the grant already ended on that day (nothing was written)",
+                      "title": "Changed",
+                      "type": "boolean"
+                    },
+                    "project_id": {
+                      "title": "Project Id",
+                      "type": "string"
+                    },
+                    "user_id": {
+                      "title": "User Id",
+                      "type": "string"
+                    },
+                    "ends_on": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Ends On"
+                    },
+                    "expires_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "The stored end: the start of the day after ends_on, UTC; null: no end",
+                      "title": "Expires At"
+                    }
+                  },
+                  "required": [
+                    "changed",
+                    "project_id",
+                    "user_id",
+                    "ends_on",
+                    "expires_at"
+                  ],
+                  "title": "AccessEndChanged",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "E67a: set, change or remove the end of one person's direct grant (project administrators; a browser session).",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "user_id": {
+                    "title": "User Id",
+                    "type": "string"
+                  },
+                  "ends_on": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "The last permitted day, YYYY-MM-DD (a UTC date; access ends at the start of the next day); null removes the end. Today or later; not for a person whose only grant is a team's, nor for the last administrator without an end date",
+                    "title": "Ends On"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "user_id",
+                  "ends_on"
+                ],
+                "title": "AccessEndDate",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/access-keys/create": {
       "post": {
         "summary": "Create an access key for one project; the key is shown once",
@@ -34317,6 +34484,106 @@
                 ],
                 "title": "OrganizationRename",
                 "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/ended": {
+      "post": {
+        "summary": "E67a: the projects where your own direct access ended (the last day of each); nothing about anyone else",
+        "description": "Scope read; accepted principals: session; project extractor none.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E67a projects/ended: the caller's own direct grants that ended and are why the caller cannot open the project.",
+                  "properties": {
+                    "projects": {
+                      "items": {
+                        "$ref": "#/components/schemas/EndedProject"
+                      },
+                      "title": "Projects",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "projects"
+                  ],
+                  "title": "EndedProjects",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "This operation reads no fields from its body; send an empty object.",
+                "properties": {},
+                "title": "NoFields",
+                "type": "object",
+                "x-ophiolite-no-fields": true
               }
             }
           }
@@ -82759,6 +83026,19 @@
           "archived": {
             "title": "Archived",
             "type": "boolean"
+          },
+          "access_ends_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E67a: when your access to this project ends (an instant, UTC); null: it does not",
+            "title": "Access Ends At"
           }
         },
         "required": [
@@ -86328,6 +86608,63 @@
             "description": "direct, or team:<team id>",
             "title": "Via",
             "type": "string"
+          },
+          "team_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E67a: the team's name for a team grant; null for a direct grant",
+            "title": "Team Name"
+          },
+          "ends_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E67a: when a direct grant ends (the start of the day after its last day, UTC); null: it does not end. Team grants carry no date",
+            "title": "Ends At"
+          },
+          "ends_on": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E67a: the last permitted day of a direct grant (YYYY-MM-DD, a UTC date); null: no end",
+            "title": "Ends On"
+          },
+          "ended": {
+            "default": false,
+            "description": "E67a: the direct grant has ended and no longer gives access",
+            "title": "Ended",
+            "type": "boolean"
+          },
+          "role_label": {
+            "default": "",
+            "description": "E67a: the role in words (Member or Viewer)",
+            "title": "Role Label",
+            "type": "string"
+          },
+          "source_label": {
+            "default": "",
+            "description": "E67a: where the grant comes from in words: Direct grant, or the team's name (A team when it has none)",
+            "title": "Source Label",
+            "type": "string"
           }
         },
         "required": [
@@ -86386,6 +86723,25 @@
             },
             "title": "Grants",
             "type": "array"
+          },
+          "ends_on": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E67a: the last permitted day of this person's direct grant, or null",
+            "title": "Ends On"
+          },
+          "ended": {
+            "default": false,
+            "description": "E67a: this person's direct grant has ended",
+            "title": "Ended",
+            "type": "boolean"
           }
         },
         "required": [
@@ -86446,6 +86802,38 @@
           "requires_plan"
         ],
         "title": "Eligibility",
+        "type": "object"
+      },
+      "EndedProject": {
+        "additionalProperties": false,
+        "properties": {
+          "project_id": {
+            "title": "Project Id",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "ended_on": {
+            "description": "The last day the access lasted (YYYY-MM-DD, a UTC date)",
+            "title": "Ended On",
+            "type": "string"
+          }
+        },
+        "required": [
+          "project_id",
+          "name",
+          "ended_on"
+        ],
+        "title": "EndedProject",
         "type": "object"
       },
       "Entity": {
@@ -93313,6 +93701,18 @@
               }
             ],
             "title": "Organization Id"
+          },
+          "access_ends_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Access Ends At"
           }
         },
         "required": [
