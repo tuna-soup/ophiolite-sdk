@@ -10,6 +10,11 @@ words. Nothing is converted or repaired, and no wellbore is linked unless you as
 Running the same upload again after an interruption continues the unfinished upload of the same folder (the same
 paths, sizes and digests): files already added are not sent again. `new=True` starts another upload instead.
 
+E90: an omitted attribution or audience is the project's New data setting (`client.new_data_defaults()`), and a
+declared value 'project-default' (or `use_project_defaults`) keeps the project's default for that field of each file
+that leaves it open; the report records it as "Project default, accepted by you" with the settings revision it was read
+at, and the deployment refuses the upload, writing nothing, if the settings changed in between.
+
 E85: one file is a folder of one, and an https address is read and added by the gateway itself: the SDK sends the
 address, never the file's bytes, and the report names the host and the file, never the address's query string.
 """
@@ -39,6 +44,10 @@ RESULT = {'added': 'Added', 'already-here': 'Already here', 'needs-decision': 'N
 OUTCOMES = ('added', 'already-here', 'needs-decision', 'not-read', 'not-supported')
 CLAIM_WAIT = 150  # seconds: the deployment's claim on a file being added lasts 120
 COLUMNS = ('path', 'result', 'kind', 'read', 'reason', 'asset')
+DEFAULT = 'project-default'  # E90: a declared value that keeps the project's default for that field
+NO_ATTRIBUTION = 'No attribution given and the project has none. Pass --attribution or ask an administrator to set one.'
+NOT_PROJECT = "This project's new files are not visible to everyone in it. Add the files for yourself or named people, then change who can see them (client.set_audience)."
+MOVED = "The project's defaults changed while this upload was being prepared. Nothing was added; run it again."
 
 
 def _checked(model, answer, what):
@@ -163,6 +172,11 @@ def declared_for(declare, files, item):
     return {**(general or {}), **(own[0] if own else {})}
 
 
+def _values(values):
+    """The declared values of one `declare` entry: {field: value} for a kind, or {kind: {field: value}} for one file."""
+    return [x for v in values.values() for x in (v.values() if isinstance(v, dict) else [v])] if isinstance(values, dict) else []
+
+
 def is_address(path):
     return isinstance(path, str) and '://' in path[:12]
 
@@ -235,6 +249,11 @@ class Report:
         said = ', '.join('%d %s' % (n, RESULT.get(k, 'Not sent yet')) for k, n in self.counts.items())
         lines = ['%s - %d files - %s. %s' % (self.view['folder_name'], self.view['files'], self.label, said)]
         lines += ['  %s: %s%s' % (r['path'], r['result'], ' - ' + r['reason'] if r['reason'] else '') for r in self.rows() if r['result'] not in ('Added', 'Already here')]
+        settings = self.view.get('settings') or {}
+        if settings.get('defaults'):  # E90: what the run took from the project's settings, and at which revision
+            took = {'attribution': 'attribution "%s"' % settings.get('attribution', ''), 'audience': who_sees(settings)}
+            used = [took[k] for k in settings['defaults']['fields']] + ['what files leave open, where kept'] * (not settings['defaults']['fields'])
+            lines.append('Project default, accepted by you (settings revision %d): %s.' % (settings['defaults']['revision'], '; '.join(used)))
         return '\n'.join(lines)
 
     def save(self, path):
@@ -247,6 +266,13 @@ class Report:
         return path
 
     def __repr__(self): return '<Report %s: %s %s>' % (self.view['folder_name'], self.label, self.counts)
+
+
+def who_sees(settings):
+    """J2's words for who can see the files a run adds."""
+    if settings.get('project_audience') == 'read': return 'Everyone in this project can see it'
+    named = [p for p in settings.get('audience') or []]
+    return 'Only you can see it' if not named else 'You and %s can see it' % ' and '.join(named)
 
 
 # --- the client --------------------------------------------------------------------------------------------------------
@@ -316,12 +342,14 @@ class UploadRuns:
         got = self.check(address)['fetched']
         return Folder(got['host'][:160], [File(got['name'], got['bytes'], got['sha256'], None, address=address)], address)
 
-    def upload(self, path, *, attribution, rights_confirmed, audience=(), well_notes='', declare=None, skip_decisions=False,
-               associate_matches=False, new=False, progress=None):
+    def upload(self, path, *, attribution=None, rights_confirmed, audience=None, well_notes='', declare=None, skip_decisions=False,
+               associate_matches=False, new=False, progress=None, use_project_defaults=False):
         """Upload a file, a folder, a .zip or an https address and return its Report. `declare` {kind: {field: value}} answers the files of that
         kind (profile, e.g. 'esri-ascii-grid/1') that need you to say what their values mean; `skip_decisions` skips
         every other file that needs a decision; `associate_matches` links each file to the one wellbore its header names.
-        `progress(report)` is called after each file."""
+        `progress(report)` is called after each file. E90: `attribution` None and `audience` None ('project' needs it to be
+        the project's setting; 'me' is no one else) take the project's New data settings; a `declare` value 'project-default'
+        or `use_project_defaults` keeps the project's default for a field a file leaves open."""
         if rights_confirmed is not True:
             raise ValidationFailed(['Confirm that you may retain these files, derive results and share them within the audience.'])
         if not isinstance(path, (str, os.PathLike)):  # E56 (F1): a path is read and digested here; an open stream is not
@@ -331,8 +359,9 @@ class UploadRuns:
         checked_declarations(declare, folder)
         run = None if new else self.unfinished(folder)
         if run is None:
-            body = {'command_id': uuid.uuid4().hex, 'folder_name': folder.name[:160], 'files': folder.listing(), 'attribution': attribution,
-                    'well_notes': well_notes, 'audience': list(audience), 'rights_confirmed': True, **({'address': folder.address} if folder.address else {})}
+            body = {'command_id': uuid.uuid4().hex, 'folder_name': folder.name[:160], 'files': folder.listing(),
+                    'well_notes': well_notes, 'rights_confirmed': True, **({'address': folder.address} if folder.address else {})}
+            body.update(self.defaults(folder, attribution, audience, declare, use_project_defaults))
             run = self._call('start', body, UploadRun)['run_id']
         report = self.send(run, folder, progress)
         for _ in range(SENDS - 1):  # E56 (N8): a file may ask again once it is read (a layer, corners); answered from `declare`
@@ -346,6 +375,41 @@ class UploadRuns:
             links = [(i['ordinal'], i['proposal']['entity_id']) for i in report.items if i.get('proposal')]
             if links: report, _ = self.associate(run, links)
         return report
+
+    def defaults(self, folder, attribution, audience, declare, use_project_defaults):
+        """E90: the start's run settings and, where a project default is kept, each file's decisions; with the settings
+        revision whenever a default is used, read once here and never refetched."""
+        out = {} if attribution is None else {'attribution': attribution}
+        if isinstance(audience, str) and audience not in ('me', 'project'): raise Refused("Choose who can see the files: 'project', 'me' or a list of people.")
+        if audience is not None and audience != 'project': out['audience'] = [] if audience == 'me' else list(audience)
+        keeps = use_project_defaults or any(v == DEFAULT for values in (declare or {}).values() for v in _values(values))
+        if attribution is not None and 'audience' in out and not keeps: return out
+        from . import new_data
+        snap = new_data.defaults(self.client)
+        if attribution is None and not (snap['attribution'] or '').strip(): raise Refused(NO_ATTRIBUTION)
+        if audience == 'project' and snap['visible_to'] != 'project': raise Refused(NOT_PROJECT)
+        out['defaults_revision'] = snap['revision']
+        if keeps: out['files'] = [{**f, **self.kept(folder, f, declare, use_project_defaults, snap['revision'])} for f in folder.listing()]
+        return out
+
+    def kept(self, folder, listed, declare, everything, revision):
+        """One file's decisions when it keeps a project default: its kind from the deployment's check of its head, the
+        values `declare` gives that kind (typed ones are yours), and the defaults kept."""
+        file = next(f for f in folder.files if f.path == listed['path'])
+        if folder.address: found = self.check(folder.address)  # the gateway reads the address again; nothing is sent from here
+        else:
+            header = {'project_id': self.client.project, 'name': file.path, 'bytes': file.size, 'mode': 'head', 'sha256': file.sha256}
+            extra = {'Content-Type': 'application/octet-stream', 'X-Ophiolite-Upload': base64.b64encode(json.dumps(header, separators=(',', ':')).encode()).decode()}
+            found = _checked(UploadCheckAnswer, self.client._post_bytes('upload-runs', 'check', file.head(), extra_headers=extra, retry=True), 'file check')
+        if not found.get('kind'): return {}
+        if found.get('defaults_revision') != revision: raise Refused(MOVED)
+        values = declared_for(declare, folder.files, {'path': file.path, 'profile': found['kind']['profile']}) or {}
+        offered = [s['key'] for s in found.get('suggestions') or [] if s['class'] == DEFAULT]
+        typed = {k: v for k, v in values.items() if v != DEFAULT}
+        keep = [k for k, v in values.items() if v == DEFAULT] + [k for k in offered if everything and k not in values]
+        missing = [k for k in keep if k not in offered]
+        if missing: raise Refused('The project has no default %s for %s; give a value instead.' % (', '.join(missing), file.path))
+        return {'decisions': typed, 'suggested': keep} if keep or typed else {}
 
     def answer(self, run, report, declare, folder):
         """Answer from `declare` each file that waits for declarations and is told something it asks; True if any was."""
