@@ -202,26 +202,55 @@ def test_production_decline_script_prints_the_evidence_fit_on_this_computer(tmp_
     assert sorted(p.name for p in tmp_path.iterdir()) == ['production-decline.png']
 
 
-# Evidence 7, live mode (E62 strategy amendment of 12 Oct by ophiolite-13): the notebook's exponential fit (numpy,
-# log-linear) on Q13a-Amstel's oil series as the live source serves it: 112 of 120 months, qi 32,190.6, D 0.02161/month.
-# The relative tolerance is 1e-9. Reordering the points or solving with lstsq instead of polyfit moves both by at most
-# about 5e-15 (measured), and a different BLAS stays in that range. A change of method or of the months fitted moves
-# them by far more than 1e-9 (curve_fit's 43,117.8 is 34 % away).
+# Evidence 7, live mode (E62 strategy amendments of 12 Oct by ophiolite-13): the notebook's exponential fit (numpy,
+# log-linear) on Q13a-Amstel's oil series as the live source serves it, held to the frozen window: 120 months,
+# 2016-01..2025-12, of the lane's NLOG fixture.
+#
+# The target: 112 of the 120 months fitted, qi 32,190.6 and D 0.02161 a month, within a relative tolerance of 1e-9.
+# Reordering the points or solving with lstsq instead of polyfit moves both by at most about 5e-15 (measured); a change
+# of method or of the months fitted moves them by far more.
+#
+# A live source can revise past months, so the served rows of the window are compared with the frozen fixture first.
+# On any difference the test skips, because that is drift, not a fit failure.
+# - FROZEN_DIGEST is the SHA-256 of the 120 canonical rows "YYYY-MM,<figure text or state>" joined by newlines.
+# - FROZEN_TAGS holds the first byte of each row's SHA-256. It counts the months that differ without carrying the
+#   figures: one byte cannot be inverted to a figure.
 LIVE_DECLINE = {'qi': 32190.64682445484, 'd': 0.02161190651083575}
 LIVE_TOLERANCE = 1e-9
+FROZEN_WINDOW = ('2016-01', 120)
+FROZEN_DIGEST = 'f44a29a2ebe1ebb40ee8e032fe4618aab1379b3b8cadce7b8085e1541868fcd2'
+FROZEN_TAGS = bytes.fromhex(
+    '255ca3ef21b698b5c4099bed85c5eabaaf09899da28b7b1f96581576577ca4ccda14c41b5263db7b5d9336b086c83fc80eecc9594d0460bdeb'
+    'bc90d9f4ccec008d59c79f8798925106a2d09498523fcd38df3792738e8d0e10d5553e389d39aea0bec2bfed218c4392dd6c98d7f404a73d842fff11203954')
 
 
-def test_production_decline_live_fit_on_the_served_amstel_series(tmp_path, monkeypatch):
-    """Runs only with OPHIOLITE_E62_LIVE_VIEW, the path of the series/view answer for Q13a-Amstel as the live source
-    serves it. The SDK repository holds no Amstel figures (Left 10). The Integration recipe (C6) records that answer from
-    the sandbox; on the lane, the Connectors' series_view.build makes it from the lane-only NLOG fixture."""
-    answer = os.environ.get('OPHIOLITE_E62_LIVE_VIEW')
-    if not answer: pytest.skip('OPHIOLITE_E62_LIVE_VIEW not set (live Evidence 7)')
+def frozen_rows(view):
+    """The canonical (month, figure) rows of the frozen window in VIEW, a month with no point being 'missing'."""
+    points = {p['t'][:7]: p for p in view['points']}
+    start, count = int(FROZEN_WINDOW[0][:4]) * 12 + int(FROZEN_WINDOW[0][5:7]) - 1, FROZEN_WINDOW[1]
+    months = ['%04d-%02d' % (year, month + 1) for year, month in (divmod(start + i, 12) for i in range(count))]
+    return [m + ',' + (points[m]['v'] if 'v' in points.get(m, {}) else points.get(m, {}).get('s', 'missing')) for m in months]
+
+
+def drift(view):
+    """None when the served window is the frozen one, else the skip reason."""
+    import hashlib
+    rows = frozen_rows(view)
+    digest = hashlib.sha256('\n'.join(rows).encode()).hexdigest()
+    if digest == FROZEN_DIGEST: return None
+    differ = sum(hashlib.sha256(r.encode()).digest()[0] != tag for r, tag in zip(rows, FROZEN_TAGS)) + abs(len(rows) - len(FROZEN_TAGS))
+    differ = max(1, differ)  # a changed month whose one-byte tag collides is still counted once
+    return f'source drift: {differ} months differ from the frozen fixture (digest {digest[:12]} vs {FROZEN_DIGEST[:12]})'
+
+
+def live_fit(served, tmp_path, monkeypatch):
+    """Skips on drift; otherwise runs the notebook on SERVED and holds its fit to the target."""
     pytest.importorskip('pandas'); pytest.importorskip('matplotlib')
+    reason = drift(served['view'])
+    if reason: pytest.skip(reason)
     import runpy
     import ophiolite.gallery as gallery
     from ophiolite.series import Series
-    served = json.loads(Path(answer).read_text())
 
     class Source:
         def series(self, name): return Series(served)
@@ -233,9 +262,32 @@ def test_production_decline_live_fit_on_the_served_amstel_series(tmp_path, monke
     monkeypatch.setattr(gallery, 'synthetic', lambda: False); monkeypatch.setattr(gallery, 'connect', lambda: Client())
     monkeypatch.setenv('OPHIOLITE_SERIES_SOURCE', 'served'); monkeypatch.chdir(tmp_path)
     ran = runpy.run_path(str(ROOT / 'notebooks' / 'production-decline' / 'notebook.py'), run_name='__main__')
-    assert len(ran['used']) == 112
+    assert len(ran['used']) == 112 and [str(t.date())[:7] for t in ran['window'].index[[0, -1]]] == ['2016-01', '2025-12']
     for name, target in LIVE_DECLINE.items():
         assert abs(ran[name] - target) <= LIVE_TOLERANCE * target, (name, ran[name], target)
+
+
+def served_view():
+    """The series/view answer for Q13a-Amstel as the live source serves it, from OPHIOLITE_E62_LIVE_VIEW. The SDK
+    repository holds no Amstel figures (Left 10). The Integration recipe (C6) records that answer from the sandbox; on
+    the lane, the Connectors' series_view.build makes it from the lane-only NLOG fixture."""
+    answer = os.environ.get('OPHIOLITE_E62_LIVE_VIEW')
+    if not answer: pytest.skip('OPHIOLITE_E62_LIVE_VIEW not set (live Evidence 7)')
+    return json.loads(Path(answer).read_text())
+
+
+def test_production_decline_live_fit_on_the_served_amstel_series(tmp_path, monkeypatch):
+    live_fit(served_view(), tmp_path, monkeypatch)
+
+
+def test_a_revised_month_in_the_live_source_is_drift_and_skips(tmp_path, monkeypatch):
+    """One month of the frozen window revised by the source: the check skips with the reason; it does not fail the fit."""
+    import copy
+    served = copy.deepcopy(served_view())
+    point = next(p for p in served['view']['points'] if p['t'].startswith('2020-03'))
+    point['v'] = str(int(float(point['v'])) + 1000) + '.0'
+    with pytest.raises(pytest.skip.Exception) as skipped: live_fit(served, tmp_path, monkeypatch)
+    assert str(skipped.value.msg).startswith('source drift: 1 months differ from the frozen fixture (digest ') and FROZEN_DIGEST[:12] in skipped.value.msg
 
 
 def test_every_entry_is_listed_built_and_described():
