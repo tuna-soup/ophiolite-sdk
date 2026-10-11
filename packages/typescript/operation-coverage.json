@@ -204,6 +204,18 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/organizations/invitation-decline",
+    "function": "postOrganizationsInvitationDecline",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/organizations/invitations-for-me",
+    "function": "postOrganizationsInvitationsForMe",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/organizations/invite-create",
     "function": "postOrganizationsInviteCreate",
     "request": "schema",
@@ -1244,6 +1256,18 @@
   {
     "operation": "POST /api/v1/projects/{project}/publications/share-preview",
     "function": "postProjectsProjectPublicationsSharePreview",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/publications/transform",
+    "function": "postProjectsProjectPublicationsTransform",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/publications/transform-preview",
+    "function": "postProjectsProjectPublicationsTransformPreview",
     "request": "schema",
     "response": "schema"
   },

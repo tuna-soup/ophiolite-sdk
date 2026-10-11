@@ -140,8 +140,9 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
 
     def exchange(self,work,**options):
         """E70a: check for updates, get latest and send to project from a work folder (ophiolite.exchange.Exchange)."""
-        from .exchange import Exchange,ClientTransport
-        return Exchange(ClientTransport(self),work,**options)
+        from .exchange import ClientTransport
+        from .presentation import PresentedExchange  # E104: the outcome shows itself with a link to this Workspace
+        return PresentedExchange(ClientTransport(self),work,origin=self.url,**options)
 
     def close(self):
         if self._owns_http:self.http.close()
@@ -710,7 +711,38 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         from .models.api import PublicationReceipt
         body,extra=planning.derive_request(self.project,written,name=name,from_=from_,method=method,command_id=command_id,of_entity=of_entity,
                                            new_version_of=new_version_of,expected_parent=expected_parent)
-        return planning.verify_derived(body,planning.parse(PublicationReceipt,self._post_bytes('publications','derive',written.bytes,extra_headers=extra,retry=True)))
+        from .presentation import PresentedReceipt,publication_recipe
+        recipe=publication_recipe(name=name,from_=from_,method=method,of_entity=of_entity)  # E104: "Send again", at call time
+        receipt=planning.verify_derived(body,planning.parse(PublicationReceipt,self._post_bytes('publications','derive',written.bytes,extra_headers=extra,retry=True)))
+        return PresentedReceipt.present(receipt,{'origin':self.url,'project':self.project,'family':'m','recipe':recipe})
+
+    def preview_change(self,asset_id,revision,change):
+        """E64: what changing one exact revision would make, stored nowhere: {'profile', 'method', 'method_key', 'samples',
+        'declared'}. CHANGE is {'kind': 'coordinates', 'to': 'EPSG:25831', 'values': 'bilinear'} or {'kind': 'units',
+        'curves': {'DT': 'us/m'}}. A change that cannot be made raises with the sentence the Workspace shows."""
+        from .entities import _in_its_words
+        return _in_its_words(lambda:self._post('publications','transform-preview',{'asset_id':asset_id,'revision':revision,'change':change},retry=True))
+
+    def _change(self,asset_id,revision,change,name,command_id):
+        from . import publish as planning
+        from .models.api import PublicationReceipt
+        preview=self.preview_change(asset_id,revision,change)
+        body={'asset_id':asset_id,'revision':revision,'change':change,'name':name,'command_id':command_id,'previewed':preview['method_key']}
+        from .entities import _in_its_words
+        return planning.parse(PublicationReceipt,_in_its_words(lambda:self._post('publications','transform',body,retry=True)))
+
+    def change_coordinates(self,asset_id,revision,*,to,name,command_id,values='bilinear'):
+        """E64: a new version of the same type in the system TO, made on the server by the one operation it selects
+        for these points (the method record names it, its published accuracy, area and any grid with its SHA-256).
+        The original is never changed. A grid is resampled once onto cell centres (VALUES: 'bilinear' or 'nearest').
+        `command_id` is required: a retry with the same id returns the same receipt."""
+        return self._change(asset_id,revision,{'kind':'coordinates','to':to,'values':values},name,command_id)
+
+    def change_units(self,asset_id,revision,*,curves,name,command_id):
+        """E64: a new version of a LAS log with each curve in CURVES ({mnemonic: unit}, the depth axis by its own
+        mnemonic) converted by the one units table; the method record keeps the coefficients. Nothing is guessed: a
+        curve whose unit is not stated, of another kind or not in the table raises with its sentence."""
+        return self._change(asset_id,revision,{'kind':'units','curves':dict(curves)},name,command_id)
 
     def import_bundle(self,bundle,*,audience,attribution,rights_confirmed,well_logs=None):
         """E18: upload every original a portable bundle carries as your own new, private upload, with

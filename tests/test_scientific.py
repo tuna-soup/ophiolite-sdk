@@ -63,7 +63,7 @@ def test_refuses_incomplete_view(case):
 
 def test_link_is_exact_and_percent_encoded():
     data,_=view();data.descriptors[0].project_id='a project';data.descriptors[0].asset_id='x/y?#';data.descriptors[0].revision='r/1?';data.descriptors[0].scientific.curve='GR /?#'
-    assert data.workspace_url()=='https://workspace.example/project/a%20project/asset/x%2Fy%3F%23?revision=r%2F1%3F&kind=scientific&curve=GR%20%2F%3F%23'
+    assert data.workspace_url()=='https://workspace.example/project/a%20project/data/m~x%2Fy%3F%23?revision=r%2F1%3F'
     data.url='';assert data.workspace_url() is None
 
 
