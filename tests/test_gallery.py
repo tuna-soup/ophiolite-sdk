@@ -202,6 +202,42 @@ def test_production_decline_script_prints_the_evidence_fit_on_this_computer(tmp_
     assert sorted(p.name for p in tmp_path.iterdir()) == ['production-decline.png']
 
 
+# Evidence 7, live mode (E62 strategy amendment of 12 Oct by ophiolite-13): the notebook's exponential fit (numpy,
+# log-linear) on Q13a-Amstel's oil series as the live source serves it: 112 of 120 months, qi 32,190.6, D 0.02161/month.
+# The relative tolerance is 1e-9. Reordering the points or solving with lstsq instead of polyfit moves both by at most
+# about 5e-15 (measured), and a different BLAS stays in that range. A change of method or of the months fitted moves
+# them by far more than 1e-9 (curve_fit's 43,117.8 is 34 % away).
+LIVE_DECLINE = {'qi': 32190.64682445484, 'd': 0.02161190651083575}
+LIVE_TOLERANCE = 1e-9
+
+
+def test_production_decline_live_fit_on_the_served_amstel_series(tmp_path, monkeypatch):
+    """Runs only with OPHIOLITE_E62_LIVE_VIEW, the path of the series/view answer for Q13a-Amstel as the live source
+    serves it. The SDK repository holds no Amstel figures (Left 10). The Integration recipe (C6) records that answer from
+    the sandbox; on the lane, the Connectors' series_view.build makes it from the lane-only NLOG fixture."""
+    answer = os.environ.get('OPHIOLITE_E62_LIVE_VIEW')
+    if not answer: pytest.skip('OPHIOLITE_E62_LIVE_VIEW not set (live Evidence 7)')
+    pytest.importorskip('pandas'); pytest.importorskip('matplotlib')
+    import runpy
+    import ophiolite.gallery as gallery
+    from ophiolite.series import Series
+    served = json.loads(Path(answer).read_text())
+
+    class Source:
+        def series(self, name): return Series(served)
+        def series_list(self): return [{'name': served['view']['name']}]
+
+    class Client:
+        def source(self, selection_id): return Source()
+
+    monkeypatch.setattr(gallery, 'synthetic', lambda: False); monkeypatch.setattr(gallery, 'connect', lambda: Client())
+    monkeypatch.setenv('OPHIOLITE_SERIES_SOURCE', 'served'); monkeypatch.chdir(tmp_path)
+    ran = runpy.run_path(str(ROOT / 'notebooks' / 'production-decline' / 'notebook.py'), run_name='__main__')
+    assert len(ran['used']) == 112
+    for name, target in LIVE_DECLINE.items():
+        assert abs(ran[name] - target) <= LIVE_TOLERANCE * target, (name, ran[name], target)
+
+
 def test_every_entry_is_listed_built_and_described():
     assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'grids-and-gis-files', 'how-was-this-made', 'open-it-here', 'a-spreadsheet-becomes-wells-and-tops', 'layers-for-a-gis', 'a-spreadsheet-and-a-database-joined', 'production-decline']
     for entry in GALLERY['notebooks']:
