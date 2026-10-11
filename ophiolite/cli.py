@@ -282,6 +282,14 @@ def parser():
     tables.add_argument('--audience',action='append',default=[],metavar='PERSON',help='table: a project member who may read what is added (repeat); you are always included')
     tables.add_argument('--command-id',help='table: the same id returns the same run instead of starting another')
     tables.add_argument('--dry-run',action='store_true',help='table: show what would be added; nothing is added')
+    tables.add_argument('--layout',metavar='NAME',help='table: use this project layout\'s mapping (its target is the layout\'s); a layout is never used unless named (E89)')
+    layouts=project(sub.add_parser('layouts',help='The project\'s layouts: list, show NAME, rename NAME NEW, retire NAME, use-again NAME, export [NAME...] --out FILE, import FILE, keep CONNECTION TABLE, update NAME, reconnect NAME CONNECTION TABLE (E89)'))
+    layouts.add_argument('action',choices=['list','show','rename','retire','use-again','export','import','keep','update','reconnect'])
+    layouts.add_argument('names',nargs='*',metavar='ARG',help='the layout name and what the action takes')
+    layouts.add_argument('--version',type=int,help='show, use-again: an earlier version')
+    layouts.add_argument('--retired',action='store_true',help='list: also the retired layouts')
+    layouts.add_argument('--out',type=Path,help='export: the file to write (the bytes the workspace\'s Download saves)')
+    layouts.add_argument('--name',help='keep: the layout\'s name (default: the connection\'s name)')
     upload=project(sub.add_parser('upload',help='Upload a file, a folder, a .zip or an https address: every file it can read is added, and one report says what became of each'))
     upload.add_argument('path',help='The file, folder or .zip file, or an https:// address the deployment fetches')
     upload.add_argument('--project',dest='upload_project',help='The project (default: the configuration\'s)')
@@ -294,6 +302,7 @@ def parser():
     upload.add_argument('--associate-matches',action='store_true',help='Link each file to the one wellbore whose name its header names')
     upload.add_argument('--report',type=Path,help='Write the report to this .csv (or .json) file')
     upload.add_argument('--new',action='store_true',help='Start another upload instead of continuing the unfinished upload of this folder')
+    upload.add_argument('--layout',metavar='NAME',help='A table file: add it with this project layout\'s mapping (E89). Without it a table that matches a layout is not added')
     init=sub.add_parser('init',help='Start an application from a packaged template (map-application, derive-and-publish, sync-worker, notebook, agent-workflow)')
     init.add_argument('template',nargs='?',help='The template name; omit with --list');init.add_argument('--output',type=Path,help='An empty or new folder (default: ./TEMPLATE)')
     init.add_argument('--list',action='store_true',help='List the packaged templates')
@@ -709,6 +718,8 @@ def _upload(args,client):
     """E55: upload a folder or a .zip; exit 0 when every file is added or already here, 4 when any is not (the report
     is still written), 1 on a refusal before anything was sent."""
     if not args.rights_confirmed:raise Refused('Confirm with --rights-confirmed that you may retain these files, derive results and share them within the audience.')
+    tabled=_layout_upload(args,client)
+    if tabled is not None:return tabled
     runs=client.upload_runs
     def progress(report):
         if not args.json:print('Adding files... %d of %d.' % (sum(v for k,v in report.counts.items() if k!='not-sent'),report.view['files']),file=sys.stderr,flush=True)
@@ -720,6 +731,87 @@ def _upload(args,client):
     done(args,report.text()+('\n'+wells if wells else '')+('\nReport written to %s' % args.report if args.report else ''),{'upload':report.view})
     report.exit_code=0 if report.ok else EXIT['conflict']
     return report
+
+
+TABLE_FILES=('.csv','.txt','.tsv','.xlsx','.xls')
+
+
+def _layout_upload(args,client):
+    """E89 J8: a table file uploaded with --layout is added with that layout's mapping (E87's table import); without it,
+    a table whose columns are one of the project's layouts is not added and the command names the layout (exit 4): a
+    layout is never applied unless named (R10). Anything else is None: the ordinary upload."""
+    path=Path(args.path)
+    if not (path.is_file() and path.suffix.lower() in TABLE_FILES):
+        if args.layout:raise Refused('--layout is for one table file (.csv, .xlsx or .xls).')
+        return None
+    from .imports import result_lines
+    from .layouts import needs_decision
+    if args.layout:
+        result=client.imports.from_table(path,layout=args.layout,audience=args.audience)
+        answer=result['run']
+        return done(args,'\n'.join(result_lines(answer,result['preview'])),{'import':answer,'preview':result['preview']})
+    layouts=client.layouts()
+    if not any(v['by']=='header' for v in layouts.list(retired=False)):return None
+    read=client.imports.read(path)
+    matches=layouts.match([c['name'] for c in read.get('columns') or []]) if read.get('columns') else []
+    if matches:raise needs_decision(matches)
+    return None
+
+
+def _layouts(args,client):
+    """E89: layouts list | show NAME | rename NAME NEW | retire NAME | use-again NAME | export [NAME...] --out FILE |
+    import FILE | keep CONNECTION TABLE | update NAME | reconnect NAME CONNECTION TABLE. Names only; --json carries the
+    answers. import exits 4 when any layout of the file was not added."""
+    from .layouts import columns_line,holds,import_lines,list_lines,_day
+    layouts,given=client.layouts(),args.names
+    takes={'list':0,'show':1,'rename':2,'retire':1,'use-again':1,'import':1,'keep':2,'update':1,'reconnect':3}
+    if args.action in takes and len(given)!=takes[args.action]:
+        raise Refused({'list':'layouts list takes no name.','show':'Give the layout: ophiolite layouts show NAME.','rename':'Give the layout and its new name: ophiolite layouts rename NAME NEW.',
+                       'retire':'Give the layout: ophiolite layouts retire NAME.','use-again':'Give the layout: ophiolite layouts use-again NAME.','import':'Give the file: ophiolite layouts import FILE.',
+                       'keep':'Give the connection and the table: ophiolite layouts keep CONNECTION TABLE.','update':'Give the layout: ophiolite layouts update NAME.',
+                       'reconnect':'Give the layout, the connection and the table: ophiolite layouts reconnect NAME CONNECTION TABLE.'}[args.action])
+    if args.version and args.action not in ('show','use-again'):raise Refused('Only show and use-again take --version.')
+    if args.out and args.action!='export':raise Refused('Only export takes --out.')
+    if args.name and args.action!='keep':raise Refused('Only keep takes --name.')
+    names=_people(client)
+    if args.action=='list':
+        views=layouts.list(retired=args.retired)
+        return done(args,'\n'.join(list_lines(views,names)),{'layouts':views})
+    if args.action=='show':
+        view=layouts.get(given[0],version=args.version)
+        who=lambda person:names.get(person) or 'a project member'
+        doc=view.get('layout') or {}
+        lines=[view['name']+('' if view['version']==view['head_version'] else ' (version %d)' % view['version']),'Holds: '+holds(view),
+               'Made by %s on %s' % (who(view['made_by']),_day(view['made_at']))]
+        if len(view['history'])>1:lines.append('Changed by %s on %s' % (who(view['changed_by']),_day(view['changed_at'])))
+        lines.append('Last used by %s on %s' % (who(view['last_used']['person']),_day(view['last_used']['at'])) if view.get('last_used') else 'Not used yet')
+        if columns_line(view):lines.append('Columns: '+columns_line(view))
+        for field,column in ((doc.get('mapping') or {}).get('fields') or {}).items():lines.append('  %s: %s' % (column if isinstance(column,str) else ', '.join(column),field))
+        lines+=['Version %d, %s, %s' % (h['version'],who(h['actor']),_day(h['at'])) for h in reversed(view['history'])]
+        return done(args,'\n'.join(lines),{'layout':view})
+    if args.action=='export':
+        if not args.out:raise Refused('Say where to write it: ophiolite layouts export [NAME...] --out FILE.')
+        layouts.export_to(args.out,given or None)
+        return done(args,'Saved %s' % args.out.name,{'out':str(args.out)})
+    if args.action=='import':
+        answer=layouts.import_(Path(given[0]))
+        done(args,'\n'.join(import_lines(answer)),answer)
+        if any(o['result']=='not-added' for o in answer['outcomes']):raise SystemExit(EXIT['conflict'])
+        return answer
+    if args.action=='rename':view,said=layouts.rename(given[0],given[1]),'Renamed to "%s".'
+    elif args.action=='retire':view,said=layouts.retire(given[0]),'"%s" is retired.'
+    elif args.action=='use-again':view,said=layouts.use_again(given[0],version=args.version),('Version %d is the layout again.' % args.version) if args.version else '"%s" is offered again.'
+    elif args.action=='keep':view,said=layouts.keep(given[0],given[1],name=args.name),'Kept as the project layout "%s". Later changes to your own mapping do not change it.'
+    elif args.action=='update':view,said=layouts.update(given[0]),'Updated the project layout "%s".'
+    else:view,said=layouts.reconnect(*given),'"%s" uses this connection now.'
+    return done(args,said % view['name'] if '%s' in said else said,{'layout':view})
+
+
+def _people(client):
+    """Display names of the project's members by account id (never printed); empty when the deployment gives none."""
+    from .errors import OphioliteError
+    try:return (client.members().get('display') or {}).get('member_names') or {}
+    except OphioliteError:return {}
 
 
 def _wells_from_run(args,client):
@@ -793,15 +885,15 @@ def _table_import(args,client):
     from .errors import IntegrityConflict
     from .imports import STOPPED,parse_mapping,result_lines,review_lines
     imports=client.imports
-    table_only=(args.target,args.map,args.declare,args.well,args.authority,args.sheet,args.header_row,args.delimiter,args.decimal_mark,args.encoding,args.separate,args.audience,args.command_id,args.dry_run)
-    if args.action!='table' and any(table_only):raise Refused('Only import table takes --target, --map, --declare, --well, the reading options, --audience, --command-id or --dry-run.')
+    table_only=(args.target,args.layout,args.map,args.declare,args.well,args.authority,args.sheet,args.header_row,args.delimiter,args.decimal_mark,args.encoding,args.separate,args.audience,args.command_id,args.dry_run)
+    if args.action!='table' and any(table_only):raise Refused('Only import table takes --target, --layout, --map, --declare, --well, the reading options, --audience, --command-id or --dry-run.')
     if args.action=='list':
         if args.what:raise Refused('import list takes no id.')
         rows=imports.list()
         return done(args,'\n'.join('%s  %s (%s): %s' % (r['id'],r.get('key') or '',r['target'],r['words']) for r in rows) or 'No table import in this project.',{'imports':rows})
     if not args.what:raise Refused('Give the file: ophiolite import table FILE --target well-tops.' if args.action=='table' else 'Give the run id: ophiolite import %s ID (see `ophiolite import list`).' % args.action)
     if args.action=='table':
-        if not args.target:raise Refused('Say what the table holds with --target: wells, well-tops, deviation-survey, point-set or time-depth.')
+        if not (args.target or args.layout):raise Refused('Say what the table holds with --target: wells, well-tops, deviation-survey, point-set or time-depth.')
         declared={}
         for text in args.declare:
             key,eq,value=text.partition('=')
@@ -812,7 +904,7 @@ def _table_import(args,client):
             if not args.json:print('Import %s started. If it stops, continue with: ophiolite import resume %s' % (answer['id'],answer['id']),flush=True)
         path=Path(args.what)
         if not path.is_file():raise Refused('%s is not a file.' % args.what)
-        result=imports.from_table(path,args.target,parse_mapping(args.map) if args.map else None,declarations=declared or None,reading=reading or None,well=args.well,
+        result=imports.from_table(path,args.target,parse_mapping(args.map) if args.map else None,layout=args.layout,declarations=declared or None,reading=reading or None,well=args.well,
                                   separate=args.separate,authority=args.authority,audience=args.audience,command_id=args.command_id,dry_run=args.dry_run,on_start=started)
         review=result['preview']
         if args.dry_run:
@@ -1060,6 +1152,7 @@ def _main(argv=None):
         if args.command=='checks':return _checks(args,client)
         if args.command in ('check','get','send'):return _exchange(args,client)
         if args.command=='upload':return _upload(args,client)
+        if args.command=='layouts':return _layouts(args,client)
         if args.command=='publish-derived':  # E30b
             from .writers import WrittenOriginal
             parents=[tuple(p.split(':',1)) for p in args.parents]
