@@ -18,9 +18,10 @@ class Entity:
         identity = 'provisional' if self.identity['provisional'] else '%s:%s' % (self.identity['authority'], self.identity['key'])
         return 'Entity(%s %r, %s)' % (self.kind, self.name, identity)
 
-    def assets(self, profile=None):
-        """The exact revisions associated with this entity that you may read."""
-        return self._client.data(self, **({'profile': profile} if profile else {}))
+    def assets(self, profile=None, include_wellbores=False):
+        """The exact revisions associated with this entity that you may read. E66: `include_wellbores=True` (a well only)
+        also returns those of the well's wellbores you may read, in one read, each item naming its `entity`."""
+        return self._client.data(self, **({'profile': profile} if profile else {}), **({'include_parts': True} if include_wellbores else {}))
 
     def wellbores(self):
         if self.kind != 'well': return []

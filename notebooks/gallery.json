@@ -84,6 +84,13 @@
       "sentence": "Read the layers QGIS opens from your project, every collection page by page, see why a path is not placed, and draw the wellbore paths in plan view.",
       "modes": ["synthetic", "live"],
       "data": "Two pages written in the notebook, or the layers you may read in your project; reading changes nothing."
+    },
+    {
+      "slug": "where-are-my-wells",
+      "title": "Where are my wells",
+      "sentence": "See where the wells you may read are located, draw them, and read one well's data together with its wellbores'.",
+      "modes": ["synthetic", "live"],
+      "data": "Three synthetic wells, one with a wellbore and a log, or the wells you may read in your project; reading changes nothing."
     }
   ]
 }
