@@ -120,8 +120,26 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/org-connections/capability",
+    "function": "postOrgConnectionsCapability",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/org-connections/create",
     "function": "postOrgConnectionsCreate",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/org-connections/destination-create",
+    "function": "postOrgConnectionsDestinationCreate",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/org-connections/destination-restrict",
+    "function": "postOrgConnectionsDestinationRestrict",
     "request": "schema",
     "response": "schema"
   },
@@ -134,6 +152,36 @@
   {
     "operation": "POST /api/v1/org-connections/list",
     "function": "postOrgConnectionsList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/org-connections/request",
+    "function": "postOrgConnectionsRequest",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/org-connections/request-approve",
+    "function": "postOrgConnectionsRequestApprove",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/org-connections/request-decline",
+    "function": "postOrgConnectionsRequestDecline",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/org-connections/request-withdraw",
+    "function": "postOrgConnectionsRequestWithdraw",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/org-connections/requests",
+    "function": "postOrgConnectionsRequests",
     "request": "schema",
     "response": "schema"
   },
