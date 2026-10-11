@@ -70,6 +70,13 @@
       "sentence": "Publish a result, open its exact version in the Workspace from the notebook, and add the next version with its Send again line, which refuses once someone else added one first.",
       "modes": ["synthetic", "live"],
       "data": "A synthetic five-sample gamma-ray log, or a log in your project; publishing creates a result only you can see until you share it."
+    },
+    {
+      "slug": "who-has-access-until-when",
+      "title": "Who has access, and until when",
+      "sentence": "Read the projects you reach and the last day your access to each lasts, then who has access to this project, through what, and until when.",
+      "modes": ["synthetic", "live"],
+      "data": "A synthetic project with four people, or your project; nothing is changed, and who has access is shown to project administrators only."
     }
   ]
 }

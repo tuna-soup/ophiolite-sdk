@@ -145,8 +145,17 @@ def test_open_it_here_opens_the_exact_version_and_sends_again_once_synthetic(tmp
     assert 'Sent again: version 2 - run twice, still version 2' in text
     assert 'Version 3 arrived first; the line built on version 2 was refused: The result has a newer version; review it before adding another' in text
 
+def test_who_has_access_until_when_reads_the_last_days_and_who_has_access_synthetic(tmp_path, monkeypatch):
+    """E67a C6 (R12): the stored end is the start of the next UTC day; the notebook names the last day (M5 literals)."""
+    text = run('who-has-access-until-when', tmp_path, monkeypatch)
+    assert 'Synthetic project (member): no end date' in text and 'Shared survey (viewer): ends 1 January 2999' in text
+    assert 'Alice: no end date - Member through Direct grant' in text and 'Bob: until 31 December 2999 - Member through Direct grant' in text
+    assert 'Erin: no access (ended after 31 December 1999) - Member through Direct grant' in text
+    assert 'Vic: no end date - Viewer through Geoscience' in text and 'Wrote who-has-access-until-when.png' in text
+
+
 def test_every_entry_is_listed_built_and_described():
-    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'grids-and-gis-files', 'how-was-this-made', 'open-it-here']
+    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'grids-and-gis-files', 'how-was-this-made', 'open-it-here', 'who-has-access-until-when']
     for entry in GALLERY['notebooks']:
         assert set(entry) == {'slug', 'title', 'sentence', 'modes', 'data'} and entry['modes'] == ['synthetic', 'live']
         script = (ROOT / 'notebooks' / entry['slug'] / 'notebook.py').read_text()

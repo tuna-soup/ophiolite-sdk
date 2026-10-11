@@ -298,6 +298,19 @@ def parser():
     return parser
 
 
+MONTHS=('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec')
+
+
+def ends_words(instant):
+    """E67a: 'ends 14 Nov 2026' for the stored end 2026-11-15T00:00:00Z: the last permitted day, a UTC date in every zone."""
+    from datetime import datetime,timedelta,timezone
+    try:at=datetime.fromisoformat(instant.replace('Z','+00:00'))
+    except (AttributeError,ValueError):return 'ends '+str(instant)
+    if at.tzinfo is None:at=at.replace(tzinfo=timezone.utc)
+    day=(at.astimezone(timezone.utc)-timedelta(microseconds=1)).date()
+    return 'ends %d %s %d'%(day.day,MONTHS[day.month-1],day.year)
+
+
 def _discover(args):
     """E27: projects/orgs for a credential file or OPHIOLITE_ACCESS_KEY; plain words unless --json."""
     from .account import Account
@@ -317,7 +330,7 @@ def _discover(args):
     if args.json:return done(args,None,{'projects' if args.command=='projects' else 'organizations':rows,**({'normalised':list(notes)} if notes else {})})
     if not rows:print('This credential reaches no project.' if args.command=='projects' else 'No organisation holds a project this credential reaches.');return
     for row in rows:
-        if args.command=='projects':print((row.get('name') or 'Unnamed project')+' - '+{'member':'can edit','viewer':'can view'}.get(row.get('role'),'access')+(' and administer' if row.get('can_administer') else ''))
+        if args.command=='projects':print((row.get('name') or 'Unnamed project')+' - '+{'member':'can edit','viewer':'can view'}.get(row.get('role'),'access')+(' and administer' if row.get('can_administer') else '')+(', '+ends_words(row['access_ends_at']) if row.get('access_ends_at') else ''))
         else:print(row.get('name') or 'Unnamed organisation')
 
 

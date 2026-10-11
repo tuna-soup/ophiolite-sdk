@@ -268,6 +268,7 @@ class ProjectEntry(Contract):
     role: str | None
     can_administer: bool
     organization_id: str | None
+    access_ends_at: str | None = None  # E67a: the instant (UTC) the reader's direct grant ends; null when it does not
 
 
 class ProjectsPage(Contract):
