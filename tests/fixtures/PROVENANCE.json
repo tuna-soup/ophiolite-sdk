@@ -1517,7 +1517,7 @@
     {
       "path": "ophiolite/contracts/scientific/v1/fixtures/hon-gt-01-gamma-ray-excerpt.las",
       "sha256": "8f7dce3351e8dba04479cb0b0714c49cb3a210f2b2b6e7279f07f37d7c222515",
-      "source_commit": "49203217e60cec1601fdef1cc6f8c3054f82876f",
+      "source_commit": "4caf213795024cd97a2ac45a284ab82eb76bb8e2",
       "origin": "NLOG.NL composite log 5682_hongt01_2012_comp.las of well HONSELERSDIJK-GT-01 (SHA-256 cfa223bc...f537, 2,984,666 bytes), cropped to depth 2466.0-2621.0 m and the curves DEPTH and GR; copied by Ophiolite Platform contracts/scientific/v1/fixtures/hon-gt-01-gamma-ray-excerpt.las",
       "license": "LicenseRef-NLOG-Disclaimer-2016-08-09",
       "disposition": "third-party-attribution",
