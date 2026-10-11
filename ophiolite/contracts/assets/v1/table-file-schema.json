@@ -1,0 +1,720 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/assets/v1/table-file-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.table-file/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "Fidelity": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "const": "assessed",
+          "title": "Status",
+          "type": "string"
+        },
+        "preserved": {
+          "items": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Preserved",
+          "type": "array"
+        },
+        "losses": {
+          "items": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Losses",
+          "type": "array"
+        },
+        "unknown_context": {
+          "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Unknown Context",
+          "type": "array"
+        },
+        "decisions": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 512,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 64,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decisions"
+        }
+      },
+      "required": [
+        "status",
+        "preserved",
+        "losses",
+        "unknown_context"
+      ],
+      "title": "Fidelity",
+      "type": "object"
+    },
+    "Reference": {
+      "additionalProperties": false,
+      "properties": {
+        "authority": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Authority",
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "profile": {
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+          "title": "Profile",
+          "type": "string"
+        }
+      },
+      "required": [
+        "authority",
+        "key",
+        "revision",
+        "profile"
+      ],
+      "title": "Reference",
+      "type": "object"
+    },
+    "TableFileAnnotation": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Description"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "maxLength": 32,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Unit"
+        },
+        "missing": {
+          "anyOf": [
+            {
+              "maxLength": 40,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Missing"
+        }
+      },
+      "required": [
+        "description",
+        "unit",
+        "missing"
+      ],
+      "title": "TableFileAnnotation",
+      "type": "object"
+    },
+    "TableFileColumn": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "db_type": {
+          "maxLength": 256,
+          "title": "Db Type",
+          "type": "string"
+        },
+        "logical": {
+          "anyOf": [
+            {
+              "enum": [
+                "text",
+                "integer",
+                "float",
+                "decimal",
+                "boolean",
+                "date",
+                "timestamp",
+                "timestamptz"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Logical"
+        },
+        "nullable": {
+          "title": "Nullable",
+          "type": "boolean"
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Comment"
+        },
+        "read": {
+          "title": "Read",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "db_type",
+        "logical",
+        "nullable",
+        "comment",
+        "read"
+      ],
+      "title": "TableFileColumn",
+      "type": "object"
+    },
+    "TableFileContext": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "table",
+          "title": "Type",
+          "type": "string"
+        },
+        "format": {
+          "enum": [
+            "csv",
+            "xls",
+            "xlsx",
+            "parquet"
+          ],
+          "title": "Format",
+          "type": "string"
+        },
+        "profile": {
+          "enum": [
+            "table-csv/1",
+            "table-excel/1",
+            "table-parquet/1"
+          ],
+          "title": "Profile",
+          "type": "string"
+        },
+        "decisions": {
+          "items": {
+            "$ref": "#/$defs/TableFileDecision"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "title": "Decisions",
+          "type": "array"
+        },
+        "sheet": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sheet"
+        },
+        "sheets": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 1000,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sheets"
+        },
+        "preamble": {
+          "anyOf": [
+            {
+              "items": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "maxItems": 1000,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Preamble"
+        },
+        "geo": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Geo"
+        },
+        "rows": {
+          "maximum": 100000,
+          "minimum": 0,
+          "title": "Rows",
+          "type": "integer"
+        },
+        "columns": {
+          "maximum": 128,
+          "minimum": 1,
+          "title": "Columns",
+          "type": "integer"
+        },
+        "coverage": {
+          "$ref": "#/$defs/TableFileCoverage"
+        },
+        "quantities": {
+          "additionalProperties": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Quantities",
+          "type": "object"
+        },
+        "fidelity": {
+          "$ref": "#/$defs/Fidelity"
+        }
+      },
+      "required": [
+        "type",
+        "format",
+        "profile",
+        "decisions",
+        "rows",
+        "columns",
+        "coverage",
+        "quantities",
+        "fidelity"
+      ],
+      "title": "TableFileContext",
+      "type": "object"
+    },
+    "TableFileCoordinates": {
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "X",
+          "type": "string"
+        },
+        "y": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Y",
+          "type": "string"
+        },
+        "crs": {
+          "pattern": "^EPSG:[0-9]{4,6}$",
+          "title": "Crs",
+          "type": "string"
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "crs"
+      ],
+      "title": "TableFileCoordinates",
+      "type": "object"
+    },
+    "TableFileCoverage": {
+      "additionalProperties": false,
+      "properties": {
+        "read": {
+          "items": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 128,
+          "title": "Read",
+          "type": "array"
+        },
+        "not_read": {
+          "items": {
+            "$ref": "#/$defs/TableFileNotRead"
+          },
+          "maxItems": 128,
+          "title": "Not Read",
+          "type": "array"
+        }
+      },
+      "required": [
+        "read",
+        "not_read"
+      ],
+      "title": "TableFileCoverage",
+      "type": "object"
+    },
+    "TableFileDecision": {
+      "additionalProperties": false,
+      "description": "One reading decision of the file, as E58a states it (all decided: a table is kept only once every one is).",
+      "properties": {
+        "field": {
+          "enum": [
+            "format",
+            "encoding",
+            "delimiter",
+            "decimal_mark",
+            "sheet",
+            "header_row",
+            "not_read",
+            "formulas",
+            "merged_cells",
+            "positions"
+          ],
+          "title": "Field",
+          "type": "string"
+        },
+        "status": {
+          "const": "decided",
+          "title": "Status",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        },
+        "class": {
+          "enum": [
+            "declared",
+            "previously-reviewed",
+            "project-default",
+            "inferred",
+            "none"
+          ],
+          "title": "Class",
+          "type": "string"
+        },
+        "sentence": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Sentence",
+          "type": "string"
+        },
+        "technical": {
+          "additionalProperties": true,
+          "title": "Technical",
+          "type": "object"
+        }
+      },
+      "required": [
+        "field",
+        "status",
+        "value",
+        "class",
+        "sentence",
+        "technical"
+      ],
+      "title": "TableFileDecision",
+      "type": "object"
+    },
+    "TableFileDeclarations": {
+      "additionalProperties": false,
+      "properties": {
+        "columns": {
+          "additionalProperties": {
+            "$ref": "#/$defs/TableFileAnnotation"
+          },
+          "title": "Columns",
+          "type": "object"
+        },
+        "coordinates": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TableFileCoordinates"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "columns",
+        "coordinates"
+      ],
+      "title": "TableFileDeclarations",
+      "type": "object"
+    },
+    "TableFileNotRead": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "db_type": {
+          "maxLength": 256,
+          "title": "Db Type",
+          "type": "string"
+        },
+        "reason": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "db_type",
+        "reason"
+      ],
+      "title": "TableFileNotRead",
+      "type": "object"
+    },
+    "TableInterpretation": {
+      "additionalProperties": false,
+      "description": "E58b: the executable identity of the table-file reader (Connectors `table_files.read_table` + `kept_table`).",
+      "properties": {
+        "reader": {
+          "const": "asset_connectors.table_files/1",
+          "title": "Reader",
+          "type": "string"
+        },
+        "mapping": {
+          "const": "table/1",
+          "title": "Mapping",
+          "type": "string"
+        },
+        "parsing_policy": {
+          "const": "table-file/1",
+          "title": "Parsing Policy",
+          "type": "string"
+        },
+        "null_policy": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Null Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reader",
+        "mapping",
+        "parsing_policy",
+        "null_policy"
+      ],
+      "title": "TableInterpretation",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "E58b: a table kept as it is: every column (read or not), the key, the declarations and the rows of the columns read\nin file order, each row's own line (CSV) or sheet row (`source_rows`); values as ADR 0020 writes them (a declared\nmissing-value marker stays a value).",
+  "properties": {
+    "schema": {
+      "const": "ophiolite.table-file/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "representation": {
+      "const": "normalized",
+      "title": "Representation",
+      "type": "string"
+    },
+    "source": {
+      "$ref": "#/$defs/Reference"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "interpretation": {
+      "$ref": "#/$defs/TableInterpretation"
+    },
+    "interpretation_sha256": {
+      "description": "SHA-256 of the companion table-interpretation.json this content was read under.",
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Interpretation Sha256",
+      "type": "string"
+    },
+    "context": {
+      "$ref": "#/$defs/TableFileContext"
+    },
+    "source_rows": {
+      "items": {
+        "minimum": 1,
+        "type": "integer"
+      },
+      "maxItems": 100000,
+      "title": "Source Rows",
+      "type": "array"
+    },
+    "encoding": {
+      "const": "table-encoding/1",
+      "title": "Encoding",
+      "type": "string"
+    },
+    "columns": {
+      "items": {
+        "$ref": "#/$defs/TableFileColumn"
+      },
+      "maxItems": 128,
+      "minItems": 1,
+      "title": "Columns",
+      "type": "array"
+    },
+    "key": {
+      "anyOf": [
+        {
+          "items": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 128,
+          "minItems": 1,
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Key"
+    },
+    "declarations": {
+      "$ref": "#/$defs/TableFileDeclarations"
+    },
+    "rows": {
+      "items": {
+        "items": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": "array"
+      },
+      "maxItems": 100000,
+      "title": "Rows",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema",
+    "representation",
+    "source",
+    "source_sha256",
+    "interpretation",
+    "interpretation_sha256",
+    "context",
+    "source_rows",
+    "encoding",
+    "columns",
+    "key",
+    "declarations",
+    "rows"
+  ],
+  "title": "TableFile",
+  "type": "object"
+}

@@ -1,0 +1,21 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "ophiolite.table-file/1",
+  "kind": "normalized",
+  "lifecycle": "preview",
+  "display_name": "Kept table",
+  "description": "Every column of a kept table (read or not, with its type), its declarations and the rows of the columns read in file order with each row's own line or sheet row; values as ADR 0020 writes them, a declared missing-value marker kept as a value.",
+  "payload_schema": "ophiolite.table-file/1",
+  "role": "normalized",
+  "media_types": [
+    "application/json"
+  ],
+  "interpretation": {
+    "reader": "asset_connectors.table_files/1",
+    "parsing_policy": "table-file/1",
+    "mapping": "table/1"
+  },
+  "table_target": {
+    "none": "normalized-form"
+  }
+}

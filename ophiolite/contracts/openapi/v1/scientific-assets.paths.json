@@ -786,6 +786,136 @@
           }
         }
       }
+    },
+    "/api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/export": {
+      "get": {
+        "description": "E58b: an exact revision as a Parquet, GeoParquet or CSV file, written from its stored representations",
+        "parameters": [
+          {
+            "name": "project",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "asset",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "revision",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "parquet",
+                "geoparquet",
+                "csv"
+              ],
+              "default": "parquet"
+            },
+            "description": "GeoParquet 1.1.0 for point sets only."
+          },
+          {
+            "name": "curves",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "A LAS log: the curves to export (repeat the parameter); every stored curve when omitted."
+          }
+        ],
+        "security": [
+          {
+            "scopedBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The file",
+            "headers": {
+              "Content-Disposition": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Content-SHA256": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "SHA-256 of the body"
+              },
+              "X-Ophiolite-Revision": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The exact revision the file was written from"
+              }
+            },
+            "content": {
+              "application/vnd.apache.parquet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Versioned error; see README",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Busy: retry the same exact request after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

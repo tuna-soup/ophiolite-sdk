@@ -31,7 +31,10 @@
     "irap-ascii-grid/1": {"scientific_profile": "regular-grid-surface-source/1", "source_schema": "IRAP-classic-ASCII-grid", "mapping_version": "regular-grid-surface/1", "history": "retained-exact-read"},
     "esri-shapefile/1": {"scientific_profile": "feature-set-source/1", "source_schema": "ESRI-Shapefile", "mapping_version": "feature-set/1", "history": "retained-exact-read"},
     "ogc-geopackage/1": {"scientific_profile": "feature-set-source/1", "source_schema": "OGC-GeoPackage/1.2-1.4", "mapping_version": "feature-set/1", "history": "retained-exact-read"},
-    "geojson/1": {"scientific_profile": "feature-set-source/1", "source_schema": "GeoJSON/RFC7946", "mapping_version": "feature-set/1", "history": "retained-exact-read"}
+    "geojson/1": {"scientific_profile": "feature-set-source/1", "source_schema": "GeoJSON/RFC7946", "mapping_version": "feature-set/1", "history": "retained-exact-read"},
+    "table-csv/1": {"scientific_profile": "ophiolite.table-file/1", "source_schema": "CSV", "mapping_version": "table/1", "history": "retained-exact-read"},
+    "table-excel/1": {"scientific_profile": "ophiolite.table-file/1", "source_schema": "Excel-sheet", "mapping_version": "table/1", "history": "retained-exact-read"},
+    "table-parquet/1": {"scientific_profile": "ophiolite.table-file/1", "source_schema": "Parquet", "mapping_version": "table/1", "history": "retained-exact-read"}
   },
   "policy_defaults": {"retained": false, "retention_permitted": false, "redistribution_permitted": false, "audience": []},
   "identity": {"entity": "source namespace plus explicit stable entity key; never name or coordinate inference", "revision": "exact source revision; opaque string", "representation": "profile plus payload SHA-256; does not create a new authority"},
