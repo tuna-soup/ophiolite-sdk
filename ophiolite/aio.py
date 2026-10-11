@@ -115,7 +115,7 @@ class AsyncClient(Client):
     async def read(self,asset,revision,curves,*,strict_interpretation=False):
         if not isinstance(curves,(list,tuple)) or not curves or len(set(curves))!=len(curves):
             raise Refused('Choose distinct value curves explicitly.')
-        descriptors=[];views=[];artifact=None;wire_descriptors=[];wire_curves=[]
+        descriptors=[];views=[];artifact=None;wire_descriptors=[];wire_curves=[];wire_curve_bytes=[]
         for curve in curves:
             path,query=self._path(asset,revision,curve)
             data=await self._json(path+query+PROFILES,256*1024)
@@ -127,8 +127,8 @@ class AsyncClient(Client):
             body=await self._get(path+'/representations/'+quote(normalized['id'],safe='')+query,normalized['bytes'])
             model,view=_core.verify_pair(data,body,artifact,curve,strict_interpretation=strict_interpretation)
             descriptors.append(model);views.append(view)
-            wire_descriptors.append(data);wire_curves.append(json.loads(body))
-        return CurveSet(descriptors,views,artifact,url=self.url,project=self.project,wire_descriptors=wire_descriptors,wire_curves=wire_curves)
+            wire_descriptors.append(data);wire_curves.append(json.loads(body));wire_curve_bytes.append(body)
+        return CurveSet(descriptors,views,artifact,url=self.url,project=self.project,wire_descriptors=wire_descriptors,wire_curves=wire_curves,wire_curve_bytes=wire_curve_bytes)
 
     async def curve_window(self,asset,revision,curve,top,base,*,level=None,rows=None,max_pages=64):
         """E100a: Client.curve_window with the same checks."""
