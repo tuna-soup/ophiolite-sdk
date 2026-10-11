@@ -79,6 +79,13 @@
       "data": "A synthetic six-row tops table made on your computer; adding it creates sets of tops only you can see until you share them."
     },
     {
+      "slug": "layers-for-a-gis",
+      "title": "Layers for a GIS",
+      "sentence": "Read the layers QGIS opens from your project, every collection page by page, see why a path is not placed, and draw the wellbore paths in plan view.",
+      "modes": ["synthetic", "live"],
+      "data": "Two pages written in the notebook, or the layers you may read in your project; reading changes nothing."
+    },
+    {
       "slug": "share-a-procedure",
       "title": "Share a procedure with your project",
       "sentence": "Check a procedure and run it on your computer, add it to your project privately, enable it, and run it as a colleague who is asked once to trust it.",

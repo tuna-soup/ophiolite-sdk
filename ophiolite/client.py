@@ -115,6 +115,12 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         return self.upload_runs.upload(path_or_address,attribution=attribution,rights_confirmed=rights_confirmed,audience=audience,well_notes=well_notes,
                                        declare=declare,skip_decisions=skip_decisions,associate_matches=link_wellbore,new=new,progress=progress)
 
+    def layouts(self):
+        """E89: the project's layouts: list, match, save, rename, retire, use again, keep, update, reconnect, export and
+        import, by name (ophiolite.layouts.Layouts)."""
+        from .layouts import Layouts
+        return Layouts(self)
+
     @property
     def well_names(self):
         """E88: the wells your uploads and imports name: proposals, accept, aliases and go back (ophiolite.well_names.WellNames)."""

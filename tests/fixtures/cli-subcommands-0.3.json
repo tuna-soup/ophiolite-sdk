@@ -13,6 +13,7 @@
   "get": "Get the latest version of an item into a new or held folder; you then hold it",
   "import": "Add a table file as wells, well tops, deviation surveys, point sets or time-depth pairs: table FILE --target T (--dry-run to review), list, status ID, pause ID, resume ID, cancel ID",
   "init": "Start an application from a packaged template (map-application, derive-and-publish, sync-worker, notebook, agent-workflow)",
+  "layouts": "The project's layouts: list, show NAME, rename NAME NEW, retire NAME, use-again NAME, export [NAME...] --out FILE, import FILE, keep CONNECTION TABLE, update NAME, reconnect NAME CONNECTION TABLE (E89)",
   "list": "List permitted scientific assets without a run",
   "login": "Approve this project in your browser",
   "logout": "Revoke application access",
