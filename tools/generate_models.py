@@ -58,7 +58,9 @@ class Generator:
             prefix = '#/$defs/'
             if not reference.startswith(prefix): raise ValueError('Unsupported model reference: '+reference)
             key = reference[len(prefix):].replace('~1','/').replace('~0','~')
-            return self.model(key,self.documents[document]['$defs'][key],document)
+            definition = self.documents[document]['$defs'][key]
+            if definition.get('type') != 'object': return self.expression(definition,name(key),document)  # E50b1: a named union is inlined
+            return self.model(key,definition,document)
         if 'const' in schema: expression = 'Literal['+repr(schema['const'])+']'
         elif 'enum' in schema: expression = 'Literal['+', '.join(repr(x) for x in schema['enum'])+']'
         elif 'anyOf' in schema or 'oneOf' in schema:
@@ -92,7 +94,8 @@ class Generator:
         for path, schema in documents.items():
             self.scan(schema,path)
             self.model(schema['title'],schema,path)
-            for key, definition in schema.get('$defs',{}).items(): self.model(key,definition,path)
+            for key, definition in schema.get('$defs',{}).items():
+                if definition.get('type') == 'object': self.model(key,definition,path)
         emitted = {}; pending = list(self.classes)
         while pending:
             model_name = pending.pop(0); schema = self.classes[model_name]; document = self.origins[model_name]
