@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.31.0",
+  "version": "1.32.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -1009,6 +1009,18 @@
       "kind": "capability",
       "path": "connectors/v1/capabilities/postgresql-tables.json",
       "title": "PostgreSQL tables: types, directions, change detection, losses and qualification"
+    },
+    {
+      "id": "ophiolite.connector-capability/sqlserver-wells/1",
+      "kind": "capability",
+      "path": "connectors/v1/capabilities/sqlserver-wells.json",
+      "title": "SQL Server well headers and tables: types, directions, change detection, losses and qualification; OSDU kind: none (a source connector)"
+    },
+    {
+      "id": "ophiolite.connector-capability/oracle-wells/1",
+      "kind": "capability",
+      "path": "connectors/v1/capabilities/oracle-wells.json",
+      "title": "Oracle well headers and tables: types, directions, change detection, losses and qualification; OSDU kind: none (a source connector)"
     },
     {
       "id": "ophiolite.connector-capability/qgis/1",

@@ -5,7 +5,7 @@
     "version": "1.0.0-pilot",
     "description": "One public API for every project operation. Three credential kinds reach it: the browser session (opaque HttpOnly cookie plus the X-CSRF-Token proof and, on non-GET requests, the exact Origin), a project-scoped delegate lasting at most five minutes (Bearer oph_api_..., parent session and current native permissions remain mandatory), and a browser-approved provider grant (Bearer provider token plus X-Ophiolite-Application-Grant; capability 1: the scientific read resources and the applications route within its read/write scopes; capability 3 adds reading wells, wellbores and lineage and the LAS upload routes). A request that carries an Authorization header is a machine request and is refused with MACHINE_AUTH_REQUIRED when a cookie or Origin travels with it. Scope and capability are ceilings; every operation runs the same native permission checks whoever calls it. Not a stable SDK or unattended service-account contract.",
     "x-ophiolite-contracts": {
-      "registry_version": "1.31.0",
+      "registry_version": "1.32.0",
       "index": "/api/v1/contracts",
       "served_profiles": [
         "las2/1",
@@ -17875,6 +17875,22 @@
                       "default": null,
                       "description": "E59: whether the storage honours If-Match (conditional) or each file is read in one request (single)",
                       "title": "Mode"
+                    },
+                    "notes": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E61, Oracle: what the connection does not check (the certificate's subject name only; a statement the server does not interrupt can run past the time limit)",
+                      "title": "Notes"
                     }
                   },
                   "required": [
@@ -31562,7 +31578,7 @@
             "application/json": {
               "schema": {
                 "additionalProperties": false,
-                "description": "E59 (K6): a storage bucket named in the browser or in a request. A separate model, chosen by `kind` before\nvalidation, so OrgRequest and the command digests of every E41 database request stay exactly as they were. The\naccess key travels as `username`, the secret key as `password` (E39's one sign-in per person).",
+                "description": "E61: a SQL Server or Oracle database named in the browser or in a request, chosen by `kind` before validation as\nBucketRequest is, so the command digests of every E41 and E59 request stay exactly as they were. `dn` is the\ncertificate subject name an Oracle database is checked against (default `CN=<host>`); a storage bucket's fields\nare refused. It is also the documented superset of the two operations whose `kind` changes them.",
                 "properties": {
                   "organization_id": {
                     "maxLength": 160,
@@ -31731,7 +31747,9 @@
                     "default": "postgresql",
                     "enum": [
                       "postgresql",
-                      "bucket"
+                      "bucket",
+                      "sqlserver",
+                      "oracle"
                     ],
                     "title": "Kind",
                     "type": "string"
@@ -31776,12 +31794,18 @@
                     "maxLength": 1024,
                     "title": "Folder",
                     "type": "string"
+                  },
+                  "dn": {
+                    "default": "",
+                    "maxLength": 1024,
+                    "title": "Dn",
+                    "type": "string"
                   }
                 },
                 "required": [
                   "organization_id"
                 ],
-                "title": "BucketRequest",
+                "title": "EngineRequest",
                 "type": "object"
               }
             }
@@ -33014,7 +33038,7 @@
             "application/json": {
               "schema": {
                 "additionalProperties": false,
-                "description": "E59 (K6): a storage bucket named in the browser or in a request. A separate model, chosen by `kind` before\nvalidation, so OrgRequest and the command digests of every E41 database request stay exactly as they were. The\naccess key travels as `username`, the secret key as `password` (E39's one sign-in per person).",
+                "description": "E61: a SQL Server or Oracle database named in the browser or in a request, chosen by `kind` before validation as\nBucketRequest is, so the command digests of every E41 and E59 request stay exactly as they were. `dn` is the\ncertificate subject name an Oracle database is checked against (default `CN=<host>`); a storage bucket's fields\nare refused. It is also the documented superset of the two operations whose `kind` changes them.",
                 "properties": {
                   "organization_id": {
                     "maxLength": 160,
@@ -33183,7 +33207,9 @@
                     "default": "postgresql",
                     "enum": [
                       "postgresql",
-                      "bucket"
+                      "bucket",
+                      "sqlserver",
+                      "oracle"
                     ],
                     "title": "Kind",
                     "type": "string"
@@ -33228,12 +33254,18 @@
                     "maxLength": 1024,
                     "title": "Folder",
                     "type": "string"
+                  },
+                  "dn": {
+                    "default": "",
+                    "maxLength": 1024,
+                    "title": "Dn",
+                    "type": "string"
                   }
                 },
                 "required": [
                   "organization_id"
                 ],
-                "title": "BucketRequest",
+                "title": "EngineRequest",
                 "type": "object"
               }
             }
@@ -35393,6 +35425,22 @@
                       "default": null,
                       "description": "E59: whether the storage honours If-Match (conditional) or each file is read in one request (single)",
                       "title": "Mode"
+                    },
+                    "notes": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E61, Oracle: what the connection does not check (the certificate's subject name only; a statement the server does not interrupt can run past the time limit)",
+                      "title": "Notes"
                     }
                   },
                   "required": [
@@ -101113,7 +101161,11 @@
             "type": "string"
           },
           "kind": {
-            "const": "postgresql",
+            "enum": [
+              "postgresql",
+              "sqlserver",
+              "oracle"
+            ],
             "title": "Kind",
             "type": "string"
           },
@@ -101210,7 +101262,12 @@
         "description": "E41: where a database added in the browser is. Never a sign-in.",
         "properties": {
           "kind": {
-            "const": "postgresql",
+            "description": "E61: SQL Server and Oracle too; `dbname` is an Oracle service name",
+            "enum": [
+              "postgresql",
+              "sqlserver",
+              "oracle"
+            ],
             "title": "Kind",
             "type": "string"
           },
@@ -101239,6 +101296,19 @@
             "description": "system, or the name of a certificate authority kept with ophiolite-ops configure connection-ca",
             "title": "Trust",
             "type": "string"
+          },
+          "dn": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E61, Oracle: the certificate subject name the database is checked against (default CN=<host>)",
+            "title": "Dn"
           }
         },
         "required": [
