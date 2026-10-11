@@ -426,8 +426,8 @@ class ScientificAsset(Contract):
     custodian: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(...)
     source_reference: Reference | None = Field(...)
     profile: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] = Field(...)
-    scientific: ScientificContext | TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext | RecipePointContext | WellLocationContext | WaveletContext | ModelSectionContext | SeismicSectionContext | TimeDepthContext | FeatureContext = Field(...)
-    interpretation: Interpretation | TypedInterpretation | RecipeInterpretation | PackageInterpretation = Field(...)
+    scientific: ScientificContext | TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext | RecipePointContext | WellLocationContext | WaveletContext | ModelSectionContext | SeismicSectionContext | TimeDepthContext | FeatureContext | TableFileContext = Field(...)
+    interpretation: Interpretation | TypedInterpretation | RecipeInterpretation | PackageInterpretation | TableInterpretation = Field(...)
     interpretation_evidence: Literal['live', 'recorded', 'recorded-differs', 'not-recorded'] = Field('live')
     recorded_interpretation: RecordedInterpretation | None = Field(None)
     representations: Annotated[list[Representation], Field(min_length=2, max_length=8)] = Field(...)
@@ -738,6 +738,38 @@ class StringLeaf(Contract):
     type: Literal['string'] = Field(...)
     value: Annotated[str, Field(max_length=1024)] = Field(...)
 
+class TableFileContext(Contract):
+    type: Literal['table'] = Field(...)
+    format: Literal['csv', 'xls', 'xlsx', 'parquet'] = Field(...)
+    profile: Literal['table-csv/1', 'table-excel/1', 'table-parquet/1'] = Field(...)
+    decisions: Annotated[list[TableFileDecision], Field(min_length=1, max_length=16)] = Field(...)
+    sheet: str | None = Field(None)
+    sheets: Annotated[list[str], Field(max_length=1000)] | None = Field(None)
+    preamble: Annotated[list[list[str]], Field(max_length=1000)] | None = Field(None)
+    geo: dict[str, Any] | None = Field(None)
+    rows: Annotated[int, Field(ge=0, le=100000)] = Field(...)
+    columns: Annotated[int, Field(ge=1, le=128)] = Field(...)
+    coverage: TableFileCoverage = Field(...)
+    quantities: dict[str, Annotated[str, Field(min_length=1, max_length=128)]] = Field(...)
+    fidelity: Fidelity = Field(...)
+
+class TableFileCoverage(Contract):
+    read: Annotated[list[Annotated[str, Field(min_length=1, max_length=1024)]], Field(max_length=128)] = Field(...)
+    not_read: Annotated[list[TableFileNotRead], Field(max_length=128)] = Field(...)
+
+class TableFileDecision(Contract):
+    field: Literal['format', 'encoding', 'delimiter', 'decimal_mark', 'sheet', 'header_row', 'not_read', 'formulas', 'merged_cells', 'positions'] = Field(...)
+    status: Literal['decided'] = Field(...)
+    value: str | int | list[str] | None = Field(...)
+    class_: Literal['declared', 'previously-reviewed', 'project-default', 'inferred', 'none'] = Field(..., alias='class')
+    sentence: Annotated[str, Field(min_length=1, max_length=2000)] = Field(...)
+    technical: dict[str, Any] = Field(...)
+
+class TableFileNotRead(Contract):
+    name: Annotated[str, Field(min_length=1, max_length=1024)] = Field(...)
+    db_type: Annotated[str, Field(max_length=256)] = Field(...)
+    reason: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+
 class TableImportOrigin(Contract):
     kind: Literal['table-file'] = Field(...)
     run: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
@@ -746,6 +778,13 @@ class TableImportOrigin(Contract):
     sheet: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(...)
     header_row: Annotated[int, Field(ge=1)] | None = Field(...)
     source_rows: Annotated[list[Annotated[list[Annotated[int, Field(ge=1)]], Field(min_length=2, max_length=2)]], Field(min_length=1, max_length=10000)] = Field(...)
+    interpretation_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] | None = Field(None)
+
+class TableInterpretation(Contract):
+    reader: Literal['asset_connectors.table_files/1'] = Field(...)
+    mapping: Literal['table/1'] = Field(...)
+    parsing_policy: Literal['table-file/1'] = Field(...)
+    null_policy: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
 
 class TimeDepthContext(Contract):
     type: Literal['time-depth'] = Field(...)
@@ -893,6 +932,43 @@ class AssetSummary(Contract):
     sample_count: Annotated[int, Field(ge=0, le=100000)] | None = Field(...)
     allowed_operations: Annotated[list[Literal['read', 'export', 'use-as-input']], Field(max_length=3)] = Field(...)
     display: Display | None = Field(None)
+
+class TableFile(Contract):
+    schema_: Literal['ophiolite.table-file/1'] = Field(..., alias='schema')
+    representation: Literal['normalized'] = Field(...)
+    source: Reference = Field(...)
+    source_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    interpretation: TableInterpretation = Field(...)
+    interpretation_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    context: TableFileContext = Field(...)
+    source_rows: Annotated[list[Annotated[int, Field(ge=1)]], Field(max_length=100000)] = Field(...)
+    encoding: Literal['table-encoding/1'] = Field(...)
+    columns: Annotated[list[TableFileColumn], Field(min_length=1, max_length=128)] = Field(...)
+    key: Annotated[list[Annotated[str, Field(min_length=1, max_length=1024)]], Field(min_length=1, max_length=128)] | None = Field(...)
+    declarations: TableFileDeclarations = Field(...)
+    rows: Annotated[list[list[str | bool | int | float | None]], Field(max_length=100000)] = Field(...)
+
+class TableFileAnnotation(Contract):
+    description: Annotated[str, Field(min_length=1, max_length=128)] | None = Field(...)
+    unit: Annotated[str, Field(min_length=1, max_length=32)] | None = Field(...)
+    missing: Annotated[str, Field(min_length=1, max_length=40)] | None = Field(...)
+
+class TableFileColumn(Contract):
+    name: Annotated[str, Field(min_length=1, max_length=1024)] = Field(...)
+    db_type: Annotated[str, Field(max_length=256)] = Field(...)
+    logical: Literal['text', 'integer', 'float', 'decimal', 'boolean', 'date', 'timestamp', 'timestamptz'] | None = Field(...)
+    nullable: bool = Field(...)
+    comment: str | None = Field(...)
+    read: bool = Field(...)
+
+class TableFileCoordinates(Contract):
+    x: Annotated[str, Field(min_length=1, max_length=1024)] = Field(...)
+    y: Annotated[str, Field(min_length=1, max_length=1024)] = Field(...)
+    crs: Annotated[str, Field(pattern='^EPSG:[0-9]{4,6}$')] = Field(...)
+
+class TableFileDeclarations(Contract):
+    columns: dict[str, TableFileAnnotation] = Field(...)
+    coordinates: TableFileCoordinates | None = Field(...)
 
 class Table(Contract):
     schema_: Literal['ophiolite.table/1'] = Field(..., alias='schema')
@@ -1856,7 +1932,12 @@ RevisionManifestV3.model_rebuild()
 SeismicContext.model_rebuild()
 SeismicSectionContext.model_rebuild()
 StringLeaf.model_rebuild()
+TableFileContext.model_rebuild()
+TableFileCoverage.model_rebuild()
+TableFileDecision.model_rebuild()
+TableFileNotRead.model_rebuild()
 TableImportOrigin.model_rebuild()
+TableInterpretation.model_rebuild()
 TimeDepthContext.model_rebuild()
 TopsContext.model_rebuild()
 TrajectoryContext.model_rebuild()
@@ -1874,6 +1955,11 @@ SeismicVolume.model_rebuild()
 Chunk.model_rebuild()
 HeaderPositions.model_rebuild()
 AssetSummary.model_rebuild()
+TableFile.model_rebuild()
+TableFileAnnotation.model_rebuild()
+TableFileColumn.model_rebuild()
+TableFileCoordinates.model_rebuild()
+TableFileDeclarations.model_rebuild()
 Table.model_rebuild()
 TableReadColumn.model_rebuild()
 TableNotReadColumn.model_rebuild()

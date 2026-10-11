@@ -1536,6 +1536,12 @@
     "response": "schema"
   },
   {
+    "operation": "GET /api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/export",
+    "function": "getProjectsProjectScientificAssetsAssetRevisionsRevisionExport",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
     "operation": "GET /api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/representations/{representation}",
     "function": "getProjectsProjectScientificAssetsAssetRevisionsRevisionRepresentationsRepresentation",
     "request": "explicitly-untyped",
@@ -1646,6 +1652,12 @@
   {
     "operation": "POST /api/v1/projects/{project}/sources/export",
     "function": "postProjectsProjectSourcesExport",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/sources/export-file",
+    "function": "postProjectsProjectSourcesExportFile",
     "request": "schema",
     "response": "schema"
   },
