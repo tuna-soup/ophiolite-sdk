@@ -14,6 +14,18 @@ No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
   An object above the deployment's request limit is left out with its sentence (`report.left_out`). Command line:
   `ophiolite sources browse CONNECTION [--prefix P] [--cursor C]` and `ophiolite sources import CONNECTION [--prefix P]
   [--keep-copy] --attribution A --rights-confirmed [--report r.csv]`; `list`, `describe` and `read` are unchanged.
+- Tables kept as they are and file downloads (E58b, preview API): `client.imports.from_table(path, "table",
+  columns={column: {'unit', 'quantity', 'missing', 'description'}})` keeps a CSV, Excel or Parquet file as it is;
+  `client.read_data(asset, revision)` returns `Table` (`rows`, `columns`, `key`, `declarations`, `units`, `not_read`
+  with one warning naming those columns, and `to_frame(missing=, decimal=)` on the frame code of SQL tables read as
+  tables). `client.export_file(asset, revision, path, format=, curves=)` and `Table.download(path, format=)` save an
+  exact revision (a kept table, tops, a trajectory, a point set or a LAS log) as one Parquet, GeoParquet (point sets)
+  or CSV file written by the server; `source.read().download(path, format=)` saves a connected SQL table. Every
+  download is checked against the digest and the revision the server states, through the same partial-file rule as
+  `download_original`, and nothing is saved otherwise; a connected selection that moved since the read is
+  `SourceRevisionDiffers`, one that can no longer be read keeps the server's refusal. No pyarrow is needed to download.
+  Command line: `ophiolite read-data --asset A --revision R --format parquet|geoparquet|csv --out FILE [--curve C]`.
+  Gallery: "A spreadsheet and a database, joined".
 - Grids and GIS files (E56, preview API): `client.read_data` returns `FeatureSet` for map features from a Shapefile,
   a GeoPackage layer or a GeoJSON file (`features` in file order with coordinates as stored, `fields`, `to_frame()`
   with one row per feature), checked offline against the server's rules; ZMAP+, CPS-3 and IRAP grids read as

@@ -18,10 +18,10 @@ from .well_imports import _checked
 
 FINAL = ('complete', 'complete-with-skipped', 'cancelled', 'incomplete')
 STOPPED = ('paused', 'resumable', 'needs-review')
-TARGETS = ('wells', 'well-tops', 'deviation-survey', 'point-set', 'time-depth')
+TARGETS = ('wells', 'well-tops', 'deviation-survey', 'point-set', 'time-depth', 'table')  # E58b: `table` keeps the file as it is
 NOUNS = {'wells': ('well', 'wells'), 'well-tops': ('top', 'tops'), 'time-depth': ('depth and time pair', 'depth and time pairs'),
-         'deviation-survey': ('survey station', 'survey stations'), 'point-set': ('point', 'points')}
-SET_NOUN = {'well-tops': 'tops', 'time-depth': 'time-depth', 'deviation-survey': 'deviation survey', 'point-set': 'points'}
+         'deviation-survey': ('survey station', 'survey stations'), 'point-set': ('point', 'points'), 'table': ('row', 'rows')}
+SET_NOUN = {'well-tops': 'tops', 'time-depth': 'time-depth', 'deviation-survey': 'deviation survey', 'point-set': 'points', 'table': 'table'}
 SET_HEAD = {'well-tops': 'Tops', 'time-depth': 'Time-depth pairs', 'deviation-survey': 'Deviation surveys', 'point-set': 'Point sets'}
 VALUE_WORDS = {'not-numeric': 'is not a number', 'non-finite': 'is not a finite number', 'value-missing': 'is empty',
                'out-of-range': 'is outside the range this field allows', 'not-increasing': 'is not larger than in the row before',
@@ -264,10 +264,14 @@ class Imports:
             if answer['state'] in FINAL or answer['state'] in STOPPED: return answer
         raise VerificationFailed('The import did not finish in %d steps; run it again to continue.' % max_steps)
 
-    def from_table(self, source, target, mapping=None, *, declarations=None, name=None, reading=None, well=None, separate=None,
+    def from_table(self, source, target, mapping=None, *, declarations=None, columns=None, name=None, reading=None, well=None, separate=None,
                    authority=None, audience=(), command_id=None, dry_run=False, progress=None, on_start=None):
         """Read, preview and (unless dry_run) start and run: returns {'read', 'preview', 'run'} ('run' is None for a dry
-        run, which adds nothing). `mapping` is {field: column}; omitted, the table must be in the target's standard layout."""
+        run, which adds nothing). `mapping` is {field: column}; omitted, the table must be in the target's standard layout.
+        E58b: `target="table"` keeps the file as it is (no mapping needed); `columns` gives what each column holds,
+        {column: {'unit', 'quantity', 'missing', 'description'}}; read it back with client.read_data(asset, revision)."""
+        if target == 'table' and mapping is None: mapping = {}
+        notes = dict(columns or {})  # `columns` below is the table's own column names
         read = self.read(source, name=name, reading=reading)
         if read.get('columns') is None: raise Refused('Answer the questions about how to read this table first: give reading=%s.' % sorted(
             d['field'] for d in read['context'].get('decisions', []) if d.get('status') == 'needs-decision'))
@@ -279,7 +283,7 @@ class Imports:
         for column in [c for v in fields.values() for c in (v if isinstance(v, list) else [v])]:
             if column not in columns: raise Refused('This table has no column named %r. Its columns: %s.' % (column, ', '.join(columns)))
         declared = {**((layout or {}).get('declarations') or {}), **(declarations or {})}
-        body = {'fields': fields, **(declared if target == 'wells' else {'declarations': declared})}
+        body = {'fields': fields, **(declared if target == 'wells' else {'declarations': declared}), **({'columns': notes} if notes else {})}
         options = {'reading': reading, 'well': well, 'separate': separate, 'authority': authority}
         review = self.preview(read, target, body, **options)
         if dry_run: return {'read': read, 'preview': review, 'run': None}

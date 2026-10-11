@@ -172,10 +172,12 @@ def parser():
     export.add_argument('--asset',required=True,action='append',help='Repeat --asset and --revision once per exact revision');export.add_argument('--revision',required=True,action='append')
     export.add_argument('--curve',action='append',help='Well log curves; omit for well tops, trajectories and grids');export.add_argument('--output',type=Path,required=True)
     export.add_argument('--no-groups',action='store_true',help='Leave out the result groups observed at export time')
-    typed=sub.add_parser('read-data',help='Read well tops, a trajectory or a horizon grid at an exact revision and save it')
+    typed=sub.add_parser('read-data',help='Read well tops, a trajectory, a horizon grid or a kept table at an exact revision and save it; --format parquet, geoparquet or csv saves one file')
     typed.add_argument('--configuration',type=Path,default=Path('configuration.json'))
     typed.add_argument('--credentials',type=Path)
-    typed.add_argument('--asset',required=True);typed.add_argument('--revision',required=True);typed.add_argument('--output',type=Path,required=True)
+    typed.add_argument('--asset',required=True);typed.add_argument('--revision',required=True);typed.add_argument('--output','--out',type=Path,required=True)
+    typed.add_argument('--format',choices=['parquet','geoparquet','csv'],help='Save the revision as this one file at --output (a table, tops, a trajectory, a point set or a well log), checked against the file the server holds')
+    typed.add_argument('--curve',action='append',help='--format with a well log: the curves to save (repeat); omitted, every stored curve')
     derived=sub.add_parser('publish-derived',help='Publish a file you derived from exact revisions, with its declared method (a command id or a work folder is required)')
     derived.add_argument('--configuration',type=Path,default=Path('configuration.json'));derived.add_argument('--credentials',type=Path)
     derived.add_argument('file',type=Path,help='The derived file (LAS 2.0 or one of the typed formats)')
@@ -1074,7 +1076,13 @@ def _main(argv=None):
             receipt=WorkFolder(client,args.work).publish_derived(written,**options) if args.work else client.publish_derived(written,command_id=args.command_id,**options)
             return done(args,'Published %s as version %d of %s - it is private until you share it.' % (args.name,receipt.revision_number,receipt.asset_id),
                         {'published':receipt.model_dump(mode='json',by_alias=True)})
+        if args.command=='read-data' and args.format:  # E58b: one file written by the server, verified before it is kept
+            if args.output.exists():raise Refused('The output file already exists; choose a new name.')
+            saved=client.export_file(args.asset,args.revision,args.output,format=args.format,curves=args.curve)
+            return done(args,'Saved %s as %s - written from revision %s and checked against the file the server holds.' % (saved,args.format.replace('geoparquet','GeoParquet').replace('parquet','Parquet').replace('csv','CSV'),args.revision),
+                        {'saved':str(saved),'format':args.format,'revision':args.revision})
         if args.command=='read-data':
+            if args.curve:raise Refused('--curve chooses curves of a file saved with --format.')
             data=client.read_data(args.asset,args.revision)
             if args.output.exists():raise Refused('The output folder already exists; choose a new folder.')
             args.output.mkdir(parents=True)

@@ -91,12 +91,16 @@ def asset(value):
     typed = 'type' in value['scientific']
     recipe = 'recipe_schema' in profiles.get(value['profile'], {})  # E23a: read through an import recipe
     packaged = profiles.get(value['profile'], {}).get('package') == 'without-recipe'  # E56: a Shapefile read from its members
-    require((recipe or packaged) == (value.get('package') is not None), 'A package is present exactly when the interpretation is recipe- or package-based')
+    kept = value['interpretation'].get('parsing_policy') == 'table-file/1'  # E58b: a kept table, the original with its table-interpretation.json
+    require(kept == (value['scientific'].get('type') == 'table'), 'Scientific context and interpretation disagree')
+    require((recipe or packaged or kept) == (value.get('package') is not None), 'A package is present exactly when the interpretation is recipe- or package-based')
     require(packaged == (value['interpretation'].get('parsing_policy') == 'package-strict/1'), 'Interpretation is not the one this profile declares')
     if value.get('package') is not None:
-        require((value['package']['recipe'] is None) == packaged, 'A recipe pin belongs to a recipe read and to nothing else')
+        require((value['package']['recipe'] is None) == (packaged or kept), 'A recipe pin belongs to a recipe read and to nothing else')
     if typed and recipe:
         require(value['interpretation'].get('mapping') == profiles[value['profile']]['connector']['mapping_version'], 'Scientific context and interpretation disagree')
+    elif kept:
+        require(value['interpretation'].get('mapping') == 'table/1', 'Scientific context and interpretation disagree')
     elif typed:
         mapping = {'well-tops': 'well-tops/1', 'trajectory': 'trajectory/1', 'regular-grid-surface': 'regular-grid-surface/1',
                    'triangulated-surface': 'triangulated-surface/1', 'point-set': 'point-set/1', 'polyline-set': 'polyline-set/1', 'seismic-volume': 'seismic-volume/1',
@@ -299,6 +303,11 @@ def typed_payload(value):
         require(len(depth) == len(time) == c['count'] >= 2 and (velocity is None) == (not c['velocity_provided']) and (velocity is None or len(velocity) == len(depth)), 'Pairs and their context disagree')
         require(all(a < b for a, b in zip(depth, depth[1:])) and all(a < b for a, b in zip(time, time[1:])), 'Depth and time must strictly increase')
         require(c['depth_range'] == [depth[0], depth[-1]] and c['time_range'] == [time[0], time[-1]], 'Pairs and their ranges disagree')
+    elif kind == 'table':  # E58b: a kept table; its rows, columns and coverage agree with the context
+        read = [col['name'] for col in value['columns'] if col['read']]
+        require(len(value['rows']) == len(value['source_rows']) == c['rows'] and len(value['columns']) == c['columns'], 'Rows, columns and their context disagree')
+        require(c['coverage']['read'] == read and [n['name'] for n in c['coverage']['not_read']] == [col['name'] for col in value['columns'] if not col['read']],
+                'The columns read and their coverage disagree')
 
 
 GEOMETRY_DEPTH = {'Point': 0, 'MultiPoint': 1, 'LineString': 1, 'MultiLineString': 2, 'Polygon': 2, 'MultiPolygon': 3}

@@ -84,6 +84,13 @@
       "sentence": "Browse a folder of well logs in your organisation's storage bucket, add it read from your storage each time, and see why a file that later changes is reported instead of read.",
       "modes": ["synthetic", "live"],
       "data": "Two synthetic gamma-ray logs made on your computer, or a folder of a storage connection your organisation added; nothing is written to your storage."
+    },
+    {
+      "slug": "a-spreadsheet-and-a-database-joined",
+      "title": "A spreadsheet and a database, joined",
+      "sentence": "Keep a spreadsheet as it is with its units and missing-value marker, read a database table, and join the two on the well name.",
+      "modes": ["synthetic", "live"],
+      "data": "A synthetic six-sample spreadsheet and a three-well database made on your computer; keeping the spreadsheet creates a table only you can see until you share it."
     }
   ]
 }
