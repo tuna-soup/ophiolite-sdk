@@ -1,6 +1,6 @@
 {
-  "platform_commit": "a865e6ea05d7477beca67be13ffa1d0ae3b10490",
-  "contracts_tree": "50cb15b677a06bb36f86a5f8bf07d1521b254936",
+  "platform_commit": "bfa1f375a620659ca073fd1a7dd7bd73fbbd8f15",
+  "contracts_tree": "e4d8cb5dc9adc6513cbdba514769970ccee33645",
   "registry_version": "1.31.0",
   "files": {
     "README.md": "7d8239610b76cc50a45307dbb7723bdfbff5406407a7ce7561538320ea8e6ab8",
@@ -103,7 +103,7 @@
     "connectors/v1/capabilities/osdu-record.json": "a08d32e14295f7745341e4c8c53b9366811e03e40e0905a6e0cd353134582693",
     "connectors/v1/capabilities/postgresql-tables.json": "71dd94c3b62ad88ddcf031d7757a945d33438428a6834b3498c0791e69c8adc6",
     "connectors/v1/capabilities/postgresql-wells.json": "52bbd6d4f3b924426c3b1a850e0e7df8d787de2a7a93ecec412e82df6c4d2e8e",
-    "connectors/v1/capabilities/qgis.json": "2eb9b13fa4b6e9076a45af91740da2cf45e2e078517f37507f8d4eb365e9cbdb",
+    "connectors/v1/capabilities/qgis.json": "38801adbb5788c6225e73a7b7f19beedbc216a671b00d114da69787732ef5274",
     "connectors/v1/capabilities/resinsight.json": "3c4eac6d7d243343405a001b4cee45b9d210994cb336d1ff2f64a0e554149c0d",
     "connectors/v1/capabilities/schema.json": "14237dd90295af6892340f69c17f01cfe1396d4c25902be73061927b80f29af8",
     "connectors/v1/capabilities/section-upload.json": "cda60ce02117d0e8101b69a38492474f22da8d750b07af18888d28d11d3554aa",
@@ -119,7 +119,7 @@
     "generated/v1/ophiolite-contracts.ts": "927191a899a3d897d1960c6c71eea46b1cb15ab2db8aaeed715a30282636313d",
     "mappings/v1/application-curve-to-well-curve.json": "aa2e1c1925f68aede0b3c5e7d8d7e7921ad69ea35733bc2e7d936a21c233c0dc",
     "mappings/v1/typed-standards.json": "a5188c618714d6fcc1bb08ac509364c69c424cae3de5195ca2f4d943c6c04e8f",
-    "openapi/v1/openapi.json": "d1d624676db150f676eb5bdcd80c60c9925e91a0beb4a5b61ff4279cb2e92795",
+    "openapi/v1/openapi.json": "4800ab84b3fa932574dfd41300fd9c0fefa0e18f36de21cd6ebe333ec916606d",
     "openapi/v1/scientific-assets.paths.json": "791b7f256e08fbcb11b18a1455e451b13ba40cc62727b92766592e9556de35cf",
     "procedures/v1/README.md": "899d058eb116379d390ebe013a7ea56e1d07e852a3f50a7975f190e62e48555d",
     "procedures/v1/fixtures/bundles/depth-shift/procedure.json": "5549b9196f43cd5e6ec56424fc54a0aea1161c69b4e25fd8616cac28d9b0997f",
