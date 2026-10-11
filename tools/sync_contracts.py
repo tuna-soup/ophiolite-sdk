@@ -61,6 +61,34 @@ def snapshot(source):
     files['SOURCE.json'] = (json.dumps(provenance, indent=2)+'\n').encode()
     return files
 
+PROVENANCE = 'tests/fixtures/PROVENANCE.json'
+PREFIX = 'ophiolite/contracts/'
+PENDING_REVIEW = 3  # exit code: the snapshot is written and a new path's row waits for a person's disposition
+
+
+def provenance_rows(manifest, files):
+    """The public-input rows kept true to the new snapshot: a contract row gets the new sha256 and source_commit, a row
+    whose path left the snapshot is dropped, a new path gets a pending-review row with empty evidence (check_public_inputs
+    rejects it until a person writes the disposition; this tool never does). Other fields, row order and rows that did
+    not change are kept as they were."""
+    source = json.loads(files['SOURCE.json']); commit, digests = source['platform_commit'], source['files']
+    rows, seen = [], set()
+    for row in manifest['inputs']:
+        if row['path'].startswith(PREFIX):
+            name = row['path'].removeprefix(PREFIX)
+            if name not in digests:
+                continue
+            seen.add(name)
+            if (row.get('sha256'), row.get('source_commit')) != (digests[name], commit):
+                row = {**row, 'sha256': digests[name], 'source_commit': commit}
+        rows.append(row)
+    pending = [PREFIX + name for name in digests if name not in seen]
+    rows += [{'path': path, 'sha256': digests[path.removeprefix(PREFIX)], 'source_commit': commit,
+              'origin': 'Ophiolite Platform contracts/' + path.removeprefix(PREFIX), 'license': '',
+              'disposition': 'pending-review', 'evidence': ''} for path in pending]
+    return {**manifest, 'inputs': rows}, pending
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--source', type=Path, default=ROOT.parent/'ophiolite-platform')
@@ -77,12 +105,34 @@ def main():
         new['platform_commit'] = old['platform_commit']
         files['SOURCE.json'] = (json.dumps(new, indent=2)+'\n').encode()
         if actual != files: raise ValueError('Contract snapshot differs by paths or bytes')
-    else:
-        if destination.exists():
-            actual = {p.relative_to(destination).as_posix() for p in destination.rglob('*') if p.is_file()}
-            if actual-files.keys(): raise ValueError('Untracked snapshot paths; inspect before updating')
-        for name, raw in files.items():
-            path = destination/name; path.parent.mkdir(parents=True, exist_ok=True); path.write_bytes(raw)
+        print(f'Contracts: {len(files)-1} source files verified')
+        return 0
+    # H44: everything is decided before anything is written, so a refusal changes nothing.
+    removed = set()
+    if destination.exists():
+        actual = {p.relative_to(destination).as_posix() for p in destination.rglob('*') if p.is_file()}
+        recorded = destination/'SOURCE.json'
+        previous = set(json.loads(recorded.read_text())['files']) | {'SOURCE.json'} if recorded.is_file() else set()
+        extra = actual - files.keys()
+        # Only a file the last snapshot listed may go (Platform removed it); anything else is someone's.
+        if extra - previous: raise ValueError('Untracked snapshot paths; inspect before updating')
+        removed = extra
+    record = ROOT/PROVENANCE
+    manifest, pending = provenance_rows(json.loads(record.read_text()), files)
+    for name in sorted(removed):
+        path = destination/name; path.unlink()
+        for folder in path.parents:
+            if folder == destination or any(folder.iterdir()): break
+            folder.rmdir()
+    for name, raw in files.items():
+        path = destination/name; path.parent.mkdir(parents=True, exist_ok=True); path.write_bytes(raw)
+    record.write_text(json.dumps(manifest, indent=2)+'\n')
     print(f'Contracts: {len(files)-1} source files verified')
+    if removed: print('Pruned (listed by the last snapshot, removed upstream): ' + ', '.join(sorted(removed)))
+    print(f'Provenance: {len(manifest["inputs"])} inputs ({PROVENANCE}; tests/test_public_inputs.py keeps the count by hand)')
+    if pending:
+        print('Pending review (write disposition and evidence by hand): ' + ', '.join(pending))
+        return PENDING_REVIEW
+    return 0
 
-if __name__ == '__main__': main()
+if __name__ == '__main__': raise SystemExit(main())
