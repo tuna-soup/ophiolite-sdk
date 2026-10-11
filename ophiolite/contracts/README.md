@@ -11,7 +11,8 @@ itself, so it can move to a public Contracts repository without renaming.
 | `profiles/v1/*.json`, `profile-schema.json` | one document per profile: display name, description, role, media types, rules |
 | `assets/v1/` | the scientific asset envelope, the normalized LAS curve, the curve context, the discovery summary, synthetic fixtures |
 | `scientific/v1/` | the two native protobuf exchange profiles and their structural schemas; `shale-volume-methods.json` (E52), the one table of shale-volume formulas, constants and reference values both runtimes are held to, with the HON-GT-01 excerpt it is checked against |
-| `vocabulary/v1/` | shared terms; `quantities.json` (E52), the closed list of curve quantities with their OSDU LogCurveFamily names |
+| `vocabulary/v1/` | shared terms; `quantities.json` (E52), the closed list of curve quantities with their OSDU LogCurveFamily names; `labels.py` (E105a), the one rule for a label a person reads, standard-library Python loaded from its source text |
+| `procedures/v1/` | the procedure contract (E105a): `procedure-schema.json` (structure of `procedure.json`), `rules.json` (step lists, units, limits, sentences, `rules_version`), `procedure.py` (the one validator, bundle digest and archive check, run alike by the Platform and the SDK), `fixtures/` |
 | `relationships/v1/` | the relationship predicate registry (E20) and the lineage document schema |
 | `entities/v1/` | the entity (well, wellbore) and entity-assets schemas (E20) |
 | `connectors/v1/` | the connector semantics vocabulary, copied byte for byte into Connectors and pinned by digest there |

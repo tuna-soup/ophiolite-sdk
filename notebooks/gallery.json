@@ -72,6 +72,13 @@
       "data": "A synthetic five-sample gamma-ray log, or a log in your project; publishing creates a result only you can see until you share it."
     },
     {
+      "slug": "a-spreadsheet-becomes-wells-and-tops",
+      "title": "A spreadsheet becomes wells and tops",
+      "sentence": "Say which column holds what, review what a table of formation tops would add, then add it and read one line per set.",
+      "modes": ["synthetic", "live"],
+      "data": "A synthetic six-row tops table made on your computer; adding it creates sets of tops only you can see until you share them."
+    },
+    {
       "slug": "who-has-access-until-when",
       "title": "Who has access, and until when",
       "sentence": "Read the projects you reach and the last day your access to each lasts, then who has access to this project, through what, and until when.",

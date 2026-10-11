@@ -138,12 +138,18 @@ def test_how_was_this_made_reads_the_story_the_change_and_the_refusal_synthetic(
     assert 'Ophiolite did not run this calculation, so it cannot make it again.' in text and 'Nothing differs' not in text
 
 
-
 def test_open_it_here_opens_the_exact_version_and_sends_again_once_synthetic(tmp_path, monkeypatch):
     text = run('open-it-here', tmp_path, monkeypatch)
     assert 'Version 1 opens at http://127.0.0.1:' in text and '/project/p/data/m~' in text and '?revision=' in text
     assert 'Sent again: version 2 - run twice, still version 2' in text
     assert 'Version 3 arrived first; the line built on version 2 was refused: The result has a newer version; review it before adding another' in text
+
+
+def test_a_spreadsheet_becomes_wells_and_tops_matches_its_columns_on_this_computer_and_sends_nothing_synthetic(tmp_path, monkeypatch):
+    text = run('a-spreadsheet-becomes-wells-and-tops', tmp_path, monkeypatch)
+    assert ': 6 rows, columns Well, Formation, Top MD (m)' in text and "Columns used: well from 'Well', name from 'Formation', md from 'Top MD (m)'" in text
+    assert 'Synthetic mode: nothing is sent. In your project this table gives 2 sets of tops (3 rows and 2 rows), skips Row 6' in text
+
 
 def test_who_has_access_until_when_reads_the_last_days_and_who_has_access_synthetic(tmp_path, monkeypatch):
     """E67a C6 (R12): the stored end is the start of the next UTC day; the notebook names the last day (M5 literals)."""
@@ -155,7 +161,7 @@ def test_who_has_access_until_when_reads_the_last_days_and_who_has_access_synthe
 
 
 def test_every_entry_is_listed_built_and_described():
-    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'grids-and-gis-files', 'how-was-this-made', 'open-it-here', 'who-has-access-until-when']
+    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'grids-and-gis-files', 'how-was-this-made', 'open-it-here', 'a-spreadsheet-becomes-wells-and-tops', 'who-has-access-until-when']
     for entry in GALLERY['notebooks']:
         assert set(entry) == {'slug', 'title', 'sentence', 'modes', 'data'} and entry['modes'] == ['synthetic', 'live']
         script = (ROOT / 'notebooks' / entry['slug'] / 'notebook.py').read_text()
