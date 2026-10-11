@@ -26774,6 +26774,2729 @@
         }
       }
     },
+    "/api/v1/projects/{project}/layouts/export": {
+      "post": {
+        "summary": "E89: The active header layouts as one ophiolite.layout-export/1 file, byte-stable, with its digest (names)",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "schema": {
+                      "const": "ophiolite.layout-export/1",
+                      "title": "Schema",
+                      "type": "string"
+                    },
+                    "layouts": {
+                      "items": {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      "title": "Layouts",
+                      "type": "array"
+                    },
+                    "document_digest": {
+                      "title": "Document Digest",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "schema",
+                    "layouts",
+                    "document_digest"
+                  ],
+                  "title": "LayoutExport",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "names": {
+                    "anyOf": [
+                      {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Only these header layouts; all active header layouts when absent",
+                    "title": "Names"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "ExportLayouts",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/layouts/get": {
+      "post": {
+        "summary": "E89: One layout at its head or an earlier version, with its history (asset_id or name, version)",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "asset_id": {
+                      "title": "Asset Id",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "target": {
+                      "title": "Target",
+                      "type": "string"
+                    },
+                    "state": {
+                      "enum": [
+                        "active",
+                        "retired"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "by": {
+                      "enum": [
+                        "header",
+                        "table"
+                      ],
+                      "title": "By",
+                      "type": "string"
+                    },
+                    "version": {
+                      "description": "E69 version number of the document shown",
+                      "title": "Version",
+                      "type": "integer"
+                    },
+                    "head_version": {
+                      "title": "Head Version",
+                      "type": "integer"
+                    },
+                    "generation": {
+                      "description": "The concurrency token a change names (expected_generation)",
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "content_digest": {
+                      "description": "The stored revision of this version (Technical details only)",
+                      "title": "Content Digest",
+                      "type": "string"
+                    },
+                    "made_by": {
+                      "title": "Made By",
+                      "type": "string"
+                    },
+                    "made_at": {
+                      "title": "Made At",
+                      "type": "number"
+                    },
+                    "changed_by": {
+                      "title": "Changed By",
+                      "type": "string"
+                    },
+                    "changed_at": {
+                      "title": "Changed At",
+                      "type": "number"
+                    },
+                    "last_used": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/LayoutUse"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "needs_connection": {
+                      "default": false,
+                      "description": "E89 C4: a database table layout whose connection is not in this project (J7-15; Reconnect)",
+                      "title": "Needs Connection",
+                      "type": "boolean"
+                    },
+                    "layout": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "ophiolite.layout/1",
+                      "title": "Layout"
+                    },
+                    "history": {
+                      "items": {
+                        "$ref": "#/components/schemas/LayoutHistoryRow"
+                      },
+                      "title": "History",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "asset_id",
+                    "name",
+                    "target",
+                    "state",
+                    "by",
+                    "version",
+                    "head_version",
+                    "generation",
+                    "content_digest",
+                    "made_by",
+                    "made_at",
+                    "changed_by",
+                    "changed_at",
+                    "last_used",
+                    "history"
+                  ],
+                  "title": "LayoutRead",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Asset Id"
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Instead of asset_id: the name, matched without case",
+                    "title": "Name"
+                  },
+                  "version": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "An earlier version (E69 number); the head when absent",
+                    "title": "Version"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "GetLayout",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/layouts/import": {
+      "post": {
+        "summary": "E89: Add the layouts of a layouts file: added, already here or not added, one answer each (document, rename, command_id)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "outcomes": {
+                      "items": {
+                        "$ref": "#/components/schemas/LayoutImportOutcome"
+                      },
+                      "title": "Outcomes",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "outcomes"
+                  ],
+                  "title": "LayoutImported",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "The same command returns its first answer; another body with it is refused",
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "document": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "items": {},
+                        "type": "array"
+                      },
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "An ophiolite.layout-export/1 file as made by layouts/export",
+                    "title": "Document"
+                  },
+                  "rename": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "A name in the file -> the name it gets here",
+                    "title": "Rename"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "command_id",
+                  "document"
+                ],
+                "title": "ImportLayouts",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/layouts/keep": {
+      "post": {
+        "summary": "E89: Keep your saved mapping of a table of this project's connection as a project layout (connection_id, key, name, command_id)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "One layout at a version (the head unless asked): the document, who made and last changed it, the last use.",
+                  "properties": {
+                    "asset_id": {
+                      "title": "Asset Id",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "target": {
+                      "title": "Target",
+                      "type": "string"
+                    },
+                    "state": {
+                      "enum": [
+                        "active",
+                        "retired"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "by": {
+                      "enum": [
+                        "header",
+                        "table"
+                      ],
+                      "title": "By",
+                      "type": "string"
+                    },
+                    "version": {
+                      "description": "E69 version number of the document shown",
+                      "title": "Version",
+                      "type": "integer"
+                    },
+                    "head_version": {
+                      "title": "Head Version",
+                      "type": "integer"
+                    },
+                    "generation": {
+                      "description": "The concurrency token a change names (expected_generation)",
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "content_digest": {
+                      "description": "The stored revision of this version (Technical details only)",
+                      "title": "Content Digest",
+                      "type": "string"
+                    },
+                    "made_by": {
+                      "title": "Made By",
+                      "type": "string"
+                    },
+                    "made_at": {
+                      "title": "Made At",
+                      "type": "number"
+                    },
+                    "changed_by": {
+                      "title": "Changed By",
+                      "type": "string"
+                    },
+                    "changed_at": {
+                      "title": "Changed At",
+                      "type": "number"
+                    },
+                    "last_used": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/LayoutUse"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "needs_connection": {
+                      "default": false,
+                      "description": "E89 C4: a database table layout whose connection is not in this project (J7-15; Reconnect)",
+                      "title": "Needs Connection",
+                      "type": "boolean"
+                    },
+                    "layout": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "ophiolite.layout/1",
+                      "title": "Layout"
+                    }
+                  },
+                  "required": [
+                    "asset_id",
+                    "name",
+                    "target",
+                    "state",
+                    "by",
+                    "version",
+                    "head_version",
+                    "generation",
+                    "content_digest",
+                    "made_by",
+                    "made_at",
+                    "changed_by",
+                    "changed_at",
+                    "last_used"
+                  ],
+                  "title": "LayoutView",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "description": "C4 (D7): keep your saved mapping of a database table as a project layout.",
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "The same command returns its first answer; another body with it is refused",
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "connection_id": {
+                    "maxLength": 80,
+                    "minLength": 1,
+                    "title": "Connection Id",
+                    "type": "string"
+                  },
+                  "key": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Key",
+                    "type": "string"
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "The layout's name; the connection's display name when absent ((2), (3) when taken)",
+                    "title": "Name"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "command_id",
+                  "connection_id",
+                  "key"
+                ],
+                "title": "KeepLayout",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/layouts/list": {
+      "post": {
+        "summary": "E89: This project's layouts, active and retired, with who made and last changed each and its last use",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "layouts": {
+                      "items": {
+                        "$ref": "#/components/schemas/LayoutView"
+                      },
+                      "title": "Layouts",
+                      "type": "array"
+                    },
+                    "active": {
+                      "title": "Active",
+                      "type": "integer"
+                    },
+                    "most": {
+                      "description": "Active layouts a project keeps",
+                      "title": "Most",
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "layouts",
+                    "active",
+                    "most"
+                  ],
+                  "title": "LayoutList",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "ListLayouts",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/layouts/match": {
+      "post": {
+        "summary": "E89: The active layouts a table's columns are, exact or reordered; several are all listed and none is chosen (columns, target)",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "matches": {
+                      "items": {
+                        "$ref": "#/components/schemas/LayoutMatch"
+                      },
+                      "title": "Matches",
+                      "type": "array"
+                    },
+                    "retired_ignored": {
+                      "description": "Retired layouts this header would match; never offered",
+                      "title": "Retired Ignored",
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "matches",
+                    "retired_ignored"
+                  ],
+                  "title": "LayoutMatches",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "target": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Target"
+                  },
+                  "columns": {
+                    "description": "The table's column names as read, in file order",
+                    "items": {
+                      "type": "string"
+                    },
+                    "title": "Columns",
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "columns"
+                ],
+                "title": "MatchLayouts",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/layouts/reconnect": {
+      "post": {
+        "summary": "E89: Point a moved table layout at a connection of this project with the same table schema (connection_id, key, expected_generation, command_id)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "One layout at a version (the head unless asked): the document, who made and last changed it, the last use.",
+                  "properties": {
+                    "asset_id": {
+                      "title": "Asset Id",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "target": {
+                      "title": "Target",
+                      "type": "string"
+                    },
+                    "state": {
+                      "enum": [
+                        "active",
+                        "retired"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "by": {
+                      "enum": [
+                        "header",
+                        "table"
+                      ],
+                      "title": "By",
+                      "type": "string"
+                    },
+                    "version": {
+                      "description": "E69 version number of the document shown",
+                      "title": "Version",
+                      "type": "integer"
+                    },
+                    "head_version": {
+                      "title": "Head Version",
+                      "type": "integer"
+                    },
+                    "generation": {
+                      "description": "The concurrency token a change names (expected_generation)",
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "content_digest": {
+                      "description": "The stored revision of this version (Technical details only)",
+                      "title": "Content Digest",
+                      "type": "string"
+                    },
+                    "made_by": {
+                      "title": "Made By",
+                      "type": "string"
+                    },
+                    "made_at": {
+                      "title": "Made At",
+                      "type": "number"
+                    },
+                    "changed_by": {
+                      "title": "Changed By",
+                      "type": "string"
+                    },
+                    "changed_at": {
+                      "title": "Changed At",
+                      "type": "number"
+                    },
+                    "last_used": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/LayoutUse"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "needs_connection": {
+                      "default": false,
+                      "description": "E89 C4: a database table layout whose connection is not in this project (J7-15; Reconnect)",
+                      "title": "Needs Connection",
+                      "type": "boolean"
+                    },
+                    "layout": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "ophiolite.layout/1",
+                      "title": "Layout"
+                    }
+                  },
+                  "required": [
+                    "asset_id",
+                    "name",
+                    "target",
+                    "state",
+                    "by",
+                    "version",
+                    "head_version",
+                    "generation",
+                    "content_digest",
+                    "made_by",
+                    "made_at",
+                    "changed_by",
+                    "changed_at",
+                    "last_used"
+                  ],
+                  "title": "LayoutView",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "The same command returns its first answer; another body with it is refused",
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Asset Id"
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Name"
+                  },
+                  "expected_generation": {
+                    "title": "Expected Generation",
+                    "type": "integer"
+                  },
+                  "connection_id": {
+                    "description": "A connection of this project holding the same table",
+                    "maxLength": 80,
+                    "minLength": 1,
+                    "title": "Connection Id",
+                    "type": "string"
+                  },
+                  "key": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Key",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "command_id",
+                  "expected_generation",
+                  "connection_id",
+                  "key"
+                ],
+                "title": "ReconnectLayout",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/layouts/rename": {
+      "post": {
+        "summary": "E89: Rename a layout as a new version (new_name, expected_generation, command_id)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "One layout at a version (the head unless asked): the document, who made and last changed it, the last use.",
+                  "properties": {
+                    "asset_id": {
+                      "title": "Asset Id",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "target": {
+                      "title": "Target",
+                      "type": "string"
+                    },
+                    "state": {
+                      "enum": [
+                        "active",
+                        "retired"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "by": {
+                      "enum": [
+                        "header",
+                        "table"
+                      ],
+                      "title": "By",
+                      "type": "string"
+                    },
+                    "version": {
+                      "description": "E69 version number of the document shown",
+                      "title": "Version",
+                      "type": "integer"
+                    },
+                    "head_version": {
+                      "title": "Head Version",
+                      "type": "integer"
+                    },
+                    "generation": {
+                      "description": "The concurrency token a change names (expected_generation)",
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "content_digest": {
+                      "description": "The stored revision of this version (Technical details only)",
+                      "title": "Content Digest",
+                      "type": "string"
+                    },
+                    "made_by": {
+                      "title": "Made By",
+                      "type": "string"
+                    },
+                    "made_at": {
+                      "title": "Made At",
+                      "type": "number"
+                    },
+                    "changed_by": {
+                      "title": "Changed By",
+                      "type": "string"
+                    },
+                    "changed_at": {
+                      "title": "Changed At",
+                      "type": "number"
+                    },
+                    "last_used": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/LayoutUse"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "needs_connection": {
+                      "default": false,
+                      "description": "E89 C4: a database table layout whose connection is not in this project (J7-15; Reconnect)",
+                      "title": "Needs Connection",
+                      "type": "boolean"
+                    },
+                    "layout": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "ophiolite.layout/1",
+                      "title": "Layout"
+                    }
+                  },
+                  "required": [
+                    "asset_id",
+                    "name",
+                    "target",
+                    "state",
+                    "by",
+                    "version",
+                    "head_version",
+                    "generation",
+                    "content_digest",
+                    "made_by",
+                    "made_at",
+                    "changed_by",
+                    "changed_at",
+                    "last_used"
+                  ],
+                  "title": "LayoutView",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "The same command returns its first answer; another body with it is refused",
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Asset Id"
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Name"
+                  },
+                  "expected_generation": {
+                    "title": "Expected Generation",
+                    "type": "integer"
+                  },
+                  "new_name": {
+                    "title": "New Name",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "command_id",
+                  "expected_generation",
+                  "new_name"
+                ],
+                "title": "RenameLayout",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/layouts/retire": {
+      "post": {
+        "summary": "E89: Stop offering a layout; runs that used it keep it (expected_generation, command_id)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "One layout at a version (the head unless asked): the document, who made and last changed it, the last use.",
+                  "properties": {
+                    "asset_id": {
+                      "title": "Asset Id",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "target": {
+                      "title": "Target",
+                      "type": "string"
+                    },
+                    "state": {
+                      "enum": [
+                        "active",
+                        "retired"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "by": {
+                      "enum": [
+                        "header",
+                        "table"
+                      ],
+                      "title": "By",
+                      "type": "string"
+                    },
+                    "version": {
+                      "description": "E69 version number of the document shown",
+                      "title": "Version",
+                      "type": "integer"
+                    },
+                    "head_version": {
+                      "title": "Head Version",
+                      "type": "integer"
+                    },
+                    "generation": {
+                      "description": "The concurrency token a change names (expected_generation)",
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "content_digest": {
+                      "description": "The stored revision of this version (Technical details only)",
+                      "title": "Content Digest",
+                      "type": "string"
+                    },
+                    "made_by": {
+                      "title": "Made By",
+                      "type": "string"
+                    },
+                    "made_at": {
+                      "title": "Made At",
+                      "type": "number"
+                    },
+                    "changed_by": {
+                      "title": "Changed By",
+                      "type": "string"
+                    },
+                    "changed_at": {
+                      "title": "Changed At",
+                      "type": "number"
+                    },
+                    "last_used": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/LayoutUse"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "needs_connection": {
+                      "default": false,
+                      "description": "E89 C4: a database table layout whose connection is not in this project (J7-15; Reconnect)",
+                      "title": "Needs Connection",
+                      "type": "boolean"
+                    },
+                    "layout": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "ophiolite.layout/1",
+                      "title": "Layout"
+                    }
+                  },
+                  "required": [
+                    "asset_id",
+                    "name",
+                    "target",
+                    "state",
+                    "by",
+                    "version",
+                    "head_version",
+                    "generation",
+                    "content_digest",
+                    "made_by",
+                    "made_at",
+                    "changed_by",
+                    "changed_at",
+                    "last_used"
+                  ],
+                  "title": "LayoutView",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "The same command returns its first answer; another body with it is refused",
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Asset Id"
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Name"
+                  },
+                  "expected_generation": {
+                    "title": "Expected Generation",
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "command_id",
+                  "expected_generation"
+                ],
+                "title": "ChangeLayout",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/layouts/save": {
+      "post": {
+        "summary": "E89: Keep a reviewed mapping as a layout, or a new version of one (layout; asset_id and expected_generation; command_id)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "One layout at a version (the head unless asked): the document, who made and last changed it, the last use.",
+                  "properties": {
+                    "asset_id": {
+                      "title": "Asset Id",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "target": {
+                      "title": "Target",
+                      "type": "string"
+                    },
+                    "state": {
+                      "enum": [
+                        "active",
+                        "retired"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "by": {
+                      "enum": [
+                        "header",
+                        "table"
+                      ],
+                      "title": "By",
+                      "type": "string"
+                    },
+                    "version": {
+                      "description": "E69 version number of the document shown",
+                      "title": "Version",
+                      "type": "integer"
+                    },
+                    "head_version": {
+                      "title": "Head Version",
+                      "type": "integer"
+                    },
+                    "generation": {
+                      "description": "The concurrency token a change names (expected_generation)",
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "content_digest": {
+                      "description": "The stored revision of this version (Technical details only)",
+                      "title": "Content Digest",
+                      "type": "string"
+                    },
+                    "made_by": {
+                      "title": "Made By",
+                      "type": "string"
+                    },
+                    "made_at": {
+                      "title": "Made At",
+                      "type": "number"
+                    },
+                    "changed_by": {
+                      "title": "Changed By",
+                      "type": "string"
+                    },
+                    "changed_at": {
+                      "title": "Changed At",
+                      "type": "number"
+                    },
+                    "last_used": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/LayoutUse"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "needs_connection": {
+                      "default": false,
+                      "description": "E89 C4: a database table layout whose connection is not in this project (J7-15; Reconnect)",
+                      "title": "Needs Connection",
+                      "type": "boolean"
+                    },
+                    "layout": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "ophiolite.layout/1",
+                      "title": "Layout"
+                    }
+                  },
+                  "required": [
+                    "asset_id",
+                    "name",
+                    "target",
+                    "state",
+                    "by",
+                    "version",
+                    "head_version",
+                    "generation",
+                    "content_digest",
+                    "made_by",
+                    "made_at",
+                    "changed_by",
+                    "changed_at",
+                    "last_used"
+                  ],
+                  "title": "LayoutView",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "The same command returns its first answer; another body with it is refused",
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "layout": {
+                    "additionalProperties": true,
+                    "description": "ophiolite.layout-save/1: target, name, columns as read, mapping, declarations, reading; no digest",
+                    "title": "Layout",
+                    "type": "object"
+                  },
+                  "asset_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "A new version of this layout's mapping",
+                    "title": "Asset Id"
+                  },
+                  "expected_generation": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Expected Generation"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "command_id",
+                  "layout"
+                ],
+                "title": "SaveLayout",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/layouts/update": {
+      "post": {
+        "summary": "E89: A new version of a kept table layout from your current saved mapping (expected_generation, command_id)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "One layout at a version (the head unless asked): the document, who made and last changed it, the last use.",
+                  "properties": {
+                    "asset_id": {
+                      "title": "Asset Id",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "target": {
+                      "title": "Target",
+                      "type": "string"
+                    },
+                    "state": {
+                      "enum": [
+                        "active",
+                        "retired"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "by": {
+                      "enum": [
+                        "header",
+                        "table"
+                      ],
+                      "title": "By",
+                      "type": "string"
+                    },
+                    "version": {
+                      "description": "E69 version number of the document shown",
+                      "title": "Version",
+                      "type": "integer"
+                    },
+                    "head_version": {
+                      "title": "Head Version",
+                      "type": "integer"
+                    },
+                    "generation": {
+                      "description": "The concurrency token a change names (expected_generation)",
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "content_digest": {
+                      "description": "The stored revision of this version (Technical details only)",
+                      "title": "Content Digest",
+                      "type": "string"
+                    },
+                    "made_by": {
+                      "title": "Made By",
+                      "type": "string"
+                    },
+                    "made_at": {
+                      "title": "Made At",
+                      "type": "number"
+                    },
+                    "changed_by": {
+                      "title": "Changed By",
+                      "type": "string"
+                    },
+                    "changed_at": {
+                      "title": "Changed At",
+                      "type": "number"
+                    },
+                    "last_used": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/LayoutUse"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "needs_connection": {
+                      "default": false,
+                      "description": "E89 C4: a database table layout whose connection is not in this project (J7-15; Reconnect)",
+                      "title": "Needs Connection",
+                      "type": "boolean"
+                    },
+                    "layout": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "ophiolite.layout/1",
+                      "title": "Layout"
+                    }
+                  },
+                  "required": [
+                    "asset_id",
+                    "name",
+                    "target",
+                    "state",
+                    "by",
+                    "version",
+                    "head_version",
+                    "generation",
+                    "content_digest",
+                    "made_by",
+                    "made_at",
+                    "changed_by",
+                    "changed_at",
+                    "last_used"
+                  ],
+                  "title": "LayoutView",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "The same command returns its first answer; another body with it is refused",
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Asset Id"
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Name"
+                  },
+                  "expected_generation": {
+                    "title": "Expected Generation",
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "command_id",
+                  "expected_generation"
+                ],
+                "title": "ChangeLayout",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/layouts/use-again": {
+      "post": {
+        "summary": "E89: Offer a retired layout again, or an earlier version's mapping, as a new version (expected_generation, command_id)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "One layout at a version (the head unless asked): the document, who made and last changed it, the last use.",
+                  "properties": {
+                    "asset_id": {
+                      "title": "Asset Id",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "target": {
+                      "title": "Target",
+                      "type": "string"
+                    },
+                    "state": {
+                      "enum": [
+                        "active",
+                        "retired"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "by": {
+                      "enum": [
+                        "header",
+                        "table"
+                      ],
+                      "title": "By",
+                      "type": "string"
+                    },
+                    "version": {
+                      "description": "E69 version number of the document shown",
+                      "title": "Version",
+                      "type": "integer"
+                    },
+                    "head_version": {
+                      "title": "Head Version",
+                      "type": "integer"
+                    },
+                    "generation": {
+                      "description": "The concurrency token a change names (expected_generation)",
+                      "title": "Generation",
+                      "type": "integer"
+                    },
+                    "content_digest": {
+                      "description": "The stored revision of this version (Technical details only)",
+                      "title": "Content Digest",
+                      "type": "string"
+                    },
+                    "made_by": {
+                      "title": "Made By",
+                      "type": "string"
+                    },
+                    "made_at": {
+                      "title": "Made At",
+                      "type": "number"
+                    },
+                    "changed_by": {
+                      "title": "Changed By",
+                      "type": "string"
+                    },
+                    "changed_at": {
+                      "title": "Changed At",
+                      "type": "number"
+                    },
+                    "last_used": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/LayoutUse"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "needs_connection": {
+                      "default": false,
+                      "description": "E89 C4: a database table layout whose connection is not in this project (J7-15; Reconnect)",
+                      "title": "Needs Connection",
+                      "type": "boolean"
+                    },
+                    "layout": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "ophiolite.layout/1",
+                      "title": "Layout"
+                    }
+                  },
+                  "required": [
+                    "asset_id",
+                    "name",
+                    "target",
+                    "state",
+                    "by",
+                    "version",
+                    "head_version",
+                    "generation",
+                    "content_digest",
+                    "made_by",
+                    "made_at",
+                    "changed_by",
+                    "changed_at",
+                    "last_used"
+                  ],
+                  "title": "LayoutView",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "The same command returns its first answer; another body with it is refused",
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Asset Id"
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Name"
+                  },
+                  "expected_generation": {
+                    "title": "Expected Generation",
+                    "type": "integer"
+                  },
+                  "version": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "The earlier version whose mapping is used again; the head when absent",
+                    "title": "Version"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "command_id",
+                  "expected_generation"
+                ],
+                "title": "UseLayoutAgain",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/maps/curve-import": {
       "post": {
         "summary": "Import a LAS curve",
@@ -68449,6 +71172,18 @@
                     "default": null,
                     "description": "preview, start (C5): labels of sets to add beside a set of the same name with other content.",
                     "title": "Separate"
+                  },
+                  "layout": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/LayoutRef"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E89, preview and start of a file: the layout whose mapping the request carries; the server checks it fits this table now and records the class of each pick."
                   }
                 },
                 "required": [
@@ -68767,6 +71502,18 @@
                     "default": null,
                     "description": "preview, start (C5): labels of sets to add beside a set of the same name with other content.",
                     "title": "Separate"
+                  },
+                  "layout": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/LayoutRef"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E89, preview and start of a file: the layout whose mapping the request carries; the server checks it fits this table now and records the class of each pick."
                   }
                 },
                 "required": [
@@ -69072,6 +71819,18 @@
                     "default": null,
                     "description": "preview, start (C5): labels of sets to add beside a set of the same name with other content.",
                     "title": "Separate"
+                  },
+                  "layout": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/LayoutRef"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E89, preview and start of a file: the layout whose mapping the request carries; the server checks it fits this table now and records the class of each pick."
                   }
                 },
                 "required": [
@@ -69377,6 +72136,18 @@
                     "default": null,
                     "description": "preview, start (C5): labels of sets to add beside a set of the same name with other content.",
                     "title": "Separate"
+                  },
+                  "layout": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/LayoutRef"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E89, preview and start of a file: the layout whose mapping the request carries; the server checks it fits this table now and records the class of each pick."
                   }
                 },
                 "required": [
@@ -69947,6 +72718,18 @@
                     "default": null,
                     "description": "preview, start (C5): labels of sets to add beside a set of the same name with other content.",
                     "title": "Separate"
+                  },
+                  "layout": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/LayoutRef"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E89, preview and start of a file: the layout whose mapping the request carries; the server checks it fits this table now and records the class of each pick."
                   }
                 },
                 "required": [
@@ -70252,6 +73035,18 @@
                     "default": null,
                     "description": "preview, start (C5): labels of sets to add beside a set of the same name with other content.",
                     "title": "Separate"
+                  },
+                  "layout": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/LayoutRef"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E89, preview and start of a file: the layout whose mapping the request carries; the server checks it fits this table now and records the class of each pick."
                   }
                 },
                 "required": [
@@ -70557,6 +73352,18 @@
                     "default": null,
                     "description": "preview, start (C5): labels of sets to add beside a set of the same name with other content.",
                     "title": "Separate"
+                  },
+                  "layout": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/LayoutRef"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E89, preview and start of a file: the layout whose mapping the request carries; the server checks it fits this table now and records the class of each pick."
                   }
                 },
                 "required": [
@@ -70862,6 +73669,18 @@
                     "default": null,
                     "description": "preview, start (C5): labels of sets to add beside a set of the same name with other content.",
                     "title": "Separate"
+                  },
+                  "layout": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/LayoutRef"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E89, preview and start of a file: the layout whose mapping the request carries; the server checks it fits this table now and records the class of each pick."
                   }
                 },
                 "required": [
@@ -94887,6 +97706,540 @@
         "title": "LASInspection",
         "type": "object"
       },
+      "LayoutBasis": {
+        "additionalProperties": false,
+        "description": "C4 (D3): what a landing that carried a layout recorded: the layout at its version, how the header matched it and\nthe class of each pick, derived by the server.",
+        "properties": {
+          "layout": {
+            "title": "Layout",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          },
+          "generation": {
+            "title": "Generation",
+            "type": "integer"
+          },
+          "how": {
+            "enum": [
+              "exact",
+              "reordered"
+            ],
+            "title": "How",
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/LayoutFieldPick"
+            },
+            "title": "Fields",
+            "type": "array"
+          },
+          "declarations": {
+            "items": {
+              "$ref": "#/components/schemas/LayoutDeclarationPick"
+            },
+            "title": "Declarations",
+            "type": "array"
+          }
+        },
+        "required": [
+          "layout",
+          "name",
+          "version",
+          "generation",
+          "how",
+          "fields",
+          "declarations"
+        ],
+        "title": "LayoutBasis",
+        "type": "object"
+      },
+      "LayoutDeclarationPick": {
+        "additionalProperties": false,
+        "properties": {
+          "declaration": {
+            "title": "Declaration",
+            "type": "string"
+          },
+          "class": {
+            "enum": [
+              "previously-reviewed",
+              "declared"
+            ],
+            "title": "Class",
+            "type": "string"
+          },
+          "by": {
+            "anyOf": [
+              {
+                "const": "you",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "By"
+          },
+          "supported_by": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Supported By"
+          }
+        },
+        "required": [
+          "declaration",
+          "class"
+        ],
+        "title": "LayoutDeclarationPick",
+        "type": "object"
+      },
+      "LayoutFieldPick": {
+        "additionalProperties": false,
+        "properties": {
+          "field": {
+            "title": "Field",
+            "type": "string"
+          },
+          "class": {
+            "enum": [
+              "previously-reviewed",
+              "declared",
+              "none"
+            ],
+            "title": "Class",
+            "type": "string"
+          },
+          "by": {
+            "anyOf": [
+              {
+                "const": "you",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "By"
+          },
+          "reuse": {
+            "anyOf": [
+              {
+                "const": "layout",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Reuse"
+          },
+          "supported_by": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "{layout, version}",
+            "title": "Supported By"
+          },
+          "how": {
+            "anyOf": [
+              {
+                "enum": [
+                  "exact",
+                  "reordered"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "How"
+          }
+        },
+        "required": [
+          "field",
+          "class"
+        ],
+        "title": "LayoutFieldPick",
+        "type": "object"
+      },
+      "LayoutHistoryRow": {
+        "additionalProperties": false,
+        "properties": {
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "active",
+              "retired"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "actor": {
+            "title": "Actor",
+            "type": "string"
+          },
+          "at": {
+            "title": "At",
+            "type": "number"
+          }
+        },
+        "required": [
+          "version",
+          "name",
+          "state",
+          "actor",
+          "at"
+        ],
+        "title": "LayoutHistoryRow",
+        "type": "object"
+      },
+      "LayoutImportOutcome": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "result": {
+            "enum": [
+              "added",
+              "already-here",
+              "not-added"
+            ],
+            "title": "Result",
+            "type": "string"
+          },
+          "asset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Asset Id"
+          },
+          "sentence": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Sentence"
+          },
+          "problem": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Problem"
+          }
+        },
+        "required": [
+          "name",
+          "result"
+        ],
+        "title": "LayoutImportOutcome",
+        "type": "object"
+      },
+      "LayoutMatch": {
+        "additionalProperties": false,
+        "properties": {
+          "asset_id": {
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "target": {
+            "title": "Target",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          },
+          "generation": {
+            "title": "Generation",
+            "type": "integer"
+          },
+          "made_by": {
+            "title": "Made By",
+            "type": "string"
+          },
+          "last_used": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LayoutUse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "how": {
+            "enum": [
+              "exact",
+              "reordered"
+            ],
+            "title": "How",
+            "type": "string"
+          },
+          "layout": {
+            "additionalProperties": true,
+            "title": "Layout",
+            "type": "object"
+          },
+          "fields": {
+            "additionalProperties": true,
+            "description": "C4: the layout's mapped fields resolved to this header's column labels (by normalised name); what a client puts in the landing's mapping",
+            "title": "Fields",
+            "type": "object"
+          },
+          "class": {
+            "const": "previously-reviewed",
+            "title": "Class",
+            "type": "string"
+          }
+        },
+        "required": [
+          "asset_id",
+          "name",
+          "target",
+          "version",
+          "generation",
+          "made_by",
+          "last_used",
+          "how",
+          "layout",
+          "fields",
+          "class"
+        ],
+        "title": "LayoutMatch",
+        "type": "object"
+      },
+      "LayoutRef": {
+        "additionalProperties": false,
+        "description": "C4: the layout a landing carries, as the person saw it (match or get); start refuses it when it changed since.",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          },
+          "generation": {
+            "minimum": 1,
+            "title": "Generation",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "generation"
+        ],
+        "title": "LayoutRef",
+        "type": "object"
+      },
+      "LayoutUse": {
+        "additionalProperties": false,
+        "properties": {
+          "person": {
+            "title": "Person",
+            "type": "string"
+          },
+          "at": {
+            "title": "At",
+            "type": "number"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "person",
+          "at",
+          "run_id",
+          "version"
+        ],
+        "title": "LayoutUse",
+        "type": "object"
+      },
+      "LayoutView": {
+        "additionalProperties": false,
+        "description": "One layout at a version (the head unless asked): the document, who made and last changed it, the last use.",
+        "properties": {
+          "asset_id": {
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "target": {
+            "title": "Target",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "active",
+              "retired"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "by": {
+            "enum": [
+              "header",
+              "table"
+            ],
+            "title": "By",
+            "type": "string"
+          },
+          "version": {
+            "description": "E69 version number of the document shown",
+            "title": "Version",
+            "type": "integer"
+          },
+          "head_version": {
+            "title": "Head Version",
+            "type": "integer"
+          },
+          "generation": {
+            "description": "The concurrency token a change names (expected_generation)",
+            "title": "Generation",
+            "type": "integer"
+          },
+          "content_digest": {
+            "description": "The stored revision of this version (Technical details only)",
+            "title": "Content Digest",
+            "type": "string"
+          },
+          "made_by": {
+            "title": "Made By",
+            "type": "string"
+          },
+          "made_at": {
+            "title": "Made At",
+            "type": "number"
+          },
+          "changed_by": {
+            "title": "Changed By",
+            "type": "string"
+          },
+          "changed_at": {
+            "title": "Changed At",
+            "type": "number"
+          },
+          "last_used": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LayoutUse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "needs_connection": {
+            "default": false,
+            "description": "E89 C4: a database table layout whose connection is not in this project (J7-15; Reconnect)",
+            "title": "Needs Connection",
+            "type": "boolean"
+          },
+          "layout": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "ophiolite.layout/1",
+            "title": "Layout"
+          }
+        },
+        "required": [
+          "asset_id",
+          "name",
+          "target",
+          "state",
+          "by",
+          "version",
+          "head_version",
+          "generation",
+          "content_digest",
+          "made_by",
+          "made_at",
+          "changed_by",
+          "changed_at",
+          "last_used"
+        ],
+        "title": "LayoutView",
+        "type": "object"
+      },
       "LeftOrganization": {
         "additionalProperties": false,
         "properties": {
@@ -104957,6 +108310,18 @@
             "description": "The retained input of a file run.",
             "title": "Input Id"
           },
+          "layout": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LayoutBasis"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E89: present when the request carried a layout."
+          },
           "identity_authority": {
             "anyOf": [
               {
@@ -105266,6 +108631,18 @@
             ],
             "description": "The retained input of a file run.",
             "title": "Input Id"
+          },
+          "layout": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LayoutBasis"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E89: present when the request carried a layout."
           }
         },
         "required": [
@@ -105421,6 +108798,18 @@
               }
             ],
             "default": null
+          },
+          "layout": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LayoutBasis"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E89: present when the request carried a layout."
           }
         },
         "required": [
@@ -105472,6 +108861,47 @@
           "declarations"
         ],
         "title": "TableLayoutMatch",
+        "type": "object"
+      },
+      "TableLayoutOffer": {
+        "additionalProperties": false,
+        "properties": {
+          "asset_id": {
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          },
+          "generation": {
+            "title": "Generation",
+            "type": "integer"
+          },
+          "fits": {
+            "description": "The table still has the schema the layout was kept from",
+            "title": "Fits",
+            "type": "boolean"
+          },
+          "mapping": {
+            "additionalProperties": true,
+            "title": "Mapping",
+            "type": "object"
+          }
+        },
+        "required": [
+          "asset_id",
+          "name",
+          "version",
+          "generation",
+          "fits",
+          "mapping"
+        ],
+        "title": "TableLayoutOffer",
         "type": "object"
       },
       "TableNotKept": {
@@ -105614,6 +109044,22 @@
             "default": null,
             "description": "E86: ophiolite.mapping-suggestions/1, a column per field with its class and whether it is pre-filled; your earlier pick of this table comes first, a pick of another table (reuse similar) is only offered.",
             "title": "Column Suggestions"
+          },
+          "layouts": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/TableLayoutOffer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E89 C4: the layouts this project kept for this table, present only when you have no saved mapping of your own and one exists; none is chosen for you.",
+            "title": "Layouts"
           }
         },
         "required": [
@@ -105811,6 +109257,18 @@
             ],
             "description": "The retained input of a file run.",
             "title": "Input Id"
+          },
+          "layout": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LayoutBasis"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E89: present when the request carried a layout."
           },
           "totals": {
             "$ref": "#/components/schemas/TableSetTotals"
@@ -106229,6 +109687,18 @@
             ],
             "description": "The retained input of a file run.",
             "title": "Input Id"
+          },
+          "layout": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LayoutBasis"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E89: present when the request carried a layout."
           }
         },
         "required": [
@@ -106498,6 +109968,18 @@
           },
           "audience": {
             "$ref": "#/components/schemas/WellImportAudience"
+          },
+          "layout": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LayoutBasis"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E89: present when the request carried a layout."
           }
         },
         "required": [
