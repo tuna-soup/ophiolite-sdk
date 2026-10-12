@@ -426,6 +426,11 @@ def synthetic_server():
             if route.endswith('/entities/extent'): return 200, {'crs':request.get('crs','OGC:CRS84'),'bbox':[5.1,52.1,6.2,52.9],'count':2,'untransformed':0}
             return 200, {'entities':[dict(well, location=dict(well['location'], crs=request.get('crs') or 'OGC:CRS84') if well['location'] else None) for well in WELLS],
                          'next_cursor':None,'untransformed':0}
+        if method == 'POST' and route in ('/api/v1/projects/list', prefix.rsplit('/', 1)[0] + '/access/effective'):  # E67a: who has access, until when
+            if not token: return 401, {'error':'Sign in again.'}
+            if route == '/api/v1/projects/list': return 200, {'projects':_discovered(_owner(token)), 'next_cursor':None}
+            if _owner(token) != 'alice': return 403, {'error':'Effective project administration required for p'}
+            return 200, {'members':ACCESS}
         if method == 'POST' and '/results/' in route:  # E94: how a result was made, from the fixture's own records
             if not token: return 401, {'error':'Sign in again.'}
             return _results(route.rsplit('/', 1)[-1], json.loads(body or b'{}'), _owner(token), applications, summary)
@@ -445,6 +450,45 @@ def synthetic_server():
 # The same page shapes as the server's (`ophiolite.story/1`, `ophiolite.dependents/1`, `ophiolite.what-changed/1`) for
 # the fixture's synthetic log and the derived publications made against it. Every publication here is reported by its
 # publisher (a declared method), so making one again is refused with the server's words, as the server refuses it.
+
+# --- E67a: who has access to the synthetic project, and until when ---------------------------------------------------
+# A stored end is the start of the day after the last permitted day, in UTC (3000-01-01T00:00:00Z: the last day is
+# 31 December 2999). Alice administers p with no end; Bob's direct grant ends; Vic reaches p through a team, which has no
+# end; Erin's direct grant ended, so she has no access. The literals are the strategy's M5 table.
+
+
+def _grant(role, via=None, ends_at=None, ended_on=None, ended=False):
+    team = via is not None
+    return {'role':role, 'can_compute':role == 'member', 'via':'team:' + via if team else 'direct', 'team_name':via, 'ends_at':ends_at,
+            'ends_on':ended_on, 'ended':ended, 'role_label':role.title(), 'source_label':via if team else 'Direct grant'}
+
+
+def _member(user, name, role, *grants, administer=False):
+    direct = next((g for g in grants if g['via'] == 'direct'), None)
+    live = [g for g in grants if not g['ended']]
+    return {'user_id':user, 'name':name, 'enabled':True, 'blocked':False, 'can_edit':(role == 'member') if live else None,
+            'can_compute':bool(live) and role == 'member', 'can_administer':administer, 'has_access':bool(live), 'grants':list(grants),
+            'ends_on':direct['ends_on'] if direct else None, 'ended':bool(direct and direct['ended'])}
+
+
+ACCESS = [_member('alice', 'Alice', 'member', _grant('member'), administer=True),
+          _member('bob', 'Bob', 'member', _grant('member', ends_at='3000-01-01T00:00:00Z', ended_on='2999-12-31')),
+          _member('erin', 'Erin', 'member', _grant('member', ends_at='2000-01-01T00:00:00Z', ended_on='1999-12-31', ended=True)),
+          _member('vic', 'Vic', 'viewer', _grant('viewer', via='Geoscience'))]
+
+
+def _discovered(owner):
+    """projects/list for the synthetic reader: p (Alice administers it with no end; Bob's access ends) and, for Alice, a
+    shared project whose access ends on 1 January 2999."""
+    ends = {'alice':None, 'bob':'3000-01-01T00:00:00Z', 'vic':None}
+    if owner not in ends: return []
+    rows = [{'id':'p', 'name':'Synthetic project', 'role':'member' if owner != 'vic' else 'viewer', 'can_administer':owner == 'alice',
+             'organization_id':None, 'access_ends_at':ends[owner]}]
+    if owner == 'alice':
+        rows.append({'id':'shared-survey', 'name':'Shared survey', 'role':'viewer', 'can_administer':False, 'organization_id':None,
+                     'access_ends_at':'2999-01-02T00:00:00Z'})
+    return rows
+
 
 NOT_RUN = 'Ophiolite did not run this calculation, so it cannot make it again.'
 

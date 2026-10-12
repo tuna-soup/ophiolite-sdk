@@ -396,6 +396,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/ended",
+    "function": "postProjectsEnded",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/list",
     "function": "postProjectsList",
     "request": "schema",
@@ -416,6 +422,12 @@
   {
     "operation": "POST /api/v1/projects/{project}/access/effective",
     "function": "postProjectsProjectAccessEffective",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/access/end-date",
+    "function": "postProjectsProjectAccessEndDate",
     "request": "schema",
     "response": "schema"
   },
@@ -936,6 +948,18 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/details/history",
+    "function": "postProjectsProjectDetailsHistory",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/details/rename",
+    "function": "postProjectsProjectDetailsRename",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/entities/assets",
     "function": "postProjectsProjectEntitiesAssets",
     "request": "schema",
@@ -1388,6 +1412,48 @@
   {
     "operation": "POST /api/v1/projects/{project}/native/SetProjectMember",
     "function": "postProjectsProjectNativeSetProjectMember",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/procedures/bundle",
+    "function": "postProjectsProjectProceduresBundle",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/procedures/enable",
+    "function": "postProjectsProjectProceduresEnable",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/procedures/get",
+    "function": "postProjectsProjectProceduresGet",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/procedures/list",
+    "function": "postProjectsProjectProceduresList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/procedures/register",
+    "function": "postProjectsProjectProceduresRegister",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/procedures/trust",
+    "function": "postProjectsProjectProceduresTrust",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/procedures/withdraw",
+    "function": "postProjectsProjectProceduresWithdraw",
     "request": "schema",
     "response": "schema"
   },

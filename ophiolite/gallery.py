@@ -12,6 +12,10 @@
    file `OPHIOLITE_CREDENTIAL` names), else `OPHIOLITE_ACCESS_KEY`, as the templates read them.
 
 When none applies it raises `Refused` with the sentence that says what to set. Importing this module contacts nothing.
+
+`colleague()` (E105b) is a second project member's client for a notebook that shows both sides of sharing: the one a
+harness bound with `use(client, colleague=...)`, else, outside synthetic mode, `OPHIOLITE_COLLEAGUE_ACCESS_KEY` for
+the same address and project; otherwise None and the notebook says what it would show.
 """
 import atexit
 import os
@@ -19,14 +23,24 @@ import os
 from .errors import Refused
 
 _bound = None
+_colleague = None
 _synthetic = None
 
 
-def use(client):
-    """Make `connect()` return this client (None forgets it)."""
-    global _bound
-    _bound = client
+def use(client, colleague=None):
+    """Make `connect()` return this client and `colleague()` that one (None forgets them)."""
+    global _bound, _colleague
+    _bound, _colleague = client, colleague
     return client
+
+
+def colleague():
+    """A second project member's client, or None (see the module text)."""
+    from .auth import Credential
+    from .client import Client
+    if _bound is not None or synthetic(): return _colleague
+    key, project = os.environ.get('OPHIOLITE_COLLEAGUE_ACCESS_KEY'), os.environ.get('OPHIOLITE_PROJECT')
+    return Client(os.environ['OPHIOLITE_URL'], project, Credential.bearer(key, source='environment')) if key and project else None
 
 
 def synthetic():
