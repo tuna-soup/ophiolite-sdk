@@ -19024,6 +19024,291 @@
         }
       }
     },
+    "/api/v1/projects/{project}/context/new-data": {
+      "post": {
+        "summary": "E90: What new files start with: who sees them, depth reference, coordinate system, unit system and attribution (any member)",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E90: what new files start with; `legacy` when no one has chosen who sees new files (they stay private).",
+                  "properties": {
+                    "revision": {
+                      "title": "Revision",
+                      "type": "integer"
+                    },
+                    "settings": {
+                      "$ref": "#/components/schemas/NewDataSettingsRead"
+                    },
+                    "legacy": {
+                      "title": "Legacy",
+                      "type": "boolean"
+                    },
+                    "administrator": {
+                      "title": "Administrator",
+                      "type": "boolean"
+                    },
+                    "custom_coordinate_system": {
+                      "title": "Custom Coordinate System",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "revision",
+                    "settings",
+                    "legacy",
+                    "administrator",
+                    "custom_coordinate_system"
+                  ],
+                  "title": "NewData",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "ProjectOnly",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/context/new-data-save": {
+      "post": {
+        "summary": "E90: Replace what new files start with (project administrators; expected_revision); recorded in Activity",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E90: what new files start with; `legacy` when no one has chosen who sees new files (they stay private).",
+                  "properties": {
+                    "revision": {
+                      "title": "Revision",
+                      "type": "integer"
+                    },
+                    "settings": {
+                      "$ref": "#/components/schemas/NewDataSettingsRead"
+                    },
+                    "legacy": {
+                      "title": "Legacy",
+                      "type": "boolean"
+                    },
+                    "administrator": {
+                      "title": "Administrator",
+                      "type": "boolean"
+                    },
+                    "custom_coordinate_system": {
+                      "title": "Custom Coordinate System",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "revision",
+                    "settings",
+                    "legacy",
+                    "administrator",
+                    "custom_coordinate_system"
+                  ],
+                  "title": "NewData",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "expected_revision": {
+                    "minimum": 0,
+                    "title": "Expected Revision",
+                    "type": "integer"
+                  },
+                  "settings": {
+                    "$ref": "#/components/schemas/NewDataSettings"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "expected_revision",
+                  "settings"
+                ],
+                "title": "NewDataWrite",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/context/policy": {
       "post": {
         "summary": "Project scientific context policy",
@@ -23231,6 +23516,601 @@
                   "ids"
                 ],
                 "title": "InboxMarkRead",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/las-uploads/audience": {
+      "post": {
+        "summary": "E90: who can see an uploaded original and who can build on it, as one control (the uploader)",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E90: who can see an uploaded original and who can build on it.",
+                  "properties": {
+                    "asset_id": {
+                      "title": "Asset Id",
+                      "type": "string"
+                    },
+                    "state": {
+                      "enum": [
+                        "me",
+                        "people",
+                        "project"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "people": {
+                      "items": {
+                        "$ref": "#/components/schemas/AudienceLine"
+                      },
+                      "title": "People",
+                      "type": "array"
+                    },
+                    "policy_generation": {
+                      "title": "Policy Generation",
+                      "type": "integer"
+                    },
+                    "grants_generation": {
+                      "title": "Grants Generation",
+                      "type": "integer"
+                    },
+                    "replayed": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Replayed"
+                    }
+                  },
+                  "required": [
+                    "asset_id",
+                    "state",
+                    "people",
+                    "policy_generation",
+                    "grants_generation"
+                  ],
+                  "title": "AudienceSnapshot",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "title": "Asset Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "asset_id"
+                ],
+                "title": "AssetOnly",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/las-uploads/audience-preview": {
+      "post": {
+        "summary": "E90: what an audience change would do (who would be told, who would lose it, whether it is narrower), run and rolled back",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E90: an audience change, run and rolled back.",
+                  "properties": {
+                    "told": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "People you may see who would gain read or reuse access; null when you may not list members.",
+                      "title": "Told"
+                    },
+                    "losing": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "People you may see who would lose read access; null when you may not list members.",
+                      "title": "Losing"
+                    },
+                    "narrower": {
+                      "description": "Whether the change is narrower (anyone loses access to the original or a result built on it); a commit then needs a reason.",
+                      "title": "Narrower",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "told",
+                    "losing",
+                    "narrower"
+                  ],
+                  "title": "AudiencePreview",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "E90: the one sharing control of an uploaded original.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "title": "Asset Id",
+                    "type": "string"
+                  },
+                  "state": {
+                    "enum": [
+                      "me",
+                      "people",
+                      "project"
+                    ],
+                    "title": "State",
+                    "type": "string"
+                  },
+                  "people": {
+                    "default": [],
+                    "items": {
+                      "$ref": "#/components/schemas/AudiencePerson"
+                    },
+                    "maxItems": 100,
+                    "title": "People",
+                    "type": "array"
+                  },
+                  "reason": {
+                    "anyOf": [
+                      {
+                        "maxLength": 500,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Required on commit only when the change is narrower (400 reason-required)",
+                    "title": "Reason"
+                  },
+                  "expected_generation": {
+                    "description": "The policy generation you read",
+                    "minimum": 0,
+                    "title": "Expected Generation",
+                    "type": "integer"
+                  },
+                  "expected_grants_generation": {
+                    "description": "The grants generation you read",
+                    "minimum": 0,
+                    "title": "Expected Grants Generation",
+                    "type": "integer"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Command Id"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "asset_id",
+                  "state",
+                  "expected_generation",
+                  "expected_grants_generation"
+                ],
+                "title": "AudienceChange",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/las-uploads/audience-save": {
+      "post": {
+        "summary": "E90: set who can see an uploaded original and who can build on it in one change (both generations; a reason only when narrower)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E90: who can see an uploaded original and who can build on it.",
+                  "properties": {
+                    "asset_id": {
+                      "title": "Asset Id",
+                      "type": "string"
+                    },
+                    "state": {
+                      "enum": [
+                        "me",
+                        "people",
+                        "project"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "people": {
+                      "items": {
+                        "$ref": "#/components/schemas/AudienceLine"
+                      },
+                      "title": "People",
+                      "type": "array"
+                    },
+                    "policy_generation": {
+                      "title": "Policy Generation",
+                      "type": "integer"
+                    },
+                    "grants_generation": {
+                      "title": "Grants Generation",
+                      "type": "integer"
+                    },
+                    "replayed": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Replayed"
+                    }
+                  },
+                  "required": [
+                    "asset_id",
+                    "state",
+                    "people",
+                    "policy_generation",
+                    "grants_generation"
+                  ],
+                  "title": "AudienceSnapshot",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "E90: the one sharing control of an uploaded original.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "title": "Asset Id",
+                    "type": "string"
+                  },
+                  "state": {
+                    "enum": [
+                      "me",
+                      "people",
+                      "project"
+                    ],
+                    "title": "State",
+                    "type": "string"
+                  },
+                  "people": {
+                    "default": [],
+                    "items": {
+                      "$ref": "#/components/schemas/AudiencePerson"
+                    },
+                    "maxItems": 100,
+                    "title": "People",
+                    "type": "array"
+                  },
+                  "reason": {
+                    "anyOf": [
+                      {
+                        "maxLength": 500,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Required on commit only when the change is narrower (400 reason-required)",
+                    "title": "Reason"
+                  },
+                  "expected_generation": {
+                    "description": "The policy generation you read",
+                    "minimum": 0,
+                    "title": "Expected Generation",
+                    "type": "integer"
+                  },
+                  "expected_grants_generation": {
+                    "description": "The grants generation you read",
+                    "minimum": 0,
+                    "title": "Expected Grants Generation",
+                    "type": "integer"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Command Id"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "asset_id",
+                  "state",
+                  "expected_generation",
+                  "expected_grants_generation"
+                ],
+                "title": "AudienceChange",
                 "type": "object"
               }
             }
@@ -77053,6 +77933,19 @@
                       ],
                       "default": null,
                       "description": "E85b: present when an address was read"
+                    },
+                    "defaults_revision": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E90: the project defaults revision this answer offered; `upload-runs/start` names it",
+                      "title": "Defaults Revision"
                     }
                   },
                   "required": [
@@ -78444,10 +79337,17 @@
                     "type": "array"
                   },
                   "attribution": {
-                    "maxLength": 500,
-                    "minLength": 1,
-                    "title": "Attribution",
-                    "type": "string"
+                    "anyOf": [
+                      {
+                        "maxLength": 500,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Attribution"
                   },
                   "well_notes": {
                     "default": "",
@@ -78456,12 +79356,20 @@
                     "type": "string"
                   },
                   "audience": {
-                    "items": {
-                      "type": "string"
-                    },
-                    "maxItems": 100,
-                    "title": "Audience",
-                    "type": "array"
+                    "anyOf": [
+                      {
+                        "items": {
+                          "type": "string"
+                        },
+                        "maxItems": 100,
+                        "type": "array"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Audience"
                   },
                   "rights_confirmed": {
                     "const": true,
@@ -78493,6 +79401,20 @@
                     ],
                     "default": null,
                     "description": "E59: the files are objects of a storage bucket, read with the person's own key and either copied into the project or read where they live"
+                  },
+                  "defaults_revision": {
+                    "anyOf": [
+                      {
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E90: the project defaults revision the check answered",
+                    "title": "Defaults Revision"
                   }
                 },
                 "required": [
@@ -78500,7 +79422,6 @@
                   "command_id",
                   "folder_name",
                   "files",
-                  "attribution",
                   "rights_confirmed"
                 ],
                 "title": "Start",
@@ -97972,6 +98893,70 @@
         "title": "Attempt",
         "type": "object"
       },
+      "AudienceLine": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "can_see": {
+            "title": "Can See",
+            "type": "boolean"
+          },
+          "legacy": {
+            "title": "Legacy",
+            "type": "boolean"
+          },
+          "build_on": {
+            "title": "Build On",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "can_see",
+          "legacy",
+          "build_on"
+        ],
+        "title": "AudienceLine",
+        "type": "object"
+      },
+      "AudiencePerson": {
+        "properties": {
+          "id": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "can_see": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "const": "legacy",
+                "type": "string"
+              }
+            ],
+            "description": "true: can see it (ceiling and read grant); false: cannot; \"legacy\": keeps an earlier entry, grants nothing",
+            "title": "Can See"
+          },
+          "build_on": {
+            "default": false,
+            "description": "Can build on it (the reuse grant); under \"people\" it needs can_see true",
+            "title": "Build On",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "can_see"
+        ],
+        "title": "AudiencePerson",
+        "type": "object"
+      },
       "Binding": {
         "additionalProperties": false,
         "properties": {
@@ -98502,6 +99487,19 @@
             "const": "none",
             "type": "string",
             "title": "Default"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E90: why the project's default is not offered for this field (a coordinate system this kind of file cannot use)",
+            "title": "Note"
           }
         },
         "required": [
@@ -106754,6 +107752,116 @@
           }
         },
         "title": "Native_arraybridge_v1_WellTop",
+        "type": "object"
+      },
+      "NewDataSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "visible_to": {
+            "enum": [
+              "project",
+              "me"
+            ],
+            "title": "Visible To",
+            "type": "string"
+          },
+          "depth_reference": {
+            "anyOf": [
+              {
+                "enum": [
+                  "GL",
+                  "KB",
+                  "MSL"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Depth Reference"
+          },
+          "coordinate_system": {
+            "default": "",
+            "maxLength": 128,
+            "title": "Coordinate System",
+            "type": "string"
+          },
+          "unit_system": {
+            "default": "unknown",
+            "maxLength": 64,
+            "title": "Unit System",
+            "type": "string"
+          },
+          "attribution": {
+            "default": "",
+            "maxLength": 500,
+            "title": "Attribution",
+            "type": "string"
+          }
+        },
+        "required": [
+          "visible_to"
+        ],
+        "title": "NewDataSettings",
+        "type": "object"
+      },
+      "NewDataSettingsRead": {
+        "additionalProperties": false,
+        "properties": {
+          "visible_to": {
+            "anyOf": [
+              {
+                "enum": [
+                  "project",
+                  "me"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visible To"
+          },
+          "depth_reference": {
+            "anyOf": [
+              {
+                "enum": [
+                  "GL",
+                  "KB",
+                  "MSL"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Depth Reference"
+          },
+          "coordinate_system": {
+            "title": "Coordinate System",
+            "type": "string"
+          },
+          "unit_system": {
+            "title": "Unit System",
+            "type": "string"
+          },
+          "attribution": {
+            "title": "Attribution",
+            "type": "string"
+          }
+        },
+        "required": [
+          "visible_to",
+          "depth_reference",
+          "coordinate_system",
+          "unit_system",
+          "attribution"
+        ],
+        "title": "NewDataSettingsRead",
         "type": "object"
       },
       "ObjectNode": {
@@ -115040,6 +116148,38 @@
         "title": "UploadRunCounts",
         "type": "object"
       },
+      "UploadRunDefaults": {
+        "additionalProperties": false,
+        "description": "E90: the project defaults a run used: their revision, who accepted them, and the run's own settings taken from them\n(a file's kept defaults are in its evidence, class project-default).",
+        "properties": {
+          "revision": {
+            "title": "Revision",
+            "type": "integer"
+          },
+          "accepted_by": {
+            "title": "Accepted By",
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "enum": [
+                "attribution",
+                "audience"
+              ],
+              "type": "string"
+            },
+            "title": "Fields",
+            "type": "array"
+          }
+        },
+        "required": [
+          "revision",
+          "accepted_by",
+          "fields"
+        ],
+        "title": "UploadRunDefaults",
+        "type": "object"
+      },
       "UploadRunEvidence": {
         "additionalProperties": false,
         "description": "E85: one decided field and where it came from; the server derives the class.",
@@ -115490,6 +116630,32 @@
             ],
             "default": null,
             "description": "E85b: present when the run's file was fetched from an address"
+          },
+          "project_audience": {
+            "anyOf": [
+              {
+                "const": "read",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E90: everyone in the project can see each file the run adds (the default \"Everyone in this project\")",
+            "title": "Project Audience"
+          },
+          "defaults": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UploadRunDefaults"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E90: present when the run used a project default"
           }
         },
         "required": [
