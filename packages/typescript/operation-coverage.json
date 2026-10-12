@@ -1140,6 +1140,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/las-uploads/decision-set",
+    "function": "postProjectsProjectLasUploadsDecisionSet",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/las-uploads/finish",
     "function": "postProjectsProjectLasUploadsFinish",
     "request": "schema",

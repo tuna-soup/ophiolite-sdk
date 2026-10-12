@@ -25042,6 +25042,191 @@
         }
       }
     },
+    "/api/v1/projects/{project}/las-uploads/decision-set": {
+      "post": {
+        "summary": "E23b: keep your decisions, file list and unsaved configuration changes for one file, to preview and add it with (24 h)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "staged_set": {
+                      "title": "Staged Set",
+                      "type": "string"
+                    },
+                    "expires_at": {
+                      "title": "Expires At",
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "staged_set",
+                    "expires_at"
+                  ],
+                  "title": "StagedSet",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "E23b: one file's decisions before Add: its members, the recipe it starts from, decisions and configuration changes.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "profile": {
+                    "title": "Profile",
+                    "type": "string"
+                  },
+                  "package": {
+                    "description": "The members in body order: name, role, bytes, sha256 (at most 8)",
+                    "items": {
+                      "additionalProperties": true,
+                      "type": "object"
+                    },
+                    "title": "Package",
+                    "type": "array"
+                  },
+                  "recipe": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "{asset_id, revision} of a recipe you can read; absent: the default reading",
+                    "title": "Recipe"
+                  },
+                  "layout": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "type": "object"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "{asset_id, generation} of a reading layout (not yet available)",
+                    "title": "Layout"
+                  },
+                  "decisions": {
+                    "default": [],
+                    "description": "At most 12: kind, field, value or selection, reason (120 characters), supersedes",
+                    "items": {
+                      "additionalProperties": true,
+                      "type": "object"
+                    },
+                    "title": "Decisions",
+                    "type": "array"
+                  },
+                  "changes": {
+                    "default": [],
+                    "description": "At most 24: setting, target, to, evidence {member, locator}, reason (120 characters)",
+                    "items": {
+                      "additionalProperties": true,
+                      "type": "object"
+                    },
+                    "title": "Changes",
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "profile",
+                  "package"
+                ],
+                "title": "DecisionSetRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/las-uploads/finish": {
       "post": {
         "summary": "E54: Check a file whose parts have all arrived (202; read state until it is checked)",
@@ -25665,6 +25850,19 @@
                       }
                     ],
                     "default": null
+                  },
+                  "staged_set": {
+                    "anyOf": [
+                      {
+                        "pattern": "^[0-9a-f]{64}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Staged Set"
                   }
                 },
                 "required": [
@@ -80516,6 +80714,34 @@
                     ],
                     "default": null,
                     "title": "Declared"
+                  },
+                  "scientific_decisions": {
+                    "anyOf": [
+                      {
+                        "pattern": "^[0-9a-f]{64}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E23b: a new staged set for a point export, with its preview receipt",
+                    "title": "Scientific Decisions"
+                  },
+                  "preview_receipt": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Preview Receipt"
                   }
                 },
                 "required": [
@@ -105002,6 +105228,59 @@
             ],
             "default": null,
             "description": "E85: the exact well log a tops or deviation file belongs to (the old form's Belongs to well log)"
+          },
+          "recipe": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RunRecipe"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E23b: read with this exact recipe revision, your own or one shared with you"
+          },
+          "layout": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RunLayout"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E23b: read with this reading layout version (its generation as reviewed)"
+          },
+          "scientific_decisions": {
+            "anyOf": [
+              {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E23b: the staged set of decisions for this file",
+            "title": "Scientific Decisions"
+          },
+          "preview_receipt": {
+            "anyOf": [
+              {
+                "maxLength": 1024,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E23b: the receipt `inspect` answered with the preview",
+            "title": "Preview Receipt"
           }
         },
         "required": [
@@ -114085,6 +114364,50 @@
           "unchanged"
         ],
         "title": "ReturnedUnchanged",
+        "type": "object"
+      },
+      "RunLayout": {
+        "additionalProperties": false,
+        "properties": {
+          "asset_id": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "generation": {
+            "minimum": 1,
+            "title": "Generation",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "asset_id",
+          "generation"
+        ],
+        "title": "RunLayout",
+        "type": "object"
+      },
+      "RunRecipe": {
+        "additionalProperties": false,
+        "properties": {
+          "asset_id": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "revision": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Revision",
+            "type": "string"
+          }
+        },
+        "required": [
+          "asset_id",
+          "revision"
+        ],
+        "title": "RunRecipe",
         "type": "object"
       },
       "RunnerLimits": {
