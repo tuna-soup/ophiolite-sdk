@@ -36,6 +36,17 @@
         ],
         "date": "2026-09-25",
         "evidence": "integration:web/docs/src/content/docs/availability.md (Mac QGIS 4.2.2 follow/pin)"
+      },
+      "reach": {
+        "route": "raster",
+        "asset_kinds": [
+          "scalar-map"
+        ],
+        "transport": "map-connection",
+        "slice": null,
+        "client_limits": [
+          "The QGIS plug-in is qualified on macOS only"
+        ]
       }
     },
     {
@@ -79,6 +90,17 @@
         "platforms": [],
         "date": null,
         "evidence": null
+      },
+      "reach": {
+        "route": "raster",
+        "asset_kinds": [
+          "regular-grid-surface"
+        ],
+        "transport": "map-connection",
+        "slice": null,
+        "client_limits": [
+          "Through the QGIS plug-in"
+        ]
       }
     },
     {
@@ -102,6 +124,403 @@
         "platforms": [],
         "date": null,
         "evidence": null
+      },
+      "reach": {
+        "route": "raster",
+        "asset_kinds": [
+          "triangulated-surface"
+        ],
+        "transport": "map-connection",
+        "slice": null,
+        "client_limits": [
+          "Through the QGIS plug-in, as a mesh"
+        ]
+      }
+    },
+    {
+      "profile": "well-location/1",
+      "data": "Wells",
+      "direction": "read",
+      "exact_old_revisions": "unavailable",
+      "change_detection": "none",
+      "losses": [
+        "A well without coordinates is left out of the layer",
+        "Display styling is QGIS-side and not returned"
+      ],
+      "unsupported": [
+        "editing in place",
+        "sending a layer from QGIS"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-09-30",
+        "evidence": "integration:docs/verification/E46-qgis-4.2.2-2026-09-30.md (QGIS 4.2.2 headless on Linux: 205 located wells as the layer Wells)"
+      },
+      "reach": {
+        "route": "features",
+        "collections": [
+          "wells"
+        ],
+        "layer": "Wells",
+        "asset_kinds": [
+          "well-location"
+        ],
+        "transport": "ogc-api-features",
+        "slice": "E29",
+        "client_limits": [
+          "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
+        ]
+      }
+    },
+    {
+      "profile": "well-tops-csv/1",
+      "data": "Well tops",
+      "direction": "read",
+      "exact_old_revisions": "unavailable",
+      "change_detection": "none",
+      "losses": [
+        "A top is drawn at its wellbore's location; depths are properties",
+        "Display styling is QGIS-side and not returned"
+      ],
+      "unsupported": [
+        "editing in place",
+        "sending a layer from QGIS"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-10-11",
+        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 headless on Linux, C7 harness)"
+      },
+      "reach": {
+        "route": "features",
+        "collections": [
+          "tops"
+        ],
+        "layer": "Tops",
+        "asset_kinds": [
+          "well-tops"
+        ],
+        "transport": "ogc-api-features",
+        "slice": "E65",
+        "client_limits": [
+          "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
+        ]
+      }
+    },
+    {
+      "profile": "deviation-csv/1",
+      "data": "Deviation survey",
+      "direction": "read",
+      "exact_old_revisions": "unavailable",
+      "change_detection": "none",
+      "losses": [
+        "A path is drawn only where the survey states grid north and starts at its datum",
+        "Display styling is QGIS-side and not returned"
+      ],
+      "unsupported": [
+        "editing in place",
+        "sending a layer from QGIS"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-10-11",
+        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 headless on Linux, C7 harness)"
+      },
+      "reach": {
+        "route": "features",
+        "collections": [
+          "wellbore-paths"
+        ],
+        "layer": "Wellbore paths",
+        "asset_kinds": [
+          "trajectory"
+        ],
+        "transport": "ogc-api-features",
+        "slice": "E65",
+        "client_limits": [
+          "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
+        ]
+      }
+    },
+    {
+      "profile": "points-csv/1",
+      "data": "Point set",
+      "direction": "read",
+      "exact_old_revisions": "unavailable",
+      "change_detection": "none",
+      "losses": [
+        "Attributes beyond the height are properties",
+        "Display styling is QGIS-side and not returned"
+      ],
+      "unsupported": [
+        "editing in place",
+        "sending a layer from QGIS"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-10-11",
+        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 headless on Linux, C7 harness)"
+      },
+      "reach": {
+        "route": "features",
+        "collections": [
+          "point-sets"
+        ],
+        "layer": "Point sets",
+        "asset_kinds": [
+          "point-set"
+        ],
+        "transport": "ogc-api-features",
+        "slice": "E65",
+        "client_limits": [
+          "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
+        ]
+      }
+    },
+    {
+      "profile": "opendtect-faultsticks/1",
+      "data": "Fault sticks",
+      "direction": "read",
+      "exact_old_revisions": "unavailable",
+      "change_detection": "none",
+      "losses": [
+        "Each stick is one line; the fault it belongs to is a property",
+        "Display styling is QGIS-side and not returned"
+      ],
+      "unsupported": [
+        "editing in place",
+        "sending a layer from QGIS"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-10-11",
+        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 headless on Linux, C7 harness)"
+      },
+      "reach": {
+        "route": "features",
+        "collections": [
+          "lines"
+        ],
+        "layer": "Lines",
+        "asset_kinds": [
+          "polyline-set"
+        ],
+        "transport": "ogc-api-features",
+        "slice": "E65",
+        "client_limits": [
+          "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
+        ]
+      }
+    },
+    {
+      "profile": "geojson/1",
+      "data": "Map features",
+      "direction": "read",
+      "exact_old_revisions": "unavailable",
+      "change_detection": "none",
+      "losses": [
+        "Features are split into points, lines and polygons by geometry",
+        "Display styling is QGIS-side and not returned"
+      ],
+      "unsupported": [
+        "editing in place",
+        "sending a layer from QGIS"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-10-11",
+        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 headless on Linux, C7 harness)"
+      },
+      "reach": {
+        "route": "features",
+        "collections": [
+          "feature-points",
+          "feature-lines",
+          "feature-polygons"
+        ],
+        "layer": "Feature points, Feature lines or Feature polygons",
+        "asset_kinds": [
+          "feature-set"
+        ],
+        "transport": "ogc-api-features",
+        "slice": "E65",
+        "client_limits": [
+          "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
+        ]
+      }
+    },
+    {
+      "profile": "petrel-points-attributes/1",
+      "data": "Point set",
+      "direction": "read",
+      "exact_old_revisions": "unavailable",
+      "change_detection": "none",
+      "losses": [
+        "Attributes beyond the height are properties",
+        "Display styling is QGIS-side and not returned"
+      ],
+      "unsupported": [
+        "editing in place",
+        "sending a layer from QGIS"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-10-11",
+        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 headless on Linux, C7 harness)"
+      },
+      "reach": {
+        "route": "features",
+        "collections": [
+          "point-sets"
+        ],
+        "layer": "Point sets",
+        "asset_kinds": [
+          "point-set"
+        ],
+        "transport": "ogc-api-features",
+        "slice": "E65",
+        "client_limits": [
+          "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
+        ]
+      }
+    },
+    {
+      "profile": "opendtect-horizon-ascii/1",
+      "data": "Point set",
+      "direction": "read",
+      "exact_old_revisions": "unavailable",
+      "change_detection": "none",
+      "losses": [
+        "Attributes beyond the height are properties",
+        "Display styling is QGIS-side and not returned"
+      ],
+      "unsupported": [
+        "editing in place",
+        "sending a layer from QGIS"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-10-11",
+        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 headless on Linux, C7 harness)"
+      },
+      "reach": {
+        "route": "features",
+        "collections": [
+          "point-sets"
+        ],
+        "layer": "Point sets",
+        "asset_kinds": [
+          "point-set"
+        ],
+        "transport": "ogc-api-features",
+        "slice": "E65",
+        "client_limits": [
+          "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
+        ]
+      }
+    },
+    {
+      "profile": "esri-shapefile/1",
+      "data": "Map features",
+      "direction": "read",
+      "exact_old_revisions": "unavailable",
+      "change_detection": "none",
+      "losses": [
+        "Features are split into points, lines and polygons by geometry",
+        "Display styling is QGIS-side and not returned"
+      ],
+      "unsupported": [
+        "editing in place",
+        "sending a layer from QGIS"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-10-11",
+        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 headless on Linux, C7 harness)"
+      },
+      "reach": {
+        "route": "features",
+        "collections": [
+          "feature-points",
+          "feature-lines",
+          "feature-polygons"
+        ],
+        "layer": "Feature points, Feature lines or Feature polygons",
+        "asset_kinds": [
+          "feature-set"
+        ],
+        "transport": "ogc-api-features",
+        "slice": "E65",
+        "client_limits": [
+          "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
+        ]
+      }
+    },
+    {
+      "profile": "ogc-geopackage/1",
+      "data": "Map features",
+      "direction": "read",
+      "exact_old_revisions": "unavailable",
+      "change_detection": "none",
+      "losses": [
+        "Features are split into points, lines and polygons by geometry",
+        "Display styling is QGIS-side and not returned"
+      ],
+      "unsupported": [
+        "editing in place",
+        "sending a layer from QGIS"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-10-11",
+        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 headless on Linux, C7 harness)"
+      },
+      "reach": {
+        "route": "features",
+        "collections": [
+          "feature-points",
+          "feature-lines",
+          "feature-polygons"
+        ],
+        "layer": "Feature points, Feature lines or Feature polygons",
+        "asset_kinds": [
+          "feature-set"
+        ],
+        "transport": "ogc-api-features",
+        "slice": "E65",
+        "client_limits": [
+          "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
+        ]
       }
     },
     {

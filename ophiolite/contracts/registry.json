@@ -1289,6 +1289,12 @@
       "title": "Mapping check codes: severity, sentence templates and parameters, one per code (E86)"
     },
     {
+      "id": "ophiolite.qgis-reach/1",
+      "kind": "vocabulary",
+      "path": "vocabulary/v1/qgis-reach.json",
+      "title": "What QGIS can open, per profile and route, and the sentences the What's next card says (E91)"
+    },
+    {
       "id": "ophiolite.coordinate-systems/1",
       "kind": "vocabulary",
       "path": "vocabulary/v1/coordinate-systems.json",

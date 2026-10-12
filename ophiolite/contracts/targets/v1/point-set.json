@@ -25,6 +25,7 @@
   {
    "name": "x",
    "label": "X",
+   "description": "Easting of the point, in the coordinate system named in the column header.",
    "noun": "X",
    "kind": "coordinate",
    "axis": "x",
@@ -45,6 +46,7 @@
   {
    "name": "y",
    "label": "Y",
+   "description": "Northing of the point, in the coordinate system named in the column header.",
    "noun": "Y",
    "kind": "coordinate",
    "axis": "y",
@@ -65,6 +67,7 @@
   {
    "name": "z",
    "label": "Z",
+   "description": "The value at the point, for example a depth, in the unit named in the column header. Leave it empty when there is none.",
    "noun": "Z value",
    "kind": "number",
    "dimension": "dimensionless",
@@ -86,6 +89,7 @@
   {
    "name": "attributes",
    "label": "Attributes",
+   "description": "Further columns of numbers kept with each point, named with letters, digits and underscores.",
    "noun": "attribute",
    "kind": "number",
    "dimension": "dimensionless",
