@@ -425,20 +425,20 @@
           {
             "name": "top",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "number"
             },
-            "description": "Top of the depth window, in the curve's depth unit."
+            "description": "Top of the depth window, in the curve's depth unit. Required unless index is given."
           },
           {
             "name": "base",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "number"
             },
-            "description": "Base of the depth window, in the curve's depth unit."
+            "description": "Base of the depth window, in the curve's depth unit. Required unless index is given."
           },
           {
             "name": "level",
@@ -461,6 +461,16 @@
               "maximum": 2048
             },
             "description": "Item budget: the server chooses the smallest level whose item count is at most rows (level 17 when none is). Exactly one of level and rows."
+          },
+          {
+            "name": "index",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "description": "E100b: in place of top and base, the level-0 page (2,048 samples, aligned to multiples of 2,048) that holds this sample index, with its before and after; refused beyond the last sample."
           },
           {
             "name": "cursor",
@@ -589,7 +599,7 @@
     },
     "/api/v1/projects/{project}/wells/{well}/versions/{version}/curve-assets/{asset}/revisions/{revision}/windows": {
       "get": {
-        "description": "One page of a depth window of a native well curve asset (ophiolite.curve-window/1, identity.kind native), read through the caller’s own GetCurveAsset; MD only (tvd and tvdss answer 422). A conditional request (If-None-Match) still reads the curve as the caller and answers 304 when the ETag is current.",
+        "description": "One page of a depth window of a native well curve asset (ophiolite.curve-window/1, identity.kind native), read through the caller’s own GetCurveAsset; MD, or TVD and TVDSS from the well’s qualified trajectory and datum (otherwise 422 with the reason). A conditional request (If-None-Match) still reads the curve as the caller and answers 304 when the ETag is current.",
         "parameters": [
           {
             "name": "project",
@@ -695,7 +705,17 @@
                 "tvdss"
               ]
             },
-            "description": "Depth reference; only md is windowed (tvd and tvdss answer 422)."
+            "description": "Depth reference. tvd reads the qualified trajectory depths; tvdss also needs sea_datum to match the well's qualified datum. Without them: 422 with the reason."
+          },
+          {
+            "name": "sea_datum",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "description": "The sea-level datum a tvdss window is read against; it must match the well's qualified datum."
           }
         ],
         "security": [

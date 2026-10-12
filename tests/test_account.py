@@ -15,7 +15,7 @@ from test_auth import envelope, cache
 URL = 'http://localhost:8765'
 REAL_CLIENT = httpx.Client
 PROJECTS = [{'id': 'p', 'name': 'Pilot', 'role': 'member', 'can_administer': True, 'organization_id': 'o'},
-            {'id': 'q', 'name': 'Shared', 'role': 'viewer', 'can_administer': False, 'organization_id': None}]
+            {'id': 'q', 'name': 'Shared', 'role': 'viewer', 'can_administer': False, 'organization_id': None, 'access_ends_at': '2026-11-15T00:00:00Z'}]
 
 
 def gateway(state=None):
@@ -77,7 +77,9 @@ def test_the_projects_and_orgs_commands(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr('ophiolite.account.httpx.Client', lambda **k: gateway()[0])  # a fresh client per command (Account closes its own)
     credential = write_credential(tmp_path)
     cli.main(['projects', '--url', URL, '--credential', str(credential), '--limit', '1'])
-    assert capsys.readouterr().out.splitlines() == ['Pilot - can edit and administer', 'Shared - can view']
+    assert capsys.readouterr().out.splitlines() == ['Pilot - can edit and administer', 'Shared - can view, ends 14 Nov 2026']
+    cli.main(['projects', '--url', URL, '--credential', str(credential), '--json'])  # E67a: the field is always there
+    assert [(p['id'], p['access_ends_at']) for p in json.loads(capsys.readouterr().out)['projects']] == [('p', None), ('q', '2026-11-15T00:00:00Z')]
     cli.main(['orgs', '--url', URL, '--credential', str(credential), '--json'])
     assert json.loads(capsys.readouterr().out) == {'organizations': [{'id': 'o', 'name': 'Operator'}]}
     broken = tmp_path / 'private' / 'broken.json'; broken.write_text('{not json'); broken.chmod(0o600)
@@ -87,3 +89,11 @@ def test_the_projects_and_orgs_commands(tmp_path, monkeypatch, capsys):
     assert refused.value.code == 3 and 'Cannot read private SDK credentials' in err and 'Traceback' not in err  # a sign-in problem
     with pytest.raises(SystemExit) as refused: cli.entrypoint(['projects', '--url', URL, '--credential', str(credential), '--limit', '0'])
     assert refused.value.code == 1 and '--limit is 1 to 100' in capsys.readouterr().err
+
+
+def test_a_row_without_an_end_comes_back_with_an_explicit_none():
+    """E67a C6 (F4, M5): an answer that omits the field (an older gateway, an undated grant) yields the key with None,
+    and the other keys come back unchanged."""
+    http, _ = gateway()
+    rows = connect(URL, Credential.bearer('oph_key_example'), http).projects()
+    assert rows == [{**PROJECTS[0], 'access_ends_at': None}, PROJECTS[1]] and 'access_ends_at' not in PROJECTS[0]

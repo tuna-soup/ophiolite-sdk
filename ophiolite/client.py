@@ -76,9 +76,10 @@ class CurveSet:
 from .locations import LocationClient  # noqa: E402
 from .sources import SourceClient  # noqa: E402
 from .checks import CheckClient  # noqa: E402
+from .procedures import ProcedureClient  # noqa: E402
 
 
-class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient):  # E29: wells() and extent(); E50a: sources(); E96: checks
+class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient, ProcedureClient):  # E29: wells() and extent(); E50a: sources(); E96: checks; E105b: procedures
     def __init__(self,url,project,credential=None,http=None):
         self.url=origin(url)
         if not isinstance(project,str) or not project:raise Refused('Choose a project.')
@@ -109,13 +110,38 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         from .upload_runs import UploadRuns
         return UploadRuns(self)
 
-    def upload(self,path_or_address,*,attribution,rights_confirmed,audience=(),well_notes='',declare=None,skip_decisions=False,link_wellbore=False,new=False,progress=None):
+    def upload(self,path_or_address,*,attribution=None,rights_confirmed,audience=None,well_notes='',declare=None,skip_decisions=False,link_wellbore=False,new=False,progress=None,
+               use_project_defaults=False):
         """E85: add a file, a folder, a .zip or an https address in one upload and return its report
         (ophiolite.upload_runs.Report). `declare` {kind: {field: value}} answers what the files of that kind leave open;
         `link_wellbore` links each file to the one wellbore whose name its header names. An address is fetched by the
-        gateway: no file bytes are sent from here."""
+        gateway: no file bytes are sent from here. E90: an omitted `attribution` or `audience` is the project's New data
+        setting ('me' is only you, 'project' everyone when that is the setting, a list names people); a declared value
+        'project-default', or `use_project_defaults`, keeps the project's default for a field a file leaves open."""
         return self.upload_runs.upload(path_or_address,attribution=attribution,rights_confirmed=rights_confirmed,audience=audience,well_notes=well_notes,
-                                       declare=declare,skip_decisions=skip_decisions,associate_matches=link_wellbore,new=new,progress=progress)
+                                       declare=declare,skip_decisions=skip_decisions,associate_matches=link_wellbore,new=new,progress=progress,
+                                       use_project_defaults=use_project_defaults)
+
+    def new_data_defaults(self):
+        """E90: what new files start with in this project (ophiolite.new_data): the five settings and their `revision`."""
+        from . import new_data
+        return new_data.defaults(self)
+
+    def set_new_data_defaults(self,snap,**fields):
+        """E90: an administrator's change of the settings reviewed in `snap`; refused, never refetched, when they changed since."""
+        from . import new_data
+        return new_data.set_defaults(self,snap,**fields)
+
+    def audience(self,asset):
+        """E90: who can see an uploaded original and who can build on it, with both generations (ophiolite.new_data)."""
+        from . import new_data
+        return new_data.audience(self,asset)
+
+    def set_audience(self,snap,*,state=None,people=None,build_on=None,reason=None,command_id=None):
+        """E90: change who can see the original reviewed in `snap` (both of its generations are sent; nothing is refetched).
+        A narrower change needs a `reason`; the deployment's refusal says so."""
+        from . import new_data
+        return new_data.save(self,new_data.change(snap,state,people,build_on),reason,command_id)
 
     def layouts(self):
         """E89: the project's layouts: list, match, save, rename, retire, use again, keep, update, reconnect, export and
@@ -228,7 +254,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         for curve in curves:
             path,query=self._path(asset,revision,curve)
             data=self._json(path+query+PROFILES,256*1024)
-            _core.verify_descriptor(data,self.project,asset,revision,curve)
+            _core.refuse_windows_only(_core.verify_descriptor(data,self.project,asset,revision,curve))
             raw=_core.rules.artifact(data)
             normalized=next(r for r in data['representations'] if r['kind']=='normalized')
             if artifact is None:artifact=self._get(path+'/representations/'+quote(raw['id'],safe='')+query,raw['bytes'])

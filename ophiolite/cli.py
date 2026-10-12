@@ -156,12 +156,27 @@ def parser():
     checked=steps.add_parser('validate',parents=[common],help='Say whether Ophiolite would accept a procedure folder, and why not')
     checked.add_argument('folder',type=Path)
     ran=steps.add_parser('run',parents=[common],help='Run a procedure on local files; writes its outputs and run.json into a new folder')
-    ran.add_argument('folder',type=Path);ran.add_argument('--output',type=Path,required=True,help='A new folder for the outputs')
+    ran.add_argument('folder',type=Path,nargs='?',help='The procedure folder (or --from-project NAME)')
+    ran.add_argument('--from-project',metavar='NAME',help='Run a version from the project\'s catalogue instead of a folder (E105b): the highest enabled one, or --version')
+    ran.add_argument('--version',type=int,help='With --from-project: this version number (your own private ones included)')
+    ran.add_argument('--yes',action='store_true',help='With --from-project: trust the version without asking (recorded as your trust)')
+    ran.add_argument('--output',type=Path,required=True,help='A new folder for the outputs')
     ran.add_argument('--input',action='append',default=[],help='SLOT=PATH; repeat for each file')
     ran.add_argument('--kind',action='append',default=[],help='SLOT=KIND: the type of data of a file that is not an earlier run\'s output')
     ran.add_argument('--declared',action='append',default=[],help='SLOT=PATH: a JSON file of that data\'s declarations')
     ran.add_argument('--system',action='append',default=[],help='SLOT=PATH: a local JSON file with a source\'s connection settings (never recorded)')
     ran.add_argument('--setting',action='append',default=[],help='NAME=VALUE; once per setting')
+    for p in (ran,):p.add_argument('--configuration',type=Path,default=Path('configuration.json'));p.add_argument('--credentials',type=Path)
+    catalogue=lambda name,help:steps.add_parser(name,parents=[common],help=help)  # E105b: the project's catalogue (needs the project's configuration)
+    reg=catalogue('register','Register a procedure folder as a private version of this project')
+    reg.add_argument('folder',type=Path)
+    shown=catalogue('list','The procedures of this project you can see');shown.add_argument('--name')
+    one=catalogue('show','One procedure: what it reads and makes, its settings and who registered it');one.add_argument('name');one.add_argument('--version',type=int)
+    for name,help in (('enable','Enable a version for everyone in this project (administrators)'),('withdraw','Withdraw a version: it is never fetched or run again'),
+                      ('trust','Trust a version, so running it asks nothing')):
+        c=catalogue(name,help);c.add_argument('name');c.add_argument('--version',type=int,required=True)
+    for p in (reg,shown,one)+tuple(steps.choices[n] for n in ('enable','withdraw','trust')):
+        p.add_argument('--configuration',type=Path,default=Path('configuration.json'));p.add_argument('--credentials',type=Path)
     tables=sub.add_parser('targets',help='What each type of table needs: its fields, which are required and the choices that describe it (offline)')  # E86
     tables.add_argument('name',nargs='?',help='One type, for example well-tops')
     bundle=sub.add_parser('bundle',help='Check or summarize a portable bundle offline (no server or account needed)')
@@ -285,6 +300,16 @@ def parser():
     tables.add_argument('--command-id',help='table: the same id returns the same run instead of starting another')
     tables.add_argument('--dry-run',action='store_true',help='table: show what would be added; nothing is added')
     tables.add_argument('--layout',metavar='NAME',help='table: use this project layout\'s mapping (its target is the layout\'s); a layout is never used unless named (E89)')
+    newdata=project(sub.add_parser('new-data',help='What new files start with in this project: who can see them, depth reference, coordinate system, units and attribution (E90)'))
+    newdata.add_argument('--set',action='append',default=[],metavar='KEY=VALUE',help='An administrator\'s change: visible_to, depth_reference, coordinate_system, unit_system or attribution (repeat)')
+    who=project(sub.add_parser('audience',help='Who can see an uploaded original of yours and who can build on it: show it, or change it in one step (E90)'))
+    who.add_argument('--asset',required=True,help='The uploaded original\'s asset id')
+    who.add_argument('--show',action='store_true',help='Show who can see it (the default when nothing is changed); with --json, a snapshot to change later with --snapshot')
+    who.add_argument('--set',metavar='WHO',help='project, me, or the people who can see it (ID,ID)')
+    who.add_argument('--build-on',action='append',default=[],metavar='PERSON',help='A person who can also build on it (repeat)')
+    who.add_argument('--snapshot',type=Path,help='Change the snapshot you reviewed (from --show --json) instead of reading it now')
+    who.add_argument('--reason',help='Why, when the change is narrower (kept with the change)')
+    who.add_argument('--dry-run',action='store_true',help='Say who would be told and who would lose access; change nothing')
     layouts=project(sub.add_parser('layouts',help='The project\'s layouts: list, show NAME, rename NAME NEW, retire NAME, use-again NAME, export [NAME...] --out FILE, import FILE, keep CONNECTION TABLE, update NAME, reconnect NAME CONNECTION TABLE (E89)'))
     layouts.add_argument('action',choices=['list','show','rename','retire','use-again','export','import','keep','update','reconnect'])
     layouts.add_argument('names',nargs='*',metavar='ARG',help='the layout name and what the action takes')
@@ -295,8 +320,9 @@ def parser():
     upload=project(sub.add_parser('upload',help='Upload a file, a folder, a .zip or an https address: every file it can read is added, and one report says what became of each'))
     upload.add_argument('path',help='The file, folder or .zip file, or an https:// address the deployment fetches')
     upload.add_argument('--project',dest='upload_project',help='The project (default: the configuration\'s)')
-    upload.add_argument('--attribution',required=True,help='Where these files come from (shown with every file)')
-    upload.add_argument('--audience',action='append',default=[],metavar='PERSON',help='A project member who may later be given access (repeat); the files start private')
+    upload.add_argument('--attribution',help='Where these files come from (shown with every file); without it, the project\'s source attribution (E90)')
+    upload.add_argument('--audience',action='append',metavar='WHO',help='Who can see the files: project, me, or project members by id (PERSON or ID,ID; repeat); without it, the project\'s setting for new files (E90)')
+    upload.add_argument('--use-project-defaults',action='store_true',help='Keep the project\'s default for every field a file leaves open (E90); --declare KIND:KEY=project-default keeps one')
     upload.add_argument('--well-notes',default='',help='Well context notes kept with every file')
     upload.add_argument('--rights-confirmed',action='store_true',help='I have permission to retain these files, derive results and share within this audience')
     upload.add_argument('--declare',action='append',default=[],metavar='KIND:KEY=VALUE',help='Say what the values of that kind\'s files mean (repeat); other kinds are not touched')
@@ -353,6 +379,19 @@ def parser():
     return parser
 
 
+MONTHS=('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec')
+
+
+def ends_words(instant):
+    """E67a: 'ends 14 Nov 2026' for the stored end 2026-11-15T00:00:00Z: the last permitted day, a UTC date in every zone."""
+    from datetime import datetime,timedelta,timezone
+    try:at=datetime.fromisoformat(instant.replace('Z','+00:00'))
+    except (AttributeError,ValueError):return 'ends '+str(instant)
+    if at.tzinfo is None:at=at.replace(tzinfo=timezone.utc)
+    day=(at.astimezone(timezone.utc)-timedelta(microseconds=1)).date()
+    return 'ends %d %s %d'%(day.day,MONTHS[day.month-1],day.year)
+
+
 def _discover(args):
     """E27: projects/orgs for a credential file or OPHIOLITE_ACCESS_KEY; plain words unless --json."""
     from .account import Account
@@ -372,7 +411,7 @@ def _discover(args):
     if args.json:return done(args,None,{'projects' if args.command=='projects' else 'organizations':rows,**({'normalised':list(notes)} if notes else {})})
     if not rows:print('This credential reaches no project.' if args.command=='projects' else 'No organisation holds a project this credential reaches.');return
     for row in rows:
-        if args.command=='projects':print((row.get('name') or 'Unnamed project')+' - '+{'member':'can edit','viewer':'can view'}.get(row.get('role'),'access')+(' and administer' if row.get('can_administer') else ''))
+        if args.command=='projects':print((row.get('name') or 'Unnamed project')+' - '+{'member':'can edit','viewer':'can view'}.get(row.get('role'),'access')+(' and administer' if row.get('can_administer') else '')+(', '+ends_words(row['access_ends_at']) if row.get('access_ends_at') else ''))
         else:print(row.get('name') or 'Unnamed organisation')
 
 
@@ -704,6 +743,51 @@ def _declarations(given):
     return out
 
 
+def _audience_given(given):
+    """E90: --audience (repeat): None (the project's setting), 'project', 'me' or the people named."""
+    if given is None:return None
+    named=[p.strip() for text in given for p in text.split(',') if p.strip()]
+    if named in (['project'],['me']):return named[0]
+    if {'project','me'}&set(named):raise Refused('Give --audience project, --audience me, or people by id; not both.')
+    return named
+
+
+def _new_data(args,client):
+    """E90: the project's New data settings; --set changes them once, conditional on the revision just read."""
+    from . import new_data
+    snap=new_data.defaults(client)
+    if args.set:
+        fields={}
+        for text in args.set:
+            key,eq,value=text.partition('=')
+            if not (key and eq):raise Refused('Give each setting as KEY=VALUE, for example unit_system=m.')
+            fields[key]=None if key=='depth_reference' and value in ('','none') else value
+        snap=new_data.set_defaults(client,snap,**fields)
+    return done(args,'\n'.join(new_data.lines(snap)),{'new_data':snap})
+
+
+def _audience(args,client):
+    """E90: who can see an uploaded original; --set (and --build-on) previews the change with both generations and
+    applies exactly that snapshot; --dry-run stops after the preview."""
+    from . import new_data
+    snap=json.loads(args.snapshot.read_text()) if args.snapshot else new_data.audience(client,args.asset)
+    snap=snap.get('audience',snap)
+    if snap.get('asset_id')!=args.asset:raise Refused('The snapshot is of another original; read it again with --show --json.')
+    shown=['Who can see it: %s' % {'me':'Only you','people':'You and the people below','project':'Everyone in this project'}[snap['state']]]
+    shown+=['  %s: %s%s' % (p['id'],'can see (earlier entry)' if p['can_see']=='legacy' else 'can see' if p['can_see'] else 'cannot see',', can build on it' if p['build_on'] else '') for p in snap['people']]
+    shown.append('Generations: who can see %d, recipients %d.' % (snap['policy_generation'],snap['grants_generation']))
+    if args.set is None and not args.build_on:return done(args,'\n'.join(shown),{'audience':snap})
+    named=None if args.set is None else _audience_given([args.set])
+    state=named if named in ('me','project') else None if named is None else 'people'
+    body=new_data.change(snap,state,named if isinstance(named,list) else None,args.build_on or None)
+    seen=new_data.preview(client,body)
+    line=new_data.preview_line(seen)
+    if args.dry_run:return done(args,line,{'preview':seen,'request':body})
+    if seen.get('narrower') and not args.reason:raise Refused(line+' This is narrower: say why with --reason.')
+    saved=new_data.save(client,body,args.reason)
+    return done(args,'%s Saved.\nGenerations: who can see %d, recipients %d.' % (line,saved['policy_generation'],saved['grants_generation']),{'audience':saved})
+
+
 def _named_wells(client,run):
     """E88: the upload report's last line: the wells its files name that are not in this project, and the command that
     lists them. None when there are none, or when the server has no well-names (an older deployment)."""
@@ -725,9 +809,16 @@ def _upload(args,client):
     runs=client.upload_runs
     def progress(report):
         if not args.json:print('Adding files... %d of %d.' % (sum(v for k,v in report.counts.items() if k!='not-sent'),report.view['files']),file=sys.stderr,flush=True)
-    from .upload_runs import is_address
-    report=runs.upload(args.path if is_address(args.path) else Path(args.path),attribution=args.attribution,audience=args.audience,rights_confirmed=True,well_notes=args.well_notes,
-                       declare=_declarations(args.declare),skip_decisions=args.skip_decisions,associate_matches=args.associate_matches,new=args.new,progress=progress)
+    from .upload_runs import NO_ATTRIBUTION, is_address
+    try:
+        report=runs.upload(args.path if is_address(args.path) else Path(args.path),attribution=args.attribution,audience=_audience_given(args.audience),rights_confirmed=True,
+                           well_notes=args.well_notes,declare=_declarations(args.declare),skip_decisions=args.skip_decisions,associate_matches=args.associate_matches,new=args.new,
+                           progress=progress,use_project_defaults=args.use_project_defaults)
+    except Refused as error:
+        if str(error)!=NO_ATTRIBUTION:raise
+        if args.json:print(json.dumps({'error':{'code':'usage','message':NO_ATTRIBUTION}},indent=2))
+        else:print(NO_ATTRIBUTION,file=sys.stderr)
+        raise SystemExit(EXIT['usage'])
     if args.report:report.save(args.report)
     wells=_named_wells(client,report.run_id)
     done(args,report.text()+('\n'+wells if wells else '')+('\nReport written to %s' % args.report if args.report else ''),{'upload':report.view})
@@ -749,7 +840,7 @@ def _layout_upload(args,client):
     from .imports import result_lines
     from .layouts import needs_decision
     if args.layout:
-        result=client.imports.from_table(path,layout=args.layout,audience=args.audience)
+        result=client.imports.from_table(path,layout=args.layout,audience=args.audience or [])  # E90: a table import names its people (the upload's default is not a table's)
         answer=result['run']
         return done(args,'\n'.join(result_lines(answer,result['preview'])),{'import':answer,'preview':result['preview']})
     layouts=client.layouts()
@@ -1057,6 +1148,55 @@ def _slots(texts,flag,many=False):
     return found
 
 
+CATALOGUE_VERBS=('register','list','show','enable','withdraw','trust')
+
+
+def _catalogue_verb(args):
+    return args.command=='procedures' and (args.procedure_action in CATALOGUE_VERBS or args.procedure_action=='run' and args.from_project)
+
+
+def _state_words(v):
+    return {'private':'private (you and the administrators)','enabled':'enabled for everyone','withdrawn':'withdrawn'}[v['state']]+(', trusted by you' if v['trusted'] else '')
+
+
+def _catalogue(args,client):
+    """E105b: the project's catalogue. Words by default; each verb's documented JSON under --json. A version is named
+    by its procedure name and number; the digest is in --json."""
+    from . import procedures
+    try:
+        if args.procedure_action=='register':
+            v=client.procedure_register(args.folder)
+            text=('%s, version %d, is already registered: %s.' % (v['label'],v['version'],_state_words(v)) if v['already'] else
+                  'Registered %s, version %d. It is private: you and the project administrators see it until an administrator enables it for everyone.' % (v['label'],v['version']))
+            return done(args,text,v)
+        if args.procedure_action=='list':
+            versions=client.procedure_list(args.name)
+            lines=['%s, version %d (%s): %s' % (v['label'],v['version'],v['name'],_state_words(v)) for v in versions]
+            return done(args,'\n'.join(lines) or 'This project has no procedures you can see yet.',{'versions':versions})
+        if args.procedure_action=='run':
+            def ask(question):
+                print(question['text']+' [y/N] ',end='',flush=True)
+                return sys.stdin.readline().strip().lower() in ('y','yes')
+            result=client.procedure_run(args.from_project,args.output,_slots(args.input,'--input',many=True),version=args.version,yes=args.yes,
+                                        prompt=ask if sys.stdin.isatty() else None,kinds=_slots(args.kind,'--kind'),declared=_slots(args.declared,'--declared'),
+                                        systems=_slots(args.system,'--system'),settings=args.setting)
+            return done(args,result['sentence'],{'ran':True,**result})
+        chosen=client.procedure_version(args.name,args.version)
+        if args.procedure_action=='show':
+            v=client.procedure_get(chosen['digest']);w=v['words']
+            lines=['%s, version %d (%s): %s' % (v['label'],v['version'],v['name'],_state_words(v)),w['sentence'],
+                   'Registered by %s.' % v['added_by']]+['Setting %s: %s%s' % (s['label'],s['default'] if s['default'] is not None else 'no default',(' '+s['unit']) if s['unit'] and s['default'] is not None else '') for s in w['settings']]
+            return done(args,'\n'.join(lines),v)
+        v=getattr(client,'procedure_'+args.procedure_action)(chosen['digest'])
+        if args.procedure_action=='trust':return done(args,'You trust %s, version %d, in this project.' % (chosen['label'],chosen['version']),v)
+        text={'enable':'Enabled %s, version %d, for everyone in this project.','withdraw':'Withdrew %s, version %d: it is never fetched or run again.'}[args.procedure_action]
+        return done(args,text % (v['label'],v['version']),v)
+    except procedures.NotRun as error:
+        if args.json:print(json.dumps({'error':{'code':error.code,'message':str(error),'field':error.field,'details':error.details}},indent=2,default=str))
+        else:print(str(error),file=sys.stderr)
+        raise SystemExit(EXIT['refused'])
+
+
 def _procedures(args):
     """E105a: procedures new|validate|run. The default line is words only; identifiers, digests, field paths and
     what the procedure printed are under --json (and in log.txt beside a run's outputs)."""
@@ -1072,6 +1212,7 @@ def _procedures(args):
         done(args,text,payload)
         if not verdict['valid']:raise SystemExit(EXIT['refused'])
         return payload
+    if args.folder is None:raise SystemExit('Name the procedure folder, or run one from the project with --from-project NAME.')
     try:
         result=procedures.run(args.folder,args.output,_slots(args.input,'--input',many=True),kinds=_slots(args.kind,'--kind'),
                               declared=_slots(args.declared,'--declared'),systems=_slots(args.system,'--system'),settings=args.setting)
@@ -1096,7 +1237,7 @@ def _main(argv=None):
     if args.command=='skills':
         return done(args,str(files('ophiolite').joinpath('skills')),{'path':str(files('ophiolite').joinpath('skills'))})
     if args.command=='targets':return _targets(args)  # E86: offline; reads the packaged contracts only
-    if args.command=='procedures':return _procedures(args)  # E105a: offline; reads and runs local files only
+    if args.command=='procedures' and not _catalogue_verb(args):return _procedures(args)  # E105a: offline; reads and runs local files only
     if args.command=='bundle':
         # Offline: no configuration, credentials or network are read.
         from .bundle import open_bundle,pack
@@ -1152,8 +1293,11 @@ def _main(argv=None):
         if args.command=='curves':return _curves(args,client)
         if args.command in ('entities','wells','changes','sources','org-connections','well-imports','story','what-changed','dependents','remake','import'):return _journey(args,client)
         if args.command=='checks':return _checks(args,client)
+        if args.command=='procedures':return _catalogue(args,client)  # E105b: the project's catalogue
         if args.command in ('check','get','send'):return _exchange(args,client)
         if args.command=='upload':return _upload(args,client)
+        if args.command=='new-data':return _new_data(args,client)
+        if args.command=='audience':return _audience(args,client)
         if args.command=='layouts':return _layouts(args,client)
         if args.command=='publish-derived':  # E30b
             from .writers import WrittenOriginal
