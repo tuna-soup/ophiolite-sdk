@@ -1,0 +1,21 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "ophiolite.curve-columns/1",
+  "kind": "normalized",
+  "lifecycle": "preview",
+  "display_name": "Well log curve read in sections",
+  "description": "One curve of a LAS file above 100,000 samples, stored as its depths and values in float64 after a JSON header; read in windows, never whole.",
+  "payload_schema": "ophiolite.curve-columns/1",
+  "role": "normalized",
+  "media_types": [
+    "application/vnd.ophiolite.curve-columns"
+  ],
+  "interpretation": {
+    "reader": "asset_connectors.las_reader/1",
+    "parsing_policy": "las2-strict-null/1",
+    "mapping": "application-curve/1"
+  },
+  "table_target": {
+    "none": "not-a-table"
+  }
+}

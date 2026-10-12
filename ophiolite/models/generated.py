@@ -8,32 +8,17 @@ class Contract(BaseModel):
     __strict_extras__: ClassVar[bool] = False
 
 
-class ScientificContext(Contract):
-    curve: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
-    unit: Annotated[str, Field(max_length=128)] = Field(...)
-    unit_status: Literal['declared', 'unknown'] = Field(...)
-    axis_unit: Annotated[str, Field(max_length=128)] = Field(...)
-    axis_unit_status: Literal['declared', 'unknown'] = Field(...)
-    depth_reference: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
-    sample_count: Annotated[int, Field(ge=0, le=100000)] = Field(...)
-    axis_order: Literal['increasing', 'decreasing', 'unordered', 'insufficient'] = Field(...)
-    axis_duplicates: bool = Field(...)
-    missing_count: Annotated[int, Field(ge=0, le=100000)] = Field(...)
-    missing_value_marker: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
-    quantity: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(None)
-    quantity_status: Literal['suggested', 'declared'] | None = Field(None)
-
-class ApplicationCurve(Contract):
-    schema_: Literal['ophiolite.application-curve/1'] = Field(..., alias='schema')
+class CurveColumnsHeader(Contract):
+    schema_: Literal['ophiolite.curve-columns/1'] = Field(..., alias='schema')
     representation: Literal['normalized'] = Field(...)
-    axis: Annotated[list[float], Field(max_length=100000)] = Field(...)
-    values: Annotated[list[float | None], Field(max_length=100000)] = Field(...)
     curve: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     unit: Annotated[str, Field(max_length=128)] = Field(...)
     context: CurveContext = Field(...)
     source: Reference = Field(...)
     source_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
     interpretation: Interpretation = Field(...)
+    count: Annotated[int, Field(ge=0, le=4000000)] = Field(...)
+    encoding: Literal['f64le'] = Field(...)
 
 class CurveContext(Contract):
     depth_index: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
@@ -55,12 +40,44 @@ class Reference(Contract):
     revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     profile: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] = Field(...)
 
+class ScientificContext(Contract):
+    curve: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    unit: Annotated[str, Field(max_length=128)] = Field(...)
+    unit_status: Literal['declared', 'unknown'] = Field(...)
+    axis_unit: Annotated[str, Field(max_length=128)] = Field(...)
+    axis_unit_status: Literal['declared', 'unknown'] = Field(...)
+    depth_reference: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    sample_count: Annotated[int, Field(ge=0, le=4000000)] = Field(...)
+    axis_order: Literal['increasing', 'decreasing', 'unordered', 'insufficient'] = Field(...)
+    axis_duplicates: bool = Field(...)
+    missing_count: Annotated[int, Field(ge=0, le=4000000)] = Field(...)
+    missing_value_marker: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    quantity: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(None)
+    quantity_status: Literal['suggested', 'declared'] | None = Field(None)
+    read: Literal['windows'] | None = Field(None)
+    depth_min: float | None = Field(None)
+    depth_max: float | None = Field(None)
+    value_min: float | None = Field(None)
+    value_max: float | None = Field(None)
+
+class ApplicationCurve(Contract):
+    schema_: Literal['ophiolite.application-curve/1'] = Field(..., alias='schema')
+    representation: Literal['normalized'] = Field(...)
+    axis: Annotated[list[float], Field(max_length=100000)] = Field(...)
+    values: Annotated[list[float | None], Field(max_length=100000)] = Field(...)
+    curve: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    unit: Annotated[str, Field(max_length=128)] = Field(...)
+    context: CurveContext = Field(...)
+    source: Reference = Field(...)
+    source_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    interpretation: Interpretation = Field(...)
+
 class Curvewindow(Contract):
     schema_: Literal['ophiolite.curve-window/1'] = Field(..., alias='schema')
     shape: Literal['raw', 'summary'] = Field(...)
     identity: CurvewindowIdentity = Field(...)
     unit: Annotated[str, Field(max_length=128)] = Field(...)
-    reference: Literal['md'] = Field(...)
+    reference: Literal['md', 'tvd', 'tvdss'] = Field(...)
     depth_unit: Annotated[str, Field(max_length=128)] = Field(...)
     source: CurvewindowSource = Field(...)
     request: CurvewindowRequest = Field(...)
@@ -659,7 +676,7 @@ class ReleaseRecord(Contract):
 class Representation(Contract):
     id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     kind: Literal['original', 'captured-result', 'derived-artifact', 'normalized'] = Field(...)
-    media_type: Literal['application/x-las', 'application/json', 'text/csv', 'text/plain', 'application/octet-stream', 'image/tiff', 'application/x-esri-shapefile', 'application/geopackage+sqlite3', 'application/geo+json'] = Field(...)
+    media_type: Literal['application/x-las', 'application/json', 'text/csv', 'text/plain', 'application/octet-stream', 'image/tiff', 'application/x-esri-shapefile', 'application/geopackage+sqlite3', 'application/geo+json', 'application/vnd.ophiolite.curve-columns'] = Field(...)
     profile: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] = Field(...)
     bytes: Annotated[int, Field(ge=0, le=68719476736)] = Field(...)
     sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
@@ -890,7 +907,7 @@ class AssetSummary(Contract):
     profile: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] = Field(...)
     custodian: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(...)
     curves: Annotated[list[Annotated[str, Field(min_length=1, max_length=512)]], Field(max_length=64)] = Field(...)
-    sample_count: Annotated[int, Field(ge=0, le=100000)] | None = Field(...)
+    sample_count: Annotated[int, Field(ge=0, le=4000000)] | None = Field(...)
     allowed_operations: Annotated[list[Literal['read', 'export', 'use-as-input']], Field(max_length=3)] = Field(...)
     display: Display | None = Field(None)
 
@@ -1237,6 +1254,7 @@ class ContractProfile(Contract):
     role: Literal['artifact', 'normalized'] = Field(None)
     media_types: Annotated[list[Annotated[str, Field(min_length=1)]], Field(min_length=1)] = Field(None)
     normalized_profile: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$')] = Field(None)
+    normalized_profiles: Annotated[list[Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$')]], Field(min_length=1)] = Field(None)
     context_schema: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$')] = Field(None)
     recipe_schema: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$')] = Field(None)
     package: Literal['without-recipe'] = Field(None)
@@ -1735,6 +1753,7 @@ class CurvewindowIdentityNative(Contract):
     well_version: Annotated[int, Field(ge=0)] = Field(...)
     curve_asset_revision: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
     curve_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    qualification: CurvewindowIdentityNativeQualification = Field(None)
 
 class PortableBundleManifestV2EntitiesItemIdentity(Contract):
     authority: str | None = Field(...)
@@ -1761,15 +1780,20 @@ class BundleAssetV2RelationshipsWell_Log2(Contract):
     asset_id: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
     revision: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
 
+class CurvewindowIdentityNativeQualification(Contract):
+    kind: Literal['trajectory', 'datum'] = Field(...)
+    revision: Annotated[str, Field(max_length=1024)] = Field(...)
+
 class PortableBundleManifestV2RelationshipsItemEvidence1Source(Contract):
     asset_id: str = Field(...)
     revision: str = Field(...)
 
-ScientificContext.model_rebuild()
-ApplicationCurve.model_rebuild()
+CurveColumnsHeader.model_rebuild()
 CurveContext.model_rebuild()
 Interpretation.model_rebuild()
 Reference.model_rebuild()
+ScientificContext.model_rebuild()
+ApplicationCurve.model_rebuild()
 Curvewindow.model_rebuild()
 FeatureSet.model_rebuild()
 Feature.model_rebuild()
@@ -1991,4 +2015,5 @@ PortableBundleManifestV2RelationshipsItemSubject.model_rebuild()
 PortableBundleManifestV2RelationshipsItemObject.model_rebuild()
 PortableBundleManifestV2RelationshipsItemEvidence1.model_rebuild()
 BundleAssetV2RelationshipsWell_Log2.model_rebuild()
+CurvewindowIdentityNativeQualification.model_rebuild()
 PortableBundleManifestV2RelationshipsItemEvidence1Source.model_rebuild()

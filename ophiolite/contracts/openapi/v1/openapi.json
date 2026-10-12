@@ -5,7 +5,7 @@
     "version": "1.0.0-pilot",
     "description": "One public API for every project operation. Three credential kinds reach it: the browser session (opaque HttpOnly cookie plus the X-CSRF-Token proof and, on non-GET requests, the exact Origin), a project-scoped delegate lasting at most five minutes (Bearer oph_api_..., parent session and current native permissions remain mandatory), and a browser-approved provider grant (Bearer provider token plus X-Ophiolite-Application-Grant; capability 1: the scientific read resources and the applications route within its read/write scopes; capability 3 adds reading wells, wellbores and lineage and the LAS upload routes). A request that carries an Authorization header is a machine request and is refused with MACHINE_AUTH_REQUIRED when a cookie or Origin travels with it. Scope and capability are ceilings; every operation runs the same native permission checks whoever calls it. Not a stable SDK or unattended service-account contract.",
     "x-ophiolite-contracts": {
-      "registry_version": "1.30.0",
+      "registry_version": "1.31.0",
       "index": "/api/v1/contracts",
       "served_profiles": [
         "las2/1",
@@ -47964,6 +47964,57 @@
                       ],
                       "default": null,
                       "title": "Values"
+                    },
+                    "reference": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Reference"
+                    },
+                    "depth": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "enum": [
+                                  "NaN",
+                                  "Infinity",
+                                  "-Infinity"
+                                ],
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Depth"
+                    },
+                    "qualification": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Qualification"
                     }
                   },
                   "title": "Native_arraybridge_v1_CurveAssetData",
@@ -48049,6 +48100,30 @@
                     ],
                     "default": null,
                     "title": "Revision"
+                  },
+                  "reference": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Reference"
+                  },
+                  "sea_datum": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Sea Datum"
                   }
                 },
                 "title": "Native_arraybridge_v1_CurveAssetRequest",
@@ -86294,7 +86369,7 @@
                       "items": {
                         "x-ophiolite": {
                           "id": "ophiolite.asset-summary/1",
-                          "version": "1.3.0",
+                          "version": "1.4.0",
                           "lifecycle": "preview"
                         },
                         "additionalProperties": false,
@@ -86364,7 +86439,7 @@
                           "sample_count": {
                             "anyOf": [
                               {
-                                "maximum": 100000,
+                                "maximum": 4000000,
                                 "minimum": 0,
                                 "type": "integer"
                               },
@@ -86931,7 +87006,7 @@
                 "schema": {
                   "x-ophiolite": {
                     "id": "ophiolite.scientific-asset/1",
-                    "version": "1.19.0",
+                    "version": "1.20.0",
                     "lifecycle": "preview"
                   },
                   "additionalProperties": false,
@@ -89296,7 +89371,7 @@
                               "type": "string"
                             },
                             "sample_count": {
-                              "maximum": 100000,
+                              "maximum": 4000000,
                               "minimum": 0,
                               "title": "Sample Count",
                               "type": "integer"
@@ -89316,7 +89391,7 @@
                               "type": "boolean"
                             },
                             "missing_count": {
-                              "maximum": 100000,
+                              "maximum": 4000000,
                               "minimum": 0,
                               "title": "Missing Count",
                               "type": "integer"
@@ -89356,6 +89431,67 @@
                               ],
                               "default": null,
                               "title": "Quantity Status"
+                            },
+                            "read": {
+                              "anyOf": [
+                                {
+                                  "const": "windows",
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "default": null,
+                              "title": "Read"
+                            },
+                            "depth_min": {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "default": null,
+                              "title": "Depth Min"
+                            },
+                            "depth_max": {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "default": null,
+                              "title": "Depth Max"
+                            },
+                            "value_min": {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "default": null,
+                              "title": "Value Min"
+                            },
+                            "value_max": {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "default": null,
+                              "title": "Value Max"
                             }
                           },
                           "required": [
@@ -92574,7 +92710,8 @@
                               "image/tiff",
                               "application/x-esri-shapefile",
                               "application/geopackage+sqlite3",
-                              "application/geo+json"
+                              "application/geo+json",
+                              "application/vnd.ophiolite.curve-columns"
                             ],
                             "title": "Media Type",
                             "type": "string"
@@ -92622,9 +92759,25 @@
                           "losses"
                         ],
                         "then": {
+                          "if": {
+                            "properties": {
+                              "profile": {
+                                "not": {
+                                  "const": "ophiolite.curve-columns/1"
+                                }
+                              }
+                            }
+                          },
                           "properties": {
                             "bytes": {
-                              "maximum": 33554432
+                              "maximum": 65048576
+                            }
+                          },
+                          "then": {
+                            "properties": {
+                              "bytes": {
+                                "maximum": 33554432
+                              }
                             }
                           }
                         },
@@ -93659,20 +93812,20 @@
           {
             "name": "top",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "number"
             },
-            "description": "Top of the depth window, in the curve's depth unit."
+            "description": "Top of the depth window, in the curve's depth unit. Required unless index is given."
           },
           {
             "name": "base",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "number"
             },
-            "description": "Base of the depth window, in the curve's depth unit."
+            "description": "Base of the depth window, in the curve's depth unit. Required unless index is given."
           },
           {
             "name": "level",
@@ -93695,6 +93848,16 @@
               "maximum": 2048
             },
             "description": "Item budget: the server chooses the smallest level whose item count is at most rows (level 17 when none is). Exactly one of level and rows."
+          },
+          {
+            "name": "index",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "description": "E100b: in place of top and base, the level-0 page (2,048 samples, aligned to multiples of 2,048) that holds this sample index, with its before and after; refused beyond the last sample."
           },
           {
             "name": "cursor",
@@ -93762,7 +93925,7 @@
                 "schema": {
                   "x-ophiolite": {
                     "id": "ophiolite.curve-window/1",
-                    "version": "1.0.0",
+                    "version": "1.1.0",
                     "lifecycle": "preview"
                   },
                   "title": "Curve window",
@@ -93863,6 +94026,27 @@
                               "type": "string",
                               "minLength": 1,
                               "maxLength": 512
+                            },
+                            "qualification": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "required": [
+                                "kind",
+                                "revision"
+                              ],
+                              "description": "Present only on tvd and tvdss answers: what qualified the depths. A re-qualified trajectory or datum changes the identity, so the ETag and the cursor change.",
+                              "properties": {
+                                "kind": {
+                                  "enum": [
+                                    "trajectory",
+                                    "datum"
+                                  ]
+                                },
+                                "revision": {
+                                  "type": "string",
+                                  "maxLength": 1024
+                                }
+                              }
                             }
                           }
                         }
@@ -93873,7 +94057,12 @@
                       "maxLength": 128
                     },
                     "reference": {
-                      "const": "md"
+                      "enum": [
+                        "md",
+                        "tvd",
+                        "tvdss"
+                      ],
+                      "description": "The depth reference of every depth in the answer. tvd and tvdss are answered for native curves only, from a qualified trajectory (tvdss: and the matching sea-level datum)."
                     },
                     "depth_unit": {
                       "type": "string",
@@ -94276,7 +94465,7 @@
                     "type": "object"
                   },
                   "then": {
-                    "description": "The value rules: the shape discriminates the body (raw at level 0 and exact; summary at 1..17), and only a native identity carries native.",
+                    "description": "The value rules: the shape discriminates the body (raw at level 0 and exact; summary at 1..17), and only a native identity carries native; tvd and tvdss only for a native identity that names its qualification, and only they carry one.",
                     "allOf": [
                       {
                         "if": {
@@ -94386,6 +94575,47 @@
                               }
                             }
                           }
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "reference": {
+                              "const": "md"
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "identity": {
+                              "properties": {
+                                "native": {
+                                  "not": {
+                                    "required": [
+                                      "qualification"
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "else": {
+                          "properties": {
+                            "identity": {
+                              "required": [
+                                "native"
+                              ],
+                              "properties": {
+                                "native": {
+                                  "required": [
+                                    "qualification"
+                                  ]
+                                }
+                              }
+                            }
+                          },
+                          "description": "tvd and tvdss: a native identity (only a native identity carries native, by the rule above) naming its qualification."
                         }
                       }
                     ]
@@ -94529,7 +94759,7 @@
     },
     "/api/v1/projects/{project}/wells/{well}/versions/{version}/curve-assets/{asset}/revisions/{revision}/windows": {
       "get": {
-        "description": "One page of a depth window of a native well curve asset (ophiolite.curve-window/1, identity.kind native), read through the caller\u2019s own GetCurveAsset; MD only (tvd and tvdss answer 422). A conditional request (If-None-Match) still reads the curve as the caller and answers 304 when the ETag is current.",
+        "description": "One page of a depth window of a native well curve asset (ophiolite.curve-window/1, identity.kind native), read through the caller\u2019s own GetCurveAsset; MD, or TVD and TVDSS from the well\u2019s qualified trajectory and datum (otherwise 422 with the reason). A conditional request (If-None-Match) still reads the curve as the caller and answers 304 when the ETag is current.",
         "parameters": [
           {
             "name": "project",
@@ -94635,7 +94865,17 @@
                 "tvdss"
               ]
             },
-            "description": "Depth reference; only md is windowed (tvd and tvdss answer 422)."
+            "description": "Depth reference. tvd reads the qualified trajectory depths; tvdss also needs sea_datum to match the well's qualified datum. Without them: 422 with the reason."
+          },
+          {
+            "name": "sea_datum",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "description": "The sea-level datum a tvdss window is read against; it must match the well's qualified datum."
           }
         ],
         "security": [
@@ -94674,7 +94914,7 @@
                 "schema": {
                   "x-ophiolite": {
                     "id": "ophiolite.curve-window/1",
-                    "version": "1.0.0",
+                    "version": "1.1.0",
                     "lifecycle": "preview"
                   },
                   "title": "Curve window",
@@ -94775,6 +95015,27 @@
                               "type": "string",
                               "minLength": 1,
                               "maxLength": 512
+                            },
+                            "qualification": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "required": [
+                                "kind",
+                                "revision"
+                              ],
+                              "description": "Present only on tvd and tvdss answers: what qualified the depths. A re-qualified trajectory or datum changes the identity, so the ETag and the cursor change.",
+                              "properties": {
+                                "kind": {
+                                  "enum": [
+                                    "trajectory",
+                                    "datum"
+                                  ]
+                                },
+                                "revision": {
+                                  "type": "string",
+                                  "maxLength": 1024
+                                }
+                              }
                             }
                           }
                         }
@@ -94785,7 +95046,12 @@
                       "maxLength": 128
                     },
                     "reference": {
-                      "const": "md"
+                      "enum": [
+                        "md",
+                        "tvd",
+                        "tvdss"
+                      ],
+                      "description": "The depth reference of every depth in the answer. tvd and tvdss are answered for native curves only, from a qualified trajectory (tvdss: and the matching sea-level datum)."
                     },
                     "depth_unit": {
                       "type": "string",
@@ -95188,7 +95454,7 @@
                     "type": "object"
                   },
                   "then": {
-                    "description": "The value rules: the shape discriminates the body (raw at level 0 and exact; summary at 1..17), and only a native identity carries native.",
+                    "description": "The value rules: the shape discriminates the body (raw at level 0 and exact; summary at 1..17), and only a native identity carries native; tvd and tvdss only for a native identity that names its qualification, and only they carry one.",
                     "allOf": [
                       {
                         "if": {
@@ -95298,6 +95564,47 @@
                               }
                             }
                           }
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "reference": {
+                              "const": "md"
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "identity": {
+                              "properties": {
+                                "native": {
+                                  "not": {
+                                    "required": [
+                                      "qualification"
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "else": {
+                          "properties": {
+                            "identity": {
+                              "required": [
+                                "native"
+                              ],
+                              "properties": {
+                                "native": {
+                                  "required": [
+                                    "qualification"
+                                  ]
+                                }
+                              }
+                            }
+                          },
+                          "description": "tvd and tvdss: a native identity (only a native identity carries native, by the rule above) naming its qualification."
                         }
                       }
                     ]
@@ -105050,6 +105357,11 @@
             "description": "E56: the companion files of a package read without a recipe, together",
             "title": "Package Companion Bytes",
             "type": "integer"
+          },
+          "las_rows": {
+            "description": "E100b: the depth samples of one LAS file; a curve above 100,000 is read in windows",
+            "title": "Las Rows",
+            "type": "integer"
           }
         },
         "required": [
@@ -105067,7 +105379,8 @@
           "max_traces",
           "max_samples",
           "max_inline_bytes",
-          "package_companion_bytes"
+          "package_companion_bytes",
+          "las_rows"
         ],
         "title": "Limits",
         "type": "object"
@@ -105864,6 +106177,30 @@
             ],
             "default": null,
             "title": "Revision"
+          },
+          "reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Reference"
+          },
+          "sea_datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Sea Datum"
           }
         },
         "title": "Native_arraybridge_v1_CurveAssetRequest",
