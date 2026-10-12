@@ -165,11 +165,11 @@
     },
     {
       "id": "ophiolite.portable-bundle/2",
-      "version": "2.7.0",
+      "version": "2.8.0",
       "lifecycle": "preview",
       "path": "bundles/v2/manifest-schema.json",
       "title": "PortableBundleManifestV2",
-      "description": "Portable bundle 2: exact selected revisions of well logs, well tops, trajectories, regular-grid surfaces, meshes, point sets, fault sticks, seismic slices, wavelets, rock model sections, seismic sections, time-depth tables and feature sets with files, digests, served context, permitted lineage and relationships."
+      "description": "Portable bundle 2: exact selected revisions of well logs, well tops, trajectories, regular-grid surfaces, meshes, point sets, fault sticks, seismic slices, wavelets, rock model sections, seismic sections, time-depth tables and feature sets with files, digests, served context, permitted lineage and relationships; 2.8 (E23c) carries the source package, its companion members and the interpretation of a recipe-read point set or a Shapefile-read feature set."
     },
     {
       "id": "ophiolite.polyline-set/1",
@@ -867,6 +867,19 @@
       "path": "bundles/v2/fixtures/manifest-sections.json",
       "title": "Portable bundle 2.5 manifest fixture: a wavelet, a rock model section and a synthetic section naming both (E53)",
       "schema": "ophiolite.portable-bundle/2"
+    },
+    {
+      "id": "ophiolite.fixture/bundles/manifest-package.json/2",
+      "kind": "fixture",
+      "path": "bundles/v2/fixtures/manifest-package.json",
+      "title": "Portable bundle 2.8 manifest fixture: a recipe-read point set with its package, companion members and interpretation (E23c)",
+      "schema": "ophiolite.portable-bundle/2"
+    },
+    {
+      "id": "ophiolite.fixture/bundles/manifest-v1-version-2-8.json/1",
+      "kind": "fixture",
+      "path": "bundles/v1/fixtures/manifest-v1-version-2-8.json",
+      "title": "A bundle 1 manifest that differs from the valid one only by bundle_version 2.8.0; the v1 schema refuses it for its version alone (E23c)"
     },
     {
       "id": "ophiolite.fixture/assets/tops.original/1",
