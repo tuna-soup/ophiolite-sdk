@@ -115,7 +115,7 @@
     "connectors/v1/contract.json": "aa80a511712b248074bcaa41e04e7164bfcab5b5ea4273deb961b977846be295",
     "connectors/v1/readers.json": "a2337df0fc5a50c15b4c43997da4f2c130aee1a7f31dd00c26ab15cf8cb8c386",
     "docs/api-versioning.md": "5bbb5e993c866533f5f80876289fa186965db515955e503aa6e8460c37840cfb",
-    "entities/v1/entity-assets-schema.json": "edccdcbd0d7fae50a25bb4762f8deb255fb7964713a266a3b601171f8d86f9f4",
+    "entities/v1/entity-assets-schema.json": "4af626ee163d234bc612f73741a8070cd4769e4a6c2faf704cfbd6b4d3743b8a",
     "entities/v1/entity-schema.json": "5888db3fe6dc7acdf17ae8792e82c91fca8385fa9ec146fbe8e096bf46febf89",
     "generated/v1/ophiolite-contracts.ts": "967444a4a091220fd98aac0e7f8025abbc83ea2a59e7ad639ac848cdf27748c2",
     "mappings/v1/application-curve-to-well-curve.json": "aa2e1c1925f68aede0b3c5e7d8d7e7921ad69ea35733bc2e7d936a21c233c0dc",

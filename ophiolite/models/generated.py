@@ -1202,8 +1202,17 @@ class BundlePackageV2(Contract):
 class EntityAssets(Contract):
     schema_: Literal['ophiolite.entity-assets/1'] = Field(..., alias='schema')
     entity: EntityRef = Field(...)
-    items: Annotated[list[AssociatedRevision], Field(max_length=100)] = Field(...)
+    items: Annotated[list[AssociatedRevision], Field(max_length=100)] | Annotated[list[AssociatedEntityRevision], Field(max_length=100)] = Field(...)
     next_cursor: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(None)
+
+class AssociatedEntityRevision(Contract):
+    asset_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    row: Annotated[str, Field(min_length=1, max_length=160)] | None = Field(None)
+    profile: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    name: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    association: Association = Field(...)
+    entity: EntityRef = Field(...)
 
 class AssociatedRevision(Contract):
     asset_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
@@ -1958,6 +1967,7 @@ BundlePackageMemberV2.model_rebuild()
 BundleRecipePinV2.model_rebuild()
 BundlePackageV2.model_rebuild()
 EntityAssets.model_rebuild()
+AssociatedEntityRevision.model_rebuild()
 AssociatedRevision.model_rebuild()
 Association.model_rebuild()
 EntityRef.model_rebuild()

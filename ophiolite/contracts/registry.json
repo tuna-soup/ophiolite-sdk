@@ -285,11 +285,11 @@
     },
     {
       "id": "ophiolite.entity-assets/1",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "lifecycle": "preview",
       "path": "entities/v1/entity-assets-schema.json",
       "title": "EntityAssets",
-      "description": "The exact revisions associated with an entity that the caller may read, with the evidence of each association (E20)."
+      "description": "The exact revisions associated with an entity that the caller may read, with the evidence of each association (E20); 1.2.0: with include_parts, a well's and its readable wellbores' items, each naming its entity (E66)."
     },
     {
       "id": "ophiolite.lineage/1",
