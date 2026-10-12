@@ -24,6 +24,30 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/account/application-decide",
+    "function": "postAccountApplicationDecide",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/account/application-request",
+    "function": "postAccountApplicationRequest",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/account/application-revoke",
+    "function": "postAccountApplicationRevoke",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/account/applications",
+    "function": "postAccountApplications",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/account/revoke",
     "function": "postAccountRevoke",
     "request": "schema",
@@ -80,6 +104,18 @@
   {
     "operation": "POST /api/v1/application-access/status",
     "function": "postApplicationAccessStatus",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/applications/exchange",
+    "function": "postApplicationsExchange",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/applications/register",
+    "function": "postApplicationsRegister",
     "request": "schema",
     "response": "schema"
   },
@@ -218,6 +254,48 @@
   {
     "operation": "POST /api/v1/organizations/activity",
     "function": "postOrganizationsActivity",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/organizations/application-activate",
+    "function": "postOrganizationsApplicationActivate",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/organizations/application-list",
+    "function": "postOrganizationsApplicationList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/organizations/application-provision",
+    "function": "postOrganizationsApplicationProvision",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/organizations/application-reactivate",
+    "function": "postOrganizationsApplicationReactivate",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/organizations/application-register",
+    "function": "postOrganizationsApplicationRegister",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/organizations/application-rotate",
+    "function": "postOrganizationsApplicationRotate",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/organizations/application-suspend",
+    "function": "postOrganizationsApplicationSuspend",
     "request": "schema",
     "response": "schema"
   },
@@ -822,6 +900,18 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/context/new-data",
+    "function": "postProjectsProjectContextNewData",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/context/new-data-save",
+    "function": "postProjectsProjectContextNewDataSave",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/context/policy",
     "function": "postProjectsProjectContextPolicy",
     "request": "schema",
@@ -992,6 +1082,24 @@
   {
     "operation": "POST /api/v1/projects/{project}/inbox/mark-read",
     "function": "postProjectsProjectInboxMarkRead",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/las-uploads/audience",
+    "function": "postProjectsProjectLasUploadsAudience",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/las-uploads/audience-preview",
+    "function": "postProjectsProjectLasUploadsAudiencePreview",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/las-uploads/audience-save",
+    "function": "postProjectsProjectLasUploadsAudienceSave",
     "request": "schema",
     "response": "schema"
   },
