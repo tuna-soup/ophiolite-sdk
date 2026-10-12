@@ -79,6 +79,7 @@ class AsyncClient(Client):
                         from . import application_transport as policy
                         meta=policy.envelope(response,await policy.bounded(response))  # E31: the server's metadata, bounded
                         kind,message=categories.get(response.status_code,(Unavailable,'Scientific read failed. Check service access and retry.'))
+                        if response.status_code==422 and meta.get('message'):message=meta['message']  # H48: the server's reason, not the generic sentence
                         if kind is Busy:raise Busy(message,meta.get('remedy',''),status=response.status_code,retry_after=delay,code=meta.get('code'),**policy.carried(meta))
                         raise kind(message,meta.get('remedy',''),status=response.status_code,code=meta.get('code'),**policy.carried(meta))
                     if answer is not None:answer.update({k.lower():v for k,v in response.headers.items() if k.lower() in ('content-range','x-content-sha256','etag','x-ophiolite-access-generation')})  # E100a: window validators
