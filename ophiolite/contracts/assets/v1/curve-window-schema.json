@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/curve-window-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.curve-window/1",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "lifecycle": "preview"
   },
   "title": "Curve window",
@@ -104,6 +104,27 @@
               "type": "string",
               "minLength": 1,
               "maxLength": 512
+            },
+            "qualification": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "revision"
+              ],
+              "description": "Present only on tvd and tvdss answers: what qualified the depths. A re-qualified trajectory or datum changes the identity, so the ETag and the cursor change.",
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "trajectory",
+                    "datum"
+                  ]
+                },
+                "revision": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              }
             }
           }
         }
@@ -114,7 +135,12 @@
       "maxLength": 128
     },
     "reference": {
-      "const": "md"
+      "enum": [
+        "md",
+        "tvd",
+        "tvdss"
+      ],
+      "description": "The depth reference of every depth in the answer. tvd and tvdss are answered for native curves only, from a qualified trajectory (tvdss: and the matching sea-level datum)."
     },
     "depth_unit": {
       "type": "string",
@@ -517,7 +543,7 @@
     "type": "object"
   },
   "then": {
-    "description": "The value rules: the shape discriminates the body (raw at level 0 and exact; summary at 1..17), and only a native identity carries native.",
+    "description": "The value rules: the shape discriminates the body (raw at level 0 and exact; summary at 1..17), and only a native identity carries native; tvd and tvdss only for a native identity that names its qualification, and only they carry one.",
     "allOf": [
       {
         "if": {
@@ -627,6 +653,47 @@
               }
             }
           }
+        }
+      },
+      {
+        "if": {
+          "properties": {
+            "reference": {
+              "const": "md"
+            }
+          }
+        },
+        "then": {
+          "properties": {
+            "identity": {
+              "properties": {
+                "native": {
+                  "not": {
+                    "required": [
+                      "qualification"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "else": {
+          "properties": {
+            "identity": {
+              "required": [
+                "native"
+              ],
+              "properties": {
+                "native": {
+                  "required": [
+                    "qualification"
+                  ]
+                }
+              }
+            }
+          },
+          "description": "tvd and tvdss: a native identity (only a native identity carries native, by the rule above) naming its qualification."
         }
       }
     ]

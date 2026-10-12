@@ -50,12 +50,13 @@ class Account:
         return value
 
     def projects(self, *, limit=50):
-        """Every project this credential reaches (all pages): dicts with id, name, role, can_administer, organization_id."""
+        """Every project this credential reaches (all pages): dicts with id, name, role, can_administer, organization_id
+        and access_ends_at (E67a: the instant, UTC, the reader's access ends; None when it does not end)."""
         out, cursor, seen = [], None, set()
         while True:
             page = self._discover('list', {'limit': limit, **({'cursor': cursor} if cursor else {})})
             checked(ProjectsPage, page, 'Invalid project discovery response.')  # E31: the documented page, then the same rows
-            rows = page.get('projects')
+            rows = [{**row, 'access_ends_at': row.get('access_ends_at')} for row in page.get('projects')]  # E67a: always present
             for row in rows:
                 if row.get('id') in seen: raise Unavailable('Project discovery repeated a project across pages.')
                 seen.add(row.get('id')); out.append(row)

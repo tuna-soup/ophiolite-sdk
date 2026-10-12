@@ -156,12 +156,27 @@ def parser():
     checked=steps.add_parser('validate',parents=[common],help='Say whether Ophiolite would accept a procedure folder, and why not')
     checked.add_argument('folder',type=Path)
     ran=steps.add_parser('run',parents=[common],help='Run a procedure on local files; writes its outputs and run.json into a new folder')
-    ran.add_argument('folder',type=Path);ran.add_argument('--output',type=Path,required=True,help='A new folder for the outputs')
+    ran.add_argument('folder',type=Path,nargs='?',help='The procedure folder (or --from-project NAME)')
+    ran.add_argument('--from-project',metavar='NAME',help='Run a version from the project\'s catalogue instead of a folder (E105b): the highest enabled one, or --version')
+    ran.add_argument('--version',type=int,help='With --from-project: this version number (your own private ones included)')
+    ran.add_argument('--yes',action='store_true',help='With --from-project: trust the version without asking (recorded as your trust)')
+    ran.add_argument('--output',type=Path,required=True,help='A new folder for the outputs')
     ran.add_argument('--input',action='append',default=[],help='SLOT=PATH; repeat for each file')
     ran.add_argument('--kind',action='append',default=[],help='SLOT=KIND: the type of data of a file that is not an earlier run\'s output')
     ran.add_argument('--declared',action='append',default=[],help='SLOT=PATH: a JSON file of that data\'s declarations')
     ran.add_argument('--system',action='append',default=[],help='SLOT=PATH: a local JSON file with a source\'s connection settings (never recorded)')
     ran.add_argument('--setting',action='append',default=[],help='NAME=VALUE; once per setting')
+    for p in (ran,):p.add_argument('--configuration',type=Path,default=Path('configuration.json'));p.add_argument('--credentials',type=Path)
+    catalogue=lambda name,help:steps.add_parser(name,parents=[common],help=help)  # E105b: the project's catalogue (needs the project's configuration)
+    reg=catalogue('register','Register a procedure folder as a private version of this project')
+    reg.add_argument('folder',type=Path)
+    shown=catalogue('list','The procedures of this project you can see');shown.add_argument('--name')
+    one=catalogue('show','One procedure: what it reads and makes, its settings and who registered it');one.add_argument('name');one.add_argument('--version',type=int)
+    for name,help in (('enable','Enable a version for everyone in this project (administrators)'),('withdraw','Withdraw a version: it is never fetched or run again'),
+                      ('trust','Trust a version, so running it asks nothing')):
+        c=catalogue(name,help);c.add_argument('name');c.add_argument('--version',type=int,required=True)
+    for p in (reg,shown,one)+tuple(steps.choices[n] for n in ('enable','withdraw','trust')):
+        p.add_argument('--configuration',type=Path,default=Path('configuration.json'));p.add_argument('--credentials',type=Path)
     tables=sub.add_parser('targets',help='What each type of table needs: its fields, which are required and the choices that describe it (offline)')  # E86
     tables.add_argument('name',nargs='?',help='One type, for example well-tops')
     bundle=sub.add_parser('bundle',help='Check or summarize a portable bundle offline (no server or account needed)')
@@ -399,6 +414,19 @@ def _choices(args,every=False):
     return choices if every or named or changes or choices.declare or args.layout else None
 
 
+MONTHS=('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec')
+
+
+def ends_words(instant):
+    """E67a: 'ends 14 Nov 2026' for the stored end 2026-11-15T00:00:00Z: the last permitted day, a UTC date in every zone."""
+    from datetime import datetime,timedelta,timezone
+    try:at=datetime.fromisoformat(instant.replace('Z','+00:00'))
+    except (AttributeError,ValueError):return 'ends '+str(instant)
+    if at.tzinfo is None:at=at.replace(tzinfo=timezone.utc)
+    day=(at.astimezone(timezone.utc)-timedelta(microseconds=1)).date()
+    return 'ends %d %s %d'%(day.day,MONTHS[day.month-1],day.year)
+
+
 def _discover(args):
     """E27: projects/orgs for a credential file or OPHIOLITE_ACCESS_KEY; plain words unless --json."""
     from .account import Account
@@ -418,7 +446,7 @@ def _discover(args):
     if args.json:return done(args,None,{'projects' if args.command=='projects' else 'organizations':rows,**({'normalised':list(notes)} if notes else {})})
     if not rows:print('This credential reaches no project.' if args.command=='projects' else 'No organisation holds a project this credential reaches.');return
     for row in rows:
-        if args.command=='projects':print((row.get('name') or 'Unnamed project')+' - '+{'member':'can edit','viewer':'can view'}.get(row.get('role'),'access')+(' and administer' if row.get('can_administer') else ''))
+        if args.command=='projects':print((row.get('name') or 'Unnamed project')+' - '+{'member':'can edit','viewer':'can view'}.get(row.get('role'),'access')+(' and administer' if row.get('can_administer') else '')+(', '+ends_words(row['access_ends_at']) if row.get('access_ends_at') else ''))
         else:print(row.get('name') or 'Unnamed organisation')
 
 
@@ -1179,6 +1207,55 @@ def _slots(texts,flag,many=False):
     return found
 
 
+CATALOGUE_VERBS=('register','list','show','enable','withdraw','trust')
+
+
+def _catalogue_verb(args):
+    return args.command=='procedures' and (args.procedure_action in CATALOGUE_VERBS or args.procedure_action=='run' and args.from_project)
+
+
+def _state_words(v):
+    return {'private':'private (you and the administrators)','enabled':'enabled for everyone','withdrawn':'withdrawn'}[v['state']]+(', trusted by you' if v['trusted'] else '')
+
+
+def _catalogue(args,client):
+    """E105b: the project's catalogue. Words by default; each verb's documented JSON under --json. A version is named
+    by its procedure name and number; the digest is in --json."""
+    from . import procedures
+    try:
+        if args.procedure_action=='register':
+            v=client.procedure_register(args.folder)
+            text=('%s, version %d, is already registered: %s.' % (v['label'],v['version'],_state_words(v)) if v['already'] else
+                  'Registered %s, version %d. It is private: you and the project administrators see it until an administrator enables it for everyone.' % (v['label'],v['version']))
+            return done(args,text,v)
+        if args.procedure_action=='list':
+            versions=client.procedure_list(args.name)
+            lines=['%s, version %d (%s): %s' % (v['label'],v['version'],v['name'],_state_words(v)) for v in versions]
+            return done(args,'\n'.join(lines) or 'This project has no procedures you can see yet.',{'versions':versions})
+        if args.procedure_action=='run':
+            def ask(question):
+                print(question['text']+' [y/N] ',end='',flush=True)
+                return sys.stdin.readline().strip().lower() in ('y','yes')
+            result=client.procedure_run(args.from_project,args.output,_slots(args.input,'--input',many=True),version=args.version,yes=args.yes,
+                                        prompt=ask if sys.stdin.isatty() else None,kinds=_slots(args.kind,'--kind'),declared=_slots(args.declared,'--declared'),
+                                        systems=_slots(args.system,'--system'),settings=args.setting)
+            return done(args,result['sentence'],{'ran':True,**result})
+        chosen=client.procedure_version(args.name,args.version)
+        if args.procedure_action=='show':
+            v=client.procedure_get(chosen['digest']);w=v['words']
+            lines=['%s, version %d (%s): %s' % (v['label'],v['version'],v['name'],_state_words(v)),w['sentence'],
+                   'Registered by %s.' % v['added_by']]+['Setting %s: %s%s' % (s['label'],s['default'] if s['default'] is not None else 'no default',(' '+s['unit']) if s['unit'] and s['default'] is not None else '') for s in w['settings']]
+            return done(args,'\n'.join(lines),v)
+        v=getattr(client,'procedure_'+args.procedure_action)(chosen['digest'])
+        if args.procedure_action=='trust':return done(args,'You trust %s, version %d, in this project.' % (chosen['label'],chosen['version']),v)
+        text={'enable':'Enabled %s, version %d, for everyone in this project.','withdraw':'Withdrew %s, version %d: it is never fetched or run again.'}[args.procedure_action]
+        return done(args,text % (v['label'],v['version']),v)
+    except procedures.NotRun as error:
+        if args.json:print(json.dumps({'error':{'code':error.code,'message':str(error),'field':error.field,'details':error.details}},indent=2,default=str))
+        else:print(str(error),file=sys.stderr)
+        raise SystemExit(EXIT['refused'])
+
+
 def _procedures(args):
     """E105a: procedures new|validate|run. The default line is words only; identifiers, digests, field paths and
     what the procedure printed are under --json (and in log.txt beside a run's outputs)."""
@@ -1194,6 +1271,7 @@ def _procedures(args):
         done(args,text,payload)
         if not verdict['valid']:raise SystemExit(EXIT['refused'])
         return payload
+    if args.folder is None:raise SystemExit('Name the procedure folder, or run one from the project with --from-project NAME.')
     try:
         result=procedures.run(args.folder,args.output,_slots(args.input,'--input',many=True),kinds=_slots(args.kind,'--kind'),
                               declared=_slots(args.declared,'--declared'),systems=_slots(args.system,'--system'),settings=args.setting)
@@ -1218,7 +1296,7 @@ def _main(argv=None):
     if args.command=='skills':
         return done(args,str(files('ophiolite').joinpath('skills')),{'path':str(files('ophiolite').joinpath('skills'))})
     if args.command=='targets':return _targets(args)  # E86: offline; reads the packaged contracts only
-    if args.command=='procedures':return _procedures(args)  # E105a: offline; reads and runs local files only
+    if args.command=='procedures' and not _catalogue_verb(args):return _procedures(args)  # E105a: offline; reads and runs local files only
     if args.command=='bundle':
         # Offline: no configuration, credentials or network are read.
         from .bundle import open_bundle,pack
@@ -1274,6 +1352,7 @@ def _main(argv=None):
         if args.command=='curves':return _curves(args,client)
         if args.command in ('entities','wells','changes','sources','org-connections','well-imports','story','what-changed','dependents','remake','import'):return _journey(args,client)
         if args.command=='checks':return _checks(args,client)
+        if args.command=='procedures':return _catalogue(args,client)  # E105b: the project's catalogue
         if args.command in ('check','get','send'):return _exchange(args,client)
         if args.command=='upload':return _upload(args,client)
         if args.command=='inspect':return _inspect(args,client)
