@@ -20,10 +20,7 @@ from test_seismic import slices_bundle
 FROZEN = Path(__file__).parent / 'frozen'
 ROLE_SENTENCE = 'Bundle 1.0 carries exactly one original per asset and only known file roles.'
 TYPE_SENTENCE = 'An asset has an unknown type.'
-REFUSED_FEATURE_SET = ('Portable export is not yet supported for this feature set: a Shapefile-read feature set carries its companion files, '
-                       'which a bundle cannot hold yet.')
-REFUSED_POINT_SET = ('Portable export is not yet supported for this type: a recipe-read point set carries its source package and decisions, '
-                     'which a bundle cannot hold yet.')
+NO_ROWS = 'This revision was read from a source package; export it with Client.export, which reads the package and its decisions with it.'
 
 
 def frozen(minor):
@@ -113,12 +110,13 @@ def test_released_readers_refuse_an_unknown_file_role_per_reader_and_type(tmp_pa
     assert seen == OUTCOMES
 
 
-def test_the_two_export_refusals_are_these_sentences(tmp_path):
+def test_a_package_read_without_its_rows_is_refused_with_this_sentence(tmp_path):
+    """E23c C3 replaced the two C1 refusals (recipe-read point set; Shapefile-read feature set) with this one: the rows travel with Client.export."""
     descriptor = json.loads(FIXTURES.joinpath('point-set-2.json').read_bytes())
     points = _core.typed_result(descriptor, FIXTURES.joinpath('point-set-2-data.json').read_bytes(), FIXTURES.joinpath('point-set-2.original').read_bytes())
     with pytest.raises(Refused) as refused: bundle.write_bundle(tmp_path / 'p', [item(points)])
-    assert str(refused.value) == REFUSED_POINT_SET
+    assert str(refused.value) == NO_ROWS
     features = typed_read('feature-set'); features._wire_descriptor = {**features._wire_descriptor, 'package': {'recipe': None, 'members': []}}
     with pytest.raises(Refused) as refused: bundle.write_bundle(tmp_path / 'f', [item(features)])
-    assert str(refused.value) == REFUSED_FEATURE_SET
+    assert str(refused.value) == NO_ROWS
     assert not (tmp_path / 'p').exists() and not (tmp_path / 'f').exists()
