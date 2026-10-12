@@ -1374,6 +1374,24 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/public-repositories/collections",
+    "function": "postProjectsProjectPublicRepositoriesCollections",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/public-repositories/features-import",
+    "function": "postProjectsProjectPublicRepositoriesFeaturesImport",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/public-repositories/features-preview",
+    "function": "postProjectsProjectPublicRepositoriesFeaturesPreview",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/public-repositories/import",
     "function": "postProjectsProjectPublicRepositoriesImport",
     "request": "schema",

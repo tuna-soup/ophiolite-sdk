@@ -9,6 +9,13 @@ service could not serve (`report.not_read`). Pressing it is the confirmation tha
 `check("nlog")` asks the service again and reports what changed; nothing is replaced, appended or moved.
 `attribution(result)` lists the public sources a derived result was made from, with the sentence a page shows.
 
+Features from another service (C5c): `collections(address)` lists what an OGC API - Features or WFS service on an
+approved origin offers, with the licence its own documents state; `features_preview(address, collection)` says which
+coordinate systems it offers and whether it can be brought in; `features_import(address, collections, audience=[...])`
+reads each collection whole onto one feature set (no well, no association) and returns the run's report with the
+licence. A collection the service cannot serve whole, or answers in another coordinate system, is refused and nothing
+is kept.
+
 A refusal is raised as a typed error carrying the sentence the workspace shows: the service is not switched on, only an
 administrator may bring data in, the service is not answering, or it asked Ophiolite to slow down.
 """
@@ -18,14 +25,16 @@ import time
 import uuid
 
 from .errors import Busy, IntegrityConflict, OphioliteError, PermissionRefused, Refused
-from .models.api import (PublicSources, RepositoryCatalogue, RepositoryCheck, RepositoryImport, RepositoryPreview, RepositorySearch,
-                         UploadRun, UploadRunStep)
+from .models.api import (PublicSources, RepositoryCatalogue, RepositoryCheck, RepositoryCollections, RepositoryFeaturesImport,
+                         RepositoryFeaturesPreview, RepositoryImport, RepositoryPreview, RepositorySearch, UploadRun, UploadRunStep)
 from .upload_runs import CLAIM_WAIT, Report
 from .well_imports import _checked
 
 # the gateway's own sentences (Platform public_repositories.py) that name a refusal the journey words differently
 NOT_ENABLED = 'This public repository is not enabled on this deployment.'
 INCLUDE = ('location', 'tops', 'survey', 'logs', 'all-logs')
+NOT_APPROVED = 'This address is not approved on this installation.'
+NOT_LISTED = 'Features from this service can be looked at but not brought in'
 
 
 class RepositoryNotEnabled(PermissionRefused): code = 'repository-not-enabled'
@@ -38,6 +47,15 @@ class RepositoryUnavailable(Busy): code = 'repository-unavailable'
 
 
 class RepositoryRateLimited(RepositoryUnavailable): code = 'repository-rate-limited'
+
+
+class FeaturesNotApproved(PermissionRefused): code = 'features-not-approved'
+
+
+class FeaturesNotListed(PermissionRefused): code = 'features-not-listed'
+
+
+class FeaturesNotRead(RepositoryUnavailable): code = 'features-not-read'
 
 
 def said(service):
@@ -61,6 +79,20 @@ def _typed(error, service, operation):
     return None
 
 
+def _features_typed(error, operation):
+    """A refusal of the features rows: the gateway's sentence is already the workspace's (it never names the service's
+    own text), so it is kept as the message; the class says which refusal it is."""
+    server = error.server_message or ''
+    carried = dict(status=error.status, request_id=error.request_id, docs=error.docs, server_message=error.server_message, details=error.details)
+    if isinstance(error, PermissionRefused) and server.startswith(NOT_APPROVED): return FeaturesNotApproved(server, **carried)
+    if isinstance(error, PermissionRefused) and server.startswith(NOT_LISTED): return FeaturesNotListed(server, **carried)
+    if isinstance(error, PermissionRefused) and operation == 'features-import' and 'keep copies' not in server:
+        return RepositoryAdministratorsOnly('Only a project administrator can add features from this service.', **carried)
+    if error.code == 'repository-unavailable':
+        return FeaturesNotRead(server or 'The service cannot be read now; try again later.', retry_after=getattr(error, 'retry_after', 0), **carried)
+    return None
+
+
 class BroughtIn(Report):
     """The folder upload's report of a `bring_in`, with what the service could not serve (`not_read`: code, name, kind,
     outcome) and the service it came from."""
@@ -78,6 +110,26 @@ class BroughtIn(Report):
         return '\n'.join(lines)
 
     def to_dict(self): return {'upload': self.view, 'not_read': self.not_read}
+
+
+class FeaturesBroughtIn(Report):
+    """The folder upload's report of a `features_import`: one feature set per collection, with the licence the service
+    states (`licence`, or `licence_sentence` "not stated by the service") and per collection its count and whether only
+    the first features were read (`collections`)."""
+
+    def __init__(self, view, started):
+        super().__init__(view)
+        self.licence, self.licence_sentence = started['licence'], started['licence_sentence']
+        self.collections = list(started['collections'])
+
+    def text(self):
+        lines = [super().text()]
+        lines += ['  %s: %d feature%s%s' % (c['title'] or c['id'], c['count'], '' if c['count'] == 1 else 's', ' (only the first were read)' if c['capped'] else '')
+                  for c in self.collections]
+        lines.append('  Licence: %s' % (self.licence['href'] if self.licence else self.licence_sentence))
+        return '\n'.join(lines)
+
+    def to_dict(self): return {'upload': self.view, 'licence': self.licence, 'licence_sentence': self.licence_sentence, 'collections': self.collections}
 
 
 class Attribution:
@@ -102,6 +154,9 @@ class Attribution:
     def __repr__(self): return '<Attribution %s: %s>' % (self.asset_id, ', '.join(self.services) or 'no public source')
 
 
+FEATURES_ROWS = ('collections', 'features-preview', 'features-import')
+
+
 class PublicRepositories:
     def __init__(self, client):
         self.client = client
@@ -109,7 +164,7 @@ class PublicRepositories:
     def _call(self, operation, body, model, service=None, retry=False):
         try: answer = self.client._post('public-repositories', operation, body, retry=retry)
         except OphioliteError as error:
-            typed = _typed(error, service, operation) if service else None
+            typed = _features_typed(error, operation) if operation in FEATURES_ROWS else _typed(error, service, operation) if service else None
             if typed is None: raise
             raise typed from error
         return _checked(model, answer, 'public repository ' + operation)
@@ -143,6 +198,25 @@ class PublicRepositories:
         """Ask SERVICE again for every file of it you can read (or of these boreholes) and report what changed:
         `sentence` and per file `state` and `changed` (bytes, meaning). A report only: nothing is replaced or appended."""
         return self._call('check', {'service': service, **({'codes': list(codes)} if codes else {})}, RepositoryCheck, service)
+
+    def collections(self, address):
+        """What the features service at ADDRESS (an OGC API - Features landing page or a WFS endpoint on an origin this
+        installation approves) lists, with the licence its documents state and whether it can be brought in. Nothing is kept."""
+        return self._call('collections', {'address': address}, RepositoryCollections)
+
+    def features_preview(self, address, collection):
+        """One collection: its coordinate systems, the licence, whether it can be brought in. No feature is read."""
+        return self._call('features-preview', {'address': address, 'collection': collection}, RepositoryFeaturesPreview)
+
+    def features_import(self, address, collections, *, audience, crs=None, folder_name=None, command_id=None, progress=None):
+        """A project administrator's import: each collection is read whole by the gateway (in CRS, a system it offers,
+        else the one it is stored in) and lands as one feature set; no well and no association is made. `audience` names
+        who may read what comes in (never a project default). Returns the report (`FeaturesBroughtIn`)."""
+        body = {'address': address, 'collections': list(collections), 'audience': list(audience), 'command_id': command_id or uuid.uuid4().hex,
+                **({'crs': crs} if crs else {}), **({'folder_name': folder_name} if folder_name else {})}
+        started = self._call('features-import', body, RepositoryFeaturesImport, retry=True)  # the command id makes a repeat safe
+        view = self._drive(started['run']['run_id'], None, progress)
+        return FeaturesBroughtIn(view, started)
 
     def attribution(self, result):
         """The public sources of a derived result (a receipt, a selection or an asset id) you may read."""
@@ -180,7 +254,7 @@ class PublicRepositories:
                     if error.code == 'run-ended': return self._status(run_id)
                     if error.code != 'claimed': raise
                 except OphioliteError as error:
-                    typed = _typed(error, service, 'file')
+                    typed = _typed(error, service, 'file') if service else _features_typed(error, 'file')
                     if typed is None: raise
                     raise typed from error
                 if progress: progress(Report(self._status(run_id)))

@@ -121,7 +121,7 @@ IMPORT_OPERATIONS={'well-imports':{'preview','start','step','status','list','can
                    'table-imports':{'read','preview','start','step','status','pause','resume','cancel','list'},  # E87: a table becomes typed data
                    'well-names':{'propose','accept','aliases','go-back'},  # E88: the wells a set of runs names
                    'layouts':{'list','get','match','export','save','rename','retire','use-again','import','keep','update','reconnect'},  # E89: layouts
-                   'public-repositories':{'catalogue','search','preview','import','check'}}  # E60: public repositories (NLOG)
+                   'public-repositories':{'catalogue','search','preview','import','check','collections','features-preview','features-import'}}  # E60: public repositories (NLOG; features services, C5c)
 RELEASE_OPERATIONS={'releases':{'list','get','download','download-snapshot'}}  # E50c: the kept copies Wells.with_source reads (read routes only)
 SESSION_OPERATIONS={'las-uploads':{'begin','part','state','finish','cancel'},'capabilities':{'describe'}}  # E54: a file sent in parts; the served limits
 

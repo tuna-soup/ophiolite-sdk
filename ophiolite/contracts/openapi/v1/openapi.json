@@ -43437,6 +43437,620 @@
         }
       }
     },
+    "/api/v1/projects/{project}/public-repositories/collections": {
+      "post": {
+        "summary": "E60: The collections a features service on an approved origin lists, with the licence it states; nothing is kept",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "public-repositories/collections: what a features service lists; nothing is kept.",
+                  "properties": {
+                    "service": {
+                      "title": "Service",
+                      "type": "string"
+                    },
+                    "address": {
+                      "title": "Address",
+                      "type": "string"
+                    },
+                    "protocol": {
+                      "enum": [
+                        "ogc-api-features",
+                        "wfs"
+                      ],
+                      "title": "Protocol",
+                      "type": "string"
+                    },
+                    "title": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Title"
+                    },
+                    "listed": {
+                      "description": "The service is on the deployment's list, so its collections can be brought in",
+                      "title": "Listed",
+                      "type": "boolean"
+                    },
+                    "display_name": {
+                      "title": "Display Name",
+                      "type": "string"
+                    },
+                    "licence": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/RepositoryLicence"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "licence_sentence": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "\"not stated by the service\" when its documents state no licence",
+                      "title": "Licence Sentence"
+                    },
+                    "collections": {
+                      "items": {
+                        "$ref": "#/components/schemas/RepositoryCollection"
+                      },
+                      "title": "Collections",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "service",
+                    "address",
+                    "protocol",
+                    "title",
+                    "listed",
+                    "display_name",
+                    "licence",
+                    "licence_sentence",
+                    "collections"
+                  ],
+                  "title": "RepositoryCollections",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "address": {
+                    "description": "the features service's address (an OGC API - Features landing page or a WFS endpoint) on an origin this deployment approves",
+                    "maxLength": 2000,
+                    "minLength": 1,
+                    "title": "Address",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "address"
+                ],
+                "title": "CollectionsRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/public-repositories/features-import": {
+      "post": {
+        "summary": "E60: Bring whole collections of a features service in as feature sets (project administrators): each is read first, then a folder upload of kind features-service starts; drive it with upload-runs/file and repository true",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "public-repositories/features-import: the started run (drive it with upload-runs/file, repository true), the licence and what was read.",
+                  "properties": {
+                    "run": {
+                      "$ref": "#/components/schemas/UploadRun"
+                    },
+                    "licence": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/RepositoryLicence"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "licence_sentence": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Licence Sentence"
+                    },
+                    "collections": {
+                      "items": {
+                        "$ref": "#/components/schemas/RepositoryFeaturesCollection"
+                      },
+                      "title": "Collections",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "run",
+                    "licence",
+                    "licence_sentence",
+                    "collections"
+                  ],
+                  "title": "RepositoryFeaturesImport",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "address": {
+                    "maxLength": 2000,
+                    "minLength": 1,
+                    "title": "Address",
+                    "type": "string"
+                  },
+                  "collections": {
+                    "description": "the collections, by id; each is read whole",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 20,
+                    "minItems": 1,
+                    "title": "Collections",
+                    "type": "array"
+                  },
+                  "crs": {
+                    "anyOf": [
+                      {
+                        "pattern": "^(EPSG:\\d{1,6}|OGC:CRS84)$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "a coordinate system the collection offers; default: the one the service stores it in",
+                    "title": "Crs"
+                  },
+                  "audience": {
+                    "description": "who may read what comes in, named explicitly (never a project default)",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 100,
+                    "title": "Audience",
+                    "type": "array"
+                  },
+                  "folder_name": {
+                    "anyOf": [
+                      {
+                        "maxLength": 160,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Folder Name"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "command_id",
+                  "address",
+                  "collections",
+                  "audience"
+                ],
+                "title": "FeaturesImportRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/public-repositories/features-preview": {
+      "post": {
+        "summary": "E60: One collection of a features service: its coordinate systems and licence, and whether it can be brought in; nothing is kept",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "public-repositories/features-preview: one collection; no feature is read and nothing is kept.",
+                  "properties": {
+                    "service": {
+                      "title": "Service",
+                      "type": "string"
+                    },
+                    "address": {
+                      "title": "Address",
+                      "type": "string"
+                    },
+                    "collection": {
+                      "title": "Collection",
+                      "type": "string"
+                    },
+                    "title": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Title"
+                    },
+                    "storage_crs": {
+                      "title": "Storage Crs",
+                      "type": "string"
+                    },
+                    "crs": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Crs",
+                      "type": "array"
+                    },
+                    "licence": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/RepositoryLicence"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "licence_sentence": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Licence Sentence"
+                    },
+                    "can_bring_in": {
+                      "title": "Can Bring In",
+                      "type": "boolean"
+                    },
+                    "features_per_run": {
+                      "title": "Features Per Run",
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "service",
+                    "address",
+                    "collection",
+                    "title",
+                    "storage_crs",
+                    "crs",
+                    "licence",
+                    "licence_sentence",
+                    "can_bring_in",
+                    "features_per_run"
+                  ],
+                  "title": "RepositoryFeaturesPreview",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "address": {
+                    "description": "the features service's address (an OGC API - Features landing page or a WFS endpoint) on an origin this deployment approves",
+                    "maxLength": 2000,
+                    "minLength": 1,
+                    "title": "Address",
+                    "type": "string"
+                  },
+                  "collection": {
+                    "description": "the collection's id (WFS: the feature type's name)",
+                    "maxLength": 200,
+                    "minLength": 1,
+                    "title": "Collection",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "address",
+                  "collection"
+                ],
+                "title": "FeaturesPreviewRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/public-repositories/import": {
       "post": {
         "summary": "E60: Bring boreholes in (project administrators): every file is listed and a folder upload starts under the origin repository; drive it with upload-runs/file and repository true",
@@ -110863,6 +111477,45 @@
         "title": "RepositoryCheckFile",
         "type": "object"
       },
+      "RepositoryCollection": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "storage_crs": {
+            "title": "Storage Crs",
+            "type": "string"
+          },
+          "crs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Crs",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "storage_crs",
+          "crs"
+        ],
+        "title": "RepositoryCollection",
+        "type": "object"
+      },
       "RepositoryCopy": {
         "additionalProperties": false,
         "properties": {
@@ -110882,18 +111535,54 @@
         "title": "RepositoryCopy",
         "type": "object"
       },
+      "RepositoryFeaturesCollection": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "capped": {
+            "title": "Capped",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "count",
+          "capped"
+        ],
+        "title": "RepositoryFeaturesCollection",
+        "type": "object"
+      },
       "RepositoryFile": {
         "additionalProperties": false,
         "properties": {
           "code": {
-            "description": "the borehole's code at the service (NLOG: its BOREHOLE_CODE)",
+            "description": "the borehole's code at the service (NLOG: its BOREHOLE_CODE); for a features service, the collection's id",
             "maxLength": 80,
             "minLength": 1,
             "title": "Code",
             "type": "string"
           },
           "name": {
-            "description": "the file's name as the service's preview lists it",
+            "description": "the file's name as the service's preview lists it (a collection: `<id>.geojson`)",
             "maxLength": 300,
             "minLength": 1,
             "title": "Name",
@@ -110905,6 +111594,41 @@
           "name"
         ],
         "title": "RepositoryFile",
+        "type": "object"
+      },
+      "RepositoryLicence": {
+        "additionalProperties": false,
+        "properties": {
+          "href": {
+            "title": "Href",
+            "type": "string"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "where": {
+            "enum": [
+              "collection",
+              "landing"
+            ],
+            "title": "Where",
+            "type": "string"
+          }
+        },
+        "required": [
+          "href",
+          "title",
+          "where"
+        ],
+        "title": "RepositoryLicence",
         "type": "object"
       },
       "RepositoryLog": {
@@ -111257,6 +111981,44 @@
             "minItems": 1,
             "title": "Items",
             "type": "array"
+          },
+          "kind": {
+            "default": "boreholes",
+            "description": "E60 C5c: boreholes (a repository's wells and their files) or features-service (collections read onto feature sets; no well is made)",
+            "enum": [
+              "boreholes",
+              "features-service"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "address": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "features-service: the service's address (on one of its approved origins)",
+            "title": "Address"
+          },
+          "crs": {
+            "anyOf": [
+              {
+                "pattern": "^(EPSG:\\d{1,6}|OGC:CRS84)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "features-service: the coordinate system read",
+            "title": "Crs"
           }
         },
         "required": [
@@ -111288,8 +112050,15 @@
             "$ref": "#/components/schemas/RepositoryCopy"
           },
           "boreholes_per_run": {
-            "title": "Boreholes Per Run",
-            "type": "integer"
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Boreholes Per Run"
           },
           "include": {
             "items": {
@@ -111300,6 +112069,41 @@
           },
           "readiness": {
             "$ref": "#/components/schemas/RepositoryReadiness"
+          },
+          "kind": {
+            "description": "C5c: boreholes (search, preview, import) or features (collections, features-preview, features-import)",
+            "enum": [
+              "boreholes",
+              "features"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "C5c: a features service's address",
+            "title": "Address"
+          },
+          "features_per_run": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "C5c: the features one collection is read up to",
+            "title": "Features Per Run"
           }
         },
         "required": [
@@ -111310,7 +112114,8 @@
           "copy",
           "boreholes_per_run",
           "include",
-          "readiness"
+          "readiness",
+          "kind"
         ],
         "title": "RepositoryService",
         "type": "object"
@@ -117360,7 +118165,8 @@
                   "location",
                   "tops",
                   "survey",
-                  "log"
+                  "log",
+                  "features"
                 ],
                 "type": "string"
               },
@@ -117381,6 +118187,32 @@
               }
             ],
             "default": null
+          },
+          "count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "C5c: the features a collection's file holds",
+            "title": "Count"
+          },
+          "capped": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "C5c: true when only the first 10,000 features of the collection were read",
+            "title": "Capped"
           },
           "long_name": {
             "anyOf": [
@@ -117441,6 +118273,46 @@
             "description": "The licence id of the service's terms",
             "title": "Terms",
             "type": "string"
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "const": "features-service",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "C5c: present on a features service's run (no well is made)",
+            "title": "Kind"
+          },
+          "address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "C5c: the features service's address",
+            "title": "Address"
+          },
+          "crs": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "C5c: the coordinate system the collections were read in",
+            "title": "Crs"
           }
         },
         "required": [

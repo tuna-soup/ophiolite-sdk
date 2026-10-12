@@ -977,6 +977,12 @@
       "title": "NLOG (public repository): types, directions, change detection, losses and qualification"
     },
     {
+      "id": "ophiolite.connector-capability/public-repository-ogc-features/1",
+      "kind": "capability",
+      "path": "connectors/v1/capabilities/public-repository-ogc-features.json",
+      "title": "Features services (public repository): types, directions, change detection, losses and qualification"
+    },
+    {
       "id": "ophiolite.connector-capability/qgis/1",
       "kind": "capability",
       "path": "connectors/v1/capabilities/qgis.json",

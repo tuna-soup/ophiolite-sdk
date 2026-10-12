@@ -215,16 +215,19 @@ type WireRemakeStatus = { "schema": "ophiolite.remake/1"; "execution_id": string
 type WireRemakeSummary = { "reason": string; "changed": (number) | (null); "of": number; "largest": (number) | (null); "unit": (string) | (null) };
 type WireRepositoryBorehole = { "code": string; "name": (string) | (null); "field": (string) | (null); "operator": (string) | (null); "public_since": (string) | (null); "side": (string) | (null); "in_project": boolean; "well": (WireRepositoryWell) | (null) };
 type WireRepositoryCheckFile = { "code": string; "name": string; "kind": string; "asset_id": string; "revision": string; "state": "unchanged" | "update_available" | "needs-review" | "missing"; "changed": Array<"bytes" | "meaning"> };
+type WireRepositoryCollection = { "id": string; "title": (string) | (null); "storage_crs": string; "crs": Array<string> };
 type WireRepositoryCopy = { "retention_permitted": boolean; "redistribution_permitted": boolean };
+type WireRepositoryFeaturesCollection = { "id": string; "title": (string) | (null); "count": number; "capped": boolean };
 type WireRepositoryFile = { "code": string; "name": string };
+type WireRepositoryLicence = { "href": string; "title": (string) | (null); "where": "collection" | "landing" };
 type WireRepositoryLog = { "document": (number) | (string); "name": (string) | (null); "bytes": (number) | (null); "composite": boolean; "profile": (string) | (null) };
 type WireRepositoryNotRead = { "code": string; "name": (string) | (null); "kind": (string) | (null); "outcome": string };
 type WireRepositoryOrigin = { "origin": Array<(string) | (number)>; "name": string; "copy": WireRepositoryCopy };
 type WireRepositoryPosition = { "x": number; "y": number; "crs": string; "nearest_metre": boolean; "submitted": (string) | (null) };
 type WireRepositoryPreviewItem = { "code": string; "name"?: (string) | (null); "outcome": (string) | (null); "position"?: (WireRepositoryPosition) | (null); "tops"?: (number) | (null); "surveys"?: (Array<number>) | (null); "logs"?: (Array<WireRepositoryLog>) | (null); "in_project": boolean; "well": (WireRepositoryWell) | (null) };
 type WireRepositoryReadiness = { "code": string; "sentence": string; "actor": string; "remedy": string; "docs": string; "reason"?: (string) | (null) };
-type WireRepositoryRun = { "service": string; "items": Array<WireRepositoryFile> };
-type WireRepositoryService = { "service": string; "connection_id": string; "display_name": string; "terms": WireRepositoryTerms; "copy": WireRepositoryCopy; "boreholes_per_run": number; "include": Array<string>; "readiness": WireRepositoryReadiness };
+type WireRepositoryRun = { "service": string; "items": Array<WireRepositoryFile>; "kind"?: "boreholes" | "features-service"; "address"?: (string) | (null); "crs"?: (string) | (null) };
+type WireRepositoryService = { "service": string; "connection_id": string; "display_name": string; "terms": WireRepositoryTerms; "copy": WireRepositoryCopy; "boreholes_per_run": (number) | (null); "include": Array<string>; "readiness": WireRepositoryReadiness; "kind": "boreholes" | "features"; "address"?: (string) | (null); "features_per_run"?: (number) | (null) };
 type WireRepositoryTerms = { "licence_id": string; "url": string; "sentence": string; "summary": string; "clause": string };
 type WireRepositoryWell = { "entity_id": string; "name": string };
 type WireResultGroup = { "id": string; "name": string; "description": string; "owner": string; "members": Array<WireGroupMember>; "recommended": (Record<string, unknown>) | (null); "history": Array<Record<string, unknown>>; "generation": number; "can_edit": boolean; "can_recommend": boolean; "display"?: (WireDisplay) | (null) };
@@ -309,8 +312,8 @@ type WireUploadRunFile = { "ordinal": number; "path": string; "bytes": number; "
 type WireUploadRunMember = { "ordinal": number; "path": string; "role": string; "bytes": number; "sha256": string };
 type WireUploadRunProposal = { "entity_id": string; "name": string };
 type WireUploadRunRecord = { "asset_id": string; "revision": string };
-type WireUploadRunRepository = { "service": string; "code": string; "name": string; "kind"?: ("location" | "tops" | "survey" | "log") | (null); "well"?: (WireUploadRunRepositoryWell) | (null); "long_name"?: (string) | (null); "linked"?: (boolean) | (null); "record"?: (WireUploadRunRecord) | (null) };
-type WireUploadRunRepositorySource = { "repository": string; "terms": string };
+type WireUploadRunRepository = { "service": string; "code": string; "name": string; "kind"?: ("location" | "tops" | "survey" | "log" | "features") | (null); "well"?: (WireUploadRunRepositoryWell) | (null); "count"?: (number) | (null); "capped"?: (boolean) | (null); "long_name"?: (string) | (null); "linked"?: (boolean) | (null); "record"?: (WireUploadRunRecord) | (null) };
+type WireUploadRunRepositorySource = { "repository": string; "terms": string; "kind"?: ("features-service") | (null); "address"?: (string) | (null); "crs"?: (string) | (null) };
 type WireUploadRunRepositoryWell = { "entity_id": string; "name": string; "outcome": "created" | "already-here" };
 type WireUploadRunSend = { "mode": "body" | "parts"; "members": Array<WireUploadRunMember> };
 type WireUploadRunSettings = { "attribution": string; "well_notes": string; "audience": Array<string>; "source"?: (WireUploadRunSource) | (WireUploadRunRepositorySource) | (null) };
@@ -1223,6 +1226,18 @@ export function postProjectsProjectPublicRepositoriesCatalogue(transport: Transp
 export type postProjectsProjectPublicRepositoriesCheckInput = { path: { "project": string }; body: { "project_id": string; "service": string; "codes"?: (Array<string>) | (null) }; options?: OperationOptions };
 export function postProjectsProjectPublicRepositoriesCheck(transport: Transport, input: postProjectsProjectPublicRepositoriesCheckInput): Promise<{ "service": string; "checked_at": number; "sentence": string; "files": Array<WireRepositoryCheckFile> }> {
   return transport.request<{ "service": string; "checked_at": number; "sentence": string; "files": Array<WireRepositoryCheckFile> }>("POST", "/api/v1/projects/{project}/public-repositories/check", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectPublicRepositoriesCollectionsInput = { path: { "project": string }; body: { "project_id": string; "address": string }; options?: OperationOptions };
+export function postProjectsProjectPublicRepositoriesCollections(transport: Transport, input: postProjectsProjectPublicRepositoriesCollectionsInput): Promise<{ "service": string; "address": string; "protocol": "ogc-api-features" | "wfs"; "title": (string) | (null); "listed": boolean; "display_name": string; "licence": (WireRepositoryLicence) | (null); "licence_sentence": (string) | (null); "collections": Array<WireRepositoryCollection> }> {
+  return transport.request<{ "service": string; "address": string; "protocol": "ogc-api-features" | "wfs"; "title": (string) | (null); "listed": boolean; "display_name": string; "licence": (WireRepositoryLicence) | (null); "licence_sentence": (string) | (null); "collections": Array<WireRepositoryCollection> }>("POST", "/api/v1/projects/{project}/public-repositories/collections", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectPublicRepositoriesFeaturesImportInput = { path: { "project": string }; body: { "project_id": string; "command_id": string; "address": string; "collections": Array<string>; "crs"?: (string) | (null); "audience": Array<string>; "folder_name"?: (string) | (null) }; options?: OperationOptions };
+export function postProjectsProjectPublicRepositoriesFeaturesImport(transport: Transport, input: postProjectsProjectPublicRepositoriesFeaturesImportInput): Promise<{ "run": WireUploadRun; "licence": (WireRepositoryLicence) | (null); "licence_sentence": (string) | (null); "collections": Array<WireRepositoryFeaturesCollection> }> {
+  return transport.request<{ "run": WireUploadRun; "licence": (WireRepositoryLicence) | (null); "licence_sentence": (string) | (null); "collections": Array<WireRepositoryFeaturesCollection> }>("POST", "/api/v1/projects/{project}/public-repositories/features-import", input.path, undefined, input.body, input.options, null, false);
+}
+export type postProjectsProjectPublicRepositoriesFeaturesPreviewInput = { path: { "project": string }; body: { "project_id": string; "address": string; "collection": string }; options?: OperationOptions };
+export function postProjectsProjectPublicRepositoriesFeaturesPreview(transport: Transport, input: postProjectsProjectPublicRepositoriesFeaturesPreviewInput): Promise<{ "service": string; "address": string; "collection": string; "title": (string) | (null); "storage_crs": string; "crs": Array<string>; "licence": (WireRepositoryLicence) | (null); "licence_sentence": (string) | (null); "can_bring_in": boolean; "features_per_run": number }> {
+  return transport.request<{ "service": string; "address": string; "collection": string; "title": (string) | (null); "storage_crs": string; "crs": Array<string>; "licence": (WireRepositoryLicence) | (null); "licence_sentence": (string) | (null); "can_bring_in": boolean; "features_per_run": number }>("POST", "/api/v1/projects/{project}/public-repositories/features-preview", input.path, undefined, input.body, input.options, null, false);
 }
 export type postProjectsProjectPublicRepositoriesImportInput = { path: { "project": string }; body: { "project_id": string; "command_id": string; "service": string; "codes": Array<string>; "include"?: Array<string>; "audience": Array<string>; "folder_name"?: (string) | (null) }; options?: OperationOptions };
 export function postProjectsProjectPublicRepositoriesImport(transport: Transport, input: postProjectsProjectPublicRepositoriesImportInput): Promise<{ "run": WireUploadRun; "not_read": Array<WireRepositoryNotRead> }> {

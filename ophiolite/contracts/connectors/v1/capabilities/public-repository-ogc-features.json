@@ -1,0 +1,50 @@
+{
+  "schema": "ophiolite.connector-capability/1",
+  "id": "public-repository-ogc-features",
+  "display_name": "Features from another public service",
+  "kind": "source",
+  "summary": "Map features from a public OGC API - Features collection or WFS layer the operator approved (for example PDOK), read as a feature set in the coordinate system the service states, with the service's licence named.",
+  "host": {
+    "name": "OGC API - Features and WFS 2.0 (PDOK, NLOG)",
+    "versions": [
+      "2026-10-12"
+    ],
+    "os": [
+      "linux"
+    ]
+  },
+  "routes": [
+    {
+      "profile": "geojson/1",
+      "data": "Map features (OSDU GeoJSON FeatureCollection)",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "explicit",
+      "losses": [
+        "Feature ids are not kept",
+        "Positions in the coordinate system the service states; nothing is transformed",
+        "Nested property values are kept only in the exact original",
+        "Only the first 10,000 features of a collection are read; the report says when more exist",
+        "Read from the service as it answers on the day; an older version is kept only once copied in",
+        "Every copy carries the service's licence as its own documents state it, or says it is not stated"
+      ],
+      "unsupported": [
+        "CRS transformation",
+        "a coordinate system the service reprojects with an offset (NLOG: its own system only)",
+        "GeometryCollection",
+        "mixed geometry kinds",
+        "XML (GML) output"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-10-12",
+        "evidence": "connectors:tests/test_repository_ogc.py (recorded NLOG WFS and PDOK exchanges, 12 October 2026; loopback services)"
+      }
+    }
+  ],
+  "redistribution": "As the service's licence states: PDOK Bestuurlijke Gebieden under CC BY 4.0 (name Kadaster / PDOK and link the licence); NLOG under its disclaimer (quote NLOG.NL as the source).",
+  "example": null
+}

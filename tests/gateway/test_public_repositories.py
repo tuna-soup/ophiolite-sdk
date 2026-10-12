@@ -98,3 +98,66 @@ def test_a_result_derived_from_an_nlog_log_lists_nlog_in_its_attribution(nlog):
     assert alice.public_repositories.attribution(plain).services == ['nlog']  # the attribution follows the result
     with pytest.raises((PermissionRefused, Unavailable)) as refused: bob.public_repositories.attribution(receipt)  # not shared with bob
     assert 'NLOG' not in str(refused.value)
+
+
+# --- features from another service (C5c; follow-up C6f) ---------------------------------------------------------------
+
+def enable_features(monkeypatch, incomplete=False):
+    """The gateway's public repositories with PDOK switched on and its recorded exchanges replayed (asked with the page size
+    the recording used); the one link that was not recorded is answered by the labelled SYNTHETIC terminal page, or, when
+    INCOMPLETE, finds the service unreachable (Platform `test_public_repositories_features`, Codex r7 ruling 1)."""
+    from asset_connectors.repositories import ogc
+    from asset_connectors.repositories.limiter import Limiter
+    from project_gateway import public_repositories
+    from project_gateway.tests.test_public_repositories import Edited
+    from project_gateway.tests.test_public_repositories_features import Hosts, Pdok
+    monkeypatch.setattr(ogc.OgcFeatures.__init__, '__defaults__', (2, ogc.CAP))
+    init = public_repositories.PublicRepositories.__init__
+    transport = Hosts(**{'api.pdok.nl': Pdok(incomplete=incomplete), 'www.nlog.nl': Edited(), 'www.gdngeoservices.nl': Edited()})
+
+    def replayed(self, runs, entities, **kw):
+        init(self, runs, entities, setting={'enabled': ['nlog', 'pdok']}, transport=transport, limiter=Limiter(sleep=lambda s: None, spacing=0),
+             sleep=lambda s: None)
+    monkeypatch.setattr(public_repositories.PublicRepositories, '__init__', replayed)
+    return transport
+
+
+PDOK = 'https://api.pdok.nl/kadaster/brk-bestuurlijke-gebieden/ogc/v1'
+PDOK_LICENCE = 'https://creativecommons.org/licenses/by/4.0/deed.nl'
+
+
+def test_features_import_lands_one_feature_set_with_the_licence_the_service_states(monkeypatch, request):
+    enable_features(monkeypatch)
+    w = request.getfixturevalue('web')
+    alice = client(w, 'alice', 'delegate')
+    preview = alice.public_repositories.features_preview(PDOK, 'provinciegebied')
+    assert preview['can_bring_in'] is True and preview['licence']['href'] == PDOK_LICENCE
+    services = {s['service']: s for s in alice.public_repositories.catalogue()['services']}
+    assert services['pdok']['kind'] == 'features' and services['pdok']['boreholes_per_run'] is None
+    report = alice.public_repositories.features_import(PDOK, ['provinciegebied'], crs='OGC:CRS84', audience=['alice'], command_id='c6f-pdok')
+    assert report.ok and report.state == 'closed', report.text()
+    assert [(c['id'], c['count'], c['capped']) for c in report.collections] == [('provinciegebied', 5, False)]  # 4 recorded + 1 synthetic
+    assert report.licence['href'] == PDOK_LICENCE and report.licence['where'] == 'landing'
+    assert 'Licence: ' + PDOK_LICENCE in report.text()
+    assert [e.name for e in alice.entities()] == []  # no well (hard gate A)
+
+
+def test_a_features_import_that_cannot_be_read_whole_is_refused_in_words(monkeypatch, request):
+    from ophiolite.public_repositories import FeaturesNotRead
+    enable_features(monkeypatch, incomplete=True)
+    alice = client(request.getfixturevalue('web'), 'alice', 'delegate')
+    with pytest.raises(FeaturesNotRead) as refused:
+        alice.public_repositories.features_import(PDOK, ['provinciegebied'], crs='OGC:CRS84', audience=['alice'])
+    assert str(refused.value) == 'The service stopped answering before the whole collection was read. Nothing was read; try again later.'
+
+
+def test_an_address_that_is_not_approved_and_a_member_who_is_not_an_administrator_are_refused(monkeypatch, request):
+    from ophiolite.public_repositories import FeaturesNotApproved
+    enable_features(monkeypatch)
+    w = request.getfixturevalue('web')
+    alice, bob = client(w, 'alice', 'delegate'), client(w, 'bob', 'delegate')
+    with pytest.raises(FeaturesNotApproved) as refused: alice.public_repositories.collections('https://elsewhere.example.test/ogc')
+    assert str(refused.value).startswith('This address is not approved on this installation.')
+    with pytest.raises(RepositoryAdministratorsOnly) as refused:
+        bob.public_repositories.features_import(PDOK, ['provinciegebied'], crs='OGC:CRS84', audience=[])
+    assert str(refused.value) == 'Only a project administrator can add features from this service.'

@@ -941,8 +941,11 @@ class RepositoryService(Contract):
     service: str
     display_name: str
     terms: RepositoryTerms
-    boreholes_per_run: int
+    boreholes_per_run: int | None
     include: list[str]
+    kind: Literal['boreholes', 'features'] = 'boreholes'
+    address: str | None = None
+    features_per_run: int | None = None
 
 
 class RepositoryCatalogue(Contract):
@@ -997,6 +1000,62 @@ class RepositoryImport(Contract):
     """public-repositories/import: the started run (driven with upload-runs/file, repository true) and what was not listed."""
     run: UploadRun
     not_read: list[RepositoryNotRead]
+
+
+class RepositoryLicence(Contract):
+    href: str
+    title: str | None
+    where: Literal['collection', 'landing']
+
+
+class RepositoryCollection(Contract):
+    id: str
+    title: str | None
+    storage_crs: str
+    crs: list[str]
+
+
+class RepositoryCollections(Contract):
+    """public-repositories/collections: what a features service lists; nothing is kept."""
+    service: str
+    address: str
+    protocol: Literal['ogc-api-features', 'wfs']
+    title: str | None
+    listed: bool
+    display_name: str
+    licence: RepositoryLicence | None
+    licence_sentence: str | None
+    collections: list[RepositoryCollection]
+
+
+class RepositoryFeaturesPreview(Contract):
+    """public-repositories/features-preview: one collection; no feature is read and nothing is kept."""
+    service: str
+    address: str
+    collection: str
+    title: str | None
+    storage_crs: str
+    crs: list[str]
+    licence: RepositoryLicence | None
+    licence_sentence: str | None
+    can_bring_in: bool
+    features_per_run: int
+
+
+class RepositoryFeaturesCollection(Contract):
+    id: str
+    title: str | None
+    count: int
+    capped: bool
+
+
+class RepositoryFeaturesImport(Contract):
+    """public-repositories/features-import: the started run (driven with upload-runs/file, repository true), the licence
+    the service states and what each collection held."""
+    run: UploadRun
+    licence: RepositoryLicence | None
+    licence_sentence: str | None
+    collections: list[RepositoryFeaturesCollection]
 
 
 class RepositoryCheckFile(Contract):
