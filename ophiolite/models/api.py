@@ -349,6 +349,27 @@ class SourceSelectionsPage(Contract):
     scope: str
 
 
+class SourceBrowseItem(Contract):
+    """E59: one file of a storage connection's folder, as the person's own key lists it."""
+    key: str
+    name: str
+    folder: str
+    size: int
+    modified: str | None = None
+    etag: str
+    profile: str | None = None
+    read_in_place: bool
+
+
+class SourceBrowsePage(Contract):
+    """E59: sources/discover of a storage connection: subfolders, then files; `next_cursor` continues the folder."""
+    items: list[SourceBrowseItem]
+    folders: list[str]
+    next_cursor: str | None = None
+    left_out: int = 0
+    left_out_sentence: str | None = None
+
+
 class SourceExportManifestDoc(Contract):
     schema_: str = Field(alias='schema', pattern='^ophiolite\\.source-snapshot/1$')
     reference: SourceReferenceDoc
@@ -673,6 +694,16 @@ class UploadCheckFetched(Contract):
     sha256: str
 
 
+class UploadCheckBucketFetched(Contract):
+    """E59: what the gateway read of a storage object with your own key."""
+    connection_id: str
+    key: str
+    name: str
+    bytes: int
+    sha256: str
+    read_in_place: bool
+
+
 class UploadCheckAnswer(Contract):
     """E85: upload-runs/check, the fields the SDK reads."""
     reads: Literal['head', 'whole']
@@ -680,7 +711,7 @@ class UploadCheckAnswer(Contract):
     stated: list[dict]
     asks: list[dict]
     refusal: dict | None = None
-    fetched: UploadCheckFetched | None = None
+    fetched: UploadCheckFetched | UploadCheckBucketFetched | None = None
 
 
 class UploadRunStep(Contract):
