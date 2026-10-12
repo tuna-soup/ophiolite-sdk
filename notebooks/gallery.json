@@ -112,6 +112,13 @@
       "sentence": "Keep a spreadsheet as it is with its units and missing-value marker, read a database table, and join the two on the well name.",
       "modes": ["synthetic", "live"],
       "data": "A synthetic six-sample spreadsheet and a three-well database made on your computer; keeping the spreadsheet creates a table only you can see until you share it."
+    },
+    {
+      "slug": "wells-from-sql-server-and-oracle",
+      "title": "Wells from SQL Server and Oracle",
+      "sentence": "Read the same table of wells from a SQL Server and an Oracle database at their recorded revisions and check that both give the same wells at the same coordinates.",
+      "modes": ["synthetic", "live"],
+      "data": "Three Groningen wells typed as each system returns them; in a project, the two SQL sources you selected, read only."
     }
   ]
 }

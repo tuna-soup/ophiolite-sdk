@@ -174,6 +174,17 @@ def test_a_spreadsheet_and_a_database_joined_joins_on_the_well_name_and_sends_no
     assert 'Hydreco: mean porosity 25.00 %' in text and 'Wintershall Noordzee: mean porosity 19.75 %' in text  # -888 left out of the mean
 
 
+def test_wells_from_sql_server_and_oracle_compares_both_systems_on_this_computer_synthetic(tmp_path, monkeypatch):
+    """E61 C9 (R4): synthetic mode compares typed rows; Oracle's empty string is NULL, coordinates are as stored."""
+    text = run('wells-from-sql-server-and-oracle', tmp_path, monkeypatch)
+    assert 'Synthetic mode: nothing is sent. Three wells, as each system returns them, are compared on this computer.' in text
+    assert 'SQL Server: 3 wells in EPSG:28992' in text and 'Oracle: 3 wells in EPSG:28992' in text
+    assert 'In both: 3 wells; in one only: 0; at other coordinates: 0' in text
+    assert 'ALO-01 in SQL Server: ALLARDSOOG-01 at x 217009.52200567, y 568544.1263913' in text
+    assert 'ALO-01 in Oracle: ALLARDSOOG-01 at x 217009.52200567, y 568544.1263913' in text
+    assert "Wells without an operator: {'SQL Server': 0, 'Oracle': 1}" in text
+
+
 def test_share_a_procedure_checks_and_runs_it_locally_and_adds_nothing_synthetic(tmp_path, monkeypatch):
     text = run('share-a-procedure', tmp_path, monkeypatch)
     assert 'Valid: Shift tops by a fixed depth, version 1. It reads Well tops (CSV) and makes Well tops (CSV).' in text
@@ -191,7 +202,7 @@ def test_who_has_access_until_when_reads_the_last_days_and_who_has_access_synthe
 
 
 def test_every_entry_is_listed_built_and_described():
-    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'grids-and-gis-files', 'how-was-this-made', 'open-it-here', 'a-spreadsheet-becomes-wells-and-tops', 'layers-for-a-gis', 'well-logs-in-a-bucket', 'share-a-procedure', 'who-has-access-until-when', 'a-spreadsheet-and-a-database-joined']
+    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'grids-and-gis-files', 'how-was-this-made', 'open-it-here', 'a-spreadsheet-becomes-wells-and-tops', 'layers-for-a-gis', 'well-logs-in-a-bucket', 'share-a-procedure', 'who-has-access-until-when', 'a-spreadsheet-and-a-database-joined', 'wells-from-sql-server-and-oracle']
     for entry in GALLERY['notebooks']:
         assert set(entry) == {'slug', 'title', 'sentence', 'modes', 'data'} and entry['modes'] == ['synthetic', 'live']
         script = (ROOT / 'notebooks' / entry['slug'] / 'notebook.py').read_text()

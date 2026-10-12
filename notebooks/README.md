@@ -20,6 +20,7 @@ Without `OPHIOLITE_URL` they work on a synthetic log served on the reader's own 
 | `share-a-procedure/` | A procedure checked and run on your computer, added privately, enabled, then trusted once and run by a colleague |
 | `who-has-access-until-when/` | The projects you reach and the last day your access to each lasts, and who has access to this project, through what, and until when |
 | `a-spreadsheet-and-a-database-joined/` | A spreadsheet kept as it is with its unit and missing-value marker, a database table read at its revision, and the two joined on the well name |
+| `wells-from-sql-server-and-oracle/` | The same table of wells read from SQL Server and from Oracle at their revisions, compared well by well and plotted |
 
 `gallery.json` lists every notebook (slug, title, sentence, modes, data); the documentation site's gallery page is
 generated from it. Each folder holds `notebook.py`, the percent script you edit, and `notebook.ipynb`, built from it:

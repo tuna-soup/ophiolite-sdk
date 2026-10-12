@@ -51,6 +51,8 @@ No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
   `SourceRevisionDiffers`, one that can no longer be read keeps the server's refusal. No pyarrow is needed to download.
   Command line: `ophiolite read-data --asset A --revision R --format parquet|geoparquet|csv --out FILE [--curve C]`.
   Gallery: "A spreadsheet and a database, joined".
+- Wells from SQL Server and Oracle (E61): a source selected from a SQL Server or Oracle table reads like any other
+  (`client.source(id).read(expect_revision=...).to_frame()`). Gallery: "Wells from SQL Server and Oracle".
 - Grids and GIS files (E56, preview API): `client.read_data` returns `FeatureSet` for map features from a Shapefile,
   a GeoPackage layer or a GeoJSON file (`features` in file order with coordinates as stored, `fields`, `to_frame()`
   with one row per feature), checked offline against the server's rules; ZMAP+, CPS-3 and IRAP grids read as
