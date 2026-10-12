@@ -40,6 +40,9 @@ def test_a_recipe_read_point_set_reads_with_kinded_columns_and_its_decisions():
     z = next(d for d in points.decisions if d.field == 'z_meaning')
     assert isinstance(z, Decision) and z.selected == 'time' and z.evidence[0].member == 'point-set-2.readme.txt' and z.evidence[0].locator == 'line 2'
     assert isinstance(points.recipe, Recipe) and points.recipe.default and len(points.recipe.sha256) == 64
+    assert repr(points.recipe) == '<Recipe the default reading of this kind of file>' and repr(z) == '<Decision Values: time>'
+    saved = Recipe({'reference': {'asset_id': 'asset-recipe-1', 'revision': 'f' * 64}, 'sha256': 'e' * 64})
+    assert repr(saved) == '<Recipe a reading saved in the project>' and saved.details()['asset_id'] == 'asset-recipe-1'
 
 
 def test_point_set_1_reads_and_frames_as_before():
@@ -58,8 +61,8 @@ def test_needs_decision_is_on_the_object():
     payload['context']['fidelity']['execution'].update(status='needs-decision', unresolved=['z_meaning'])
     descriptor['package'].update(status='needs-decision', unresolved=['z_meaning'])
     points = _core.typed_result(descriptor, rehash(descriptor, payload), original)
-    assert points.status == 'needs-decision' and points.unresolved == ['z_meaning'] and 'needs decision: z_meaning' in repr(points)
-    assert repr(next(d for d in points.decisions if d.field == 'z_meaning')) == '<Decision z_meaning: needs decision>'
+    assert points.status == 'needs-decision' and points.unresolved == ['z_meaning'] and repr(points) == '<PointSet 4 points (needs a decision: Values)>'
+    assert repr(next(d for d in points.decisions if d.field == 'z_meaning')) == '<Decision Values: needs a decision>'
 
 
 @pytest.mark.parametrize('edit,match', [

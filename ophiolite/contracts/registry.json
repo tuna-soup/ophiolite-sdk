@@ -125,7 +125,7 @@
     },
     {
       "id": "ophiolite.point-set/2",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "lifecycle": "preview",
       "path": "assets/v1/point-set-2-schema.json",
       "title": "PointSet2",
@@ -138,6 +138,14 @@
       "path": "assets/v1/import-recipe-schema.json",
       "title": "ImportRecipe",
       "description": "An import recipe: columns, parsing, observation rules with precedence, declarations and the registered operations declare, select-column and mark-missing."
+    },
+    {
+      "id": "ophiolite.import-recipe/2",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/import-recipe-2-schema.json",
+      "title": "ImportRecipe2",
+      "description": "An import recipe with the attributed decisions of people (E23b): /1 plus events (declare, select-evidence, clear, leave-unresolved, change), one current head per field."
     },
     {
       "id": "ophiolite/well-curve/1",

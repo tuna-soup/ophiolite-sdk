@@ -40,13 +40,13 @@ def schemas():
     """Publish the Pydantic-generated schemas listed in the registry."""
     from project_gateway.scientific_assets import (Asset, AssetSummary, Curve, ScientificContext, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface,
                                                    PointSet, PolylineSet, SeismicVolume, SeismicSlice, ImportRecipe, PointSet2,
-                                                   WellLocationUpload, WellLocation, Wavelet, ModelSection, SeismicSection, TimeDepth, FeatureSet)
+                                                   ImportRecipe2, WellLocationUpload, WellLocation, Wavelet, ModelSection, SeismicSection, TimeDepth, FeatureSet)
     from project_gateway.domain import RelationshipRegistry, Entity, EntityAssets, Lineage
     from project_gateway.scientific_assets import DerivationRecord, Parameters  # E94
     from project_gateway.scientific_assets import CheckRecord  # E96
     for model in (CheckRecord, DerivationRecord, Parameters, Asset, Curve, ScientificContext, AssetSummary, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface, PointSet, PolylineSet, SeismicVolume, SeismicSlice,
                   RelationshipRegistry, Entity, EntityAssets, Lineage, ImportRecipe, PointSet2, WellLocationUpload, WellLocation,
-                  Wavelet, ModelSection, SeismicSection, TimeDepth, FeatureSet):  # E53; E57; E56
+                  Wavelet, ModelSection, SeismicSection, TimeDepth, FeatureSet, ImportRecipe2):  # E53; E57; E56; E23b
         write(CONTRACTS / model.CONTRACT['path'], model.model_json_schema())
 
 

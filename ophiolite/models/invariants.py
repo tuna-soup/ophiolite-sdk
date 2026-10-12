@@ -365,6 +365,13 @@ def recipe_points(value, rows):
     require(len({d['field'] for d in f['decisions']}) == len(f['decisions']) and all(c[k] == decided.get(k, 'unknown') for k in RECIPE_FIELDS), 'The context is not the decided values')
     for d in f['decisions']:
         if d['status'] == 'decided': require(any(o['value'] == d['selected'] and o['sufficient'] for o in d['observations']), 'A decided field names no sufficient observation')
+        selection = d.get('selection')  # E23b point-set/2 1.1.0: a person's choice of one observation by its id
+        require((d['selected_by'] == 'selection') == (selection is not None), 'A selection does not name the observation it chose')
+        if selection is not None:
+            chosen = [o for o in d['observations'] if o.get('id') == selection['observation']]
+            require(chosen, 'A selection names no observation of its field')
+            require(not chosen[0].get('rejected'), 'A selection chose an observation marked rejected')
+            require(chosen[0]['value'] == d['selected'], 'A selection differs from the value of the observation it names')
     unresolved = [d['field'] for d in f['decisions'] if d['status'] != 'decided']
     require(f['execution']['unresolved'] == unresolved and f['execution']['status'] == ('decided' if not unresolved and not f['execution']['scientific_problems'] else 'needs-decision'), 'The execution status and the decisions disagree')
 
