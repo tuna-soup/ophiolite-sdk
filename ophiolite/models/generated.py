@@ -1185,7 +1185,7 @@ class BundleSelectedV2(Contract):
 
 class BundleFileV2(Contract):
     path: Annotated[str, Field(pattern='^assets/[0-9]{1,3}/[A-Za-z0-9._-]{1,120}$')] = Field(...)
-    role: Literal['original', 'descriptor', 'normalized', 'slice'] = Field(...)
+    role: Literal['original', 'descriptor', 'normalized', 'slice', 'package', 'companion', 'interpretation'] = Field(...)
     curve: Annotated[str, Field(min_length=1, max_length=80)] = Field(None)
     sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
     bytes: Annotated[int, Field(ge=0, le=33554432)] = Field(...)
@@ -1206,6 +1206,7 @@ class BundleAssetV2(Contract):
     relationships: BundleAssetV2Relationships = Field(None)
     original: BundleAssetV2Original = Field(None)
     slices: Annotated[list[BundleSliceV2], Field(min_length=1, max_length=64)] = Field(None)
+    package: BundlePackageV2 = Field(None)
 
 class BundleHistoryV2(Contract):
     number: Annotated[int, Field(ge=1)] = Field(...)
@@ -1230,11 +1231,37 @@ class BundleSliceV2(Contract):
     shape: Annotated[list[Annotated[int, Field(ge=1)]], Field(min_length=2, max_length=2)] = Field(...)
     scope: Annotated[str, Field(min_length=1, max_length=500)] = Field(...)
 
+class BundlePackageMemberV2(Contract):
+    name: Annotated[str, Field(min_length=1, max_length=200)] = Field(...)
+    role: Literal['primary', 'crs-metadata', 'readme', 'companion'] = Field(...)
+    sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    bytes: Annotated[int, Field(ge=1, le=33554432)] = Field(...)
+    file: Annotated[str, Field(pattern='^assets/[0-9]{1,3}/[A-Za-z0-9._-]{1,120}$')] = Field(...)
+
+class BundleRecipePinV2(Contract):
+    reference: None | BundleRecipePinV2Reference1 = Field(...)
+    sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+
+class BundlePackageV2(Contract):
+    package_digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    members: Annotated[list[BundlePackageMemberV2], Field(min_length=1, max_length=8)] = Field(...)
+    recipe: None | BundleRecipePinV2 = Field(...)
+    interpretation: None | Annotated[str, Field(pattern='^assets/[0-9]{1,3}/[A-Za-z0-9._-]{1,120}$')] = Field(...)
+
 class EntityAssets(Contract):
     schema_: Literal['ophiolite.entity-assets/1'] = Field(..., alias='schema')
     entity: EntityRef = Field(...)
-    items: Annotated[list[AssociatedRevision], Field(max_length=100)] = Field(...)
+    items: Annotated[list[AssociatedRevision], Field(max_length=100)] | Annotated[list[AssociatedEntityRevision], Field(max_length=100)] = Field(...)
     next_cursor: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(None)
+
+class AssociatedEntityRevision(Contract):
+    asset_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    row: Annotated[str, Field(min_length=1, max_length=160)] | None = Field(None)
+    profile: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    name: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    association: Association = Field(...)
+    entity: EntityRef = Field(...)
 
 class AssociatedRevision(Contract):
     asset_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
@@ -1789,6 +1816,10 @@ class BundleGroupV2Recommended1(Contract):
     at: float = Field(...)
     reason: Annotated[str, Field(min_length=1, max_length=500)] = Field(...)
 
+class BundleRecipePinV2Reference1(Contract):
+    asset_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    revision: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+
 class ContractProfileTable_Target1(Contract):
     none: Literal['normalized-form', 'read-by-recipe', 'not-a-table'] = Field(...)
 
@@ -1986,7 +2017,11 @@ BundleHistoryV2.model_rebuild()
 BundleGroupV2.model_rebuild()
 BundleSliceChoice.model_rebuild()
 BundleSliceV2.model_rebuild()
+BundlePackageMemberV2.model_rebuild()
+BundleRecipePinV2.model_rebuild()
+BundlePackageV2.model_rebuild()
 EntityAssets.model_rebuild()
+AssociatedEntityRevision.model_rebuild()
 AssociatedRevision.model_rebuild()
 Association.model_rebuild()
 EntityRef.model_rebuild()
@@ -2061,6 +2096,7 @@ PortableBundleManifestV2RelationshipsItem.model_rebuild()
 BundleAssetV2Relationships.model_rebuild()
 BundleAssetV2Original.model_rebuild()
 BundleGroupV2Recommended1.model_rebuild()
+BundleRecipePinV2Reference1.model_rebuild()
 ContractProfileTable_Target1.model_rebuild()
 RepresentationRulesArtifact_Kind_By_Origin.model_rebuild()
 CurvewindowIdentityNative.model_rebuild()

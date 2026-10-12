@@ -1,0 +1,122 @@
+{
+  "schema": "ophiolite.portable-bundle/2",
+  "bundle_version": "2.8.0",
+  "created_at": "2026-10-12T00:00:00Z",
+  "exporter": {
+    "name": "ophiolite-sdk",
+    "version": "0.1.0"
+  },
+  "scope": "selection",
+  "selection": [
+    {
+      "asset_id": "synthetic-petrel-points",
+      "revision": "c3070963e51644452b9fbdcfed354579d03259a5ee20ad7dae5909bc908d2dfb",
+      "curves": []
+    }
+  ],
+  "assets": [
+    {
+      "asset_id": "synthetic-petrel-points",
+      "revision": "c3070963e51644452b9fbdcfed354579d03259a5ee20ad7dae5909bc908d2dfb",
+      "origin": "retained-capture",
+      "profile": "petrel-points-attributes/1",
+      "name": null,
+      "files": [
+        {
+          "path": "assets/0/original.txt",
+          "role": "original",
+          "sha256": "c3070963e51644452b9fbdcfed354579d03259a5ee20ad7dae5909bc908d2dfb",
+          "bytes": 423
+        },
+        {
+          "path": "assets/0/descriptor.json",
+          "role": "descriptor",
+          "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "bytes": 12000
+        },
+        {
+          "path": "assets/0/data.json",
+          "role": "normalized",
+          "sha256": "8930eb160145033bbe5a461e790c066cdd025fda1127d85eb75b127e76ce25d9",
+          "bytes": 8483
+        },
+        {
+          "path": "assets/0/package.json",
+          "role": "package",
+          "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "bytes": 700
+        },
+        {
+          "path": "assets/0/interpretation.json",
+          "role": "interpretation",
+          "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "bytes": 4000
+        },
+        {
+          "path": "assets/0/companion-1.bin",
+          "role": "companion",
+          "sha256": "059fd3ba90975429682cc08221cafc55a48182a5da3d4cf651b5a3d9593e2549",
+          "bytes": 114
+        },
+        {
+          "path": "assets/0/companion-2.bin",
+          "role": "companion",
+          "sha256": "7f90ca1184f3af05cae6bdb28499db5992ee3c7d9edcf00f95b8e6d629833905",
+          "bytes": 177
+        }
+      ],
+      "history": null,
+      "parents": [],
+      "parent_visibility": "complete",
+      "relationships": {
+        "well_log": null
+      },
+      "omissions": [
+        "Synthetic offline fixture, not a server publication"
+      ],
+      "losses": [
+        "Comment lines and number spelling are kept only in the exact original"
+      ],
+      "type": "point-set",
+      "package": {
+        "package_digest": "90524498601813dd6c8ed5991f5fa7e8499ea2f2f739c4e3b6846056014def63",
+        "members": [
+          {
+            "name": "point-set-2.crsmeta.xml",
+            "role": "crs-metadata",
+            "sha256": "059fd3ba90975429682cc08221cafc55a48182a5da3d4cf651b5a3d9593e2549",
+            "bytes": 114,
+            "file": "assets/0/companion-1.bin"
+          },
+          {
+            "name": "point-set-2.original",
+            "role": "primary",
+            "sha256": "c3070963e51644452b9fbdcfed354579d03259a5ee20ad7dae5909bc908d2dfb",
+            "bytes": 423,
+            "file": "assets/0/original.txt"
+          },
+          {
+            "name": "point-set-2.readme.txt",
+            "role": "readme",
+            "sha256": "7f90ca1184f3af05cae6bdb28499db5992ee3c7d9edcf00f95b8e6d629833905",
+            "bytes": 177,
+            "file": "assets/0/companion-2.bin"
+          }
+        ],
+        "recipe": {
+          "reference": null,
+          "sha256": "23d6174b8a62a1399177c1b298f174f23b9d778a62b7422537bc5201c5a9515c"
+        },
+        "interpretation": "assets/0/interpretation.json"
+      }
+    }
+  ],
+  "groups": null,
+  "recommendations": null,
+  "limits": {
+    "max_assets": 128,
+    "max_file_bytes": 33554432,
+    "max_total_bytes": 536870912
+  },
+  "notice": "Checksums show integrity, not authorship or scientific correctness."
+}
