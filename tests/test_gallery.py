@@ -166,8 +166,15 @@ def test_well_logs_in_a_bucket_pins_its_logs_and_reports_a_changed_one_synthetic
     assert 'After W-1/gamma.las changed: a different digest; reading it reports that the revision is unavailable' in text
 
 
+def test_public_repository_to_map_draws_what_nlog_listed_and_sends_nothing_synthetic(tmp_path, monkeypatch):
+    text = run('public-repository-to-map', tmp_path, monkeypatch)
+    assert 'Synthetic mode: nothing is sent. NLOG listed 4 wells for HON-GT:' in text
+    assert 'HON-GT-01: position (75242.83, 448081.04, Dutch RD) · 24 formation tops · 1 deviation survey (67 stations)' in text
+    assert 'in your project the 4 wells would be added at these positions, each with the line "Source: NLOG.NL"' in text
+
+
 def test_every_entry_is_listed_built_and_described():
-    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'grids-and-gis-files', 'how-was-this-made', 'open-it-here', 'a-spreadsheet-becomes-wells-and-tops', 'layers-for-a-gis', 'well-logs-in-a-bucket']
+    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'grids-and-gis-files', 'how-was-this-made', 'open-it-here', 'a-spreadsheet-becomes-wells-and-tops', 'layers-for-a-gis', 'well-logs-in-a-bucket', 'public-repository-to-map']
     for entry in GALLERY['notebooks']:
         assert set(entry) == {'slug', 'title', 'sentence', 'modes', 'data'} and entry['modes'] == ['synthetic', 'live']
         script = (ROOT / 'notebooks' / entry['slug'] / 'notebook.py').read_text()

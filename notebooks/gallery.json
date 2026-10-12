@@ -91,6 +91,13 @@
       "sentence": "Browse a folder of well logs in your organisation's storage bucket, add it read from your storage each time, and see why a file that later changes is reported instead of read.",
       "modes": ["synthetic", "live"],
       "data": "Two synthetic gamma-ray logs made on your computer, or a folder of a storage connection your organisation added; nothing is written to your storage."
+    },
+    {
+      "slug": "public-repository-to-map",
+      "title": "Wells from NLOG on a map",
+      "sentence": "Search the Dutch oil and gas portal NLOG for wells, see what it holds for each one, bring their positions into your project and draw them on a map.",
+      "modes": ["synthetic", "live"],
+      "data": "What NLOG listed for the HON-GT wells on 1 October 2026 (Source: NLOG.NL), or NLOG itself through your project; bringing wells in creates wells only you can see until you share them."
     }
   ]
 }
