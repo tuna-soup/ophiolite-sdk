@@ -28,13 +28,16 @@ VERSION_2 = '2.0.0'
 TYPED_ORIGINALS = {'well-tops-csv/1': 'original.csv', 'deviation-csv/1': 'original.csv', 'esri-ascii-grid/1': 'original.asc', 'mesh-text/1': 'original.txt', 'points-csv/1': 'original.csv',
                    'opendtect-faultsticks/1': 'original.txt', 'wavelet-text/1': 'original.txt', 'model-section-text/1': 'original.txt', 'seismic-section-text/1': 'original.txt',
                    'time-depth-csv/1': 'original.csv', 'zmap-plus-grid/1': 'original.zmap', 'cps3-ascii-grid/1': 'original.cps3', 'irap-ascii-grid/1': 'original.irap',
-                   'geojson/1': 'original.geojson', 'ogc-geopackage/1': 'original.gpkg'}  # E56
+                   'geojson/1': 'original.geojson', 'ogc-geopackage/1': 'original.gpkg',  # E56
+                   'petrel-points-attributes/1': 'original.txt', 'opendtect-horizon-ascii/1': 'original.txt', 'esri-shapefile/1': 'original.shp'}  # E23c: package primaries
 NEWER_TYPES = {'triangulated-surface': 2, 'point-set': 2, 'polyline-set': 3, 'seismic-slice': 3, 'wavelet': 5, 'model-section': 5, 'seismic-section': 5, 'time-depth': 6,
                'feature-set': 7}  # the 2.x minor that introduced them
 # E56: grids of the new formats are a known type with an original an older reader cannot send back; they need 2.7 too
 NEWER_PROFILES = {'zmap-plus-grid/1': 7, 'cps3-ascii-grid/1': 7, 'irap-ascii-grid/1': 7}
 TYPES_2 = ('well-log', 'well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-slice',
            'wavelet', 'model-section', 'seismic-section', 'time-depth', 'feature-set')  # 2.5 (E53); 2.6 (E57); 2.7 (E56)
+NOT_IMPORTED_PACKAGE = 'Importing a file that comes with companion files is not available yet.'
+PACKAGE_TYPES, PACKAGE_ROLES, PACKAGE_MINOR = ('point-set', 'feature-set'), ('package', 'companion', 'interpretation'), 8  # E23c (bundle 2.8)
 NOT_IMPORTED_SYNTHETIC = ('A synthetic section is not imported: its model and wavelet are not part of the project it would join. '
                           'Import them and compute it again.')
 SLICE_NAME = re.compile(r'^slice-(inline|crossline|sample)-(-?[0-9]{1,9})\.json$')
@@ -85,6 +88,7 @@ class BundleAsset:
         self.origin = entry['origin']; self.history = entry.get('history'); self.parents = entry['parents']
         self.parent_visibility = entry['parent_visibility']; self.original = original; self.curves = curves
         self.type = entry.get('type', 'well-log'); self.data = data; self.relationships = entry.get('relationships')
+        self.package = None  # 2.8 (E23c): the source package, its companions and interpretation (bundle_package.Package)
 
 
 class Bundle:
@@ -234,7 +238,7 @@ def open_bundle(path):
     for index, entry in enumerate(entries):
         files = entry.get('files')
         if not isinstance(files, list) or not files: raise VerificationFailed('An asset lists no files.')
-        content = {}
+        content, raw_by_path = {}, {}
         for item in files:
             relative = item.get('path') if isinstance(item, dict) else None
             if not isinstance(relative, str) or not PATH.fullmatch(relative) or PurePosixPath(relative).parts[1] != str(index):
@@ -250,7 +254,8 @@ def open_bundle(path):
             if not target.is_file() or target.stat().st_size != size: raise VerificationFailed('A bundle file is missing or has the wrong size.')
             raw = target.read_bytes()
             if hashlib.sha256(raw).hexdigest() != item.get('sha256'): raise VerificationFailed('A bundle file does not match its checksum.')
-            content.setdefault(item.get('role'), {})[relative if item.get('role') == 'slice' else item.get('curve')] = raw
+            content.setdefault(item.get('role'), {})[relative if item.get('role') in ('slice', 'companion') else item.get('curve')] = raw
+            raw_by_path[relative] = raw
         chosen = selection[index] if isinstance(selection[index], dict) else {}
         if (chosen.get('asset_id'), chosen.get('revision')) != (entry.get('asset_id'), entry.get('revision')):
             raise VerificationFailed('An asset is not the exact revision that was selected.')
@@ -261,10 +266,11 @@ def open_bundle(path):
             raise VerificationFailed('Only seismic slices omit their original.')
         if kind == 'seismic-slice':  # 2.3: slices of a volume; the original is named by digest, not carried
             loaded.append(_slice_asset(entry, chosen, content, files)); continue
-        if roles.count('original') != 1 or set(roles) - {'original', 'descriptor', 'normalized'}:
+        known = {'original', 'descriptor', 'normalized'} | (set(PACKAGE_ROLES) if kind in PACKAGE_TYPES else set())  # 2.8 (E23c)
+        if roles.count('original') != 1 or set(roles) - known:
             raise VerificationFailed('Bundle 1.0 carries exactly one original per asset and only known file roles.')
         if kind != 'well-log':
-            loaded.append(_typed_asset(entry, chosen, content, files, kind)); continue
+            loaded.append(_typed_asset(entry, chosen, content, files, kind, raw_by_path.__getitem__)); continue
         if sorted(content.get('descriptor', {})) != sorted(chosen.get('curves') or []) or sorted(content.get('normalized', {})) != sorted(chosen.get('curves') or []):
             raise VerificationFailed('The curve files are not exactly the selected curves.')
         original = content.get('original', {}).get(None)
@@ -362,9 +368,9 @@ def _check_groups(manifest, entries):
             raise VerificationFailed('A group recommends a version that is not in this bundle.')
 
 
-def _typed_asset(entry, chosen, content, files, kind):
-    from . import _core
-    if chosen.get('curves') != [] or roles_of(files) != ['descriptor', 'normalized', 'original'] or any(item.get('curve') is not None for item in files):
+def _typed_asset(entry, chosen, content, files, kind, raw_of):
+    from . import _core, bundle_package
+    if chosen.get('curves') != [] or [r for r in roles_of(files) if r not in PACKAGE_ROLES] != ['descriptor', 'normalized', 'original'] or any(item.get('curve') is not None for item in files):
         raise VerificationFailed('A typed asset carries exactly one original, one descriptor and one data file, and no curves.')
     wire_descriptor = _finite_json(content['descriptor'][None], 'A descriptor'); body = content['normalized'][None]; _finite_json(body, 'Typed data')
     if (wire_descriptor.get('asset_id'), wire_descriptor.get('revision')) != (entry.get('asset_id'), entry.get('revision')):
@@ -372,8 +378,10 @@ def _typed_asset(entry, chosen, content, files, kind):
     if (wire_descriptor.get('scientific') or {}).get('type') != kind: raise VerificationFailed('The manifest disagrees with a descriptor (type).')
     for field in ('origin', 'profile', 'parents', 'parent_visibility', 'relationships'):
         if wire_descriptor.get(field, 'complete' if field == 'parent_visibility' else None) != entry.get(field): raise VerificationFailed('The manifest disagrees with a descriptor (' + field + ').')
+    package = bundle_package.check(entry, files, raw_of, wire_descriptor, json.loads(body))  # 2.8 (E23c): before the data is used
     data = _core.typed_result(wire_descriptor, body, content['original'][None])
-    return BundleAsset(entry, content['original'][None], {}, data)
+    loaded = BundleAsset(entry, content['original'][None], {}, data); loaded.package = package
+    return loaded
 
 
 def _slice_asset(entry, chosen, content, files):
@@ -461,18 +469,19 @@ def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=
             if getattr(read, 'type', None) == 'seismic-volume': raise Refused('A seismic volume is exported as chosen slices; the complete volume is not exported.')
             if hasattr(read, '_wire_data_bytes'):  # E11 typed data: exact original, descriptor and data as served
                 first = read._wire_descriptor
-                if first.get('package') is not None:  # E23a: until E23c the package and its decisions have no bundle form
-                    if first['scientific']['type'] == 'feature-set':  # E56 (K9): a Shapefile is read from its members
-                        raise Refused('Portable export is not yet supported for this feature set: a Shapefile-read feature set carries its companion files, which a bundle cannot hold yet.')
-                    raise Refused('Portable export is not yet supported for this type: a recipe-read point set carries its source package and decisions, which a bundle cannot hold yet.')
                 files = [put(folder + TYPED_ORIGINALS[first['profile']], read.original, 'original'),
                          put(folder + 'descriptor.json', (json.dumps(first, indent=2, allow_nan=False) + '\n').encode(), 'descriptor'),
                          put(folder + 'data.json', read._wire_data_bytes, 'normalized')]
+                block = None
+                if first.get('package') is not None:  # E23c (2.8): the package, its companions and the interpretation travel too
+                    from .bundle_package import write_files
+                    more, block = write_files(read, folder, put, files[0]['path']); files += more
                 assets.append({'asset_id': first['asset_id'], 'revision': first['revision'], 'origin': first['origin'], 'profile': first['profile'],
                                'type': first['scientific']['type'], 'name': None, 'files': files, 'history': first.get('history'), 'parents': first.get('parents', []),
                                'parent_visibility': first.get('parent_visibility', 'complete'), 'relationships': first.get('relationships'),
                                'omissions': list(first.get('provenance', {}).get('omissions', [])),
                                'losses': sorted({loss for r in first.get('representations', []) for loss in r.get('losses', [])})})
+                if block is not None: assets[-1]['package'] = block
                 selection.append({**chosen, 'curves': []}); continue
             files = [put(folder + 'original.las', read.artifact, 'original')]
             first = read._wire_descriptors[0]
@@ -492,7 +501,8 @@ def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=
                         **({'entities_omitted': entities_omitted} if entities_omitted else {})}  # E22b: why no wells travel
         # The lowest version that expresses this content: 1.x for well logs, 2.x for typed data;
         # the minor rises only for observations (1) or the newer types (2), so older readers keep working.
-        minor = max([1 if observations else 0, 4 if graph else 0] + [max(NEWER_TYPES.get(a.get('type'), 0), NEWER_PROFILES.get(a.get('profile'), 0)) for a in assets])
+        minor = max([1 if observations else 0, 4 if graph else 0] + [max(NEWER_TYPES.get(a.get('type'), 0), NEWER_PROFILES.get(a.get('profile'), 0)) for a in assets]
+                    + [PACKAGE_MINOR for a in assets if 'package' in a])  # E23c: 2.8 only for an asset with a package
         version = ('2' if typed_bundle else '1') + f'.{minor}.0'
         manifest = {'schema': SCHEMA_2 if typed_bundle else SCHEMA, 'bundle_version': version, 'created_at': datetime.now(timezone.utc).isoformat(timespec='seconds'),
                     'exporter': {'name': 'ophiolite-sdk', 'version': __version__}, 'scope': 'selection', 'selection': selection, 'assets': assets,
@@ -579,6 +589,8 @@ def import_plan(bundle, well_logs):
         def refuse(reason): steps.append({**step, 'state': 'refused', 'reason': reason})
         if asset.original is None:
             refuse('This bundle carries no original for it (a seismic slice is not the volume)'); continue
+        if asset.package is not None:  # E23c: re-import of a package follows E23b2's upload flow (C7)
+            refuse(NOT_IMPORTED_PACKAGE); continue
         if asset.type == 'seismic-section' and asset.data.context['origin'] == 'synthetic':
             refuse(NOT_IMPORTED_SYNTHETIC); continue  # E53: a synthetic exists only with its parents
         original = next(f for f in entry['files'] if f['role'] == 'original')

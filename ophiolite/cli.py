@@ -190,6 +190,7 @@ def parser():
     tables.add_argument('name',nargs='?',help='One type, for example well-tops')
     bundle=sub.add_parser('bundle',help='Check or summarize a portable bundle offline (no server or account needed)')
     bundle.add_argument('action',choices=['check','show','pack']);bundle.add_argument('path',type=Path);bundle.add_argument('archive',type=Path,nargs='?',help='pack: the .zip to write')
+    bundle.add_argument('--details',action='store_true',help='show: also the identifiers, checksums and recorded terms')  # E23c (C4)
     export=sub.add_parser('export',help='Export exact revisions into a new portable bundle')
     export.add_argument('--configuration',type=Path,default=Path('configuration.json'))
     export.add_argument('--credentials',type=Path)
@@ -1265,7 +1266,12 @@ def _main(argv=None):
         if args.action=='check':
             return done(args,'Bundle verified: %d exact revisions, %d curves, %d other data. Checksums show integrity, not authorship.' % (len(opened.assets),sum(len(a.curves) for a in opened.assets),sum(a.data is not None for a in opened.assets)),
                         {'verified':True,'revisions':len(opened.assets),'curves':sum(len(a.curves) for a in opened.assets),'other_data':sum(a.data is not None for a in opened.assets)})
-        print(json.dumps({**opened.summary(),'items':[{'asset_id':a.asset_id,'revision':a.revision,'name':a.name,'type':a.type,'curves':sorted(a.curves),'history':a.history,'parent_visibility':a.parent_visibility} for a in opened.assets]},indent=2));return
+        if not args.details:  # E23c (C4, D5): words by default; identifiers, checksums and manifest terms only with --details
+            from .bundle_package import show_words
+            print(show_words(opened));return
+        print(json.dumps({**opened.summary(),'items':[{'asset_id':a.asset_id,'revision':a.revision,'name':a.name,'type':a.type,'curves':sorted(a.curves),'history':a.history,'parent_visibility':a.parent_visibility,
+                                                       **({'package':{'package_digest':a.package.digest,'members':a.package.members,'recipe':a.package.recipe,'decisions':a.package.decisions}} if a.package is not None else {})}
+                                                      for a in opened.assets]},indent=2));return
     _load()
     if args.command=='doctor':return _doctor(args)
     config=configuration(args.configuration)

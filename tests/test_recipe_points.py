@@ -8,7 +8,7 @@ import json
 from importlib.resources import files
 
 import pytest
-from ophiolite import _core, bundle, validate
+from ophiolite import _core, bundle, bundle_package, validate
 from ophiolite.errors import Refused, VerificationFailed
 from ophiolite.models import invariants as rules
 from ophiolite.typed import Decision, PointSet, Recipe
@@ -92,8 +92,9 @@ def test_the_artifact_is_matched_by_kind_exactly():
     assert rules.artifact(extra)['id'] == 'artifact'  # a third kind is never mistaken for the artifact
 
 
-def test_portable_export_refuses_a_recipe_read_point_set(tmp_path):
-    points = _core.typed_result(*load())
+def test_portable_export_of_a_recipe_read_point_set_needs_its_package_rows(tmp_path):
+    points = _core.typed_result(*load())  # E23c: exported with Client.export, which reads the package rows (tests/test_bundle_package.py)
     chosen = {'asset_id': points._wire_descriptor['asset_id'], 'revision': points._wire_descriptor['revision'], 'curves': None}
-    with pytest.raises(Refused, match='^Portable export is not yet supported for this type'): bundle.write_bundle(tmp_path / 'b', [(chosen, points)])
+    with pytest.raises(Refused) as refused: bundle.write_bundle(tmp_path / 'b', [(chosen, points)])
+    assert str(refused.value) == bundle_package.NO_ROWS
     assert not (tmp_path / 'b').exists()
