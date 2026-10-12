@@ -419,13 +419,16 @@ class UploadRuns:
         return report
 
     def upload(self, path, *, attribution=None, rights_confirmed, audience=None, well_notes='', declare=None, skip_decisions=False,
-               associate_matches=False, new=False, progress=None, use_project_defaults=False):
+               associate_matches=False, new=False, progress=None, use_project_defaults=False, scientific=None):
         """Upload a file, a folder, a .zip or an https address and return its Report. `declare` {kind: {field: value}} answers the files of that
         kind (profile, e.g. 'esri-ascii-grid/1') that need you to say what their values mean; `skip_decisions` skips
         every other file that needs a decision; `associate_matches` links each file to the one wellbore its header names.
         `progress(report)` is called after each file. E90: `attribution` None and `audience` None ('project' needs it to be
         the project's setting; 'me' is no one else) take the project's New data settings; a `declare` value 'project-default'
-        or `use_project_defaults` keeps the project's default for a field a file leaves open."""
+        or `use_project_defaults` keeps the project's default for a field a file leaves open. E23b: `scientific`
+        (`recipes.Choices`) reads each Petrel or OpendTect point export of the kinds it names with those decisions, each with
+        its reason, and adds it with the receipt of that preview; one that still needs a decision refuses the upload before
+        anything is sent, with what is open."""
         if rights_confirmed is not True:
             raise ValidationFailed(['Confirm that you may retain these files, derive results and share them within the audience.'])
         if not isinstance(path, (str, os.PathLike)):  # E56 (F1): a path is read and digested here; an open stream is not
@@ -433,12 +436,19 @@ class UploadRuns:
         checked_declarations(declare)
         folder = self.fetched(path) if is_address(path) else self.open(path)
         checked_declarations(declare, folder)
-        run = None if new else self.unfinished(folder)
+        pins = {path: seen.pin() for path, seen in self.inspected(folder, scientific).items()} if scientific else {}
+        run = None if new else self.unfinished(folder, pins)
         if run is None:
             body = {'command_id': uuid.uuid4().hex, 'folder_name': folder.name[:160], 'files': folder.listing(),
                     'well_notes': well_notes, 'rights_confirmed': True, **({'address': folder.address} if folder.address else {})}
             body.update(self.defaults(folder, attribution, audience, declare, use_project_defaults))
-            run = self._call('start', body, UploadRun)['run_id']
+            if pins: body['files'] = [{**f, **pins.get(f['path'], {})} for f in body['files']]
+            try: run = self._call('start', body, UploadRun)['run_id']
+            except OphioliteError as error:  # E23b: a preview older than a day (or read otherwise since) is looked at again, once
+                if error.code != 'preview-again' or not pins: raise
+                pins = {path: seen.pin() for path, seen in self.inspected(folder, scientific).items()}
+                body.update(command_id=uuid.uuid4().hex, files=[{**f, **pins.get(f['path'], {})} for f in body['files']])
+                run = self._call('start', body, UploadRun)['run_id']
         report = self.send(run, folder, progress)
         for _ in range(SENDS - 1):  # E56 (N8): a file may ask again once it is read (a layer, corners); answered from `declare`
             if not self.answer(run, report, declare, folder): break
@@ -472,11 +482,7 @@ class UploadRuns:
         """One file's decisions when it keeps a project default: its kind from the deployment's check of its head, the
         values `declare` gives that kind (typed ones are yours), and the defaults kept."""
         file = next(f for f in folder.files if f.path == listed['path'])
-        if folder.address: found = self.check(folder.address)  # the gateway reads the address again; nothing is sent from here
-        else:
-            header = {'project_id': self.client.project, 'name': file.path, 'bytes': file.size, 'mode': 'head', 'sha256': file.sha256}
-            extra = {'Content-Type': 'application/octet-stream', 'X-Ophiolite-Upload': base64.b64encode(json.dumps(header, separators=(',', ':')).encode()).decode()}
-            found = _checked(UploadCheckAnswer, self.client._post_bytes('upload-runs', 'check', file.head(), extra_headers=extra, retry=True), 'file check')
+        found = self.check(folder.address) if folder.address else self.head_check(file)  # an address is read again by the gateway
         if not found.get('kind'): return {}
         if found.get('defaults_revision') != revision: raise Refused(MOVED)
         values = declared_for(declare, folder.files, {'path': file.path, 'profile': found['kind']['profile']}) or {}
@@ -486,6 +492,29 @@ class UploadRuns:
         missing = [k for k in keep if k not in offered]
         if missing: raise Refused('The project has no default %s for %s; give a value instead.' % (', '.join(missing), file.path))
         return {'decisions': typed, 'suggested': keep} if keep or typed else {}
+
+    def head_check(self, file):
+        """The deployment's check of a file's head: its kind, what it states and leaves open; nothing is kept."""
+        header = {'project_id': self.client.project, 'name': file.path, 'bytes': file.size, 'mode': 'head', 'sha256': file.sha256}
+        extra = {'Content-Type': 'application/octet-stream', 'X-Ophiolite-Upload': base64.b64encode(json.dumps(header, separators=(',', ':')).encode()).decode()}
+        return _checked(UploadCheckAnswer, self.client._post_bytes('upload-runs', 'check', file.head(), extra_headers=extra, retry=True), 'file check')
+
+    def inspected(self, folder, choices, ready=True):
+        """E23b: {path: recipes.Inspection} of each point export of the folder that `choices` names (by its kind, as the
+        deployment's check of its head says); refused with what is open while any still needs a decision."""
+        from . import recipes
+        if folder.address or folder.connection: raise Refused('Decisions for a point export are sent with its files; choose a file or a folder on this computer.')
+        exts = {e for r in readers() if r['profile'] in recipes.PROFILES for e in r['extensions']}
+        kinds = {}
+        for f in folder.files:
+            name = PurePosixPath(f.path).name
+            if name == 'README.txt' or name.endswith('.crsmeta.xml') or PurePosixPath(name).suffix.lower() not in exts: continue
+            profile = (self.head_check(f).get('kind') or {}).get('profile')
+            if profile in recipes.PROFILES and choices.given(profile): kinds[f.path] = profile
+        if not kinds: raise Refused('No Petrel or OpendTect point export of these files takes these decisions.')
+        seen = recipes.Scientific(self.client).inspect(folder, choices, kinds)
+        if ready and not all(i.ready for i in seen.values()): raise Refused('\n'.join(line for i in seen.values() for line in i.lines()), code='needs-decision')
+        return seen
 
     def answer(self, run, report, declare, folder):
         """Answer from `declare` each file that waits for declarations and is told something it asks; True if any was."""
@@ -501,7 +530,7 @@ class UploadRuns:
             self.decide(run, [item['ordinal']], 'declare', values); answered = True
         return answered
 
-    def unfinished(self, folder):
+    def unfinished(self, folder, pins=None):
         """The id of your unfinished upload of this folder (the same name, paths, sizes and digests), or None. An upload
         whose files all ended but one still waits for a decision is unfinished too (E56, N8): `declare` may answer it now."""
         listing = folder.listing()
@@ -509,7 +538,8 @@ class UploadRuns:
             if summary['state'] not in ('open', 'closed') or summary['folder_name'] != folder.name[:160]: continue
             view = self.status(summary['run_id']).view
             if summary['state'] == 'closed' and not any(i['state'] == 'needs-decision' and i['role'] == 'primary' for i in view['items']): continue
-            if [{'path': i['path'], 'bytes': i['bytes'], 'sha256': i['sha256']} for i in view['items']] == listing: return summary['run_id']
+            if [{'path': i['path'], 'bytes': i['bytes'], 'sha256': i['sha256']} for i in view['items']] != listing: continue
+            if all(i.get('scientific_decisions') == (pins or {}).get(i['path'], {}).get('scientific_decisions') for i in view['items']): return summary['run_id']  # E23b: only with the set it started with
         return None
 
     def send(self, run_id, folder, progress=None, passes=3):

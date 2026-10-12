@@ -313,7 +313,10 @@ def parser():
     upload.add_argument('--associate-matches',action='store_true',help='Link each file to the one wellbore whose name its header names')
     upload.add_argument('--report',type=Path,help='Write the report to this .csv (or .json) file')
     upload.add_argument('--new',action='store_true',help='Start another upload instead of continuing the unfinished upload of this folder')
-    upload.add_argument('--layout',metavar='NAME',help='A table file: add it with this project layout\'s mapping (E89). Without it a table that matches a layout is not added')
+    upload.add_argument('--layout',metavar='NAME',help='A table file: add it with this project layout\'s mapping (E89). Without it a table that matches a layout is not added. A Petrel or OpendTect point export: read it with this reading layout (E23b)')
+    inspect=project(sub.add_parser('inspect',help='How Petrel or OpendTect point exports are read with your decisions, before adding them; nothing is added (E23b)'))
+    inspect.add_argument('paths',nargs='+',metavar='PATH',help='The files (or one folder or .zip): each point export with its README and coordinate file')
+    for p in (upload,inspect):scientific_options(p)
     init=sub.add_parser('init',help='Start an application from a packaged template (map-application, derive-and-publish, sync-worker, notebook, agent-workflow)')
     init.add_argument('template',nargs='?',help='The template name; omit with --list');init.add_argument('--output',type=Path,help='An empty or new folder (default: ./TEMPLATE)')
     init.add_argument('--list',action='store_true',help='List the packaged templates')
@@ -360,6 +363,40 @@ def parser():
     skills=sub.add_parser('skills',help='Locate packaged SDK guidance')
     skills.add_subparsers(dest='action',required=True).add_parser('path')
     return parser
+
+
+def scientific_options(p):
+    """E23b: what a person says about a Petrel or OpendTect point export, each with a reason (KIND is its profile)."""
+    p.add_argument('--why',action='append',default=[],metavar='KIND:KEY=TEXT',help='Why you declare, select or leave a field of a point export (at most 120 characters; repeat)')
+    p.add_argument('--select',action='append',default=[],metavar='KIND:KEY=VALUE',help='A point export: use the value the files state for this field (repeat)')
+    p.add_argument('--leave-unresolved',action='append',default=[],metavar='KIND:KEY',help='A point export: add it with this field open (not in a project that needs complete context; repeat)')
+    p.add_argument('--config',type=Path,metavar='FILE',help='A point export: changes to how it is read, {"kind": KIND, "changes": [...]} (an unsaved draft)')
+    p.add_argument('--details',action='store_true',help='Also print the technical particulars (ids, digests, the preview receipt)')
+    if p.prog.endswith('inspect'):
+        p.add_argument('--declare',action='append',default=[],metavar='KIND:KEY=VALUE',help='Declare what a field of that kind\'s files means (repeat; with --why)')
+        p.add_argument('--layout',metavar='NAME',help='Read the point exports with this reading layout')
+
+
+def _choices(args,every=False):
+    """E23b: the scientific options as recipes.Choices, or None; a point export's --declare joins them (it needs --why)."""
+    from .recipes import PROFILES,Choices
+    declared=_declarations(args.declare)
+    left={}
+    for text in args.leave_unresolved:
+        kind,_,key=text.partition(':')
+        if not (kind and key):raise Refused('Give each field left open as KIND:KEY, for example petrel-points-attributes/1:vertical_datum.')
+        left.setdefault(kind,[]).append(key)
+    changes={}
+    if args.config:
+        try:config=json.loads(args.config.read_text())
+        except (OSError,ValueError):raise Refused('Cannot read %s as JSON.' % args.config.name) from None
+        if not isinstance(config,dict) or config.get('kind') not in PROFILES or not isinstance(config.get('changes'),list):
+            raise Refused('A --config file is {"kind": "petrel-points-attributes/1" or "opendtect-horizon-ascii/1", "changes": [...]}.')
+        changes={config['kind']:config['changes']}
+    choices=Choices({k:v for k,v in declared.items() if k in PROFILES},_declarations(args.why),_declarations(args.select),left,changes,args.layout,every=every)
+    named=set(choices.why)|set(choices.select)|set(left)
+    if named-set(PROFILES):raise Refused('--why, --select and --leave-unresolved are for Petrel and OpendTect point exports (%s).' % ', '.join(PROFILES))
+    return choices if every or named or changes or choices.declare or args.layout else None
 
 
 def _discover(args):
@@ -779,11 +816,13 @@ def _upload(args,client):
     runs=client.upload_runs
     def progress(report):
         if not args.json:print('Adding files... %d of %d.' % (sum(v for k,v in report.counts.items() if k!='not-sent'),report.view['files']),file=sys.stderr,flush=True)
+    from .recipes import PROFILES
     from .upload_runs import NO_ATTRIBUTION, is_address
+    scientific=_choices(args)
     try:
         report=runs.upload(args.path if is_address(args.path) else Path(args.path),attribution=args.attribution,audience=_audience_given(args.audience),rights_confirmed=True,
-                           well_notes=args.well_notes,declare=_declarations(args.declare),skip_decisions=args.skip_decisions,associate_matches=args.associate_matches,new=args.new,
-                           progress=progress,use_project_defaults=args.use_project_defaults)
+                           well_notes=args.well_notes,declare={k:v for k,v in _declarations(args.declare).items() if k not in PROFILES},skip_decisions=args.skip_decisions,
+                           associate_matches=args.associate_matches,new=args.new,progress=progress,use_project_defaults=args.use_project_defaults,scientific=scientific)
     except Refused as error:
         if str(error)!=NO_ATTRIBUTION:raise
         if args.json:print(json.dumps({'error':{'code':'usage','message':NO_ATTRIBUTION}},indent=2))
@@ -791,12 +830,34 @@ def _upload(args,client):
         raise SystemExit(EXIT['usage'])
     if args.report:report.save(args.report)
     wells=_named_wells(client,report.run_id)
-    done(args,report.text()+('\n'+wells if wells else '')+('\nReport written to %s' % args.report if args.report else ''),{'upload':report.view})
+    details='\nTechnical details:\n'+json.dumps(report.view,indent=1,default=str) if args.details else ''
+    done(args,report.text()+('\n'+wells if wells else '')+('\nReport written to %s' % args.report if args.report else '')+details,{'upload':report.view})
     report.exit_code=0 if report.ok else EXIT['conflict']
     return report
 
 
+def _inspect(args,client):
+    """E23b: each point export of PATH... read with the decisions given; exit 0 when every one can be added, 4 when any
+    still needs a decision. Nothing is added."""
+    from .upload_runs import Folder
+    runs=client.upload_runs
+    files=[f for path in args.paths for f in runs.open(Path(path)).files]
+    seen=runs.inspected(Folder('inspect',files),_choices(args,every=True),ready=False)
+    lines=[line for i in seen.values() for line in i.lines()]
+    if args.details:lines+=['Technical details:',json.dumps({p:i.details() for p,i in seen.items()},indent=1,default=str)]
+    done(args,'\n'.join(lines),{'inspections':{p:i.details() for p,i in seen.items()}})
+    if not all(i.ready for i in seen.values()):raise SystemExit(EXIT['conflict'])
+    return seen
+
+
 TABLE_FILES=('.csv','.txt','.tsv','.xlsx','.xls')
+
+
+def _point_export(client,path):
+    """E23b: True when the deployment reads this file as a Petrel or OpendTect point export."""
+    from .recipes import PROFILES
+    from .upload_runs import open_file
+    return ((client.upload_runs.head_check(open_file(path).files[0]).get('kind') or {}).get('profile')) in PROFILES
 
 
 def _layout_upload(args,client):
@@ -804,9 +865,8 @@ def _layout_upload(args,client):
     a table whose columns are one of the project's layouts is not added and the command names the layout (exit 4): a
     layout is never applied unless named (R10). Anything else is None: the ordinary upload."""
     path=Path(args.path)
-    if not (path.is_file() and path.suffix.lower() in TABLE_FILES):
-        if args.layout:raise Refused('--layout is for one table file (.csv, .xlsx or .xls).')
-        return None
+    if not (path.is_file() and path.suffix.lower() in TABLE_FILES):return None  # E23b: --layout reads a point export with a reading layout
+    if args.layout and path.suffix.lower()=='.txt' and _point_export(client,path):return None  # a .txt may be a point export
     from .imports import result_lines
     from .layouts import needs_decision
     if args.layout:
@@ -816,7 +876,7 @@ def _layout_upload(args,client):
     layouts=client.layouts()
     if not any(v['by']=='header' for v in layouts.list(retired=False)):return None
     read=client.imports.read(path)
-    matches=layouts.match([c['name'] for c in read.get('columns') or []]) if read.get('columns') else []
+    matches=[m for m in layouts.match([c['name'] for c in read.get('columns') or []]) if m.get('kind','table-mapping')=='table-mapping'] if read.get('columns') else []
     if matches:raise needs_decision(matches)
     return None
 
@@ -825,7 +885,7 @@ def _layouts(args,client):
     """E89: layouts list | show NAME | rename NAME NEW | retire NAME | use-again NAME | export [NAME...] --out FILE |
     import FILE | keep CONNECTION TABLE | update NAME | reconnect NAME CONNECTION TABLE. Names only; --json carries the
     answers. import exits 4 when any layout of the file was not added."""
-    from .layouts import columns_line,holds,import_lines,list_lines,_day
+    from .layouts import columns_line,holds,import_lines,list_lines,reading_lines,_day
     layouts,given=client.layouts(),args.names
     takes={'list':0,'show':1,'rename':2,'retire':1,'use-again':1,'import':1,'keep':2,'update':1,'reconnect':3}
     if args.action in takes and len(given)!=takes[args.action]:
@@ -850,6 +910,7 @@ def _layouts(args,client):
         lines.append('Last used by %s on %s' % (who(view['last_used']['person']),_day(view['last_used']['at'])) if view.get('last_used') else 'Not used yet')
         if columns_line(view):lines.append('Columns: '+columns_line(view))
         for field,column in ((doc.get('mapping') or {}).get('fields') or {}).items():lines.append('  %s: %s' % (column if isinstance(column,str) else ', '.join(column),field))
+        if view.get('kind')=='import-recipe':lines+=reading_lines(view,who)  # E23b
         lines+=['Version %d, %s, %s' % (h['version'],who(h['actor']),_day(h['at'])) for h in reversed(view['history'])]
         return done(args,'\n'.join(lines),{'layout':view})
     if args.action=='export':
@@ -1215,6 +1276,7 @@ def _main(argv=None):
         if args.command=='checks':return _checks(args,client)
         if args.command in ('check','get','send'):return _exchange(args,client)
         if args.command=='upload':return _upload(args,client)
+        if args.command=='inspect':return _inspect(args,client)
         if args.command=='new-data':return _new_data(args,client)
         if args.command=='audience':return _audience(args,client)
         if args.command=='layouts':return _layouts(args,client)

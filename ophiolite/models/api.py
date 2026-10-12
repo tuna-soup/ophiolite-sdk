@@ -869,6 +869,8 @@ class LayoutViewAnswer(Contract):
     last_used: LayoutUse | None
     needs_connection: bool = False
     layout: dict | None = None
+    kind: Literal['table-mapping', 'import-recipe'] = 'table-mapping'  # E23b: a reading layout of a point export
+    declared_by: dict | None = None  # E23b: who declared each value of a reading layout, and who imported it
 
 
 class LayoutHistoryRow(Contract):
@@ -900,7 +902,8 @@ class LayoutMatchAnswer(Contract):
     last_used: LayoutUse | None
     how: Literal['exact', 'reordered']
     layout: dict
-    fields: dict
+    fields: dict | None  # E23b: None for a reading layout, whose columns are roles, not fields
+    kind: Literal['table-mapping', 'import-recipe'] = 'table-mapping'
     class_: Literal['previously-reviewed'] = Field(alias='class')
 
 

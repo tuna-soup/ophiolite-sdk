@@ -50,13 +50,19 @@ def _said(call):
 
 
 def holds(view):
-    """J4: what a layout holds."""
+    """J4: what a layout holds; E23b: a reading layout names the kind of export it reads."""
+    if view.get('kind') == 'import-recipe':
+        from .recipes import reader_label
+        return 'Reading layout: ' + reader_label(view['target'])
     return 'Well locations (database table)' if view['by'] == 'table' else HOLDS.get(view['target'], 'A table')
 
 
 def columns_line(view):
     """J4: `4: Well Name, Top, MD (m) and 1 more`, the mapped columns in the file's order; '' for a database table."""
     doc = view.get('layout') or {}
+    if view.get('kind') == 'import-recipe':  # E23b: a reading layout's columns, as the file names them
+        sources = [c['source'] for c in (doc.get('mapping') or {}).get('columns') or []]
+        return '%d: %s%s' % (len(sources), ', '.join(sources[:3]), ' and %d more' % (len(sources) - 3) if len(sources) > 3 else '') if sources else ''
     match = doc.get('match') or {}
     if match.get('by') != 'header': return ''
     order = match['columns']
@@ -64,6 +70,20 @@ def columns_line(view):
     labels.sort(key=lambda c: order.index(_normal(c)) if _normal(c) in order else len(order))
     shown = labels[:3]
     return '%d: %s%s' % (len(order), ', '.join(shown), ' and %d more' % (len(order) - len(shown)) if len(order) > len(shown) else '')
+
+
+def reading_lines(view, who):
+    """E23b: a reading layout's columns (role and kind) and the values it declares, with who declared or imported each."""
+    from .recipes import FIELDS, KINDS, ROLES, field_label, value_label
+    doc = view.get('layout') or {}
+    lines = ['  %s: %s, %s' % (c['source'], ROLES.get(c['role'], 'Another role'), KINDS.get(c['kind'], 'Another kind')) for c in (doc.get('mapping') or {}).get('columns') or []]
+    for field, said in sorted((doc.get('declarations') or {}).items()):
+        value, reason = (said.get('value'), said.get('reason')) if isinstance(said, dict) else (said, None)
+        by = (view.get('declared_by') or {}).get(field) or {}
+        whose = 'Imported by %s' % who(by['imported_by']) if by.get('imported_by') else 'Declared by %s' % who(by['actor']) if by.get('actor') else 'Declared'
+        label = field_label(field) if field in FIELDS else 'Another field'
+        lines.append('%s: %s. %s%s' % (label, value_label(field, value) if field in FIELDS else value, whose, ': ' + reason if reason else ''))
+    return lines
 
 
 def _day(at):
@@ -187,4 +207,4 @@ class Layouts:
         return self._call('import', {'command_id': command_id or uuid.uuid4().hex, 'document': document}, LayoutImported)
 
 
-__all__ = ['Layouts', 'columns_line', 'export_bytes', 'holds', 'import_lines', 'list_lines']
+__all__ = ['Layouts', 'columns_line', 'export_bytes', 'holds', 'import_lines', 'list_lines', 'reading_lines']
