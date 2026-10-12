@@ -1223,7 +1223,7 @@ export type BundleSelectedV2 = {
 
 export type BundleFileV2 = {
   path: string;
-  role: "original" | "descriptor" | "normalized" | "slice";
+  role: "original" | "descriptor" | "normalized" | "slice" | "package" | "companion" | "interpretation";
   curve?: string;
   sha256: string;
   bytes: number;
@@ -1254,6 +1254,7 @@ export type BundleAssetV2 = {
     included: false;
   };
   slices?: BundleSliceV2[];
+  package?: BundlePackageV2;
 };
 
 export type BundleHistoryV2 = {
@@ -1287,6 +1288,29 @@ export type BundleSliceV2 = {
   label: number;
   shape: number[];
   scope: string;
+};
+
+export type BundlePackageMemberV2 = {
+  name: string;
+  role: "primary" | "crs-metadata" | "readme" | "companion";
+  sha256: string;
+  bytes: number;
+  file: string;
+};
+
+export type BundleRecipePinV2 = {
+  reference: null | {
+    asset_id: string;
+    revision: string;
+  };
+  sha256: string;
+};
+
+export type BundlePackageV2 = {
+  package_digest: string;
+  members: BundlePackageMemberV2[];
+  recipe: null | BundleRecipePinV2;
+  interpretation: null | string;
 };
 
 export type PortableBundleManifestV2 = {
