@@ -373,6 +373,25 @@ WELLS = [{'entity_id':'well-synthetic-1','kind':'well','name':'Synthetic well 1'
          {'entity_id':'well-synthetic-2','kind':'well','name':'Synthetic well 2','owner':'alice','generation':1,
           'location':{'x':6.2,'y':52.9,'crs':'OGC:CRS84','source':{'asset_id':'wells-table','revision':'r1','profile':'ophiolite/sql-table/1','row':'2'},'elevation_reference':'unknown'}},
          {'entity_id':'well-synthetic-3','kind':'well','name':'Synthetic well 3','owner':'alice','generation':1,'location':None}]
+# E66: Synthetic well 1 has one wellbore, and the synthetic gamma-ray log is filed on that wellbore, not on the well.
+BORE = {'entity_id':'wellbore-synthetic-1','kind':'wellbore','name':'Synthetic well 1 main'}
+
+
+def _entity_reads(operation, request, log):
+    """entities/get and entities/assets for the synthetic wells (E66: with include_parts, the well's wellbore's items too)."""
+    ident = request.get('entity_id'); well = next((w for w in WELLS if w['entity_id'] == ident), None)
+    ref = lambda d: {k: d[k] for k in ('entity_id','kind','name')}
+    if ident == BORE['entity_id']: document = dict(BORE, owner='alice', generation=1, identity={'provisional':True}, parts=[], part_of=ref(WELLS[0]))
+    elif well: document = dict(ref(well), owner='alice', generation=1, identity={'provisional':True}, parts=[BORE] if well is WELLS[0] else [], part_of=None)
+    else: return 404, {'error':'No such well or wellbore.'}
+    if operation == 'get': return 200, document
+    parts = request.get('include_parts') is True
+    if parts and document['kind'] != 'well': return 422, {'error':'Only a well has wellbores'}
+    owners = {ident} | ({p['entity_id'] for p in document['parts']} if parts else set())
+    items = [{'asset_id':log['asset_id'],'revision':log['revision'],'profile':log['profile'],'name':log['name'],
+              'association':{'assertion_id':'a1','predicate':'of-entity','evidence':{'statement':'Synthetic: the log of Synthetic well 1 main.'},'asserted_by':'alice','asserted_at':'2026-10-11T00:00:00Z'},
+              **({'entity':dict(BORE)} if parts else {})}] if BORE['entity_id'] in owners else []
+    return 200, {'schema':'ophiolite.entity-assets/1','entity':ref(document),'items':items,'next_cursor':None}
 
 
 @contextmanager
@@ -431,6 +450,9 @@ def synthetic_server():
             if route == '/api/v1/projects/list': return 200, {'projects':_discovered(_owner(token)), 'next_cursor':None}
             if _owner(token) != 'alice': return 403, {'error':'Effective project administration required for p'}
             return 200, {'members':ACCESS}
+        if method == 'POST' and route.endswith(('/entities/get', '/entities/assets')):  # E66: a well's data with its wellbore's
+            if not token: return 401, {'error':'Sign in again.'}
+            return _entity_reads(route.rsplit('/', 1)[-1], json.loads(body or b'{}'), summary)
         if method == 'POST' and '/results/' in route:  # E94: how a result was made, from the fixture's own records
             if not token: return 401, {'error':'Sign in again.'}
             return _results(route.rsplit('/', 1)[-1], json.loads(body or b'{}'), _owner(token), applications, summary)
