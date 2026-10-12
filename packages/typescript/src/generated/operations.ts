@@ -414,9 +414,9 @@ export type getConnectorConfigInput = { options?: OperationOptions };
 export function getConnectorConfig(transport: Transport, input: getConnectorConfigInput): Promise<{ "issuer": string; "client_id": string; "poll_interval"?: (number) | (null) }> {
   return transport.request<{ "issuer": string; "client_id": string; "poll_interval"?: (number) | (null) }>("GET", "/api/v1/connector/config", {}, undefined, undefined, input.options, null, false);
 }
-export type postConnectorOperationInput = { path: { "operation": string }; body: Record<string, unknown>; options?: OperationOptions };
+export type postConnectorOperationInput = { path: { "operation": string }; body: Uint8Array; options?: OperationOptions };
 export function postConnectorOperation(transport: Transport, input: postConnectorOperationInput): Promise<unknown> {
-  return transport.request<unknown>("POST", "/api/v1/connector/{operation}", input.path, undefined, input.body, input.options, null, false);
+  return transport.request<unknown>("POST", "/api/v1/connector/{operation}", input.path, undefined, input.body, input.options, null, true);
 }
 export type getContractsInput = { options?: OperationOptions };
 export function getContracts(transport: Transport, input: getContractsInput): Promise<WireContractsRegistry> {
