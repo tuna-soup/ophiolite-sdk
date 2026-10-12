@@ -151,6 +151,14 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         from .well_names import WellNames
         return WellNames(self)
 
+    def import_storage(self,connection,prefix=None,*,keep_copy=False,attribution,rights_confirmed,audience=(),well_notes='',declare=None,skip_decisions=False,
+                       link_wellbore=False,new=False,progress=None):
+        """E59: add every file below PREFIX of a storage connection in one upload and return its report
+        (ophiolite.upload_runs.Report): read from your storage each time, or with `keep_copy` added as a copy (when the
+        organisation allows copies). The gateway reads each object with your own sign-in; no key is given here."""
+        return self.upload_runs.import_storage(connection,prefix,keep_copy=keep_copy,attribution=attribution,rights_confirmed=rights_confirmed,audience=audience,
+                                               well_notes=well_notes,declare=declare,skip_decisions=skip_decisions,associate_matches=link_wellbore,new=new,progress=progress)
+
     def well_imports(self):
         """E42a: import a copy of an approved well table as wells (ophiolite.well_imports.WellImports)."""
         from .well_imports import WellImports

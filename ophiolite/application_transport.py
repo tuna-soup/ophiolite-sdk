@@ -134,7 +134,9 @@ UPLOAD_CODES={'file-too-large','no-room','part-corrupt','file-mismatch','access-
               'unknown-run','claimed','session-mismatch','run-ended','too-many-runs','head-too-large',  # E55: a folder upload's refusals
               'address-invalid','address-not-found','address-private','address-certificate','address-other-site','address-redirects','address-sign-in',
               'address-answer','address-too-large','address-too-large-unknown','address-too-slow','address-compressed','address-off','address-busy',
-              'address-other-run'}  # E85b: an address's refusals, the deployment's sentence (it names the host only)
+              'address-other-run',  # E85b: an address's refusals, the deployment's sentence (it names the host only)
+              'copy-not-allowed','copy-audience','bucket-other-run','bucket-refused','bucket-object-missing','bucket-offline',
+              'bucket-needs-review','bucket-changed','bucket-busy'}  # E59: a storage folder's refusals (they name no key or secret)
 
 
 def upload_limit(meta):
