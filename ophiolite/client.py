@@ -13,8 +13,9 @@ from .errors import (AuthenticationRequired, PermissionRefused, IntegrityConflic
                      Incompatible, Unavailable, VerificationFailed)
 
 MAX_BYTES=32*1024*1024
-# E94: every descriptor request declares the revision manifest profiles this library verifies (/3 carries how a result was made)
-PROFILES='&profiles=%2F1%2C%2F2%2C%2F3'
+# E94: every descriptor request declares the revision manifest profiles this library verifies (/3 carries how a result was made;
+# E106: /4, how a result was made with a catalogue procedure on a person's computer)
+PROFILES='&profiles=%2F1%2C%2F2%2C%2F3%2C%2F4'
 
 
 from ._core import origin
@@ -700,21 +701,24 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
             partial.unlink(missing_ok=True);raise
         return destination
 
-    def publish_derived(self,written,*,name,from_,method,command_id,of_entity=None,new_version_of=None,expected_parent=None):
+    def publish_derived(self,written,*,name,from_,method,command_id,of_entity=None,new_version_of=None,expected_parent=None,procedure=None):
         """E30b: publish a file you derived (a `WrittenOriginal` from ophiolite.writers) from exact revisions you
         may reuse, with the method you declare. `command_id` is required: a network retry with the same id is
         safe (the same receipt comes back); a fresh id on retry can create a second asset. Use
         WorkFolder.publish_derived for automatic recovery (it saves a stable command id and the file's digest
         before sending). `from_` names 1-32 parents (objects with asset_id and revision, or (asset_id, revision));
         `new_version_of`/`expected_parent` add a version to an earlier publication of the same lineage: your own, or
-        (E70c) a colleague's when the project names you both; its author stays the author."""
+        (E70c) a colleague's when the project names you both; its author stays the author. `procedure` ({'id': run id,
+        'role': output role}, E106) publishes one output of a reported run: for a run made again the receipt may be the
+        earlier result, with its `outcome`."""
         from . import publish as planning
         from .models.api import PublicationReceipt
         body,extra=planning.derive_request(self.project,written,name=name,from_=from_,method=method,command_id=command_id,of_entity=of_entity,
-                                           new_version_of=new_version_of,expected_parent=expected_parent)
+                                           new_version_of=new_version_of,expected_parent=expected_parent,procedure=procedure)
         from .presentation import PresentedReceipt,publication_recipe
         recipe=publication_recipe(name=name,from_=from_,method=method,of_entity=of_entity)  # E104: "Send again", at call time
-        receipt=planning.verify_derived(body,planning.parse(PublicationReceipt,self._post_bytes('publications','derive',written.bytes,extra_headers=extra,retry=True)))
+        verify=planning.verify_derived if procedure is None else planning.verify_run_output
+        receipt=verify(body,planning.parse(PublicationReceipt,self._post_bytes('publications','derive',written.bytes,extra_headers=extra,retry=True)))
         return PresentedReceipt.present(receipt,{'origin':self.url,'project':self.project,'family':'m','recipe':recipe})
 
     def preview_change(self,asset_id,revision,change):

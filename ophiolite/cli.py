@@ -175,7 +175,16 @@ def parser():
     for name,help in (('enable','Enable a version for everyone in this project (administrators)'),('withdraw','Withdraw a version: it is never fetched or run again'),
                       ('trust','Trust a version, so running it asks nothing')):
         c=catalogue(name,help);c.add_argument('name');c.add_argument('--version',type=int,required=True)
-    for p in (reg,shown,one)+tuple(steps.choices[n] for n in ('enable','withdraw','trust')):
+    published=catalogue('publish','Publish a run made with run --from-project on project versions (--input SLOT=@RESULT:REVISION): each output once, under the run')  # E106
+    published.add_argument('folder',type=Path,help='The run\'s output folder');published.add_argument('--name',help='The name of the published result')
+    again=catalogue('again','Run a procedure-made result again on this computer; the project says whether it is the same result')  # E106
+    again.add_argument('result',help='The result to run again');again.add_argument('--revision',required=True,help='Its exact version')
+    other=again.add_mutually_exclusive_group()
+    other.add_argument('--version',type=int,help='Run this version of the procedure instead of the one that made it')
+    other.add_argument('--folder',type=Path,help='Run a local procedure folder (it must be a version in the project)')
+    again.add_argument('--output',type=Path,required=True,help='A new folder for the outputs');again.add_argument('--name')
+    again.add_argument('--yes',action='store_true',help='Trust the version without asking (recorded as your trust)')
+    for p in (reg,shown,one,published,again)+tuple(steps.choices[n] for n in ('enable','withdraw','trust')):
         p.add_argument('--configuration',type=Path,default=Path('configuration.json'));p.add_argument('--credentials',type=Path)
     tables=sub.add_parser('targets',help='What each type of table needs: its fields, which are required and the choices that describe it (offline)')  # E86
     tables.add_argument('name',nargs='?',help='One type, for example well-tops')
@@ -1031,7 +1040,7 @@ def _slots(texts,flag,many=False):
     return found
 
 
-CATALOGUE_VERBS=('register','list','show','enable','withdraw','trust')
+CATALOGUE_VERBS=('register','list','show','enable','withdraw','trust','publish','again')
 
 
 def _catalogue_verb(args):
@@ -1064,6 +1073,16 @@ def _catalogue(args,client):
                                         prompt=ask if sys.stdin.isatty() else None,kinds=_slots(args.kind,'--kind'),declared=_slots(args.declared,'--declared'),
                                         systems=_slots(args.system,'--system'),settings=args.setting)
             return done(args,result['sentence'],{'ran':True,**result})
+        if args.procedure_action=='publish':  # E106
+            result=client.procedure_publish(args.folder,name=args.name)
+            return done(args,result['sentence'],result)
+        if args.procedure_action=='again':  # E106
+            def ask(question):
+                print(question['text']+' [y/N] ',end='',flush=True)
+                return sys.stdin.readline().strip().lower() in ('y','yes')
+            result=client.procedure_again(args.result,args.revision,args.output,version=args.version,folder=args.folder,yes=args.yes,
+                                          prompt=ask if sys.stdin.isatty() else None,name=args.name)
+            return done(args,result['ran']+'\n'+result['sentence'],result)
         chosen=client.procedure_version(args.name,args.version)
         if args.procedure_action=='show':
             v=client.procedure_get(chosen['digest']);w=v['words']

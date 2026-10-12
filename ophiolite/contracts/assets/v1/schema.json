@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/schema.json",
   "x-ophiolite": {
     "id": "ophiolite.scientific-asset/1",
-    "version": "1.19.0",
+    "version": "1.20.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -300,6 +300,31 @@
       "title": "DerivationDisplay",
       "type": "object"
     },
+    "DerivationDisplayV2": {
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Method",
+          "type": "string"
+        },
+        "parameters": {
+          "items": {
+            "$ref": "#/$defs/ParameterLabelV2"
+          },
+          "maxItems": 64,
+          "title": "Parameters",
+          "type": "array"
+        }
+      },
+      "required": [
+        "method",
+        "parameters"
+      ],
+      "title": "DerivationDisplayV2",
+      "type": "object"
+    },
     "DerivationInfo": {
       "additionalProperties": false,
       "description": "1.11.0 (E30a): the declared method of a derived revision (its parents are `parents`/the lineage, not here).",
@@ -357,6 +382,89 @@
         "digest"
       ],
       "title": "DerivationOutput",
+      "type": "object"
+    },
+    "DerivationProcedure": {
+      "additionalProperties": false,
+      "description": "E106: the catalogue version and the reported run a `reported` record was made by. `envelope_sha256` binds the\nserver's stored run envelope (the server's reader refuses a changed envelope; a portable reader checks the\nmanifest digest only).",
+      "properties": {
+        "digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        },
+        "rules_version": {
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Rules Version",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "version_label": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Version Label"
+        },
+        "step": {
+          "enum": [
+            "read",
+            "source",
+            "process",
+            "send",
+            "check"
+          ],
+          "title": "Step",
+          "type": "string"
+        },
+        "run_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "envelope_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Envelope Sha256",
+          "type": "string"
+        },
+        "runner": {
+          "$ref": "#/$defs/ProcedureRunner"
+        },
+        "again_of": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MadeAgain"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "digest",
+        "rules_version",
+        "label",
+        "version_label",
+        "step",
+        "run_id",
+        "envelope_sha256",
+        "runner",
+        "again_of"
+      ],
+      "title": "DerivationProcedure",
       "type": "object"
     },
     "DerivationRecord": {
@@ -472,6 +580,133 @@
         "derivation_digest"
       ],
       "title": "DerivationRecord",
+      "type": "object"
+    },
+    "DerivationRecordV2": {
+      "additionalProperties": false,
+      "description": "E106 (`ophiolite.derivation/2`): `derivation/1` plus kind `reported`, choice labels in `display`, and the\n`procedure` block a reported record carries (and no other kind does). A reported record names every input\noccurrence as `<slot>[<n>]` (n from 0, in the run's order), so order and multiplicity are in `derivation_digest`,\nwhich is unchanged; one version may occur in several slots or positions.",
+      "properties": {
+        "schema": {
+          "const": "ophiolite.derivation/2",
+          "title": "Schema",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "executed",
+            "declared",
+            "edited",
+            "received",
+            "reported"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "implementation": {
+          "$ref": "#/$defs/ImplementationV2"
+        },
+        "display": {
+          "$ref": "#/$defs/DerivationDisplayV2"
+        },
+        "parameters": {
+          "$ref": "#/$defs/Parameters"
+        },
+        "script_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Script Sha256"
+        },
+        "release": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ReleaseRecord"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "inputs": {
+          "items": {
+            "$ref": "#/$defs/DerivationInput"
+          },
+          "maxItems": 64,
+          "title": "Inputs",
+          "type": "array"
+        },
+        "outputs": {
+          "items": {
+            "$ref": "#/$defs/DerivationOutput"
+          },
+          "maxItems": 16,
+          "title": "Outputs",
+          "type": "array"
+        },
+        "execution_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Execution Id"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Request Id"
+        },
+        "procedure": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DerivationProcedure"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "derivation_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Derivation Digest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema",
+        "kind",
+        "implementation",
+        "display",
+        "parameters",
+        "script_sha256",
+        "release",
+        "inputs",
+        "outputs",
+        "execution_id",
+        "request_id",
+        "procedure",
+        "derivation_digest"
+      ],
+      "title": "DerivationRecordV2",
       "type": "object"
     },
     "Display": {
@@ -1296,6 +1531,36 @@
       "title": "Implementation",
       "type": "object"
     },
+    "ImplementationV2": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "version": {
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        },
+        "version_label": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Version Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "version_label"
+      ],
+      "title": "ImplementationV2",
+      "type": "object"
+    },
     "ImportOrigin": {
       "additionalProperties": false,
       "description": "1.9.0: a file imported from a portable bundle \u2014 provenance, not authority.",
@@ -1533,6 +1798,22 @@
         "revision"
       ],
       "title": "LineageReference",
+      "type": "object"
+    },
+    "MadeAgain": {
+      "additionalProperties": false,
+      "description": "The earlier result this one was made again from, by its lineage commitment; never an asset id.",
+      "properties": {
+        "commitment": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Commitment",
+          "type": "string"
+        }
+      },
+      "required": [
+        "commitment"
+      ],
+      "title": "MadeAgain",
       "type": "object"
     },
     "ManifestArtifact": {
@@ -2194,6 +2475,29 @@
       "title": "PackageRecord",
       "type": "object"
     },
+    "ParameterChoice": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Value",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "label"
+      ],
+      "title": "ParameterChoice",
+      "type": "object"
+    },
     "ParameterEntry": {
       "additionalProperties": false,
       "properties": {
@@ -2283,6 +2587,59 @@
         "label"
       ],
       "title": "ParameterLabel",
+      "type": "object"
+    },
+    "ParameterLabelV2": {
+      "additionalProperties": false,
+      "description": "E106: a setting's words at publication; a choice setting keeps the labels of its values (a procedure's manifest).",
+      "properties": {
+        "key": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "maxLength": 40,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        },
+        "choices": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/ParameterChoice"
+              },
+              "maxItems": 32,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Choices"
+        }
+      },
+      "required": [
+        "key",
+        "label"
+      ],
+      "title": "ParameterLabelV2",
       "type": "object"
     },
     "Parameters": {
@@ -2665,6 +3022,46 @@
         "points"
       ],
       "title": "PolylineContext",
+      "type": "object"
+    },
+    "ProcedureRunner": {
+      "additionalProperties": false,
+      "description": "Who reported the run: a person, or an agent with the person it acts for.",
+      "properties": {
+        "kind": {
+          "enum": [
+            "person",
+            "agent"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "principal": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Principal",
+          "type": "string"
+        },
+        "on_behalf_of": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "On Behalf Of"
+        }
+      },
+      "required": [
+        "kind",
+        "principal",
+        "on_behalf_of"
+      ],
+      "title": "ProcedureRunner",
       "type": "object"
     },
     "Provenance": {
@@ -3482,6 +3879,64 @@
         "derivation_record"
       ],
       "title": "RevisionManifestV3",
+      "type": "object"
+    },
+    "RevisionManifestV4": {
+      "additionalProperties": false,
+      "description": "E106: /3's shape with a `derivation/2` record, which `digest` covers; `digest_v2` is the /2 digest of the same\nrevision, served as the /2 view to every reader that does not declare /4 (a /3 reader included).",
+      "properties": {
+        "schema": {
+          "const": "ophiolite.revision-manifest/4",
+          "title": "Schema",
+          "type": "string"
+        },
+        "digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        },
+        "digest_v2": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Digest V2",
+          "type": "string"
+        },
+        "artifact": {
+          "$ref": "#/$defs/ManifestArtifact"
+        },
+        "representations": {
+          "items": {
+            "$ref": "#/$defs/ManifestRepresentation"
+          },
+          "maxItems": 512,
+          "title": "Representations",
+          "type": "array"
+        },
+        "lineage": {
+          "items": {
+            "$ref": "#/$defs/LineageEntry"
+          },
+          "maxItems": 64,
+          "title": "Lineage",
+          "type": "array"
+        },
+        "method": {
+          "$ref": "#/$defs/MethodRecord"
+        },
+        "derivation_record": {
+          "$ref": "#/$defs/DerivationRecordV2"
+        }
+      },
+      "required": [
+        "schema",
+        "digest",
+        "digest_v2",
+        "artifact",
+        "representations",
+        "lineage",
+        "method",
+        "derivation_record"
+      ],
+      "title": "RevisionManifestV4",
       "type": "object"
     },
     "ScientificContext": {
@@ -4565,7 +5020,8 @@
             "mapping": {
               "ophiolite.revision-manifest/1": "#/$defs/RevisionManifest",
               "ophiolite.revision-manifest/2": "#/$defs/RevisionManifestV2",
-              "ophiolite.revision-manifest/3": "#/$defs/RevisionManifestV3"
+              "ophiolite.revision-manifest/3": "#/$defs/RevisionManifestV3",
+              "ophiolite.revision-manifest/4": "#/$defs/RevisionManifestV4"
             },
             "propertyName": "schema"
           },
@@ -4578,6 +5034,9 @@
             },
             {
               "$ref": "#/$defs/RevisionManifestV3"
+            },
+            {
+              "$ref": "#/$defs/RevisionManifestV4"
             }
           ]
         },

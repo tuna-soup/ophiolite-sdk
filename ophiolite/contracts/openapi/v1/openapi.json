@@ -5,7 +5,7 @@
     "version": "1.0.0-pilot",
     "description": "One public API for every project operation. Three credential kinds reach it: the browser session (opaque HttpOnly cookie plus the X-CSRF-Token proof and, on non-GET requests, the exact Origin), a project-scoped delegate lasting at most five minutes (Bearer oph_api_..., parent session and current native permissions remain mandatory), and a browser-approved provider grant (Bearer provider token plus X-Ophiolite-Application-Grant; capability 1: the scientific read resources and the applications route within its read/write scopes; capability 3 adds reading wells, wellbores and lineage and the LAS upload routes). A request that carries an Authorization header is a machine request and is refused with MACHINE_AUTH_REQUIRED when a cookie or Origin travels with it. Scope and capability are ceilings; every operation runs the same native permission checks whoever calls it. Not a stable SDK or unattended service-account contract.",
     "x-ophiolite-contracts": {
-      "registry_version": "1.30.0",
+      "registry_version": "1.31.0",
       "index": "/api/v1/contracts",
       "served_profiles": [
         "las2/1",
@@ -40765,6 +40765,604 @@
         }
       }
     },
+    "/api/v1/projects/{project}/procedure-runs/get": {
+      "post": {
+        "summary": "One run you reported (or your agent reported for you): what it was given, each output and whether it is published yet",
+        "description": "Scope read; accepted principals: session, delegate, agent; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "run_id": {
+                      "title": "Run Id",
+                      "type": "string"
+                    },
+                    "state": {
+                      "description": "complete when every output role has an outcome",
+                      "enum": [
+                        "partial",
+                        "complete"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "procedure": {
+                      "$ref": "#/components/schemas/RunProcedureDetail"
+                    },
+                    "runner": {
+                      "$ref": "#/components/schemas/RunRunner"
+                    },
+                    "settings": {
+                      "additionalProperties": true,
+                      "title": "Settings",
+                      "type": "object"
+                    },
+                    "inputs": {
+                      "additionalProperties": {
+                        "items": {
+                          "$ref": "#/components/schemas/RunInput"
+                        },
+                        "type": "array"
+                      },
+                      "title": "Inputs",
+                      "type": "object"
+                    },
+                    "outputs": {
+                      "items": {
+                        "$ref": "#/components/schemas/RunOutput"
+                      },
+                      "title": "Outputs",
+                      "type": "array"
+                    },
+                    "again_of": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/RunVersion"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "at": {
+                      "title": "At",
+                      "type": "number"
+                    },
+                    "already": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "On report: true when this command was already reported (the stored run)",
+                      "title": "Already"
+                    }
+                  },
+                  "required": [
+                    "run_id",
+                    "state",
+                    "procedure",
+                    "runner",
+                    "settings",
+                    "inputs",
+                    "outputs",
+                    "again_of",
+                    "at"
+                  ],
+                  "title": "ProcedureRun",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "run_id": {
+                    "maxLength": 64,
+                    "minLength": 64,
+                    "pattern": "^[0-9a-f]{64}$",
+                    "title": "Run Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "run_id"
+                ],
+                "title": "ProcedureRunRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/procedure-runs/prepare-again": {
+      "post": {
+        "summary": "What running a procedure-made result again needs: the version, settings, ordered inputs and outputs, for anyone who may use them all",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "procedure": {
+                      "$ref": "#/components/schemas/RunProcedureWords"
+                    },
+                    "settings": {
+                      "additionalProperties": true,
+                      "title": "Settings",
+                      "type": "object"
+                    },
+                    "inputs": {
+                      "additionalProperties": {
+                        "items": {
+                          "$ref": "#/components/schemas/AgainBinding"
+                        },
+                        "type": "array"
+                      },
+                      "title": "Inputs",
+                      "type": "object"
+                    },
+                    "outputs": {
+                      "items": {
+                        "$ref": "#/components/schemas/AgainOutput"
+                      },
+                      "title": "Outputs",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "procedure",
+                    "settings",
+                    "inputs",
+                    "outputs"
+                  ],
+                  "title": "PreparedAgain",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Asset Id",
+                    "type": "string"
+                  },
+                  "revision": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Revision",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "asset_id",
+                  "revision"
+                ],
+                "title": "PrepareAgainRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/procedure-runs/report": {
+      "post": {
+        "summary": "Report a run of an enabled procedure version: its settings, ordered inputs and the outputs it made; the server checks each claim and keeps the run",
+        "description": "Scope write; accepted principals: session, delegate, agent; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "run_id": {
+                      "title": "Run Id",
+                      "type": "string"
+                    },
+                    "state": {
+                      "description": "complete when every output role has an outcome",
+                      "enum": [
+                        "partial",
+                        "complete"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "procedure": {
+                      "$ref": "#/components/schemas/RunProcedureDetail"
+                    },
+                    "runner": {
+                      "$ref": "#/components/schemas/RunRunner"
+                    },
+                    "settings": {
+                      "additionalProperties": true,
+                      "title": "Settings",
+                      "type": "object"
+                    },
+                    "inputs": {
+                      "additionalProperties": {
+                        "items": {
+                          "$ref": "#/components/schemas/RunInput"
+                        },
+                        "type": "array"
+                      },
+                      "title": "Inputs",
+                      "type": "object"
+                    },
+                    "outputs": {
+                      "items": {
+                        "$ref": "#/components/schemas/RunOutput"
+                      },
+                      "title": "Outputs",
+                      "type": "array"
+                    },
+                    "again_of": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/RunVersion"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "at": {
+                      "title": "At",
+                      "type": "number"
+                    },
+                    "already": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "On report: true when this command was already reported (the stored run)",
+                      "title": "Already"
+                    }
+                  },
+                  "required": [
+                    "run_id",
+                    "state",
+                    "procedure",
+                    "runner",
+                    "settings",
+                    "inputs",
+                    "outputs",
+                    "again_of",
+                    "at"
+                  ],
+                  "title": "ProcedureRun",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "Save it before sending: the same command id and body answer the same run; another body is refused (request)",
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "procedure": {
+                    "$ref": "#/components/schemas/RunProcedure"
+                  },
+                  "settings": {
+                    "additionalProperties": true,
+                    "description": "Setting values by key, typed as the manifest says; a setting left out takes its default",
+                    "title": "Settings",
+                    "type": "object"
+                  },
+                  "inputs": {
+                    "additionalProperties": {
+                      "items": {
+                        "$ref": "#/components/schemas/RunVersion"
+                      },
+                      "type": "array"
+                    },
+                    "description": "The versions each input slot read, in the order the run read them",
+                    "title": "Inputs",
+                    "type": "object"
+                  },
+                  "outputs": {
+                    "description": "Every output role of the procedure, once",
+                    "items": {
+                      "$ref": "#/components/schemas/RunOutputClaim"
+                    },
+                    "maxItems": 16,
+                    "title": "Outputs",
+                    "type": "array"
+                  },
+                  "again_of": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/RunVersion"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "A procedure-made result this run makes again"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "command_id",
+                  "procedure",
+                  "inputs",
+                  "outputs"
+                ],
+                "title": "ProcedureRunReport",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/procedures/bundle": {
       "post": {
         "summary": "The archive of a procedure version you may see and that is not withdrawn (base64); verify it against its digest",
@@ -42577,7 +43175,7 @@
               "application/json": {
                 "schema": {
                   "additionalProperties": false,
-                  "description": "What publications/derive answers, and answers again for the same command.",
+                  "description": "What publications/derive answers, and answers again for the same command. E106: with `outcome` for an output of\na run made again; for a \"Same result\" nothing was published and the asset is the earlier result.",
                   "properties": {
                     "asset_id": {
                       "title": "Asset Id",
@@ -42626,6 +43224,17 @@
                     "command_id": {
                       "title": "Command Id",
                       "type": "string"
+                    },
+                    "outcome": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/RunOutcome"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
                     }
                   },
                   "required": [
@@ -42805,6 +43414,17 @@
                     "minimum": 1,
                     "title": "Output Bytes",
                     "type": "integer"
+                  },
+                  "run": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/RunOutputRef"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
                   }
                 },
                 "required": [
@@ -43653,7 +44273,7 @@
               "application/json": {
                 "schema": {
                   "additionalProperties": false,
-                  "description": "What publications/derive answers, and answers again for the same command.",
+                  "description": "What publications/derive answers, and answers again for the same command. E106: with `outcome` for an output of\na run made again; for a \"Same result\" nothing was published and the asset is the earlier result.",
                   "properties": {
                     "asset_id": {
                       "title": "Asset Id",
@@ -43702,6 +44322,17 @@
                     "command_id": {
                       "title": "Command Id",
                       "type": "string"
+                    },
+                    "outcome": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/RunOutcome"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
                     }
                   },
                   "required": [
@@ -83130,7 +83761,7 @@
               "type": "string",
               "maxLength": 512
             },
-            "description": "The revision manifest profiles this reader verifies, comma separated (for example /1,/2,/3). Absent means /1,/2: a /3 revision is then served as its /2 view, with digest_v2 as its digest and no derivation_record."
+            "description": "The revision manifest profiles this reader verifies, comma separated (for example /1,/2,/3,/4). Absent means /1,/2: a /3 or /4 revision is then served as its /2 view, with digest_v2 as its digest and no derivation_record. A /4 revision is served as /4 only to a reader that lists /4; a /3 reader gets its /2 view."
           }
         ],
         "security": [
@@ -83149,7 +83780,7 @@
                 "schema": {
                   "x-ophiolite": {
                     "id": "ophiolite.scientific-asset/1",
-                    "version": "1.19.0",
+                    "version": "1.20.0",
                     "lifecycle": "preview"
                   },
                   "additionalProperties": false,
@@ -84607,6 +85238,918 @@
                                 "derivation_record"
                               ],
                               "title": "RevisionManifestV3",
+                              "type": "object"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "description": "E106: /3's shape with a `derivation/2` record, which `digest` covers; `digest_v2` is the /2 digest of the same\nrevision, served as the /2 view to every reader that does not declare /4 (a /3 reader included).",
+                              "properties": {
+                                "schema": {
+                                  "const": "ophiolite.revision-manifest/4",
+                                  "title": "Schema",
+                                  "type": "string"
+                                },
+                                "digest": {
+                                  "pattern": "^[0-9a-f]{64}$",
+                                  "title": "Digest",
+                                  "type": "string"
+                                },
+                                "digest_v2": {
+                                  "pattern": "^[0-9a-f]{64}$",
+                                  "title": "Digest V2",
+                                  "type": "string"
+                                },
+                                "artifact": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "sha256": {
+                                      "pattern": "^[0-9a-f]{64}$",
+                                      "title": "Sha256",
+                                      "type": "string"
+                                    },
+                                    "bytes": {
+                                      "maximum": 68719476736,
+                                      "minimum": 0,
+                                      "title": "Bytes",
+                                      "type": "integer"
+                                    }
+                                  },
+                                  "required": [
+                                    "sha256",
+                                    "bytes"
+                                  ],
+                                  "title": "ManifestArtifact",
+                                  "type": "object"
+                                },
+                                "representations": {
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "id": {
+                                        "maxLength": 512,
+                                        "minLength": 1,
+                                        "title": "Id",
+                                        "type": "string"
+                                      },
+                                      "sha256": {
+                                        "pattern": "^[0-9a-f]{64}$",
+                                        "title": "Sha256",
+                                        "type": "string"
+                                      },
+                                      "bytes": {
+                                        "maximum": 33554432,
+                                        "minimum": 0,
+                                        "title": "Bytes",
+                                        "type": "integer"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "sha256",
+                                      "bytes"
+                                    ],
+                                    "title": "ManifestRepresentation",
+                                    "type": "object"
+                                  },
+                                  "maxItems": 512,
+                                  "title": "Representations",
+                                  "type": "array"
+                                },
+                                "lineage": {
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "description": "1.8.0: one lineage assertion as a commitment sha256(salt + canonical([predicate, reference])).\nDisclosed (predicate, reference, salt) only when the caller may see the other revision.",
+                                    "properties": {
+                                      "commitment": {
+                                        "pattern": "^[0-9a-f]{64}$",
+                                        "title": "Commitment",
+                                        "type": "string"
+                                      },
+                                      "predicate": {
+                                        "anyOf": [
+                                          {
+                                            "enum": [
+                                              "derived-from",
+                                              "supersedes"
+                                            ],
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ],
+                                        "default": null,
+                                        "title": "Predicate"
+                                      },
+                                      "reference": {
+                                        "anyOf": [
+                                          {
+                                            "additionalProperties": false,
+                                            "description": "An exact revision a lineage assertion names; `ophiolite:managed` means another revision of this asset.",
+                                            "properties": {
+                                              "authority": {
+                                                "maxLength": 512,
+                                                "minLength": 1,
+                                                "title": "Authority",
+                                                "type": "string"
+                                              },
+                                              "key": {
+                                                "maxLength": 512,
+                                                "minLength": 1,
+                                                "title": "Key",
+                                                "type": "string"
+                                              },
+                                              "revision": {
+                                                "maxLength": 512,
+                                                "minLength": 1,
+                                                "title": "Revision",
+                                                "type": "string"
+                                              },
+                                              "profile": {
+                                                "anyOf": [
+                                                  {
+                                                    "maxLength": 128,
+                                                    "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "type": "null"
+                                                  }
+                                                ],
+                                                "default": null,
+                                                "title": "Profile"
+                                              }
+                                            },
+                                            "required": [
+                                              "authority",
+                                              "key",
+                                              "revision"
+                                            ],
+                                            "title": "LineageReference",
+                                            "type": "object"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ],
+                                        "default": null
+                                      },
+                                      "salt": {
+                                        "anyOf": [
+                                          {
+                                            "pattern": "^[0-9a-f]{32}$",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ],
+                                        "default": null,
+                                        "title": "Salt"
+                                      }
+                                    },
+                                    "required": [
+                                      "commitment"
+                                    ],
+                                    "title": "LineageEntry",
+                                    "type": "object"
+                                  },
+                                  "maxItems": 64,
+                                  "title": "Lineage",
+                                  "type": "array"
+                                },
+                                "method": {
+                                  "additionalProperties": false,
+                                  "description": "1.11.0 (E30a): how a derived revision was made, as its publishing request declared it \u2014 the projection of\nits interpretation record (E23a's decision family: selected by declaration).",
+                                  "properties": {
+                                    "name": {
+                                      "maxLength": 80,
+                                      "minLength": 1,
+                                      "title": "Name",
+                                      "type": "string"
+                                    },
+                                    "declared": {
+                                      "default": true,
+                                      "title": "Declared",
+                                      "type": "boolean"
+                                    },
+                                    "library": {
+                                      "default": "",
+                                      "maxLength": 80,
+                                      "title": "Library",
+                                      "type": "string"
+                                    },
+                                    "version": {
+                                      "default": "",
+                                      "maxLength": 40,
+                                      "title": "Version",
+                                      "type": "string"
+                                    },
+                                    "parameters": {
+                                      "additionalProperties": true,
+                                      "title": "Parameters",
+                                      "type": "object"
+                                    },
+                                    "script_sha256": {
+                                      "anyOf": [
+                                        {
+                                          "pattern": "^[0-9a-f]{64}$",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ],
+                                      "default": null,
+                                      "title": "Script Sha256"
+                                    }
+                                  },
+                                  "required": [
+                                    "name"
+                                  ],
+                                  "title": "MethodRecord",
+                                  "type": "object"
+                                },
+                                "derivation_record": {
+                                  "additionalProperties": false,
+                                  "description": "E106 (`ophiolite.derivation/2`): `derivation/1` plus kind `reported`, choice labels in `display`, and the\n`procedure` block a reported record carries (and no other kind does). A reported record names every input\noccurrence as `<slot>[<n>]` (n from 0, in the run's order), so order and multiplicity are in `derivation_digest`,\nwhich is unchanged; one version may occur in several slots or positions.",
+                                  "properties": {
+                                    "schema": {
+                                      "const": "ophiolite.derivation/2",
+                                      "title": "Schema",
+                                      "type": "string"
+                                    },
+                                    "kind": {
+                                      "enum": [
+                                        "executed",
+                                        "declared",
+                                        "edited",
+                                        "received",
+                                        "reported"
+                                      ],
+                                      "title": "Kind",
+                                      "type": "string"
+                                    },
+                                    "implementation": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "maxLength": 128,
+                                          "minLength": 1,
+                                          "title": "Id",
+                                          "type": "string"
+                                        },
+                                        "version": {
+                                          "maxLength": 40,
+                                          "minLength": 1,
+                                          "title": "Version",
+                                          "type": "string"
+                                        },
+                                        "version_label": {
+                                          "maxLength": 120,
+                                          "minLength": 1,
+                                          "title": "Version Label",
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id",
+                                        "version",
+                                        "version_label"
+                                      ],
+                                      "title": "ImplementationV2",
+                                      "type": "object"
+                                    },
+                                    "display": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "method": {
+                                          "maxLength": 120,
+                                          "minLength": 1,
+                                          "title": "Method",
+                                          "type": "string"
+                                        },
+                                        "parameters": {
+                                          "items": {
+                                            "additionalProperties": false,
+                                            "description": "E106: a setting's words at publication; a choice setting keeps the labels of its values (a procedure's manifest).",
+                                            "properties": {
+                                              "key": {
+                                                "maxLength": 80,
+                                                "minLength": 1,
+                                                "title": "Key",
+                                                "type": "string"
+                                              },
+                                              "label": {
+                                                "maxLength": 100,
+                                                "minLength": 1,
+                                                "title": "Label",
+                                                "type": "string"
+                                              },
+                                              "unit": {
+                                                "anyOf": [
+                                                  {
+                                                    "maxLength": 40,
+                                                    "type": "string"
+                                                  },
+                                                  {
+                                                    "type": "null"
+                                                  }
+                                                ],
+                                                "default": null,
+                                                "title": "Unit"
+                                              },
+                                              "choices": {
+                                                "anyOf": [
+                                                  {
+                                                    "items": {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "value": {
+                                                          "maxLength": 100,
+                                                          "minLength": 1,
+                                                          "title": "Value",
+                                                          "type": "string"
+                                                        },
+                                                        "label": {
+                                                          "maxLength": 100,
+                                                          "minLength": 1,
+                                                          "title": "Label",
+                                                          "type": "string"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "value",
+                                                        "label"
+                                                      ],
+                                                      "title": "ParameterChoice",
+                                                      "type": "object"
+                                                    },
+                                                    "maxItems": 32,
+                                                    "type": "array"
+                                                  },
+                                                  {
+                                                    "type": "null"
+                                                  }
+                                                ],
+                                                "default": null,
+                                                "title": "Choices"
+                                              }
+                                            },
+                                            "required": [
+                                              "key",
+                                              "label"
+                                            ],
+                                            "title": "ParameterLabelV2",
+                                            "type": "object"
+                                          },
+                                          "maxItems": 64,
+                                          "title": "Parameters",
+                                          "type": "array"
+                                        }
+                                      },
+                                      "required": [
+                                        "method",
+                                        "parameters"
+                                      ],
+                                      "title": "DerivationDisplayV2",
+                                      "type": "object"
+                                    },
+                                    "parameters": {
+                                      "additionalProperties": false,
+                                      "description": "E94 (`ophiolite.parameters/1`): what must be given again to reproduce a calculation (`request`) and what that\nrequest resolved to when it ran (`resolved`), both canonical trees.",
+                                      "properties": {
+                                        "schema": {
+                                          "const": "ophiolite.parameters/1",
+                                          "title": "Schema",
+                                          "type": "string"
+                                        },
+                                        "request": {
+                                          "oneOf": [
+                                            {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "type": {
+                                                  "const": "number",
+                                                  "title": "Type",
+                                                  "type": "string"
+                                                },
+                                                "value": {
+                                                  "maxLength": 40,
+                                                  "minLength": 1,
+                                                  "title": "Value",
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "type",
+                                                "value"
+                                              ],
+                                              "title": "NumberLeaf",
+                                              "type": "object"
+                                            },
+                                            {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "type": {
+                                                  "const": "integer",
+                                                  "title": "Type",
+                                                  "type": "string"
+                                                },
+                                                "value": {
+                                                  "pattern": "^-?(0|[1-9][0-9]{0,30})$",
+                                                  "title": "Value",
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "type",
+                                                "value"
+                                              ],
+                                              "title": "IntegerLeaf",
+                                              "type": "object"
+                                            },
+                                            {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "type": {
+                                                  "const": "string",
+                                                  "title": "Type",
+                                                  "type": "string"
+                                                },
+                                                "value": {
+                                                  "maxLength": 1024,
+                                                  "title": "Value",
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "type",
+                                                "value"
+                                              ],
+                                              "title": "StringLeaf",
+                                              "type": "object"
+                                            },
+                                            {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "type": {
+                                                  "const": "boolean",
+                                                  "title": "Type",
+                                                  "type": "string"
+                                                },
+                                                "value": {
+                                                  "title": "Value",
+                                                  "type": "boolean"
+                                                }
+                                              },
+                                              "required": [
+                                                "type",
+                                                "value"
+                                              ],
+                                              "title": "BooleanLeaf",
+                                              "type": "object"
+                                            },
+                                            {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "type": {
+                                                  "const": "null",
+                                                  "title": "Type",
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "type"
+                                              ],
+                                              "title": "NullLeaf",
+                                              "type": "object"
+                                            },
+                                            {
+                                              "$ref": "#/components/schemas/ObjectNode"
+                                            },
+                                            {
+                                              "$ref": "#/components/schemas/ArrayNode"
+                                            }
+                                          ],
+                                          "title": "Request"
+                                        },
+                                        "resolved": {
+                                          "oneOf": [
+                                            {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "type": {
+                                                  "const": "number",
+                                                  "title": "Type",
+                                                  "type": "string"
+                                                },
+                                                "value": {
+                                                  "maxLength": 40,
+                                                  "minLength": 1,
+                                                  "title": "Value",
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "type",
+                                                "value"
+                                              ],
+                                              "title": "NumberLeaf",
+                                              "type": "object"
+                                            },
+                                            {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "type": {
+                                                  "const": "integer",
+                                                  "title": "Type",
+                                                  "type": "string"
+                                                },
+                                                "value": {
+                                                  "pattern": "^-?(0|[1-9][0-9]{0,30})$",
+                                                  "title": "Value",
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "type",
+                                                "value"
+                                              ],
+                                              "title": "IntegerLeaf",
+                                              "type": "object"
+                                            },
+                                            {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "type": {
+                                                  "const": "string",
+                                                  "title": "Type",
+                                                  "type": "string"
+                                                },
+                                                "value": {
+                                                  "maxLength": 1024,
+                                                  "title": "Value",
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "type",
+                                                "value"
+                                              ],
+                                              "title": "StringLeaf",
+                                              "type": "object"
+                                            },
+                                            {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "type": {
+                                                  "const": "boolean",
+                                                  "title": "Type",
+                                                  "type": "string"
+                                                },
+                                                "value": {
+                                                  "title": "Value",
+                                                  "type": "boolean"
+                                                }
+                                              },
+                                              "required": [
+                                                "type",
+                                                "value"
+                                              ],
+                                              "title": "BooleanLeaf",
+                                              "type": "object"
+                                            },
+                                            {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "type": {
+                                                  "const": "null",
+                                                  "title": "Type",
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "type"
+                                              ],
+                                              "title": "NullLeaf",
+                                              "type": "object"
+                                            },
+                                            {
+                                              "$ref": "#/components/schemas/ObjectNode"
+                                            },
+                                            {
+                                              "$ref": "#/components/schemas/ArrayNode"
+                                            }
+                                          ],
+                                          "title": "Resolved"
+                                        }
+                                      },
+                                      "required": [
+                                        "schema",
+                                        "request",
+                                        "resolved"
+                                      ],
+                                      "title": "Parameters",
+                                      "type": "object"
+                                    },
+                                    "script_sha256": {
+                                      "anyOf": [
+                                        {
+                                          "pattern": "^[0-9a-f]{64}$",
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ],
+                                      "title": "Script Sha256"
+                                    },
+                                    "release": {
+                                      "anyOf": [
+                                        {
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "number": {
+                                              "pattern": "^[0-9]{4}\\.[0-9]{1,2}\\.[0-9]{1,4}$",
+                                              "title": "Number",
+                                              "type": "string"
+                                            },
+                                            "digest": {
+                                              "pattern": "^[0-9a-f]{64}$",
+                                              "title": "Digest",
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "number",
+                                            "digest"
+                                          ],
+                                          "title": "ReleaseRecord",
+                                          "type": "object"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
+                                    "inputs": {
+                                      "items": {
+                                        "additionalProperties": false,
+                                        "description": "A parent by its slot and the salted lineage commitment the manifest carries for it; never an asset id.",
+                                        "properties": {
+                                          "slot": {
+                                            "maxLength": 40,
+                                            "minLength": 1,
+                                            "title": "Slot",
+                                            "type": "string"
+                                          },
+                                          "commitment": {
+                                            "pattern": "^[0-9a-f]{64}$",
+                                            "title": "Commitment",
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "slot",
+                                          "commitment"
+                                        ],
+                                        "title": "DerivationInput",
+                                        "type": "object"
+                                      },
+                                      "maxItems": 64,
+                                      "title": "Inputs",
+                                      "type": "array"
+                                    },
+                                    "outputs": {
+                                      "items": {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "role": {
+                                            "maxLength": 40,
+                                            "minLength": 1,
+                                            "title": "Role",
+                                            "type": "string"
+                                          },
+                                          "digest": {
+                                            "pattern": "^[0-9a-f]{64}$",
+                                            "title": "Digest",
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "role",
+                                          "digest"
+                                        ],
+                                        "title": "DerivationOutput",
+                                        "type": "object"
+                                      },
+                                      "maxItems": 16,
+                                      "title": "Outputs",
+                                      "type": "array"
+                                    },
+                                    "execution_id": {
+                                      "anyOf": [
+                                        {
+                                          "maxLength": 128,
+                                          "minLength": 1,
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ],
+                                      "title": "Execution Id"
+                                    },
+                                    "request_id": {
+                                      "anyOf": [
+                                        {
+                                          "maxLength": 128,
+                                          "minLength": 1,
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ],
+                                      "title": "Request Id"
+                                    },
+                                    "procedure": {
+                                      "anyOf": [
+                                        {
+                                          "additionalProperties": false,
+                                          "description": "E106: the catalogue version and the reported run a `reported` record was made by. `envelope_sha256` binds the\nserver's stored run envelope (the server's reader refuses a changed envelope; a portable reader checks the\nmanifest digest only).",
+                                          "properties": {
+                                            "digest": {
+                                              "pattern": "^[0-9a-f]{64}$",
+                                              "title": "Digest",
+                                              "type": "string"
+                                            },
+                                            "rules_version": {
+                                              "maxLength": 40,
+                                              "minLength": 1,
+                                              "title": "Rules Version",
+                                              "type": "string"
+                                            },
+                                            "label": {
+                                              "maxLength": 100,
+                                              "minLength": 1,
+                                              "title": "Label",
+                                              "type": "string"
+                                            },
+                                            "version_label": {
+                                              "anyOf": [
+                                                {
+                                                  "maxLength": 100,
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "type": "null"
+                                                }
+                                              ],
+                                              "title": "Version Label"
+                                            },
+                                            "step": {
+                                              "enum": [
+                                                "read",
+                                                "source",
+                                                "process",
+                                                "send",
+                                                "check"
+                                              ],
+                                              "title": "Step",
+                                              "type": "string"
+                                            },
+                                            "run_id": {
+                                              "pattern": "^[0-9a-f]{64}$",
+                                              "title": "Run Id",
+                                              "type": "string"
+                                            },
+                                            "envelope_sha256": {
+                                              "pattern": "^[0-9a-f]{64}$",
+                                              "title": "Envelope Sha256",
+                                              "type": "string"
+                                            },
+                                            "runner": {
+                                              "additionalProperties": false,
+                                              "description": "Who reported the run: a person, or an agent with the person it acts for.",
+                                              "properties": {
+                                                "kind": {
+                                                  "enum": [
+                                                    "person",
+                                                    "agent"
+                                                  ],
+                                                  "title": "Kind",
+                                                  "type": "string"
+                                                },
+                                                "principal": {
+                                                  "maxLength": 200,
+                                                  "minLength": 1,
+                                                  "title": "Principal",
+                                                  "type": "string"
+                                                },
+                                                "on_behalf_of": {
+                                                  "anyOf": [
+                                                    {
+                                                      "maxLength": 200,
+                                                      "minLength": 1,
+                                                      "type": "string"
+                                                    },
+                                                    {
+                                                      "type": "null"
+                                                    }
+                                                  ],
+                                                  "title": "On Behalf Of"
+                                                }
+                                              },
+                                              "required": [
+                                                "kind",
+                                                "principal",
+                                                "on_behalf_of"
+                                              ],
+                                              "title": "ProcedureRunner",
+                                              "type": "object"
+                                            },
+                                            "again_of": {
+                                              "anyOf": [
+                                                {
+                                                  "additionalProperties": false,
+                                                  "description": "The earlier result this one was made again from, by its lineage commitment; never an asset id.",
+                                                  "properties": {
+                                                    "commitment": {
+                                                      "pattern": "^[0-9a-f]{64}$",
+                                                      "title": "Commitment",
+                                                      "type": "string"
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "commitment"
+                                                  ],
+                                                  "title": "MadeAgain",
+                                                  "type": "object"
+                                                },
+                                                {
+                                                  "type": "null"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "digest",
+                                            "rules_version",
+                                            "label",
+                                            "version_label",
+                                            "step",
+                                            "run_id",
+                                            "envelope_sha256",
+                                            "runner",
+                                            "again_of"
+                                          ],
+                                          "title": "DerivationProcedure",
+                                          "type": "object"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
+                                    "derivation_digest": {
+                                      "pattern": "^[0-9a-f]{64}$",
+                                      "title": "Derivation Digest",
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "schema",
+                                    "kind",
+                                    "implementation",
+                                    "display",
+                                    "parameters",
+                                    "script_sha256",
+                                    "release",
+                                    "inputs",
+                                    "outputs",
+                                    "execution_id",
+                                    "request_id",
+                                    "procedure",
+                                    "derivation_digest"
+                                  ],
+                                  "title": "DerivationRecordV2",
+                                  "type": "object"
+                                }
+                              },
+                              "required": [
+                                "schema",
+                                "digest",
+                                "digest_v2",
+                                "artifact",
+                                "representations",
+                                "lineage",
+                                "method",
+                                "derivation_record"
+                              ],
+                              "title": "RevisionManifestV4",
                               "type": "object"
                             }
                           ]
@@ -95466,6 +97009,87 @@
         "title": "AdministrationWarning",
         "type": "object"
       },
+      "AgainBinding": {
+        "additionalProperties": false,
+        "properties": {
+          "asset_id": {
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "revision": {
+            "title": "Revision",
+            "type": "string"
+          },
+          "profile": {
+            "title": "Profile",
+            "type": "string"
+          },
+          "declared": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Declared"
+          }
+        },
+        "required": [
+          "asset_id",
+          "revision",
+          "profile",
+          "declared"
+        ],
+        "title": "AgainBinding",
+        "type": "object"
+      },
+      "AgainOutput": {
+        "additionalProperties": false,
+        "properties": {
+          "role": {
+            "title": "Role",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "declared": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Declared",
+            "type": "object"
+          },
+          "earlier": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RunVersion"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The earlier result for this role, when you can read it"
+          }
+        },
+        "required": [
+          "role",
+          "label",
+          "kind",
+          "declared",
+          "earlier"
+        ],
+        "title": "AgainOutput",
+        "type": "object"
+      },
       "AgentEvidence": {
         "additionalProperties": false,
         "description": "E95: what the agent reports it was asked, the model it says it used and where its conversation lives.",
@@ -99168,9 +100792,20 @@
               "request",
               "too-large",
               "bundle-integrity",
-              "capacity"
+              "capacity",
+              "unknown-procedure",
+              "step",
+              "slots",
+              "limits",
+              "input",
+              "kind",
+              "settings",
+              "roles",
+              "again",
+              "result",
+              "catalogue"
             ],
-            "description": "E105b: only with code procedure-refused: why the catalogue refused (a closed list)"
+            "description": "E105b: only with code procedure-refused: why the catalogue refused; E106: with code procedure-run-refused: which claim of a run was refused (closed lists)"
           },
           "rule": {
             "type": "string",
@@ -106801,7 +108436,7 @@
       },
       "PublicationReceipt": {
         "additionalProperties": false,
-        "description": "What publications/derive answers, and answers again for the same command.",
+        "description": "What publications/derive answers, and answers again for the same command. E106: with `outcome` for an output of\na run made again; for a \"Same result\" nothing was published and the asset is the earlier result.",
         "properties": {
           "asset_id": {
             "title": "Asset Id",
@@ -106850,6 +108485,17 @@
           "command_id": {
             "title": "Command Id",
             "type": "string"
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RunOutcome"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
           }
         },
         "required": [
@@ -107974,6 +109620,450 @@
           "unchanged"
         ],
         "title": "ReturnedUnchanged",
+        "type": "object"
+      },
+      "RunInput": {
+        "additionalProperties": false,
+        "properties": {
+          "asset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Asset Id"
+          },
+          "revision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Revision"
+          },
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Profile"
+          },
+          "declared": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Declared"
+          },
+          "restricted": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "True when you can no longer read this input; nothing else about it is shown",
+            "title": "Restricted"
+          }
+        },
+        "title": "RunInput",
+        "type": "object"
+      },
+      "RunOutcome": {
+        "additionalProperties": false,
+        "description": "E106: what publishing an output of a run made again did: compared with the earlier result for its role.",
+        "properties": {
+          "outcome": {
+            "enum": [
+              "same",
+              "same-newer",
+              "same-earlier",
+              "different",
+              "not-compared",
+              "no-earlier"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "sentence": {
+            "title": "Sentence",
+            "type": "string"
+          },
+          "earlier": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Parent"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The earlier result compared with (null when none you can read)"
+          }
+        },
+        "required": [
+          "outcome",
+          "sentence",
+          "earlier"
+        ],
+        "title": "RunOutcome",
+        "type": "object"
+      },
+      "RunOutput": {
+        "additionalProperties": false,
+        "properties": {
+          "role": {
+            "title": "Role",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "sha256": {
+            "title": "Sha256",
+            "type": "string"
+          },
+          "bytes": {
+            "title": "Bytes",
+            "type": "integer"
+          },
+          "declared": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Declared",
+            "type": "object"
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "enum": [
+                  "published",
+                  "same",
+                  "same-newer",
+                  "same-earlier",
+                  "different",
+                  "not-compared",
+                  "no-earlier"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "What publishing this role did; null until it is published",
+            "title": "Outcome"
+          },
+          "asset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Asset Id"
+          },
+          "revision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revision"
+          },
+          "receipt": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Receipt"
+          }
+        },
+        "required": [
+          "role",
+          "kind",
+          "sha256",
+          "bytes",
+          "declared",
+          "outcome",
+          "asset_id",
+          "revision",
+          "receipt"
+        ],
+        "title": "RunOutput",
+        "type": "object"
+      },
+      "RunOutputClaim": {
+        "additionalProperties": false,
+        "properties": {
+          "role": {
+            "maxLength": 40,
+            "minLength": 1,
+            "title": "Role",
+            "type": "string"
+          },
+          "sha256": {
+            "description": "sha256 of the file the run made for this role",
+            "maxLength": 64,
+            "minLength": 64,
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Sha256",
+            "type": "string"
+          },
+          "bytes": {
+            "description": "Its size in bytes (at most the result limit)",
+            "minimum": 1,
+            "title": "Bytes",
+            "type": "integer"
+          },
+          "declared": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "What the file does not say itself (as a derived result declares it); nothing for a LAS file",
+            "maxProperties": 12,
+            "title": "Declared",
+            "type": "object"
+          }
+        },
+        "required": [
+          "role",
+          "sha256",
+          "bytes"
+        ],
+        "title": "RunOutputClaim",
+        "type": "object"
+      },
+      "RunOutputRef": {
+        "additionalProperties": false,
+        "description": "E106: the reported run and the role this file is (`procedure-runs/report`); the run's envelope decides the rest.",
+        "properties": {
+          "id": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "role": {
+            "maxLength": 40,
+            "minLength": 1,
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "role"
+        ],
+        "title": "RunOutputRef",
+        "type": "object"
+      },
+      "RunProcedure": {
+        "additionalProperties": false,
+        "properties": {
+          "digest": {
+            "description": "The version's digest (digest_of over its members, as `ophiolite procedures validate` prints it)",
+            "maxLength": 64,
+            "minLength": 64,
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Digest",
+            "type": "string"
+          }
+        },
+        "required": [
+          "digest"
+        ],
+        "title": "RunProcedure",
+        "type": "object"
+      },
+      "RunProcedureDetail": {
+        "additionalProperties": false,
+        "properties": {
+          "digest": {
+            "title": "Digest",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "version_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version Label"
+          },
+          "rules_version": {
+            "title": "Rules Version",
+            "type": "string"
+          },
+          "step": {
+            "enum": [
+              "read",
+              "source",
+              "process",
+              "send",
+              "check"
+            ],
+            "title": "Step",
+            "type": "string"
+          }
+        },
+        "required": [
+          "digest",
+          "name",
+          "version",
+          "label",
+          "version_label",
+          "rules_version",
+          "step"
+        ],
+        "title": "RunProcedureDetail",
+        "type": "object"
+      },
+      "RunProcedureWords": {
+        "additionalProperties": false,
+        "properties": {
+          "digest": {
+            "title": "Digest",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "version_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version Label"
+          }
+        },
+        "required": [
+          "digest",
+          "name",
+          "version",
+          "label",
+          "version_label"
+        ],
+        "title": "RunProcedureWords",
+        "type": "object"
+      },
+      "RunRunner": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "person",
+              "agent"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "principal": {
+            "title": "Principal",
+            "type": "string"
+          },
+          "on_behalf_of": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "On Behalf Of"
+          }
+        },
+        "required": [
+          "kind",
+          "principal",
+          "on_behalf_of"
+        ],
+        "title": "RunRunner",
+        "type": "object"
+      },
+      "RunVersion": {
+        "additionalProperties": false,
+        "properties": {
+          "asset_id": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "revision": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Revision",
+            "type": "string"
+          }
+        },
+        "required": [
+          "asset_id",
+          "revision"
+        ],
+        "title": "RunVersion",
         "type": "object"
       },
       "RunnerLimits": {
@@ -110017,7 +112107,8 @@
               "edited",
               "original",
               "reference",
-              "not-recorded"
+              "not-recorded",
+              "reported"
             ],
             "title": "Kind",
             "type": "string"
@@ -110585,6 +112676,58 @@
             "default": null,
             "description": "The access key a publication came through, by its label as named then (never a token)",
             "title": "Via"
+          },
+          "procedure_digest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E106: the catalogue version that made a reported result",
+            "title": "Procedure Digest"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E106: the reported run",
+            "title": "Run Id"
+          },
+          "rules_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E106: the procedure rules the run was checked under",
+            "title": "Rules Version"
+          },
+          "again_command": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E106: the command that runs it again on your computer",
+            "title": "Again Command"
           }
         },
         "title": "StoryTechnical",

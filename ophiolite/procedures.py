@@ -76,6 +76,17 @@ class LocalVersion:
     declared: dict = field(default_factory=dict)
 
 
+@dataclass
+class ProjectInput:
+    """E106: a project version downloaded for a run: its file here, its stored type and declarations, and the exact
+    version it is (recorded in run.json, so the run can be reported and published)."""
+    path: str
+    kind: str
+    declared: dict
+    asset_id: str
+    revision: str
+
+
 @dataclass(frozen=True)
 class LocalSystem:
     """A source procedure's connection settings, read from a local file; never copied into a record."""
@@ -124,6 +135,14 @@ SENTENCES = {
     'trust-needed': 'Not run: this procedure runs code someone else wrote on this computer. Answer the question in a terminal, or add --yes to trust it.',
     'declined': 'Not run: you did not trust this procedure. Nothing ran and nothing was recorded.',
     'bundle-differs': 'Not run: the procedure the project sent does not match its digest; nothing was kept.',
+    # E106: project versions as inputs; publishing a run; running a result again
+    'project-input-format': 'Not run: give a project version as --input SLOT=@RESULT:REVISION.',
+    'project-input-class': 'Not run: {label} reads a file, not a project version.',
+    'not-a-run': 'Not published: this folder is not the output of a run (run.json is missing or changed).',
+    'local-inputs': 'Not published: this run read files from this computer; run it on project versions (--input SLOT=@RESULT:REVISION) to publish it.',
+    'output-changed': 'Not published: {file} changed after the run; run it again.',
+    'inputs-differ': 'Not published: the project describes {label} differently from what the run used; run it again.',
+    'refused': '{sentence}',
 }
 WHAT = {'number': 'a finite number', 'integer': 'a whole number', 'boolean': 'true or false', 'choice': 'one of its choices', 'string': 'a short text'}
 INTEGER = re.compile(r'^[-+]?[0-9]+$')
@@ -207,7 +226,10 @@ def _bind(manifest, inputs, kinds, declared, systems):
         if slot not in slots: raise NotRun('unknown-input', '/inputs', {'given': slot})
     bound, record, systems_record = {}, {}, {}
     for slot, item in slots.items():
-        label, cls, paths = item['label'], item['class'], [str(Path(p).resolve()) for p in inputs.get(slot, ())]
+        listed = list(inputs.get(slot, ()))
+        label, cls, paths = item['label'], item['class'], [str(Path(p.path if isinstance(p, ProjectInput) else p).resolve()) for p in listed]
+        if any(isinstance(p, ProjectInput) for p in listed) and (cls != 'version' or item.get('from') == 'file'):
+            raise NotRun('project-input-class', f'/inputs/{slot}', label=label)
         if cls == 'system':
             config_path = systems.get(slot)
             if config_path is None: raise NotRun('missing-input', f'/inputs/{slot}', label=label)
@@ -227,8 +249,14 @@ def _bind(manifest, inputs, kinds, declared, systems):
             bound[slot] = [LocalFile(p, Path(p).name) for p in paths]
             record[slot] = [{'file': p, 'sha256': _sha256(p)} for p in paths]
             continue
-        versions = []
-        for path in paths:
+        versions, record[slot] = [], []
+        for path, chosen in zip(paths, listed):
+            if isinstance(chosen, ProjectInput):  # E106: the stored type and declarations of an exact project version
+                if chosen.kind not in item['kinds']: raise NotRun('wrong-kind', f'/inputs/{slot}', {'kind': chosen.kind, 'accepted': item['kinds']}, label=label)
+                versions.append(LocalVersion(path, chosen.kind, dict(chosen.declared)))
+                record[slot].append({'file': path, 'sha256': _sha256(path), 'kind': chosen.kind, 'declared': dict(chosen.declared),
+                                     'asset_id': chosen.asset_id, 'revision': chosen.revision})
+                continue
             if slot in kinds:
                 kind, given = kinds[slot], {}
                 if slot in declared:
@@ -241,8 +269,8 @@ def _bind(manifest, inputs, kinds, declared, systems):
                 kind, given = found
             if kind not in item['kinds']: raise NotRun('wrong-kind', f'/inputs/{slot}', {'kind': kind, 'accepted': item['kinds']}, label=label)
             versions.append(LocalVersion(path, kind, given))
+            record[slot].append({'file': path, 'sha256': _sha256(path), 'kind': kind, 'declared': given})
         bound[slot] = versions
-        record[slot] = [{'file': v.path, 'sha256': _sha256(v.path), 'kind': v.kind, 'declared': v.declared} for v in versions]
     return bound, record, systems_record
 
 
@@ -315,7 +343,7 @@ def run(folder, destination, inputs=None, *, kinds=None, declared=None, systems=
     if manifest['step'] in ('send', 'check'): raise NotRun('later-release', '/step', step=manifest['step'])
     if destination.exists() or destination.is_symlink(): raise NotRun('destination-exists', '', {'destination': str(destination)})
     target = destination.parent.resolve() / destination.name
-    given = [Path(p).resolve() for paths in (inputs or {}).values() for p in paths] + [Path(p).resolve() for p in (systems or {}).values()]
+    given = [Path(p.path if isinstance(p, ProjectInput) else p).resolve() for paths in (inputs or {}).values() for p in paths] + [Path(p).resolve() for p in (systems or {}).values()]
     if any(_inside(target, p) for p in [folder] + given): raise NotRun('overlap', '', {'destination': str(target)})
     values = _setting_values(manifest, settings)
     bound, input_record, system_record = _bind(manifest, inputs or {}, kinds or {}, declared or {}, systems or {})
@@ -398,6 +426,82 @@ def new(folder, step, label):
     (folder / 'procedure.json').write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
     (folder / 'procedure.py').write_text(code, encoding='utf-8')
     return validate(folder)
+
+
+# ---------------------------------------------------------------- reported runs (E106)
+
+PROJECT_INPUT = re.compile(r'^@([^:@\s]+):([^:@\s]+)$')
+EXTENSIONS = {'las2/1': '.las', 'esri-ascii-grid/1': '.asc', 'well-location/1': '.json', 'wavelet-text/1': '.txt'}
+OUTCOME_WORDS = {'same': 'Same result', 'same-newer': 'Same result, newer procedure version', 'same-earlier': 'Same result, earlier procedure version',
+                 'different': 'Different result', 'not-compared': 'Not compared', 'no-earlier': 'No earlier result you can read to compare with'}
+
+
+def before_report(state):
+    """Called after publish.json is saved and before the report is sent (tests stop a publish here, row 15)."""
+
+
+def manifest_of(folder):
+    verdict = validate(folder)
+    if not verdict['valid']: raise NotRun('not-valid', verdict['field'], {'code': verdict['code']}, sentence=verdict['sentence'])
+    return verdict['manifest']
+
+
+def contract_readers():
+    return json.loads((CONTRACT.parents[2] / 'connectors' / 'v1' / 'readers.json').read_text(encoding='utf-8'))['readers']
+
+
+def _extension(profile):
+    return EXTENSIONS.get(profile, '.csv')
+
+
+def _discard(inputs):
+    """Remove the downloaded copies of project versions (the run keeps their checksums and exact versions)."""
+    for given in (inputs or {}).values():
+        for item in given:
+            if isinstance(item, ProjectInput): shutil.rmtree(Path(item.path).parent, ignore_errors=True)
+
+
+def _save(path, value):
+    partial = path.with_name(path.name + '.partial')
+    partial.write_text(json.dumps(value, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+    os.replace(partial, path)
+
+
+def _text(value):
+    """A typed setting as the `name=value` text a run reads."""
+    if isinstance(value, bool): return 'true' if value else 'false'
+    return value if isinstance(value, str) else repr(value)
+
+
+def output_command(run_id, role):
+    """The command id an output of a run is published under (the server's rule): the same for every retry."""
+    return hashlib.sha256(f'{run_id}/{role}'.encode()).hexdigest()
+
+
+def method_of(procedure, settings):
+    """The method a run's output is published with: what the server derives from the run, exactly."""
+    return {'name': procedure['label'][:80], 'declared': True, 'library': procedure['name'][:80], 'version': str(procedure['version']),
+            'parameters': settings, 'script_sha256': procedure['digest']}
+
+
+def titled(state, reported, output):
+    """The name an output is published under: the name given (or the procedure's label), with the output's role
+    when the procedure makes several."""
+    name = state.get('name') or reported['procedure']['label']
+    return (name if len(reported['outputs']) == 1 else f"{name}: {output['role']}")[:160]
+
+
+def _outcome_words(receipt, name, kind, reported, earlier=None):
+    """{outcome, sentence} for one published output, in words; identifiers stay in the receipt (--json). `earlier` is
+    the title of the earlier result a "Same result" names (its name and version)."""
+    outcome = (receipt.get('outcome') or {}).get('outcome') or 'published'
+    procedure = reported['procedure']
+    made = f"made with {procedure['label']} version {procedure['version']} on your computer"
+    what = f"{name} ({contract().RULES['kind_words'].get(kind, kind)})"
+    if outcome == 'published': return {'outcome': outcome, 'sentence': f'Published {what}, {made}.'}
+    sentence = receipt['outcome']['sentence']
+    if outcome.startswith('same'): return {'outcome': outcome, 'sentence': f'{sentence}: {earlier or name}. Nothing was published.'}
+    return {'outcome': outcome, 'sentence': f'{sentence}: published {what} as a new private result, {made}.'}
 
 
 # ---------------------------------------------------------------- the project catalogue (E105b)
@@ -519,4 +623,162 @@ class ProcedureClient:
                 if not prompt(question(found)): raise NotRun('declined', '', {'digest': digest})
             self.procedure_trust(digest)
         _before_run(folder)
-        return run(folder, destination, inputs, kinds=kinds, declared=declared, systems=systems, settings=settings, expected_digest=digest)
+        inputs = self._project_inputs(inputs or {})
+        try: return run(folder, destination, inputs, kinds=kinds, declared=declared, systems=systems, settings=settings, expected_digest=digest)
+        finally: _discard(inputs)
+
+    # ------------------------------------------------------------ E106: project versions, reported runs, again
+
+    def _project_inputs(self, inputs):
+        """Each `@RESULT:REVISION` input downloaded as exactly that version, with its stored type and declarations
+        (the typed descriptor's profile, and its context for the declarations the reader takes); other inputs as given."""
+        out, work = {}, None
+        try:
+            for slot, given in inputs.items():
+                out[slot] = []
+                for n, text in enumerate(given):
+                    found = PROJECT_INPUT.match(str(text)) if isinstance(text, str) else None
+                    if found is None and isinstance(text, str) and text.startswith('@'): raise NotRun('project-input-format', f'/inputs/{slot}')
+                    if found is None:
+                        out[slot].append(text); continue
+                    work = work or Path(tempfile.mkdtemp(prefix='ophiolite-inputs-'))
+                    out[slot].append(self._download_version(found.group(1), found.group(2), work / f'{slot}-{n}'))
+        except BaseException:
+            _discard(out); shutil.rmtree(work, ignore_errors=True) if work else None
+            raise
+        return out
+
+    def _download_version(self, asset, revision, stem, profile=None, declared=None):
+        """One exact version for a run: its original, its stored type and declarations (given by the server for a run
+        made again; otherwise read from its typed description)."""
+        if profile is None:
+            from urllib.parse import quote
+            from . import _core
+            from .client import PROFILES
+            path = self.prefix + '/' + quote(asset, safe='') + '/revisions/' + quote(revision, safe='')
+            described = self._json(path + '?' + PROFILES[1:], 256 * 1024)
+            _core.verify_typed_descriptor(described, self.project, asset, revision)
+            profile, context = described['profile'], described.get('scientific') or {}
+            keys = [d['key'] for r in contract_readers() if r['profile'] == profile for d in r['declared']]
+            declared = {k: context[k] for k in keys if isinstance(context.get(k), str)}
+        stem.parent.mkdir(parents=True, exist_ok=True)
+        target = stem.with_suffix(_extension(profile))
+        self.download_original(asset, revision, target)
+        return ProjectInput(str(target), profile, dict(declared or {}), asset, revision)
+
+    def procedure_publish(self, folder, *, name=None, again_of=None):
+        """Report a run of a catalogue version on project versions, then publish each of its outputs under the run. The
+        report's command id is saved in the run folder (publish.json) before anything is sent, and every output is
+        published under a command id derived from the run, so publishing again after a stop or a lost answer resumes:
+        one run, each output once. Returns {sentence, run, outputs: [{role, outcome, sentence, receipt}]}."""
+        folder = Path(folder)
+        try: record = json.loads((folder / 'run.json').read_text(encoding='utf-8'))
+        except (OSError, ValueError): raise NotRun('not-a-run') from None
+        if record.get('schema') != LOCAL_RUN: raise NotRun('not-a-run')
+        if record.get('systems') or any('asset_id' not in v for versions in record['inputs'].values() for v in versions): raise NotRun('local-inputs')
+        outputs = []
+        for role, output in record['outputs'].items():
+            path = folder / output['file']
+            if not path.is_file() or _sha256(path) != output['sha256']: raise NotRun('output-changed', f'/outputs/{role}', file=output['file'])
+            outputs.append({'role': role, 'sha256': output['sha256'], 'bytes': path.stat().st_size, 'declared': output['declared']})
+        state_path = folder / 'publish.json'
+        try: state = json.loads(state_path.read_text(encoding='utf-8'))
+        except (OSError, ValueError): state = None
+        if state is None:  # saved before the report is sent (row 15): a lost answer is the same command again
+            import uuid
+            state = {'schema': 'ophiolite.procedure-publish/1', 'command_id': 'run-' + uuid.uuid4().hex, 'name': name, 'again_of': again_of}
+            _save(state_path, state)
+        before_report(state)
+        body = {'command_id': state['command_id'], 'procedure': {'digest': record['procedure']['digest']}, 'settings': record['settings'],
+                'inputs': {slot: [{'asset_id': v['asset_id'], 'revision': v['revision']} for v in versions] for slot, versions in record['inputs'].items()},
+                'outputs': outputs, 'again_of': state.get('again_of')}
+        reported = self._reported(lambda: self._post('procedure-runs', 'report', body, retry=True))
+        for slot, versions in record['inputs'].items():
+            for used, stored in zip(versions, reported['inputs'].get(slot, [])):
+                if stored.get('restricted') or (stored.get('profile'), stored.get('declared') or {}) != (used['kind'], used['declared'] or {}):
+                    raise NotRun('inputs-differ', f'/inputs/{slot}', label=slot)
+        done = {o['role']: o for o in reported['outputs'] if o['outcome'] is not None}
+        method = method_of(reported['procedure'], reported['settings'])
+        parents = [{'asset_id': v['asset_id'], 'revision': v['revision']} for slot in record['inputs'] for v in record['inputs'][slot]]
+        parents = list({(p['asset_id'], p['revision']): p for p in parents}.values())
+        results = []
+        for output in reported['outputs']:
+            role = output['role']
+            if role in done:
+                receipt = done[role]['receipt']
+            else:
+                local = record['outputs'][role]
+                raw = (folder / local['file']).read_bytes()
+                receipt = self._run_output(raw, local['profile'], local['declared'], titled(state, reported, output), parents, method, reported['run_id'], role)
+            earlier = self._title_of(receipt) if (receipt.get('outcome') or {}).get('outcome', '').startswith('same') else None
+            results.append({'role': role, 'kind': output['kind'], 'receipt': receipt, **_outcome_words(receipt, titled(state, reported, output), output['kind'], reported, earlier)})
+        state['run_id'] = reported['run_id']; _save(state_path, state)
+        return {'sentence': '\n'.join(r['sentence'] for r in results), 'run': self.procedure_run_get(reported['run_id']), 'outputs': results}
+
+    def _named(self, reference):
+        """A result's story node (its name and version), or {} when the story does not answer."""
+        from .errors import OphioliteError
+        try: return next(n for n in self.story(reference['asset_id'], reference['revision'], limit=1)['nodes'] if n.get('asset_id') == reference['asset_id'])
+        except (OphioliteError, StopIteration, KeyError): return {}
+
+    def _title_of(self, reference):
+        node = self._named(reference)
+        if not node.get('name'): return None
+        return node['name'] + (', version %d' % node['version'] if node.get('version') else '')
+
+    def _reported(self, call):
+        from .errors import Refused, IntegrityConflict
+        try: return call()
+        except (Refused, IntegrityConflict) as error:
+            if getattr(error, 'code', None) == 'procedure-run-refused': raise NotRun('refused', '', {'reason': getattr(error, 'details', {}).get('reason')}, sentence=error.message) from None
+            raise
+
+    def _run_output(self, raw, profile, declared, name, parents, method, run_id, role):
+        """publications/derive for one output of a run: the command id is the run's for this role (a retry is the same
+        command); the receipt is the published result, or the earlier result for a run made again with the same result."""
+        from .writers import WrittenOriginal
+        receipt = self._reported(lambda: self.publish_derived(WrittenOriginal(raw, profile, dict(declared or {})), name=name[:160], from_=parents, method=method,
+                                                              command_id=output_command(run_id, role), procedure={'id': run_id, 'role': role}))
+        return receipt.model_dump(mode='json', exclude_none=True)
+
+    def procedure_run_get(self, run_id):
+        return self._post('procedure-runs', 'get', {'run_id': run_id}, retry=True)
+
+    def procedure_prepare_again(self, asset, revision):
+        return self._reported(lambda: self._post('procedure-runs', 'prepare-again', {'asset_id': asset, 'revision': revision}, retry=True))
+
+    def procedure_again(self, asset, revision, destination, *, version=None, folder=None, prompt=None, yes=False, cache=None, name=None):
+        """Run a procedure-made result again on this computer and publish it under the new run: the server says per
+        output whether it is the same result (nothing published) or a new private result made again from the earlier
+        one. `version` runs another catalogue version of the same procedure; `folder` runs a local copy whose digest is
+        a catalogue version."""
+        prepared = self.procedure_prepare_again(asset, revision)
+        words = prepared['procedure']
+        if name is None:  # a new result made again is named after the earlier one
+            earlier = self._named({'asset_id': asset, 'revision': revision}).get('name')
+            name = earlier and (earlier[:146] + ' (made again)')
+        if folder is not None:
+            local = Path(folder)
+            found = self.procedure_get(digest(local))
+            if found['state'] == 'withdrawn': raise NotRun('withdrawn', '', {'digest': found['digest']}, date=_day(found['withdrawn_at']))
+        else:
+            chosen = self.procedure_version(words['name'], version) if version is not None else {'digest': words['digest']}
+            found = self.procedure_get(chosen['digest'])
+            if found['state'] == 'withdrawn': raise NotRun('withdrawn', '', {'digest': found['digest']}, date=_day(found['withdrawn_at']))
+            local = self._cached(found['digest'], cache)
+            if not (found['trusted'] or found['mine']):
+                if not yes:
+                    if prompt is None: raise NotRun('trust-needed', '', {'digest': found['digest']})
+                    if not prompt(question(found)): raise NotRun('declined', '', {'digest': found['digest']})
+                self.procedure_trust(found['digest'])
+        manifest = manifest_of(local)
+        work = Path(tempfile.mkdtemp(prefix='ophiolite-inputs-'))
+        try:
+            inputs = {slot: [self._download_version(b['asset_id'], b['revision'], work / f'{slot}-{n}', b['profile'], b['declared'] or {})
+                             for n, b in enumerate(bindings)] for slot, bindings in prepared['inputs'].items()}
+            settings = [f'{k}={_text(v)}' for k, v in prepared['settings'].items() if k in {s['key'] for s in manifest.get('settings', [])}]
+            _before_run(local)
+            ran = run(local, destination, inputs, settings=settings, expected_digest=found['digest'])
+        finally: shutil.rmtree(work, ignore_errors=True)
+        published = self.procedure_publish(destination, name=name, again_of={'asset_id': asset, 'revision': revision})
+        return {**published, 'ran': ran['sentence']}

@@ -29,7 +29,12 @@ def details(node, names):
     who = lambda ident: (names.get(ident) or ident) if ident else NOT_RECORDED
     kind, made, method = node['kind'], node.get('made') or {}, node.get('method')
     out = []
-    if kind == 'declared' or made.get('reported_by'):
+    if kind == 'reported':  # E106: made with a catalogue procedure on a person's computer (or by an agent, for its delegator)
+        if made.get('by_kind') == 'agent':
+            on = 'by %s' % (made.get('by_name') or 'an agent') + (' for %s' % who(made['on_behalf_of']) if made.get('on_behalf_of') else '')
+        else: on = "on %s's computer" % who(made.get('reported_by'))
+        if method: out.append('Made with %s %s %s; Ophiolite did not run this calculation.' % (method['display'], method['version_label'], on))
+    elif kind == 'declared' or made.get('reported_by'):
         out.append('Reported by %s; Ophiolite did not run this calculation.' % who(made.get('reported_by')))
         if method: out.append(method['display'] + '.' if method['display'].startswith('Method') else 'Method: %s.' % method['display'])
     elif kind == 'edited':

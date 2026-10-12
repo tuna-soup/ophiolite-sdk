@@ -411,7 +411,7 @@ class XYZ(Contract):
 
 class ScientificAsset(Contract):
     package: PackageRecord | None = Field(None)
-    manifest: Annotated[RevisionManifest | RevisionManifestV2 | RevisionManifestV3, Field(discriminator='schema_')] | None = Field(None)
+    manifest: Annotated[RevisionManifest | RevisionManifestV2 | RevisionManifestV3 | RevisionManifestV4, Field(discriminator='schema_')] | None = Field(None)
     derivation: DerivationInfo | None = Field(None)
     acquisition: Acquisition | None = Field(None)
     relationships: Relationships | None = Field(None)
@@ -461,6 +461,10 @@ class DerivationDisplay(Contract):
     method: Annotated[str, Field(min_length=1, max_length=120)] = Field(...)
     parameters: Annotated[list[ParameterLabel], Field(max_length=64)] = Field(...)
 
+class DerivationDisplayV2(Contract):
+    method: Annotated[str, Field(min_length=1, max_length=120)] = Field(...)
+    parameters: Annotated[list[ParameterLabelV2], Field(max_length=64)] = Field(...)
+
 class DerivationInfo(Contract):
     method: MethodRecord = Field(...)
 
@@ -471,6 +475,17 @@ class DerivationInput(Contract):
 class DerivationOutput(Contract):
     role: Annotated[str, Field(min_length=1, max_length=40)] = Field(...)
     digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+
+class DerivationProcedure(Contract):
+    digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    rules_version: Annotated[str, Field(min_length=1, max_length=40)] = Field(...)
+    label: Annotated[str, Field(min_length=1, max_length=100)] = Field(...)
+    version_label: Annotated[str, Field(min_length=1, max_length=100)] | None = Field(...)
+    step: Literal['read', 'source', 'process', 'send', 'check'] = Field(...)
+    run_id: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    envelope_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    runner: ProcedureRunner = Field(...)
+    again_of: MadeAgain | None = Field(...)
 
 class DerivationRecord(Contract):
     schema_: Literal['ophiolite.derivation/1'] = Field(..., alias='schema')
@@ -484,6 +499,21 @@ class DerivationRecord(Contract):
     outputs: Annotated[list[DerivationOutput], Field(max_length=16)] = Field(...)
     execution_id: Annotated[str, Field(min_length=1, max_length=128)] | None = Field(...)
     request_id: Annotated[str, Field(min_length=1, max_length=128)] | None = Field(...)
+    derivation_digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+
+class DerivationRecordV2(Contract):
+    schema_: Literal['ophiolite.derivation/2'] = Field(..., alias='schema')
+    kind: Literal['executed', 'declared', 'edited', 'received', 'reported'] = Field(...)
+    implementation: ImplementationV2 = Field(...)
+    display: DerivationDisplayV2 = Field(...)
+    parameters: Parameters = Field(...)
+    script_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] | None = Field(...)
+    release: ReleaseRecord | None = Field(...)
+    inputs: Annotated[list[DerivationInput], Field(max_length=64)] = Field(...)
+    outputs: Annotated[list[DerivationOutput], Field(max_length=16)] = Field(...)
+    execution_id: Annotated[str, Field(min_length=1, max_length=128)] | None = Field(...)
+    request_id: Annotated[str, Field(min_length=1, max_length=128)] | None = Field(...)
+    procedure: DerivationProcedure | None = Field(...)
     derivation_digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
 
 class Display(Contract):
@@ -519,6 +549,11 @@ class Implementation(Contract):
     version: Annotated[str, Field(min_length=1, max_length=40)] = Field(...)
     version_label: Annotated[str, Field(min_length=1, max_length=80)] = Field(...)
 
+class ImplementationV2(Contract):
+    id: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+    version: Annotated[str, Field(min_length=1, max_length=40)] = Field(...)
+    version_label: Annotated[str, Field(min_length=1, max_length=120)] = Field(...)
+
 class ImportOrigin(Contract):
     kind: Literal['portable-bundle'] = Field(...)
     manifest_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
@@ -547,6 +582,9 @@ class LineageReference(Contract):
     key: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     profile: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] | None = Field(None)
+
+class MadeAgain(Contract):
+    commitment: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
 
 class ManifestArtifact(Contract):
     sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
@@ -609,6 +647,10 @@ class PackageRecord(Contract):
     status: Literal['decided', 'needs-decision'] = Field(...)
     unresolved: Annotated[list[Literal['crs', 'xy_unit', 'z_unit', 'z_meaning', 'positive', 'vertical_datum']], Field(max_length=6)] = Field(...)
 
+class ParameterChoice(Contract):
+    value: Annotated[str, Field(min_length=1, max_length=100)] = Field(...)
+    label: Annotated[str, Field(min_length=1, max_length=100)] = Field(...)
+
 class ParameterEntry(Contract):
     key: Annotated[str, Field(min_length=1, max_length=80)] = Field(...)
     value: Annotated[NumberLeaf | IntegerLeaf | StringLeaf | BooleanLeaf | NullLeaf | ObjectNode | ArrayNode, Field(discriminator='type')] = Field(...)
@@ -618,6 +660,12 @@ class ParameterLabel(Contract):
     label: Annotated[str, Field(min_length=1, max_length=80)] = Field(...)
     unit: Annotated[str, Field(max_length=40)] | None = Field(None)
 
+class ParameterLabelV2(Contract):
+    key: Annotated[str, Field(min_length=1, max_length=80)] = Field(...)
+    label: Annotated[str, Field(min_length=1, max_length=100)] = Field(...)
+    unit: Annotated[str, Field(max_length=40)] | None = Field(None)
+    choices: Annotated[list[ParameterChoice], Field(max_length=32)] | None = Field(None)
+
 class Parameters(Contract):
     schema_: Literal['ophiolite.parameters/1'] = Field(..., alias='schema')
     request: Annotated[NumberLeaf | IntegerLeaf | StringLeaf | BooleanLeaf | NullLeaf | ObjectNode | ArrayNode, Field(discriminator='type')] = Field(...)
@@ -626,6 +674,11 @@ class Parameters(Contract):
 class Person(Contract):
     id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     label: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(None)
+
+class ProcedureRunner(Contract):
+    kind: Literal['person', 'agent'] = Field(...)
+    principal: Annotated[str, Field(min_length=1, max_length=200)] = Field(...)
+    on_behalf_of: Annotated[str, Field(min_length=1, max_length=200)] | None = Field(...)
 
 class Provenance(Contract):
     evidence: Literal['source-declared', 'script-declared'] = Field(...)
@@ -695,6 +748,16 @@ class RevisionManifestV3(Contract):
     lineage: Annotated[list[LineageEntry], Field(max_length=64)] = Field(...)
     method: MethodRecord = Field(...)
     derivation_record: DerivationRecord = Field(...)
+
+class RevisionManifestV4(Contract):
+    schema_: Literal['ophiolite.revision-manifest/4'] = Field(..., alias='schema')
+    digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    digest_v2: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    artifact: ManifestArtifact = Field(...)
+    representations: Annotated[list[ManifestRepresentation], Field(max_length=512)] = Field(...)
+    lineage: Annotated[list[LineageEntry], Field(max_length=64)] = Field(...)
+    method: MethodRecord = Field(...)
+    derivation_record: DerivationRecordV2 = Field(...)
 
 class SeismicContext(Contract):
     type: Literal['seismic-volume'] = Field(...)
@@ -1815,19 +1878,24 @@ Acquisition.model_rebuild()
 ArrayNode.model_rebuild()
 BooleanLeaf.model_rebuild()
 DerivationDisplay.model_rebuild()
+DerivationDisplayV2.model_rebuild()
 DerivationInfo.model_rebuild()
 DerivationInput.model_rebuild()
 DerivationOutput.model_rebuild()
+DerivationProcedure.model_rebuild()
 DerivationRecord.model_rebuild()
+DerivationRecordV2.model_rebuild()
 Display.model_rebuild()
 Evaluated.model_rebuild()
 History.model_rebuild()
 Implementation.model_rebuild()
+ImplementationV2.model_rebuild()
 ImportOrigin.model_rebuild()
 IntegerLeaf.model_rebuild()
 LineRange.model_rebuild()
 LineageEntry.model_rebuild()
 LineageReference.model_rebuild()
+MadeAgain.model_rebuild()
 ManifestArtifact.model_rebuild()
 ManifestRepresentation.model_rebuild()
 MeshContext.model_rebuild()
@@ -1838,10 +1906,13 @@ NumberLeaf.model_rebuild()
 ObjectNode.model_rebuild()
 PackageMemberRecord.model_rebuild()
 PackageRecord.model_rebuild()
+ParameterChoice.model_rebuild()
 ParameterEntry.model_rebuild()
 ParameterLabel.model_rebuild()
+ParameterLabelV2.model_rebuild()
 Parameters.model_rebuild()
 Person.model_rebuild()
+ProcedureRunner.model_rebuild()
 Provenance.model_rebuild()
 RecipePin.model_rebuild()
 RecipeReference.model_rebuild()
@@ -1853,6 +1924,7 @@ Retention.model_rebuild()
 RevisionManifest.model_rebuild()
 RevisionManifestV2.model_rebuild()
 RevisionManifestV3.model_rebuild()
+RevisionManifestV4.model_rebuild()
 SeismicContext.model_rebuild()
 SeismicSectionContext.model_rebuild()
 StringLeaf.model_rebuild()

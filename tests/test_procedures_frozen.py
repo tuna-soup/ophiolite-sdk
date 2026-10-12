@@ -73,3 +73,21 @@ def test_the_offline_commands_answer_as_frozen(tmp_path, monkeypatch):
     if os.environ.get('OPHIOLITE_REFREEZE') == '1':
         ANSWERS.write_text(json.dumps(found, indent=2, sort_keys=True) + '\n')
     assert found == json.loads(ANSWERS.read_text())
+
+
+HELP = Path(__file__).resolve().parent / 'fixtures/procedures-help-e105b.json'
+
+
+def test_the_help_of_every_command_before_e106_is_unchanged(monkeypatch):
+    """E106: `publish` and `again` join the group; the help of the commands that were there reads exactly as at the E105b
+    lane head (tests/fixtures/procedures-help-e105b.json, recorded from SDK 9de3d1a at 100 columns)."""
+    import sys
+    frozen = json.loads(HELP.read_text())
+    monkeypatch.setenv('COLUMNS', str(frozen['columns'])); monkeypatch.setattr(sys, 'argv', ['ophiolite'])
+    found = {}
+    for verb in frozen['help']:
+        text = io.StringIO()
+        with contextlib.redirect_stdout(text):
+            with pytest.raises(SystemExit): cli.parser().parse_args(['procedures', verb, '--help'])
+        found[verb] = text.getvalue()
+    assert found == frozen['help'] and len(found) == 9

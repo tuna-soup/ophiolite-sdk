@@ -146,7 +146,7 @@
               "type": "string",
               "maxLength": 512
             },
-            "description": "The revision manifest profiles this reader verifies, comma separated (for example /1,/2,/3). Absent means /1,/2: a /3 revision is then served as its /2 view, with digest_v2 as its digest and no derivation_record."
+            "description": "The revision manifest profiles this reader verifies, comma separated (for example /1,/2,/3,/4). Absent means /1,/2: a /3 or /4 revision is then served as its /2 view, with digest_v2 as its digest and no derivation_record. A /4 revision is served as /4 only to a reader that lists /4; a /3 reader gets its /2 view."
           }
         ],
         "security": [

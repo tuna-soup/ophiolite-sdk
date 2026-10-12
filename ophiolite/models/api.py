@@ -20,7 +20,7 @@ class Grant(Contract):
 
 # Hand-written application responses are kept separate from generated contracts.
 from typing import Literal
-from pydantic import ConfigDict, PrivateAttr, model_validator
+from pydantic import ConfigDict, PrivateAttr, model_serializer, model_validator
 from .generated import Reference
 
 class OutputReference(Contract):
@@ -250,6 +250,18 @@ class RestrictedResultPreview(RestrictedResultSummary):
 # E30b: publications/derive
 from .generated import MethodRecord
 
+class RunEarlier(Contract):
+    asset_id: str
+    revision: str
+
+
+class RunOutcome(Contract):
+    """E106: what publishing an output of a run made again did, compared with the earlier result for its role."""
+    outcome: Literal['same','same-newer','same-earlier','different','not-compared','no-earlier']
+    sentence: str
+    earlier: RunEarlier | None
+
+
 class PublicationReceipt(Contract):
     asset_id: str
     revision: str = Field(pattern='^[0-9a-f]{64}$')
@@ -258,6 +270,14 @@ class PublicationReceipt(Contract):
     derived_from: list[Reference] = Field(min_length=1,max_length=32)
     method: MethodRecord
     command_id: str
+    outcome: RunOutcome | None = Field(None, repr=False)  # E106: only a run's output carries one; the frozen repr stays
+
+    @model_serializer(mode='wrap')
+    def _without_absent_outcome(self, handler):
+        """E106: a receipt that is not a run's output dumps exactly as before."""
+        data = handler(self)
+        if self.outcome is None: data.pop('outcome', None)
+        return data
 
 
 # E31 S2: the journey routes' answers, validated before a client method hands them on (the method's return shape

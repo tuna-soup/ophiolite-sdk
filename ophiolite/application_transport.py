@@ -91,7 +91,7 @@ def envelope(response,raw=None):
     if isinstance(body.get('code'),str) and CODE.match(body['code']):meta['code']=body['code']
     if isinstance(body.get('stage'),str) and STAGE.match(body['stage']):meta['stage']=body['stage']  # E51a
     if isinstance(body.get('field'),str) and FIELD.match(body['field']):meta['field']=body['field']  # E96: the one field a check refusal names
-    if meta.get('code')=='procedure-refused':  # E105b: the closed reason, and E105a's rule and path when the contract refused
+    if meta.get('code') in ('procedure-refused','procedure-run-refused'):  # E105b: the closed reason, and E105a's rule and path when the contract refused; E106: a run's
         for key in ('reason','rule'):
             if isinstance(body.get(key),str) and CODE.match(body[key]):meta[key]=body[key]
         if isinstance(body.get('path'),str) and len(body['path'])<=300:meta['path']=body['path']
@@ -131,7 +131,7 @@ def status(response,operation,raw=None):
     if kind is Busy:raise Busy(message,recovery,status=code,retry_after=delay(response),code=meta.get('code'),**carried(meta))
     if code==413:message=upload_limit(meta) or message
     if meta.get('code') in UPLOAD_CODES and meta.get('message'):message=meta['message']  # E54: the server's sentence for a file sent in parts
-    if meta.get('code')=='procedure-refused' and meta.get('message'):message=meta['message']  # E105b: the server's closed sentence
+    if meta.get('code') in ('procedure-refused','procedure-run-refused') and meta.get('message'):message=meta['message']  # E105b, E106: the server's closed sentence
     raise kind(message,recovery,status=code,code=meta.get('code'),**carried(meta))
 
 

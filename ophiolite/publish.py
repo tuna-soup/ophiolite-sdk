@@ -115,7 +115,8 @@ SOURCE_OPERATIONS={'sources':{'list','export'}}  # E50a: the source reads (not R
 MAP_OPERATIONS={'maps':{'export'},'catalog':{'history'}}  # E70a C4: `get` of a scalar map and its version numbers (existing read routes)
 RESULT_OPERATIONS={'results':{'story','what-changed','dependents','remake-run','remake-save'}}  # E94: how a result was made, and making it again
 CHECK_OPERATIONS={'checks':{'publish','list','compare','publishers'}}  # E96: checks against a reference
-PROCEDURE_OPERATIONS={'procedures':{'register','list','get','bundle','enable','withdraw','trust'}}  # E105b: the project catalogue
+PROCEDURE_OPERATIONS={'procedures':{'register','list','get','bundle','enable','withdraw','trust'},  # E105b: the project catalogue
+                      'procedure-runs':{'report','get','prepare-again'}}  # E106: a reported run and running a result again
 REPORT_OPERATIONS={'activity':{'report'}}  # E70b: a confirmed `get` reports which version this holder received
 IMPORT_OPERATIONS={'well-imports':{'preview','start','step','status','list','cancel'},  # E42a: import a copy of an approved well table
                    'upload-runs':{'start','file','check','file-parts','status','list','cancel','associate','decide','share'},  # E55: a folder upload; E85: check
@@ -654,7 +655,7 @@ def _parent(value):
     return parent
 
 
-def derive_request(project,written,*,name,from_,method,command_id,of_entity=None,new_version_of=None,expected_parent=None):
+def derive_request(project,written,*,name,from_,method,command_id,of_entity=None,new_version_of=None,expected_parent=None,procedure=None):
     """The X-Ophiolite-Upload header of publications/derive, validated before anything is sent."""
     import hashlib
     from .writers import WrittenOriginal
@@ -669,6 +670,7 @@ def derive_request(project,written,*,name,from_,method,command_id,of_entity=None
     if of_entity is not None:body['of_entity']=dict(of_entity)
     if (new_version_of is None)!=(expected_parent is None):raise ValidationFailed(['A new version names both your earlier result and the version it replaces.'])
     if new_version_of is not None:body.update(new_version_of=new_version_of,expected_parent=expected_parent)
+    if procedure is not None:body['run']={'id':procedure['id'],'role':procedure['role']}  # E106: an output of a reported run
     if not 1<=len(parents)<=32 or len({(p['asset_id'],p['revision']) for p in parents})!=len(parents):raise ValidationFailed(['Name 1-32 distinct parents.'])
     if not isinstance(name,str) or not name.strip() or len(name)>160:raise ValidationFailed(['Give the result a name (up to 160 characters).'])
     try:api.MethodRecord.model_validate(method)
@@ -692,6 +694,17 @@ def verify_derived(body,receipt):
     if len(named)!=len(sent) or any(rev!=revision or (own and key!=asset) for (own,key,rev),(asset,revision) in zip(named,sent)):
         raise VerificationFailed('The publication receipt names different parents.')
     if body.get('new_version_of') and receipt.asset_id!=body['new_version_of']:raise VerificationFailed('The new version was published to a different result.')
+    return receipt
+
+
+def verify_run_output(body,receipt):
+    """E106: an output of a reported run. Published: the receipt names this file, as verify_derived checks. The same
+    result as the earlier one: nothing was published, and the receipt is the earlier result it names, under this command."""
+    outcome=receipt.outcome
+    if outcome is None or not outcome.outcome.startswith('same'):return verify_derived(body,receipt)
+    if receipt.command_id!=body['command_id'] or receipt.profile!=body['profile'] or outcome.earlier is None or \
+       (outcome.earlier.asset_id,outcome.earlier.revision)!=(receipt.asset_id,receipt.revision):
+        raise VerificationFailed('The answer for this output names another result than the earlier one it was compared with.')
     return receipt
 
 

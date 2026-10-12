@@ -1284,6 +1284,24 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/procedure-runs/get",
+    "function": "postProjectsProjectProcedureRunsGet",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/procedure-runs/prepare-again",
+    "function": "postProjectsProjectProcedureRunsPrepareAgain",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/procedure-runs/report",
+    "function": "postProjectsProjectProcedureRunsReport",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/procedures/bundle",
     "function": "postProjectsProjectProceduresBundle",
     "request": "schema",

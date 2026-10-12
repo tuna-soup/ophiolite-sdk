@@ -67,7 +67,8 @@ def test_a_2_manifest_with_its_method_verifies_and_a_changed_method_is_refused(f
     refused(lambda c: c['manifest'].pop('method'))  # a /2 manifest without its method
     refused(lambda c: c['manifest'].__setitem__('schema', 'ophiolite.revision-manifest/1'))  # relabelled: /1 carries no method
     refused(lambda c: c['manifest'].__setitem__('schema', 'ophiolite.revision-manifest/3'))  # relabelled: /3 carries a derivation record
-    refused(lambda c: c['manifest'].__setitem__('schema', 'ophiolite.revision-manifest/4'))  # a schema this reader does not know
+    refused(lambda c: c['manifest'].__setitem__('schema', 'ophiolite.revision-manifest/4'))  # relabelled: /4 carries a derivation record too
+    refused(lambda c: c['manifest'].__setitem__('schema', 'ophiolite.revision-manifest/5'))  # a schema this reader does not know
     refused(lambda c: c['derivation']['method'].__setitem__('name', 'Something else'))  # the descriptor's copy
     refused(lambda c: c.pop('derivation'))  # a /2 manifest's method must be declared
 
@@ -77,7 +78,7 @@ def test_an_unknown_manifest_schema_keeps_its_exact_message(fixture):
     the invariant directly, apart from the public model (which refuses the shape first)."""
     from ophiolite.models import invariants
     d, raw, _ = fixture('derived'); d = with_method(d)
-    d['manifest']['schema'] = 'ophiolite.revision-manifest/4'  # E94: /3 is known now
+    d['manifest']['schema'] = 'ophiolite.revision-manifest/5'  # E94: /3 is known now; E106: /4 too
     normalized = next(r for r in d['representations'] if r['kind'] == 'normalized')
     with pytest.raises(Exception, match='^Unknown revision manifest'): invariants.manifest(d, {'sha256': d['manifest']['artifact']['sha256'], 'bytes': d['manifest']['artifact']['bytes']}, normalized)
 
@@ -137,3 +138,77 @@ def test_the_2_view_of_a_3_manifest_passes_the_older_checks_unchanged(fixture):
     view = copy.deepcopy(d)
     view['manifest'] = {'schema': 'ophiolite.revision-manifest/2', 'digest': m['digest_v2'], **{k: m[k] for k in ('artifact', 'representations', 'lineage', 'method')}}
     assert view['derivation'] == {'method': m['method']} and validate.pair(view, raw)
+
+
+DIGEST = 'd' * 64
+
+
+def with_reported(d, again=False):
+    """E106: a /4 manifest carries a `derivation/2` record of kind `reported` with its procedure block; the digests are
+    written out here from the contract's words (schema /4 in `digest`, the /2 view in `digest_v2`)."""
+    d = with_method(d); m = d['manifest']
+    named = [e for e in m['lineage'] if e.get('predicate') == 'derived-from']
+    hidden = next(e for e in m['lineage'] if 'predicate' not in e)
+    record = {'schema': 'ophiolite.derivation/2', 'kind': 'reported',
+              'implementation': {'id': 'shift-tops', 'version': '3', 'version_label': 'version 3 (First release)'},
+              'display': {'method': 'Shift tops by a fixed depth', 'parameters': [{'key': 'offset', 'label': 'Offset', 'unit': 'gAPI', 'choices': None},  # as the server dumps it
+                                                                       {'key': 'mode', 'label': 'How to shift', 'unit': None, 'choices': [{'value': 'op_sub', 'label': 'Subtract the shift'}]}]},
+              'parameters': {'schema': 'ophiolite.parameters/1', 'request': {'type': 'object', 'entries': [{'key': 'mode', 'value': {'type': 'string', 'value': 'op_sub'}},
+                                                                                                       {'key': 'offset', 'value': {'type': 'integer', 'value': '2'}}]}, 'resolved': {'type': 'object', 'entries': []}},
+              'script_sha256': DIGEST, 'release': None,
+              'inputs': [{'slot': 'gamma[0]', 'commitment': named[0]['commitment']}], 'outputs': [{'role': 'result', 'digest': m['artifact']['sha256']}],
+              'execution_id': None, 'request_id': None,
+              'procedure': {'digest': DIGEST, 'rules_version': '1.0.0', 'label': 'Shift tops by a fixed depth', 'version_label': 'First release', 'step': 'process',
+                            'run_id': 'e' * 64, 'envelope_sha256': 'f' * 64, 'runner': {'kind': 'person', 'principal': 'bob', 'on_behalf_of': None},
+                            'again_of': {'commitment': hidden['commitment']} if again else None}}
+    record['derivation_digest'] = making(record)
+    body = {'asset_id': d['asset_id'], 'revision': d['revision'], 'artifact': m['artifact'], 'representations': sorted(m['representations'], key=lambda r: r['id']),
+            'lineage': sorted(e['commitment'] for e in m['lineage']), 'method': m['method']}
+    d['manifest'] = {**m, 'schema': 'ophiolite.revision-manifest/4', 'digest_v2': m['digest'],
+                     'digest': hashlib.sha256(utf8({**body, 'schema': 'ophiolite.revision-manifest/4', 'derivation_record': record}).encode()).hexdigest(),
+                     'derivation_record': record}
+    return d
+
+
+def redigest(c):
+    """Recompute both digests after an edit, so only the rule under test can refuse."""
+    m = c['manifest']; record = m['derivation_record']
+    record['derivation_digest'] = making(record)
+    body = {'asset_id': c['asset_id'], 'revision': c['revision'], 'artifact': m['artifact'], 'representations': sorted(m['representations'], key=lambda r: r['id']),
+            'lineage': sorted(e['commitment'] for e in m['lineage']), 'method': m['method']}
+    m['digest'] = hashlib.sha256(utf8({**body, 'schema': m['schema'], 'derivation_record': record}).encode()).hexdigest()
+
+
+@pytest.mark.parametrize('again', [False, True])
+def test_a_4_manifest_with_a_reported_record_verifies_and_every_change_is_refused(fixture, again):
+    d, raw, _ = fixture('derived'); d = with_reported(d, again)
+    assert validate.pair(d, raw)
+    def refused(edit, message, resign=True):
+        c = copy.deepcopy(d); edit(c)
+        if resign: redigest(c)
+        with pytest.raises(VerificationFailed, match=message): validate.pair(c, raw)
+    procedure = lambda c: c['manifest']['derivation_record']['procedure']  # noqa: E731
+    refused(lambda c: procedure(c).__setitem__('run_id', '0' * 64), 'manifest digest', resign=False)  # outside the making, inside the manifest
+    refused(lambda c: c['manifest'].__setitem__('digest_v2', '0' * 64), '/2 view digest')
+    refused(lambda c: c['manifest']['derivation_record'].__setitem__('script_sha256', 'c' * 64), 'procedure version as its code')
+    refused(lambda c: c['manifest']['derivation_record'].__setitem__('execution_id', 'exec-1'), 'procedure version as its code')
+    refused(lambda c: c['manifest']['derivation_record'].__setitem__('procedure', None), 'procedure block')
+    refused(lambda c: c['manifest']['derivation_record'].__setitem__('kind', 'executed'), 'procedure block')
+    refused(lambda c: procedure(c).__setitem__('again_of', {'commitment': '9' * 64}), 'earlier result')
+    refused(lambda c: c['manifest'].__setitem__('schema', 'ophiolite.revision-manifest/3'), 'declared contract|derivation record')  # relabelled: /3 carries derivation/1
+    refused(lambda c: c['manifest']['derivation_record'].__setitem__('schema', 'ophiolite.derivation/1'), 'declared contract|derivation record')
+
+
+def test_an_executed_record_in_a_4_manifest_carries_no_procedure_block(fixture):
+    d, raw, _ = fixture('derived'); d = with_reported(d)
+    record = d['manifest']['derivation_record']
+    record.update(kind='executed', procedure=None, script_sha256=None, release={'number': '2026.10.65', 'digest': 'a' * 64}, execution_id='exec-1')
+    redigest(d)
+    assert validate.pair(d, raw)  # derivation/2 keeps every derivation/1 kind
+
+
+def test_the_2_view_of_a_4_manifest_passes_the_older_checks_unchanged(fixture):
+    d, raw, _ = fixture('derived'); d = with_reported(d); m = d['manifest']
+    view = copy.deepcopy(d)
+    view['manifest'] = {'schema': 'ophiolite.revision-manifest/2', 'digest': m['digest_v2'], **{k: m[k] for k in ('artifact', 'representations', 'lineage', 'method')}}
+    assert validate.pair(view, raw)

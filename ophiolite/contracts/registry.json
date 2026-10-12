@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.30.0",
+  "version": "1.31.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -37,7 +37,7 @@
     },
     {
       "id": "ophiolite.scientific-asset/1",
-      "version": "1.19.0",
+      "version": "1.20.0",
       "lifecycle": "preview",
       "path": "assets/v1/schema.json",
       "title": "ScientificAsset",
@@ -306,6 +306,14 @@
       "path": "scientific/v1/derivation.json",
       "title": "DerivationRecord",
       "description": "How a version was made: kind, implementation, the registry words at execution time, parameters, release, inputs by slot and lineage commitment, outputs by role, and the digest over the making (E94)."
+    },
+    {
+      "id": "ophiolite.derivation/2",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "scientific/v1/derivation-2.json",
+      "title": "DerivationRecordV2",
+      "description": "derivation/1 plus kind reported: a result a person or an agent made by running a catalogue procedure version, with the procedure block (version, run, envelope digest, runner, made-again-from), every input occurrence as slot[n] and the choice labels of its settings (E106)."
     },
     {
       "id": "ophiolite.parameters/1",
