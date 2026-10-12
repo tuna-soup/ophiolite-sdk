@@ -43441,6 +43441,57 @@
                       ],
                       "default": null,
                       "title": "Values"
+                    },
+                    "reference": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Reference"
+                    },
+                    "depth": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "anyOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "enum": [
+                                  "NaN",
+                                  "Infinity",
+                                  "-Infinity"
+                                ],
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Depth"
+                    },
+                    "qualification": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Qualification"
                     }
                   },
                   "title": "Native_arraybridge_v1_CurveAssetData",
@@ -43526,6 +43577,30 @@
                     ],
                     "default": null,
                     "title": "Revision"
+                  },
+                  "reference": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Reference"
+                  },
+                  "sea_datum": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Sea Datum"
                   }
                 },
                 "title": "Native_arraybridge_v1_CurveAssetRequest",
@@ -100169,6 +100244,30 @@
             ],
             "default": null,
             "title": "Revision"
+          },
+          "reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Reference"
+          },
+          "sea_datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Sea Datum"
           }
         },
         "title": "Native_arraybridge_v1_CurveAssetRequest",
