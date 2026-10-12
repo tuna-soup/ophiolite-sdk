@@ -103,7 +103,8 @@
    "default": null,
    "prefill": [
     "declared",
-    "previously-reviewed"
+    "previously-reviewed",
+    "project-default"
    ],
    "applies_to": [
     "x",

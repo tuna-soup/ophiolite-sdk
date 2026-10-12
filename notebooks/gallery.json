@@ -86,11 +86,25 @@
       "data": "Two pages written in the notebook, or the layers you may read in your project; reading changes nothing."
     },
     {
+      "slug": "well-logs-in-a-bucket",
+      "title": "Well logs in a bucket",
+      "sentence": "Browse a folder of well logs in your organisation's storage bucket, add it read from your storage each time, and see why a file that later changes is reported instead of read.",
+      "modes": ["synthetic", "live"],
+      "data": "Two synthetic gamma-ray logs made on your computer, or a folder of a storage connection your organisation added; nothing is written to your storage."
+    },
+    {
       "slug": "share-a-procedure",
       "title": "Share a procedure with your project",
       "sentence": "Check a procedure and run it on your computer, add it to your project privately, enable it, and run it as a colleague who is asked once to trust it.",
       "modes": ["synthetic", "live"],
       "data": "Two synthetic formation tops and the SDK's sample depth-shift procedure; in your project it adds a private procedure only you and the administrators see until one enables it."
+    },
+    {
+      "slug": "who-has-access-until-when",
+      "title": "Who has access, and until when",
+      "sentence": "Read the projects you reach and the last day your access to each lasts, then who has access to this project, through what, and until when.",
+      "modes": ["synthetic", "live"],
+      "data": "A synthetic project with four people, or your project; nothing is changed, and who has access is shown to project administrators only."
     }
   ]
 }
