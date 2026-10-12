@@ -1,3 +1,4 @@
+import copy
 import hashlib
 import json
 import os
@@ -325,3 +326,58 @@ def test_sources_read_json_needs_no_pandas(tmp_path):
         done = subprocess.run([sys.executable, '-m', 'ophiolite', 'sources', 'read', 's1', '--json'], cwd=tmp_path, env=env, capture_output=True, text=True, timeout=60)
     assert done.returncode == 0, done.stderr
     assert len(json.loads(done.stdout)['rows']) == 2
+
+
+# ---------------------------------------------------------------- E23c (C4): bundle show says what the interpretation is
+
+def _shown(capsys,root,*extra):
+    cli.main(['bundle','show',str(root),*extra]);return capsys.readouterr().out
+
+TOKENS=('needs-decision','point-set','feature-set','recipe-execution','package-read','petrel-points-attributes','z_meaning','selected_by','crs-metadata')
+OLD_WORDS='''This bundle holds 4 exact revisions. Checksums show the files are intact, not who made them. The original revision cannot be independently confirmed.
+
+An unnamed item: a well log, 1 curve.
+
+An unnamed item: well tops.
+
+An unnamed item: a well trajectory.
+
+An unnamed item: a grid surface.
+'''
+
+
+def test_bundle_show_names_each_decision_in_words_and_no_identifier(tmp_path,capsys):
+    import re
+    from test_bundle_package import written
+    opened=written(tmp_path)
+    shown=_shown(capsys,opened.path)
+    assert 'Z is time in milliseconds; read from line 2 of the README.' in shown
+    assert 'Coordinates are in EPSG:23031; read from line 2 of the coordinate system file.' in shown
+    assert 'The original revision cannot be independently confirmed.' in shown and 'manifest' not in shown.lower() and 'digest' not in shown.lower()
+    assert not re.search('[0-9a-f]{12,}',shown) and opened.assets[0].asset_id not in shown
+    assert not [t for t in TOKENS if t in shown]
+    details=json.loads(_shown(capsys,opened.path,'--details'))
+    item=details['items'][0]
+    assert (item['asset_id'],item['type'],item['package']['package_digest'])==(opened.assets[0].asset_id,'point-set',opened.assets[0].package.digest)
+
+
+def test_bundle_show_says_needs_a_decision_for_an_unresolved_field(tmp_path,capsys):
+    from test_bundle_package import FIXTURES,recipe_read,written
+    descriptor=json.loads(FIXTURES.joinpath('point-set-2.json').read_bytes());data=json.loads(FIXTURES.joinpath('point-set-2-data.json').read_bytes())
+    z=next(d for d in data['context']['fidelity']['decisions'] if d['field']=='z_meaning')
+    z.update(selected=None,selected_by=None,status='needs-decision')
+    data['context']['z_meaning']='unknown';data['context']['fidelity']['unknown_context']=['z_meaning']
+    data['context']['fidelity']['execution'].update(status='needs-decision',unresolved=['z_meaning'])
+    descriptor['package'].update(status='needs-decision',unresolved=['z_meaning'])
+    descriptor['scientific']['fidelity']=copy.deepcopy(data['context']['fidelity']);descriptor['scientific']['z_meaning']='unknown'
+    shown=_shown(capsys,written(tmp_path,recipe_read(descriptor,data)).path)
+    assert '  What Z measures: Needs a decision.\n' in shown and 'Z is in milliseconds; read from line 2 of the README.' in shown
+    assert not [t for t in TOKENS if t in shown]
+
+
+def test_bundle_show_of_an_older_bundle_is_words_too(tmp_path,capsys):
+    from ophiolite import bundle
+    from test_bundle import typed_items
+    root=bundle.write_bundle(tmp_path/'old',typed_items()).path
+    assert _shown(capsys,root)==OLD_WORDS
+    assert json.loads(_shown(capsys,root,'--details'))['types']==['regular-grid-surface','trajectory','well-log','well-tops']

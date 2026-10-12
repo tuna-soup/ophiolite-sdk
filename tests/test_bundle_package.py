@@ -324,3 +324,18 @@ def test_written_package_manifests_satisfy_the_two_eight_contract(tmp_path):
         manifest = written(tmp_path, read, name).manifest
         jsonschema.Draft202012Validator(schema).validate(manifest)
         assert manifest['assets'][0]['package']['interpretation'] == 'assets/0/interpretation.json'
+
+
+def test_the_client_checks_each_package_row_against_the_record_it_names(monkeypatch):
+    """C4: Client.export reads the rows after the data and checks each one (the gateway tests prove the reads themselves)."""
+    from urllib.parse import unquote
+    from ophiolite import Client
+    from ophiolite.errors import IntegrityConflict
+    points = recipe_read(); d = points._wire_descriptor; served = dict(points.package_rows); asked = []
+    c = Client('https://workspace.example', 'p')
+    def get(path, limit, **kw): asked.append((unquote(path.rsplit('/', 1)[1]), limit)); return served[asked[-1][0]]
+    monkeypatch.setattr(c, '_get', get)
+    assert c._package_rows(d['asset_id'], d['revision'], d) == points.package_rows
+    assert asked == [('package', bundle.MAX_FILE_BYTES), ('interpretation', bundle.MAX_FILE_BYTES), ('companion:point-set-2.crsmeta.xml', 114), ('companion:point-set-2.readme.txt', 177)]
+    served['companion:point-set-2.readme.txt'] = served['companion:point-set-2.readme.txt'].replace(b'ms', b's ')
+    with pytest.raises(IntegrityConflict, match='^A package file of this revision is not the one its record names'): c._package_rows(d['asset_id'], d['revision'], d)

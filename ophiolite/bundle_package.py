@@ -164,3 +164,74 @@ def check(entry, files, raw_of, descriptor, data):
 def _guard(name, check):
     """One named link; tests replace this function to skip one guard and show a mutated bundle reaches it (the control)."""
     check()
+
+
+# --- plain words for `ophiolite bundle show` (C4; D5) -----------------------------------------------------------------
+# The default output is words a non-engineer reads: no checksum, asset id, recipe id or enum token. `--details` prints those.
+
+KIND_WORDS = {'well-log': 'a well log', 'well-tops': 'well tops', 'trajectory': 'a well trajectory', 'regular-grid-surface': 'a grid surface',
+              'triangulated-surface': 'a triangulated surface', 'point-set': 'a set of points', 'polyline-set': 'a set of lines (fault sticks)',
+              'seismic-slice': 'seismic slices', 'wavelet': 'a wavelet', 'model-section': 'a model section', 'seismic-section': 'a seismic section',
+              'time-depth': 'a time-depth relation', 'feature-set': 'map features'}
+UNIT_WORDS = {'m': 'metres', 'ft': 'feet', 'ms': 'milliseconds', 's': 'seconds', 'us/ft': 'microseconds per foot'}
+FIELD_WORDS = {'z_meaning': 'What Z measures', 'z_unit': 'The unit of Z', 'positive': 'Which way Z increases', 'crs': 'The coordinate system',
+               'xy_unit': 'The unit of X and Y', 'vertical_datum': 'The height reference', 'encoding': 'The text encoding'}
+MEMBER_WORDS = {'readme': 'the README', 'crs-metadata': 'the coordinate system file', 'primary': 'the file itself', 'companion': 'a companion file'}
+NOT_CONFIRMED = 'The original revision cannot be independently confirmed.'
+NEEDS_DECISION = 'Needs a decision'
+
+
+def _unit(value):
+    return UNIT_WORDS.get(value, value)
+
+
+def _statement(field, value, decided):
+    """One decided field as a sentence: 'Z is time in milliseconds'."""
+    if field == 'z_meaning':
+        unit = decided.get('z_unit')
+        return 'Z is %s%s' % (value, ' in ' + _unit(unit) if unit else '')
+    if field == 'z_unit': return 'Z is in ' + _unit(value)
+    if field == 'positive': return 'Z increases %s' % {'up': 'upwards', 'down': 'downwards'}.get(value, value)
+    if field == 'crs': return 'Coordinates are in ' + str(value)
+    if field == 'xy_unit': return 'X and Y are in ' + _unit(value)
+    if field == 'vertical_datum': return 'Heights are relative to ' + str(value)
+    return '%s is %s' % (FIELD_WORDS.get(field, 'A setting'), value)
+
+
+def _source(observations):
+    member = next((o for o in observations if o.get('source') == 'member'), None)
+    if member is not None:
+        where = member.get('locator') or ''
+        return 'read from %s of %s' % (where, MEMBER_WORDS.get(member.get('role'), 'a file in the package')) if where else 'read from ' + MEMBER_WORDS.get(member.get('role'), 'a file in the package')
+    if any(o.get('source') == 'declared' for o in observations): return 'as declared at upload'
+    return 'as the import recipe states'
+
+
+def decision_lines(decisions):
+    """Plain sentences for recorded decisions, in a fixed order; an unresolved field says 'Needs a decision'."""
+    lines = [d if d.endswith('.') else d + '.' for d in decisions if isinstance(d, str)]  # a package read records its decisions as sentences (E56)
+    decisions = [d for d in decisions if isinstance(d, dict)]
+    decided = {d['field']: d['selected'] for d in decisions if d.get('status') == 'decided'}
+    for d in sorted(decisions, key=lambda d: (list(FIELD_WORDS).index(d['field']) if d['field'] in FIELD_WORDS else 99, d['field'])):
+        if d.get('status') != 'decided':
+            lines.append('%s: %s.' % (FIELD_WORDS.get(d['field'], 'A setting'), NEEDS_DECISION)); continue
+        if d['field'] == 'z_unit' and 'z_meaning' in decided: continue  # said with what Z measures
+        lines.append('%s; %s.' % (_statement(d['field'], d['selected'], decided), _source(d.get('observations') or [])))
+    return lines
+
+
+def show_words(opened):
+    """The default `bundle show` text for an opened bundle (D5): what it holds, in words."""
+    count = len(opened.assets)
+    lines = ['This bundle holds %d exact revision%s. Checksums show the files are intact, not who made them. %s' % (count, '' if count == 1 else 's', NOT_CONFIRMED)]
+    for asset in opened.assets:
+        kind = KIND_WORDS.get(asset.type, 'data')
+        lines.append('')
+        lines.append('%s: %s%s.' % (asset.name or 'An unnamed item', kind, ', %d curve%s' % (len(asset.curves), '' if len(asset.curves) == 1 else 's') if asset.curves else ''))
+        package = getattr(asset, 'package', None)
+        if package is None: continue
+        others = sum(1 for m in package.members if m['role'] != 'primary')
+        how = 'with an import recipe' if package.recipe is not None else 'by its format'
+        lines.append('  Read from a file that comes with %d companion file%s, %s; the files travel in this bundle.' % (others, '' if others == 1 else 's', how))
+        lines.extend('  ' + line for line in decision_lines(package.decisions))
+    return '\n'.join(lines)
