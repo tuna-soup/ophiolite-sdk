@@ -5,7 +5,7 @@
     "version": "1.0.0-pilot",
     "description": "One public API for every project operation. Three credential kinds reach it: the browser session (opaque HttpOnly cookie plus the X-CSRF-Token proof and, on non-GET requests, the exact Origin), a project-scoped delegate lasting at most five minutes (Bearer oph_api_..., parent session and current native permissions remain mandatory), and a browser-approved provider grant (Bearer provider token plus X-Ophiolite-Application-Grant; capability 1: the scientific read resources and the applications route within its read/write scopes; capability 3 adds reading wells, wellbores and lineage and the LAS upload routes). A request that carries an Authorization header is a machine request and is refused with MACHINE_AUTH_REQUIRED when a cookie or Origin travels with it. Scope and capability are ceilings; every operation runs the same native permission checks whoever calls it. Not a stable SDK or unattended service-account contract.",
     "x-ophiolite-contracts": {
-      "registry_version": "1.32.0",
+      "registry_version": "1.33.0",
       "index": "/api/v1/contracts",
       "served_profiles": [
         "las2/1",
@@ -336,6 +336,173 @@
                   "project_id"
                 ],
                 "title": "ProjectOnly",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/access/end-date": {
+      "post": {
+        "summary": "E67a: set, change or remove the last day of a person's direct grant (project administrators)",
+        "description": "Scope write; accepted principals: session; project extractor top.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "changed": {
+                      "description": "False when the grant already ended on that day (nothing was written)",
+                      "title": "Changed",
+                      "type": "boolean"
+                    },
+                    "project_id": {
+                      "title": "Project Id",
+                      "type": "string"
+                    },
+                    "user_id": {
+                      "title": "User Id",
+                      "type": "string"
+                    },
+                    "ends_on": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Ends On"
+                    },
+                    "expires_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "The stored end: the start of the day after ends_on, UTC; null: no end",
+                      "title": "Expires At"
+                    }
+                  },
+                  "required": [
+                    "changed",
+                    "project_id",
+                    "user_id",
+                    "ends_on",
+                    "expires_at"
+                  ],
+                  "title": "AccessEndChanged",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "E67a: set, change or remove the end of one person's direct grant (project administrators; a browser session).",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "user_id": {
+                    "title": "User Id",
+                    "type": "string"
+                  },
+                  "ends_on": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "The last permitted day, YYYY-MM-DD (a UTC date; access ends at the start of the next day); null removes the end. Today or later; not for a person whose only grant is a team's, nor for the last administrator without an end date",
+                    "title": "Ends On"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "user_id",
+                  "ends_on"
+                ],
+                "title": "AccessEndDate",
                 "type": "object"
               }
             }
@@ -19043,6 +19210,291 @@
         }
       }
     },
+    "/api/v1/projects/{project}/context/new-data": {
+      "post": {
+        "summary": "E90: What new files start with: who sees them, depth reference, coordinate system, unit system and attribution (any member)",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E90: what new files start with; `legacy` when no one has chosen who sees new files (they stay private).",
+                  "properties": {
+                    "revision": {
+                      "title": "Revision",
+                      "type": "integer"
+                    },
+                    "settings": {
+                      "$ref": "#/components/schemas/NewDataSettingsRead"
+                    },
+                    "legacy": {
+                      "title": "Legacy",
+                      "type": "boolean"
+                    },
+                    "administrator": {
+                      "title": "Administrator",
+                      "type": "boolean"
+                    },
+                    "custom_coordinate_system": {
+                      "title": "Custom Coordinate System",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "revision",
+                    "settings",
+                    "legacy",
+                    "administrator",
+                    "custom_coordinate_system"
+                  ],
+                  "title": "NewData",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "ProjectOnly",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/context/new-data-save": {
+      "post": {
+        "summary": "E90: Replace what new files start with (project administrators; expected_revision); recorded in Activity",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E90: what new files start with; `legacy` when no one has chosen who sees new files (they stay private).",
+                  "properties": {
+                    "revision": {
+                      "title": "Revision",
+                      "type": "integer"
+                    },
+                    "settings": {
+                      "$ref": "#/components/schemas/NewDataSettingsRead"
+                    },
+                    "legacy": {
+                      "title": "Legacy",
+                      "type": "boolean"
+                    },
+                    "administrator": {
+                      "title": "Administrator",
+                      "type": "boolean"
+                    },
+                    "custom_coordinate_system": {
+                      "title": "Custom Coordinate System",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "revision",
+                    "settings",
+                    "legacy",
+                    "administrator",
+                    "custom_coordinate_system"
+                  ],
+                  "title": "NewData",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "expected_revision": {
+                    "minimum": 0,
+                    "title": "Expected Revision",
+                    "type": "integer"
+                  },
+                  "settings": {
+                    "$ref": "#/components/schemas/NewDataSettings"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "expected_revision",
+                  "settings"
+                ],
+                "title": "NewDataWrite",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/context/policy": {
       "post": {
         "summary": "Project scientific context policy",
@@ -19810,6 +20262,281 @@
                   "policy"
                 ],
                 "title": "PolicyWrite",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/details/history": {
+      "post": {
+        "summary": "E67a: the project's earlier names, newest first (project members)",
+        "description": "Scope read; accepted principals: session; project extractor top.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E67a details/history: the project's current name and its renames, newest first (at most 100).",
+                  "properties": {
+                    "project_id": {
+                      "title": "Project Id",
+                      "type": "string"
+                    },
+                    "name": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Name"
+                    },
+                    "renames": {
+                      "items": {
+                        "$ref": "#/components/schemas/ProjectNameChange"
+                      },
+                      "title": "Renames",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "project_id",
+                    "name",
+                    "renames"
+                  ],
+                  "title": "ProjectNames",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "ProjectOnly",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/details/rename": {
+      "post": {
+        "summary": "E67a: change the project's display name; the id and every address stay (project administrators)",
+        "description": "Scope write; accepted principals: session; project extractor top.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "changed": {
+                      "description": "False when the project already had this name (nothing was written)",
+                      "title": "Changed",
+                      "type": "boolean"
+                    },
+                    "project_id": {
+                      "title": "Project Id",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "previous_name": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Previous Name"
+                    }
+                  },
+                  "required": [
+                    "changed",
+                    "project_id",
+                    "name",
+                    "previous_name"
+                  ],
+                  "title": "ProjectRenamed",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "E67a: change a project's display name (project administrators; a browser session). The id never changes.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "1-120 characters after trimming, at most 160 bytes; the same name writes nothing",
+                    "title": "Name",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "name"
+                ],
+                "title": "ProjectRename",
                 "type": "object"
               }
             }
@@ -23250,6 +23977,601 @@
                   "ids"
                 ],
                 "title": "InboxMarkRead",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/las-uploads/audience": {
+      "post": {
+        "summary": "E90: who can see an uploaded original and who can build on it, as one control (the uploader)",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E90: who can see an uploaded original and who can build on it.",
+                  "properties": {
+                    "asset_id": {
+                      "title": "Asset Id",
+                      "type": "string"
+                    },
+                    "state": {
+                      "enum": [
+                        "me",
+                        "people",
+                        "project"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "people": {
+                      "items": {
+                        "$ref": "#/components/schemas/AudienceLine"
+                      },
+                      "title": "People",
+                      "type": "array"
+                    },
+                    "policy_generation": {
+                      "title": "Policy Generation",
+                      "type": "integer"
+                    },
+                    "grants_generation": {
+                      "title": "Grants Generation",
+                      "type": "integer"
+                    },
+                    "replayed": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Replayed"
+                    }
+                  },
+                  "required": [
+                    "asset_id",
+                    "state",
+                    "people",
+                    "policy_generation",
+                    "grants_generation"
+                  ],
+                  "title": "AudienceSnapshot",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "title": "Asset Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "asset_id"
+                ],
+                "title": "AssetOnly",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/las-uploads/audience-preview": {
+      "post": {
+        "summary": "E90: what an audience change would do (who would be told, who would lose it, whether it is narrower), run and rolled back",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E90: an audience change, run and rolled back.",
+                  "properties": {
+                    "told": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "People you may see who would gain read or reuse access; null when you may not list members.",
+                      "title": "Told"
+                    },
+                    "losing": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "People you may see who would lose read access; null when you may not list members.",
+                      "title": "Losing"
+                    },
+                    "narrower": {
+                      "description": "Whether the change is narrower (anyone loses access to the original or a result built on it); a commit then needs a reason.",
+                      "title": "Narrower",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "told",
+                    "losing",
+                    "narrower"
+                  ],
+                  "title": "AudiencePreview",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "E90: the one sharing control of an uploaded original.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "title": "Asset Id",
+                    "type": "string"
+                  },
+                  "state": {
+                    "enum": [
+                      "me",
+                      "people",
+                      "project"
+                    ],
+                    "title": "State",
+                    "type": "string"
+                  },
+                  "people": {
+                    "default": [],
+                    "items": {
+                      "$ref": "#/components/schemas/AudiencePerson"
+                    },
+                    "maxItems": 100,
+                    "title": "People",
+                    "type": "array"
+                  },
+                  "reason": {
+                    "anyOf": [
+                      {
+                        "maxLength": 500,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Required on commit only when the change is narrower (400 reason-required)",
+                    "title": "Reason"
+                  },
+                  "expected_generation": {
+                    "description": "The policy generation you read",
+                    "minimum": 0,
+                    "title": "Expected Generation",
+                    "type": "integer"
+                  },
+                  "expected_grants_generation": {
+                    "description": "The grants generation you read",
+                    "minimum": 0,
+                    "title": "Expected Grants Generation",
+                    "type": "integer"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Command Id"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "asset_id",
+                  "state",
+                  "expected_generation",
+                  "expected_grants_generation"
+                ],
+                "title": "AudienceChange",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/las-uploads/audience-save": {
+      "post": {
+        "summary": "E90: set who can see an uploaded original and who can build on it in one change (both generations; a reason only when narrower)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E90: who can see an uploaded original and who can build on it.",
+                  "properties": {
+                    "asset_id": {
+                      "title": "Asset Id",
+                      "type": "string"
+                    },
+                    "state": {
+                      "enum": [
+                        "me",
+                        "people",
+                        "project"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "people": {
+                      "items": {
+                        "$ref": "#/components/schemas/AudienceLine"
+                      },
+                      "title": "People",
+                      "type": "array"
+                    },
+                    "policy_generation": {
+                      "title": "Policy Generation",
+                      "type": "integer"
+                    },
+                    "grants_generation": {
+                      "title": "Grants Generation",
+                      "type": "integer"
+                    },
+                    "replayed": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Replayed"
+                    }
+                  },
+                  "required": [
+                    "asset_id",
+                    "state",
+                    "people",
+                    "policy_generation",
+                    "grants_generation"
+                  ],
+                  "title": "AudienceSnapshot",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "E90: the one sharing control of an uploaded original.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "title": "Asset Id",
+                    "type": "string"
+                  },
+                  "state": {
+                    "enum": [
+                      "me",
+                      "people",
+                      "project"
+                    ],
+                    "title": "State",
+                    "type": "string"
+                  },
+                  "people": {
+                    "default": [],
+                    "items": {
+                      "$ref": "#/components/schemas/AudiencePerson"
+                    },
+                    "maxItems": 100,
+                    "title": "People",
+                    "type": "array"
+                  },
+                  "reason": {
+                    "anyOf": [
+                      {
+                        "maxLength": 500,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Required on commit only when the change is narrower (400 reason-required)",
+                    "title": "Reason"
+                  },
+                  "expected_generation": {
+                    "description": "The policy generation you read",
+                    "minimum": 0,
+                    "title": "Expected Generation",
+                    "type": "integer"
+                  },
+                  "expected_grants_generation": {
+                    "description": "The grants generation you read",
+                    "minimum": 0,
+                    "title": "Expected Grants Generation",
+                    "type": "integer"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Command Id"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "asset_id",
+                  "state",
+                  "expected_generation",
+                  "expected_grants_generation"
+                ],
+                "title": "AudienceChange",
                 "type": "object"
               }
             }
@@ -41840,6 +43162,18 @@
                       "description": "The join link; the invitation token is shown only here",
                       "title": "Url",
                       "type": "string"
+                    },
+                    "project": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/InvitedProject"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E67a: the project this invitation also gives access to"
                     }
                   },
                   "required": [
@@ -41906,6 +43240,18 @@
                   "email": {
                     "title": "Email",
                     "type": "string"
+                  },
+                  "project": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/InviteProject"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E67a: also give access to one project of this organisation"
                   }
                 },
                 "required": [
@@ -42076,6 +43422,18 @@
                       "description": "The join link; the invitation token is shown only here",
                       "title": "Url",
                       "type": "string"
+                    },
+                    "project": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/InvitedProject"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E67a: the project this invitation also gives access to"
                     }
                   },
                   "required": [
@@ -42936,6 +44294,1623 @@
         }
       }
     },
+    "/api/v1/projects/{project}/procedures/bundle": {
+      "post": {
+        "summary": "The archive of a procedure version you may see and that is not withdrawn (base64); verify it against its digest",
+        "description": "Scope read; accepted principals: session, delegate, agent; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "digest": {
+                      "title": "Digest",
+                      "type": "string"
+                    },
+                    "archive_sha256": {
+                      "title": "Archive Sha256",
+                      "type": "string"
+                    },
+                    "bytes": {
+                      "title": "Bytes",
+                      "type": "integer"
+                    },
+                    "archive": {
+                      "description": "The canonical archive, base64; unpack it with the procedure contract and compare its digest with `digest` before running anything",
+                      "title": "Archive",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "digest",
+                    "archive_sha256",
+                    "bytes",
+                    "archive"
+                  ],
+                  "title": "ProcedureBundle",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "digest": {
+                    "description": "The version's digest (digest_of over its members, as `ophiolite procedures validate` prints it)",
+                    "maxLength": 64,
+                    "minLength": 64,
+                    "pattern": "^[0-9a-f]{64}$",
+                    "title": "Digest",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "digest"
+                ],
+                "title": "ProcedureDigestRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/procedures/enable": {
+      "post": {
+        "summary": "Enable a procedure version for every member of the project (project administrators)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "digest": {
+                      "title": "Digest",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "version": {
+                      "title": "Version",
+                      "type": "integer"
+                    },
+                    "version_label": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Version Label"
+                    },
+                    "label": {
+                      "title": "Label",
+                      "type": "string"
+                    },
+                    "state": {
+                      "description": "private: its registrant and administrators see it; enabled: every member; withdrawn: never served again",
+                      "enum": [
+                        "private",
+                        "enabled",
+                        "withdrawn"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "added_by": {
+                      "title": "Added By",
+                      "type": "string"
+                    },
+                    "added_kind": {
+                      "enum": [
+                        "person",
+                        "agent"
+                      ],
+                      "title": "Added Kind",
+                      "type": "string"
+                    },
+                    "on_behalf_of": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "An agent's registration: the person it acts for",
+                      "title": "On Behalf Of"
+                    },
+                    "added_at": {
+                      "title": "Added At",
+                      "type": "number"
+                    },
+                    "enabled_by": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Enabled By"
+                    },
+                    "enabled_at": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Enabled At"
+                    },
+                    "withdrawn_by": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Withdrawn By"
+                    },
+                    "withdrawn_at": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Withdrawn At"
+                    },
+                    "words": {
+                      "$ref": "#/components/schemas/ProcedureWords"
+                    },
+                    "trusted": {
+                      "description": "You (this credential's principal) trust this version's code in this project",
+                      "title": "Trusted",
+                      "type": "boolean"
+                    },
+                    "mine": {
+                      "description": "You registered this version, or your agent registered it for you; a client asks no trust question for it",
+                      "title": "Mine",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "digest",
+                    "name",
+                    "version",
+                    "version_label",
+                    "label",
+                    "state",
+                    "added_by",
+                    "added_kind",
+                    "on_behalf_of",
+                    "added_at",
+                    "enabled_by",
+                    "enabled_at",
+                    "withdrawn_by",
+                    "withdrawn_at",
+                    "words",
+                    "trusted",
+                    "mine"
+                  ],
+                  "title": "ProcedureVersion",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "digest": {
+                    "description": "The version's digest (digest_of over its members, as `ophiolite procedures validate` prints it)",
+                    "maxLength": 64,
+                    "minLength": 64,
+                    "pattern": "^[0-9a-f]{64}$",
+                    "title": "Digest",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "The same command id and body answer the same result; another body is refused (request)",
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "digest",
+                  "command_id"
+                ],
+                "title": "ProcedureChangeRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/procedures/get": {
+      "post": {
+        "summary": "One procedure version by digest: its manifest, words, state and who added and enabled it",
+        "description": "Scope read; accepted principals: session, delegate, agent; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "digest": {
+                      "title": "Digest",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "version": {
+                      "title": "Version",
+                      "type": "integer"
+                    },
+                    "version_label": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Version Label"
+                    },
+                    "label": {
+                      "title": "Label",
+                      "type": "string"
+                    },
+                    "state": {
+                      "description": "private: its registrant and administrators see it; enabled: every member; withdrawn: never served again",
+                      "enum": [
+                        "private",
+                        "enabled",
+                        "withdrawn"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "added_by": {
+                      "title": "Added By",
+                      "type": "string"
+                    },
+                    "added_kind": {
+                      "enum": [
+                        "person",
+                        "agent"
+                      ],
+                      "title": "Added Kind",
+                      "type": "string"
+                    },
+                    "on_behalf_of": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "An agent's registration: the person it acts for",
+                      "title": "On Behalf Of"
+                    },
+                    "added_at": {
+                      "title": "Added At",
+                      "type": "number"
+                    },
+                    "enabled_by": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Enabled By"
+                    },
+                    "enabled_at": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Enabled At"
+                    },
+                    "withdrawn_by": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Withdrawn By"
+                    },
+                    "withdrawn_at": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Withdrawn At"
+                    },
+                    "words": {
+                      "$ref": "#/components/schemas/ProcedureWords"
+                    },
+                    "trusted": {
+                      "description": "You (this credential's principal) trust this version's code in this project",
+                      "title": "Trusted",
+                      "type": "boolean"
+                    },
+                    "mine": {
+                      "description": "You registered this version, or your agent registered it for you; a client asks no trust question for it",
+                      "title": "Mine",
+                      "type": "boolean"
+                    },
+                    "manifest": {
+                      "additionalProperties": true,
+                      "description": "The version's procedure.json (ophiolite.procedure/1), for Technical details",
+                      "title": "Manifest",
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "digest",
+                    "name",
+                    "version",
+                    "version_label",
+                    "label",
+                    "state",
+                    "added_by",
+                    "added_kind",
+                    "on_behalf_of",
+                    "added_at",
+                    "enabled_by",
+                    "enabled_at",
+                    "withdrawn_by",
+                    "withdrawn_at",
+                    "words",
+                    "trusted",
+                    "mine",
+                    "manifest"
+                  ],
+                  "title": "ProcedureDetail",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "digest": {
+                    "description": "The version's digest (digest_of over its members, as `ophiolite procedures validate` prints it)",
+                    "maxLength": 64,
+                    "minLength": 64,
+                    "pattern": "^[0-9a-f]{64}$",
+                    "title": "Digest",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "digest"
+                ],
+                "title": "ProcedureDigestRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/procedures/list": {
+      "post": {
+        "summary": "The procedure versions you may see in this project, with their state and words",
+        "description": "Scope read; accepted principals: session, delegate, agent; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "versions": {
+                      "items": {
+                        "$ref": "#/components/schemas/ProcedureVersion"
+                      },
+                      "title": "Versions",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "versions"
+                  ],
+                  "title": "ProcedureList",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "maxLength": 127,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Only the versions of this procedure name",
+                    "title": "Name"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "ProcedureListRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/procedures/register": {
+      "post": {
+        "summary": "Register a procedure bundle (its archive, base64); the server reads it with the procedure contract and keeps it private to you and the administrators",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "digest": {
+                      "title": "Digest",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "version": {
+                      "title": "Version",
+                      "type": "integer"
+                    },
+                    "version_label": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Version Label"
+                    },
+                    "label": {
+                      "title": "Label",
+                      "type": "string"
+                    },
+                    "state": {
+                      "description": "private: its registrant and administrators see it; enabled: every member; withdrawn: never served again",
+                      "enum": [
+                        "private",
+                        "enabled",
+                        "withdrawn"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "added_by": {
+                      "title": "Added By",
+                      "type": "string"
+                    },
+                    "added_kind": {
+                      "enum": [
+                        "person",
+                        "agent"
+                      ],
+                      "title": "Added Kind",
+                      "type": "string"
+                    },
+                    "on_behalf_of": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "An agent's registration: the person it acts for",
+                      "title": "On Behalf Of"
+                    },
+                    "added_at": {
+                      "title": "Added At",
+                      "type": "number"
+                    },
+                    "enabled_by": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Enabled By"
+                    },
+                    "enabled_at": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Enabled At"
+                    },
+                    "withdrawn_by": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Withdrawn By"
+                    },
+                    "withdrawn_at": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Withdrawn At"
+                    },
+                    "words": {
+                      "$ref": "#/components/schemas/ProcedureWords"
+                    },
+                    "trusted": {
+                      "description": "You (this credential's principal) trust this version's code in this project",
+                      "title": "Trusted",
+                      "type": "boolean"
+                    },
+                    "mine": {
+                      "description": "You registered this version, or your agent registered it for you; a client asks no trust question for it",
+                      "title": "Mine",
+                      "type": "boolean"
+                    },
+                    "already": {
+                      "description": "This digest was already registered in this project: the answer is that version",
+                      "title": "Already",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "digest",
+                    "name",
+                    "version",
+                    "version_label",
+                    "label",
+                    "state",
+                    "added_by",
+                    "added_kind",
+                    "on_behalf_of",
+                    "added_at",
+                    "enabled_by",
+                    "enabled_at",
+                    "withdrawn_by",
+                    "withdrawn_at",
+                    "words",
+                    "trusted",
+                    "mine",
+                    "already"
+                  ],
+                  "title": "RegisteredProcedure",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "The same command id and body answer the same result; another body is refused (request)",
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "archive": {
+                    "description": "The bundle as an archive (`ophiolite procedures` packs it), base64; at most 1.25 MiB decoded (refused too-large). The digest is computed from the files, never sent (refused typed-digest)",
+                    "maxLength": 1800000,
+                    "title": "Archive",
+                    "type": "string"
+                  },
+                  "archive_sha256": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 64,
+                        "pattern": "^[0-9a-f]{64}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "sha256 of the decoded archive; an agent sends it and its plan names it. When sent it must match (refused request)",
+                    "title": "Archive Sha256"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "command_id",
+                  "archive"
+                ],
+                "title": "ProcedureRegisterRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/procedures/trust": {
+      "post": {
+        "summary": "Record that you trust the code of one procedure version in this project",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "digest": {
+                      "title": "Digest",
+                      "type": "string"
+                    },
+                    "trusted": {
+                      "const": true,
+                      "title": "Trusted",
+                      "type": "boolean"
+                    },
+                    "already": {
+                      "title": "Already",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "digest",
+                    "trusted",
+                    "already"
+                  ],
+                  "title": "ProcedureTrust",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "digest": {
+                    "description": "The version's digest (digest_of over its members, as `ophiolite procedures validate` prints it)",
+                    "maxLength": 64,
+                    "minLength": 64,
+                    "pattern": "^[0-9a-f]{64}$",
+                    "title": "Digest",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "The same command id and body answer the same result; another body is refused (request)",
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "digest",
+                  "command_id"
+                ],
+                "title": "ProcedureChangeRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/procedures/withdraw": {
+      "post": {
+        "summary": "Withdraw a procedure version (project administrators, or its registrant while it is private); it is never served again",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "digest": {
+                      "title": "Digest",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "version": {
+                      "title": "Version",
+                      "type": "integer"
+                    },
+                    "version_label": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Version Label"
+                    },
+                    "label": {
+                      "title": "Label",
+                      "type": "string"
+                    },
+                    "state": {
+                      "description": "private: its registrant and administrators see it; enabled: every member; withdrawn: never served again",
+                      "enum": [
+                        "private",
+                        "enabled",
+                        "withdrawn"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "added_by": {
+                      "title": "Added By",
+                      "type": "string"
+                    },
+                    "added_kind": {
+                      "enum": [
+                        "person",
+                        "agent"
+                      ],
+                      "title": "Added Kind",
+                      "type": "string"
+                    },
+                    "on_behalf_of": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "An agent's registration: the person it acts for",
+                      "title": "On Behalf Of"
+                    },
+                    "added_at": {
+                      "title": "Added At",
+                      "type": "number"
+                    },
+                    "enabled_by": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Enabled By"
+                    },
+                    "enabled_at": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Enabled At"
+                    },
+                    "withdrawn_by": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Withdrawn By"
+                    },
+                    "withdrawn_at": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Withdrawn At"
+                    },
+                    "words": {
+                      "$ref": "#/components/schemas/ProcedureWords"
+                    },
+                    "trusted": {
+                      "description": "You (this credential's principal) trust this version's code in this project",
+                      "title": "Trusted",
+                      "type": "boolean"
+                    },
+                    "mine": {
+                      "description": "You registered this version, or your agent registered it for you; a client asks no trust question for it",
+                      "title": "Mine",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "digest",
+                    "name",
+                    "version",
+                    "version_label",
+                    "label",
+                    "state",
+                    "added_by",
+                    "added_kind",
+                    "on_behalf_of",
+                    "added_at",
+                    "enabled_by",
+                    "enabled_at",
+                    "withdrawn_by",
+                    "withdrawn_at",
+                    "words",
+                    "trusted",
+                    "mine"
+                  ],
+                  "title": "ProcedureVersion",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "digest": {
+                    "description": "The version's digest (digest_of over its members, as `ophiolite procedures validate` prints it)",
+                    "maxLength": 64,
+                    "minLength": 64,
+                    "pattern": "^[0-9a-f]{64}$",
+                    "title": "Digest",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "The same command id and body answer the same result; another body is refused (request)",
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "digest",
+                  "command_id"
+                ],
+                "title": "ProcedureChangeRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/ended": {
+      "post": {
+        "summary": "E67a: the projects where your own direct access ended (the last day of each); nothing about anyone else",
+        "description": "Scope read; accepted principals: session; project extractor none.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E67a projects/ended: the caller's own direct grants that ended and are why the caller cannot open the project.",
+                  "properties": {
+                    "projects": {
+                      "items": {
+                        "$ref": "#/components/schemas/EndedProject"
+                      },
+                      "title": "Projects",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "projects"
+                  ],
+                  "title": "EndedProjects",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "This operation reads no fields from its body; send an empty object.",
+                "properties": {},
+                "title": "NoFields",
+                "type": "object",
+                "x-ophiolite-no-fields": true
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/list": {
       "post": {
         "summary": "Projects this credential may reach, one page at a time (limit, cursor)",
@@ -43260,7 +46235,10 @@
                         "wavelet-text/1",
                         "model-section-text/1",
                         "seismic-section-text/1",
-                        "time-depth-csv/1"
+                        "time-depth-csv/1",
+                        "ogc-geopackage/1",
+                        "geojson/1",
+                        "esri-shapefile/1"
                       ],
                       "title": "Profile",
                       "type": "string"
@@ -44336,7 +47314,10 @@
                         "wavelet-text/1",
                         "model-section-text/1",
                         "seismic-section-text/1",
-                        "time-depth-csv/1"
+                        "time-depth-csv/1",
+                        "ogc-geopackage/1",
+                        "geojson/1",
+                        "esri-shapefile/1"
                       ],
                       "title": "Profile",
                       "type": "string"
@@ -77879,6 +80860,19 @@
                       ],
                       "default": null,
                       "description": "E85b: present when an address was read"
+                    },
+                    "defaults_revision": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E90: the project defaults revision this answer offered; `upload-runs/start` names it",
+                      "title": "Defaults Revision"
                     }
                   },
                   "required": [
@@ -79270,10 +82264,17 @@
                     "type": "array"
                   },
                   "attribution": {
-                    "maxLength": 500,
-                    "minLength": 1,
-                    "title": "Attribution",
-                    "type": "string"
+                    "anyOf": [
+                      {
+                        "maxLength": 500,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Attribution"
                   },
                   "well_notes": {
                     "default": "",
@@ -79282,12 +82283,20 @@
                     "type": "string"
                   },
                   "audience": {
-                    "items": {
-                      "type": "string"
-                    },
-                    "maxItems": 100,
-                    "title": "Audience",
-                    "type": "array"
+                    "anyOf": [
+                      {
+                        "items": {
+                          "type": "string"
+                        },
+                        "maxItems": 100,
+                        "type": "array"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Audience"
                   },
                   "rights_confirmed": {
                     "const": true,
@@ -79319,6 +82328,20 @@
                     ],
                     "default": null,
                     "description": "E59: the files are objects of a storage bucket, read with the person's own key and either copied into the project or read where they live"
+                  },
+                  "defaults_revision": {
+                    "anyOf": [
+                      {
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E90: the project defaults revision the check answered",
+                    "title": "Defaults Revision"
                   }
                 },
                 "required": [
@@ -79326,7 +82349,6 @@
                   "command_id",
                   "folder_name",
                   "files",
-                  "attribution",
                   "rights_confirmed"
                 ],
                 "title": "Start",
@@ -84682,7 +87704,7 @@
                       "items": {
                         "x-ophiolite": {
                           "id": "ophiolite.asset-summary/1",
-                          "version": "1.3.0",
+                          "version": "1.4.0",
                           "lifecycle": "preview"
                         },
                         "additionalProperties": false,
@@ -84752,7 +87774,7 @@
                           "sample_count": {
                             "anyOf": [
                               {
-                                "maximum": 100000,
+                                "maximum": 4000000,
                                 "minimum": 0,
                                 "type": "integer"
                               },
@@ -85319,7 +88341,7 @@
                 "schema": {
                   "x-ophiolite": {
                     "id": "ophiolite.scientific-asset/1",
-                    "version": "1.20.0",
+                    "version": "1.21.0",
                     "lifecycle": "preview"
                   },
                   "additionalProperties": false,
@@ -87697,7 +90719,7 @@
                               "type": "string"
                             },
                             "sample_count": {
-                              "maximum": 100000,
+                              "maximum": 4000000,
                               "minimum": 0,
                               "title": "Sample Count",
                               "type": "integer"
@@ -87717,7 +90739,7 @@
                               "type": "boolean"
                             },
                             "missing_count": {
-                              "maximum": 100000,
+                              "maximum": 4000000,
                               "minimum": 0,
                               "title": "Missing Count",
                               "type": "integer"
@@ -87757,6 +90779,67 @@
                               ],
                               "default": null,
                               "title": "Quantity Status"
+                            },
+                            "read": {
+                              "anyOf": [
+                                {
+                                  "const": "windows",
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "default": null,
+                              "title": "Read"
+                            },
+                            "depth_min": {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "default": null,
+                              "title": "Depth Min"
+                            },
+                            "depth_max": {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "default": null,
+                              "title": "Depth Max"
+                            },
+                            "value_min": {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "default": null,
+                              "title": "Value Min"
+                            },
+                            "value_max": {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "default": null,
+                              "title": "Value Max"
                             }
                           },
                           "required": [
@@ -91339,7 +94422,8 @@
                               "image/tiff",
                               "application/x-esri-shapefile",
                               "application/geopackage+sqlite3",
-                              "application/geo+json"
+                              "application/geo+json",
+                              "application/vnd.ophiolite.curve-columns"
                             ],
                             "title": "Media Type",
                             "type": "string"
@@ -91387,9 +94471,25 @@
                           "losses"
                         ],
                         "then": {
+                          "if": {
+                            "properties": {
+                              "profile": {
+                                "not": {
+                                  "const": "ophiolite.curve-columns/1"
+                                }
+                              }
+                            }
+                          },
                           "properties": {
                             "bytes": {
-                              "maximum": 33554432
+                              "maximum": 65048576
+                            }
+                          },
+                          "then": {
+                            "properties": {
+                              "bytes": {
+                                "maximum": 33554432
+                              }
                             }
                           }
                         },
@@ -92424,20 +95524,20 @@
           {
             "name": "top",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "number"
             },
-            "description": "Top of the depth window, in the curve's depth unit."
+            "description": "Top of the depth window, in the curve's depth unit. Required unless index is given."
           },
           {
             "name": "base",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "number"
             },
-            "description": "Base of the depth window, in the curve's depth unit."
+            "description": "Base of the depth window, in the curve's depth unit. Required unless index is given."
           },
           {
             "name": "level",
@@ -92460,6 +95560,16 @@
               "maximum": 2048
             },
             "description": "Item budget: the server chooses the smallest level whose item count is at most rows (level 17 when none is). Exactly one of level and rows."
+          },
+          {
+            "name": "index",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "description": "E100b: in place of top and base, the level-0 page (2,048 samples, aligned to multiples of 2,048) that holds this sample index, with its before and after; refused beyond the last sample."
           },
           {
             "name": "cursor",
@@ -92527,7 +95637,7 @@
                 "schema": {
                   "x-ophiolite": {
                     "id": "ophiolite.curve-window/1",
-                    "version": "1.0.0",
+                    "version": "1.1.0",
                     "lifecycle": "preview"
                   },
                   "title": "Curve window",
@@ -92628,6 +95738,27 @@
                               "type": "string",
                               "minLength": 1,
                               "maxLength": 512
+                            },
+                            "qualification": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "required": [
+                                "kind",
+                                "revision"
+                              ],
+                              "description": "Present only on tvd and tvdss answers: what qualified the depths. A re-qualified trajectory or datum changes the identity, so the ETag and the cursor change.",
+                              "properties": {
+                                "kind": {
+                                  "enum": [
+                                    "trajectory",
+                                    "datum"
+                                  ]
+                                },
+                                "revision": {
+                                  "type": "string",
+                                  "maxLength": 1024
+                                }
+                              }
                             }
                           }
                         }
@@ -92638,7 +95769,12 @@
                       "maxLength": 128
                     },
                     "reference": {
-                      "const": "md"
+                      "enum": [
+                        "md",
+                        "tvd",
+                        "tvdss"
+                      ],
+                      "description": "The depth reference of every depth in the answer. tvd and tvdss are answered for native curves only, from a qualified trajectory (tvdss: and the matching sea-level datum)."
                     },
                     "depth_unit": {
                       "type": "string",
@@ -93041,7 +96177,7 @@
                     "type": "object"
                   },
                   "then": {
-                    "description": "The value rules: the shape discriminates the body (raw at level 0 and exact; summary at 1..17), and only a native identity carries native.",
+                    "description": "The value rules: the shape discriminates the body (raw at level 0 and exact; summary at 1..17), and only a native identity carries native; tvd and tvdss only for a native identity that names its qualification, and only they carry one.",
                     "allOf": [
                       {
                         "if": {
@@ -93151,6 +96287,47 @@
                               }
                             }
                           }
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "reference": {
+                              "const": "md"
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "identity": {
+                              "properties": {
+                                "native": {
+                                  "not": {
+                                    "required": [
+                                      "qualification"
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "else": {
+                          "properties": {
+                            "identity": {
+                              "required": [
+                                "native"
+                              ],
+                              "properties": {
+                                "native": {
+                                  "required": [
+                                    "qualification"
+                                  ]
+                                }
+                              }
+                            }
+                          },
+                          "description": "tvd and tvdss: a native identity (only a native identity carries native, by the rule above) naming its qualification."
                         }
                       }
                     ]
@@ -93294,7 +96471,7 @@
     },
     "/api/v1/projects/{project}/wells/{well}/versions/{version}/curve-assets/{asset}/revisions/{revision}/windows": {
       "get": {
-        "description": "One page of a depth window of a native well curve asset (ophiolite.curve-window/1, identity.kind native), read through the caller\u2019s own GetCurveAsset; MD only (tvd and tvdss answer 422). A conditional request (If-None-Match) still reads the curve as the caller and answers 304 when the ETag is current.",
+        "description": "One page of a depth window of a native well curve asset (ophiolite.curve-window/1, identity.kind native), read through the caller\u2019s own GetCurveAsset; MD, or TVD and TVDSS from the well\u2019s qualified trajectory and datum (otherwise 422 with the reason). A conditional request (If-None-Match) still reads the curve as the caller and answers 304 when the ETag is current.",
         "parameters": [
           {
             "name": "project",
@@ -93400,7 +96577,17 @@
                 "tvdss"
               ]
             },
-            "description": "Depth reference; only md is windowed (tvd and tvdss answer 422)."
+            "description": "Depth reference. tvd reads the qualified trajectory depths; tvdss also needs sea_datum to match the well's qualified datum. Without them: 422 with the reason."
+          },
+          {
+            "name": "sea_datum",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "description": "The sea-level datum a tvdss window is read against; it must match the well's qualified datum."
           }
         ],
         "security": [
@@ -93439,7 +96626,7 @@
                 "schema": {
                   "x-ophiolite": {
                     "id": "ophiolite.curve-window/1",
-                    "version": "1.0.0",
+                    "version": "1.1.0",
                     "lifecycle": "preview"
                   },
                   "title": "Curve window",
@@ -93540,6 +96727,27 @@
                               "type": "string",
                               "minLength": 1,
                               "maxLength": 512
+                            },
+                            "qualification": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "required": [
+                                "kind",
+                                "revision"
+                              ],
+                              "description": "Present only on tvd and tvdss answers: what qualified the depths. A re-qualified trajectory or datum changes the identity, so the ETag and the cursor change.",
+                              "properties": {
+                                "kind": {
+                                  "enum": [
+                                    "trajectory",
+                                    "datum"
+                                  ]
+                                },
+                                "revision": {
+                                  "type": "string",
+                                  "maxLength": 1024
+                                }
+                              }
                             }
                           }
                         }
@@ -93550,7 +96758,12 @@
                       "maxLength": 128
                     },
                     "reference": {
-                      "const": "md"
+                      "enum": [
+                        "md",
+                        "tvd",
+                        "tvdss"
+                      ],
+                      "description": "The depth reference of every depth in the answer. tvd and tvdss are answered for native curves only, from a qualified trajectory (tvdss: and the matching sea-level datum)."
                     },
                     "depth_unit": {
                       "type": "string",
@@ -93953,7 +97166,7 @@
                     "type": "object"
                   },
                   "then": {
-                    "description": "The value rules: the shape discriminates the body (raw at level 0 and exact; summary at 1..17), and only a native identity carries native.",
+                    "description": "The value rules: the shape discriminates the body (raw at level 0 and exact; summary at 1..17), and only a native identity carries native; tvd and tvdss only for a native identity that names its qualification, and only they carry one.",
                     "allOf": [
                       {
                         "if": {
@@ -94063,6 +97276,47 @@
                               }
                             }
                           }
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "reference": {
+                              "const": "md"
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "identity": {
+                              "properties": {
+                                "native": {
+                                  "not": {
+                                    "required": [
+                                      "qualification"
+                                    ]
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "else": {
+                          "properties": {
+                            "identity": {
+                              "required": [
+                                "native"
+                              ],
+                              "properties": {
+                                "native": {
+                                  "required": [
+                                    "qualification"
+                                  ]
+                                }
+                              }
+                            }
+                          },
+                          "description": "tvd and tvdss: a native identity (only a native identity carries native, by the rule above) naming its qualification."
                         }
                       }
                     ]
@@ -98281,6 +101535,19 @@
           "archived": {
             "title": "Archived",
             "type": "boolean"
+          },
+          "access_ends_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E67a: when your access to this project ends (an instant, UTC); null: it does not",
+            "title": "Access Ends At"
           }
         },
         "required": [
@@ -99382,6 +102649,70 @@
         "title": "Attempt",
         "type": "object"
       },
+      "AudienceLine": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "can_see": {
+            "title": "Can See",
+            "type": "boolean"
+          },
+          "legacy": {
+            "title": "Legacy",
+            "type": "boolean"
+          },
+          "build_on": {
+            "title": "Build On",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "can_see",
+          "legacy",
+          "build_on"
+        ],
+        "title": "AudienceLine",
+        "type": "object"
+      },
+      "AudiencePerson": {
+        "properties": {
+          "id": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "can_see": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "const": "legacy",
+                "type": "string"
+              }
+            ],
+            "description": "true: can see it (ceiling and read grant); false: cannot; \"legacy\": keeps an earlier entry, grants nothing",
+            "title": "Can See"
+          },
+          "build_on": {
+            "default": false,
+            "description": "Can build on it (the reuse grant); under \"people\" it needs can_see true",
+            "title": "Build On",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "can_see"
+        ],
+        "title": "AudiencePerson",
+        "type": "object"
+      },
       "Binding": {
         "additionalProperties": false,
         "properties": {
@@ -99912,6 +103243,19 @@
             "const": "none",
             "type": "string",
             "title": "Default"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E90: why the project's default is not offered for this field (a coordinate system this kind of file cannot use)",
+            "title": "Note"
           }
         },
         "required": [
@@ -101970,6 +105314,63 @@
             "description": "direct, or team:<team id>",
             "title": "Via",
             "type": "string"
+          },
+          "team_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E67a: the team's name for a team grant; null for a direct grant",
+            "title": "Team Name"
+          },
+          "ends_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E67a: when a direct grant ends (the start of the day after its last day, UTC); null: it does not end. Team grants carry no date",
+            "title": "Ends At"
+          },
+          "ends_on": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E67a: the last permitted day of a direct grant (YYYY-MM-DD, a UTC date); null: no end",
+            "title": "Ends On"
+          },
+          "ended": {
+            "default": false,
+            "description": "E67a: the direct grant has ended and no longer gives access",
+            "title": "Ended",
+            "type": "boolean"
+          },
+          "role_label": {
+            "default": "",
+            "description": "E67a: the role in words (Member or Viewer)",
+            "title": "Role Label",
+            "type": "string"
+          },
+          "source_label": {
+            "default": "",
+            "description": "E67a: where the grant comes from in words: Direct grant, or the team's name (A team when it has none)",
+            "title": "Source Label",
+            "type": "string"
           }
         },
         "required": [
@@ -102028,6 +105429,25 @@
             },
             "title": "Grants",
             "type": "array"
+          },
+          "ends_on": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E67a: the last permitted day of this person's direct grant, or null",
+            "title": "Ends On"
+          },
+          "ended": {
+            "default": false,
+            "description": "E67a: this person's direct grant has ended",
+            "title": "Ended",
+            "type": "boolean"
           }
         },
         "required": [
@@ -102088,6 +105508,38 @@
           "requires_plan"
         ],
         "title": "Eligibility",
+        "type": "object"
+      },
+      "EndedProject": {
+        "additionalProperties": false,
+        "properties": {
+          "project_id": {
+            "title": "Project Id",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "ended_on": {
+            "description": "The last day the access lasted (YYYY-MM-DD, a UTC date)",
+            "title": "Ended On",
+            "type": "string"
+          }
+        },
+        "required": [
+          "project_id",
+          "name",
+          "ended_on"
+        ],
+        "title": "EndedProject",
         "type": "object"
       },
       "Entity": {
@@ -102421,6 +105873,31 @@
               "request"
             ],
             "description": "E96: only with code check-refused: the one field the refusal names"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "permission",
+              "invalid",
+              "typed-digest",
+              "version-not-higher",
+              "not-found",
+              "withdrawn",
+              "not-enabled",
+              "request",
+              "too-large",
+              "bundle-integrity",
+              "capacity"
+            ],
+            "description": "E105b: only with code procedure-refused: why the catalogue refused (a closed list)"
+          },
+          "rule": {
+            "type": "string",
+            "description": "E105b: only with reason invalid: the procedure contract's code (contracts/procedures/v1/rules.json sentences)"
+          },
+          "path": {
+            "type": "string",
+            "description": "E105b: only with reason invalid: the JSON path in procedure.json or the member path the rule names (may be empty)"
           }
         }
       },
@@ -102760,6 +106237,18 @@
           "expires_at": {
             "title": "Expires At",
             "type": "string"
+          },
+          "project": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FoundProject"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E67a: the project, role and last day this invitation also gives"
           }
         },
         "required": [
@@ -102770,6 +106259,48 @@
           "expires_at"
         ],
         "title": "FoundInvitation",
+        "type": "object"
+      },
+      "FoundProject": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "role": {
+            "enum": [
+              "member",
+              "viewer"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "ends_on": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ends On"
+          }
+        },
+        "required": [
+          "name",
+          "role",
+          "ends_on"
+        ],
+        "title": "FoundProject",
         "type": "object"
       },
       "GroupMember": {
@@ -103066,6 +106597,18 @@
               }
             ],
             "title": "Error Code"
+          },
+          "project": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ListedProject"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E67a: the project the invitation names, and what admission did with it"
           }
         },
         "required": [
@@ -103079,6 +106622,99 @@
           "error_code"
         ],
         "title": "InvitationRow",
+        "type": "object"
+      },
+      "InviteProject": {
+        "additionalProperties": false,
+        "description": "E67a: the project an invitation names, applied when the person joins (an owner who administers that project).",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "role": {
+            "description": "member or viewer; an invitation never makes an administrator",
+            "title": "Role",
+            "type": "string"
+          },
+          "can_compute": {
+            "description": "Whether the person may run calculations; a viewer cannot",
+            "title": "Can Compute",
+            "type": "boolean"
+          },
+          "ends_on": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The last permitted day, YYYY-MM-DD (a UTC date); null: no end",
+            "title": "Ends On"
+          }
+        },
+        "required": [
+          "id",
+          "role",
+          "can_compute",
+          "ends_on"
+        ],
+        "title": "InviteProject",
+        "type": "object"
+      },
+      "InvitedProject": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "role": {
+            "enum": [
+              "member",
+              "viewer"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "can_compute": {
+            "title": "Can Compute",
+            "type": "boolean"
+          },
+          "ends_on": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The last permitted day (a UTC date); null: no end",
+            "title": "Ends On"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "role",
+          "can_compute",
+          "ends_on"
+        ],
+        "title": "InvitedProject",
         "type": "object"
       },
       "Job": {
@@ -103920,6 +107556,11 @@
             "description": "E56: the companion files of a package read without a recipe, together",
             "title": "Package Companion Bytes",
             "type": "integer"
+          },
+          "las_rows": {
+            "description": "E100b: the depth samples of one LAS file; a curve above 100,000 is read in windows",
+            "title": "Las Rows",
+            "type": "integer"
           }
         },
         "required": [
@@ -103937,7 +107578,8 @@
           "max_traces",
           "max_samples",
           "max_inline_bytes",
-          "package_companion_bytes"
+          "package_companion_bytes",
+          "las_rows"
         ],
         "title": "Limits",
         "type": "object"
@@ -103962,6 +107604,80 @@
           "entity_id"
         ],
         "title": "Link",
+        "type": "object"
+      },
+      "ListedProject": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "role": {
+            "enum": [
+              "member",
+              "viewer"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "can_compute": {
+            "title": "Can Compute",
+            "type": "boolean"
+          },
+          "ends_on": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The last permitted day (a UTC date); null: no end",
+            "title": "Ends On"
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "enum": [
+                  "applied",
+                  "already_has_access",
+                  "ended_before_acceptance",
+                  "inviter_not_administrator",
+                  "project_moved",
+                  "blocked"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "What admission did with the project (join.PROJECT_GRANTS); null until the invitation is accepted",
+            "title": "Outcome"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "role",
+          "can_compute",
+          "ends_on",
+          "outcome"
+        ],
+        "title": "ListedProject",
         "type": "object"
       },
       "LocationProvenance": {
@@ -108166,6 +111882,116 @@
         "title": "Native_arraybridge_v1_WellTop",
         "type": "object"
       },
+      "NewDataSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "visible_to": {
+            "enum": [
+              "project",
+              "me"
+            ],
+            "title": "Visible To",
+            "type": "string"
+          },
+          "depth_reference": {
+            "anyOf": [
+              {
+                "enum": [
+                  "GL",
+                  "KB",
+                  "MSL"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Depth Reference"
+          },
+          "coordinate_system": {
+            "default": "",
+            "maxLength": 128,
+            "title": "Coordinate System",
+            "type": "string"
+          },
+          "unit_system": {
+            "default": "unknown",
+            "maxLength": 64,
+            "title": "Unit System",
+            "type": "string"
+          },
+          "attribution": {
+            "default": "",
+            "maxLength": 500,
+            "title": "Attribution",
+            "type": "string"
+          }
+        },
+        "required": [
+          "visible_to"
+        ],
+        "title": "NewDataSettings",
+        "type": "object"
+      },
+      "NewDataSettingsRead": {
+        "additionalProperties": false,
+        "properties": {
+          "visible_to": {
+            "anyOf": [
+              {
+                "enum": [
+                  "project",
+                  "me"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visible To"
+          },
+          "depth_reference": {
+            "anyOf": [
+              {
+                "enum": [
+                  "GL",
+                  "KB",
+                  "MSL"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Depth Reference"
+          },
+          "coordinate_system": {
+            "title": "Coordinate System",
+            "type": "string"
+          },
+          "unit_system": {
+            "title": "Unit System",
+            "type": "string"
+          },
+          "attribution": {
+            "title": "Attribution",
+            "type": "string"
+          }
+        },
+        "required": [
+          "visible_to",
+          "depth_reference",
+          "coordinate_system",
+          "unit_system",
+          "attribution"
+        ],
+        "title": "NewDataSettingsRead",
+        "type": "object"
+      },
       "ObjectNode": {
         "additionalProperties": false,
         "properties": {
@@ -109770,6 +113596,263 @@
         "title": "Principal",
         "type": "object"
       },
+      "ProcedureSettingWords": {
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "default": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The default in words (numbers as numbers, yes or no, a choice's label, the neutral phrase for text that is not a label); null without one",
+            "title": "Default"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          },
+          "choices": {
+            "description": "A choice setting's labels, in order",
+            "items": {
+              "type": "string"
+            },
+            "title": "Choices",
+            "type": "array"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "default",
+          "unit",
+          "choices"
+        ],
+        "title": "ProcedureSettingWords",
+        "type": "object"
+      },
+      "ProcedureVersion": {
+        "additionalProperties": false,
+        "properties": {
+          "digest": {
+            "title": "Digest",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          },
+          "version_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version Label"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "state": {
+            "description": "private: its registrant and administrators see it; enabled: every member; withdrawn: never served again",
+            "enum": [
+              "private",
+              "enabled",
+              "withdrawn"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "added_by": {
+            "title": "Added By",
+            "type": "string"
+          },
+          "added_kind": {
+            "enum": [
+              "person",
+              "agent"
+            ],
+            "title": "Added Kind",
+            "type": "string"
+          },
+          "on_behalf_of": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "An agent's registration: the person it acts for",
+            "title": "On Behalf Of"
+          },
+          "added_at": {
+            "title": "Added At",
+            "type": "number"
+          },
+          "enabled_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enabled By"
+          },
+          "enabled_at": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enabled At"
+          },
+          "withdrawn_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Withdrawn By"
+          },
+          "withdrawn_at": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Withdrawn At"
+          },
+          "words": {
+            "$ref": "#/components/schemas/ProcedureWords"
+          },
+          "trusted": {
+            "description": "You (this credential's principal) trust this version's code in this project",
+            "title": "Trusted",
+            "type": "boolean"
+          },
+          "mine": {
+            "description": "You registered this version, or your agent registered it for you; a client asks no trust question for it",
+            "title": "Mine",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "digest",
+          "name",
+          "version",
+          "version_label",
+          "label",
+          "state",
+          "added_by",
+          "added_kind",
+          "on_behalf_of",
+          "added_at",
+          "enabled_by",
+          "enabled_at",
+          "withdrawn_by",
+          "withdrawn_at",
+          "words",
+          "trusted",
+          "mine"
+        ],
+        "title": "ProcedureVersion",
+        "type": "object"
+      },
+      "ProcedureWords": {
+        "additionalProperties": false,
+        "properties": {
+          "sentence": {
+            "description": "The contract's sentence for this version: what it reads and makes",
+            "title": "Sentence",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "version_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version Label"
+          },
+          "inputs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Inputs",
+            "type": "array"
+          },
+          "outputs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Outputs",
+            "type": "array"
+          },
+          "settings": {
+            "items": {
+              "$ref": "#/components/schemas/ProcedureSettingWords"
+            },
+            "title": "Settings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "sentence",
+          "label",
+          "version_label",
+          "inputs",
+          "outputs",
+          "settings"
+        ],
+        "title": "ProcedureWords",
+        "type": "object"
+      },
       "ProjectEntry": {
         "description": "A project the calling credential may reach. organization_id is null when the project is not bound to\nan organisation the reader belongs to (for example a project shared with the reader directly).",
         "properties": {
@@ -109813,6 +113896,18 @@
               }
             ],
             "title": "Organization Id"
+          },
+          "access_ends_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Access Ends At"
           }
         },
         "required": [
@@ -109823,6 +113918,60 @@
           "organization_id"
         ],
         "title": "ProjectEntry",
+        "type": "object"
+      },
+      "ProjectNameChange": {
+        "additionalProperties": false,
+        "properties": {
+          "sequence": {
+            "title": "Sequence",
+            "type": "integer"
+          },
+          "old_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Old Name"
+          },
+          "new_name": {
+            "title": "New Name",
+            "type": "string"
+          },
+          "actor_id": {
+            "title": "Actor Id",
+            "type": "string"
+          },
+          "actor_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actor Name"
+          },
+          "at": {
+            "description": "When the name changed (UTC, seconds)",
+            "title": "At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sequence",
+          "old_name",
+          "new_name",
+          "actor_id",
+          "actor_name",
+          "at"
+        ],
+        "title": "ProjectNameChange",
         "type": "object"
       },
       "PublicationReceipt": {
@@ -109856,7 +114005,10 @@
               "wavelet-text/1",
               "model-section-text/1",
               "seismic-section-text/1",
-              "time-depth-csv/1"
+              "time-depth-csv/1",
+              "ogc-geopackage/1",
+              "geojson/1",
+              "esri-shapefile/1"
             ],
             "title": "Profile",
             "type": "string"
@@ -116476,6 +120628,38 @@
         "title": "UploadRunCounts",
         "type": "object"
       },
+      "UploadRunDefaults": {
+        "additionalProperties": false,
+        "description": "E90: the project defaults a run used: their revision, who accepted them, and the run's own settings taken from them\n(a file's kept defaults are in its evidence, class project-default).",
+        "properties": {
+          "revision": {
+            "title": "Revision",
+            "type": "integer"
+          },
+          "accepted_by": {
+            "title": "Accepted By",
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "enum": [
+                "attribution",
+                "audience"
+              ],
+              "type": "string"
+            },
+            "title": "Fields",
+            "type": "array"
+          }
+        },
+        "required": [
+          "revision",
+          "accepted_by",
+          "fields"
+        ],
+        "title": "UploadRunDefaults",
+        "type": "object"
+      },
       "UploadRunEvidence": {
         "additionalProperties": false,
         "description": "E85: one decided field and where it came from; the server derives the class.",
@@ -116926,6 +121110,32 @@
             ],
             "default": null,
             "description": "E85b: present when the run's file was fetched from an address"
+          },
+          "project_audience": {
+            "anyOf": [
+              {
+                "const": "read",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E90: everyone in the project can see each file the run adds (the default \"Everyone in this project\")",
+            "title": "Project Audience"
+          },
+          "defaults": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UploadRunDefaults"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E90: present when the run used a project default"
           }
         },
         "required": [

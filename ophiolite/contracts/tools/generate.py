@@ -45,9 +45,10 @@ def schemas():
     from project_gateway.scientific_assets import DerivationRecord, Parameters  # E94
     from project_gateway.scientific_assets import CheckRecord  # E96
     from project_gateway.scientific_assets import TableFile  # E58b
+    from project_gateway.scientific_assets import CurveColumnsHeader  # E100b
     for model in (CheckRecord, DerivationRecord, Parameters, Asset, Curve, ScientificContext, AssetSummary, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface, PointSet, PolylineSet, SeismicVolume, SeismicSlice,
                   RelationshipRegistry, Entity, EntityAssets, Lineage, ImportRecipe, PointSet2, WellLocationUpload, WellLocation,
-                  Wavelet, ModelSection, SeismicSection, TimeDepth, FeatureSet, TableFile):  # E53; E57; E56; E58b
+                  Wavelet, ModelSection, SeismicSection, TimeDepth, FeatureSet, CurveColumnsHeader, TableFile):  # E53; E57; E56; E100b; E58b
         write(CONTRACTS / model.CONTRACT['path'], model.model_json_schema())
 
 
@@ -255,7 +256,7 @@ class Unsupported(ValueError):
 ANNOTATIONS = {'$schema', '$id', 'x-ophiolite', 'title', 'description', 'default', 'examples', 'deprecated',
                'minLength', 'maxLength', 'pattern', 'format', 'minimum', 'maximum', 'exclusiveMinimum', 'exclusiveMaximum',
                'multipleOf', 'minItems', 'maxItems', 'uniqueItems', 'discriminator',
-               'if', 'then'}  # E54: a conditional bound (only an original may exceed 32 MiB) is a value rule, not a type
+               'if', 'then', 'else'}  # E54: a conditional bound (only an original may exceed 32 MiB) is a value rule, not a type; E100b: else
 SCALARS = {'string': 'string', 'integer': 'number', 'number': 'number', 'boolean': 'boolean', 'null': 'null'}
 
 
