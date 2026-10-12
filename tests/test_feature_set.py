@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 import pytest
-from ophiolite import _core, bundle
+from ophiolite import _core, bundle, bundle_package
 from ophiolite.errors import Refused, VerificationFailed
 from ophiolite.typed import FeatureSet
 from ophiolite.upload_runs import File, Folder, checked_declarations, declared_for
@@ -81,11 +81,12 @@ def test_bundle_two_seven_carries_a_feature_set_and_the_released_reader_refuses_
     assert bundle.write_bundle(tmp_path / 'old', typed_items()).manifest['bundle_version'] == '2.0.0'  # the minor rises only for the new type
 
 
-def test_a_shapefile_read_feature_set_is_not_exported(tmp_path):
-    r = typed_read('feature-set')
+def test_a_shapefile_read_feature_set_needs_its_package_rows_to_be_exported(tmp_path):
+    r = typed_read('feature-set')  # E23c: exported with Client.export, which reads the package rows (tests/test_bundle_package.py)
     r._wire_descriptor = {**r._wire_descriptor, 'package': {'recipe': None, 'members': []}}
-    with pytest.raises(Refused, match='a Shapefile-read feature set carries its companion files'):
-        bundle.write_bundle(tmp_path / 'b', typed_items() + [item(r)])
+    with pytest.raises(Refused) as refused: bundle.write_bundle(tmp_path / 'b', typed_items() + [item(r)])
+    assert str(refused.value) == bundle_package.NO_ROWS
+    assert not (tmp_path / 'b').exists()
 
 
 def files(*paths):

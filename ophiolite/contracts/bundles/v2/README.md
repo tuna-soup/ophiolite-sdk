@@ -67,3 +67,46 @@ with "An asset has an unknown type."
 `original.gpkg`, `descriptor.json`, `data.json`, the served `ophiolite.feature-set/1`). A feature set read
 from a Shapefile package (its descriptor carries `package`) is refused, as other packages are, until E23c.
 A 2.6 reader refuses 2.7 content by its asset types with "An asset has an unknown type."
+
+## 2.8 — packages, recipes and decisions (E23c)
+
+2.8 carries a revision that was read from a **source package**: a point set read with an import recipe
+(Petrel or OpendTect, its descriptor `package.recipe` is set) or a feature set read from a Shapefile's members
+(`package.recipe` is `null`). Nothing new is invented about what an interpretation is; the bundle carries what
+the server stored for that revision, exactly, and nothing a reader of the revision could not already read. The
+asset `type` stays `point-set` or `feature-set`, so tools that only need the values keep their dispatch. Three
+file roles are added, each allowed only on an asset with a `package` block:
+
+| Role | File | Content |
+|---|---|---|
+| `package` | `package.json` | the stored package manifest row, exact bytes (at most once) |
+| `companion` | `companion-<k>.bin` | one per non-primary member, exact bytes; `k` counts the non-primary members from 1 in package order (0-8) |
+| `interpretation` | `interpretation.json` | the stored interpretation row, exact bytes: `ophiolite.recipe-execution/1` (recipe document, its SHA-256, decisions with their evidence, execution) or `ophiolite.package-read/1` for a Shapefile (at most once) |
+
+The primary member is the asset's `original`. Member names may be up to 200 characters of any script; bundle paths
+stay `[A-Za-z0-9._-]`, so the names live in the asset's `package` block, a **projection** of the descriptor's
+`package` record that readers compare field by field:
+
+| `package` field | Equals |
+|---|---|
+| `package_digest` | the descriptor's `package.package_digest`, recomputed from the member records |
+| `members[*].name, role, sha256, bytes` | the descriptor's member record and the stored package row's member (`digest` there) |
+| `members[*].file` | bundle only: the path holding the member's exact bytes, listed in `files` |
+| `recipe` | the descriptor's `package.recipe` (`reference` and `sha256`), or `null` for a Shapefile |
+| `interpretation` | bundle only: the path of the interpretation file, or `null` |
+
+Readers check on open, each with its own sentence: the projection agrees with the descriptor and the stored row;
+every member file matches its record; the package digest recomputes; the primary is the original; the recipe
+SHA-256 recomputes from the carried recipe document and equals the descriptor's; the decisions and execution equal
+the descriptor's; the interpretation and package rows are the ones the descriptor's revision manifest lists, when it
+has one. Checksums and these checks prove the parts agree with each other, not that the bundle is the original
+revision: a fully consistent rewrite is not detectable without a digest from a trusted party, and readers say so.
+
+Exporters write 2.8 only for an asset with a package; every other asset keeps the minor it had. Released readers
+refuse a 2.8 package bundle and never misread it: a 2.2-2.7 reader refuses a point set by its file roles ("Bundle
+1.0 carries exactly one original per asset and only known file roles."), a 2.1 reader by its type ("An asset has an
+unknown type."), and a Shapefile feature set by its type below 2.7 and by its roles in 2.7 ([fixture](fixtures/manifest-package.json)).
+The interpretation of an import recipe 2 (attributed events) travels in a portable form in a later minor; until
+then an exporter refuses it. Not carried: the private recipe asset (only its pin and rules), display names of the
+people who decided. Carried as before and stated here: the descriptor's `authorization.evaluated_for` and a group
+recommendation's `by` name the exporter's account; the source files are kept byte for byte and may contain names.
