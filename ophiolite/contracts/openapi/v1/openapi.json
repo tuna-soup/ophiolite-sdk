@@ -46339,7 +46339,8 @@
                       "wavelet-text/1",
                       "model-section-text/1",
                       "seismic-section-text/1",
-                      "time-depth-csv/1"
+                      "time-depth-csv/1",
+                      "ogc-geopackage/1"
                     ],
                     "title": "Profile",
                     "type": "string"
@@ -98866,8 +98867,8 @@
     },
     "/api/v1/connector/{operation}": {
       "post": {
-        "summary": "The GIS connector's session: a named operation (sources/*, activity/list and report, workspace, maps/*, context/*, rpc/*)",
-        "description": "A connector sign-in (Bearer from the connector client, no cookie or Origin) calls the named operation; the body and answer are that operation's, documented at its own path, except that catalog/history adds three fields to each version of a map: published_at (UTC, ISO 8601), published_by_you (boolean) and published_by_name (the person's display name, or null). Releases, collections and subscriptions are not reachable here.",
+        "summary": "The GIS connector's session: a named operation (sources/*, activity/list and report, workspace, maps/*, context/*, rpc/*, publications/derive and info, applications/result-history)",
+        "description": "A connector sign-in (Bearer from the connector client, no cookie or Origin) calls the named operation; the body and answer are that operation's, documented at its own path, except that catalog/history adds three fields to each version of a map: published_at (UTC, ISO 8601), published_by_you (boolean) and published_by_name (the person's display name, or null). Releases, collections and subscriptions are not reachable here. publications/derive, publications/info and applications/result-history are served exactly as at their project paths and need the row's scope in the connector sign-in (read: granted at sign-in; write: granted by the person's consent at the first send); without it they answer 403 \"Sign in again to let QGIS read version history and sharing.\" (read) or \"QGIS may not send to this project yet.\" (write). publications/derive takes application/octet-stream with the X-Ophiolite-Upload header, as at /api/v1/projects/{project}/publications/derive.",
         "security": [
           {
             "bearer": []
@@ -98891,6 +98892,13 @@
               "schema": {
                 "type": "object",
                 "x-ophiolite-body-of": "operation"
+              }
+            },
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary",
+                "description": "publications/derive only: the derived file; its details in X-Ophiolite-Upload"
               }
             }
           }
