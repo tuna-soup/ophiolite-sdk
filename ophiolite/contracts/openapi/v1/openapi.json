@@ -873,6 +873,468 @@
         }
       }
     },
+    "/api/v1/account/application-decide": {
+      "post": {
+        "summary": "E33: application decide (your consent to registered applications)",
+        "description": "Scope write; accepted principals: session; project extractor none.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "redirect": {
+                      "description": "The application's redirect address with consent and state, or error=access_denied",
+                      "title": "Redirect",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "redirect"
+                  ],
+                  "title": "ConsentDecision",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "request": {
+                    "maxLength": 80,
+                    "minLength": 16,
+                    "title": "Request",
+                    "type": "string"
+                  },
+                  "approve": {
+                    "title": "Approve",
+                    "type": "boolean"
+                  },
+                  "projects": {
+                    "anyOf": [
+                      {
+                        "items": {
+                          "type": "string"
+                        },
+                        "maxItems": 500,
+                        "type": "array"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Projects"
+                  }
+                },
+                "required": [
+                  "request",
+                  "approve"
+                ],
+                "title": "ConsentDecide",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/account/application-request": {
+      "post": {
+        "summary": "E33: application request (your consent to registered applications)",
+        "description": "Scope read; accepted principals: session; project extractor none.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "application": {
+                      "$ref": "#/components/schemas/Named"
+                    },
+                    "organization": {
+                      "$ref": "#/components/schemas/Named"
+                    },
+                    "scopes": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Scopes",
+                      "type": "array"
+                    },
+                    "redirect_uri": {
+                      "title": "Redirect Uri",
+                      "type": "string"
+                    },
+                    "projects": {
+                      "description": "The projects you may limit the approval to",
+                      "items": {
+                        "$ref": "#/components/schemas/Named"
+                      },
+                      "title": "Projects",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "application",
+                    "organization",
+                    "scopes",
+                    "redirect_uri",
+                    "projects"
+                  ],
+                  "title": "ConsentRequestView",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "request": {
+                    "maxLength": 80,
+                    "minLength": 16,
+                    "title": "Request",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "request"
+                ],
+                "title": "ConsentRead",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/account/application-revoke": {
+      "post": {
+        "summary": "E33: application revoke (your consent to registered applications)",
+        "description": "Scope write; accepted principals: session; project extractor none.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "revoked": {
+                      "title": "Revoked",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "revoked"
+                  ],
+                  "title": "ConsentRevoked",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "application_id": {
+                    "maxLength": 80,
+                    "minLength": 1,
+                    "title": "Application Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "application_id"
+                ],
+                "title": "ConsentRevoke",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/account/applications": {
+      "post": {
+        "summary": "E33: applications (your consent to registered applications)",
+        "description": "Scope read; accepted principals: session; project extractor none.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "applications": {
+                      "items": {
+                        "$ref": "#/components/schemas/ApprovedApplication"
+                      },
+                      "title": "Applications",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "applications"
+                  ],
+                  "title": "ApprovedApplications",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "description": "No fields; send an empty object.",
+                "properties": {},
+                "title": "ConsentList",
+                "type": "object",
+                "x-ophiolite-no-fields": true
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/account/revoke": {
       "post": {
         "summary": "Revoke an account session",
@@ -17842,6 +18304,39 @@
                       "default": null,
                       "description": "E41: the sign-in could change the database (a warning, never a refusal)",
                       "title": "Warnings"
+                    },
+                    "names": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E59, a storage bucket: at most 21 names in the allowed folder, as the key lists them",
+                      "title": "Names"
+                    },
+                    "mode": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "conditional",
+                            "single"
+                          ],
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E59: whether the storage honours If-Match (conditional) or each file is read in one request (single)",
+                      "title": "Mode"
                     }
                   },
                   "required": [
@@ -18525,6 +19020,291 @@
                   "coverage"
                 ],
                 "title": "NativeReport",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/context/new-data": {
+      "post": {
+        "summary": "E90: What new files start with: who sees them, depth reference, coordinate system, unit system and attribution (any member)",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E90: what new files start with; `legacy` when no one has chosen who sees new files (they stay private).",
+                  "properties": {
+                    "revision": {
+                      "title": "Revision",
+                      "type": "integer"
+                    },
+                    "settings": {
+                      "$ref": "#/components/schemas/NewDataSettingsRead"
+                    },
+                    "legacy": {
+                      "title": "Legacy",
+                      "type": "boolean"
+                    },
+                    "administrator": {
+                      "title": "Administrator",
+                      "type": "boolean"
+                    },
+                    "custom_coordinate_system": {
+                      "title": "Custom Coordinate System",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "revision",
+                    "settings",
+                    "legacy",
+                    "administrator",
+                    "custom_coordinate_system"
+                  ],
+                  "title": "NewData",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "ProjectOnly",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/context/new-data-save": {
+      "post": {
+        "summary": "E90: Replace what new files start with (project administrators; expected_revision); recorded in Activity",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E90: what new files start with; `legacy` when no one has chosen who sees new files (they stay private).",
+                  "properties": {
+                    "revision": {
+                      "title": "Revision",
+                      "type": "integer"
+                    },
+                    "settings": {
+                      "$ref": "#/components/schemas/NewDataSettingsRead"
+                    },
+                    "legacy": {
+                      "title": "Legacy",
+                      "type": "boolean"
+                    },
+                    "administrator": {
+                      "title": "Administrator",
+                      "type": "boolean"
+                    },
+                    "custom_coordinate_system": {
+                      "title": "Custom Coordinate System",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "revision",
+                    "settings",
+                    "legacy",
+                    "administrator",
+                    "custom_coordinate_system"
+                  ],
+                  "title": "NewData",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "expected_revision": {
+                    "minimum": 0,
+                    "title": "Expected Revision",
+                    "type": "integer"
+                  },
+                  "settings": {
+                    "$ref": "#/components/schemas/NewDataSettings"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "expected_revision",
+                  "settings"
+                ],
+                "title": "NewDataWrite",
                 "type": "object"
               }
             }
@@ -22739,6 +23519,601 @@
                   "ids"
                 ],
                 "title": "InboxMarkRead",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/las-uploads/audience": {
+      "post": {
+        "summary": "E90: who can see an uploaded original and who can build on it, as one control (the uploader)",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E90: who can see an uploaded original and who can build on it.",
+                  "properties": {
+                    "asset_id": {
+                      "title": "Asset Id",
+                      "type": "string"
+                    },
+                    "state": {
+                      "enum": [
+                        "me",
+                        "people",
+                        "project"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "people": {
+                      "items": {
+                        "$ref": "#/components/schemas/AudienceLine"
+                      },
+                      "title": "People",
+                      "type": "array"
+                    },
+                    "policy_generation": {
+                      "title": "Policy Generation",
+                      "type": "integer"
+                    },
+                    "grants_generation": {
+                      "title": "Grants Generation",
+                      "type": "integer"
+                    },
+                    "replayed": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Replayed"
+                    }
+                  },
+                  "required": [
+                    "asset_id",
+                    "state",
+                    "people",
+                    "policy_generation",
+                    "grants_generation"
+                  ],
+                  "title": "AudienceSnapshot",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "title": "Asset Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "asset_id"
+                ],
+                "title": "AssetOnly",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/las-uploads/audience-preview": {
+      "post": {
+        "summary": "E90: what an audience change would do (who would be told, who would lose it, whether it is narrower), run and rolled back",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E90: an audience change, run and rolled back.",
+                  "properties": {
+                    "told": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "People you may see who would gain read or reuse access; null when you may not list members.",
+                      "title": "Told"
+                    },
+                    "losing": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "People you may see who would lose read access; null when you may not list members.",
+                      "title": "Losing"
+                    },
+                    "narrower": {
+                      "description": "Whether the change is narrower (anyone loses access to the original or a result built on it); a commit then needs a reason.",
+                      "title": "Narrower",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "told",
+                    "losing",
+                    "narrower"
+                  ],
+                  "title": "AudiencePreview",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "E90: the one sharing control of an uploaded original.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "title": "Asset Id",
+                    "type": "string"
+                  },
+                  "state": {
+                    "enum": [
+                      "me",
+                      "people",
+                      "project"
+                    ],
+                    "title": "State",
+                    "type": "string"
+                  },
+                  "people": {
+                    "default": [],
+                    "items": {
+                      "$ref": "#/components/schemas/AudiencePerson"
+                    },
+                    "maxItems": 100,
+                    "title": "People",
+                    "type": "array"
+                  },
+                  "reason": {
+                    "anyOf": [
+                      {
+                        "maxLength": 500,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Required on commit only when the change is narrower (400 reason-required)",
+                    "title": "Reason"
+                  },
+                  "expected_generation": {
+                    "description": "The policy generation you read",
+                    "minimum": 0,
+                    "title": "Expected Generation",
+                    "type": "integer"
+                  },
+                  "expected_grants_generation": {
+                    "description": "The grants generation you read",
+                    "minimum": 0,
+                    "title": "Expected Grants Generation",
+                    "type": "integer"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Command Id"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "asset_id",
+                  "state",
+                  "expected_generation",
+                  "expected_grants_generation"
+                ],
+                "title": "AudienceChange",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/las-uploads/audience-save": {
+      "post": {
+        "summary": "E90: set who can see an uploaded original and who can build on it in one change (both generations; a reason only when narrower)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E90: who can see an uploaded original and who can build on it.",
+                  "properties": {
+                    "asset_id": {
+                      "title": "Asset Id",
+                      "type": "string"
+                    },
+                    "state": {
+                      "enum": [
+                        "me",
+                        "people",
+                        "project"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "people": {
+                      "items": {
+                        "$ref": "#/components/schemas/AudienceLine"
+                      },
+                      "title": "People",
+                      "type": "array"
+                    },
+                    "policy_generation": {
+                      "title": "Policy Generation",
+                      "type": "integer"
+                    },
+                    "grants_generation": {
+                      "title": "Grants Generation",
+                      "type": "integer"
+                    },
+                    "replayed": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Replayed"
+                    }
+                  },
+                  "required": [
+                    "asset_id",
+                    "state",
+                    "people",
+                    "policy_generation",
+                    "grants_generation"
+                  ],
+                  "title": "AudienceSnapshot",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "E90: the one sharing control of an uploaded original.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "title": "Asset Id",
+                    "type": "string"
+                  },
+                  "state": {
+                    "enum": [
+                      "me",
+                      "people",
+                      "project"
+                    ],
+                    "title": "State",
+                    "type": "string"
+                  },
+                  "people": {
+                    "default": [],
+                    "items": {
+                      "$ref": "#/components/schemas/AudiencePerson"
+                    },
+                    "maxItems": 100,
+                    "title": "People",
+                    "type": "array"
+                  },
+                  "reason": {
+                    "anyOf": [
+                      {
+                        "maxLength": 500,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Required on commit only when the change is narrower (400 reason-required)",
+                    "title": "Reason"
+                  },
+                  "expected_generation": {
+                    "description": "The policy generation you read",
+                    "minimum": 0,
+                    "title": "Expected Generation",
+                    "type": "integer"
+                  },
+                  "expected_grants_generation": {
+                    "description": "The grants generation you read",
+                    "minimum": 0,
+                    "title": "Expected Grants Generation",
+                    "type": "integer"
+                  },
+                  "command_id": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Command Id"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "asset_id",
+                  "state",
+                  "expected_generation",
+                  "expected_grants_generation"
+                ],
+                "title": "AudienceChange",
                 "type": "object"
               }
             }
@@ -34252,6 +35627,7 @@
             "application/json": {
               "schema": {
                 "additionalProperties": false,
+                "description": "E59 (K6): a storage bucket named in the browser or in a request. A separate model, chosen by `kind` before\nvalidation, so OrgRequest and the command digests of every E41 database request stay exactly as they were. The\naccess key travels as `username`, the secret key as `password` (E39's one sign-in per person).",
                 "properties": {
                   "organization_id": {
                     "maxLength": 160,
@@ -34418,7 +35794,10 @@
                   },
                   "kind": {
                     "default": "postgresql",
-                    "maxLength": 40,
+                    "enum": [
+                      "postgresql",
+                      "bucket"
+                    ],
                     "title": "Kind",
                     "type": "string"
                   },
@@ -34438,12 +35817,36 @@
                     "default": false,
                     "title": "Grant Use",
                     "type": "boolean"
+                  },
+                  "endpoint": {
+                    "default": "",
+                    "maxLength": 300,
+                    "title": "Endpoint",
+                    "type": "string"
+                  },
+                  "region": {
+                    "default": "",
+                    "maxLength": 64,
+                    "title": "Region",
+                    "type": "string"
+                  },
+                  "bucket": {
+                    "default": "",
+                    "maxLength": 63,
+                    "title": "Bucket",
+                    "type": "string"
+                  },
+                  "folder": {
+                    "default": "",
+                    "maxLength": 1024,
+                    "title": "Folder",
+                    "type": "string"
                   }
                 },
                 "required": [
                   "organization_id"
                 ],
-                "title": "OrgRequest",
+                "title": "BucketRequest",
                 "type": "object"
               }
             }
@@ -35676,6 +37079,7 @@
             "application/json": {
               "schema": {
                 "additionalProperties": false,
+                "description": "E59 (K6): a storage bucket named in the browser or in a request. A separate model, chosen by `kind` before\nvalidation, so OrgRequest and the command digests of every E41 database request stay exactly as they were. The\naccess key travels as `username`, the secret key as `password` (E39's one sign-in per person).",
                 "properties": {
                   "organization_id": {
                     "maxLength": 160,
@@ -35842,7 +37246,10 @@
                   },
                   "kind": {
                     "default": "postgresql",
-                    "maxLength": 40,
+                    "enum": [
+                      "postgresql",
+                      "bucket"
+                    ],
                     "title": "Kind",
                     "type": "string"
                   },
@@ -35862,12 +37269,36 @@
                     "default": false,
                     "title": "Grant Use",
                     "type": "boolean"
+                  },
+                  "endpoint": {
+                    "default": "",
+                    "maxLength": 300,
+                    "title": "Endpoint",
+                    "type": "string"
+                  },
+                  "region": {
+                    "default": "",
+                    "maxLength": 64,
+                    "title": "Region",
+                    "type": "string"
+                  },
+                  "bucket": {
+                    "default": "",
+                    "maxLength": 63,
+                    "title": "Bucket",
+                    "type": "string"
+                  },
+                  "folder": {
+                    "default": "",
+                    "maxLength": 1024,
+                    "title": "Folder",
+                    "type": "string"
                   }
                 },
                 "required": [
                   "organization_id"
                 ],
-                "title": "OrgRequest",
+                "title": "BucketRequest",
                 "type": "object"
               }
             }
@@ -37994,6 +39425,39 @@
                       "default": null,
                       "description": "E41: the sign-in could change the database (a warning, never a refusal)",
                       "title": "Warnings"
+                    },
+                    "names": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E59, a storage bucket: at most 21 names in the allowed folder, as the key lists them",
+                      "title": "Names"
+                    },
+                    "mode": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "conditional",
+                            "single"
+                          ],
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E59: whether the storage honours If-Match (conditional) or each file is read in one request (single)",
+                      "title": "Mode"
                     }
                   },
                   "required": [
@@ -38812,6 +40276,1542 @@
                   "organization_id"
                 ],
                 "title": "RecordPageRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/application-activate": {
+      "post": {
+        "summary": "E33: application activate (registered applications; organisation owners)",
+        "description": "Scope write; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "An organisation's registered application (never its secret).",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "owner": {
+                      "title": "Owner",
+                      "type": "string"
+                    },
+                    "row_version": {
+                      "title": "Row Version",
+                      "type": "integer"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "redirect_uris": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Redirect Uris",
+                      "type": "array"
+                    },
+                    "capability": {
+                      "const": 3,
+                      "title": "Capability",
+                      "type": "integer"
+                    },
+                    "scopes": {
+                      "items": {
+                        "enum": [
+                          "read",
+                          "write"
+                        ],
+                        "type": "string"
+                      },
+                      "title": "Scopes",
+                      "type": "array"
+                    },
+                    "client_type": {
+                      "enum": [
+                        "confidential",
+                        "public"
+                      ],
+                      "title": "Client Type",
+                      "type": "string"
+                    },
+                    "provisioning_state": {
+                      "enum": [
+                        "pending",
+                        "provisioned",
+                        "error"
+                      ],
+                      "title": "Provisioning State",
+                      "type": "string"
+                    },
+                    "access_state": {
+                      "enum": [
+                        "active",
+                        "suspended",
+                        "pending_activation"
+                      ],
+                      "title": "Access State",
+                      "type": "string"
+                    },
+                    "client_id": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Client Id"
+                    },
+                    "created_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Created At"
+                    },
+                    "rotated_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Rotated At"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organization_id",
+                    "owner",
+                    "row_version",
+                    "name",
+                    "redirect_uris",
+                    "capability",
+                    "scopes",
+                    "client_type",
+                    "provisioning_state",
+                    "access_state",
+                    "client_id",
+                    "created_at",
+                    "rotated_at"
+                  ],
+                  "title": "RegisteredApplication",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "pattern": "^[a-zA-Z0-9-]{1,80}$",
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "maxLength": 80,
+                    "minLength": 1,
+                    "title": "Id",
+                    "type": "string"
+                  },
+                  "row_version": {
+                    "minimum": 1,
+                    "title": "Row Version",
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "organization_id",
+                  "id",
+                  "row_version"
+                ],
+                "title": "ApplicationChange",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/application-list": {
+      "post": {
+        "summary": "E33: application list (registered applications; organisation owners)",
+        "description": "Scope read; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "applications": {
+                      "items": {
+                        "$ref": "#/components/schemas/RegisteredApplication"
+                      },
+                      "title": "Applications",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "applications"
+                  ],
+                  "title": "RegisteredApplications",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "pattern": "^[a-zA-Z0-9-]{1,80}$",
+                    "title": "Organization Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "organization_id"
+                ],
+                "title": "ApplicationList",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/application-provision": {
+      "post": {
+        "summary": "E33: application provision (registered applications; organisation owners)",
+        "description": "Scope write; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "owner": {
+                      "title": "Owner",
+                      "type": "string"
+                    },
+                    "row_version": {
+                      "title": "Row Version",
+                      "type": "integer"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "redirect_uris": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Redirect Uris",
+                      "type": "array"
+                    },
+                    "capability": {
+                      "const": 3,
+                      "title": "Capability",
+                      "type": "integer"
+                    },
+                    "scopes": {
+                      "items": {
+                        "enum": [
+                          "read",
+                          "write"
+                        ],
+                        "type": "string"
+                      },
+                      "title": "Scopes",
+                      "type": "array"
+                    },
+                    "client_type": {
+                      "enum": [
+                        "confidential",
+                        "public"
+                      ],
+                      "title": "Client Type",
+                      "type": "string"
+                    },
+                    "provisioning_state": {
+                      "enum": [
+                        "pending",
+                        "provisioned",
+                        "error"
+                      ],
+                      "title": "Provisioning State",
+                      "type": "string"
+                    },
+                    "access_state": {
+                      "enum": [
+                        "active",
+                        "suspended",
+                        "pending_activation"
+                      ],
+                      "title": "Access State",
+                      "type": "string"
+                    },
+                    "client_id": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Client Id"
+                    },
+                    "created_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Created At"
+                    },
+                    "rotated_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Rotated At"
+                    },
+                    "client_secret": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "The provider client secret, answered this once (confidential clients)",
+                      "title": "Client Secret"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organization_id",
+                    "owner",
+                    "row_version",
+                    "name",
+                    "redirect_uris",
+                    "capability",
+                    "scopes",
+                    "client_type",
+                    "provisioning_state",
+                    "access_state",
+                    "client_id",
+                    "created_at",
+                    "rotated_at"
+                  ],
+                  "title": "RegisteredApplicationSecret",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "pattern": "^[a-zA-Z0-9-]{1,80}$",
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "maxLength": 80,
+                    "minLength": 1,
+                    "title": "Id",
+                    "type": "string"
+                  },
+                  "row_version": {
+                    "minimum": 1,
+                    "title": "Row Version",
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "organization_id",
+                  "id",
+                  "row_version"
+                ],
+                "title": "ApplicationChange",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/application-reactivate": {
+      "post": {
+        "summary": "E33: application reactivate (registered applications; organisation owners)",
+        "description": "Scope write; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "An organisation's registered application (never its secret).",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "owner": {
+                      "title": "Owner",
+                      "type": "string"
+                    },
+                    "row_version": {
+                      "title": "Row Version",
+                      "type": "integer"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "redirect_uris": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Redirect Uris",
+                      "type": "array"
+                    },
+                    "capability": {
+                      "const": 3,
+                      "title": "Capability",
+                      "type": "integer"
+                    },
+                    "scopes": {
+                      "items": {
+                        "enum": [
+                          "read",
+                          "write"
+                        ],
+                        "type": "string"
+                      },
+                      "title": "Scopes",
+                      "type": "array"
+                    },
+                    "client_type": {
+                      "enum": [
+                        "confidential",
+                        "public"
+                      ],
+                      "title": "Client Type",
+                      "type": "string"
+                    },
+                    "provisioning_state": {
+                      "enum": [
+                        "pending",
+                        "provisioned",
+                        "error"
+                      ],
+                      "title": "Provisioning State",
+                      "type": "string"
+                    },
+                    "access_state": {
+                      "enum": [
+                        "active",
+                        "suspended",
+                        "pending_activation"
+                      ],
+                      "title": "Access State",
+                      "type": "string"
+                    },
+                    "client_id": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Client Id"
+                    },
+                    "created_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Created At"
+                    },
+                    "rotated_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Rotated At"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organization_id",
+                    "owner",
+                    "row_version",
+                    "name",
+                    "redirect_uris",
+                    "capability",
+                    "scopes",
+                    "client_type",
+                    "provisioning_state",
+                    "access_state",
+                    "client_id",
+                    "created_at",
+                    "rotated_at"
+                  ],
+                  "title": "RegisteredApplication",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "pattern": "^[a-zA-Z0-9-]{1,80}$",
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "maxLength": 80,
+                    "minLength": 1,
+                    "title": "Id",
+                    "type": "string"
+                  },
+                  "row_version": {
+                    "minimum": 1,
+                    "title": "Row Version",
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "organization_id",
+                  "id",
+                  "row_version"
+                ],
+                "title": "ApplicationChange",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/application-register": {
+      "post": {
+        "summary": "E33: application register (registered applications; organisation owners)",
+        "description": "Scope write; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "owner": {
+                      "title": "Owner",
+                      "type": "string"
+                    },
+                    "row_version": {
+                      "title": "Row Version",
+                      "type": "integer"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "redirect_uris": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Redirect Uris",
+                      "type": "array"
+                    },
+                    "capability": {
+                      "const": 3,
+                      "title": "Capability",
+                      "type": "integer"
+                    },
+                    "scopes": {
+                      "items": {
+                        "enum": [
+                          "read",
+                          "write"
+                        ],
+                        "type": "string"
+                      },
+                      "title": "Scopes",
+                      "type": "array"
+                    },
+                    "client_type": {
+                      "enum": [
+                        "confidential",
+                        "public"
+                      ],
+                      "title": "Client Type",
+                      "type": "string"
+                    },
+                    "provisioning_state": {
+                      "enum": [
+                        "pending",
+                        "provisioned",
+                        "error"
+                      ],
+                      "title": "Provisioning State",
+                      "type": "string"
+                    },
+                    "access_state": {
+                      "enum": [
+                        "active",
+                        "suspended",
+                        "pending_activation"
+                      ],
+                      "title": "Access State",
+                      "type": "string"
+                    },
+                    "client_id": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Client Id"
+                    },
+                    "created_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Created At"
+                    },
+                    "rotated_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Rotated At"
+                    },
+                    "client_secret": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "The provider client secret, answered this once (confidential clients)",
+                      "title": "Client Secret"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organization_id",
+                    "owner",
+                    "row_version",
+                    "name",
+                    "redirect_uris",
+                    "capability",
+                    "scopes",
+                    "client_type",
+                    "provisioning_state",
+                    "access_state",
+                    "client_id",
+                    "created_at",
+                    "rotated_at"
+                  ],
+                  "title": "RegisteredApplicationSecret",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "pattern": "^[a-zA-Z0-9-]{1,80}$",
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "name": {
+                    "maxLength": 120,
+                    "minLength": 1,
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "redirect_uris": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 10,
+                    "minItems": 1,
+                    "title": "Redirect Uris",
+                    "type": "array"
+                  },
+                  "scopes": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 2,
+                    "minItems": 1,
+                    "title": "Scopes",
+                    "type": "array"
+                  },
+                  "client_type": {
+                    "default": "confidential",
+                    "title": "Client Type",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "organization_id",
+                  "name",
+                  "redirect_uris",
+                  "scopes"
+                ],
+                "title": "ApplicationRegister",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/application-rotate": {
+      "post": {
+        "summary": "E33: application rotate (registered applications; organisation owners)",
+        "description": "Scope write; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "owner": {
+                      "title": "Owner",
+                      "type": "string"
+                    },
+                    "row_version": {
+                      "title": "Row Version",
+                      "type": "integer"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "redirect_uris": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Redirect Uris",
+                      "type": "array"
+                    },
+                    "capability": {
+                      "const": 3,
+                      "title": "Capability",
+                      "type": "integer"
+                    },
+                    "scopes": {
+                      "items": {
+                        "enum": [
+                          "read",
+                          "write"
+                        ],
+                        "type": "string"
+                      },
+                      "title": "Scopes",
+                      "type": "array"
+                    },
+                    "client_type": {
+                      "enum": [
+                        "confidential",
+                        "public"
+                      ],
+                      "title": "Client Type",
+                      "type": "string"
+                    },
+                    "provisioning_state": {
+                      "enum": [
+                        "pending",
+                        "provisioned",
+                        "error"
+                      ],
+                      "title": "Provisioning State",
+                      "type": "string"
+                    },
+                    "access_state": {
+                      "enum": [
+                        "active",
+                        "suspended",
+                        "pending_activation"
+                      ],
+                      "title": "Access State",
+                      "type": "string"
+                    },
+                    "client_id": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Client Id"
+                    },
+                    "created_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Created At"
+                    },
+                    "rotated_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Rotated At"
+                    },
+                    "client_secret": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "The provider client secret, answered this once (confidential clients)",
+                      "title": "Client Secret"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organization_id",
+                    "owner",
+                    "row_version",
+                    "name",
+                    "redirect_uris",
+                    "capability",
+                    "scopes",
+                    "client_type",
+                    "provisioning_state",
+                    "access_state",
+                    "client_id",
+                    "created_at",
+                    "rotated_at"
+                  ],
+                  "title": "RegisteredApplicationSecret",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "pattern": "^[a-zA-Z0-9-]{1,80}$",
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "maxLength": 80,
+                    "minLength": 1,
+                    "title": "Id",
+                    "type": "string"
+                  },
+                  "row_version": {
+                    "minimum": 1,
+                    "title": "Row Version",
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "organization_id",
+                  "id",
+                  "row_version"
+                ],
+                "title": "ApplicationChange",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/organizations/application-suspend": {
+      "post": {
+        "summary": "E33: application suspend (registered applications; organisation owners)",
+        "description": "Scope write; accepted principals: session; project extractor org.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "An organisation's registered application (never its secret).",
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "organization_id": {
+                      "title": "Organization Id",
+                      "type": "string"
+                    },
+                    "owner": {
+                      "title": "Owner",
+                      "type": "string"
+                    },
+                    "row_version": {
+                      "title": "Row Version",
+                      "type": "integer"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "redirect_uris": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Redirect Uris",
+                      "type": "array"
+                    },
+                    "capability": {
+                      "const": 3,
+                      "title": "Capability",
+                      "type": "integer"
+                    },
+                    "scopes": {
+                      "items": {
+                        "enum": [
+                          "read",
+                          "write"
+                        ],
+                        "type": "string"
+                      },
+                      "title": "Scopes",
+                      "type": "array"
+                    },
+                    "client_type": {
+                      "enum": [
+                        "confidential",
+                        "public"
+                      ],
+                      "title": "Client Type",
+                      "type": "string"
+                    },
+                    "provisioning_state": {
+                      "enum": [
+                        "pending",
+                        "provisioned",
+                        "error"
+                      ],
+                      "title": "Provisioning State",
+                      "type": "string"
+                    },
+                    "access_state": {
+                      "enum": [
+                        "active",
+                        "suspended",
+                        "pending_activation"
+                      ],
+                      "title": "Access State",
+                      "type": "string"
+                    },
+                    "client_id": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Client Id"
+                    },
+                    "created_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Created At"
+                    },
+                    "rotated_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Rotated At"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "organization_id",
+                    "owner",
+                    "row_version",
+                    "name",
+                    "redirect_uris",
+                    "capability",
+                    "scopes",
+                    "client_type",
+                    "provisioning_state",
+                    "access_state",
+                    "client_id",
+                    "created_at",
+                    "rotated_at"
+                  ],
+                  "title": "RegisteredApplication",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "organization_id": {
+                    "pattern": "^[a-zA-Z0-9-]{1,80}$",
+                    "title": "Organization Id",
+                    "type": "string"
+                  },
+                  "id": {
+                    "maxLength": 80,
+                    "minLength": 1,
+                    "title": "Id",
+                    "type": "string"
+                  },
+                  "row_version": {
+                    "minimum": 1,
+                    "title": "Row Version",
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "organization_id",
+                  "id",
+                  "row_version"
+                ],
+                "title": "ApplicationChange",
                 "type": "object"
               }
             }
@@ -41092,7 +44092,10 @@
                         "wavelet-text/1",
                         "model-section-text/1",
                         "seismic-section-text/1",
-                        "time-depth-csv/1"
+                        "time-depth-csv/1",
+                        "ogc-geopackage/1",
+                        "geojson/1",
+                        "esri-shapefile/1"
                       ],
                       "title": "Profile",
                       "type": "string"
@@ -42168,7 +45171,10 @@
                         "wavelet-text/1",
                         "model-section-text/1",
                         "seismic-section-text/1",
-                        "time-depth-csv/1"
+                        "time-depth-csv/1",
+                        "ogc-geopackage/1",
+                        "geojson/1",
+                        "esri-shapefile/1"
                       ],
                       "title": "Profile",
                       "type": "string"
@@ -52874,6 +55880,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -53345,6 +56377,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -53705,6 +56763,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -54046,6 +57130,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -54262,6 +57372,61 @@
                         }
                       ],
                       "title": "Next Offset"
+                    },
+                    "folders": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E59: the folders one level below, for a storage bucket.",
+                      "title": "Folders"
+                    },
+                    "next_cursor": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E59: the opaque next page of a storage bucket; send it back as `cursor`.",
+                      "title": "Next Cursor"
+                    },
+                    "left_out": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E59: files whose names cannot be shown safely, counted, never named.",
+                      "title": "Left Out"
+                    },
+                    "left_out_sentence": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E59: the sentence saying how many were left out.",
+                      "title": "Left Out Sentence"
                     }
                   },
                   "required": [
@@ -54392,6 +57557,32 @@
                     "minimum": 0,
                     "title": "Offset",
                     "type": "integer"
+                  },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
                   },
                   "limit": {
                     "default": 100,
@@ -57900,6 +61091,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -58776,6 +61993,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -59116,6 +62359,32 @@
                     "minimum": 0,
                     "title": "Offset",
                     "type": "integer"
+                  },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
                   },
                   "limit": {
                     "default": 100,
@@ -59672,6 +62941,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -60010,6 +63305,32 @@
                     "minimum": 0,
                     "title": "Offset",
                     "type": "integer"
+                  },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
                   },
                   "limit": {
                     "default": 100,
@@ -60392,6 +63713,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -60745,6 +64092,32 @@
                     "minimum": 0,
                     "title": "Offset",
                     "type": "integer"
+                  },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
                   },
                   "limit": {
                     "default": 100,
@@ -61143,6 +64516,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -61511,6 +64910,32 @@
                     "minimum": 0,
                     "title": "Offset",
                     "type": "integer"
+                  },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
                   },
                   "limit": {
                     "default": 100,
@@ -61909,6 +65334,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -62301,6 +65752,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -62663,6 +66140,32 @@
                     "minimum": 0,
                     "title": "Offset",
                     "type": "integer"
+                  },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
                   },
                   "limit": {
                     "default": 100,
@@ -63160,6 +66663,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -63526,6 +67055,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -63888,6 +67443,32 @@
                     "minimum": 0,
                     "title": "Offset",
                     "type": "integer"
+                  },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
                   },
                   "limit": {
                     "default": 100,
@@ -64448,6 +68029,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -64943,6 +68550,32 @@
                     "minimum": 0,
                     "title": "Offset",
                     "type": "integer"
+                  },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
                   },
                   "limit": {
                     "default": 100,
@@ -65880,6 +69513,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -66371,6 +70030,32 @@
                     "title": "Offset",
                     "type": "integer"
                   },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
+                  },
                   "limit": {
                     "default": 100,
                     "maximum": 1000,
@@ -66702,6 +70387,32 @@
                     "minimum": 0,
                     "title": "Offset",
                     "type": "integer"
+                  },
+                  "prefix": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Prefix"
+                  },
+                  "cursor": {
+                    "anyOf": [
+                      {
+                        "maxLength": 1024,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cursor"
                   },
                   "limit": {
                     "default": 100,
@@ -74980,6 +78691,19 @@
                       ],
                       "default": null,
                       "description": "E85b: present when an address was read"
+                    },
+                    "defaults_revision": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E90: the project defaults revision this answer offered; `upload-runs/start` names it",
+                      "title": "Defaults Revision"
                     }
                   },
                   "required": [
@@ -75126,6 +78850,18 @@
                     "default": null,
                     "description": "E85b: an https address instead of bytes (mode whole, no name or size, no body); the gateway fetches and reads it, and the answer's `fetched` names what was read",
                     "title": "Address"
+                  },
+                  "bucket": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/BucketObject"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E59: a storage bucket's object instead of bytes (mode whole, no name or size, no body); the gateway reads it with the person's own key, and the answer's `fetched` names what was read"
                   }
                 },
                 "required": [
@@ -75596,6 +79332,12 @@
                     "default": null,
                     "description": "E85b: the address the run was started with, query included; the server fetches it again (no body is sent) and adds the file only if its bytes are the ones read",
                     "title": "Address"
+                  },
+                  "bucket": {
+                    "default": false,
+                    "description": "E59: the row is a storage bucket's object; the server reads it again (no body is sent) and adds or selects it only if its bytes are the ones read",
+                    "title": "Bucket",
+                    "type": "boolean"
                   }
                 },
                 "required": [
@@ -76353,10 +80095,17 @@
                     "type": "array"
                   },
                   "attribution": {
-                    "maxLength": 500,
-                    "minLength": 1,
-                    "title": "Attribution",
-                    "type": "string"
+                    "anyOf": [
+                      {
+                        "maxLength": 500,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Attribution"
                   },
                   "well_notes": {
                     "default": "",
@@ -76365,12 +80114,20 @@
                     "type": "string"
                   },
                   "audience": {
-                    "items": {
-                      "type": "string"
-                    },
-                    "maxItems": 100,
-                    "title": "Audience",
-                    "type": "array"
+                    "anyOf": [
+                      {
+                        "items": {
+                          "type": "string"
+                        },
+                        "maxItems": 100,
+                        "type": "array"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Audience"
                   },
                   "rights_confirmed": {
                     "const": true,
@@ -76390,6 +80147,32 @@
                     "default": null,
                     "description": "E85b: the https address of the run's one file; kept without its query string",
                     "title": "Address"
+                  },
+                  "bucket": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/BucketRun"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E59: the files are objects of a storage bucket, read with the person's own key and either copied into the project or read where they live"
+                  },
+                  "defaults_revision": {
+                    "anyOf": [
+                      {
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E90: the project defaults revision the check answered",
+                    "title": "Defaults Revision"
                   }
                 },
                 "required": [
@@ -76397,7 +80180,6 @@
                   "command_id",
                   "folder_name",
                   "files",
-                  "attribution",
                   "rights_confirmed"
                 ],
                 "title": "Start",
@@ -94242,6 +98024,393 @@
         }
       }
     },
+    "/api/v1/applications/exchange": {
+      "post": {
+        "summary": "E33: exchange a provider access token and a consent handle for an application credential",
+        "description": "Machine only: from the application's server, with no cookie, Origin or Authorization header. The provider token is introspected (issuer, audience, client); the consent must be current. 503 when registered applications are not configured.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "access_token": {
+                    "maxLength": 16383,
+                    "minLength": 21,
+                    "title": "Access Token",
+                    "type": "string"
+                  },
+                  "consent": {
+                    "maxLength": 4096,
+                    "minLength": 20,
+                    "title": "Consent",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "access_token",
+                  "consent"
+                ],
+                "title": "Exchange",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "An opaque oph_app_ credential",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "applications/exchange: an opaque application credential (oph_app_...).",
+                  "properties": {
+                    "access_token": {
+                      "title": "Access Token",
+                      "type": "string"
+                    },
+                    "token_type": {
+                      "const": "Bearer",
+                      "title": "Token Type",
+                      "type": "string"
+                    },
+                    "expires_in": {
+                      "title": "Expires In",
+                      "type": "integer"
+                    },
+                    "scopes": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Scopes",
+                      "type": "array"
+                    },
+                    "projects": {
+                      "anyOf": [
+                        {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Projects"
+                    }
+                  },
+                  "required": [
+                    "access_token",
+                    "token_type",
+                    "expires_in",
+                    "scopes",
+                    "projects"
+                  ],
+                  "title": "ApplicationCredential",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        }
+      }
+    },
+    "/api/v1/applications/register": {
+      "post": {
+        "summary": "E33: RFC 7591 dynamic client registration (off unless the deployment enables it)",
+        "description": "Machine only: from the application's server, with no cookie, Origin or Authorization header. The application is created pending activation by an owner of the receiving organisation; 404 when registration is not enabled.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "C5: the RFC 7591 client metadata this deployment honours; other metadata is ignored (RFC 7591 \u00a72).",
+                "properties": {
+                  "client_name": {
+                    "maxLength": 120,
+                    "minLength": 1,
+                    "title": "Client Name",
+                    "type": "string"
+                  },
+                  "redirect_uris": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 10,
+                    "minItems": 1,
+                    "title": "Redirect Uris",
+                    "type": "array"
+                  },
+                  "token_endpoint_auth_method": {
+                    "default": "client_secret_basic",
+                    "title": "Token Endpoint Auth Method",
+                    "type": "string"
+                  },
+                  "scope": {
+                    "default": "read",
+                    "maxLength": 40,
+                    "title": "Scope",
+                    "type": "string"
+                  },
+                  "grant_types": {
+                    "default": [
+                      "authorization_code"
+                    ],
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 2,
+                    "title": "Grant Types",
+                    "type": "array"
+                  },
+                  "response_types": {
+                    "default": [
+                      "code"
+                    ],
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 1,
+                    "title": "Response Types",
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "client_name",
+                  "redirect_uris"
+                ],
+                "title": "ClientRegistration",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "RFC 7591 section 3.2.2",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "RFC 7591 section 3.2.2.",
+                  "properties": {
+                    "error": {
+                      "enum": [
+                        "invalid_redirect_uri",
+                        "invalid_client_metadata"
+                      ],
+                      "title": "Error",
+                      "type": "string"
+                    },
+                    "error_description": {
+                      "title": "Error Description",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "error_description"
+                  ],
+                  "title": "ClientRegistrationError",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          },
+          "201": {
+            "description": "The registered client (RFC 7591 section 3.2.1)",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "applications/register (RFC 7591 section 3.2.1); the application awaits an administrator's activation.",
+                  "properties": {
+                    "client_id": {
+                      "title": "Client Id",
+                      "type": "string"
+                    },
+                    "client_id_issued_at": {
+                      "title": "Client Id Issued At",
+                      "type": "integer"
+                    },
+                    "client_name": {
+                      "title": "Client Name",
+                      "type": "string"
+                    },
+                    "redirect_uris": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Redirect Uris",
+                      "type": "array"
+                    },
+                    "token_endpoint_auth_method": {
+                      "title": "Token Endpoint Auth Method",
+                      "type": "string"
+                    },
+                    "grant_types": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "title": "Grant Types",
+                      "type": "array"
+                    },
+                    "response_types": {
+                      "items": {
+                        "const": "code",
+                        "type": "string"
+                      },
+                      "title": "Response Types",
+                      "type": "array"
+                    },
+                    "scope": {
+                      "title": "Scope",
+                      "type": "string"
+                    },
+                    "ophiolite_application_id": {
+                      "title": "Ophiolite Application Id",
+                      "type": "string"
+                    },
+                    "ophiolite_access_state": {
+                      "title": "Ophiolite Access State",
+                      "type": "string"
+                    },
+                    "client_secret": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Client Secret"
+                    },
+                    "client_secret_expires_at": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "title": "Client Secret Expires At"
+                    }
+                  },
+                  "required": [
+                    "client_id",
+                    "client_id_issued_at",
+                    "client_name",
+                    "redirect_uris",
+                    "token_endpoint_auth_method",
+                    "grant_types",
+                    "response_types",
+                    "scope",
+                    "ophiolite_application_id",
+                    "ophiolite_access_state"
+                  ],
+                  "title": "ClientRegistered",
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/contracts": {
       "get": {
         "summary": "Contracts registry index",
@@ -94883,7 +99052,15 @@
               "destination-refused",
               "undetermined",
               "sign-in-needed",
-              "browser-approval-off"
+              "browser-approval-off",
+              "no-list-right",
+              "bucket-missing",
+              "wrong-region",
+              "object-missing",
+              "object-changed",
+              "throttled",
+              "unreadable",
+              "no-consistent-read"
             ],
             "title": "Code",
             "type": "string"
@@ -95550,6 +99727,64 @@
         "title": "ApplicationGrant",
         "type": "object"
       },
+      "ApprovedApplication": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "organization": {
+            "title": "Organization",
+            "type": "string"
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Scopes",
+            "type": "array"
+          },
+          "projects": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "None: every project you can reach",
+            "title": "Projects"
+          },
+          "approved_at": {
+            "title": "Approved At",
+            "type": "string"
+          },
+          "deadline": {
+            "title": "Deadline",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "organization",
+          "scopes",
+          "projects",
+          "approved_at",
+          "deadline"
+        ],
+        "title": "ApprovedApplication",
+        "type": "object"
+      },
       "ArrayNode": {
         "additionalProperties": false,
         "properties": {
@@ -96000,6 +100235,70 @@
         "title": "Attempt",
         "type": "object"
       },
+      "AudienceLine": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "can_see": {
+            "title": "Can See",
+            "type": "boolean"
+          },
+          "legacy": {
+            "title": "Legacy",
+            "type": "boolean"
+          },
+          "build_on": {
+            "title": "Build On",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "can_see",
+          "legacy",
+          "build_on"
+        ],
+        "title": "AudienceLine",
+        "type": "object"
+      },
+      "AudiencePerson": {
+        "properties": {
+          "id": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "can_see": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "const": "legacy",
+                "type": "string"
+              }
+            ],
+            "description": "true: can see it (ceiling and read grant); false: cannot; \"legacy\": keeps an earlier entry, grants nothing",
+            "title": "Can See"
+          },
+          "build_on": {
+            "default": false,
+            "description": "Can build on it (the reuse grant); under \"people\" it needs can_see true",
+            "title": "Build On",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "can_see"
+        ],
+        "title": "AudiencePerson",
+        "type": "object"
+      },
       "Binding": {
         "additionalProperties": false,
         "properties": {
@@ -96017,6 +100316,66 @@
           "organization_id"
         ],
         "title": "Binding",
+        "type": "object"
+      },
+      "BucketObject": {
+        "additionalProperties": false,
+        "description": "E59: one object of a storage bucket the person may read: the organisation connection and the exact key.",
+        "properties": {
+          "connection_id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Connection Id",
+            "type": "string"
+          },
+          "key": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "title": "Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "connection_id",
+          "key"
+        ],
+        "title": "BucketObject",
+        "type": "object"
+      },
+      "BucketRun": {
+        "additionalProperties": false,
+        "properties": {
+          "connection_id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Connection Id",
+            "type": "string"
+          },
+          "custody": {
+            "description": "read-in-place: a pinned source selection per file; copy: a retained upload, as a dropped file",
+            "enum": [
+              "read-in-place",
+              "copy"
+            ],
+            "title": "Custody",
+            "type": "string"
+          },
+          "keys": {
+            "description": "the exact object key of each file, in the order of `files`",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Keys",
+            "type": "array"
+          }
+        },
+        "required": [
+          "connection_id",
+          "custody",
+          "keys"
+        ],
+        "title": "BucketRun",
         "type": "object"
       },
       "BuiltInSchema": {
@@ -96470,6 +100829,19 @@
             "const": "none",
             "type": "string",
             "title": "Default"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E90: why the project's default is not offered for this field (a coordinate system this kind of file cannot use)",
+            "title": "Note"
           }
         },
         "required": [
@@ -100951,6 +105323,25 @@
         "title": "MethodRecord",
         "type": "object"
       },
+      "Named": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "Named",
+        "type": "object"
+      },
       "Native_arraybridge_v1_ArchieParameters": {
         "additionalProperties": false,
         "description": "Native arraybridge.v1.ArchieParameters (protobuf JSON).",
@@ -104705,6 +109096,116 @@
         "title": "Native_arraybridge_v1_WellTop",
         "type": "object"
       },
+      "NewDataSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "visible_to": {
+            "enum": [
+              "project",
+              "me"
+            ],
+            "title": "Visible To",
+            "type": "string"
+          },
+          "depth_reference": {
+            "anyOf": [
+              {
+                "enum": [
+                  "GL",
+                  "KB",
+                  "MSL"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Depth Reference"
+          },
+          "coordinate_system": {
+            "default": "",
+            "maxLength": 128,
+            "title": "Coordinate System",
+            "type": "string"
+          },
+          "unit_system": {
+            "default": "unknown",
+            "maxLength": 64,
+            "title": "Unit System",
+            "type": "string"
+          },
+          "attribution": {
+            "default": "",
+            "maxLength": 500,
+            "title": "Attribution",
+            "type": "string"
+          }
+        },
+        "required": [
+          "visible_to"
+        ],
+        "title": "NewDataSettings",
+        "type": "object"
+      },
+      "NewDataSettingsRead": {
+        "additionalProperties": false,
+        "properties": {
+          "visible_to": {
+            "anyOf": [
+              {
+                "enum": [
+                  "project",
+                  "me"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visible To"
+          },
+          "depth_reference": {
+            "anyOf": [
+              {
+                "enum": [
+                  "GL",
+                  "KB",
+                  "MSL"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Depth Reference"
+          },
+          "coordinate_system": {
+            "title": "Coordinate System",
+            "type": "string"
+          },
+          "unit_system": {
+            "title": "Unit System",
+            "type": "string"
+          },
+          "attribution": {
+            "title": "Attribution",
+            "type": "string"
+          }
+        },
+        "required": [
+          "visible_to",
+          "depth_reference",
+          "coordinate_system",
+          "unit_system",
+          "attribution"
+        ],
+        "title": "NewDataSettingsRead",
+        "type": "object"
+      },
       "ObjectNode": {
         "additionalProperties": false,
         "properties": {
@@ -106373,7 +110874,10 @@
               "wavelet-text/1",
               "model-section-text/1",
               "seismic-section-text/1",
-              "time-depth-csv/1"
+              "time-depth-csv/1",
+              "ogc-geopackage/1",
+              "geojson/1",
+              "esri-shapefile/1"
             ],
             "title": "Profile",
             "type": "string"
@@ -106612,6 +111116,132 @@
           "profile"
         ],
         "title": "Reference",
+        "type": "object"
+      },
+      "RegisteredApplication": {
+        "additionalProperties": false,
+        "description": "An organisation's registered application (never its secret).",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "organization_id": {
+            "title": "Organization Id",
+            "type": "string"
+          },
+          "owner": {
+            "title": "Owner",
+            "type": "string"
+          },
+          "row_version": {
+            "title": "Row Version",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "redirect_uris": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Redirect Uris",
+            "type": "array"
+          },
+          "capability": {
+            "const": 3,
+            "title": "Capability",
+            "type": "integer"
+          },
+          "scopes": {
+            "items": {
+              "enum": [
+                "read",
+                "write"
+              ],
+              "type": "string"
+            },
+            "title": "Scopes",
+            "type": "array"
+          },
+          "client_type": {
+            "enum": [
+              "confidential",
+              "public"
+            ],
+            "title": "Client Type",
+            "type": "string"
+          },
+          "provisioning_state": {
+            "enum": [
+              "pending",
+              "provisioned",
+              "error"
+            ],
+            "title": "Provisioning State",
+            "type": "string"
+          },
+          "access_state": {
+            "enum": [
+              "active",
+              "suspended",
+              "pending_activation"
+            ],
+            "title": "Access State",
+            "type": "string"
+          },
+          "client_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Id"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "rotated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rotated At"
+          }
+        },
+        "required": [
+          "id",
+          "organization_id",
+          "owner",
+          "row_version",
+          "name",
+          "redirect_uris",
+          "capability",
+          "scopes",
+          "client_type",
+          "provisioning_state",
+          "access_state",
+          "client_id",
+          "created_at",
+          "rotated_at"
+        ],
+        "title": "RegisteredApplication",
         "type": "object"
       },
       "RelativeTolerance": {
@@ -112867,6 +117497,38 @@
         "title": "UploadRunCounts",
         "type": "object"
       },
+      "UploadRunDefaults": {
+        "additionalProperties": false,
+        "description": "E90: the project defaults a run used: their revision, who accepted them, and the run's own settings taken from them\n(a file's kept defaults are in its evidence, class project-default).",
+        "properties": {
+          "revision": {
+            "title": "Revision",
+            "type": "integer"
+          },
+          "accepted_by": {
+            "title": "Accepted By",
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "enum": [
+                "attribution",
+                "audience"
+              ],
+              "type": "string"
+            },
+            "title": "Fields",
+            "type": "array"
+          }
+        },
+        "required": [
+          "revision",
+          "accepted_by",
+          "fields"
+        ],
+        "title": "UploadRunDefaults",
+        "type": "object"
+      },
       "UploadRunEvidence": {
         "additionalProperties": false,
         "description": "E85: one decided field and where it came from; the server derives the class.",
@@ -113317,6 +117979,32 @@
             ],
             "default": null,
             "description": "E85b: present when the run's file was fetched from an address"
+          },
+          "project_audience": {
+            "anyOf": [
+              {
+                "const": "read",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E90: everyone in the project can see each file the run adds (the default \"Everyone in this project\")",
+            "title": "Project Audience"
+          },
+          "defaults": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UploadRunDefaults"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E90: present when the run used a project default"
           }
         },
         "required": [

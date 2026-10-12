@@ -159,6 +159,13 @@ def test_layers_for_a_gis_follows_the_next_link_and_says_why_a_path_is_not_place
     assert 'Wrote layers-for-a-gis.png with 1 paths placed' in text
 
 
+def test_well_logs_in_a_bucket_pins_its_logs_and_reports_a_changed_one_synthetic(tmp_path, monkeypatch):
+    text = run('well-logs-in-a-bucket', tmp_path, monkeypatch)
+    assert 'wells/: 3 files' in text and 'W-1/gamma.las' in text and 'notes.txt' in text and 'only as a copy' in text
+    assert 'Synthetic mode: nothing is sent. In your project the 2 logs are added' in text
+    assert 'After W-1/gamma.las changed: a different digest; reading it reports that the revision is unavailable' in text
+
+
 def test_a_spreadsheet_and_a_database_joined_joins_on_the_well_name_and_sends_nothing_synthetic(tmp_path, monkeypatch):
     text = run('a-spreadsheet-and-a-database-joined', tmp_path, monkeypatch)  # E58b
     assert ': 6 samples; porosity in %, -888 means missing' in text and 'wells.sqlite: 3 wells' in text
@@ -168,7 +175,7 @@ def test_a_spreadsheet_and_a_database_joined_joins_on_the_well_name_and_sends_no
 
 
 def test_every_entry_is_listed_built_and_described():
-    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'grids-and-gis-files', 'how-was-this-made', 'open-it-here', 'a-spreadsheet-becomes-wells-and-tops', 'layers-for-a-gis', 'a-spreadsheet-and-a-database-joined']
+    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'grids-and-gis-files', 'how-was-this-made', 'open-it-here', 'a-spreadsheet-becomes-wells-and-tops', 'layers-for-a-gis', 'well-logs-in-a-bucket', 'a-spreadsheet-and-a-database-joined']
     for entry in GALLERY['notebooks']:
         assert set(entry) == {'slug', 'title', 'sentence', 'modes', 'data'} and entry['modes'] == ['synthetic', 'live']
         script = (ROOT / 'notebooks' / entry['slug'] / 'notebook.py').read_text()

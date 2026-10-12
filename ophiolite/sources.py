@@ -25,7 +25,7 @@ import warnings
 
 from .errors import (Refused, SourceChecksumMismatch, SourceNotFound, SourceNotSupported, SourceRevisionDiffers, VerificationFailed,
                      SOURCE_GUIDE)
-from .models.api import OrgConnectionsPage, SourceExportAnswer, SourceSelectionsPage
+from .models.api import OrgConnectionsPage, SourceBrowsePage, SourceExportAnswer, SourceSelectionsPage
 
 SUPPORTED = 'sql-wells/1'
 TABLE = 'table/1'  # E50b1: any approved table, read as a table
@@ -387,6 +387,15 @@ class SourceClient:
         Selections other members bound are not listed."""
         page = _checked(SourceSelectionsPage, self._post('sources', 'list', {}), 'source listing')
         return [Source(self, document) for document in page['selections']]
+
+    def browse(self, connection, prefix=None, cursor=None):
+        """E59: one page of a storage connection's folder (PREFIX, by default the folder the connection may read), listed
+        with your own sign-in to it: `folders`, then `items` (key, name, folder, size, tag, the kind its name suggests and
+        whether it is read in place); `next_cursor` continues the page. The deployment holds your sign-in: no key or secret
+        is given or sent from here."""
+        if not isinstance(connection, str) or not connection: raise Refused('Name the storage connection by its id.')
+        body = {'connection_id': connection, **({'prefix': prefix} if prefix is not None else {}), **({'cursor': cursor} if cursor else {})}
+        return _checked(SourceBrowsePage, self._post('sources', 'discover', body, retry=True), 'storage listing')
 
     def source(self, id):
         """The selection with this stable id (a name never matches); SourceNotFound when you have none with it."""
