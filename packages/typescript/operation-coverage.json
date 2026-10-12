@@ -396,6 +396,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/ended",
+    "function": "postProjectsEnded",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/list",
     "function": "postProjectsList",
     "request": "schema",
@@ -416,6 +422,12 @@
   {
     "operation": "POST /api/v1/projects/{project}/access/effective",
     "function": "postProjectsProjectAccessEffective",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/access/end-date",
+    "function": "postProjectsProjectAccessEndDate",
     "request": "schema",
     "response": "schema"
   },
@@ -932,6 +944,18 @@
   {
     "operation": "POST /api/v1/projects/{project}/context/save",
     "function": "postProjectsProjectContextSave",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/details/history",
+    "function": "postProjectsProjectDetailsHistory",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/details/rename",
+    "function": "postProjectsProjectDetailsRename",
     "request": "schema",
     "response": "schema"
   },

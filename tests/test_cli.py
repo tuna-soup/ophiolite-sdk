@@ -325,3 +325,15 @@ def test_sources_read_json_needs_no_pandas(tmp_path):
         done = subprocess.run([sys.executable, '-m', 'ophiolite', 'sources', 'read', 's1', '--json'], cwd=tmp_path, env=env, capture_output=True, text=True, timeout=60)
     assert done.returncode == 0, done.stderr
     assert len(json.loads(done.stdout)['rows']) == 2
+
+
+@pytest.mark.parametrize('zone',['UTC','Pacific/Auckland','America/Los_Angeles'])
+def test_an_access_end_prints_its_last_day_as_a_utc_date_in_every_zone(zone,monkeypatch):
+    """E67a C6 (M5 literals): the stored end is the start of the next UTC day; the words name the last permitted day."""
+    import time
+    monkeypatch.setenv('TZ',zone);time.tzset()
+    try:
+        assert cli.ends_words('2026-11-15T00:00:00Z')=='ends 14 Nov 2026'
+        assert cli.ends_words('3000-01-01T00:00:00Z')=='ends 31 Dec 2999' and cli.ends_words('2999-01-02T00:00:00Z')=='ends 1 Jan 2999'
+    finally:
+        monkeypatch.undo();time.tzset()

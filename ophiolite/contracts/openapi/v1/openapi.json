@@ -340,6 +340,173 @@
         }
       }
     },
+    "/api/v1/projects/{project}/access/end-date": {
+      "post": {
+        "summary": "E67a: set, change or remove the last day of a person's direct grant (project administrators)",
+        "description": "Scope write; accepted principals: session; project extractor top.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "changed": {
+                      "description": "False when the grant already ended on that day (nothing was written)",
+                      "title": "Changed",
+                      "type": "boolean"
+                    },
+                    "project_id": {
+                      "title": "Project Id",
+                      "type": "string"
+                    },
+                    "user_id": {
+                      "title": "User Id",
+                      "type": "string"
+                    },
+                    "ends_on": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Ends On"
+                    },
+                    "expires_at": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "The stored end: the start of the day after ends_on, UTC; null: no end",
+                      "title": "Expires At"
+                    }
+                  },
+                  "required": [
+                    "changed",
+                    "project_id",
+                    "user_id",
+                    "ends_on",
+                    "expires_at"
+                  ],
+                  "title": "AccessEndChanged",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "E67a: set, change or remove the end of one person's direct grant (project administrators; a browser session).",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "user_id": {
+                    "title": "User Id",
+                    "type": "string"
+                  },
+                  "ends_on": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "The last permitted day, YYYY-MM-DD (a UTC date; access ends at the start of the next day); null removes the end. Today or later; not for a person whose only grant is a team's, nor for the last administrator without an end date",
+                    "title": "Ends On"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "user_id",
+                  "ends_on"
+                ],
+                "title": "AccessEndDate",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/access-keys/create": {
       "post": {
         "summary": "Create an access key for one project; the key is shown once",
@@ -20076,6 +20243,281 @@
                   "policy"
                 ],
                 "title": "PolicyWrite",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/details/history": {
+      "post": {
+        "summary": "E67a: the project's earlier names, newest first (project members)",
+        "description": "Scope read; accepted principals: session; project extractor top.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E67a details/history: the project's current name and its renames, newest first (at most 100).",
+                  "properties": {
+                    "project_id": {
+                      "title": "Project Id",
+                      "type": "string"
+                    },
+                    "name": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Name"
+                    },
+                    "renames": {
+                      "items": {
+                        "$ref": "#/components/schemas/ProjectNameChange"
+                      },
+                      "title": "Renames",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "project_id",
+                    "name",
+                    "renames"
+                  ],
+                  "title": "ProjectNames",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "ProjectOnly",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/details/rename": {
+      "post": {
+        "summary": "E67a: change the project's display name; the id and every address stay (project administrators)",
+        "description": "Scope write; accepted principals: session; project extractor top.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "changed": {
+                      "description": "False when the project already had this name (nothing was written)",
+                      "title": "Changed",
+                      "type": "boolean"
+                    },
+                    "project_id": {
+                      "title": "Project Id",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "previous_name": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Previous Name"
+                    }
+                  },
+                  "required": [
+                    "changed",
+                    "project_id",
+                    "name",
+                    "previous_name"
+                  ],
+                  "title": "ProjectRenamed",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "E67a: change a project's display name (project administrators; a browser session). The id never changes.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "1-120 characters after trimming, at most 160 bytes; the same name writes nothing",
+                    "title": "Name",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "name"
+                ],
+                "title": "ProjectRename",
                 "type": "object"
               }
             }
@@ -42669,6 +43111,18 @@
                       "description": "The join link; the invitation token is shown only here",
                       "title": "Url",
                       "type": "string"
+                    },
+                    "project": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/InvitedProject"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E67a: the project this invitation also gives access to"
                     }
                   },
                   "required": [
@@ -42735,6 +43189,18 @@
                   "email": {
                     "title": "Email",
                     "type": "string"
+                  },
+                  "project": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/InviteProject"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E67a: also give access to one project of this organisation"
                   }
                 },
                 "required": [
@@ -42905,6 +43371,18 @@
                       "description": "The join link; the invitation token is shown only here",
                       "title": "Url",
                       "type": "string"
+                    },
+                    "project": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/InvitedProject"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E67a: the project this invitation also gives access to"
                     }
                   },
                   "required": [
@@ -45276,6 +45754,106 @@
                 ],
                 "title": "ProcedureChangeRequest",
                 "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/ended": {
+      "post": {
+        "summary": "E67a: the projects where your own direct access ended (the last day of each); nothing about anyone else",
+        "description": "Scope read; accepted principals: session; project extractor none.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E67a projects/ended: the caller's own direct grants that ended and are why the caller cannot open the project.",
+                  "properties": {
+                    "projects": {
+                      "items": {
+                        "$ref": "#/components/schemas/EndedProject"
+                      },
+                      "title": "Projects",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "projects"
+                  ],
+                  "title": "EndedProjects",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "This operation reads no fields from its body; send an empty object.",
+                "properties": {},
+                "title": "NoFields",
+                "type": "object",
+                "x-ophiolite-no-fields": true
               }
             }
           }
@@ -47964,57 +48542,6 @@
                       ],
                       "default": null,
                       "title": "Values"
-                    },
-                    "reference": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "default": null,
-                      "title": "Reference"
-                    },
-                    "depth": {
-                      "anyOf": [
-                        {
-                          "items": {
-                            "anyOf": [
-                              {
-                                "type": "number"
-                              },
-                              {
-                                "enum": [
-                                  "NaN",
-                                  "Infinity",
-                                  "-Infinity"
-                                ],
-                                "type": "string"
-                              }
-                            ]
-                          },
-                          "type": "array"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "default": null,
-                      "title": "Depth"
-                    },
-                    "qualification": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "default": null,
-                      "title": "Qualification"
                     }
                   },
                   "title": "Native_arraybridge_v1_CurveAssetData",
@@ -48100,30 +48627,6 @@
                     ],
                     "default": null,
                     "title": "Revision"
-                  },
-                  "reference": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Reference"
-                  },
-                  "sea_datum": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "default": null,
-                    "title": "Sea Datum"
                   }
                 },
                 "title": "Native_arraybridge_v1_CurveAssetRequest",
@@ -99616,6 +100119,19 @@
           "archived": {
             "title": "Archived",
             "type": "boolean"
+          },
+          "access_ends_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E67a: when your access to this project ends (an instant, UTC); null: it does not",
+            "title": "Access Ends At"
           }
         },
         "required": [
@@ -103382,6 +103898,63 @@
             "description": "direct, or team:<team id>",
             "title": "Via",
             "type": "string"
+          },
+          "team_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E67a: the team's name for a team grant; null for a direct grant",
+            "title": "Team Name"
+          },
+          "ends_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E67a: when a direct grant ends (the start of the day after its last day, UTC); null: it does not end. Team grants carry no date",
+            "title": "Ends At"
+          },
+          "ends_on": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E67a: the last permitted day of a direct grant (YYYY-MM-DD, a UTC date); null: no end",
+            "title": "Ends On"
+          },
+          "ended": {
+            "default": false,
+            "description": "E67a: the direct grant has ended and no longer gives access",
+            "title": "Ended",
+            "type": "boolean"
+          },
+          "role_label": {
+            "default": "",
+            "description": "E67a: the role in words (Member or Viewer)",
+            "title": "Role Label",
+            "type": "string"
+          },
+          "source_label": {
+            "default": "",
+            "description": "E67a: where the grant comes from in words: Direct grant, or the team's name (A team when it has none)",
+            "title": "Source Label",
+            "type": "string"
           }
         },
         "required": [
@@ -103440,6 +104013,25 @@
             },
             "title": "Grants",
             "type": "array"
+          },
+          "ends_on": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E67a: the last permitted day of this person's direct grant, or null",
+            "title": "Ends On"
+          },
+          "ended": {
+            "default": false,
+            "description": "E67a: this person's direct grant has ended",
+            "title": "Ended",
+            "type": "boolean"
           }
         },
         "required": [
@@ -103500,6 +104092,38 @@
           "requires_plan"
         ],
         "title": "Eligibility",
+        "type": "object"
+      },
+      "EndedProject": {
+        "additionalProperties": false,
+        "properties": {
+          "project_id": {
+            "title": "Project Id",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "ended_on": {
+            "description": "The last day the access lasted (YYYY-MM-DD, a UTC date)",
+            "title": "Ended On",
+            "type": "string"
+          }
+        },
+        "required": [
+          "project_id",
+          "name",
+          "ended_on"
+        ],
+        "title": "EndedProject",
         "type": "object"
       },
       "Entity": {
@@ -104197,6 +104821,18 @@
           "expires_at": {
             "title": "Expires At",
             "type": "string"
+          },
+          "project": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FoundProject"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E67a: the project, role and last day this invitation also gives"
           }
         },
         "required": [
@@ -104207,6 +104843,48 @@
           "expires_at"
         ],
         "title": "FoundInvitation",
+        "type": "object"
+      },
+      "FoundProject": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "role": {
+            "enum": [
+              "member",
+              "viewer"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "ends_on": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ends On"
+          }
+        },
+        "required": [
+          "name",
+          "role",
+          "ends_on"
+        ],
+        "title": "FoundProject",
         "type": "object"
       },
       "GroupMember": {
@@ -104503,6 +105181,18 @@
               }
             ],
             "title": "Error Code"
+          },
+          "project": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ListedProject"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E67a: the project the invitation names, and what admission did with it"
           }
         },
         "required": [
@@ -104516,6 +105206,99 @@
           "error_code"
         ],
         "title": "InvitationRow",
+        "type": "object"
+      },
+      "InviteProject": {
+        "additionalProperties": false,
+        "description": "E67a: the project an invitation names, applied when the person joins (an owner who administers that project).",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "role": {
+            "description": "member or viewer; an invitation never makes an administrator",
+            "title": "Role",
+            "type": "string"
+          },
+          "can_compute": {
+            "description": "Whether the person may run calculations; a viewer cannot",
+            "title": "Can Compute",
+            "type": "boolean"
+          },
+          "ends_on": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The last permitted day, YYYY-MM-DD (a UTC date); null: no end",
+            "title": "Ends On"
+          }
+        },
+        "required": [
+          "id",
+          "role",
+          "can_compute",
+          "ends_on"
+        ],
+        "title": "InviteProject",
+        "type": "object"
+      },
+      "InvitedProject": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "role": {
+            "enum": [
+              "member",
+              "viewer"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "can_compute": {
+            "title": "Can Compute",
+            "type": "boolean"
+          },
+          "ends_on": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The last permitted day (a UTC date); null: no end",
+            "title": "Ends On"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "role",
+          "can_compute",
+          "ends_on"
+        ],
+        "title": "InvitedProject",
         "type": "object"
       },
       "Job": {
@@ -105407,6 +106190,80 @@
         "title": "Link",
         "type": "object"
       },
+      "ListedProject": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "role": {
+            "enum": [
+              "member",
+              "viewer"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "can_compute": {
+            "title": "Can Compute",
+            "type": "boolean"
+          },
+          "ends_on": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The last permitted day (a UTC date); null: no end",
+            "title": "Ends On"
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "enum": [
+                  "applied",
+                  "already_has_access",
+                  "ended_before_acceptance",
+                  "inviter_not_administrator",
+                  "project_moved",
+                  "blocked"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "What admission did with the project (join.PROJECT_GRANTS); null until the invitation is accepted",
+            "title": "Outcome"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "role",
+          "can_compute",
+          "ends_on",
+          "outcome"
+        ],
+        "title": "ListedProject",
+        "type": "object"
+      },
       "LocationProvenance": {
         "additionalProperties": false,
         "properties": {
@@ -106177,30 +107034,6 @@
             ],
             "default": null,
             "title": "Revision"
-          },
-          "reference": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "title": "Reference"
-          },
-          "sea_datum": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "title": "Sea Datum"
           }
         },
         "title": "Native_arraybridge_v1_CurveAssetRequest",
@@ -111625,6 +112458,18 @@
               }
             ],
             "title": "Organization Id"
+          },
+          "access_ends_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Access Ends At"
           }
         },
         "required": [
@@ -111635,6 +112480,60 @@
           "organization_id"
         ],
         "title": "ProjectEntry",
+        "type": "object"
+      },
+      "ProjectNameChange": {
+        "additionalProperties": false,
+        "properties": {
+          "sequence": {
+            "title": "Sequence",
+            "type": "integer"
+          },
+          "old_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Old Name"
+          },
+          "new_name": {
+            "title": "New Name",
+            "type": "string"
+          },
+          "actor_id": {
+            "title": "Actor Id",
+            "type": "string"
+          },
+          "actor_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actor Name"
+          },
+          "at": {
+            "description": "When the name changed (UTC, seconds)",
+            "title": "At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sequence",
+          "old_name",
+          "new_name",
+          "actor_id",
+          "actor_name",
+          "at"
+        ],
+        "title": "ProjectNameChange",
         "type": "object"
       },
       "PublicationReceipt": {

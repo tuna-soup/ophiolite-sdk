@@ -81,3 +81,16 @@ def test_every_post_route_is_typed_both_ways():
     coverage = json.loads((ROOT / 'packages/typescript/operation-coverage.json').read_text())
     untyped = [c['operation'] for c in coverage if c['operation'].startswith('POST') and (c['request'] == 'explicitly-untyped' or c['response'] == 'explicitly-untyped')]
     assert untyped == ['POST /api/v1/connector/{operation}'], untyped  # the connector proxy carries the named operation's own body
+
+
+def test_a_project_entry_mirrors_its_synced_component_and_refuses_a_number_for_the_end():
+    """E67a C6 (F4, M5): the hand-written row model declares `access_ends_at` as the synced component does; a model that
+    only tolerated it as an extra would accept the integer below."""
+    from pydantic import ValidationError
+    component = OPENAPI['components']['schemas']['ProjectEntry']
+    assert set(api.ProjectEntry.model_fields) == set(component['properties']) and 'access_ends_at' in api.ProjectEntry.model_fields
+    assert {n for n, f in api.ProjectEntry.model_fields.items() if f.is_required()} == set(component['required'])
+    row = {'id': 'p', 'name': 'Pilot', 'role': 'member', 'can_administer': False, 'organization_id': None}
+    assert api.ProjectEntry.model_validate({**row, 'access_ends_at': '2999-01-01T00:00:00Z'}).access_ends_at == '2999-01-01T00:00:00Z'
+    assert api.ProjectEntry.model_validate(row).access_ends_at is None
+    with pytest.raises(ValidationError): api.ProjectEntry.model_validate({**row, 'access_ends_at': 2999})

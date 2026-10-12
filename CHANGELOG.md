@@ -32,6 +32,13 @@ No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
   give the same from Python; a refusal keeps the server's sentence and its closed `reason`.
   The gallery notebook `share-a-procedure` shows both sides; `ophiolite.gallery.colleague()` gives a notebook a
   second member's client (`gallery.use(client, colleague=...)`, or `OPHIOLITE_COLLEAGUE_ACCESS_KEY`).
+- When access ends (E67a, read-only): `Account.projects()` rows always carry `access_ends_at`, the instant (UTC) your
+  direct grant on that project ends, or `None` when it does not end (no end date, or a team also gives access); a
+  project whose access has ended is not listed. `ProjectEntry` declares the field (a number is refused).
+  `ophiolite projects` prints the last permitted day as a UTC date in every zone ("ends 14 Nov 2026" for
+  `2026-11-15T00:00:00Z`); `--json` carries the instant. The gallery notebook "Who has access, and until when" reads
+  your own ends and, for a project administrator, who has access through what and until when (`access/effective`);
+  the synthetic server answers both. No SDK write method sets an end date.
 - Grids and GIS files (E56, preview API): `client.read_data` returns `FeatureSet` for map features from a Shapefile,
   a GeoPackage layer or a GeoJSON file (`features` in file order with coordinates as stored, `fields`, `to_frame()`
   with one row per feature), checked offline against the server's rules; ZMAP+, CPS-3 and IRAP grids read as
