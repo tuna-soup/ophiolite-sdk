@@ -18,6 +18,16 @@ def verify_descriptor(value, project, asset, revision, curve):
     return model
 
 
+WINDOWS_ONLY='This curve has {n:,} samples; it is read in sections. Download the original file for every sample.'
+
+
+def refuse_windows_only(model):
+    """E100b: a curve above 100,000 samples is read in sections (curve_window); a whole read is refused here, before any
+    sample or original is requested, with the gateway's sentence."""
+    scientific=model.model_dump(by_alias=True)['scientific']
+    if scientific.get('read')=='windows':raise Refused(WINDOWS_ONLY.format(n=scientific['sample_count']))
+
+
 def verify_typed_descriptor(value, project, asset, revision):
     model=validate.model(ScientificAsset,value); data=model.model_dump(by_alias=True)
     rules.asset(data)

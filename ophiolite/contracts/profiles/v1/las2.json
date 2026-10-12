@@ -19,6 +19,10 @@
     "application/x-las"
   ],
   "normalized_profile": "ophiolite.application-curve/1",
+  "normalized_profiles": [
+    "ophiolite.application-curve/1",
+    "ophiolite.curve-columns/1"
+  ],
   "context_schema": "ophiolite.curve-context/1",
   "representation_rules": {
     "artifact_kind_by_origin": {

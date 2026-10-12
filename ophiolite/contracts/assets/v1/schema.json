@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/schema.json",
   "x-ophiolite": {
     "id": "ophiolite.scientific-asset/1",
-    "version": "1.19.0",
+    "version": "1.20.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -3243,7 +3243,8 @@
             "image/tiff",
             "application/x-esri-shapefile",
             "application/geopackage+sqlite3",
-            "application/geo+json"
+            "application/geo+json",
+            "application/vnd.ophiolite.curve-columns"
           ],
           "title": "Media Type",
           "type": "string"
@@ -3291,9 +3292,25 @@
         "losses"
       ],
       "then": {
+        "if": {
+          "properties": {
+            "profile": {
+              "not": {
+                "const": "ophiolite.curve-columns/1"
+              }
+            }
+          }
+        },
         "properties": {
           "bytes": {
-            "maximum": 33554432
+            "maximum": 65048576
+          }
+        },
+        "then": {
+          "properties": {
+            "bytes": {
+              "maximum": 33554432
+            }
           }
         }
       },
@@ -3526,7 +3543,7 @@
           "type": "string"
         },
         "sample_count": {
-          "maximum": 100000,
+          "maximum": 4000000,
           "minimum": 0,
           "title": "Sample Count",
           "type": "integer"
@@ -3546,7 +3563,7 @@
           "type": "boolean"
         },
         "missing_count": {
-          "maximum": 100000,
+          "maximum": 4000000,
           "minimum": 0,
           "title": "Missing Count",
           "type": "integer"
@@ -3586,6 +3603,67 @@
           ],
           "default": null,
           "title": "Quantity Status"
+        },
+        "read": {
+          "anyOf": [
+            {
+              "const": "windows",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Read"
+        },
+        "depth_min": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Depth Min"
+        },
+        "depth_max": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Depth Max"
+        },
+        "value_min": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value Min"
+        },
+        "value_max": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value Max"
         }
       },
       "required": [

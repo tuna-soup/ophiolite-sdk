@@ -25,6 +25,23 @@ No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
   An object above the deployment's request limit is left out with its sentence (`report.left_out`). Command line:
   `ophiolite sources browse CONNECTION [--prefix P] [--cursor C]` and `ophiolite sources import CONNECTION [--prefix P]
   [--keep-copy] --attribution A --rights-confirmed [--report r.csv]`; `list`, `describe` and `read` are unchanged.
+- A project's catalogue of procedures (E105b): `ophiolite procedures register <folder>` keeps a private version
+  (`list`, `show NAME [--version N]`; administrators `enable` and `withdraw`; `trust NAME --version N`), and
+  `procedures run --from-project NAME [--version N]` runs the highest enabled version, or the numbered one you can
+  see, on this computer. A version someone else registered asks once, with who registered it, the date and the
+  exact digest, before anything runs (`--yes` answers it); the answer is recorded as your trust. Before every run the
+  version is read again (a withdrawal ends it) and the local copy is checked by digest; `procedures.run` takes
+  `expected_digest=` and refuses `changed-before-run` when the copy that would run is another. `Client.procedure_*`
+  give the same from Python; a refusal keeps the server's sentence and its closed `reason`.
+  The gallery notebook `share-a-procedure` shows both sides; `ophiolite.gallery.colleague()` gives a notebook a
+  second member's client (`gallery.use(client, colleague=...)`, or `OPHIOLITE_COLLEAGUE_ACCESS_KEY`).
+- When access ends (E67a, read-only): `Account.projects()` rows always carry `access_ends_at`, the instant (UTC) your
+  direct grant on that project ends, or `None` when it does not end (no end date, or a team also gives access); a
+  project whose access has ended is not listed. `ProjectEntry` declares the field (a number is refused).
+  `ophiolite projects` prints the last permitted day as a UTC date in every zone ("ends 14 Nov 2026" for
+  `2026-11-15T00:00:00Z`); `--json` carries the instant. The gallery notebook "Who has access, and until when" reads
+  your own ends and, for a project administrator, who has access through what and until when (`access/effective`);
+  the synthetic server answers both. No SDK write method sets an end date.
 - Grids and GIS files (E56, preview API): `client.read_data` returns `FeatureSet` for map features from a Shapefile,
   a GeoPackage layer or a GeoJSON file (`features` in file order with coordinates as stored, `fields`, `to_frame()`
   with one row per feature), checked offline against the server's rules; ZMAP+, CPS-3 and IRAP grids read as

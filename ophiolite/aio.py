@@ -120,7 +120,7 @@ class AsyncClient(Client):
         for curve in curves:
             path,query=self._path(asset,revision,curve)
             data=await self._json(path+query+PROFILES,256*1024)
-            _core.verify_descriptor(data,self.project,asset,revision,curve)
+            _core.refuse_windows_only(_core.verify_descriptor(data,self.project,asset,revision,curve))
             raw=_core.rules.artifact(data)
             normalized=next(r for r in data['representations'] if r['kind']=='normalized')
             if artifact is None:artifact=await self._get(path+'/representations/'+quote(raw['id'],safe='')+query,raw['bytes'])

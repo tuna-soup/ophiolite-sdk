@@ -115,6 +115,7 @@ SOURCE_OPERATIONS={'sources':{'list','export','discover'}}  # E50a: the source r
 MAP_OPERATIONS={'maps':{'export'},'catalog':{'history'}}  # E70a C4: `get` of a scalar map and its version numbers (existing read routes)
 RESULT_OPERATIONS={'results':{'story','what-changed','dependents','remake-run','remake-save'}}  # E94: how a result was made, and making it again
 CHECK_OPERATIONS={'checks':{'publish','list','compare','publishers'}}  # E96: checks against a reference
+PROCEDURE_OPERATIONS={'procedures':{'register','list','get','bundle','enable','withdraw','trust'}}  # E105b: the project catalogue
 REPORT_OPERATIONS={'activity':{'report'}}  # E70b: a confirmed `get` reports which version this holder received
 IMPORT_OPERATIONS={'well-imports':{'preview','start','step','status','list','cancel'},  # E42a: import a copy of an approved well table
                    'upload-runs':{'start','file','check','file-parts','status','list','cancel','associate','decide','share'},  # E55: a folder upload; E85: check
@@ -123,6 +124,7 @@ IMPORT_OPERATIONS={'well-imports':{'preview','start','step','status','list','can
                    'layouts':{'list','get','match','export','save','rename','retire','use-again','import','keep','update','reconnect'}}  # E89: layouts
 RELEASE_OPERATIONS={'releases':{'list','get','download','download-snapshot'}}  # E50c: the kept copies Wells.with_source reads (read routes only)
 SESSION_OPERATIONS={'las-uploads':{'begin','part','state','finish','cancel'},'capabilities':{'describe'}}  # E54: a file sent in parts; the served limits
+NEW_DATA_OPERATIONS={'context':{'new-data','new-data-save'},'las-uploads':{'audience','audience-preview','audience-save'}}  # E90: New data settings; the one control on an original
 
 
 # E39: an organisation's connections are not a project's; their routes carry no project (/api/v1/<area>/<op>).
@@ -134,8 +136,8 @@ def operation_path(project,area,operation):
         if operation not in ORGANIZATION_OPERATIONS[area]:raise Refused('Unsupported application operation.')
         return '/api/v1/'+area+'/'+operation
     allowed=(GROUP_OPERATIONS if area=='result-groups' else READ_OPERATIONS|WRITE_OPERATIONS if area in ('applications','las-uploads')
-             else ENTITY_OPERATIONS.get(area) or SOURCE_OPERATIONS.get(area) or MAP_OPERATIONS.get(area) or REPORT_OPERATIONS.get(area) or RESULT_OPERATIONS.get(area) or CHECK_OPERATIONS.get(area) or IMPORT_OPERATIONS.get(area) or RELEASE_OPERATIONS.get(area) or AI_OPERATIONS.get(area,set()))
-    allowed=allowed|SESSION_OPERATIONS.get(area,set())
+             else ENTITY_OPERATIONS.get(area) or SOURCE_OPERATIONS.get(area) or MAP_OPERATIONS.get(area) or REPORT_OPERATIONS.get(area) or RESULT_OPERATIONS.get(area) or CHECK_OPERATIONS.get(area) or PROCEDURE_OPERATIONS.get(area) or IMPORT_OPERATIONS.get(area) or RELEASE_OPERATIONS.get(area) or AI_OPERATIONS.get(area,set()))
+    allowed=allowed|SESSION_OPERATIONS.get(area,set())|NEW_DATA_OPERATIONS.get(area,set())
     if operation not in allowed:
         raise Refused('Unsupported application operation.')
     return '/api/v1/projects/'+quote(project,safe='')+'/'+area+'/'+operation

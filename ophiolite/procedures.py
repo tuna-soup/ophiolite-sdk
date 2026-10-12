@@ -115,6 +115,15 @@ SENTENCES = {
     'missing-output': 'Not run: the procedure did not make {label}.',
     'extra-output': 'Not run: the procedure made an output it does not declare.',
     'wrong-profile': 'Not run: {label} was made as a different type of data than declared.',
+    # E105b: the project catalogue
+    'changed-before-run': "Not run: the procedure's files changed after they were checked; nothing ran. Run it again.",
+    'cache-changed': 'Not run: the copy of this procedure on this computer was changed, so it was removed. Run it again to fetch it from the project.',
+    'no-enabled-version': 'Not run: {name} has no enabled version in this project.',
+    'no-such-version': 'Not run: there is no version {version} of {name} in this project that you can see.',
+    'withdrawn': 'Not run: this procedure was withdrawn on {date}.',
+    'trust-needed': 'Not run: this procedure runs code someone else wrote on this computer. Answer the question in a terminal, or add --yes to trust it.',
+    'declined': 'Not run: you did not trust this procedure. Nothing ran and nothing was recorded.',
+    'bundle-differs': 'Not run: the procedure the project sent does not match its digest; nothing was kept.',
 }
 WHAT = {'number': 'a finite number', 'integer': 'a whole number', 'boolean': 'true or false', 'choice': 'one of its choices', 'string': 'a short text'}
 INTEGER = re.compile(r'^[-+]?[0-9]+$')
@@ -293,11 +302,12 @@ def _child(request_path):
     return 0
 
 
-def run(folder, destination, inputs=None, *, kinds=None, declared=None, systems=None, settings=None):
+def run(folder, destination, inputs=None, *, kinds=None, declared=None, systems=None, settings=None, expected_digest=None):
     """Run a procedure on this computer and write its outputs, a log and run.json into `destination`, a new folder;
     nothing is published. `inputs` maps slot -> paths; `kinds` and `declared` give a version input's type and
     declarations (an output of an earlier run carries its own); `systems` maps slot -> a local configuration file;
-    `settings` are `name=value` texts. Raises NotRun; then no destination exists."""
+    `settings` are `name=value` texts. With `expected_digest` (E105b), the copy that runs must be exactly that version
+    or nothing runs (`changed-before-run`). Raises NotRun; then no destination exists."""
     folder, destination = Path(folder).resolve(), Path(destination).absolute()
     verdict = validate(folder)
     if not verdict['valid']: raise NotRun('not-valid', verdict['field'], {'code': verdict['code']}, sentence=verdict['sentence'])
@@ -320,7 +330,9 @@ def run(folder, destination, inputs=None, *, kinds=None, declared=None, systems=
             member.parent.mkdir(parents=True, exist_ok=True)
             member.write_bytes(raw)
         exchange.mkdir()
-        if contract().digest(snapshot) != verdict['digest']: raise NotRun('changed', '', {'validated': verdict['digest']})
+        copied = contract().digest(snapshot)
+        if copied != verdict['digest']: raise NotRun('changed', '', {'validated': verdict['digest']})
+        if expected_digest is not None and copied != expected_digest: raise NotRun('changed-before-run', '', {'expected': expected_digest, 'found': copied})
         request = work / 'request.json'
         request.write_text(json.dumps({'snapshot': str(snapshot), 'exchange': str(exchange), 'entry': manifest['entry'], 'settings': values,
                                        'inputs': {slot: _encode(value) for slot, value in bound.items()}}))
@@ -386,3 +398,125 @@ def new(folder, step, label):
     (folder / 'procedure.json').write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
     (folder / 'procedure.py').write_text(code, encoding='utf-8')
     return validate(folder)
+
+
+# ---------------------------------------------------------------- the project catalogue (E105b)
+
+def cache_root():
+    """Where fetched catalogue versions are kept, one folder per digest (OPHIOLITE_PROCEDURE_CACHE, else the user cache)."""
+    given = os.environ.get('OPHIOLITE_PROCEDURE_CACHE')
+    if given: return Path(given)
+    return Path(os.environ.get('XDG_CACHE_HOME') or Path.home() / '.cache') / 'ophiolite' / 'procedures'
+
+
+def _day(at):
+    import time
+    return time.strftime('%-d %B %Y', time.gmtime(at))
+
+
+def question(version):
+    """What a person is asked before running a version they do not trust yet: who registered it, when it was enabled
+    (or registered), and the exact digest."""
+    when = _day(version.get('enabled_at') or version['added_at'])
+    return {'label': version['label'], 'version': version['version'], 'by': version['added_by'], 'date': when, 'digest': version['digest'],
+            'text': (f"{version['label']}, version {version['version']}, was registered by {version['added_by']} and enabled on {when}. "
+                     f"Running it runs their code on this computer. Trust this version ({version['digest']})?")}
+
+
+def _before_run(folder):
+    """Called after the cached copy was checked and before it runs (tests change a file here, row 4)."""
+
+
+class ProcedureClient:
+    """Mixed into `Client` (uses its `_post`): the project's catalogue of procedures. Registering keeps a private
+    version; an administrator enables it for the project; running a version someone else registered asks once whether
+    you trust it (`trust`), then runs it on this computer exactly as `procedures.run` runs a folder."""
+
+    def procedure_register(self, folder, *, command_id=None):
+        """Register a procedure folder as a private version of this project (the server computes its digest)."""
+        verdict = validate(folder)
+        if not verdict['valid']: raise NotRun('not-valid', verdict['field'], {'code': verdict['code']}, sentence=verdict['sentence'])
+        raw = pack(folder)
+        sha = hashlib.sha256(raw).hexdigest()
+        import base64
+        body = {'command_id': command_id or 'register-' + sha[:55], 'archive': base64.b64encode(raw).decode('ascii'), 'archive_sha256': sha}
+        return self._post('procedures', 'register', body, retry=True)
+
+    def procedure_list(self, name=None):
+        """The versions you can see, by name then version number, each with its words, state and whether you trust it."""
+        return self._post('procedures', 'list', {'name': name} if name else {}, retry=True)['versions']
+
+    def procedure_get(self, digest):
+        return self._post('procedures', 'get', {'digest': digest}, retry=True)
+
+    def procedure_bundle(self, digest):
+        """The version's archive, checked here: its sha256 and the digest of the files it holds."""
+        import base64
+        out = self._post('procedures', 'bundle', {'digest': digest}, retry=True)
+        raw = base64.b64decode(out['archive'])
+        try: same = hashlib.sha256(raw).hexdigest() == out['archive_sha256'] and contract().digest_of(contract().read_archive(raw)) == digest
+        except Exception: same = False
+        if not same: raise NotRun('bundle-differs', '', {'digest': digest})
+        return raw
+
+    def _procedure_change(self, operation, digest, command_id):
+        return self._post('procedures', operation, {'command_id': command_id or f'{operation}-{digest[:48]}', 'digest': digest}, retry=True)
+
+    def procedure_enable(self, digest, *, command_id=None):
+        return self._procedure_change('enable', digest, command_id)
+
+    def procedure_withdraw(self, digest, *, command_id=None):
+        return self._procedure_change('withdraw', digest, command_id)
+
+    def procedure_trust(self, digest, *, command_id=None):
+        return self._procedure_change('trust', digest, command_id)
+
+    def procedure_version(self, name, version=None):
+        """Without `version`: the highest enabled version of `name`. With it: that version, among those you can see
+        (your own private ones included)."""
+        found = [v for v in self.procedure_list(name) if v['name'] == name]
+        chosen = [v for v in found if (v['state'] == 'enabled' if version is None else v['version'] == version)]
+        if not chosen:
+            if version is None: raise NotRun('no-enabled-version', '', {'name': name}, name=name)
+            raise NotRun('no-such-version', '', {'name': name, 'version': version}, name=name, version=version)
+        return max(chosen, key=lambda v: v['version'])
+
+    def _cached(self, digest, cache=None):
+        """The checked local copy of a version: a copy that no longer has its digest is removed and refused."""
+        root = Path(cache) if cache else cache_root()
+        folder = root / digest
+        if folder.exists() or folder.is_symlink():
+            try: same = folder.is_dir() and not folder.is_symlink() and contract().digest(folder) == digest
+            except Exception: same = False
+            if not same:
+                shutil.rmtree(folder, ignore_errors=True)
+                if folder.is_symlink() or folder.exists(): folder.unlink()
+                raise NotRun('cache-changed', '', {'digest': digest})
+            return folder
+        raw = self.procedure_bundle(digest)
+        root.mkdir(parents=True, exist_ok=True)
+        work = Path(tempfile.mkdtemp(prefix='.fetch-', dir=root))
+        try:
+            verdict = unpack(raw, work / 'p')
+            if not verdict.get('valid') or verdict.get('digest') != digest: raise NotRun('bundle-differs', '', {'digest': digest})
+            os.rename(work / 'p', folder)
+        finally: shutil.rmtree(work, ignore_errors=True)
+        return folder
+
+    def procedure_run(self, name, destination, inputs=None, *, version=None, prompt=None, yes=False, cache=None, kinds=None, declared=None,
+                      systems=None, settings=None):
+        """Run a catalogue version on this computer. The version is read again before every run (a withdrawal ends
+        it), the local copy is checked by digest, and a version you neither registered nor trust asks `prompt(question)`
+        once (or `yes=True` answers it); the answer is recorded as your trust. Nothing runs before that."""
+        chosen = self.procedure_version(name, version)
+        found = self.procedure_get(chosen['digest'])
+        if found['state'] == 'withdrawn': raise NotRun('withdrawn', '', {'digest': found['digest']}, date=_day(found['withdrawn_at']))
+        digest = found['digest']
+        folder = self._cached(digest, cache)
+        if not (found['trusted'] or found['mine']):
+            if not yes:
+                if prompt is None: raise NotRun('trust-needed', '', {'digest': digest})
+                if not prompt(question(found)): raise NotRun('declined', '', {'digest': digest})
+            self.procedure_trust(digest)
+        _before_run(folder)
+        return run(folder, destination, inputs, kinds=kinds, declared=declared, systems=systems, settings=settings, expected_digest=digest)
