@@ -114469,7 +114469,8 @@
                 "no-longer-visible",
                 "name-ambiguous",
                 "name-repeated",
-                "identifier-names-another-well"
+                "identifier-names-another-well",
+                "comment-row"
               ],
               "type": "string"
             },
@@ -117213,6 +117214,19 @@
             },
             "title": "Sha256",
             "type": "object"
+          },
+          "wells_import": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E91: the wells import this run started or answered, written by the server (the receipt a press again reads)",
+            "title": "Wells Import"
           }
         },
         "required": [
@@ -118045,7 +118059,8 @@
                 "no-longer-visible",
                 "name-ambiguous",
                 "name-repeated",
-                "identifier-names-another-well"
+                "identifier-names-another-well",
+                "comment-row"
               ],
               "type": "string"
             },
@@ -118098,7 +118113,8 @@
                 "no-longer-visible",
                 "name-ambiguous",
                 "name-repeated",
-                "identifier-names-another-well"
+                "identifier-names-another-well",
+                "comment-row"
               ],
               "type": "string"
             },
