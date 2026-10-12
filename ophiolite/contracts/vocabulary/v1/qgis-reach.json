@@ -72,7 +72,7 @@
               ],
               "layer": "Tops",
               "slice": "E65",
-              "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 headless on Linux, C7 harness)",
+              "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)",
               "client": {
                 "name": "QGIS",
                 "versions": [
@@ -105,7 +105,7 @@
               ],
               "layer": "Wellbore paths",
               "slice": "E65",
-              "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 headless on Linux, C7 harness)",
+              "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)",
               "client": {
                 "name": "QGIS",
                 "versions": [
@@ -143,7 +143,7 @@
               ],
               "layer": "Point sets",
               "slice": "E65",
-              "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 headless on Linux, C7 harness)",
+              "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)",
               "client": {
                 "name": "QGIS",
                 "versions": [
@@ -176,7 +176,7 @@
               ],
               "layer": "Lines",
               "slice": "E65",
-              "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 headless on Linux, C7 harness)",
+              "evidence": "integration:docs/verification/E71b-qgis-vector-journey.json (QGIS 4.2.2 on Linux, the plug-in holds and reads each kind)",
               "client": {
                 "name": "QGIS",
                 "versions": [
@@ -211,7 +211,7 @@
               ],
               "layer": "Feature points, Feature lines or Feature polygons",
               "slice": "E65",
-              "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 headless on Linux, C7 harness)",
+              "evidence": "integration:docs/verification/E71b-qgis-vector-journey.json (QGIS 4.2.2 on Linux, the plug-in holds and reads each kind)",
               "client": {
                 "name": "QGIS",
                 "versions": [
@@ -246,7 +246,7 @@
               ],
               "layer": "Feature points, Feature lines or Feature polygons",
               "slice": "E65",
-              "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 headless on Linux, C7 harness)",
+              "evidence": "integration:docs/verification/E71b-qgis-vector-journey.json (QGIS 4.2.2 on Linux, the plug-in holds and reads each kind)",
               "client": {
                 "name": "QGIS",
                 "versions": [
@@ -281,7 +281,7 @@
               ],
               "layer": "Feature points, Feature lines or Feature polygons",
               "slice": "E65",
-              "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 headless on Linux, C7 harness)",
+              "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)",
               "client": {
                 "name": "QGIS",
                 "versions": [
@@ -428,7 +428,7 @@
               ],
               "layer": "Point sets",
               "slice": "E65",
-              "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 headless on Linux, C7 harness)",
+              "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)",
               "client": {
                 "name": "QGIS",
                 "versions": [
@@ -461,7 +461,7 @@
               ],
               "layer": "Point sets",
               "slice": "E65",
-              "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 headless on Linux, C7 harness)",
+              "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)",
               "client": {
                 "name": "QGIS",
                 "versions": [

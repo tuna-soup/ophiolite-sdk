@@ -177,25 +177,26 @@
     },
     {
       "profile": "well-tops-csv/1",
-      "data": "Well tops",
+      "data": "Formation tops",
       "direction": "read",
       "exact_old_revisions": "unavailable",
-      "change_detection": "none",
+      "change_detection": "explicit",
       "losses": [
-        "A top is drawn at its wellbore's location; depths are properties",
+        "Opened as an OGC API - Features layer: each top at its wellbore’s location, the newest version you may read",
+        "A top whose wellbore has no location you may read is listed without a place on the map",
         "Display styling is QGIS-side and not returned"
       ],
       "unsupported": [
         "editing in place",
-        "sending a layer from QGIS"
+        "an older version of the item"
       ],
       "qualification": {
         "status": "partly-qualified",
         "platforms": [
           "linux"
         ],
-        "date": "2026-10-11",
-        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 headless on Linux, C7 harness)"
+        "date": "2026-10-10",
+        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)"
       },
       "reach": {
         "route": "features",
@@ -215,25 +216,26 @@
     },
     {
       "profile": "deviation-csv/1",
-      "data": "Deviation survey",
+      "data": "Wellbore paths",
       "direction": "read",
       "exact_old_revisions": "unavailable",
-      "change_detection": "none",
+      "change_detection": "explicit",
       "losses": [
-        "A path is drawn only where the survey states grid north and starts at its datum",
+        "Opened as an OGC API - Features layer: each survey drawn from its wellbore’s location by minimum curvature, the newest version you may read",
+        "A survey from true north, or one that does not start at its depth datum, is listed without a line",
         "Display styling is QGIS-side and not returned"
       ],
       "unsupported": [
         "editing in place",
-        "sending a layer from QGIS"
+        "an older version of the item"
       ],
       "qualification": {
         "status": "partly-qualified",
         "platforms": [
           "linux"
         ],
-        "date": "2026-10-11",
-        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 headless on Linux, C7 harness)"
+        "date": "2026-10-10",
+        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)"
       },
       "reach": {
         "route": "features",
@@ -255,23 +257,24 @@
       "profile": "points-csv/1",
       "data": "Point set",
       "direction": "read",
-      "exact_old_revisions": "unavailable",
-      "change_detection": "none",
+      "exact_old_revisions": "retained",
+      "change_detection": "polling",
       "losses": [
-        "Attributes beyond the height are properties",
-        "Display styling is QGIS-side and not returned"
+        "Points without a height are drawn flat; their height field is empty",
+        "Display styling is QGIS-side and not returned",
+        "Opened as a GeoPackage copy on this computer; edits stay in that copy until you send them or keep them as a separate layer"
       ],
       "unsupported": [
-        "editing in place",
-        "sending a layer from QGIS"
+        "a point set whose coordinate system is not stated",
+        "following the newest version automatically"
       ],
       "qualification": {
         "status": "partly-qualified",
         "platforms": [
           "linux"
         ],
-        "date": "2026-10-11",
-        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 headless on Linux, C7 harness)"
+        "date": "2026-10-10",
+        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)"
       },
       "reach": {
         "route": "features",
@@ -293,15 +296,16 @@
       "profile": "opendtect-faultsticks/1",
       "data": "Fault sticks",
       "direction": "read",
-      "exact_old_revisions": "unavailable",
-      "change_detection": "none",
+      "exact_old_revisions": "retained",
+      "change_detection": "polling",
       "losses": [
-        "Each stick is one line; the fault it belongs to is a property",
-        "Display styling is QGIS-side and not returned"
+        "Opened as one line per stick, its points in their stored order",
+        "Display styling is QGIS-side and not returned",
+        "Opened as a GeoPackage copy on this computer; edits stay in that copy until you send them or keep them as a separate layer"
       ],
       "unsupported": [
-        "editing in place",
-        "sending a layer from QGIS"
+        "a set of sticks whose coordinate system is not stated",
+        "following the newest version automatically"
       ],
       "qualification": {
         "status": "partly-qualified",
@@ -309,7 +313,7 @@
           "linux"
         ],
         "date": "2026-10-11",
-        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 headless on Linux, C7 harness)"
+        "evidence": "integration:docs/verification/E71b-qgis-vector-journey.json (QGIS 4.2.2 on Linux, the plug-in holds and reads each kind)"
       },
       "reach": {
         "route": "features",
@@ -331,23 +335,25 @@
       "profile": "geojson/1",
       "data": "Map features",
       "direction": "read",
-      "exact_old_revisions": "unavailable",
-      "change_detection": "none",
+      "exact_old_revisions": "retained",
+      "change_detection": "polling",
       "losses": [
-        "Features are split into points, lines and polygons by geometry",
-        "Display styling is QGIS-side and not returned"
+        "Measured values (M) on shapes are not kept",
+        "A field whose name QGIS reserves is renamed attribute_<name>",
+        "Display styling is QGIS-side and not returned",
+        "Opened as a GeoPackage copy on this computer; edits stay in that copy until you send them or keep them as a separate layer"
       ],
       "unsupported": [
-        "editing in place",
-        "sending a layer from QGIS"
+        "a layer that does not state its coordinate system or coordinate order",
+        "following the newest version automatically"
       ],
       "qualification": {
         "status": "partly-qualified",
         "platforms": [
           "linux"
         ],
-        "date": "2026-10-11",
-        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 headless on Linux, C7 harness)"
+        "date": "2026-10-10",
+        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)"
       },
       "reach": {
         "route": "features",
@@ -387,7 +393,7 @@
           "linux"
         ],
         "date": "2026-10-11",
-        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 headless on Linux, C7 harness)"
+        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)"
       },
       "reach": {
         "route": "features",
@@ -425,7 +431,7 @@
           "linux"
         ],
         "date": "2026-10-11",
-        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 headless on Linux, C7 harness)"
+        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)"
       },
       "reach": {
         "route": "features",
@@ -447,15 +453,17 @@
       "profile": "esri-shapefile/1",
       "data": "Map features",
       "direction": "read",
-      "exact_old_revisions": "unavailable",
-      "change_detection": "none",
+      "exact_old_revisions": "retained",
+      "change_detection": "polling",
       "losses": [
-        "Features are split into points, lines and polygons by geometry",
-        "Display styling is QGIS-side and not returned"
+        "Measured values (M) on shapes are not kept",
+        "A field whose name QGIS reserves is renamed attribute_<name>",
+        "Display styling is QGIS-side and not returned",
+        "Opened as a GeoPackage copy on this computer; edits stay in that copy until you send them or keep them as a separate layer"
       ],
       "unsupported": [
-        "editing in place",
-        "sending a layer from QGIS"
+        "a layer that does not state its coordinate system or coordinate order",
+        "following the newest version automatically"
       ],
       "qualification": {
         "status": "partly-qualified",
@@ -463,7 +471,7 @@
           "linux"
         ],
         "date": "2026-10-11",
-        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 headless on Linux, C7 harness)"
+        "evidence": "integration:docs/verification/E71b-qgis-vector-journey.json (QGIS 4.2.2 on Linux, the plug-in holds and reads each kind)"
       },
       "reach": {
         "route": "features",
@@ -487,15 +495,17 @@
       "profile": "ogc-geopackage/1",
       "data": "Map features",
       "direction": "read",
-      "exact_old_revisions": "unavailable",
-      "change_detection": "none",
+      "exact_old_revisions": "retained",
+      "change_detection": "polling",
       "losses": [
-        "Features are split into points, lines and polygons by geometry",
-        "Display styling is QGIS-side and not returned"
+        "Measured values (M) on shapes are not kept",
+        "A field whose name QGIS reserves is renamed attribute_<name>",
+        "Display styling is QGIS-side and not returned",
+        "Opened as a GeoPackage copy on this computer; edits stay in that copy until you send them or keep them as a separate layer"
       ],
       "unsupported": [
-        "editing in place",
-        "sending a layer from QGIS"
+        "a layer that does not state its coordinate system or coordinate order",
+        "following the newest version automatically"
       ],
       "qualification": {
         "status": "partly-qualified",
@@ -503,7 +513,7 @@
           "linux"
         ],
         "date": "2026-10-11",
-        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 headless on Linux, C7 harness)"
+        "evidence": "integration:docs/verification/E71b-qgis-vector-journey.json (QGIS 4.2.2 on Linux, the plug-in holds and reads each kind)"
       },
       "reach": {
         "route": "features",
@@ -521,177 +531,6 @@
         "client_limits": [
           "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
         ]
-      }
-    },
-    {
-      "profile": "points-csv/1",
-      "data": "Point set",
-      "direction": "read",
-      "exact_old_revisions": "retained",
-      "change_detection": "polling",
-      "losses": [
-        "Points without a height are drawn flat; their height field is empty",
-        "Display styling is QGIS-side and not returned",
-        "Opened as a GeoPackage copy on this computer; edits stay in that copy until you send them or keep them as a separate layer"
-      ],
-      "unsupported": [
-        "a point set whose coordinate system is not stated",
-        "following the newest version automatically"
-      ],
-      "qualification": {
-        "status": "partly-qualified",
-        "platforms": [
-          "linux"
-        ],
-        "date": "2026-10-10",
-        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)"
-      }
-    },
-    {
-      "profile": "opendtect-faultsticks/1",
-      "data": "Fault sticks",
-      "direction": "read",
-      "exact_old_revisions": "retained",
-      "change_detection": "polling",
-      "losses": [
-        "Opened as one line per stick, its points in their stored order",
-        "Display styling is QGIS-side and not returned",
-        "Opened as a GeoPackage copy on this computer; edits stay in that copy until you send them or keep them as a separate layer"
-      ],
-      "unsupported": [
-        "a set of sticks whose coordinate system is not stated",
-        "following the newest version automatically"
-      ],
-      "qualification": {
-        "status": "partly-qualified",
-        "platforms": [
-          "linux"
-        ],
-        "date": "2026-10-11",
-        "evidence": "integration:docs/verification/E71b-qgis-vector-journey.json (QGIS 4.2.2 on Linux, the plug-in holds and reads each kind)"
-      }
-    },
-    {
-      "profile": "ogc-geopackage/1",
-      "data": "Map features",
-      "direction": "read",
-      "exact_old_revisions": "retained",
-      "change_detection": "polling",
-      "losses": [
-        "Measured values (M) on shapes are not kept",
-        "A field whose name QGIS reserves is renamed attribute_<name>",
-        "Display styling is QGIS-side and not returned",
-        "Opened as a GeoPackage copy on this computer; edits stay in that copy until you send them or keep them as a separate layer"
-      ],
-      "unsupported": [
-        "a layer that does not state its coordinate system or coordinate order",
-        "following the newest version automatically"
-      ],
-      "qualification": {
-        "status": "partly-qualified",
-        "platforms": [
-          "linux"
-        ],
-        "date": "2026-10-11",
-        "evidence": "integration:docs/verification/E71b-qgis-vector-journey.json (QGIS 4.2.2 on Linux, the plug-in holds and reads each kind)"
-      }
-    },
-    {
-      "profile": "geojson/1",
-      "data": "Map features",
-      "direction": "read",
-      "exact_old_revisions": "retained",
-      "change_detection": "polling",
-      "losses": [
-        "Measured values (M) on shapes are not kept",
-        "A field whose name QGIS reserves is renamed attribute_<name>",
-        "Display styling is QGIS-side and not returned",
-        "Opened as a GeoPackage copy on this computer; edits stay in that copy until you send them or keep them as a separate layer"
-      ],
-      "unsupported": [
-        "a layer that does not state its coordinate system or coordinate order",
-        "following the newest version automatically"
-      ],
-      "qualification": {
-        "status": "partly-qualified",
-        "platforms": [
-          "linux"
-        ],
-        "date": "2026-10-10",
-        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)"
-      }
-    },
-    {
-      "profile": "esri-shapefile/1",
-      "data": "Map features",
-      "direction": "read",
-      "exact_old_revisions": "retained",
-      "change_detection": "polling",
-      "losses": [
-        "Measured values (M) on shapes are not kept",
-        "A field whose name QGIS reserves is renamed attribute_<name>",
-        "Display styling is QGIS-side and not returned",
-        "Opened as a GeoPackage copy on this computer; edits stay in that copy until you send them or keep them as a separate layer"
-      ],
-      "unsupported": [
-        "a layer that does not state its coordinate system or coordinate order",
-        "following the newest version automatically"
-      ],
-      "qualification": {
-        "status": "partly-qualified",
-        "platforms": [
-          "linux"
-        ],
-        "date": "2026-10-11",
-        "evidence": "integration:docs/verification/E71b-qgis-vector-journey.json (QGIS 4.2.2 on Linux, the plug-in holds and reads each kind)"
-      }
-    },
-    {
-      "profile": "well-tops-csv/1",
-      "data": "Formation tops",
-      "direction": "read",
-      "exact_old_revisions": "unavailable",
-      "change_detection": "explicit",
-      "losses": [
-        "Opened as an OGC API - Features layer: each top at its wellbore’s location, the newest version you may read",
-        "A top whose wellbore has no location you may read is listed without a place on the map",
-        "Display styling is QGIS-side and not returned"
-      ],
-      "unsupported": [
-        "editing in place",
-        "an older version of the item"
-      ],
-      "qualification": {
-        "status": "partly-qualified",
-        "platforms": [
-          "linux"
-        ],
-        "date": "2026-10-10",
-        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)"
-      }
-    },
-    {
-      "profile": "deviation-csv/1",
-      "data": "Wellbore paths",
-      "direction": "read",
-      "exact_old_revisions": "unavailable",
-      "change_detection": "explicit",
-      "losses": [
-        "Opened as an OGC API - Features layer: each survey drawn from its wellbore’s location by minimum curvature, the newest version you may read",
-        "A survey from true north, or one that does not start at its depth datum, is listed without a line",
-        "Display styling is QGIS-side and not returned"
-      ],
-      "unsupported": [
-        "editing in place",
-        "an older version of the item"
-      ],
-      "qualification": {
-        "status": "partly-qualified",
-        "platforms": [
-          "linux"
-        ],
-        "date": "2026-10-10",
-        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)"
       }
     }
   ],
