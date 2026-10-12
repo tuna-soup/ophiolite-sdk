@@ -104,7 +104,8 @@ def companions(paths, entries, most=8):
         if p.name == 'README.txt' or path.endswith('.crsmeta.xml'): continue
         entry = next((r for r in entries if r.get('companions') and p.suffix.lower() in r['extensions']), None)
         for rule in (entry or {}).get('companions', []):
-            name = str(p.parent / rule['pattern'].replace('{stem}', p.stem)) if str(p.parent) != '.' else rule['pattern'].replace('{stem}', p.stem)
+            named = rule['pattern'].replace('{stem}', p.stem).replace('{name}', p.name)
+            name = str(p.parent / named) if str(p.parent) != '.' else named
             if name != path and name in paths: taken.setdefault(name, []).append((path, rule['role']))
     groups = {}
     for name, owners in taken.items():

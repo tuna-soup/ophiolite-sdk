@@ -90,6 +90,9 @@ def test_companions_travel_with_their_primary_as_the_workspace_groups_them():
     paths = ['a/points.txt', 'a/points.crsmeta.xml', 'a/README.txt', 'b/horizon.xyz', 'b/README.txt', 'c/one.txt', 'c/two.txt', 'c/README.txt']
     assert recipes.companions(paths, readers()) == {'a/points.txt': [('a/README.txt', 'readme'), ('a/points.crsmeta.xml', 'crs-metadata')],
                                                     'b/horizon.xyz': [('b/README.txt', 'readme')]}  # c/README.txt: two primaries could take it
+    # Petrel names the coordinate file after the whole export name (the ConSeil excerpt's names)
+    real = ['d/SLDND_B_CONSEIL2026_T.txt', 'd/SLDND_B_CONSEIL2026_T.txt.crsmeta.xml']
+    assert recipes.companions(real, readers()) == {'d/SLDND_B_CONSEIL2026_T.txt': [('d/SLDND_B_CONSEIL2026_T.txt.crsmeta.xml', 'crs-metadata')]}
 
 
 def test_an_inspection_prints_words_and_its_details_carry_the_particulars():

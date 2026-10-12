@@ -701,6 +701,10 @@
      "role": "crs-metadata"
     },
     {
+     "pattern": "{name}.crsmeta.xml",
+     "role": "crs-metadata"
+    },
+    {
      "pattern": "README.txt",
      "role": "readme"
     }
@@ -715,11 +719,11 @@
     "direction": "read"
    },
    "fixture": {
-    "class": "synthetic",
-    "path": "tests/fixtures/petrel_points_with_readme/points.txt",
-    "sha256": "d3bbe384d54f28d0b13295db00aaf6e5c136e8c661eb5959ffd71c26ebc2d7a1",
-    "bytes": 498,
-    "replaced_by": "E89"
+    "class": "real",
+    "path": "tests/fixtures/conseil_excerpt/SLDND_B_CONSEIL2026_T.head200.txt",
+    "sha256": "abb72c69f787df384cd6bd8c264d8d2d77a33ea70541c1ef5b249e6398b24a8e",
+    "bytes": 15988,
+    "rights": "docs/release/rights/conseil-excerpt-2026-09-30.json"
    },
    "report": "{count:,} points",
    "type": "point-set",
