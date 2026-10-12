@@ -5,6 +5,14 @@
 Supported 0.x client over preview contracts, installable from reviewed source.
 No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
 
+- Colleagues sign in to your application (E33, preview API): `ophiolite.oauth_app.OAuthApp(url, application, client_id,
+  redirect_uri, store=FileStore(dir), client_secret=...)` runs your server's own leg with the identity provider
+  (`begin()`/`callback()`: code + PKCE S256 with your registration's client, state and nonce checked), sends the person
+  to Ophiolite's consent page (`consent_url()`/`consented()`), and exchanges the provider token and the consent handle
+  for an opaque application credential (`credential(person)`, `client(person, project)`). Provider tokens, the handle
+  and the credential stay in the server-side store, one private file per person; refreshes of one person are
+  serialised, a rotated refresh token is written before the exchange that uses it, and a lost rotation or a removed
+  approval raises `SignInRequired` or `ConsentRequired`. The map-application template gains `server/sign_in.py`.
 - Buckets as sources (E59, preview API): `client.browse(connection, prefix=None, cursor=None)` answers one page of a
   storage connection's folder (subfolders, then files with their size, tag, the kind their name suggests and whether
   it is read in place; `next_cursor` continues it). `client.import_storage(connection, prefix, keep_copy=False, ...)`
