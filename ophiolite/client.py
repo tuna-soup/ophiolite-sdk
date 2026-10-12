@@ -76,9 +76,10 @@ class CurveSet:
 from .locations import LocationClient  # noqa: E402
 from .sources import SourceClient  # noqa: E402
 from .checks import CheckClient  # noqa: E402
+from .procedures import ProcedureClient  # noqa: E402
 
 
-class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient):  # E29: wells() and extent(); E50a: sources(); E96: checks
+class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient, ProcedureClient):  # E29: wells() and extent(); E50a: sources(); E96: checks; E105b: procedures
     def __init__(self,url,project,credential=None,http=None):
         self.url=origin(url)
         if not isinstance(project,str) or not project:raise Refused('Choose a project.')
@@ -253,7 +254,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         for curve in curves:
             path,query=self._path(asset,revision,curve)
             data=self._json(path+query+PROFILES,256*1024)
-            _core.verify_descriptor(data,self.project,asset,revision,curve)
+            _core.refuse_windows_only(_core.verify_descriptor(data,self.project,asset,revision,curve))
             raw=_core.rules.artifact(data)
             normalized=next(r for r in data['representations'] if r['kind']=='normalized')
             if artifact is None:artifact=self._get(path+'/representations/'+quote(raw['id'],safe='')+query,raw['bytes'])

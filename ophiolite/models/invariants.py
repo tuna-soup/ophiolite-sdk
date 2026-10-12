@@ -131,7 +131,9 @@ def asset(value):
     artifact_kind=rules['artifact_kind_by_origin'][value['origin']]
     require(kinds.count(artifact_kind)==1 and len(kinds)==rules['total'], 'Profile requires one exact artifact and one normalized curve')
     raw=next(r for r in reps if r['kind']==artifact_kind); normalized=next(r for r in reps if r['kind']=='normalized')
-    require(raw['profile']==value['profile'] and normalized['profile']==profile['normalized_profile'], 'Representation profiles must be the asset profile and its normalized profile')
+    require(raw['profile']==value['profile'] and normalized['profile'] in profile.get('normalized_profiles',[profile['normalized_profile']]), 'Representation profiles must be the asset profile and its normalized profile')
+    if 'curve' in value['scientific']:  # E100b: a curve is stored as columns exactly when it is read in windows (as the gateway)
+        require((normalized['profile']=='ophiolite.curve-columns/1')==(value['scientific'].get('read')=='windows'), 'A curve is stored as columns exactly when it is read in windows')
     declared=profile['connector']['mapping_version'] if recipe else ((profiles.get(profile['normalized_profile']) or {}).get('interpretation') or {}).get('mapping')
     require(value['interpretation'].get('mapping')==declared, 'Interpretation is not the one this profile declares')
     if recipe or packaged: package(value, raw)

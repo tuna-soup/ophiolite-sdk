@@ -166,6 +166,22 @@ def test_well_logs_in_a_bucket_pins_its_logs_and_reports_a_changed_one_synthetic
     assert 'After W-1/gamma.las changed: a different digest; reading it reports that the revision is unavailable' in text
 
 
+def test_share_a_procedure_checks_and_runs_it_locally_and_adds_nothing_synthetic(tmp_path, monkeypatch):
+    text = run('share-a-procedure', tmp_path, monkeypatch)
+    assert 'Valid: Shift tops by a fixed depth, version 1. It reads Well tops (CSV) and makes Well tops (CSV).' in text
+    assert 'Measured depth before: [1000.5, 1200.0] after: [1003.0, 1202.5]' in text
+    assert 'Synthetic mode: nothing is added to a project.' in text and 'Added ' not in text and 'trusts' not in text
+
+
+def test_who_has_access_until_when_reads_the_last_days_and_who_has_access_synthetic(tmp_path, monkeypatch):
+    """E67a C6 (R12): the stored end is the start of the next UTC day; the notebook names the last day (M5 literals)."""
+    text = run('who-has-access-until-when', tmp_path, monkeypatch)
+    assert 'Synthetic project (member): no end date' in text and 'Shared survey (viewer): ends 1 January 2999' in text
+    assert 'Alice: no end date - Member through Direct grant' in text and 'Bob: until 31 December 2999 - Member through Direct grant' in text
+    assert 'Erin: no access (ended after 31 December 1999) - Member through Direct grant' in text
+    assert 'Vic: no end date - Viewer through Geoscience' in text and 'Wrote who-has-access-until-when.png' in text
+
+
 def test_a_spreadsheet_and_a_database_joined_joins_on_the_well_name_and_sends_nothing_synthetic(tmp_path, monkeypatch):
     text = run('a-spreadsheet-and-a-database-joined', tmp_path, monkeypatch)  # E58b
     assert ': 6 samples; porosity in %, -888 means missing' in text and 'wells.sqlite: 3 wells' in text
@@ -175,7 +191,7 @@ def test_a_spreadsheet_and_a_database_joined_joins_on_the_well_name_and_sends_no
 
 
 def test_every_entry_is_listed_built_and_described():
-    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'grids-and-gis-files', 'how-was-this-made', 'open-it-here', 'a-spreadsheet-becomes-wells-and-tops', 'layers-for-a-gis', 'well-logs-in-a-bucket', 'a-spreadsheet-and-a-database-joined']
+    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'grids-and-gis-files', 'how-was-this-made', 'open-it-here', 'a-spreadsheet-becomes-wells-and-tops', 'layers-for-a-gis', 'well-logs-in-a-bucket', 'share-a-procedure', 'who-has-access-until-when', 'a-spreadsheet-and-a-database-joined']
     for entry in GALLERY['notebooks']:
         assert set(entry) == {'slug', 'title', 'sentence', 'modes', 'data'} and entry['modes'] == ['synthetic', 'live']
         script = (ROOT / 'notebooks' / entry['slug'] / 'notebook.py').read_text()
