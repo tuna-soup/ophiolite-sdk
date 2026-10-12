@@ -150,7 +150,8 @@
    "default": null,
    "prefill": [
     "declared",
-    "previously-reviewed"
+    "previously-reviewed",
+    "project-default"
    ],
    "applies_to": [
     "x",
@@ -169,7 +170,8 @@
    "default": "m",
    "prefill": [
     "declared",
-    "previously-reviewed"
+    "previously-reviewed",
+    "project-default"
    ],
    "applies_to": [
     "depth"
@@ -219,7 +221,8 @@
    "default": "unknown",
    "prefill": [
     "declared",
-    "previously-reviewed"
+    "previously-reviewed",
+    "project-default"
    ],
    "applies_to": [
     "depth"
