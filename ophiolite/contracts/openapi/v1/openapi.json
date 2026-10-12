@@ -5,7 +5,7 @@
     "version": "1.0.0-pilot",
     "description": "One public API for every project operation. Three credential kinds reach it: the browser session (opaque HttpOnly cookie plus the X-CSRF-Token proof and, on non-GET requests, the exact Origin), a project-scoped delegate lasting at most five minutes (Bearer oph_api_..., parent session and current native permissions remain mandatory), and a browser-approved provider grant (Bearer provider token plus X-Ophiolite-Application-Grant; capability 1: the scientific read resources and the applications route within its read/write scopes; capability 3 adds reading wells, wellbores and lineage and the LAS upload routes). A request that carries an Authorization header is a machine request and is refused with MACHINE_AUTH_REQUIRED when a cookie or Origin travels with it. Scope and capability are ceilings; every operation runs the same native permission checks whoever calls it. Not a stable SDK or unattended service-account contract.",
     "x-ophiolite-contracts": {
-      "registry_version": "1.30.0",
+      "registry_version": "1.31.0",
       "index": "/api/v1/contracts",
       "served_profiles": [
         "las2/1",
@@ -43144,6 +43144,808 @@
         }
       }
     },
+    "/api/v1/projects/{project}/public-repositories/catalogue": {
+      "post": {
+        "summary": "E60: The public repositories this deployment reads, with their terms of use and readiness",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "public-repositories/catalogue: the services this deployment reads and the operator's extra origins.",
+                  "properties": {
+                    "services": {
+                      "items": {
+                        "$ref": "#/components/schemas/RepositoryService"
+                      },
+                      "title": "Services",
+                      "type": "array"
+                    },
+                    "origins": {
+                      "items": {
+                        "$ref": "#/components/schemas/RepositoryOrigin"
+                      },
+                      "title": "Origins",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "services",
+                    "origins"
+                  ],
+                  "title": "RepositoryCatalogue",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "CatalogueRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/public-repositories/check": {
+      "post": {
+        "summary": "E60: Check the files brought in from a public repository for changes; a report only, nothing is replaced",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "public-repositories/check: a report only; nothing is replaced, appended or moved.",
+                  "properties": {
+                    "service": {
+                      "title": "Service",
+                      "type": "string"
+                    },
+                    "checked_at": {
+                      "title": "Checked At",
+                      "type": "number"
+                    },
+                    "sentence": {
+                      "title": "Sentence",
+                      "type": "string"
+                    },
+                    "files": {
+                      "items": {
+                        "$ref": "#/components/schemas/RepositoryCheckFile"
+                      },
+                      "title": "Files",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "service",
+                    "checked_at",
+                    "sentence",
+                    "files"
+                  ],
+                  "title": "RepositoryCheck",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "service": {
+                    "maxLength": 40,
+                    "minLength": 1,
+                    "title": "Service",
+                    "type": "string"
+                  },
+                  "codes": {
+                    "anyOf": [
+                      {
+                        "items": {
+                          "type": "string"
+                        },
+                        "maxItems": 200,
+                        "minItems": 1,
+                        "type": "array"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Codes"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "service"
+                ],
+                "title": "CheckRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/public-repositories/import": {
+      "post": {
+        "summary": "E60: Bring boreholes in (project administrators): every file is listed and a folder upload starts under the origin repository; drive it with upload-runs/file and repository true",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "public-repositories/import: the started run (drive it with upload-runs/file, repository true) and what could not be listed.",
+                  "properties": {
+                    "run": {
+                      "$ref": "#/components/schemas/UploadRun"
+                    },
+                    "not_read": {
+                      "items": {
+                        "$ref": "#/components/schemas/RepositoryNotRead"
+                      },
+                      "title": "Not Read",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "run",
+                    "not_read"
+                  ],
+                  "title": "RepositoryImport",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "service": {
+                    "maxLength": 40,
+                    "minLength": 1,
+                    "title": "Service",
+                    "type": "string"
+                  },
+                  "codes": {
+                    "description": "the boreholes, by the service's code",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 200,
+                    "minItems": 1,
+                    "title": "Codes",
+                    "type": "array"
+                  },
+                  "include": {
+                    "description": "location, tops, survey, logs (composite logs), all-logs",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 5,
+                    "title": "Include",
+                    "type": "array"
+                  },
+                  "audience": {
+                    "description": "who may read what comes in, named explicitly (never a project default)",
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 100,
+                    "title": "Audience",
+                    "type": "array"
+                  },
+                  "folder_name": {
+                    "anyOf": [
+                      {
+                        "maxLength": 160,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Folder Name"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "command_id",
+                  "service",
+                  "codes",
+                  "audience"
+                ],
+                "title": "ImportRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/public-repositories/preview": {
+      "post": {
+        "summary": "E60: What would come in for each borehole: position, tops, surveys and logs; nothing is kept",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "public-repositories/preview: what would come in; nothing is kept.",
+                  "properties": {
+                    "service": {
+                      "title": "Service",
+                      "type": "string"
+                    },
+                    "items": {
+                      "items": {
+                        "$ref": "#/components/schemas/RepositoryPreviewItem"
+                      },
+                      "title": "Items",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "service",
+                    "items"
+                  ],
+                  "title": "RepositoryPreview",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "service": {
+                    "maxLength": 40,
+                    "minLength": 1,
+                    "title": "Service",
+                    "type": "string"
+                  },
+                  "codes": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "maxItems": 200,
+                    "minItems": 1,
+                    "title": "Codes",
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "service",
+                  "codes"
+                ],
+                "title": "PreviewRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/public-repositories/search": {
+      "post": {
+        "summary": "E60: Find boreholes of a public repository by name or code, or by field (and on land or offshore); nothing is kept",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "public-repositories/search: nothing is kept.",
+                  "properties": {
+                    "service": {
+                      "title": "Service",
+                      "type": "string"
+                    },
+                    "items": {
+                      "items": {
+                        "$ref": "#/components/schemas/RepositoryBorehole"
+                      },
+                      "title": "Items",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "service",
+                    "items"
+                  ],
+                  "title": "RepositorySearch",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "service": {
+                    "maxLength": 40,
+                    "minLength": 1,
+                    "title": "Service",
+                    "type": "string"
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "maxLength": 120,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "a borehole name or code (at least three characters)",
+                    "title": "Name"
+                  },
+                  "field": {
+                    "anyOf": [
+                      {
+                        "maxLength": 120,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "a field's name, exactly as the service lists it",
+                    "title": "Field"
+                  },
+                  "side": {
+                    "anyOf": [
+                      {
+                        "pattern": "^(ON|OFF)$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "ON (on land) or OFF (offshore)",
+                    "title": "Side"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "service"
+                ],
+                "title": "SearchRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/publications/derive": {
       "post": {
         "summary": "Publish a file derived from exact revisions you may reuse, with its declared method (application/octet-stream, X-Ophiolite-Upload with command_id)",
@@ -43601,6 +44403,18 @@
                       ],
                       "default": null,
                       "description": "E74b: the well a corrected position stays with: its versions name this well and keep its coordinate system and elevation reference; null for every other publication"
+                    },
+                    "public_sources": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/PublicSources"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E60 C5d: the public repositories this result was made from (their stored records and the sentence rendered from the catalogue); null when none"
                     }
                   },
                   "required": [
@@ -43854,6 +44668,18 @@
                       ],
                       "default": null,
                       "description": "E74b: the well a corrected position stays with: its versions name this well and keep its coordinate system and elevation reference; null for every other publication"
+                    },
+                    "public_sources": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/PublicSources"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "E60 C5d: the public repositories this result was made from (their stored records and the sentence rendered from the catalogue); null when none"
                     },
                     "sharing_contract": {
                       "const": "conditional",
@@ -77681,6 +78507,12 @@
                     "description": "E59: the row is a storage bucket's object; the server reads it again (no body is sent) and adds or selects it only if its bytes are the ones read",
                     "title": "Bucket",
                     "type": "boolean"
+                  },
+                  "repository": {
+                    "default": false,
+                    "description": "E60: the row is a public repository's file; the server fetches it again (no body is sent) and adds it only if its bytes are the ones listed",
+                    "title": "Repository",
+                    "type": "boolean"
                   }
                 },
                 "required": [
@@ -78487,6 +79319,18 @@
                     ],
                     "default": null,
                     "description": "E59: the files are objects of a storage bucket, read with the person's own key and either copied into the project or read where they live"
+                  },
+                  "repository": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/RepositoryRun"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E60: the files are read from a public repository by the gateway (a project administrator's import, `public-repositories/import`); each row is fetched again and added only if its bytes are the ones listed"
                   }
                 },
                 "required": [
@@ -84487,7 +85331,7 @@
                 "schema": {
                   "x-ophiolite": {
                     "id": "ophiolite.scientific-asset/1",
-                    "version": "1.19.0",
+                    "version": "1.20.0",
                     "lifecycle": "preview"
                   },
                   "additionalProperties": false,
@@ -86019,6 +86863,152 @@
                             "method"
                           ],
                           "title": "DerivationInfo",
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null
+                    },
+                    "public_sources": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "description": "1.20.0 (E60 C5d, ophiolite-13 ruling 12 Oct): the public sources a derived revision was made from.",
+                          "properties": {
+                            "records": {
+                              "items": {
+                                "additionalProperties": false,
+                                "description": "1.20.0 (E60 C5d): one public repository's document a derived revision was made from, stored when the revision was\n(C5b): structured, catalogue-built, never acquisition text.",
+                                "properties": {
+                                  "service_id": {
+                                    "maxLength": 512,
+                                    "minLength": 1,
+                                    "title": "Service Id",
+                                    "type": "string"
+                                  },
+                                  "licence_id": {
+                                    "maxLength": 512,
+                                    "minLength": 1,
+                                    "title": "Licence Id",
+                                    "type": "string"
+                                  },
+                                  "terms_url": {
+                                    "maxLength": 512,
+                                    "minLength": 1,
+                                    "title": "Terms Url",
+                                    "type": "string"
+                                  },
+                                  "document": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "upstream_item": {
+                                        "maxLength": 512,
+                                        "minLength": 1,
+                                        "title": "Upstream Item",
+                                        "type": "string"
+                                      },
+                                      "retained_revision": {
+                                        "pattern": "^[0-9a-f]{64}$",
+                                        "title": "Retained Revision",
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "upstream_item",
+                                      "retained_revision"
+                                    ],
+                                    "title": "PublicSourceDocument",
+                                    "type": "object"
+                                  },
+                                  "retrieved_at": {
+                                    "title": "Retrieved At",
+                                    "type": "number"
+                                  }
+                                },
+                                "required": [
+                                  "service_id",
+                                  "licence_id",
+                                  "terms_url",
+                                  "document",
+                                  "retrieved_at"
+                                ],
+                                "title": "PublicSourceRecord",
+                                "type": "object"
+                              },
+                              "maxItems": 64,
+                              "minItems": 1,
+                              "title": "Records",
+                              "type": "array"
+                            },
+                            "lines": {
+                              "items": {
+                                "additionalProperties": false,
+                                "description": "The sentence a page shows, rendered from the deployment's catalogue at read time, per (service, licence, terms).",
+                                "properties": {
+                                  "service_id": {
+                                    "maxLength": 512,
+                                    "minLength": 1,
+                                    "title": "Service Id",
+                                    "type": "string"
+                                  },
+                                  "licence_id": {
+                                    "maxLength": 512,
+                                    "minLength": 1,
+                                    "title": "Licence Id",
+                                    "type": "string"
+                                  },
+                                  "terms_url": {
+                                    "maxLength": 512,
+                                    "minLength": 1,
+                                    "title": "Terms Url",
+                                    "type": "string"
+                                  },
+                                  "sentence": {
+                                    "anyOf": [
+                                      {
+                                        "maxLength": 1000,
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ],
+                                    "title": "Sentence"
+                                  },
+                                  "documents": {
+                                    "items": {
+                                      "maxLength": 512,
+                                      "minLength": 1,
+                                      "type": "string"
+                                    },
+                                    "maxItems": 64,
+                                    "title": "Documents",
+                                    "type": "array"
+                                  }
+                                },
+                                "required": [
+                                  "service_id",
+                                  "licence_id",
+                                  "terms_url",
+                                  "sentence",
+                                  "documents"
+                                ],
+                                "title": "PublicSourceLine",
+                                "type": "object"
+                              },
+                              "maxItems": 64,
+                              "minItems": 1,
+                              "title": "Lines",
+                              "type": "array"
+                            }
+                          },
+                          "required": [
+                            "records",
+                            "lines"
+                          ],
+                          "title": "PublicSources",
                           "type": "object"
                         },
                         {
@@ -108387,6 +109377,153 @@
         "title": "ProjectEntry",
         "type": "object"
       },
+      "PublicSourceDocument": {
+        "additionalProperties": false,
+        "properties": {
+          "upstream_item": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Upstream Item",
+            "type": "string"
+          },
+          "retained_revision": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Retained Revision",
+            "type": "string"
+          }
+        },
+        "required": [
+          "upstream_item",
+          "retained_revision"
+        ],
+        "title": "PublicSourceDocument",
+        "type": "object"
+      },
+      "PublicSourceLine": {
+        "additionalProperties": false,
+        "description": "The sentence a page shows, rendered from the deployment's catalogue at read time, per (service, licence, terms).",
+        "properties": {
+          "service_id": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Service Id",
+            "type": "string"
+          },
+          "licence_id": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Licence Id",
+            "type": "string"
+          },
+          "terms_url": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Terms Url",
+            "type": "string"
+          },
+          "sentence": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sentence"
+          },
+          "documents": {
+            "items": {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 64,
+            "title": "Documents",
+            "type": "array"
+          }
+        },
+        "required": [
+          "service_id",
+          "licence_id",
+          "terms_url",
+          "sentence",
+          "documents"
+        ],
+        "title": "PublicSourceLine",
+        "type": "object"
+      },
+      "PublicSourceRecord": {
+        "additionalProperties": false,
+        "description": "1.20.0 (E60 C5d): one public repository's document a derived revision was made from, stored when the revision was\n(C5b): structured, catalogue-built, never acquisition text.",
+        "properties": {
+          "service_id": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Service Id",
+            "type": "string"
+          },
+          "licence_id": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Licence Id",
+            "type": "string"
+          },
+          "terms_url": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Terms Url",
+            "type": "string"
+          },
+          "document": {
+            "$ref": "#/components/schemas/PublicSourceDocument"
+          },
+          "retrieved_at": {
+            "title": "Retrieved At",
+            "type": "number"
+          }
+        },
+        "required": [
+          "service_id",
+          "licence_id",
+          "terms_url",
+          "document",
+          "retrieved_at"
+        ],
+        "title": "PublicSourceRecord",
+        "type": "object"
+      },
+      "PublicSources": {
+        "additionalProperties": false,
+        "description": "1.20.0 (E60 C5d, ophiolite-13 ruling 12 Oct): the public sources a derived revision was made from.",
+        "properties": {
+          "records": {
+            "items": {
+              "$ref": "#/components/schemas/PublicSourceRecord"
+            },
+            "maxItems": 64,
+            "minItems": 1,
+            "title": "Records",
+            "type": "array"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/PublicSourceLine"
+            },
+            "maxItems": 64,
+            "minItems": 1,
+            "title": "Lines",
+            "type": "array"
+          }
+        },
+        "required": [
+          "records",
+          "lines"
+        ],
+        "title": "PublicSources",
+        "type": "object"
+      },
       "PublicationReceipt": {
         "additionalProperties": false,
         "description": "What publications/derive answers, and answers again for the same command.",
@@ -109576,6 +110713,659 @@
           "unit"
         ],
         "title": "RemakeSummary",
+        "type": "object"
+      },
+      "RepositoryBorehole": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "field": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Field"
+          },
+          "operator": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operator"
+          },
+          "public_since": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Public Since"
+          },
+          "side": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Side"
+          },
+          "in_project": {
+            "description": "A well with this identity is in this project and you can see it",
+            "title": "In Project",
+            "type": "boolean"
+          },
+          "well": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RepositoryWell"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "field",
+          "operator",
+          "public_since",
+          "side",
+          "in_project",
+          "well"
+        ],
+        "title": "RepositoryBorehole",
+        "type": "object"
+      },
+      "RepositoryCheckFile": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "asset_id": {
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "revision": {
+            "title": "Revision",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "unchanged",
+              "update_available",
+              "needs-review",
+              "missing"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "changed": {
+            "items": {
+              "enum": [
+                "bytes",
+                "meaning"
+              ],
+              "type": "string"
+            },
+            "title": "Changed",
+            "type": "array"
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "kind",
+          "asset_id",
+          "revision",
+          "state",
+          "changed"
+        ],
+        "title": "RepositoryCheckFile",
+        "type": "object"
+      },
+      "RepositoryCopy": {
+        "additionalProperties": false,
+        "properties": {
+          "retention_permitted": {
+            "title": "Retention Permitted",
+            "type": "boolean"
+          },
+          "redistribution_permitted": {
+            "title": "Redistribution Permitted",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "retention_permitted",
+          "redistribution_permitted"
+        ],
+        "title": "RepositoryCopy",
+        "type": "object"
+      },
+      "RepositoryFile": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "description": "the borehole's code at the service (NLOG: its BOREHOLE_CODE)",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Code",
+            "type": "string"
+          },
+          "name": {
+            "description": "the file's name as the service's preview lists it",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "name"
+        ],
+        "title": "RepositoryFile",
+        "type": "object"
+      },
+      "RepositoryLog": {
+        "additionalProperties": false,
+        "properties": {
+          "document": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Document"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bytes"
+          },
+          "composite": {
+            "title": "Composite",
+            "type": "boolean"
+          },
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile"
+          }
+        },
+        "required": [
+          "document",
+          "name",
+          "bytes",
+          "composite",
+          "profile"
+        ],
+        "title": "RepositoryLog",
+        "type": "object"
+      },
+      "RepositoryNotRead": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kind"
+          },
+          "outcome": {
+            "title": "Outcome",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "kind",
+          "outcome"
+        ],
+        "title": "RepositoryNotRead",
+        "type": "object"
+      },
+      "RepositoryOrigin": {
+        "additionalProperties": false,
+        "properties": {
+          "origin": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Origin",
+            "type": "array"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "copy": {
+            "$ref": "#/components/schemas/RepositoryCopy"
+          }
+        },
+        "required": [
+          "origin",
+          "name",
+          "copy"
+        ],
+        "title": "RepositoryOrigin",
+        "type": "object"
+      },
+      "RepositoryPosition": {
+        "additionalProperties": false,
+        "properties": {
+          "x": {
+            "title": "X",
+            "type": "number"
+          },
+          "y": {
+            "title": "Y",
+            "type": "number"
+          },
+          "crs": {
+            "title": "Crs",
+            "type": "string"
+          },
+          "nearest_metre": {
+            "title": "Nearest Metre",
+            "type": "boolean"
+          },
+          "submitted": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submitted"
+          }
+        },
+        "required": [
+          "x",
+          "y",
+          "crs",
+          "nearest_metre",
+          "submitted"
+        ],
+        "title": "RepositoryPosition",
+        "type": "object"
+      },
+      "RepositoryPreviewItem": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Name"
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outcome"
+          },
+          "position": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RepositoryPosition"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "tops": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Tops"
+          },
+          "surveys": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Surveys"
+          },
+          "logs": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/RepositoryLog"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Logs"
+          },
+          "in_project": {
+            "title": "In Project",
+            "type": "boolean"
+          },
+          "well": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RepositoryWell"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "code",
+          "outcome",
+          "in_project",
+          "well"
+        ],
+        "title": "RepositoryPreviewItem",
+        "type": "object"
+      },
+      "RepositoryReadiness": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "sentence": {
+            "title": "Sentence",
+            "type": "string"
+          },
+          "actor": {
+            "title": "Actor",
+            "type": "string"
+          },
+          "remedy": {
+            "title": "Remedy",
+            "type": "string"
+          },
+          "docs": {
+            "title": "Docs",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Reason"
+          }
+        },
+        "required": [
+          "code",
+          "sentence",
+          "actor",
+          "remedy",
+          "docs"
+        ],
+        "title": "RepositoryReadiness",
+        "type": "object"
+      },
+      "RepositoryRun": {
+        "additionalProperties": false,
+        "properties": {
+          "service": {
+            "description": "a public repository the deployment enables (`public-repositories/catalogue`)",
+            "maxLength": 40,
+            "minLength": 1,
+            "title": "Service",
+            "type": "string"
+          },
+          "items": {
+            "description": "the borehole and file of each row, in the order of `files`",
+            "items": {
+              "$ref": "#/components/schemas/RepositoryFile"
+            },
+            "minItems": 1,
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "service",
+          "items"
+        ],
+        "title": "RepositoryRun",
+        "type": "object"
+      },
+      "RepositoryService": {
+        "additionalProperties": false,
+        "properties": {
+          "service": {
+            "title": "Service",
+            "type": "string"
+          },
+          "connection_id": {
+            "title": "Connection Id",
+            "type": "string"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "terms": {
+            "$ref": "#/components/schemas/RepositoryTerms"
+          },
+          "copy": {
+            "$ref": "#/components/schemas/RepositoryCopy"
+          },
+          "boreholes_per_run": {
+            "title": "Boreholes Per Run",
+            "type": "integer"
+          },
+          "include": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Include",
+            "type": "array"
+          },
+          "readiness": {
+            "$ref": "#/components/schemas/RepositoryReadiness"
+          }
+        },
+        "required": [
+          "service",
+          "connection_id",
+          "display_name",
+          "terms",
+          "copy",
+          "boreholes_per_run",
+          "include",
+          "readiness"
+        ],
+        "title": "RepositoryService",
+        "type": "object"
+      },
+      "RepositoryTerms": {
+        "additionalProperties": false,
+        "properties": {
+          "licence_id": {
+            "title": "Licence Id",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "sentence": {
+            "title": "Sentence",
+            "type": "string"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "clause": {
+            "title": "Clause",
+            "type": "string"
+          }
+        },
+        "required": [
+          "licence_id",
+          "url",
+          "sentence",
+          "summary",
+          "clause"
+        ],
+        "title": "RepositoryTerms",
+        "type": "object"
+      },
+      "RepositoryWell": {
+        "additionalProperties": false,
+        "properties": {
+          "entity_id": {
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "entity_id",
+          "name"
+        ],
+        "title": "RepositoryWell",
         "type": "object"
       },
       "ResultGroup": {
@@ -114950,6 +116740,84 @@
         "title": "UploadReceivedPart",
         "type": "object"
       },
+      "UploadRun": {
+        "additionalProperties": false,
+        "description": "upload-runs/start, status, cancel: one folder upload with every file.",
+        "properties": {
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "project_id": {
+            "title": "Project Id",
+            "type": "string"
+          },
+          "folder_name": {
+            "title": "Folder Name",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "open",
+              "closed",
+              "cancelled"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "label": {
+            "enum": [
+              "Adding",
+              "Ready to resume",
+              "Finished",
+              "Finished with files not added",
+              "Cancelled"
+            ],
+            "title": "Label",
+            "type": "string"
+          },
+          "files": {
+            "title": "Files",
+            "type": "integer"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/UploadRunCounts"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "number"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "number"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/UploadRunSettings"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/UploadRunFile"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "run_id",
+          "project_id",
+          "folder_name",
+          "state",
+          "label",
+          "files",
+          "counts",
+          "created_at",
+          "updated_at",
+          "settings",
+          "items"
+        ],
+        "title": "UploadRun",
+        "type": "object"
+      },
       "UploadRunAssociation": {
         "additionalProperties": false,
         "properties": {
@@ -114972,6 +116840,18 @@
             ],
             "default": null,
             "title": "Name"
+          },
+          "record": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UploadRunRecord"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E60: the derived location record that is linked (the location file itself stays as served)"
           }
         },
         "required": [
@@ -115343,6 +117223,18 @@
             "default": null,
             "description": "E56 (N5): the title of the GeoPackage layer this file landed as; the layer key stays in technical",
             "title": "Title"
+          },
+          "repository": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UploadRunRepository"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E60: present on a public repository's run"
           }
         },
         "required": [
@@ -115425,6 +117317,167 @@
         "title": "UploadRunProposal",
         "type": "object"
       },
+      "UploadRunRecord": {
+        "additionalProperties": false,
+        "description": "E60 (Option A): the wellbore's own location record, derived from the one location file the repository served.",
+        "properties": {
+          "asset_id": {
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "revision": {
+            "title": "Revision",
+            "type": "string"
+          }
+        },
+        "required": [
+          "asset_id",
+          "revision"
+        ],
+        "title": "UploadRunRecord",
+        "type": "object"
+      },
+      "UploadRunRepository": {
+        "additionalProperties": false,
+        "description": "E60: a public repository's row: the borehole, the file, and once it ended, the well it belongs to.",
+        "properties": {
+          "service": {
+            "title": "Service",
+            "type": "string"
+          },
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "enum": [
+                  "location",
+                  "tops",
+                  "survey",
+                  "log"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Kind"
+          },
+          "well": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UploadRunRepositoryWell"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "long_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The repository's own name for the borehole (kept as a name the well is known by)",
+            "title": "Long Name"
+          },
+          "linked": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "False when the file was already linked to another well and was not linked again",
+            "title": "Linked"
+          },
+          "record": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UploadRunRecord"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "service",
+          "code",
+          "name"
+        ],
+        "title": "UploadRunRepository",
+        "type": "object"
+      },
+      "UploadRunRepositorySource": {
+        "additionalProperties": false,
+        "description": "E60: the public repository a run's files were read from, and the terms its rights confirmation rests on.",
+        "properties": {
+          "repository": {
+            "description": "The service id in the deployment's list (nlog)",
+            "title": "Repository",
+            "type": "string"
+          },
+          "terms": {
+            "description": "The licence id of the service's terms",
+            "title": "Terms",
+            "type": "string"
+          }
+        },
+        "required": [
+          "repository",
+          "terms"
+        ],
+        "title": "UploadRunRepositorySource",
+        "type": "object"
+      },
+      "UploadRunRepositoryWell": {
+        "additionalProperties": false,
+        "properties": {
+          "entity_id": {
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "created",
+              "already-here"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          }
+        },
+        "required": [
+          "entity_id",
+          "name",
+          "outcome"
+        ],
+        "title": "UploadRunRepositoryWell",
+        "type": "object"
+      },
       "UploadRunSend": {
         "additionalProperties": false,
         "description": "How to send the file: one request (`body`, the members' bytes in this order) or in parts (`parts`).",
@@ -115476,11 +117529,15 @@
                 "$ref": "#/components/schemas/UploadRunSource"
               },
               {
+                "$ref": "#/components/schemas/UploadRunRepositorySource"
+              },
+              {
                 "type": "null"
               }
             ],
             "default": null,
-            "description": "E85b: present when the run's file was fetched from an address"
+            "description": "E85b: present when the run's file was fetched from an address; E60: the public repository its files were read from",
+            "title": "Source"
           }
         },
         "required": [

@@ -121,6 +121,13 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         return Layouts(self)
 
     @property
+    def public_repositories(self):
+        """E60: public repositories (NLOG) as sources: search, preview, bring_in, check and a derived result's attribution
+        (ophiolite.public_repositories.PublicRepositories)."""
+        from .public_repositories import PublicRepositories
+        return PublicRepositories(self)
+
+    @property
     def well_names(self):
         """E88: the wells your uploads and imports name: proposals, accept, aliases and go back (ophiolite.well_names.WellNames)."""
         from .well_names import WellNames

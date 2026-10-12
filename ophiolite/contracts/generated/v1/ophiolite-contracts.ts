@@ -486,6 +486,32 @@ export type Provenance = {
   omissions: string[];
 };
 
+export type PublicSourceDocument = {
+  upstream_item: string;
+  retained_revision: string;
+};
+
+export type PublicSourceLine = {
+  service_id: string;
+  licence_id: string;
+  terms_url: string;
+  sentence: string | null;
+  documents: string[];
+};
+
+export type PublicSourceRecord = {
+  service_id: string;
+  licence_id: string;
+  terms_url: string;
+  document: PublicSourceDocument;
+  retrieved_at: number;
+};
+
+export type PublicSources = {
+  records: PublicSourceRecord[];
+  lines: PublicSourceLine[];
+};
+
 export type RecipeFidelity = {
   status: "assessed";
   preserved: string[];
@@ -768,6 +794,7 @@ export type ScientificAsset = {
   package?: PackageRecord | null;
   manifest?: RevisionManifest | RevisionManifestV2 | RevisionManifestV3 | null;
   derivation?: DerivationInfo | null;
+  public_sources?: PublicSources | null;
   acquisition?: Acquisition | null;
   relationships?: Relationships | null;
   display?: Display | null;

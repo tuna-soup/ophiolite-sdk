@@ -925,3 +925,120 @@ class LayoutImportOutcome(Contract):
 
 class LayoutImported(Contract):
     outcomes: list[LayoutImportOutcome]
+
+
+# --- E60: public repositories (public-repositories/*), the fields the SDK reads ---------------------------------------
+
+class RepositoryTerms(Contract):
+    licence_id: str
+    url: str
+    sentence: str
+    summary: str
+    clause: str
+
+
+class RepositoryService(Contract):
+    service: str
+    display_name: str
+    terms: RepositoryTerms
+    boreholes_per_run: int
+    include: list[str]
+
+
+class RepositoryCatalogue(Contract):
+    """public-repositories/catalogue: the services this deployment reads."""
+    services: list[RepositoryService]
+    origins: list[dict]
+
+
+class RepositoryWell(Contract):
+    entity_id: str
+    name: str
+
+
+class RepositoryBorehole(Contract):
+    code: str
+    name: str | None
+    field: str | None
+    operator: str | None
+    public_since: str | None
+    side: str | None
+    in_project: bool
+    well: RepositoryWell | None
+
+
+class RepositorySearch(Contract):
+    """public-repositories/search: nothing is kept."""
+    service: str
+    items: list[RepositoryBorehole]
+
+
+class RepositoryPreviewItem(Contract):
+    code: str
+    outcome: str | None
+    in_project: bool
+    well: RepositoryWell | None
+
+
+class RepositoryPreview(Contract):
+    """public-repositories/preview: what would come in; nothing is kept."""
+    service: str
+    items: list[RepositoryPreviewItem]
+
+
+class RepositoryNotRead(Contract):
+    code: str
+    name: str | None
+    kind: str | None
+    outcome: str
+
+
+class RepositoryImport(Contract):
+    """public-repositories/import: the started run (driven with upload-runs/file, repository true) and what was not listed."""
+    run: UploadRun
+    not_read: list[RepositoryNotRead]
+
+
+class RepositoryCheckFile(Contract):
+    code: str
+    name: str
+    kind: str
+    asset_id: str
+    revision: str
+    state: Literal['unchanged', 'update_available', 'needs-review', 'missing']
+    changed: list[Literal['bytes', 'meaning']]
+
+
+class RepositoryCheck(Contract):
+    """public-repositories/check: a report only; nothing is replaced, appended or moved."""
+    service: str
+    checked_at: float
+    sentence: str
+    files: list[RepositoryCheckFile]
+
+
+class PublicSourceDocument(Contract):
+    upstream_item: str
+    retained_revision: str = Field(pattern='^[0-9a-f]{64}$')
+
+
+class PublicSourceRecord(Contract):
+    service_id: str
+    licence_id: str
+    terms_url: str
+    document: PublicSourceDocument
+    retrieved_at: float
+
+
+class PublicSourceLine(Contract):
+    service_id: str
+    licence_id: str
+    terms_url: str
+    sentence: str | None
+    documents: list[str]
+
+
+class PublicSources(Contract):
+    """E60 C5d (asset 1.20.0): the public sources a derived revision was made from, with the sentence a page shows."""
+    records: list[PublicSourceRecord] = Field(min_length=1, max_length=64)
+    lines: list[PublicSourceLine] = Field(min_length=1, max_length=64)

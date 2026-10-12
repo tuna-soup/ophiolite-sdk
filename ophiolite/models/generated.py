@@ -413,6 +413,7 @@ class ScientificAsset(Contract):
     package: PackageRecord | None = Field(None)
     manifest: Annotated[RevisionManifest | RevisionManifestV2 | RevisionManifestV3, Field(discriminator='schema_')] | None = Field(None)
     derivation: DerivationInfo | None = Field(None)
+    public_sources: PublicSources | None = Field(None)
     acquisition: Acquisition | None = Field(None)
     relationships: Relationships | None = Field(None)
     display: Display | None = Field(None)
@@ -633,6 +634,28 @@ class Provenance(Contract):
     code_reference: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(...)
     environment_reference: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(...)
     omissions: Annotated[list[Annotated[str, Field(min_length=1, max_length=512)]], Field(max_length=32)] = Field(...)
+
+class PublicSourceDocument(Contract):
+    upstream_item: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    retained_revision: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+
+class PublicSourceLine(Contract):
+    service_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    licence_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    terms_url: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    sentence: Annotated[str, Field(max_length=1000)] | None = Field(...)
+    documents: Annotated[list[Annotated[str, Field(min_length=1, max_length=512)]], Field(max_length=64)] = Field(...)
+
+class PublicSourceRecord(Contract):
+    service_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    licence_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    terms_url: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    document: PublicSourceDocument = Field(...)
+    retrieved_at: float = Field(...)
+
+class PublicSources(Contract):
+    records: Annotated[list[PublicSourceRecord], Field(min_length=1, max_length=64)] = Field(...)
+    lines: Annotated[list[PublicSourceLine], Field(min_length=1, max_length=64)] = Field(...)
 
 class RecipePin(Contract):
     reference: RecipeReference | None = Field(...)
@@ -1843,6 +1866,10 @@ ParameterLabel.model_rebuild()
 Parameters.model_rebuild()
 Person.model_rebuild()
 Provenance.model_rebuild()
+PublicSourceDocument.model_rebuild()
+PublicSourceLine.model_rebuild()
+PublicSourceRecord.model_rebuild()
+PublicSources.model_rebuild()
 RecipePin.model_rebuild()
 RecipeReference.model_rebuild()
 RecordedInterpretation.model_rebuild()

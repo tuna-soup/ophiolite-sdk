@@ -1362,6 +1362,36 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/public-repositories/catalogue",
+    "function": "postProjectsProjectPublicRepositoriesCatalogue",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/public-repositories/check",
+    "function": "postProjectsProjectPublicRepositoriesCheck",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/public-repositories/import",
+    "function": "postProjectsProjectPublicRepositoriesImport",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/public-repositories/preview",
+    "function": "postProjectsProjectPublicRepositoriesPreview",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/public-repositories/search",
+    "function": "postProjectsProjectPublicRepositoriesSearch",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/publications/derive",
     "function": "postProjectsProjectPublicationsDerive",
     "request": "schema",

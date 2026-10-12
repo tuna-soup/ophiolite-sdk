@@ -303,6 +303,17 @@ def parser():
     upload.add_argument('--report',type=Path,help='Write the report to this .csv (or .json) file')
     upload.add_argument('--new',action='store_true',help='Start another upload instead of continuing the unfinished upload of this folder')
     upload.add_argument('--layout',metavar='NAME',help='A table file: add it with this project layout\'s mapping (E89). Without it a table that matches a layout is not added')
+    # E60: public repositories (NLOG): the same words as client.public_repositories
+    repos=project(sub.add_parser('repositories',help='Public repositories (NLOG): search SERVICE --name N, bring-in SERVICE CODE... --audience P, check SERVICE [CODE...]'))
+    repos.add_argument('action',choices=['search','bring-in','check'])
+    repos.add_argument('service',help='The public repository, for example nlog')
+    repos.add_argument('codes',nargs='*',metavar='CODE',help='bring-in, check: the boreholes, by the service\'s code')
+    repos.add_argument('--name',help='search: a borehole name or code (at least three characters)')
+    repos.add_argument('--field',help='search: a field\'s name, exactly as the service lists it')
+    repos.add_argument('--side',choices=['ON','OFF'],help='search: ON (on land) or OFF (offshore)')
+    repos.add_argument('--include',action='append',metavar='KIND',choices=['location','tops','survey','logs','all-logs'],help='bring-in: what to bring in (repeat; default: position, tops, survey and composite logs)')
+    repos.add_argument('--audience',action='append',default=[],metavar='PERSON',help='bring-in: a project member who may read what comes in (repeat)')
+    repos.add_argument('--report',type=Path,help='bring-in: write the report to this .csv (or .json) file')
     init=sub.add_parser('init',help='Start an application from a packaged template (map-application, derive-and-publish, sync-worker, notebook, agent-workflow)')
     init.add_argument('template',nargs='?',help='The template name; omit with --list');init.add_argument('--output',type=Path,help='An empty or new folder (default: ./TEMPLATE)')
     init.add_argument('--list',action='store_true',help='List the packaged templates')
@@ -660,6 +671,33 @@ def _storage(args,client):
     done(args,'\n'.join([report.text()]+left)+('\nReport written to %s' % args.report if args.report else ''),
          {'upload':report.view,'left_out':[{'key':k,'sentence':s} for k,s in report.left_out]})
     report.exit_code=0 if report.ok and not report.left_out else EXIT['conflict']
+    return report
+
+
+def _repositories(args,client):
+    """E60: repositories search SERVICE --name N | --field F [--side ON|OFF]; bring-in SERVICE CODE... [--include K] --audience P
+    [--report FILE] (exits 0 when every file is added or already here and nothing was left unread, 4 otherwise);
+    check SERVICE [CODE...]. --json prints what client.public_repositories answers."""
+    repos=client.public_repositories
+    if args.action!='search' and (args.name or args.field or args.side):raise Refused('Only search takes --name, --field or --side.')
+    if args.action!='bring-in' and (args.include or args.audience or args.report):raise Refused('Only bring-in takes --include, --audience or --report.')
+    if args.action=='search':
+        if args.codes:raise Refused('search takes --name or --field, not codes.')
+        rows=repos.search(args.service,name=args.name,field=args.field,side=args.side)
+        lines=['%d well%s found' % (len(rows),'' if len(rows)==1 else 's')]+['%s  %s  %s  %s  %s%s' % (r['code'],r['name'] or '',r['field'] or '',r['operator'] or '',
+               r['public_since'] or '','  Already in this project' if r['in_project'] else '') for r in rows]
+        return done(args,'\n'.join(lines),{'service':args.service,'items':rows})
+    if args.action=='check':
+        answer=repos.check(args.service,args.codes or None)
+        lines=[answer['sentence']]+['  %s/%s: %s%s' % (f['code'],f['name'],f['state'],' ('+', '.join(f['changed'])+')' if f['changed'] else '') for f in answer['files'] if f['state']!='unchanged']
+        return done(args,'\n'.join(lines),answer)
+    if not args.codes:raise Refused('Name the boreholes: ophiolite repositories bring-in %s CODE...' % args.service)
+    def progress(report):
+        if not args.json:print('Adding files... %d of %d.' % (sum(v for k,v in report.counts.items() if k!='not-sent'),report.view['files']),file=sys.stderr,flush=True)
+    report=repos.bring_in(args.service,args.codes,include=args.include,audience=args.audience,progress=progress)
+    if args.report:report.save(args.report)
+    done(args,report.text()+('\nReport written to %s' % args.report if args.report else ''),report.to_dict())
+    report.exit_code=0 if report.ok else EXIT['conflict']
     return report
 
 
@@ -1153,6 +1191,7 @@ def _main(argv=None):
         if args.command in ('check','get','send'):return _exchange(args,client)
         if args.command=='upload':return _upload(args,client)
         if args.command=='layouts':return _layouts(args,client)
+        if args.command=='repositories':return _repositories(args,client)
         if args.command=='publish-derived':  # E30b
             from .writers import WrittenOriginal
             parents=[tuple(p.split(':',1)) for p in args.parents]

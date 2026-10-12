@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/schema.json",
   "x-ophiolite": {
     "id": "ophiolite.scientific-asset/1",
-    "version": "1.19.0",
+    "version": "1.20.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -2738,6 +2738,153 @@
       "title": "Provenance",
       "type": "object"
     },
+    "PublicSourceDocument": {
+      "additionalProperties": false,
+      "properties": {
+        "upstream_item": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Upstream Item",
+          "type": "string"
+        },
+        "retained_revision": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Retained Revision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "upstream_item",
+        "retained_revision"
+      ],
+      "title": "PublicSourceDocument",
+      "type": "object"
+    },
+    "PublicSourceLine": {
+      "additionalProperties": false,
+      "description": "The sentence a page shows, rendered from the deployment's catalogue at read time, per (service, licence, terms).",
+      "properties": {
+        "service_id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Service Id",
+          "type": "string"
+        },
+        "licence_id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Licence Id",
+          "type": "string"
+        },
+        "terms_url": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Terms Url",
+          "type": "string"
+        },
+        "sentence": {
+          "anyOf": [
+            {
+              "maxLength": 1000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sentence"
+        },
+        "documents": {
+          "items": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 64,
+          "title": "Documents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "service_id",
+        "licence_id",
+        "terms_url",
+        "sentence",
+        "documents"
+      ],
+      "title": "PublicSourceLine",
+      "type": "object"
+    },
+    "PublicSourceRecord": {
+      "additionalProperties": false,
+      "description": "1.20.0 (E60 C5d): one public repository's document a derived revision was made from, stored when the revision was\n(C5b): structured, catalogue-built, never acquisition text.",
+      "properties": {
+        "service_id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Service Id",
+          "type": "string"
+        },
+        "licence_id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Licence Id",
+          "type": "string"
+        },
+        "terms_url": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Terms Url",
+          "type": "string"
+        },
+        "document": {
+          "$ref": "#/$defs/PublicSourceDocument"
+        },
+        "retrieved_at": {
+          "title": "Retrieved At",
+          "type": "number"
+        }
+      },
+      "required": [
+        "service_id",
+        "licence_id",
+        "terms_url",
+        "document",
+        "retrieved_at"
+      ],
+      "title": "PublicSourceRecord",
+      "type": "object"
+    },
+    "PublicSources": {
+      "additionalProperties": false,
+      "description": "1.20.0 (E60 C5d, ophiolite-13 ruling 12 Oct): the public sources a derived revision was made from.",
+      "properties": {
+        "records": {
+          "items": {
+            "$ref": "#/$defs/PublicSourceRecord"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "title": "Records",
+          "type": "array"
+        },
+        "lines": {
+          "items": {
+            "$ref": "#/$defs/PublicSourceLine"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "title": "Lines",
+          "type": "array"
+        }
+      },
+      "required": [
+        "records",
+        "lines"
+      ],
+      "title": "PublicSources",
+      "type": "object"
+    },
     "RecipeFidelity": {
       "additionalProperties": false,
       "properties": {
@@ -4592,6 +4739,17 @@
       "anyOf": [
         {
           "$ref": "#/$defs/DerivationInfo"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "public_sources": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PublicSources"
         },
         {
           "type": "null"
