@@ -138,6 +138,7 @@ SENTENCES = {
     # E106: project versions as inputs; publishing a run; running a result again
     'project-input-format': 'Not run: give a project version as --input SLOT=@RESULT:REVISION.',
     'project-input-class': 'Not run: {label} reads a file, not a project version.',
+    'project-input-kind': 'Not run: the project did not say what kind of data that version is.',
     'not-a-run': 'Not published: this folder is not the output of a run (run.json is missing or changed).',
     'local-inputs': 'Not published: this run read files from this computer; run it on project versions (--input SLOT=@RESULT:REVISION) to publish it.',
     'output-changed': 'Not published: {file} changed after the run; run it again.',
@@ -651,17 +652,21 @@ class ProcedureClient:
     def _download_version(self, asset, revision, stem, profile=None, declared=None):
         """One exact version for a run: its original, its stored type and declarations (given by the server for a run
         made again; otherwise read from its typed description)."""
+        stem.parent.mkdir(parents=True, exist_ok=True)
         if profile is None:
             from urllib.parse import quote
             from . import _core
             from .client import PROFILES
+            from .errors import Incompatible
             path = self.prefix + '/' + quote(asset, safe='') + '/revisions/' + quote(revision, safe='')
-            described = self._json(path + '?' + PROFILES[1:], 256 * 1024)
+            try:
+                described = self._json(path + '?' + PROFILES[1:], 256 * 1024)
+            except Incompatible:  # a well log is described per curve: its first curve's description names its type
+                return self._download_log(asset, revision, stem)
             _core.verify_typed_descriptor(described, self.project, asset, revision)
             profile, context = described['profile'], described.get('scientific') or {}
             keys = [d['key'] for r in contract_readers() if r['profile'] == profile for d in r['declared']]
             declared = {k: context[k] for k in keys if isinstance(context.get(k), str)}
-        stem.parent.mkdir(parents=True, exist_ok=True)
         target = stem.with_suffix(_extension(profile))
         self.download_original(asset, revision, target)
         return ProjectInput(str(target), profile, dict(declared or {}), asset, revision)
@@ -715,6 +720,19 @@ class ProcedureClient:
         state['run_id'] = reported['run_id']; _save(state_path, state)
         return {'sentence': '\n'.join(r['sentence'] for r in results), 'run': self.procedure_run_get(reported['run_id']), 'outputs': results}
 
+    def _download_log(self, asset, revision, stem):
+        """A well-log version: its original, then the verified description of its first value curve, which must say
+        las2/1 (the reader declares nothing for a log)."""
+        from . import las_header
+        target = stem.with_suffix(_extension('las2/1'))
+        self.download_original(asset, revision, target)
+        first = next((c.mnemonic for c in las_header.curves(target.read_bytes())[1:]), None)
+        described = self.describe(asset, revision, first) if first else None
+        if getattr(described, 'profile', None) != 'las2/1':
+            target.unlink(missing_ok=True)
+            raise NotRun('project-input-kind', '', {'asset_id': asset, 'revision': revision})
+        return ProjectInput(str(target), 'las2/1', {}, asset, revision)
+
     def _named(self, reference):
         """A result's story node (its name and version), or {} when the story does not answer."""
         from .errors import OphioliteError
@@ -727,9 +745,9 @@ class ProcedureClient:
         return node['name'] + (', version %d' % node['version'] if node.get('version') else '')
 
     def _reported(self, call):
-        from .errors import Refused, IntegrityConflict
+        from .errors import OphioliteError
         try: return call()
-        except (Refused, IntegrityConflict) as error:
+        except OphioliteError as error:  # a refusal of any status (a result you cannot read is 404) carries the closed code
             if getattr(error, 'code', None) == 'procedure-run-refused': raise NotRun('refused', '', {'reason': getattr(error, 'details', {}).get('reason')}, sentence=error.message) from None
             raise
 

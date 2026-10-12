@@ -93,6 +93,14 @@ def test_a_withdrawn_version_refuses_with_its_date_and_runs_nothing(world, setti
     assert not (tmp_path / 'again').exists() and runs(world) == 1
 
 
+def test_a_result_the_colleague_cannot_read_refuses_in_words_and_runs_nothing(world, setting, tmp_path, original):
+    _, receipt = original
+    with world.journal.lock, world.journal.db: world.sources.retained_assets.grants_locked(receipt['asset_id'], 'bob', ['alice'], [])  # tina loses the read
+    with pytest.raises(NotRun) as caught: again(setting, tmp_path, receipt)
+    assert (caught.value.code, str(caught.value)) == ('refused', 'You cannot read this result.')
+    assert not (tmp_path / 'again').exists() and runs(world) == 1
+
+
 def test_a_changed_cached_copy_refuses_and_runs_nothing(world, setting, tmp_path, original):
     v1, receipt = original
     again(setting, tmp_path, receipt, out='warm')

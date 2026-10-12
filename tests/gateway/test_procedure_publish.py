@@ -117,6 +117,38 @@ def test_a_run_on_a_project_version_publishes_once_with_a_4_record_the_sdk_verif
     assert again['outputs'][0]['receipt'] == output['receipt'] and (runs(world), published(world)) == (1, 1)
 
 
+LOG_PROCEDURE = {'schema': 'ophiolite.procedure/1', 'name': 'gamma-copy', 'label': 'Copy gamma ray', 'version': 1, 'step': 'process',
+                 'inputs': [{'slot': 'log', 'label': 'Gamma-ray log', 'class': 'version', 'kinds': ['las2/1'], 'cardinality': 'one'}],
+                 'outputs': [{'role': 'copy', 'label': 'Gamma ray copy', 'class': 'version', 'kind': 'las2/1'}], 'settings': [],
+                 'entry': 'procedure:copy', 'requires': [], 'licence': 'MIT'}
+LOG_CODE = '''from ophiolite import procedure
+from ophiolite.writers import write_curves
+
+
+@procedure
+def copy(inputs, settings):
+    rows = open(inputs['log'][0].path).read().split('~A', 1)[1].splitlines()[1:]
+    values = [line.split() for line in rows if line.strip()]
+    return {'copy': write_curves([float(v[0]) for v in values], {'GR': ('gAPI', [float(v[1]) for v in values])}, depth_unit='m')}
+'''
+
+
+def test_a_well_log_version_is_an_input_of_type_las_named_by_its_first_curve(world, setting, tmp_path):
+    """A well log is described per curve, so its type comes from its first value curve's verified description."""
+    raw = (Path(ophiolite.__file__).resolve().parent / 'contracts/scientific/v1/fixtures/hon-gt-01-gamma-ray-excerpt.las').read_bytes()
+    log = setting['bob'].work_folder(tmp_path / 'upload').upload_las(raw, name='Gamma excerpt', attribution='NLOG.NL, HON-GT-01 excerpt', audience=['alice', 'tina'],
+                                                                     rights_confirmed=True)
+    folder = tmp_path / 'gamma-copy'; folder.mkdir()
+    (folder / 'procedure.json').write_text(json.dumps(LOG_PROCEDURE)); (folder / 'procedure.py').write_text(LOG_CODE)
+    v = setting['bob'].procedure_register(folder)
+    setting['alice'].procedure_enable(v['digest'])
+    setting['bob'].procedure_run('gamma-copy', tmp_path / 'out', {'log': ['@%s:%s' % (log.asset_id, log.revision)]})
+    [used] = json.loads((tmp_path / 'out/run.json').read_text())['inputs']['log']
+    assert (used['asset_id'], used['revision'], used['kind'], used['declared']) == (log.asset_id, log.revision, 'las2/1', {})
+    [output] = setting['bob'].procedure_publish(tmp_path / 'out', name='Gamma copy')['outputs']
+    assert output['outcome'] == 'published' and runs(world) == 1
+
+
 def test_a_publish_stopped_before_or_after_the_report_resumes_with_one_run(world, setting, tmp_path, monkeypatch):
     enable(setting, tmp_path)
     ran(setting, tmp_path)
