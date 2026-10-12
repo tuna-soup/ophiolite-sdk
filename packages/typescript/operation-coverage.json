@@ -1392,6 +1392,48 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/procedures/bundle",
+    "function": "postProjectsProjectProceduresBundle",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/procedures/enable",
+    "function": "postProjectsProjectProceduresEnable",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/procedures/get",
+    "function": "postProjectsProjectProceduresGet",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/procedures/list",
+    "function": "postProjectsProjectProceduresList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/procedures/register",
+    "function": "postProjectsProjectProceduresRegister",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/procedures/trust",
+    "function": "postProjectsProjectProceduresTrust",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/procedures/withdraw",
+    "function": "postProjectsProjectProceduresWithdraw",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/publications/derive",
     "function": "postProjectsProjectPublicationsDerive",
     "request": "schema",

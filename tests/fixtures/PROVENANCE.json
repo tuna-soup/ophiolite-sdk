@@ -2771,6 +2771,15 @@
       "license": "Apache-2.0",
       "disposition": "reviewed-for-sdk",
       "evidence": "Integration E89 strategy C6: the SDK's words and refusals are tested on the answers the workspace test replays. The tables are synthetic three-row well tops of the public well HON-GT-01 (Integration docs/release/rights/nlog-table-import-2026-10-09.json); what is recorded is the service's own answers (identifiers, counts, states, sentences), the synthetic test people alice, bob, carol and dave, and the synthetic layout and connection names."
+    },
+    {
+      "path": "tests/fixtures/procedures-offline-answers.json",
+      "sha256": "5ea5e379ffe092a3be6c0b978790547130f28da85c2acdc940dab8e6b99a1fc6",
+      "source_commit": "f0ee8a5",
+      "origin": "E105a synthetic answers of the offline procedure runner over the depth-shift sample bundle, written for the SDK procedures tests",
+      "license": "Apache-2.0",
+      "disposition": "reviewed-for-sdk",
+      "evidence": "E105a: original first-party synthetic answers (sample procedure and invented tops); no third-party data, credentials or customer data."
     }
   ]
 }

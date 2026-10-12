@@ -43765,6 +43765,1523 @@
         }
       }
     },
+    "/api/v1/projects/{project}/procedures/bundle": {
+      "post": {
+        "summary": "The archive of a procedure version you may see and that is not withdrawn (base64); verify it against its digest",
+        "description": "Scope read; accepted principals: session, delegate, agent; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "digest": {
+                      "title": "Digest",
+                      "type": "string"
+                    },
+                    "archive_sha256": {
+                      "title": "Archive Sha256",
+                      "type": "string"
+                    },
+                    "bytes": {
+                      "title": "Bytes",
+                      "type": "integer"
+                    },
+                    "archive": {
+                      "description": "The canonical archive, base64; unpack it with the procedure contract and compare its digest with `digest` before running anything",
+                      "title": "Archive",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "digest",
+                    "archive_sha256",
+                    "bytes",
+                    "archive"
+                  ],
+                  "title": "ProcedureBundle",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "digest": {
+                    "description": "The version's digest (digest_of over its members, as `ophiolite procedures validate` prints it)",
+                    "maxLength": 64,
+                    "minLength": 64,
+                    "pattern": "^[0-9a-f]{64}$",
+                    "title": "Digest",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "digest"
+                ],
+                "title": "ProcedureDigestRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/procedures/enable": {
+      "post": {
+        "summary": "Enable a procedure version for every member of the project (project administrators)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "digest": {
+                      "title": "Digest",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "version": {
+                      "title": "Version",
+                      "type": "integer"
+                    },
+                    "version_label": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Version Label"
+                    },
+                    "label": {
+                      "title": "Label",
+                      "type": "string"
+                    },
+                    "state": {
+                      "description": "private: its registrant and administrators see it; enabled: every member; withdrawn: never served again",
+                      "enum": [
+                        "private",
+                        "enabled",
+                        "withdrawn"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "added_by": {
+                      "title": "Added By",
+                      "type": "string"
+                    },
+                    "added_kind": {
+                      "enum": [
+                        "person",
+                        "agent"
+                      ],
+                      "title": "Added Kind",
+                      "type": "string"
+                    },
+                    "on_behalf_of": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "An agent's registration: the person it acts for",
+                      "title": "On Behalf Of"
+                    },
+                    "added_at": {
+                      "title": "Added At",
+                      "type": "number"
+                    },
+                    "enabled_by": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Enabled By"
+                    },
+                    "enabled_at": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Enabled At"
+                    },
+                    "withdrawn_by": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Withdrawn By"
+                    },
+                    "withdrawn_at": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Withdrawn At"
+                    },
+                    "words": {
+                      "$ref": "#/components/schemas/ProcedureWords"
+                    },
+                    "trusted": {
+                      "description": "You (this credential's principal) trust this version's code in this project",
+                      "title": "Trusted",
+                      "type": "boolean"
+                    },
+                    "mine": {
+                      "description": "You registered this version, or your agent registered it for you; a client asks no trust question for it",
+                      "title": "Mine",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "digest",
+                    "name",
+                    "version",
+                    "version_label",
+                    "label",
+                    "state",
+                    "added_by",
+                    "added_kind",
+                    "on_behalf_of",
+                    "added_at",
+                    "enabled_by",
+                    "enabled_at",
+                    "withdrawn_by",
+                    "withdrawn_at",
+                    "words",
+                    "trusted",
+                    "mine"
+                  ],
+                  "title": "ProcedureVersion",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "digest": {
+                    "description": "The version's digest (digest_of over its members, as `ophiolite procedures validate` prints it)",
+                    "maxLength": 64,
+                    "minLength": 64,
+                    "pattern": "^[0-9a-f]{64}$",
+                    "title": "Digest",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "The same command id and body answer the same result; another body is refused (request)",
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "digest",
+                  "command_id"
+                ],
+                "title": "ProcedureChangeRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/procedures/get": {
+      "post": {
+        "summary": "One procedure version by digest: its manifest, words, state and who added and enabled it",
+        "description": "Scope read; accepted principals: session, delegate, agent; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "digest": {
+                      "title": "Digest",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "version": {
+                      "title": "Version",
+                      "type": "integer"
+                    },
+                    "version_label": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Version Label"
+                    },
+                    "label": {
+                      "title": "Label",
+                      "type": "string"
+                    },
+                    "state": {
+                      "description": "private: its registrant and administrators see it; enabled: every member; withdrawn: never served again",
+                      "enum": [
+                        "private",
+                        "enabled",
+                        "withdrawn"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "added_by": {
+                      "title": "Added By",
+                      "type": "string"
+                    },
+                    "added_kind": {
+                      "enum": [
+                        "person",
+                        "agent"
+                      ],
+                      "title": "Added Kind",
+                      "type": "string"
+                    },
+                    "on_behalf_of": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "An agent's registration: the person it acts for",
+                      "title": "On Behalf Of"
+                    },
+                    "added_at": {
+                      "title": "Added At",
+                      "type": "number"
+                    },
+                    "enabled_by": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Enabled By"
+                    },
+                    "enabled_at": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Enabled At"
+                    },
+                    "withdrawn_by": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Withdrawn By"
+                    },
+                    "withdrawn_at": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Withdrawn At"
+                    },
+                    "words": {
+                      "$ref": "#/components/schemas/ProcedureWords"
+                    },
+                    "trusted": {
+                      "description": "You (this credential's principal) trust this version's code in this project",
+                      "title": "Trusted",
+                      "type": "boolean"
+                    },
+                    "mine": {
+                      "description": "You registered this version, or your agent registered it for you; a client asks no trust question for it",
+                      "title": "Mine",
+                      "type": "boolean"
+                    },
+                    "manifest": {
+                      "additionalProperties": true,
+                      "description": "The version's procedure.json (ophiolite.procedure/1), for Technical details",
+                      "title": "Manifest",
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "digest",
+                    "name",
+                    "version",
+                    "version_label",
+                    "label",
+                    "state",
+                    "added_by",
+                    "added_kind",
+                    "on_behalf_of",
+                    "added_at",
+                    "enabled_by",
+                    "enabled_at",
+                    "withdrawn_by",
+                    "withdrawn_at",
+                    "words",
+                    "trusted",
+                    "mine",
+                    "manifest"
+                  ],
+                  "title": "ProcedureDetail",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "digest": {
+                    "description": "The version's digest (digest_of over its members, as `ophiolite procedures validate` prints it)",
+                    "maxLength": 64,
+                    "minLength": 64,
+                    "pattern": "^[0-9a-f]{64}$",
+                    "title": "Digest",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "digest"
+                ],
+                "title": "ProcedureDigestRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/procedures/list": {
+      "post": {
+        "summary": "The procedure versions you may see in this project, with their state and words",
+        "description": "Scope read; accepted principals: session, delegate, agent; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "versions": {
+                      "items": {
+                        "$ref": "#/components/schemas/ProcedureVersion"
+                      },
+                      "title": "Versions",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "versions"
+                  ],
+                  "title": "ProcedureList",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "maxLength": 127,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Only the versions of this procedure name",
+                    "title": "Name"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "ProcedureListRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/procedures/register": {
+      "post": {
+        "summary": "Register a procedure bundle (its archive, base64); the server reads it with the procedure contract and keeps it private to you and the administrators",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "digest": {
+                      "title": "Digest",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "version": {
+                      "title": "Version",
+                      "type": "integer"
+                    },
+                    "version_label": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Version Label"
+                    },
+                    "label": {
+                      "title": "Label",
+                      "type": "string"
+                    },
+                    "state": {
+                      "description": "private: its registrant and administrators see it; enabled: every member; withdrawn: never served again",
+                      "enum": [
+                        "private",
+                        "enabled",
+                        "withdrawn"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "added_by": {
+                      "title": "Added By",
+                      "type": "string"
+                    },
+                    "added_kind": {
+                      "enum": [
+                        "person",
+                        "agent"
+                      ],
+                      "title": "Added Kind",
+                      "type": "string"
+                    },
+                    "on_behalf_of": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "An agent's registration: the person it acts for",
+                      "title": "On Behalf Of"
+                    },
+                    "added_at": {
+                      "title": "Added At",
+                      "type": "number"
+                    },
+                    "enabled_by": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Enabled By"
+                    },
+                    "enabled_at": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Enabled At"
+                    },
+                    "withdrawn_by": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Withdrawn By"
+                    },
+                    "withdrawn_at": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Withdrawn At"
+                    },
+                    "words": {
+                      "$ref": "#/components/schemas/ProcedureWords"
+                    },
+                    "trusted": {
+                      "description": "You (this credential's principal) trust this version's code in this project",
+                      "title": "Trusted",
+                      "type": "boolean"
+                    },
+                    "mine": {
+                      "description": "You registered this version, or your agent registered it for you; a client asks no trust question for it",
+                      "title": "Mine",
+                      "type": "boolean"
+                    },
+                    "already": {
+                      "description": "This digest was already registered in this project: the answer is that version",
+                      "title": "Already",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "digest",
+                    "name",
+                    "version",
+                    "version_label",
+                    "label",
+                    "state",
+                    "added_by",
+                    "added_kind",
+                    "on_behalf_of",
+                    "added_at",
+                    "enabled_by",
+                    "enabled_at",
+                    "withdrawn_by",
+                    "withdrawn_at",
+                    "words",
+                    "trusted",
+                    "mine",
+                    "already"
+                  ],
+                  "title": "RegisteredProcedure",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "The same command id and body answer the same result; another body is refused (request)",
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "archive": {
+                    "description": "The bundle as an archive (`ophiolite procedures` packs it), base64; at most 1.25 MiB decoded (refused too-large). The digest is computed from the files, never sent (refused typed-digest)",
+                    "maxLength": 1800000,
+                    "title": "Archive",
+                    "type": "string"
+                  },
+                  "archive_sha256": {
+                    "anyOf": [
+                      {
+                        "maxLength": 64,
+                        "minLength": 64,
+                        "pattern": "^[0-9a-f]{64}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "sha256 of the decoded archive; an agent sends it and its plan names it. When sent it must match (refused request)",
+                    "title": "Archive Sha256"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "command_id",
+                  "archive"
+                ],
+                "title": "ProcedureRegisterRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/procedures/trust": {
+      "post": {
+        "summary": "Record that you trust the code of one procedure version in this project",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "digest": {
+                      "title": "Digest",
+                      "type": "string"
+                    },
+                    "trusted": {
+                      "const": true,
+                      "title": "Trusted",
+                      "type": "boolean"
+                    },
+                    "already": {
+                      "title": "Already",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "digest",
+                    "trusted",
+                    "already"
+                  ],
+                  "title": "ProcedureTrust",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "digest": {
+                    "description": "The version's digest (digest_of over its members, as `ophiolite procedures validate` prints it)",
+                    "maxLength": 64,
+                    "minLength": 64,
+                    "pattern": "^[0-9a-f]{64}$",
+                    "title": "Digest",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "The same command id and body answer the same result; another body is refused (request)",
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "digest",
+                  "command_id"
+                ],
+                "title": "ProcedureChangeRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/procedures/withdraw": {
+      "post": {
+        "summary": "Withdraw a procedure version (project administrators, or its registrant while it is private); it is never served again",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "digest": {
+                      "title": "Digest",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "version": {
+                      "title": "Version",
+                      "type": "integer"
+                    },
+                    "version_label": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Version Label"
+                    },
+                    "label": {
+                      "title": "Label",
+                      "type": "string"
+                    },
+                    "state": {
+                      "description": "private: its registrant and administrators see it; enabled: every member; withdrawn: never served again",
+                      "enum": [
+                        "private",
+                        "enabled",
+                        "withdrawn"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "added_by": {
+                      "title": "Added By",
+                      "type": "string"
+                    },
+                    "added_kind": {
+                      "enum": [
+                        "person",
+                        "agent"
+                      ],
+                      "title": "Added Kind",
+                      "type": "string"
+                    },
+                    "on_behalf_of": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "An agent's registration: the person it acts for",
+                      "title": "On Behalf Of"
+                    },
+                    "added_at": {
+                      "title": "Added At",
+                      "type": "number"
+                    },
+                    "enabled_by": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Enabled By"
+                    },
+                    "enabled_at": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Enabled At"
+                    },
+                    "withdrawn_by": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Withdrawn By"
+                    },
+                    "withdrawn_at": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Withdrawn At"
+                    },
+                    "words": {
+                      "$ref": "#/components/schemas/ProcedureWords"
+                    },
+                    "trusted": {
+                      "description": "You (this credential's principal) trust this version's code in this project",
+                      "title": "Trusted",
+                      "type": "boolean"
+                    },
+                    "mine": {
+                      "description": "You registered this version, or your agent registered it for you; a client asks no trust question for it",
+                      "title": "Mine",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "digest",
+                    "name",
+                    "version",
+                    "version_label",
+                    "label",
+                    "state",
+                    "added_by",
+                    "added_kind",
+                    "on_behalf_of",
+                    "added_at",
+                    "enabled_by",
+                    "enabled_at",
+                    "withdrawn_by",
+                    "withdrawn_at",
+                    "words",
+                    "trusted",
+                    "mine"
+                  ],
+                  "title": "ProcedureVersion",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "digest": {
+                    "description": "The version's digest (digest_of over its members, as `ophiolite procedures validate` prints it)",
+                    "maxLength": 64,
+                    "minLength": 64,
+                    "pattern": "^[0-9a-f]{64}$",
+                    "title": "Digest",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "The same command id and body answer the same result; another body is refused (request)",
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "digest",
+                  "command_id"
+                ],
+                "title": "ProcedureChangeRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/list": {
       "post": {
         "summary": "Projects this credential may reach, one page at a time (limit, cursor)",
@@ -102009,6 +103526,31 @@
               "request"
             ],
             "description": "E96: only with code check-refused: the one field the refusal names"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "permission",
+              "invalid",
+              "typed-digest",
+              "version-not-higher",
+              "not-found",
+              "withdrawn",
+              "not-enabled",
+              "request",
+              "too-large",
+              "bundle-integrity",
+              "capacity"
+            ],
+            "description": "E105b: only with code procedure-refused: why the catalogue refused (a closed list)"
+          },
+          "rule": {
+            "type": "string",
+            "description": "E105b: only with reason invalid: the procedure contract's code (contracts/procedures/v1/rules.json sentences)"
+          },
+          "path": {
+            "type": "string",
+            "description": "E105b: only with reason invalid: the JSON path in procedure.json or the member path the rule names (may be empty)"
           }
         }
       },
@@ -109444,6 +110986,263 @@
           "agent"
         ],
         "title": "Principal",
+        "type": "object"
+      },
+      "ProcedureSettingWords": {
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "default": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The default in words (numbers as numbers, yes or no, a choice's label, the neutral phrase for text that is not a label); null without one",
+            "title": "Default"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          },
+          "choices": {
+            "description": "A choice setting's labels, in order",
+            "items": {
+              "type": "string"
+            },
+            "title": "Choices",
+            "type": "array"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "default",
+          "unit",
+          "choices"
+        ],
+        "title": "ProcedureSettingWords",
+        "type": "object"
+      },
+      "ProcedureVersion": {
+        "additionalProperties": false,
+        "properties": {
+          "digest": {
+            "title": "Digest",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          },
+          "version_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version Label"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "state": {
+            "description": "private: its registrant and administrators see it; enabled: every member; withdrawn: never served again",
+            "enum": [
+              "private",
+              "enabled",
+              "withdrawn"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "added_by": {
+            "title": "Added By",
+            "type": "string"
+          },
+          "added_kind": {
+            "enum": [
+              "person",
+              "agent"
+            ],
+            "title": "Added Kind",
+            "type": "string"
+          },
+          "on_behalf_of": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "An agent's registration: the person it acts for",
+            "title": "On Behalf Of"
+          },
+          "added_at": {
+            "title": "Added At",
+            "type": "number"
+          },
+          "enabled_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enabled By"
+          },
+          "enabled_at": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enabled At"
+          },
+          "withdrawn_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Withdrawn By"
+          },
+          "withdrawn_at": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Withdrawn At"
+          },
+          "words": {
+            "$ref": "#/components/schemas/ProcedureWords"
+          },
+          "trusted": {
+            "description": "You (this credential's principal) trust this version's code in this project",
+            "title": "Trusted",
+            "type": "boolean"
+          },
+          "mine": {
+            "description": "You registered this version, or your agent registered it for you; a client asks no trust question for it",
+            "title": "Mine",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "digest",
+          "name",
+          "version",
+          "version_label",
+          "label",
+          "state",
+          "added_by",
+          "added_kind",
+          "on_behalf_of",
+          "added_at",
+          "enabled_by",
+          "enabled_at",
+          "withdrawn_by",
+          "withdrawn_at",
+          "words",
+          "trusted",
+          "mine"
+        ],
+        "title": "ProcedureVersion",
+        "type": "object"
+      },
+      "ProcedureWords": {
+        "additionalProperties": false,
+        "properties": {
+          "sentence": {
+            "description": "The contract's sentence for this version: what it reads and makes",
+            "title": "Sentence",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "version_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version Label"
+          },
+          "inputs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Inputs",
+            "type": "array"
+          },
+          "outputs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Outputs",
+            "type": "array"
+          },
+          "settings": {
+            "items": {
+              "$ref": "#/components/schemas/ProcedureSettingWords"
+            },
+            "title": "Settings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "sentence",
+          "label",
+          "version_label",
+          "inputs",
+          "outputs",
+          "settings"
+        ],
+        "title": "ProcedureWords",
         "type": "object"
       },
       "ProjectEntry": {
