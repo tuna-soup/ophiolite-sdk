@@ -16,6 +16,7 @@ Without `OPHIOLITE_URL` they work on a synthetic log served on the reader's own 
 | `layers-for-a-gis/` | The layers QGIS opens, read page by page, a path that cannot be placed and why, the paths in plan view |
 | `how-was-this-made/` | Two versions of one result, how each was made, what changed, what was made from the log, and making it again |
 | `open-it-here/` | A result shown by name and version, its exact version opened in the Workspace, and Send again run twice, then refused after a newer version |
+| `well-logs-in-a-bucket/` | A storage folder of logs browsed, added read from your storage each time, and a changed file reported because no copy was kept |
 
 `gallery.json` lists every notebook (slug, title, sentence, modes, data); the documentation site's gallery page is
 generated from it. Each folder holds `notebook.py`, the percent script you edit, and `notebook.ipynb`, built from it:

@@ -5,6 +5,23 @@
 Supported 0.x client over preview contracts, installable from reviewed source.
 No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
 
+- Colleagues sign in to your application (E33, preview API): `ophiolite.oauth_app.OAuthApp(url, application, client_id,
+  redirect_uri, store=FileStore(dir), client_secret=...)` runs your server's own leg with the identity provider
+  (`begin()`/`callback()`: code + PKCE S256 with your registration's client, state and nonce checked), sends the person
+  to Ophiolite's consent page (`consent_url()`/`consented()`), and exchanges the provider token and the consent handle
+  for an opaque application credential (`credential(person)`, `client(person, project)`). Provider tokens, the handle
+  and the credential stay in the server-side store, one private file per person; refreshes of one person are
+  serialised, a rotated refresh token is written before the exchange that uses it, and a lost rotation or a removed
+  approval raises `SignInRequired` or `ConsentRequired`. The map-application template gains `server/sign_in.py`.
+- Buckets as sources (E59, preview API): `client.browse(connection, prefix=None, cursor=None)` answers one page of a
+  storage connection's folder (subfolders, then files with their size, tag, the kind their name suggests and whether
+  it is read in place; `next_cursor` continues it). `client.import_storage(connection, prefix, keep_copy=False, ...)`
+  adds every file below the folder in one upload and returns its `Report`: read from your storage each time, or with
+  `keep_copy=True` added as a copy when the organisation allows copies. The gateway reads each object with your own
+  sign-in to the storage; the SDK sends the connection and each key, never a file byte, and takes no storage key.
+  An object above the deployment's request limit is left out with its sentence (`report.left_out`). Command line:
+  `ophiolite sources browse CONNECTION [--prefix P] [--cursor C]` and `ophiolite sources import CONNECTION [--prefix P]
+  [--keep-copy] --attribution A --rights-confirmed [--report r.csv]`; `list`, `describe` and `read` are unchanged.
 - Grids and GIS files (E56, preview API): `client.read_data` returns `FeatureSet` for map features from a Shapefile,
   a GeoPackage layer or a GeoJSON file (`features` in file order with coordinates as stored, `fields`, `to_frame()`
   with one row per feature), checked offline against the server's rules; ZMAP+, CPS-3 and IRAP grids read as

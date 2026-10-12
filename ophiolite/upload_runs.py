@@ -12,6 +12,11 @@ paths, sizes and digests): files already added are not sent again. `new=True` st
 
 E85: one file is a folder of one, and an https address is read and added by the gateway itself: the SDK sends the
 address, never the file's bytes, and the report names the host and the file, never the address's query string.
+
+E59: a folder of a storage connection (`import_storage`) is read by the gateway too, with your own sign-in to it: the
+SDK sends the connection and each object's key, never a byte or a key of the storage. Each file is either read from your
+storage each time (`keep_copy=False`, a source selection pinned at the bytes read) or added as a copy, which the
+organisation must allow; the report is the same report.
 """
 import base64
 import csv
@@ -25,7 +30,7 @@ import uuid
 import zipfile
 from pathlib import Path, PurePosixPath
 
-from .errors import IntegrityConflict, Refused, ValidationFailed, VerificationFailed
+from .errors import IntegrityConflict, OphioliteError, Refused, ValidationFailed, VerificationFailed
 from .models.api import UploadCheckAnswer, UploadRun, UploadRunsListAnswer, UploadRunStep
 
 HEAD = 65536
@@ -57,8 +62,9 @@ def _sha(value):
 class File:
     """One file of the folder or zip: its path in the upload, size and digest; its bytes are read only when sent.
     A file at an address (E85b) has no bytes here: the gateway fetches it."""
-    def __init__(self, path, size, sha256, read, disk=None, address=None):
+    def __init__(self, path, size, sha256, read, disk=None, address=None, stored=False):
         self.path, self.size, self.sha256, self._read, self.disk, self.address = path, size, sha256, read, disk, address
+        self.stored = stored  # E59: an object of a storage connection, which the gateway reads again
 
     def head(self):
         if self.disk is None: return self._read()[:HEAD]
@@ -82,8 +88,9 @@ class File:
 
 
 class Folder:
-    def __init__(self, name, files, address=None):
+    def __init__(self, name, files, address=None, connection=None, left_out=()):
         self.name, self.files, self.address = name, files, address
+        self.connection, self.left_out = connection, list(left_out)  # E59: the storage connection; [(key, sentence)] not read
 
     def listing(self): return [{'path': f.path, 'bytes': f.size, 'sha256': f.sha256} for f in self.files]
 
@@ -219,6 +226,7 @@ class Report:
     def __init__(self, view):
         self.view = view
         self.run_id, self.state, self.label, self.items = view['run_id'], view['state'], view['label'], view['items']
+        self.left_out = []  # E59: [(key, sentence)] of a storage folder's objects the gateway did not read
         counts = {k.replace('_', '-'): v for k, v in view['counts'].items()}
         self.counts = {k: counts[k] for k in OUTCOMES}
         if counts['cancelled']: self.counts['cancelled'] = counts['cancelled']
@@ -316,6 +324,74 @@ class UploadRuns:
         got = self.check(address)['fetched']
         return Folder(got['host'][:160], [File(got['name'], got['bytes'], got['sha256'], None, address=address)], address)
 
+    # E59: a folder of a storage connection, read by the gateway with your own sign-in
+
+    def check_object(self, connection, key):
+        """E59: what the gateway reads of the object KEY of a storage connection (its kind, what it states and leaves
+        open, and its size and digest); nothing is added. Its refusals carry the deployment's sentence."""
+        header = {'project_id': self.client.project, 'mode': 'whole', 'bucket': {'connection_id': connection, 'key': key}}
+        extra = {'Content-Type': 'application/octet-stream', 'X-Ophiolite-Upload': base64.b64encode(json.dumps(header, separators=(',', ':')).encode()).decode()}
+        return _checked(UploadCheckAnswer, self.client._post_bytes('upload-runs', 'check', b'', extra_headers=extra, retry=True), 'file check')
+
+    def stored(self, connection, prefix=None):
+        """E59: every object below PREFIX (and its subfolders) as a folder the gateway reads, each checked by it. An object
+        the gateway does not read (larger than the deployment's request limit) is left out with its sentence in
+        `left_out`; an empty object is listed as the empty file it is."""
+        found, pending, seen = {}, [prefix], {prefix}
+        while pending:
+            at, cursor = pending.pop(0), None
+            while True:
+                page = self.client.browse(connection, at, cursor)
+                found.update((i['key'], i['size']) for i in page['items'])
+                if len(found) > MAX_FILES: _too_many(len(found))
+                for sub in page['folders']:
+                    if sub not in seen and (at is None or sub.startswith(at)): seen.add(sub); pending.append(sub)
+                cursor = page['next_cursor']
+                if not cursor: break
+        _too_many(len(found))
+        files, left_out = [], []
+        for key in sorted(found):
+            if found[key] == 0:
+                files.append(File(key, 0, hashlib.sha256(b'').hexdigest(), None, stored=True)); continue
+            try: got = self.check_object(connection, key)['fetched']
+            except OphioliteError as error:
+                if not str(error.code).startswith('bucket-') or error.code in ('bucket-refused', 'bucket-offline', 'bucket-busy'): raise
+                left_out.append((key, error.server_message or error.message)); continue
+            files.append(File(key, got['bytes'], got['sha256'], None, stored=True))
+        name = (prefix or '').rstrip('/').rsplit('/', 1)[-1] or connection
+        return Folder(name[:160], files, connection=connection, left_out=left_out)
+
+    def import_storage(self, connection, prefix=None, *, keep_copy=False, attribution, rights_confirmed, audience=(), well_notes='',
+                       declare=None, skip_decisions=False, associate_matches=False, new=False, progress=None):
+        """E59: add every file below PREFIX of a storage connection in one upload and return its Report. Without
+        `keep_copy` each file is read from your storage each time (pinned at the bytes read now); with it each file is
+        added as a copy, which the organisation's copy declaration must allow (its audience bounds `audience`). Objects
+        the gateway does not read are in `report.left_out`."""
+        if rights_confirmed is not True:
+            raise ValidationFailed(['Confirm that you may retain these files, derive results and share them within the audience.'])
+        checked_declarations(declare)
+        folder = self.stored(connection, prefix)
+        checked_declarations(declare, folder)
+        custody = {'connection_id': connection, 'custody': 'copy' if keep_copy else 'read-in-place', 'keys': [f.path for f in folder.files]}
+        run = None if new else self.unfinished(folder)
+        if run is None:
+            body = {'command_id': uuid.uuid4().hex, 'folder_name': folder.name, 'files': folder.listing(), 'attribution': attribution,
+                    'well_notes': well_notes, 'audience': list(audience), 'rights_confirmed': True, 'bucket': custody}
+            run = self._call('start', body, UploadRun)['run_id']
+        report = self.send(run, folder, progress)
+        for _ in range(SENDS - 1):
+            if not self.answer(run, report, declare, folder): break
+            report = self.send(run, folder, progress)
+        if skip_decisions:
+            ordinals = [i['ordinal'] for i in self.status(run).items if i['state'] == 'needs-decision' and i['role'] == 'primary']
+            if ordinals: self.decide(run, ordinals, 'skip')
+            report = self.send(run, folder, progress)
+        if associate_matches:
+            links = [(i['ordinal'], i['proposal']['entity_id']) for i in report.items if i.get('proposal')]
+            if links: report, _ = self.associate(run, links)
+        report.left_out = folder.left_out
+        return report
+
     def upload(self, path, *, attribution, rights_confirmed, audience=(), well_notes='', declare=None, skip_decisions=False,
                associate_matches=False, new=False, progress=None):
         """Upload a file, a folder, a .zip or an https address and return its Report. `declare` {kind: {field: value}} answers the files of that
@@ -395,15 +471,16 @@ class UploadRuns:
                 if progress: progress(self.status(run_id))
         return self.status(run_id)
 
-    def _post_file(self, run_id, ordinal, mode, raw, attempt=None, address=None):
+    def _post_file(self, run_id, ordinal, mode, raw, attempt=None, address=None, stored=False):
         header = {'project_id': self.client.project, 'run_id': run_id, 'ordinal': ordinal, 'mode': mode, **({'attempt': attempt} if attempt else {}),
-                  **({'address': address} if address else {})}
+                  **({'address': address} if address else {}), **({'bucket': True} if stored else {})}
         extra = {'Content-Type': 'application/octet-stream', 'X-Ophiolite-Upload': base64.b64encode(json.dumps(header, separators=(',', ':')).encode()).decode()}
         self.sent_bytes += len(raw)
         return _checked(UploadRunStep, self.client._post_bytes('upload-runs', 'file', raw, extra_headers=extra, retry=mode == 'head'), 'folder upload file')
 
     def _file(self, run_id, ordinal, files):
         if files[ordinal].address: return self._post_file(run_id, ordinal, 'head', b'', address=files[ordinal].address)  # the gateway fetches it again
+        if files[ordinal].stored: return self._post_file(run_id, ordinal, 'head', b'', stored=True)  # E59: the gateway reads the object again
         step = self._post_file(run_id, ordinal, 'head', files[ordinal].head())
         if step['step'] != 'send': return step
         members = step['send']['members']

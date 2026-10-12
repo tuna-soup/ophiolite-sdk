@@ -27,6 +27,9 @@ def __getattr__(name):
     if name == 'WrittenOriginal':  # E30b
         from .writers import WrittenOriginal
         return WrittenOriginal
+    if name in ('OAuthApp', 'oauth_app'):  # E33: colleagues sign in to your application's server
+        from . import oauth_app
+        return getattr(oauth_app, name)
     if name in ('Client', 'CurveSet', 'Credential'):
         from . import client
         return getattr(client, name)
