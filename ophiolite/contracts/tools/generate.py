@@ -44,8 +44,8 @@ def schemas():
     from project_gateway.domain import RelationshipRegistry, Entity, EntityAssets, Lineage
     from project_gateway.scientific_assets import DerivationRecord, Parameters  # E94
     from project_gateway.scientific_assets import CheckRecord  # E96
-    from project_gateway.scientific_assets import TableFile  # E58b
     from project_gateway.scientific_assets import CurveColumnsHeader  # E100b
+    from project_gateway.scientific_assets import TableFile  # E58b
     for model in (CheckRecord, DerivationRecord, Parameters, Asset, Curve, ScientificContext, AssetSummary, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface, PointSet, PolylineSet, SeismicVolume, SeismicSlice,
                   RelationshipRegistry, Entity, EntityAssets, Lineage, ImportRecipe, PointSet2, WellLocationUpload, WellLocation,
                   Wavelet, ModelSection, SeismicSection, TimeDepth, FeatureSet, CurveColumnsHeader, TableFile):  # E53; E57; E56; E100b; E58b
@@ -411,6 +411,7 @@ TARGETS = {'table-target-schema.json': 'targets/table-target-schema.json',  # E8
            'vocabulary/v1/mapping-check-words.json': 'targets/mapping-check-words.json',
            'vocabulary/v1/coordinate-systems.json': 'coordinate_systems.json',
            'vocabulary/v1/coordinate-systems.NOTICE': 'coordinate_systems.NOTICE',
+           'vocabulary/v1/qgis-reach.json': 'reach/v1/qgis-reach.json',  # E91: what QGIS can open, read by the What's next card
            **{'targets/v1/%s.json' % name: 'targets/v1/%s.json' % name
               for name in ('wells', 'well-tops', 'deviation-survey', 'point-set', 'time-depth', 'table')}}
 

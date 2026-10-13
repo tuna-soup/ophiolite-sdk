@@ -25,6 +25,7 @@
   {
    "name": "well",
    "label": "Well",
+   "description": "The well the top belongs to, as it is named in this project. Leave the column out when the file holds one well.",
    "noun": "well",
    "kind": "reference",
    "to": "well",
@@ -47,6 +48,7 @@
   {
    "name": "name",
    "label": "Top name",
+   "description": "The name of the top: a formation, a marker or a pick.",
    "noun": "top name",
    "kind": "name",
    "required": true,
@@ -70,6 +72,7 @@
   {
    "name": "md",
    "label": "Measured depth",
+   "description": "Measured depth along the wellbore, in the unit named in the column header.",
    "noun": "measured depth",
    "kind": "number",
    "dimension": "length",
@@ -93,6 +96,7 @@
   {
    "name": "tvd",
    "label": "Vertical depth",
+   "description": "True vertical depth, in the unit named in the column header. Leave it empty when it is not known.",
    "noun": "vertical depth",
    "kind": "number",
    "dimension": "length",
@@ -111,6 +115,7 @@
   {
    "name": "source",
    "label": "Source",
+   "description": "Where the pick comes from, for example an interpreter or a report. Leave it empty when it is not known.",
    "noun": "source",
    "kind": "text",
    "required": false,

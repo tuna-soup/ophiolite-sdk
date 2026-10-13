@@ -5,6 +5,21 @@
 Supported 0.x client over preview contracts, installable from reviewed source.
 No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
 
+- Tables kept as they are and file downloads (E58b, preview API): `client.imports.from_table(path, "table",
+  columns={column: {'unit', 'quantity', 'missing', 'description'}})` keeps a CSV, Excel or Parquet file as it is;
+  `client.read_data(asset, revision)` returns `Table` (`rows`, `columns`, `key`, `declarations`, `units`, `not_read`
+  with one warning naming those columns, and `to_frame(missing=, decimal=)` on the frame code of SQL tables read as
+  tables). `client.export_file(asset, revision, path, format=, curves=)` and `Table.download(path, format=)` save an
+  exact revision (a kept table, tops, a trajectory, a point set or a LAS log) as one Parquet, GeoParquet (point sets)
+  or CSV file written by the server; `source.read().download(path, format=)` saves a connected SQL table. Every
+  download is checked against the digest and the revision the server states, through the same partial-file rule as
+  `download_original`, and nothing is saved otherwise; a connected selection that moved since the read is
+  `SourceRevisionDiffers`, one that can no longer be read keeps the server's refusal. No pyarrow is needed to download.
+  Command line: `ophiolite read-data --asset A --revision R --format parquet|geoparquet|csv --out FILE [--curve C]`.
+  Gallery: "A spreadsheet and a database, joined".
+- A scientific read refused with 422 (`Incompatible`) now carries the server's own sentence as its message when the
+  server gives one (for example why an export cannot be written); without one, the message stays "This scientific
+  context is not supported." (H48).
 - Colleagues sign in to your application (E33, preview API): `ophiolite.oauth_app.OAuthApp(url, application, client_id,
   redirect_uri, store=FileStore(dir), client_secret=...)` runs your server's own leg with the identity provider
   (`begin()`/`callback()`: code + PKCE S256 with your registration's client, state and nonce checked), sends the person
@@ -39,18 +54,6 @@ No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
   `2026-11-15T00:00:00Z`); `--json` carries the instant. The gallery notebook "Who has access, and until when" reads
   your own ends and, for a project administrator, who has access through what and until when (`access/effective`);
   the synthetic server answers both. No SDK write method sets an end date.
-- Tables kept as they are and file downloads (E58b, preview API): `client.imports.from_table(path, "table",
-  columns={column: {'unit', 'quantity', 'missing', 'description'}})` keeps a CSV, Excel or Parquet file as it is;
-  `client.read_data(asset, revision)` returns `Table` (`rows`, `columns`, `key`, `declarations`, `units`, `not_read`
-  with one warning naming those columns, and `to_frame(missing=, decimal=)` on the frame code of SQL tables read as
-  tables). `client.export_file(asset, revision, path, format=, curves=)` and `Table.download(path, format=)` save an
-  exact revision (a kept table, tops, a trajectory, a point set or a LAS log) as one Parquet, GeoParquet (point sets)
-  or CSV file written by the server; `source.read().download(path, format=)` saves a connected SQL table. Every
-  download is checked against the digest and the revision the server states, through the same partial-file rule as
-  `download_original`, and nothing is saved otherwise; a connected selection that moved since the read is
-  `SourceRevisionDiffers`, one that can no longer be read keeps the server's refusal. No pyarrow is needed to download.
-  Command line: `ophiolite read-data --asset A --revision R --format parquet|geoparquet|csv --out FILE [--curve C]`.
-  Gallery: "A spreadsheet and a database, joined".
 - Wells from SQL Server and Oracle (E61): a source selected from a SQL Server or Oracle table reads like any other
   (`client.source(id).read(expect_revision=...).to_frame()`). Gallery: "Wells from SQL Server and Oracle".
 - Grids and GIS files (E56, preview API): `client.read_data` returns `FeatureSet` for map features from a Shapefile,

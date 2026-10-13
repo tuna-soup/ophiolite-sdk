@@ -115,6 +115,13 @@ def test_cannot_read_here_damaged_and_map_unavailable_sentences(project, tmp_pat
     assert not (tmp_path / 'o').exists() and not list(tmp_path.glob('.o.partial-*'))
 
 
+def test_get_into_a_folder_whose_parent_does_not_exist_yet(project, tmp_path):
+    """E91: What's next writes `output="data/<item name>"`; run in a fresh folder, `data` is made, not refused."""
+    e = ex(project, tmp_path / 'w')
+    e.get('poro', output=tmp_path / 'data' / 'Porosity')
+    assert (tmp_path / 'data' / 'Porosity' / 'data.bin').read_bytes() == V1 and not list((tmp_path / 'data').glob('.Porosity.partial-*'))
+
+
 @pytest.mark.parametrize('error,code,sentence,exit', [
     ('expired', 'sign-in-needed', 'Your access key is not accepted any more. Ask for a new one.', 3),
     ('busy', 'rate-limited', 'The project is busy. Wait a moment and run this again.', 5),

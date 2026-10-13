@@ -25,6 +25,7 @@
   {
    "name": "well",
    "label": "Well",
+   "description": "The well the table belongs to, as it is named in this project. Leave the column out when the file holds one well.",
    "noun": "well",
    "kind": "reference",
    "to": "well",
@@ -47,6 +48,7 @@
   {
    "name": "depth",
    "label": "Depth",
+   "description": "Depth of the pair, in the unit named in the column header.",
    "noun": "depth",
    "kind": "number",
    "dimension": "length",
@@ -68,6 +70,7 @@
   {
    "name": "time",
    "label": "Time",
+   "description": "Seismic travel time of the pair, in milliseconds.",
    "noun": "time",
    "kind": "number",
    "dimension": "time",
@@ -90,6 +93,7 @@
   {
    "name": "velocity",
    "label": "Velocity",
+   "description": "Velocity at the pair when the source states one. Leave it empty when it is not known.",
    "noun": "velocity",
    "kind": "number",
    "dimension": "velocity",

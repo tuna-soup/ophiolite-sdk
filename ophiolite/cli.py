@@ -181,6 +181,7 @@ def parser():
     tables.add_argument('name',nargs='?',help='One type, for example well-tops')
     bundle=sub.add_parser('bundle',help='Check or summarize a portable bundle offline (no server or account needed)')
     bundle.add_argument('action',choices=['check','show','pack']);bundle.add_argument('path',type=Path);bundle.add_argument('archive',type=Path,nargs='?',help='pack: the .zip to write')
+    bundle.add_argument('--details',action='store_true',help='show: also the identifiers, checksums and recorded terms')  # E23c (C4)
     export=sub.add_parser('export',help='Export exact revisions into a new portable bundle')
     export.add_argument('--configuration',type=Path,default=Path('configuration.json'))
     export.add_argument('--credentials',type=Path)
@@ -302,6 +303,17 @@ def parser():
     tables.add_argument('--layout',metavar='NAME',help='table: use this project layout\'s mapping (its target is the layout\'s); a layout is never used unless named (E89)')
     newdata=project(sub.add_parser('new-data',help='What new files start with in this project: who can see them, depth reference, coordinate system, units and attribution (E90)'))
     newdata.add_argument('--set',action='append',default=[],metavar='KEY=VALUE',help='An administrator\'s change: visible_to, depth_reference, coordinate_system, unit_system or attribution (repeat)')
+    project(sub.add_parser('templates',help='The table targets you can download a template for, their units and formats (E91)'))
+    tpl=project(sub.add_parser('template',help='Download a template for a table target: its header in your units and one example row the import skips (E91)'))
+    tpl.add_argument('target',help='wells, well-tops, deviation-survey, point-set or time-depth')
+    tpl.add_argument('--format',choices=['csv','xlsx'],default='csv')
+    tpl.add_argument('--length',choices=['m','ft'],default='m',help='The unit of depths and lengths')
+    tpl.add_argument('--crs',help='The coordinate system of X and Y (wells and point sets), for example EPSG:28992')
+    tpl.add_argument('--reference',choices=['KB','GL','MSL','unknown'],help='wells: what the depths are measured from')
+    tpl.add_argument('--output',type=Path,help='Where to write it (default ./TARGET-template.FORMAT)')
+    smp=project(sub.add_parser('sample',help='Start from the NLOG sample: one gamma-ray log and 2,222 wells (project administrators; E91)'))
+    smp.add_argument('action',choices=['start'])
+    smp.add_argument('--command-id',help='The same id returns the same sample run instead of starting another')
     who=project(sub.add_parser('audience',help='Who can see an uploaded original of yours and who can build on it: show it, or change it in one step (E90)'))
     who.add_argument('--asset',required=True,help='The uploaded original\'s asset id')
     who.add_argument('--show',action='store_true',help='Show who can see it (the default when nothing is changed); with --json, a snapshot to change later with --snapshot')
@@ -764,6 +776,27 @@ def _new_data(args,client):
             fields[key]=None if key=='depth_reference' and value in ('','none') else value
         snap=new_data.set_defaults(client,snap,**fields)
     return done(args,'\n'.join(new_data.lines(snap)),{'new_data':snap})
+
+
+def _templates(args,client):
+    """E91: the template list, one template written to a file, or the NLOG sample started and stepped to the end."""
+    from . import table_templates
+    if args.command=='templates':
+        rows=table_templates.listing(client)
+        return done(args,'\n'.join('%s: %s (%s; %s%s)' % (r['target'],r['display_name'],', '.join(r['formats']),' or '.join(r['lengths']),
+                                                         '; choose a coordinate system' if r.get('needs_crs') else '') for r in rows),{'templates':rows})
+    if args.command=='template':
+        made=table_templates.template(client,args.target,args.format,args.length,args.crs,args.reference)
+        path=made.save(args.output)
+        return done(args,'Wrote %s (%d bytes).' % (path,len(made.bytes)),{'path':str(path),'bytes':len(made.bytes),'target':made.target,'format':made.format})
+    def progress(status):
+        if not args.json:print('Adding the sample... %s wells so far.' % (status.get('counts') or {}).get('created',0),file=sys.stderr,flush=True)
+    answer=table_templates.start_sample(client,args.command_id,progress)
+    wells=answer['wells'];log=answer['log']
+    text='%s\nLog %s: %s\nWells: %s, %d added.' % (answer['statement'] or '',log['path'],log['sentence'] or log['state'],wells['state'],(wells.get('counts') or {}).get('created',0))
+    done(args,text,answer)
+    if wells.get('state')!='complete':raise SystemExit(EXIT['conflict'])
+    return answer
 
 
 def _audience(args,client):
@@ -1248,7 +1281,12 @@ def _main(argv=None):
         if args.action=='check':
             return done(args,'Bundle verified: %d exact revisions, %d curves, %d other data. Checksums show integrity, not authorship.' % (len(opened.assets),sum(len(a.curves) for a in opened.assets),sum(a.data is not None for a in opened.assets)),
                         {'verified':True,'revisions':len(opened.assets),'curves':sum(len(a.curves) for a in opened.assets),'other_data':sum(a.data is not None for a in opened.assets)})
-        print(json.dumps({**opened.summary(),'items':[{'asset_id':a.asset_id,'revision':a.revision,'name':a.name,'type':a.type,'curves':sorted(a.curves),'history':a.history,'parent_visibility':a.parent_visibility} for a in opened.assets]},indent=2));return
+        if not args.details:  # E23c (C4, D5): words by default; identifiers, checksums and manifest terms only with --details
+            from .bundle_package import show_words
+            print(show_words(opened));return
+        print(json.dumps({**opened.summary(),'items':[{'asset_id':a.asset_id,'revision':a.revision,'name':a.name,'type':a.type,'curves':sorted(a.curves),'history':a.history,'parent_visibility':a.parent_visibility,
+                                                       **({'package':{'package_digest':a.package.digest,'members':a.package.members,'recipe':a.package.recipe,'decisions':a.package.decisions}} if a.package is not None else {})}
+                                                      for a in opened.assets]},indent=2));return
     _load()
     if args.command=='doctor':return _doctor(args)
     config=configuration(args.configuration)
@@ -1298,6 +1336,7 @@ def _main(argv=None):
         if args.command=='upload':return _upload(args,client)
         if args.command=='new-data':return _new_data(args,client)
         if args.command=='audience':return _audience(args,client)
+        if args.command in ('templates','template','sample'):return _templates(args,client)
         if args.command=='layouts':return _layouts(args,client)
         if args.command=='publish-derived':  # E30b
             from .writers import WrittenOriginal

@@ -3,14 +3,15 @@
   "id": "qgis",
   "display_name": "QGIS",
   "kind": "application",
-  "summary": "Check Ophiolite project maps and surfaces for newer versions in QGIS, get one when you choose, go back one step, and send a QGIS result to the project.",
+  "summary": "Check Ophiolite project maps, surfaces, point sets, fault sticks and map features for newer versions in QGIS, get one when you choose, go back one step, and send a QGIS result to the project.",
   "host": {
     "name": "QGIS",
     "versions": [
       "4.2.2"
     ],
     "os": [
-      "macos"
+      "macos",
+      "linux"
     ]
   },
   "routes": [
@@ -35,6 +36,17 @@
         ],
         "date": "2026-09-25",
         "evidence": "integration:web/docs/src/content/docs/availability.md (Mac QGIS 4.2.2 follow/pin)"
+      },
+      "reach": {
+        "route": "raster",
+        "asset_kinds": [
+          "scalar-map"
+        ],
+        "transport": "map-connection",
+        "slice": null,
+        "client_limits": [
+          "The QGIS plug-in is qualified on macOS only"
+        ]
       }
     },
     {
@@ -78,6 +90,17 @@
         "platforms": [],
         "date": null,
         "evidence": null
+      },
+      "reach": {
+        "route": "raster",
+        "asset_kinds": [
+          "regular-grid-surface"
+        ],
+        "transport": "map-connection",
+        "slice": null,
+        "client_limits": [
+          "Through the QGIS plug-in"
+        ]
       }
     },
     {
@@ -101,6 +124,413 @@
         "platforms": [],
         "date": null,
         "evidence": null
+      },
+      "reach": {
+        "route": "raster",
+        "asset_kinds": [
+          "triangulated-surface"
+        ],
+        "transport": "map-connection",
+        "slice": null,
+        "client_limits": [
+          "Through the QGIS plug-in, as a mesh"
+        ]
+      }
+    },
+    {
+      "profile": "well-location/1",
+      "data": "Wells",
+      "direction": "read",
+      "exact_old_revisions": "unavailable",
+      "change_detection": "none",
+      "losses": [
+        "A well without coordinates is left out of the layer",
+        "Display styling is QGIS-side and not returned"
+      ],
+      "unsupported": [
+        "editing in place",
+        "sending a layer from QGIS"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-09-30",
+        "evidence": "integration:docs/verification/E46-qgis-4.2.2-2026-09-30.md (QGIS 4.2.2 headless on Linux: 205 located wells as the layer Wells)"
+      },
+      "reach": {
+        "route": "features",
+        "collections": [
+          "wells"
+        ],
+        "layer": "Wells",
+        "asset_kinds": [
+          "well-location"
+        ],
+        "transport": "ogc-api-features",
+        "slice": "E29",
+        "client_limits": [
+          "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
+        ]
+      }
+    },
+    {
+      "profile": "well-tops-csv/1",
+      "data": "Formation tops",
+      "direction": "read",
+      "exact_old_revisions": "unavailable",
+      "change_detection": "explicit",
+      "losses": [
+        "Opened as an OGC API - Features layer: each top at its wellbore’s location, the newest version you may read",
+        "A top whose wellbore has no location you may read is listed without a place on the map",
+        "Display styling is QGIS-side and not returned"
+      ],
+      "unsupported": [
+        "editing in place",
+        "an older version of the item"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-10-10",
+        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)"
+      },
+      "reach": {
+        "route": "features",
+        "collections": [
+          "tops"
+        ],
+        "layer": "Tops",
+        "asset_kinds": [
+          "well-tops"
+        ],
+        "transport": "ogc-api-features",
+        "slice": "E65",
+        "client_limits": [
+          "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
+        ]
+      }
+    },
+    {
+      "profile": "deviation-csv/1",
+      "data": "Wellbore paths",
+      "direction": "read",
+      "exact_old_revisions": "unavailable",
+      "change_detection": "explicit",
+      "losses": [
+        "Opened as an OGC API - Features layer: each survey drawn from its wellbore’s location by minimum curvature, the newest version you may read",
+        "A survey from true north, or one that does not start at its depth datum, is listed without a line",
+        "Display styling is QGIS-side and not returned"
+      ],
+      "unsupported": [
+        "editing in place",
+        "an older version of the item"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-10-10",
+        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)"
+      },
+      "reach": {
+        "route": "features",
+        "collections": [
+          "wellbore-paths"
+        ],
+        "layer": "Wellbore paths",
+        "asset_kinds": [
+          "trajectory"
+        ],
+        "transport": "ogc-api-features",
+        "slice": "E65",
+        "client_limits": [
+          "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
+        ]
+      }
+    },
+    {
+      "profile": "points-csv/1",
+      "data": "Point set",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "polling",
+      "losses": [
+        "Points without a height are drawn flat; their height field is empty",
+        "Display styling is QGIS-side and not returned",
+        "Opened as a GeoPackage copy on this computer; edits stay in that copy until you send them or keep them as a separate layer"
+      ],
+      "unsupported": [
+        "a point set whose coordinate system is not stated",
+        "following the newest version automatically"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-10-10",
+        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)"
+      },
+      "reach": {
+        "route": "features",
+        "collections": [
+          "point-sets"
+        ],
+        "layer": "Point sets",
+        "asset_kinds": [
+          "point-set"
+        ],
+        "transport": "ogc-api-features",
+        "slice": "E65",
+        "client_limits": [
+          "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
+        ]
+      }
+    },
+    {
+      "profile": "opendtect-faultsticks/1",
+      "data": "Fault sticks",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "polling",
+      "losses": [
+        "Opened as one line per stick, its points in their stored order",
+        "Display styling is QGIS-side and not returned",
+        "Opened as a GeoPackage copy on this computer; edits stay in that copy until you send them or keep them as a separate layer"
+      ],
+      "unsupported": [
+        "a set of sticks whose coordinate system is not stated",
+        "following the newest version automatically"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-10-11",
+        "evidence": "integration:docs/verification/E71b-qgis-vector-journey.json (QGIS 4.2.2 on Linux, the plug-in holds and reads each kind)"
+      },
+      "reach": {
+        "route": "features",
+        "collections": [
+          "lines"
+        ],
+        "layer": "Lines",
+        "asset_kinds": [
+          "polyline-set"
+        ],
+        "transport": "ogc-api-features",
+        "slice": "E65",
+        "client_limits": [
+          "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
+        ]
+      }
+    },
+    {
+      "profile": "geojson/1",
+      "data": "Map features",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "polling",
+      "losses": [
+        "Measured values (M) on shapes are not kept",
+        "A field whose name QGIS reserves is renamed attribute_<name>",
+        "Display styling is QGIS-side and not returned",
+        "Opened as a GeoPackage copy on this computer; edits stay in that copy until you send them or keep them as a separate layer"
+      ],
+      "unsupported": [
+        "a layer that does not state its coordinate system or coordinate order",
+        "following the newest version automatically"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-10-10",
+        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)"
+      },
+      "reach": {
+        "route": "features",
+        "collections": [
+          "feature-points",
+          "feature-lines",
+          "feature-polygons"
+        ],
+        "layer": "Feature points, Feature lines or Feature polygons",
+        "asset_kinds": [
+          "feature-set"
+        ],
+        "transport": "ogc-api-features",
+        "slice": "E65",
+        "client_limits": [
+          "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
+        ]
+      }
+    },
+    {
+      "profile": "petrel-points-attributes/1",
+      "data": "Point set",
+      "direction": "read",
+      "exact_old_revisions": "unavailable",
+      "change_detection": "none",
+      "losses": [
+        "Attributes beyond the height are properties",
+        "Display styling is QGIS-side and not returned"
+      ],
+      "unsupported": [
+        "editing in place",
+        "sending a layer from QGIS"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-10-11",
+        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)"
+      },
+      "reach": {
+        "route": "features",
+        "collections": [
+          "point-sets"
+        ],
+        "layer": "Point sets",
+        "asset_kinds": [
+          "point-set"
+        ],
+        "transport": "ogc-api-features",
+        "slice": "E65",
+        "client_limits": [
+          "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
+        ]
+      }
+    },
+    {
+      "profile": "opendtect-horizon-ascii/1",
+      "data": "Point set",
+      "direction": "read",
+      "exact_old_revisions": "unavailable",
+      "change_detection": "none",
+      "losses": [
+        "Attributes beyond the height are properties",
+        "Display styling is QGIS-side and not returned"
+      ],
+      "unsupported": [
+        "editing in place",
+        "sending a layer from QGIS"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-10-11",
+        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)"
+      },
+      "reach": {
+        "route": "features",
+        "collections": [
+          "point-sets"
+        ],
+        "layer": "Point sets",
+        "asset_kinds": [
+          "point-set"
+        ],
+        "transport": "ogc-api-features",
+        "slice": "E65",
+        "client_limits": [
+          "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
+        ]
+      }
+    },
+    {
+      "profile": "esri-shapefile/1",
+      "data": "Map features",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "polling",
+      "losses": [
+        "Measured values (M) on shapes are not kept",
+        "A field whose name QGIS reserves is renamed attribute_<name>",
+        "Display styling is QGIS-side and not returned",
+        "Opened as a GeoPackage copy on this computer; edits stay in that copy until you send them or keep them as a separate layer"
+      ],
+      "unsupported": [
+        "a layer that does not state its coordinate system or coordinate order",
+        "following the newest version automatically"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-10-11",
+        "evidence": "integration:docs/verification/E71b-qgis-vector-journey.json (QGIS 4.2.2 on Linux, the plug-in holds and reads each kind)"
+      },
+      "reach": {
+        "route": "features",
+        "collections": [
+          "feature-points",
+          "feature-lines",
+          "feature-polygons"
+        ],
+        "layer": "Feature points, Feature lines or Feature polygons",
+        "asset_kinds": [
+          "feature-set"
+        ],
+        "transport": "ogc-api-features",
+        "slice": "E65",
+        "client_limits": [
+          "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
+        ]
+      }
+    },
+    {
+      "profile": "ogc-geopackage/1",
+      "data": "Map features",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "polling",
+      "losses": [
+        "Measured values (M) on shapes are not kept",
+        "A field whose name QGIS reserves is renamed attribute_<name>",
+        "Display styling is QGIS-side and not returned",
+        "Opened as a GeoPackage copy on this computer; edits stay in that copy until you send them or keep them as a separate layer"
+      ],
+      "unsupported": [
+        "a layer that does not state its coordinate system or coordinate order",
+        "following the newest version automatically"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-10-11",
+        "evidence": "integration:docs/verification/E71b-qgis-vector-journey.json (QGIS 4.2.2 on Linux, the plug-in holds and reads each kind)"
+      },
+      "reach": {
+        "route": "features",
+        "collections": [
+          "feature-points",
+          "feature-lines",
+          "feature-polygons"
+        ],
+        "layer": "Feature points, Feature lines or Feature polygons",
+        "asset_kinds": [
+          "feature-set"
+        ],
+        "transport": "ogc-api-features",
+        "slice": "E65",
+        "client_limits": [
+          "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
+        ]
       }
     }
   ],
