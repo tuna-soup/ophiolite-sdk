@@ -193,6 +193,69 @@
                 "pattern": "^(integration|platform|connectors|sdk|workspace):[A-Za-z0-9_./-]+( \\(.{1,200}\\))?$"
               }
             }
+          },
+          "reach": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "route",
+              "asset_kinds",
+              "transport"
+            ],
+            "description": "E91: how a person opens this route in the host application, for the What's next card (reach/v1/qgis-reach.json is generated from it).",
+            "properties": {
+              "route": {
+                "enum": [
+                  "features",
+                  "raster"
+                ]
+              },
+              "collections": {
+                "type": "array",
+                "maxItems": 4,
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9-]{1,40}$"
+                },
+                "description": "The OGC API - Features collections the layer comes from (features route)."
+              },
+              "layer": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              },
+              "asset_kinds": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 8,
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9-]{1,40}$"
+                }
+              },
+              "transport": {
+                "enum": [
+                  "ogc-api-features",
+                  "map-connection"
+                ]
+              },
+              "slice": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^E[0-9]+[a-z0-9]*$"
+              },
+              "client_limits": {
+                "type": "array",
+                "maxItems": 6,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              }
+            }
           }
         }
       }

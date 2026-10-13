@@ -25,6 +25,7 @@
   {
    "name": "id",
    "label": "Well identifier",
+   "description": "The identifier that names the well everywhere, for example the borehole code. Each well appears once.",
    "noun": "well identifier",
    "kind": "identifier",
    "entity": "well",
@@ -45,6 +46,7 @@
   {
    "name": "name",
    "label": "Well name",
+   "description": "The name people use for the well.",
    "noun": "well name",
    "kind": "name",
    "required": true,
@@ -63,6 +65,7 @@
   {
    "name": "x",
    "label": "Surface X",
+   "description": "Easting of the well at the surface, in the coordinate system named in the column header.",
    "noun": "X",
    "kind": "coordinate",
    "axis": "x",
@@ -83,6 +86,7 @@
   {
    "name": "y",
    "label": "Surface Y",
+   "description": "Northing of the well at the surface, in the coordinate system named in the column header.",
    "noun": "Y",
    "kind": "coordinate",
    "axis": "y",
@@ -103,6 +107,7 @@
   {
    "name": "depth",
    "label": "Depth",
+   "description": "The well's final depth, in the unit named in the column header. Leave it empty when it is not known.",
    "noun": "depth",
    "kind": "number",
    "dimension": "length",
@@ -122,6 +127,7 @@
   {
    "name": "operator",
    "label": "Operating organization",
+   "description": "The organization that operates or operated the well. Leave it empty when it is not known.",
    "noun": "operating organization",
    "kind": "text",
    "required": false,

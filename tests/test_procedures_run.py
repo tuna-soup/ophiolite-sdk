@@ -374,4 +374,4 @@ def test_every_earlier_subcommand_keeps_its_name_and_help():
     sub = next(a for a in cli.parser()._actions if isinstance(a, argparse._SubParsersAction))
     now = {choice.dest: choice.help for choice in sub._choices_actions}
     assert {name: now.get(name) for name in frozen} == frozen
-    assert set(now) - set(frozen) == {'procedures', 'new-data', 'audience'}  # E90 adds the last two
+    assert set(now) - set(frozen) == {'procedures', 'new-data', 'audience', 'templates', 'template', 'sample'}  # E90 adds new-data and audience; E91 templates, template and sample

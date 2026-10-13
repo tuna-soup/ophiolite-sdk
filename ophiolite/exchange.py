@@ -435,6 +435,7 @@ class Exchange:
                 facts = {'name': name, 'folder': str(output)}
                 lock.__exit__(None, None, None); lock = None
                 return Outcome('already-latest', self._say('already-latest', facts), facts, {'asset_id': item_id, 'revision': head})
+            if output is not None: output.parent.mkdir(parents=True, exist_ok=True)  # E91: the card's `data/<item name>` in a new folder
             staging = output.with_name('.%s.partial-%s' % (output.name, uuid.uuid4().hex[:8])) if output is not None else None
             try:
                 try: got = self.transport.fetch(item, head, staging, **how)

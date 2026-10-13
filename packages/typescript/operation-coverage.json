@@ -2238,6 +2238,24 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/templates/csv",
+    "function": "postProjectsProjectTemplatesCsv",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/templates/list",
+    "function": "postProjectsProjectTemplatesList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/templates/xlsx",
+    "function": "postProjectsProjectTemplatesXlsx",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/upload-runs/associate",
     "function": "postProjectsProjectUploadRunsAssociate",
     "request": "schema",
@@ -2276,6 +2294,12 @@
   {
     "operation": "POST /api/v1/projects/{project}/upload-runs/list",
     "function": "postProjectsProjectUploadRunsList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/upload-runs/sample",
+    "function": "postProjectsProjectUploadRunsSample",
     "request": "schema",
     "response": "schema"
   },
