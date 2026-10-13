@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.32.0",
+  "version": "1.33.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -1295,6 +1295,12 @@
       "kind": "vocabulary",
       "path": "vocabulary/v1/mapping-check-words.json",
       "title": "Mapping check codes: severity, sentence templates and parameters, one per code (E86)"
+    },
+    {
+      "id": "ophiolite.qgis-reach/1",
+      "kind": "vocabulary",
+      "path": "vocabulary/v1/qgis-reach.json",
+      "title": "What QGIS can open, per profile and route, and the sentences the What's next card says (E91)"
     },
     {
       "id": "ophiolite.coordinate-systems/1",
