@@ -33,5 +33,5 @@ def test_each_engine_document_is_pinned_registered_and_the_connectors_bytes(name
 
 
 def test_the_snapshot_names_the_registry_version_with_both_documents():
-    # 1.32.0 is E58b's; E61 takes 1.33.0, the registry after train .91 with both engine documents (Platform a7769bb)
-    assert json.loads((CONTRACTS / 'SOURCE.json').read_text())['registry_version'] == json.loads((CONTRACTS / 'registry.json').read_text())['version'] == '1.33.0'
+    # 1.32.0 is E91's (.93), 1.33.0 is E58b's; E61 takes 1.34.0 (rulings.md, 13 October)
+    assert json.loads((CONTRACTS / 'SOURCE.json').read_text())['registry_version'] == json.loads((CONTRACTS / 'registry.json').read_text())['version'] == '1.34.0'
