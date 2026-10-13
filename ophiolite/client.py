@@ -1,5 +1,6 @@
 """Bounded reads of exact scientific revisions. No implicit login or cache access."""
 import gc
+import hashlib
 import json
 import math
 import os
@@ -122,6 +123,23 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
                                        declare=declare,skip_decisions=skip_decisions,associate_matches=link_wellbore,new=new,progress=progress,
                                        use_project_defaults=use_project_defaults)
 
+    def templates(self):
+        """E91: the table targets with a template (ophiolite.table_templates): target, display name, lengths, formats and
+        whether a coordinate system must be chosen."""
+        from . import table_templates
+        return table_templates.listing(self)
+
+    def template(self,target,format='csv',*,length='m',crs=None,reference=None):
+        """E91: the template the deployment renders for `target` ('csv' or 'xlsx'), with `.bytes`, `.filename`, `.save(path)`."""
+        from . import table_templates
+        return table_templates.template(self,target,format,length,crs,reference)
+
+    def start_sample(self,*,command_id=None,progress=None):
+        """E91: add the NLOG start sample (a project administrator): the gamma-ray log through an upload run and the
+        2,222 wells through a table import, stepped here to the end; the same command_id answers the same run."""
+        from . import table_templates
+        return table_templates.start_sample(self,command_id,progress)
+
     def new_data_defaults(self):
         """E90: what new files start with in this project (ophiolite.new_data): the five settings and their `revision`."""
         from . import new_data
@@ -208,6 +226,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
                         from . import application_transport as policy
                         meta=policy.envelope(response)  # E31: the server's code, remedy, docs and request id, read with a bound
                         kind,message=categories.get(response.status_code,(Unavailable,'Scientific read failed. Check service access and retry.'))
+                        if response.status_code==422 and meta.get('message'):message=meta['message']  # H48: the server's reason, not the generic sentence
                         if kind is Busy:raise Busy(message,meta.get('remedy',''),status=response.status_code,retry_after=delay,code=meta.get('code'),**policy.carried(meta))
                         raise kind(message,meta.get('remedy',''),status=response.status_code,code=meta.get('code'),**policy.carried(meta))
                     if answer is not None:answer.update({k.lower():v for k,v in response.headers.items() if k.lower() in ('content-range','x-content-sha256','etag','x-ophiolite-access-generation','x-ophiolite-revision','content-disposition')})  # E100a: window validators; E58b: a file's revision and name
@@ -359,6 +378,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
             if not curves:  # E11: well tops, trajectories and grids have no curves (bundle 2)
                 read=self.read_data(asset,revision)
                 if read.type=='seismic-volume':raise Refused('A seismic volume is exported as chosen slices (export_slices); the complete volume is not exported.')
+                if read._wire_descriptor.get('package') is not None:read.package_rows=self._package_rows(asset,revision,read._wire_descriptor)  # E23c (C4)
                 items.append(({'asset_id':asset,'revision':revision,'curves':[]},read));continue
             items.append(({'asset_id':asset,'revision':revision,'curves':list(curves)},self.read(asset,revision,list(curves))))
         found,omitted=self._bundle_groups(items) if groups else (None,None)
@@ -367,6 +387,26 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
             import warnings
             warnings.warn('Wells and wellbores were left out of this bundle: '+left_out+'.',UserWarning,stacklevel=2)
         return write_bundle(destination,items,groups=found,groups_omitted=omitted,graph=graph,entities_omitted=left_out)
+
+    def _package_rows(self,asset,revision,descriptor):
+        """E23c (C4): the rows a package read travels with in a bundle (package manifest, interpretation, each companion's exact
+        bytes), read right after the data with the caller's own credential and the same authorization as the artifact, so a grant
+        revoked in between fails the export. Each row is checked against the record the descriptor names: a companion against its
+        member record, the package and interpretation rows against the revision manifest listing when there is one."""
+        from .bundle import MAX_FILE_BYTES
+        from .bundle_package import rows_needed
+        from .errors import IntegrityConflict
+        path=self.prefix+'/'+quote(asset,safe='')+'/revisions/'+quote(revision,safe='')
+        listed={r['id']:(r['sha256'],r['bytes']) for r in (descriptor.get('manifest') or {}).get('representations',[])}
+        records={'companion:'+m['name']:(m['sha256'],m['bytes']) for m in descriptor['package']['members']}
+        rows={}
+        for ident in rows_needed(descriptor):
+            expected=records.get(ident) or listed.get(ident)
+            raw=self._get(path+'/representations/'+quote(ident,safe=''),expected[1] if expected else MAX_FILE_BYTES)
+            if expected is not None and (hashlib.sha256(raw).hexdigest(),len(raw))!=expected:
+                raise IntegrityConflict('A package file of this revision is not the one its record names. Nothing was written.')
+            rows[ident]=raw
+        return rows
 
     def _bundle_graph(self,items):
         """E20: the wells and wellbores (you may read) that exported revisions belong to, their wells one
@@ -420,7 +460,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
     def _headers(self):
         return _client_header.stamp(self.credential.headers(self.url,self.project) if self.credential else {})  # E93
 
-    def _post_bytes(self,area,operation,raw,*,extra_headers=None,headers=None,retry=False,expected_context=None,timeout=None):
+    def _post_bytes(self,area,operation,raw,*,extra_headers=None,headers=None,retry=False,expected_context=None,timeout=None,answer_bytes=False):
         from . import publish as planning,application_transport as policy
         from .errors import RecoveryUnavailable
         url,project=self.url,self.project
@@ -442,7 +482,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
                     for chunk in response.iter_bytes():
                         content.extend(chunk)
                         if len(content)>policy.MAX_RESPONSE:raise policy.too_large()
-                    return policy.decode(bytes(content))
+                    return bytes(content) if answer_bytes else policy.decode(bytes(content))  # E91: a template is a file, never decoded
             except httpx.HTTPError:
                 if attempt+1<attempts:continue
                 policy.disconnected(operation)

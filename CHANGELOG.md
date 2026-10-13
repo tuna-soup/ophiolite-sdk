@@ -17,6 +17,9 @@ No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
   `SourceRevisionDiffers`, one that can no longer be read keeps the server's refusal. No pyarrow is needed to download.
   Command line: `ophiolite read-data --asset A --revision R --format parquet|geoparquet|csv --out FILE [--curve C]`.
   Gallery: "A spreadsheet and a database, joined".
+- A scientific read refused with 422 (`Incompatible`) now carries the server's own sentence as its message when the
+  server gives one (for example why an export cannot be written); without one, the message stays "This scientific
+  context is not supported." (H48).
 - Colleagues sign in to your application (E33, preview API): `ophiolite.oauth_app.OAuthApp(url, application, client_id,
   redirect_uri, store=FileStore(dir), client_secret=...)` runs your server's own leg with the identity provider
   (`begin()`/`callback()`: code + PKCE S256 with your registration's client, state and nonce checked), sends the person

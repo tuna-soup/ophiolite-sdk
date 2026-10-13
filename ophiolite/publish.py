@@ -118,13 +118,14 @@ CHECK_OPERATIONS={'checks':{'publish','list','compare','publishers'}}  # E96: ch
 PROCEDURE_OPERATIONS={'procedures':{'register','list','get','bundle','enable','withdraw','trust'}}  # E105b: the project catalogue
 REPORT_OPERATIONS={'activity':{'report'}}  # E70b: a confirmed `get` reports which version this holder received
 IMPORT_OPERATIONS={'well-imports':{'preview','start','step','status','list','cancel'},  # E42a: import a copy of an approved well table
-                   'upload-runs':{'start','file','check','file-parts','status','list','cancel','associate','decide','share'},  # E55: a folder upload; E85: check
+                   'upload-runs':{'start','file','check','file-parts','status','list','cancel','associate','decide','share','sample'},  # E55: a folder upload; E85: check; E91: the sample
                    'table-imports':{'read','preview','start','step','status','pause','resume','cancel','list'},  # E87: a table becomes typed data
                    'well-names':{'propose','accept','aliases','go-back'},  # E88: the wells a set of runs names
                    'layouts':{'list','get','match','export','save','rename','retire','use-again','import','keep','update','reconnect'}}  # E89: layouts
 RELEASE_OPERATIONS={'releases':{'list','get','download','download-snapshot'}}  # E50c: the kept copies Wells.with_source reads (read routes only)
 SESSION_OPERATIONS={'las-uploads':{'begin','part','state','finish','cancel'},'capabilities':{'describe'}}  # E54: a file sent in parts; the served limits
-NEW_DATA_OPERATIONS={'context':{'new-data','new-data-save'},'las-uploads':{'audience','audience-preview','audience-save'}}  # E90: New data settings; the one control on an original
+NEW_DATA_OPERATIONS={'context':{'new-data','new-data-save'},'las-uploads':{'audience','audience-preview','audience-save'},
+                     'templates':{'list','csv','xlsx'}}  # E90: New data settings; the one control on an original. E91: table templates
 
 
 # E39: an organisation's connections are not a project's; their routes carry no project (/api/v1/<area>/<op>).

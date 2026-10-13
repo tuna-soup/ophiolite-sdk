@@ -159,6 +159,13 @@ def test_layers_for_a_gis_follows_the_next_link_and_says_why_a_path_is_not_place
     assert 'Wrote layers-for-a-gis.png with 1 paths placed' in text
 
 
+def test_where_are_my_wells_draws_the_located_wells_and_reads_a_well_with_its_wellbore_synthetic(tmp_path, monkeypatch):
+    text = run('where-are-my-wells', tmp_path, monkeypatch)
+    assert '2 wells located, within [5.1, 52.1, 6.2, 52.9] (longitude and latitude)' in text
+    assert '3 wells, 2 located, 1 without a location' in text and 'Wrote where-are-my-wells.png with 2 wells' in text
+    assert 'Synthetic well 1: 0 filed on the well, 1 with its wellbores' in text and '  Synthetic well 1 main: 1' in text  # E66
+
+
 def test_well_logs_in_a_bucket_pins_its_logs_and_reports_a_changed_one_synthetic(tmp_path, monkeypatch):
     text = run('well-logs-in-a-bucket', tmp_path, monkeypatch)
     assert 'wells/: 3 files' in text and 'W-1/gamma.las' in text and 'notes.txt' in text and 'only as a copy' in text
@@ -191,7 +198,7 @@ def test_a_spreadsheet_and_a_database_joined_joins_on_the_well_name_and_sends_no
 
 
 def test_every_entry_is_listed_built_and_described():
-    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'grids-and-gis-files', 'how-was-this-made', 'open-it-here', 'a-spreadsheet-becomes-wells-and-tops', 'layers-for-a-gis', 'well-logs-in-a-bucket', 'share-a-procedure', 'who-has-access-until-when', 'a-spreadsheet-and-a-database-joined']
+    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'grids-and-gis-files', 'how-was-this-made', 'open-it-here', 'a-spreadsheet-becomes-wells-and-tops', 'layers-for-a-gis', 'well-logs-in-a-bucket', 'share-a-procedure', 'who-has-access-until-when', 'where-are-my-wells', 'a-spreadsheet-and-a-database-joined']
     for entry in GALLERY['notebooks']:
         assert set(entry) == {'slug', 'title', 'sentence', 'modes', 'data'} and entry['modes'] == ['synthetic', 'live']
         script = (ROOT / 'notebooks' / entry['slug'] / 'notebook.py').read_text()

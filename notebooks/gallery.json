@@ -107,6 +107,13 @@
       "data": "A synthetic project with four people, or your project; nothing is changed, and who has access is shown to project administrators only."
     },
     {
+      "slug": "where-are-my-wells",
+      "title": "Where are my wells",
+      "sentence": "See where the wells you may read are located, draw them, and read one well's data together with its wellbores'.",
+      "modes": ["synthetic", "live"],
+      "data": "Three synthetic wells, one with a wellbore and a log, or the wells you may read in your project; reading changes nothing."
+    },
+    {
       "slug": "a-spreadsheet-and-a-database-joined",
       "title": "A spreadsheet and a database, joined",
       "sentence": "Keep a spreadsheet as it is with its units and missing-value marker, read a database table, and join the two on the well name.",

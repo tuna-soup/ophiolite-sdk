@@ -25,6 +25,7 @@
   {
    "name": "well",
    "label": "Well",
+   "description": "The well the survey belongs to, as it is named in this project. Leave the column out when the file holds one well.",
    "noun": "well",
    "kind": "reference",
    "to": "well",
@@ -47,6 +48,7 @@
   {
    "name": "md",
    "label": "Measured depth",
+   "description": "Measured depth of the survey station, in the unit named in the column header.",
    "noun": "measured depth",
    "kind": "number",
    "dimension": "length",
@@ -68,6 +70,7 @@
   {
    "name": "inclination",
    "label": "Inclination",
+   "description": "Inclination from vertical at the station, in degrees.",
    "noun": "inclination",
    "kind": "number",
    "dimension": "angle",
@@ -93,6 +96,7 @@
   {
    "name": "azimuth",
    "label": "Azimuth",
+   "description": "Azimuth at the station, in degrees clockwise from north.",
    "noun": "azimuth",
    "kind": "number",
    "dimension": "angle",
@@ -118,6 +122,7 @@
   {
    "name": "tvd",
    "label": "Vertical depth",
+   "description": "True vertical depth of the station, in the unit named in the column header. Leave it empty when it is not known.",
    "noun": "vertical depth",
    "kind": "number",
    "dimension": "length",
