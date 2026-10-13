@@ -107,3 +107,55 @@ def test_the_event_log_and_project_discovery_carry_it_too():
     with connect('https://ophiolite.example', Credential.bearer('oph_api_alice'), http=httpx.Client(transport=httpx.MockTransport(lambda r: refusal(403, ENVELOPE, ENVELOPE['request_id'])))) as account:
         with pytest.raises(PermissionRefused) as raised: account.projects()
     assert raised.value.request_id == ENVELOPE['request_id'] and raised.value.remedy == ENVELOPE['remedy']
+
+
+# H48 item 14: a scientific read refused with 422 says the server's reason (E58b: an export the installation cannot write).
+PARQUET = 'This installation cannot write Parquet files yet.'
+GENERIC_422 = 'This scientific context is not supported.'
+
+
+def scientific(status, body):
+    """The refusal raised by Client._get and AsyncClient._get for one response."""
+    import anyio
+    from ophiolite.aio import AsyncClient
+    handler = lambda r: refusal(status, body, 'req_h48')
+    with client(handler) as c, pytest.raises(Exception) as sync:
+        c._get('/scientific', 1000)
+    async def main():
+        async with AsyncClient('https://ophiolite.example', 'p', Credential.bearer('oph_api_alice'),
+                               http=httpx.AsyncClient(transport=httpx.MockTransport(handler))) as c:
+            with pytest.raises(Exception) as raised:
+                await c._get('/scientific', 1000)
+        return raised.value
+    return sync.value, anyio.run(main)
+
+
+def test_a_scientific_422_raises_the_server_s_sentence_in_both_clients():
+    from ophiolite.errors import Incompatible
+    for error in scientific(422, {'code': 'incompatible-context', 'message': PARQUET, 'remedy': 'R'}):
+        assert type(error) is Incompatible and error.message == PARQUET and str(error) == PARQUET + ' R'
+        assert (error.code, error.remedy, error.request_id, error.server_message) == ('incompatible-context', 'R', 'req_h48', PARQUET)
+    for error in scientific(422, {'code': 'incompatible-context', 'message': PARQUET}):
+        assert str(error) == error.message == PARQUET
+
+
+def test_a_legacy_422_body_gives_its_error_sentence():
+    for error in scientific(422, {'error': 'Unsupported depth unit.'}):
+        assert error.message == 'Unsupported depth unit.'
+
+
+@pytest.mark.parametrize('body', [b'', b'{"message": "cut', {'code': 'incompatible-context', 'message': 'x' * 1001}, {'message': 7}])
+def test_a_422_without_a_usable_sentence_keeps_the_generic_one(body):
+    for error in scientific(422, body):
+        assert error.message == GENERIC_422
+
+
+def test_other_scientific_statuses_keep_their_fixed_sentences():
+    for error in scientific(404, {'code': 'not-found', 'message': 'Asset unavailable'}):
+        assert type(error) is Unavailable and error.message == 'This exact revision is unavailable or not permitted.'
+
+
+def test_the_application_transport_is_unchanged_for_422():
+    with client(lambda r: refusal(422, {'code': 'INVALID_ARGUMENT', 'message': PARQUET})) as c, pytest.raises(Refused) as raised:
+        c._post('entities', 'get', {'entity_id': 'w1'})
+    assert raised.value.message == 'The application request was refused. Check the input and supported profile.'
