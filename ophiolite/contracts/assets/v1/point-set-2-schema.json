@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/point-set-2-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.point-set/2",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -80,7 +80,8 @@
             {
               "enum": [
                 "recipe",
-                "declaration"
+                "declaration",
+                "selection"
               ],
               "type": "string"
             },
@@ -103,6 +104,42 @@
           ],
           "title": "Status",
           "type": "string"
+        },
+        "selection": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DecisionSelection"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "reopened": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SelectionDescriptor"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "left_unresolved": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Left Unresolved"
         }
       },
       "required": [
@@ -114,6 +151,28 @@
         "status"
       ],
       "title": "Decision",
+      "type": "object"
+    },
+    "DecisionSelection": {
+      "additionalProperties": false,
+      "properties": {
+        "entry": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Entry",
+          "type": "string"
+        },
+        "observation": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Observation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "entry",
+        "observation"
+      ],
+      "title": "DecisionSelection",
       "type": "object"
     },
     "Execution": {
@@ -304,6 +363,45 @@
         "sufficient": {
           "title": "Sufficient",
           "type": "boolean"
+        },
+        "id": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Id"
+        },
+        "rejected": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rejected"
+        },
+        "entry": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Entry"
         }
       },
       "required": [
@@ -435,7 +533,10 @@
           "type": "string"
         },
         "parsing_policy": {
-          "const": "import-recipe/1",
+          "enum": [
+            "import-recipe/1",
+            "import-recipe/2"
+          ],
           "title": "Parsing Policy",
           "type": "string"
         },
@@ -620,6 +721,57 @@
         "profile"
       ],
       "title": "Reference",
+      "type": "object"
+    },
+    "SelectionDescriptor": {
+      "additionalProperties": false,
+      "description": "E23b D5: a reusable choice; on reuse it must match exactly one observation of the new package.",
+      "properties": {
+        "field": {
+          "enum": [
+            "crs",
+            "xy_unit",
+            "z_unit",
+            "z_meaning",
+            "positive",
+            "vertical_datum"
+          ],
+          "title": "Field",
+          "type": "string"
+        },
+        "value": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Value",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "primary",
+            "crs-metadata",
+            "readme",
+            "companion",
+            "declaration"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "member",
+            "declaration"
+          ],
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "value",
+        "role",
+        "source"
+      ],
+      "title": "SelectionDescriptor",
       "type": "object"
     }
   },

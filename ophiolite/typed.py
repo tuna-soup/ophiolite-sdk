@@ -8,6 +8,7 @@ not contact a server.
 """
 import math
 from .errors import Refused
+from . import recipes
 from .transform import vertical_depth as _vertical_depth
 
 TYPES = ('well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-volume',
@@ -156,7 +157,14 @@ class Decision:
     def decided(self): return self.status == 'decided'
 
     def __repr__(self):
-        return f'<Decision {self.field}={self.selected!r}>' if self.decided else f'<Decision {self.field}: needs decision>'
+        label = recipes.field_label(self.field)
+        if not self.decided: return f'<Decision {label}: needs a decision>'
+        reason = f' because {self.reason!r}' if self.selected_by in ('declaration', 'selection') and self.reason else ''
+        return f'<Decision {label}: {recipes.value_label(self.field, self.selected)}{reason}>'
+
+    def details(self):
+        """The raw particulars (field key, how it was chosen, the stored reason) for Technical details."""
+        return {'field': self.field, 'selected': self.selected, 'selected_by': self.selected_by, 'reason': self.reason, 'status': self.status}
 
 
 class Recipe:
@@ -173,7 +181,11 @@ class Recipe:
     def default(self): return self.asset_id is None
 
     def __repr__(self):
-        return '<Recipe default>' if self.default else f'<Recipe {self.asset_id}@{self.revision[:12]}>'
+        return '<Recipe the default reading of this kind of file>' if self.default else '<Recipe a reading saved in the project>'
+
+    def details(self):
+        """The raw particulars (asset id, revision, digest of the rules applied) for Technical details."""
+        return {'asset_id': self.asset_id, 'revision': self.revision, 'sha256': self.sha256}
 
 
 class PointSet(_Spatial):
@@ -224,8 +236,8 @@ class PointSet(_Spatial):
         return frame
 
     def __repr__(self):
-        pending = ' (needs decision: ' + ', '.join(self.unresolved) + ')' if self.unresolved else ''
-        return f'<PointSet {self.context["count"]} point-set{pending}>'
+        pending = ' (needs a decision: ' + ', '.join(recipes.field_label(f) for f in self.unresolved) + ')' if self.unresolved else ''
+        return f'<PointSet {self.context["count"]} points{pending}>'
 
 
 class PolylineSet(TypedData):

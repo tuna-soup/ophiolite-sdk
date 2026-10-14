@@ -191,14 +191,19 @@ class GridContext(Contract):
     value_range: Annotated[list[float], Field(min_length=2, max_length=2)] | None = Field(...)
     fidelity: Fidelity = Field(...)
 
-class ImportRecipe(Contract):
-    schema_: Literal['ophiolite.import-recipe/1'] = Field(..., alias='schema')
+class ImportRecipe2(Contract):
+    schema_: Literal['ophiolite.import-recipe/2'] = Field(..., alias='schema')
     profile: Literal['petrel-points-attributes/1', 'opendtect-horizon-ascii/1'] = Field(...)
     parsing: RecipeParsing = Field({'delimiter': 'whitespace', 'missing': []})
     columns: Annotated[list[RecipeColumn], Field(min_length=2, max_length=64)] = Field(...)
     fields: RecipeFields = Field({'crs': None, 'xy_unit': None, 'z_unit': None, 'z_meaning': None, 'positive': None, 'vertical_datum': None})
     operations: Annotated[list[Annotated[Declare | SelectColumn | MarkMissing, Field(discriminator='op')]], Field(max_length=64)] = Field([])
     expect: RecipeExpect = Field({'crs': None, 'xy_unit': None, 'z_unit': None, 'z_meaning': None, 'positive': None, 'vertical_datum': None})
+    events: Annotated[list[RecipeEvent], Field(max_length=256)] = Field([])
+
+class ChangeEvidence(Contract):
+    member: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    locator: Annotated[str, Field(pattern='^line [1-9][0-9]*$')] = Field(...)
 
 class Declare(Contract):
     op: Literal['declare'] = Field(...)
@@ -214,6 +219,25 @@ class RecipeColumn(Contract):
     role: Literal['x', 'y', 'z', 'attribute'] = Field(...)
     kind: Literal['number', 'text', 'category'] = Field(...)
     name: Annotated[str, Field(pattern='^[A-Za-z][A-Za-z0-9_]{0,63}$')] | None = Field(None)
+
+class RecipeEvent(Contract):
+    entry: Annotated[str, Field(min_length=1, max_length=80)] = Field(...)
+    kind: Literal['declare', 'select-evidence', 'clear', 'leave-unresolved', 'change'] = Field(...)
+    field: Annotated[str, Field(min_length=1, max_length=400)] = Field(...)
+    value: Annotated[str, Field(min_length=1, max_length=128)] | None = Field(None)
+    observation: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] | None = Field(None)
+    descriptor: SelectionDescriptor | None = Field(None)
+    reason: Annotated[str, Field(min_length=1, max_length=120)] | None = Field(None)
+    supersedes: Annotated[str, Field(min_length=1, max_length=80)] | None = Field(None)
+    setting: Literal['column-role', 'attribute-kind', 'missing-marker', 'delimiter', 'label-map'] | None = Field(None)
+    target: Annotated[str, Field(min_length=1, max_length=256)] | None = Field(None)
+    from_: Annotated[str, Field(min_length=1, max_length=64)] | list[Annotated[str, Field(min_length=1, max_length=64)]] | None = Field(None, alias='from')
+    to: Annotated[str, Field(min_length=1, max_length=64)] | list[Annotated[str, Field(min_length=1, max_length=64)]] | None = Field(None)
+    evidence: ChangeEvidence | None = Field(None)
+    actor: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(None)
+    at: Annotated[str, Field(min_length=1, max_length=40)] | None = Field(None)
+    reused_from: Annotated[str, Field(min_length=1, max_length=80)] | None = Field(None)
+    selector: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(None)
 
 class RecipeExpect(Contract):
     crs: Annotated[str, Field(min_length=1, max_length=128)] | None = Field(None)
@@ -249,6 +273,21 @@ class SelectColumn(Contract):
     op: Literal['select-column'] = Field(...)
     source: Annotated[str, Field(min_length=1, max_length=256)] = Field(...)
     as_: Literal['x', 'y', 'z', 'attribute'] = Field(..., alias='as')
+
+class SelectionDescriptor(Contract):
+    field: Literal['crs', 'xy_unit', 'z_unit', 'z_meaning', 'positive', 'vertical_datum'] = Field(...)
+    value: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+    role: Literal['primary', 'crs-metadata', 'readme', 'companion', 'declaration'] = Field(...)
+    source: Literal['member', 'declaration'] = Field(...)
+
+class ImportRecipe(Contract):
+    schema_: Literal['ophiolite.import-recipe/1'] = Field(..., alias='schema')
+    profile: Literal['petrel-points-attributes/1', 'opendtect-horizon-ascii/1'] = Field(...)
+    parsing: RecipeParsing = Field({'delimiter': 'whitespace', 'missing': []})
+    columns: Annotated[list[RecipeColumn], Field(min_length=2, max_length=64)] = Field(...)
+    fields: RecipeFields = Field({'crs': None, 'xy_unit': None, 'z_unit': None, 'z_meaning': None, 'positive': None, 'vertical_datum': None})
+    operations: Annotated[list[Annotated[Declare | SelectColumn | MarkMissing, Field(discriminator='op')]], Field(max_length=64)] = Field([])
+    expect: RecipeExpect = Field({'crs': None, 'xy_unit': None, 'z_unit': None, 'z_meaning': None, 'positive': None, 'vertical_datum': None})
 
 class ModelSection(Contract):
     representation: Literal['normalized'] = Field(...)
@@ -302,9 +341,16 @@ class Decision(Contract):
     field: Literal['crs', 'xy_unit', 'z_unit', 'z_meaning', 'positive', 'vertical_datum'] = Field(...)
     observations: Annotated[list[Observation], Field(max_length=32)] = Field(...)
     selected: Annotated[str, Field(min_length=1, max_length=128)] | None = Field(...)
-    selected_by: Literal['recipe', 'declaration'] | None = Field(...)
+    selected_by: Literal['recipe', 'declaration', 'selection'] | None = Field(...)
     reason: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     status: Literal['decided', 'needs-decision'] = Field(...)
+    selection: DecisionSelection | None = Field(None)
+    reopened: SelectionDescriptor | None = Field(None)
+    left_unresolved: Annotated[str, Field(min_length=1, max_length=80)] | None = Field(None)
+
+class DecisionSelection(Contract):
+    entry: Annotated[str, Field(min_length=1, max_length=80)] = Field(...)
+    observation: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
 
 class Execution(Contract):
     package_digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
@@ -327,6 +373,9 @@ class Observation(Contract):
     locator: Annotated[str, Field(pattern='^line [1-9][0-9]*$')] | None = Field(None)
     text: Annotated[str, Field(max_length=200)] | None = Field(None)
     sufficient: bool = Field(...)
+    id: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] | None = Field(None)
+    rejected: bool | None = Field(None)
+    entry: Annotated[str, Field(min_length=1, max_length=80)] | None = Field(None)
 
 class RecipeFidelity(Contract):
     status: Literal['assessed'] = Field(...)
@@ -341,7 +390,7 @@ class RecipeFidelity(Contract):
 class RecipeInterpretation(Contract):
     reader: Literal['asset_connectors.petrel_points/1', 'asset_connectors.opendtect_horizon/1'] = Field(...)
     mapping: Literal['point-set/2'] = Field(...)
-    parsing_policy: Literal['import-recipe/1'] = Field(...)
+    parsing_policy: Literal['import-recipe/1', 'import-recipe/2'] = Field(...)
     null_policy: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
 
 class RecipePointContext(Contract):
@@ -1899,22 +1948,27 @@ PackageInterpretation.model_rebuild()
 TypedInterpretation.model_rebuild()
 GridSurface.model_rebuild()
 GridContext.model_rebuild()
-ImportRecipe.model_rebuild()
+ImportRecipe2.model_rebuild()
+ChangeEvidence.model_rebuild()
 Declare.model_rebuild()
 MarkMissing.model_rebuild()
 RecipeColumn.model_rebuild()
+RecipeEvent.model_rebuild()
 RecipeExpect.model_rebuild()
 RecipeFieldRules.model_rebuild()
 RecipeFields.model_rebuild()
 RecipeParsing.model_rebuild()
 RecipeRule.model_rebuild()
 SelectColumn.model_rebuild()
+SelectionDescriptor.model_rebuild()
+ImportRecipe.model_rebuild()
 ModelSection.model_rebuild()
 ModelSectionContext.model_rebuild()
 Rock.model_rebuild()
 PointSet2.model_rebuild()
 AttributeSpec.model_rebuild()
 Decision.model_rebuild()
+DecisionSelection.model_rebuild()
 Execution.model_rebuild()
 KindedAttribute.model_rebuild()
 Observation.model_rebuild()
