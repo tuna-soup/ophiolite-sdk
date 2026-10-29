@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ophiolite"
-version = "0.1.0"
+dynamic = ["version"]  # E17p D3: the release name, written into ophiolite/_version.py by the night's release commit
 description = "Preview scientific client for Ophiolite"
 requires-python = ">=3.10"
 license = {file = "LICENSE"}
@@ -16,15 +16,20 @@ ophiolite = "ophiolite.cli:entrypoint"
 [project.optional-dependencies]
 numpy = ["numpy>=1.24"]
 pandas = ["pandas>=2"]
+lasio = ["lasio>=0.32"]  # E126a: ophiolite.lasio (to_lasio, lasio_bytes, curves_from_lasio)
 validation = ["jsonschema>=4.26"]
 telemetry = ["opentelemetry-api>=1.37"]  # E95: the reported model on the caller's span
-dev = ["pytest>=8", "build>=1", "jsonschema>=4.26", "lasio>=0.32", "opentelemetry-sdk>=1.37"]
+starter = ["pyproj>=3.6", "lasio>=0.32"]  # E129 Sa: ophiolite starter build (well heads, LAS heads)
+dev = ["pytest>=8", "build>=1", "jsonschema>=4.26", "lasio>=0.32", "pyproj>=3.6", "opentelemetry-sdk>=1.37"]
+
+[tool.setuptools.dynamic]
+version = {attr = "ophiolite._version.__version__"}
 
 [tool.setuptools.packages.find]
 include = ["ophiolite*"]
 
 [tool.setuptools.package-data]
-ophiolite = ["contracts/**/*", "contracts/*", "skills/*/SKILL.md", "templates/*", "templates/**/*"]  # E31: ophiolite init copies the packaged templates
+ophiolite = ["contracts/**/*", "contracts/*", "skills/*/SKILL.md", "templates/*", "templates/**/*", "reference/*", "reference/**/*", "procedure_templates/*", "procedure_templates/**/*", "schemas/*"]  # E31: ophiolite init copies the packaged templates; E119b: the reference procedures
 
 [tool.setuptools.exclude-package-data]
-ophiolite = ["templates/*/node_modules/**/*", "templates/*/node_modules/*", "templates/*/dist/**/*", "templates/**/__pycache__/*"]
+ophiolite = ["templates/*/node_modules/**/*", "templates/*/node_modules/*", "templates/*/dist/**/*", "templates/**/__pycache__/*", "reference/**/__pycache__/*"]

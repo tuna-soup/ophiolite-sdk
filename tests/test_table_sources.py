@@ -232,3 +232,20 @@ def test_the_command_line_prints_the_not_read_line_and_refuses_on_request(tmp_pa
     assert 'The revision covers only the columns read; not read: notes (jsonb).' in read_.stderr
     assert refused.returncode != 0 and 'not read: notes (jsonb); no rows were returned' in refused.stderr + refused.stdout and not (tmp_path / 'rows.csv').exists()
     assert described.returncode == 0 and described.stdout.splitlines()[-1] == 'The revision covers only the columns read; not read: notes (jsonb).'
+
+
+# ---- E61 R2-14: SQL Server and Oracle values arrive with six fraction digits (the connectors drop the seventh to ninth) --
+def test_sql_server_and_oracle_timestamps_keep_their_six_fraction_digits_in_records_and_frames():
+    """Literals typed here, not derived: SQL Server datetime2(7) `2026-03-01T12:34:56.1234567` and Oracle TIMESTAMP(9)
+    `…56.123456789` are delivered as `…56.123456`; datetimeoffset `…12:34:56.1234567+01:00` as `…11:34:56.123456Z`."""
+    columns = [column('i', 'integer'), column('mssql', 'timestamp', 'datetime2'), column('oracle', 'timestamp', 'TIMESTAMP(9)'),
+               column('offset', 'timestamptz', 'datetimeoffset')]
+    rows = [['1', '2026-03-01T12:34:56.123456', '2026-03-01T12:34:56.123456', '2026-03-01T11:34:56.123456Z']]
+    snap = read(table(columns, rows, key=['i']))
+    assert [snap.rows[0][c] for c in ('mssql', 'oracle', 'offset')] == ['2026-03-01T12:34:56.123456', '2026-03-01T12:34:56.123456',
+                                                                       '2026-03-01T11:34:56.123456Z']
+    frame = snap.to_frame()
+    assert {c: str(frame[c].dtype) for c in ('mssql', 'oracle', 'offset')} == {
+        'mssql': 'datetime64[us]', 'oracle': 'datetime64[us]', 'offset': 'datetime64[us, UTC]'}
+    assert [str(frame.loc[0, c]) for c in ('mssql', 'oracle', 'offset')] == [
+        '2026-03-01 12:34:56.123456', '2026-03-01 12:34:56.123456', '2026-03-01 11:34:56.123456+00:00']

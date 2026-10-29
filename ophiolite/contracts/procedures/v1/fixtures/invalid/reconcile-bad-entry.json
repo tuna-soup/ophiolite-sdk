@@ -1,0 +1,36 @@
+{
+  "schema": "ophiolite.procedure/1",
+  "name": "tops-to-team-db",
+  "label": "Tops to team DB",
+  "version": 1,
+  "step": "send",
+  "inputs": [
+    {
+      "slot": "tops",
+      "label": "Tops to deliver",
+      "class": "version",
+      "kinds": [
+        "well-tops-csv/1"
+      ],
+      "cardinality": "one"
+    },
+    {
+      "slot": "db",
+      "label": "Team tops database",
+      "class": "system",
+      "config_keys": [
+        "host",
+        "database"
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "role": "delivery",
+      "label": "Delivered tops",
+      "class": "delivery"
+    }
+  ],
+  "entry": "procedure:send",
+  "reconcile": "procedure"
+}

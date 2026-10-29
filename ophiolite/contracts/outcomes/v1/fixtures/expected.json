@@ -1,0 +1,16 @@
+{
+ "schema": "ophiolite.outcome-fixtures/1",
+ "valid": [
+  "tops-within-5m",
+  "tops-within-1m"
+ ],
+ "invalid": {
+  "unknown-key": "schema",
+  "rule-version-2": "rule",
+  "no-not-computed": "settings",
+  "without-well-set": "inputs",
+  "with-las2": "inputs",
+  "identifier-label": "label",
+  "address-in-destination": "destination"
+ }
+}

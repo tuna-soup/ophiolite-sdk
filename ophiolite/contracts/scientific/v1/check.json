@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/scientific/v1/check.json",
   "x-ophiolite": {
     "id": "ophiolite.check/1",
-    "version": "1.0.0",
+    "version": "1.2.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -383,6 +383,349 @@
       "title": "RelativeTolerance",
       "type": "object"
     },
+    "ResidualDifferences": {
+      "additionalProperties": false,
+      "description": "E119b (D8, 1.2.0): `residual-compare/1`'s differences. `count` is the number of differing pairs and `total` the\nnumber of pairs (E96); `missing` and `extra` count the keys on one side only, `reasons_differ` the pairs whose\nreasons differ; `largest` is the largest |residual difference| (metres) of the pairs computed on both sides;\n`formation` is the one both results correspond to.",
+      "properties": {
+        "count": {
+          "minimum": 0,
+          "title": "Count",
+          "type": "integer"
+        },
+        "total": {
+          "minimum": 0,
+          "title": "Total",
+          "type": "integer"
+        },
+        "largest": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Largest"
+        },
+        "missing": {
+          "minimum": 0,
+          "title": "Missing",
+          "type": "integer"
+        },
+        "extra": {
+          "minimum": 0,
+          "title": "Extra",
+          "type": "integer"
+        },
+        "reasons_differ": {
+          "minimum": 0,
+          "title": "Reasons Differ",
+          "type": "integer"
+        },
+        "formation": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Formation",
+          "type": "string"
+        },
+        "first": {
+          "items": {
+            "$ref": "#/$defs/ResidualPair"
+          },
+          "maxItems": 20,
+          "title": "First",
+          "type": "array"
+        }
+      },
+      "required": [
+        "count",
+        "total",
+        "largest",
+        "missing",
+        "extra",
+        "reasons_differ",
+        "formation",
+        "first"
+      ],
+      "title": "ResidualDifferences",
+      "type": "object"
+    },
+    "ResidualPair": {
+      "additionalProperties": false,
+      "description": "One (wellbore, occurrence) pair that differs: the top's md (metres; None for occurrence 0), each side's residual\n(metres) and reason; a side without the row has both None.",
+      "properties": {
+        "wellbore": {
+          "pattern": "^wellbore-[0-9a-f]{32}$",
+          "title": "Wellbore",
+          "type": "string"
+        },
+        "occurrence": {
+          "maximum": 10000,
+          "minimum": 0,
+          "title": "Occurrence",
+          "type": "integer"
+        },
+        "md": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Md"
+        },
+        "result_residual": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Result Residual"
+        },
+        "reference_residual": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reference Residual"
+        },
+        "result_reason": {
+          "anyOf": [
+            {
+              "enum": [
+                "grazing",
+                "along-surface",
+                "uncertain",
+                "no-surface-data",
+                "ends-above",
+                "starts-below",
+                "no-trajectory",
+                "no-top",
+                "many-crossings"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Result Reason"
+        },
+        "reference_reason": {
+          "anyOf": [
+            {
+              "enum": [
+                "grazing",
+                "along-surface",
+                "uncertain",
+                "no-surface-data",
+                "ends-above",
+                "starts-below",
+                "no-trajectory",
+                "no-top",
+                "many-crossings"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reference Reason"
+        }
+      },
+      "required": [
+        "wellbore",
+        "occurrence",
+        "md",
+        "result_residual",
+        "reference_residual",
+        "result_reason",
+        "reference_reason"
+      ],
+      "title": "ResidualPair",
+      "type": "object"
+    },
+    "TopsDifferences": {
+      "additionalProperties": false,
+      "description": "E110 (D4): `tops-compare/1`'s differences; `missing` and `extra` count the unpaired picks.",
+      "properties": {
+        "count": {
+          "minimum": 0,
+          "title": "Count",
+          "type": "integer"
+        },
+        "total": {
+          "minimum": 0,
+          "title": "Total",
+          "type": "integer"
+        },
+        "largest": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Largest"
+        },
+        "missing": {
+          "minimum": 0,
+          "title": "Missing",
+          "type": "integer"
+        },
+        "extra": {
+          "minimum": 0,
+          "title": "Extra",
+          "type": "integer"
+        },
+        "first": {
+          "items": {
+            "$ref": "#/$defs/TopsPick"
+          },
+          "maxItems": 20,
+          "title": "First",
+          "type": "array"
+        }
+      },
+      "required": [
+        "count",
+        "total",
+        "largest",
+        "missing",
+        "extra",
+        "first"
+      ],
+      "title": "TopsDifferences",
+      "type": "object"
+    },
+    "TopsPick": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "result_md": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Result Md"
+        },
+        "reference_md": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reference Md"
+        }
+      },
+      "required": [
+        "name",
+        "result_md",
+        "reference_md"
+      ],
+      "title": "TopsPick",
+      "type": "object"
+    },
+    "TrajectoryDifferences": {
+      "additionalProperties": false,
+      "description": "E110 (D4): `trajectory-compare/1`'s differences; `outside` counts stations past the reference's last md.",
+      "properties": {
+        "count": {
+          "minimum": 0,
+          "title": "Count",
+          "type": "integer"
+        },
+        "total": {
+          "minimum": 0,
+          "title": "Total",
+          "type": "integer"
+        },
+        "largest": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Largest"
+        },
+        "outside": {
+          "minimum": 0,
+          "title": "Outside",
+          "type": "integer"
+        },
+        "first": {
+          "items": {
+            "$ref": "#/$defs/TrajectoryStation"
+          },
+          "maxItems": 20,
+          "title": "First",
+          "type": "array"
+        }
+      },
+      "required": [
+        "count",
+        "total",
+        "largest",
+        "outside",
+        "first"
+      ],
+      "title": "TrajectoryDifferences",
+      "type": "object"
+    },
+    "TrajectoryStation": {
+      "additionalProperties": false,
+      "properties": {
+        "md": {
+          "title": "Md",
+          "type": "number"
+        },
+        "distance": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Distance"
+        }
+      },
+      "required": [
+        "md",
+        "distance"
+      ],
+      "title": "TrajectoryStation",
+      "type": "object"
+    },
     "CheckRefusal": {
       "additionalProperties": false,
       "description": "A refusal names exactly one field; nothing is stored.",
@@ -405,7 +748,8 @@
             "capacity",
             "limit",
             "size",
-            "request"
+            "request",
+            "kind"
           ],
           "title": "Field",
           "type": "string"
@@ -422,6 +766,291 @@
         "message"
       ],
       "title": "CheckRefusal",
+      "type": "object"
+    },
+    "ReportCounts": {
+      "additionalProperties": false,
+      "properties": {
+        "compared": {
+          "minimum": 0,
+          "title": "Compared",
+          "type": "integer"
+        },
+        "differed": {
+          "minimum": 0,
+          "title": "Differed",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "compared",
+        "differed"
+      ],
+      "title": "ReportCounts",
+      "type": "object"
+    },
+    "ReportFileReference": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "file",
+          "title": "Kind",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "name",
+        "digest"
+      ],
+      "title": "ReportFileReference",
+      "type": "object"
+    },
+    "ReportProcedure": {
+      "additionalProperties": false,
+      "description": "The check procedure as the catalogue names it; the server takes the labels from its manifest (D7).",
+      "properties": {
+        "digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "version_label": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Version Label"
+        },
+        "version_number": {
+          "minimum": 1,
+          "title": "Version Number",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "digest",
+        "label",
+        "version_number"
+      ],
+      "title": "ReportProcedure",
+      "type": "object"
+    },
+    "ReportVersionReference": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "project-version",
+          "title": "Kind",
+          "type": "string"
+        },
+        "asset_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "asset_id",
+        "revision"
+      ],
+      "title": "ReportVersionReference",
+      "type": "object"
+    },
+    "ProcedureReportRecord": {
+      "additionalProperties": false,
+      "description": "E110 (D4, `ophiolite.check/1` 1.1.0, variant `procedure-report`): a check a team's procedure ran on its own\ncomputer and reported. It names the exact result version, the procedure, the reference and the settings; it\ncarries the reported outcome and, when given, the counts. It has no fixture, output digest, differences or rules:\nOphiolite did not repeat the check, and the server stores it `claimed`.",
+      "properties": {
+        "schema": {
+          "const": "ophiolite.check/1",
+          "title": "Schema",
+          "type": "string"
+        },
+        "variant": {
+          "const": "procedure-report",
+          "title": "Variant",
+          "type": "string"
+        },
+        "subject": {
+          "$ref": "#/$defs/CheckResultSubject"
+        },
+        "procedure": {
+          "$ref": "#/$defs/ReportProcedure"
+        },
+        "reference": {
+          "discriminator": {
+            "mapping": {
+              "file": "#/$defs/ReportFileReference",
+              "project-version": "#/$defs/ReportVersionReference"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/ReportFileReference"
+            },
+            {
+              "$ref": "#/$defs/ReportVersionReference"
+            }
+          ],
+          "title": "Reference"
+        },
+        "settings": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Settings",
+          "type": "object"
+        },
+        "settings_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Settings Digest",
+          "type": "string"
+        },
+        "outcome": {
+          "enum": [
+            "passed",
+            "differed",
+            "not_compared"
+          ],
+          "title": "Outcome",
+          "type": "string"
+        },
+        "counts": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ReportCounts"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "const": "reported_not_compared",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reason"
+        },
+        "witness": {
+          "anyOf": [
+            {
+              "const": "claimed",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Witness"
+        },
+        "recorded_by": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CheckPrincipal"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "command_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Command Id"
+        },
+        "at": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "At"
+        }
+      },
+      "required": [
+        "schema",
+        "variant",
+        "subject",
+        "procedure",
+        "reference",
+        "settings",
+        "settings_digest",
+        "outcome",
+        "counts",
+        "reason"
+      ],
+      "title": "ProcedureReportRecord",
       "type": "object"
     }
   },
@@ -472,7 +1101,10 @@
     "rules_id": {
       "enum": [
         "series-compare/1",
-        "grid-compare/1"
+        "grid-compare/1",
+        "tops-compare/1",
+        "trajectory-compare/1",
+        "residual-compare/1"
       ],
       "title": "Rules Id",
       "type": "string"
@@ -549,7 +1181,23 @@
             "unreadable",
             "too_large",
             "empty",
-            "no_such_curve"
+            "no_such_curve",
+            "unit_unknown",
+            "depth_basis_unknown",
+            "depth_basis_mismatch",
+            "wellbore_mismatch",
+            "magnetic_north",
+            "azimuth_reference_unknown",
+            "azimuth_reference_mismatch",
+            "grid_unknown",
+            "datum_unknown",
+            "datum_mismatch",
+            "missing_angles",
+            "start_not_at_datum",
+            "reported_not_compared",
+            "ambiguous_rows",
+            "correspondence_mismatch",
+            "inputs_differ"
           ],
           "type": "string"
         },
@@ -565,9 +1213,19 @@
           "$ref": "#/$defs/CheckDifferences"
         },
         {
+          "$ref": "#/$defs/TopsDifferences"
+        },
+        {
+          "$ref": "#/$defs/TrajectoryDifferences"
+        },
+        {
+          "$ref": "#/$defs/ResidualDifferences"
+        },
+        {
           "type": "null"
         }
-      ]
+      ],
+      "title": "Differences"
     },
     "witness": {
       "anyOf": [

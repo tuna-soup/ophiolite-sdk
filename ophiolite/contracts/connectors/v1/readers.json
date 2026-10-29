@@ -102,6 +102,12 @@
       "other": "A different depth reference",
       "unknown": "Not stated"
      }
+    },
+    {
+     "key": "depth_datum",
+     "label": "Depth datum",
+     "kind": "text",
+     "hint": "For example rotary table"
     }
    ],
    "companions": [],
@@ -698,6 +704,10 @@
    "companions": [
     {
      "pattern": "{stem}.crsmeta.xml",
+     "role": "crs-metadata"
+    },
+    {
+     "pattern": "{name}.crsmeta.xml",
      "role": "crs-metadata"
     },
     {
@@ -1778,6 +1788,491 @@
       "from": "whole"
      }
     ]
+   },
+   "landing": "retained"
+  },
+  {
+   "profile": "well-path-positions-csv/1",
+   "label": "Well path (positions, CSV)",
+   "extensions": [
+    ".csv",
+    ".txt"
+   ],
+   "detect": "csv_well_path",
+   "limits": {
+    "names": [],
+    "template": "CSV with columns md, x, y and tvdss · measured depth must increase · up to 10,000 stations. x is easting and y northing; TVDSS is positive downward below the stated datum. Nothing is converted, filled in or turned into angles."
+   },
+   "declared": [
+    {
+     "key": "crs",
+     "label": "Coordinate system",
+     "kind": "crs",
+     "hint": "EPSG code such as EPSG:28992"
+    },
+    {
+     "key": "xy_unit",
+     "label": "Map unit",
+     "kind": "unit",
+     "hint": "For example m"
+    },
+    {
+     "key": "depth_unit",
+     "label": "Depth unit",
+     "kind": "unit",
+     "hint": "For example m or ft; for measured depth and TVDSS"
+    },
+    {
+     "key": "md_reference",
+     "label": "Measured depth from",
+     "kind": "choice",
+     "choices": {
+      "KB": "Kelly bushing",
+      "DF": "Drill floor",
+      "RT": "Rotary table",
+      "GL": "Ground level",
+      "MSL": "Mean sea level",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "tvdss_datum",
+     "label": "TVDSS below",
+     "kind": "choice",
+     "choices": {
+      "MSL": "Mean sea level",
+      "unknown": "Not stated"
+     }
+    }
+   ],
+   "companions": [],
+   "recipe": false,
+   "osdu": {
+    "kind": "work-product-component--WellboreTrajectory",
+    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+   },
+   "route": {
+    "document": "typed-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "real",
+    "path": "tests/fixtures/f3/F03-4-well-path.csv",
+    "sha256": "4dfae24ea0a3ae2a29a0d721545cd726c70eafaa48a829545ebbce0c013e067b",
+    "bytes": 564,
+    "rights": "docs/release/rights/e125-opendtect-2026-10.json"
+   },
+   "report": "{count:,} stations",
+   "type": "well-path",
+   "mapping": "well-path/1",
+   "states": {
+    "function": null,
+    "items": []
+   },
+   "landing": "retained"
+  },
+  {
+   "profile": "well-set/1",
+   "label": "Well set (JSON)",
+   "extensions": [
+    ".json"
+   ],
+   "detect": "well_set_json",
+   "limits": {
+    "names": [],
+    "template": "One JSON document with schema ophiolite.well-set/1, a label and 1 to 29 members · each member names a well and a wellbore by id, with one trajectory revision and its frame, or neither · up to 256 KiB. Nothing is looked up, converted or filled in."
+   },
+   "declared": [],
+   "companions": [],
+   "recipe": false,
+   "osdu": {
+    "none": "A list of wellbores chosen by its author; its normalized profile is ophiolite.well-set/1."
+   },
+   "route": {
+    "document": "typed-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "real",
+    "path": "../conformance/fixtures/residuals/well-set.json",
+    "sha256": "745d09acf592d1803c9ade66c09e6675a16305155fb26f61835be371211af105",
+    "bytes": 5238,
+    "rights": "docs/release/rights/nlog-groningen-residuals-2026-10.json"
+   },
+   "report": "{count:,} members",
+   "type": "well-set",
+   "mapping": "well-set/1",
+   "states": {
+    "function": null,
+    "items": []
+   },
+   "landing": "retained"
+  },
+  {
+   "profile": "well-residual/1",
+   "label": "Residual result (JSON)",
+   "extensions": [
+    ".json"
+   ],
+   "detect": "well_residual_json",
+   "limits": {
+    "names": [],
+    "template": "One JSON document with schema ophiolite.well-residual/1, the formation, the display unit, the surface and 1 to 10,000 rows · each row a residual per top in metres, or one of nine reasons · up to 8 MiB. Published only by a procedure run, never uploaded."
+   },
+   "declared": [],
+   "companions": [],
+   "recipe": false,
+   "osdu": {
+    "none": "A residual per top between a surface and the tops of selected wellbores, written by a procedure run; its normalized profile is ophiolite.well-residual/1."
+   },
+   "route": {
+    "document": "publications-derive",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "real",
+    "path": "../conformance/fixtures/residuals/expected-residuals.json",
+    "sha256": "75c141e05b4fa5c1077889d53bc5213c942970abd14400cce482f515425898e2",
+    "bytes": 3894,
+    "rights": "docs/release/rights/nlog-groningen-residuals-2026-10.json"
+   },
+   "report": "{count:,} rows",
+   "type": "well-residual",
+   "mapping": "well-residual/1",
+   "states": {
+    "function": null,
+    "items": []
+   },
+   "landing": "retained"
+  },
+  {
+   "profile": "resqml-epc/1",
+   "label": "A RESQML package (.epc with its .h5)",
+   "extensions": [
+    ".epc"
+   ],
+   "detect": "resqml_package",
+   "limits": {
+    "names": [
+     "upload_bytes"
+    ],
+    "template": "RESQML 2.0.1: the .epc with its .h5 beside it · together up to {upload_bytes}; a package above 32 MiB is not read yet · well paths, deviation surveys, well logs, triangulated surfaces and fault sticks (polyline sets) land as items of their own; an .epc without arrays is listed on its own; every other object is listed as not read. Inclination and azimuth are computed from the stored tangents; nothing else is converted or filled in."
+   },
+   "declared": [],
+   "companions": [
+    {
+     "pattern": "{stem}.h5",
+     "role": "hdf5"
+    }
+   ],
+   "recipe": false,
+   "osdu": {
+    "none": "A RESQML 2.0.1 package (Energistics); each object it holds lands as its own item, and the package's correspondence is per object (ophiolite.resqml-kinds/1)."
+   },
+   "route": {
+    "document": "typed-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "real",
+    "url": "https://community.opengroup.org/osdu/platform/domain-data-mgmt-services/reservoir/open-etp-server/-/raw/e7a5183b5e5e069e50b5c27ce51a085a4240b2cf/data/Volve_Demo_Wells_Depth.epc",
+    "sha256": "0d25a8c43119e2aaafe8a67fa706a9cd91f27f2754080431a600f2d1ae0cab72",
+    "bytes": 8052793,
+    "rights": "docs/release/rights/e124-volve-resqml-2026-10.json"
+   },
+   "report": "{count:,} items",
+   "type": "trajectory",
+   "types": [
+    "trajectory",
+    "well-path",
+    "well-log",
+    "triangulated-surface",
+    "polyline-set"
+   ],
+   "mapping": null,
+   "states": {
+    "function": null,
+    "items": []
+   },
+   "landing": "retained"
+  },
+  {
+   "profile": "petrel-horizon-ilxl/1",
+   "label": "Petrel horizon points (inline and crossline)",
+   "extensions": [
+    ".txt"
+   ],
+   "detect": "petrel_horizon_ilxl_line",
+   "limits": {
+    "names": [],
+    "template": "Petrel horizon export of \"INLINE : n XLINE : n x y z\" rows with its CRS metadata beside it, read with the standard layout."
+   },
+   "declared": [
+    {
+     "key": "crs",
+     "label": "Coordinate system",
+     "kind": "crs",
+     "hint": "EPSG code such as EPSG:28992"
+    },
+    {
+     "key": "xy_unit",
+     "label": "Map unit",
+     "kind": "unit",
+     "hint": "For example m"
+    },
+    {
+     "key": "z_meaning",
+     "label": "Values are",
+     "kind": "choice",
+     "choices": {
+      "depth": "Depth",
+      "elevation": "Elevation",
+      "time": "Time",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "z_unit",
+     "label": "Value unit",
+     "kind": "unit",
+     "hint": "For example m or ms"
+    },
+    {
+     "key": "positive",
+     "label": "Positive direction",
+     "kind": "choice",
+     "choices": {
+      "up": "Up",
+      "down": "Down",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "vertical_datum",
+     "label": "Vertical datum",
+     "kind": "text",
+     "hint": "For example NAP"
+    }
+   ],
+   "companions": [
+    {
+     "pattern": "{name}.crsmeta.xml",
+     "role": "crs-metadata"
+    },
+    {
+     "pattern": "{stem}.crsmeta.xml",
+     "role": "crs-metadata"
+    }
+   ],
+   "recipe": true,
+   "osdu": {
+    "kind": "work-product-component--SeismicHorizon",
+    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+   },
+   "route": {
+    "document": "typed-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "synthetic",
+    "path": "tests/fixtures/petrel_horizon/horizon_ilxl.txt",
+    "sha256": "f632827f1506e37bf932afcd05c0336e4a614cfa24827ec94853ed1872124cf1",
+    "bytes": 474,
+    "exception": "D75"
+   },
+   "report": "{count:,} points",
+   "type": "point-set",
+   "mapping": null,
+   "states": {
+    "function": null,
+    "items": []
+   },
+   "landing": "retained"
+  },
+  {
+   "profile": "petrel-scattered-data/1",
+   "label": "Petrel scattered-data map",
+   "extensions": [
+    ".txt",
+    ".dat"
+   ],
+   "detect": "petrel_scattered_header",
+   "limits": {
+    "names": [
+     "grid_cells"
+    ],
+    "template": "Petrel scattered-data export (version 6: numbered fields x, y, z and optionally column and row) · a grid up to {grid_cells} cells when every point lies on the grid its header declares, otherwise up to 100,000 points. Unlisted grid nodes stay missing; nothing is interpolated."
+   },
+   "declared": [
+    {
+     "key": "crs",
+     "label": "Coordinate system",
+     "kind": "crs",
+     "hint": "EPSG code such as EPSG:28992"
+    },
+    {
+     "key": "xy_unit",
+     "label": "Map unit",
+     "kind": "unit",
+     "hint": "For example m"
+    },
+    {
+     "key": "z_meaning",
+     "label": "Values are",
+     "kind": "choice",
+     "choices": {
+      "depth": "Depth",
+      "elevation": "Elevation",
+      "time": "Time",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "z_unit",
+     "label": "Value unit",
+     "kind": "unit",
+     "hint": "For example m or ms"
+    },
+    {
+     "key": "positive",
+     "label": "Positive direction",
+     "kind": "choice",
+     "choices": {
+      "up": "Up",
+      "down": "Down",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "vertical_datum",
+     "label": "Vertical datum",
+     "kind": "text",
+     "hint": "For example NAP"
+    }
+   ],
+   "companions": [],
+   "recipe": false,
+   "osdu": {
+    "kind": "work-product-component--SeismicHorizon",
+    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+   },
+   "route": {
+    "document": "typed-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "synthetic",
+    "path": "tests/fixtures/petrel_scattered/scattered_grid.txt",
+    "sha256": "74818308a3470c896b3d76abf0d87e51af51fad3a7df864facd511865a9e8d36",
+    "bytes": 849,
+    "exception": "D75"
+   },
+   "report": "{ncols:,} × {nrows:,} cells, {missing_count:,} missing",
+   "type": "regular-grid-surface",
+   "alternate_types": [
+    "point-set"
+   ],
+   "alternate_reports": {
+    "point-set": "{count:,} points"
+   },
+   "mapping": "regular-grid-surface/1",
+   "states": {
+    "function": null,
+    "items": []
+   },
+   "landing": "retained"
+  },
+  {
+   "profile": "petrel-faultsticks/1",
+   "label": "Fault sticks (Petrel)",
+   "extensions": [
+    ".txt",
+    ".dat"
+   ],
+   "detect": "petrel_faultsticks_line",
+   "limits": {
+    "names": [],
+    "template": "Petrel fault-stick export of \"INLINE- inline crossline x y z fault stick\" rows with its CRS metadata beside it · up to 200,000 points and 20,000 sticks. A stick is one run of rows with the same fault and stick number, in file order; a stick of one point is kept."
+   },
+   "declared": [
+    {
+     "key": "crs",
+     "label": "Coordinate system",
+     "kind": "crs",
+     "hint": "EPSG code such as EPSG:28992"
+    },
+    {
+     "key": "xy_unit",
+     "label": "Map unit",
+     "kind": "unit",
+     "hint": "For example m"
+    },
+    {
+     "key": "z_meaning",
+     "label": "Values are",
+     "kind": "choice",
+     "choices": {
+      "depth": "Depth",
+      "elevation": "Elevation",
+      "time": "Time",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "z_unit",
+     "label": "Value unit",
+     "kind": "unit",
+     "hint": "For example m or ms"
+    },
+    {
+     "key": "positive",
+     "label": "Positive direction",
+     "kind": "choice",
+     "choices": {
+      "up": "Up",
+      "down": "Down",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "vertical_datum",
+     "label": "Vertical datum",
+     "kind": "text",
+     "hint": "For example NAP"
+    }
+   ],
+   "companions": [
+    {
+     "pattern": "{name}.crsmeta.xml",
+     "role": "crs-metadata"
+    },
+    {
+     "pattern": "{stem}.crsmeta.xml",
+     "role": "crs-metadata"
+    }
+   ],
+   "recipe": false,
+   "osdu": {
+    "kind": "work-product-component--FaultInterpretation",
+    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+   },
+   "route": {
+    "document": "typed-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "synthetic",
+    "path": "tests/fixtures/petrel_faults/faultsticks.txt",
+    "sha256": "9971f7c8ee9c8b6d84d2803dc4d3994987e2d33bcbb8b5fc102939e9acf03771",
+    "bytes": 396,
+    "exception": "D75"
+   },
+   "report": "{sticks:,} sticks, {points:,} points",
+   "type": "polyline-set",
+   "mapping": "polyline-set/1",
+   "states": {
+    "function": null,
+    "items": []
    },
    "landing": "retained"
   }

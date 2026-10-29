@@ -72,9 +72,18 @@ KINDS = {  # kind of export -> (how it is written, the version it is written wit
 }
 
 
+def _history():  # H56 (D3): an old SDK commit in either layout (tools/history.py)
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('sdk_history', Path(__file__).resolve().parents[1] / 'tools/history.py')
+    module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+    return module
+
+
 def test_the_frozen_two_seven_reader_is_the_released_file():
-    released = subprocess.run(['git', '-C', str(Path(__file__).parents[1]), 'show', '67f05fc:ophiolite/bundle.py'], capture_output=True)
-    if released.returncode == 0: assert released.stdout == (FROZEN / 'bundle_2_7.py').read_bytes()  # full clones prove the copy is exact
+    history = _history()
+    released = history.show(Path(__file__).parents[1], '67f05fc', 'ophiolite/bundle.py')
+    if released is not None: assert released == (FROZEN / 'bundle_2_7.py').read_bytes()  # full clones prove the copy is exact
+    else: assert not history.FULL, history.missing('67f05fc')
     assert hashlib.sha256((FROZEN / 'bundle_2_7.py').read_bytes()).hexdigest() == '2c462c6bc8a8a83a410be03cd7ab9b49c706a50da7cf7eb74bac6ca7345c45bc'
 
 

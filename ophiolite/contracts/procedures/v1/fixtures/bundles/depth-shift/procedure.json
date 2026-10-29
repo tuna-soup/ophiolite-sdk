@@ -72,8 +72,6 @@
     }
   ],
   "entry": "procedure:shift",
-  "requires": [
-    "numpy>=1.24"
-  ],
+  "requires": [],
   "licence": "MIT"
 }

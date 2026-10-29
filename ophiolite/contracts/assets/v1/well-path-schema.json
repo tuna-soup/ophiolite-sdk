@@ -1,0 +1,387 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/assets/v1/well-path-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.well-path/1",
+    "version": "1.1.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "Fidelity": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "const": "assessed",
+          "title": "Status",
+          "type": "string"
+        },
+        "preserved": {
+          "items": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Preserved",
+          "type": "array"
+        },
+        "losses": {
+          "items": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Losses",
+          "type": "array"
+        },
+        "unknown_context": {
+          "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Unknown Context",
+          "type": "array"
+        },
+        "decisions": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 512,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 64,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decisions"
+        }
+      },
+      "required": [
+        "status",
+        "preserved",
+        "losses",
+        "unknown_context"
+      ],
+      "title": "Fidelity",
+      "type": "object"
+    },
+    "Reference": {
+      "additionalProperties": false,
+      "properties": {
+        "authority": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Authority",
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "profile": {
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+          "title": "Profile",
+          "type": "string"
+        }
+      },
+      "required": [
+        "authority",
+        "key",
+        "revision",
+        "profile"
+      ],
+      "title": "Reference",
+      "type": "object"
+    },
+    "ResqmlInterpretation": {
+      "additionalProperties": false,
+      "description": "E124 s1 (A1-1): the executable identity of the RESQML package reader (Connectors resqml_package) for the outputs\nit lands; additive beside the LAS and typed readers, whose literals are unchanged.",
+      "properties": {
+        "reader": {
+          "const": "asset_connectors.resqml_package/1",
+          "title": "Reader",
+          "type": "string"
+        },
+        "mapping": {
+          "enum": [
+            "trajectory/1",
+            "well-path/1",
+            "well-log/1"
+          ],
+          "title": "Mapping",
+          "type": "string"
+        },
+        "parsing_policy": {
+          "const": "resqml-exact/1",
+          "title": "Parsing Policy",
+          "type": "string"
+        },
+        "null_policy": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Null Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reader",
+        "mapping",
+        "parsing_policy",
+        "null_policy"
+      ],
+      "title": "ResqmlInterpretation",
+      "type": "object"
+    },
+    "TypedInterpretation": {
+      "additionalProperties": false,
+      "description": "The executable identity of the typed reader (Connectors typed_reader; E56: feature_files for feature sets).",
+      "properties": {
+        "reader": {
+          "enum": [
+            "asset_connectors.typed_reader/1",
+            "asset_connectors.feature_files/1"
+          ],
+          "title": "Reader",
+          "type": "string"
+        },
+        "mapping": {
+          "enum": [
+            "well-tops/1",
+            "trajectory/1",
+            "regular-grid-surface/1",
+            "triangulated-surface/1",
+            "point-set/1",
+            "polyline-set/1",
+            "seismic-volume/1",
+            "well-location/1",
+            "wavelet/1",
+            "model-section/1",
+            "seismic-section/1",
+            "time-depth/1",
+            "feature-set/1",
+            "well-path/1",
+            "well-set/1",
+            "well-residual/1"
+          ],
+          "title": "Mapping",
+          "type": "string"
+        },
+        "parsing_policy": {
+          "const": "typed-strict/1",
+          "title": "Parsing Policy",
+          "type": "string"
+        },
+        "null_policy": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Null Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reader",
+        "mapping",
+        "parsing_policy",
+        "null_policy"
+      ],
+      "title": "TypedInterpretation",
+      "type": "object"
+    },
+    "WellPathContext": {
+      "additionalProperties": false,
+      "description": "The declared and observed context of a well path given as positions (ophiolite.well-path/1). x is easting and y\nnorthing (longitude and latitude in a geographic CRS), whatever the CRS's own axis order, in `xy_unit`. Measured depth\nis measured from `md_reference` (KB kelly bushing, DF drill floor, RT rotary table, GL ground level, MSL mean sea\nlevel) and TVDSS is positive downward below `tvdss_datum` (a negative value is above it), both in `depth_unit`. What\nthe uploader did not declare is \"unknown\", never a default.",
+      "properties": {
+        "type": {
+          "const": "well-path",
+          "title": "Type",
+          "type": "string"
+        },
+        "crs": {
+          "pattern": "^(EPSG:[0-9]{4,6}|unknown)$",
+          "title": "Crs",
+          "type": "string"
+        },
+        "xy_unit": {
+          "description": "The unit of x and y.",
+          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+          "title": "Xy Unit",
+          "type": "string"
+        },
+        "depth_unit": {
+          "description": "The unit of measured depth and TVDSS.",
+          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+          "title": "Depth Unit",
+          "type": "string"
+        },
+        "md_reference": {
+          "description": "What measured depth is measured from.",
+          "enum": [
+            "KB",
+            "DF",
+            "RT",
+            "GL",
+            "MSL",
+            "unknown"
+          ],
+          "title": "Md Reference",
+          "type": "string"
+        },
+        "tvdss_datum": {
+          "description": "What TVDSS is measured below; positive downward.",
+          "enum": [
+            "MSL",
+            "unknown"
+          ],
+          "title": "Tvdss Datum",
+          "type": "string"
+        },
+        "count": {
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        },
+        "md_range": {
+          "description": "The first and last measured depth.",
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "title": "Md Range",
+          "type": "array"
+        },
+        "tvdss_range": {
+          "description": "The smallest and largest TVDSS (not the first and last).",
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "title": "Tvdss Range",
+          "type": "array"
+        },
+        "fidelity": {
+          "$ref": "#/$defs/Fidelity"
+        }
+      },
+      "required": [
+        "type",
+        "crs",
+        "xy_unit",
+        "depth_unit",
+        "md_reference",
+        "tvdss_datum",
+        "count",
+        "md_range",
+        "tvdss_range",
+        "fidelity"
+      ],
+      "title": "WellPathContext",
+      "type": "object"
+    },
+    "WellPathStation": {
+      "additionalProperties": false,
+      "description": "One position: measured depth, easting x, northing y and TVDSS (positive downward), as numbers of the file.",
+      "properties": {
+        "md": {
+          "title": "Md",
+          "type": "number"
+        },
+        "x": {
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "title": "Y",
+          "type": "number"
+        },
+        "tvdss": {
+          "title": "Tvdss",
+          "type": "number"
+        }
+      },
+      "required": [
+        "md",
+        "x",
+        "y",
+        "tvdss"
+      ],
+      "title": "WellPathStation",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "E125 s3a: a well path given as positions, stations in file order with strictly increasing measured depth. No\nconversion, no angles, no minimum curvature; a deviation survey (ophiolite.trajectory/1) is a different record.",
+  "properties": {
+    "representation": {
+      "const": "normalized",
+      "title": "Representation",
+      "type": "string"
+    },
+    "source": {
+      "$ref": "#/$defs/Reference"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "interpretation": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TypedInterpretation"
+        },
+        {
+          "$ref": "#/$defs/ResqmlInterpretation"
+        }
+      ],
+      "title": "Interpretation"
+    },
+    "schema": {
+      "const": "ophiolite.well-path/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "context": {
+      "$ref": "#/$defs/WellPathContext"
+    },
+    "stations": {
+      "items": {
+        "$ref": "#/$defs/WellPathStation"
+      },
+      "maxItems": 10000,
+      "minItems": 1,
+      "title": "Stations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "representation",
+    "source",
+    "source_sha256",
+    "interpretation",
+    "schema",
+    "context",
+    "stations"
+  ],
+  "title": "WellPath",
+  "type": "object"
+}

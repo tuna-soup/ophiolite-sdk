@@ -1,0 +1,27 @@
+"""$label."""
+from ophiolite import procedure, readers, writers
+
+
+def refuse(what):
+    raise ValueError(f'This start writes with ophiolite.writers.write_tops, which {what}; change the start to say what to keep.')
+
+
+@procedure
+def main(inputs, settings):
+    """Read the well tops with ophiolite.readers and write them again with the Ophiolite writer.
+
+    `values` holds the writer's arguments, made from everything the reader found. Your calculation goes where it is
+    marked: change `values` before they are written. A part of the file the writer has no place for stops the run
+    with a sentence, so nothing is left out without your knowing."""
+    version = inputs['data'][0]
+    found = readers.read(version)
+    columns = [name.lower() for name in found.columns]
+    for name, written in zip(columns, found.columns):
+        if name not in ('name', 'md', 'tvd', 'source'): refuse(f"has no place for the column '{written}'")
+        if name in ('tvd', 'source') and all(row[columns.index(name)] is None for row in found.rows):
+            refuse(f"writes no {name} column when every {name} cell is empty")
+    if 'depth_datum' in version.declared: refuse('has no place for a depth datum')
+    values = {'tops': [dict(zip(columns, row)) for row in found.rows],
+              'depth_unit': version.declared.get('depth_unit', 'unknown'), 'depth_basis': version.declared.get('depth_basis', 'unknown')}
+    # Your calculation: change values here.
+    return {'data': writers.write_tops(**values)}

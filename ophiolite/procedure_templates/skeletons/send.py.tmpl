@@ -1,0 +1,50 @@
+"""$label."""
+import json
+import os
+import shutil
+from pathlib import Path
+
+import ophiolite
+from ophiolite import procedure
+
+
+@procedure
+def main(inputs, settings, delivery):
+    """Copy every version in `data` and the delivery's id into the destination folder with one rename: the folder named
+    by the delivery's id is the delivery, so either all of it is there or none of it is."""
+    folder = Path(delivery.system.config['folder'])
+    if not folder.is_dir(): return ophiolite.refused('The destination folder does not exist.')
+    staged = folder / ('.%s.partial' % delivery.id)
+    shutil.rmtree(staged, ignore_errors=True)
+    staged.mkdir()
+    names = []
+    for number, version in enumerate(inputs['data']):
+        names.append('%d-%s' % (number, Path(version.path).name))
+        shutil.copyfile(version.path, staged / names[-1])
+    (staged / 'delivery.json').write_text(json.dumps({'id': delivery.id, 'items': len(names)}), encoding='utf-8')
+    try:
+        os.rename(staged, folder / delivery.id)
+    except OSError:  # the folder named by the id is already there: reconcile withdrew this delivery
+        shutil.rmtree(staged, ignore_errors=True)
+        return ophiolite.refused('This delivery was withdrawn at the destination.')
+    return ophiolite.delivered(items=len(names))
+
+
+def reconcile(delivery):
+    """What became of an earlier attempt that did not answer. Claim the folder named by its id with a withdrawal; when
+    the claim succeeds the attempt can no longer commit (not delivered); when it fails, that folder says what happened."""
+    folder = Path(delivery.system.config['folder'])
+    target, fence = folder / delivery.id, folder / ('.%s.fence' % delivery.id)
+    shutil.rmtree(fence, ignore_errors=True)
+    fence.mkdir()
+    (fence / 'WITHDRAWN').write_text(delivery.id, encoding='utf-8')
+    try:
+        os.rename(fence, target)
+        return ophiolite.not_delivered()
+    except OSError:
+        shutil.rmtree(fence, ignore_errors=True)
+    if (target / 'WITHDRAWN').is_file(): return ophiolite.not_delivered()
+    try: said = json.loads((target / 'delivery.json').read_text(encoding='utf-8'))
+    except (OSError, ValueError): return ophiolite.unknown()
+    if isinstance(said, dict) and said.get('id') == delivery.id and type(said.get('items')) is int: return ophiolite.delivered(items=said['items'])
+    return ophiolite.unknown()

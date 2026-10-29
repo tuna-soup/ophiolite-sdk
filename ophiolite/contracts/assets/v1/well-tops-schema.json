@@ -200,6 +200,12 @@
         },
         "fidelity": {
           "$ref": "#/$defs/Fidelity"
+        },
+        "depth_datum": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Depth Datum",
+          "type": "string"
         }
       },
       "required": [
@@ -240,7 +246,10 @@
             "model-section/1",
             "seismic-section/1",
             "time-depth/1",
-            "feature-set/1"
+            "feature-set/1",
+            "well-path/1",
+            "well-set/1",
+            "well-residual/1"
           ],
           "title": "Mapping",
           "type": "string"

@@ -1,0 +1,25 @@
+{
+ "schema": "ophiolite.outcome/1",
+ "label": "Tops within 1 m",
+ "kind": "well-residual/1",
+ "rule": {
+  "name": "well-residual-within/1",
+  "settings": {
+   "tolerance": {
+    "value": 1,
+    "unit": "m"
+   },
+   "not_computed": "allowed"
+  }
+ },
+ "inputs": [
+  "deviation-csv/1",
+  "esri-ascii-grid/1",
+  "well-set/1",
+  "well-tops-csv/1"
+ ],
+ "destination": {
+  "procedure": "tops-to-team-database",
+  "label": "Team database"
+ }
+}

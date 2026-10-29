@@ -1,0 +1,371 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/outcomes/v1/outcome-check-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.outcome-check/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "CheckEvaluator": {
+      "additionalProperties": false,
+      "properties": {
+        "contract": {
+          "const": "outcome-evaluator/1",
+          "title": "Contract",
+          "type": "string"
+        },
+        "rule_version": {
+          "const": 1,
+          "title": "Rule Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "contract",
+        "rule_version"
+      ],
+      "title": "CheckEvaluator",
+      "type": "object"
+    },
+    "CheckRows": {
+      "additionalProperties": false,
+      "properties": {
+        "computed": {
+          "minimum": 0,
+          "title": "Computed",
+          "type": "integer"
+        },
+        "passing": {
+          "minimum": 0,
+          "title": "Passing",
+          "type": "integer"
+        },
+        "failing_count": {
+          "description": "Every failing row; `failing` lists the first 20 in (wellbore, occurrence) order",
+          "minimum": 0,
+          "title": "Failing Count",
+          "type": "integer"
+        },
+        "failing": {
+          "items": {
+            "$ref": "#/$defs/FailingRow"
+          },
+          "maxItems": 20,
+          "title": "Failing",
+          "type": "array"
+        },
+        "not_computed": {
+          "items": {
+            "$ref": "#/$defs/NotComputedRow"
+          },
+          "maxItems": 20,
+          "title": "Not Computed",
+          "type": "array"
+        }
+      },
+      "required": [
+        "computed",
+        "passing",
+        "failing_count",
+        "failing",
+        "not_computed"
+      ],
+      "title": "CheckRows",
+      "type": "object"
+    },
+    "CheckedInput": {
+      "additionalProperties": false,
+      "properties": {
+        "slot": {
+          "minLength": 1,
+          "title": "Slot",
+          "type": "string"
+        },
+        "asset_id": {
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Revision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "slot",
+        "asset_id",
+        "revision"
+      ],
+      "title": "CheckedInput",
+      "type": "object"
+    },
+    "CheckedOutcome": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        },
+        "rule": {
+          "maxLength": 80,
+          "pattern": "^[a-z0-9][a-z0-9.-]*/[0-9]+$",
+          "title": "Rule",
+          "type": "string"
+        },
+        "settings_sha256": {
+          "description": "SHA-256 of the canonical settings of that version",
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Settings Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "rule",
+        "settings_sha256"
+      ],
+      "title": "CheckedOutcome",
+      "type": "object"
+    },
+    "CheckedPublication": {
+      "additionalProperties": false,
+      "properties": {
+        "run": {
+          "minLength": 1,
+          "title": "Run",
+          "type": "string"
+        },
+        "role": {
+          "minLength": 1,
+          "title": "Role",
+          "type": "string"
+        },
+        "seq": {
+          "description": "The seq of the publication's activity event (D3)",
+          "minimum": 1,
+          "title": "Seq",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "run",
+        "role",
+        "seq"
+      ],
+      "title": "CheckedPublication",
+      "type": "object"
+    },
+    "CheckedResult": {
+      "additionalProperties": false,
+      "properties": {
+        "asset_id": {
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Revision",
+          "type": "string"
+        },
+        "display_unit": {
+          "description": "The result's display unit, as the failing rows are told",
+          "enum": [
+            "m",
+            "ft"
+          ],
+          "title": "Display Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "asset_id",
+        "revision",
+        "display_unit"
+      ],
+      "title": "CheckedResult",
+      "type": "object"
+    },
+    "EvaluatedAs": {
+      "additionalProperties": false,
+      "properties": {
+        "person": {
+          "description": "The declarer of the outcome version, whose reading rights the evaluation used (D2)",
+          "minLength": 1,
+          "title": "Person",
+          "type": "string"
+        }
+      },
+      "required": [
+        "person"
+      ],
+      "title": "EvaluatedAs",
+      "type": "object"
+    },
+    "FailingRow": {
+      "additionalProperties": false,
+      "properties": {
+        "wellbore": {
+          "title": "Wellbore",
+          "type": "string"
+        },
+        "occurrence": {
+          "minimum": 0,
+          "title": "Occurrence",
+          "type": "integer"
+        },
+        "residual": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The residual in metres, with its sign; null for a row not computed",
+          "title": "Residual"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The row's reason when it was not computed",
+          "title": "Reason"
+        }
+      },
+      "required": [
+        "wellbore",
+        "occurrence",
+        "residual",
+        "reason"
+      ],
+      "title": "FailingRow",
+      "type": "object"
+    },
+    "NotComputedRow": {
+      "additionalProperties": false,
+      "properties": {
+        "wellbore": {
+          "title": "Wellbore",
+          "type": "string"
+        },
+        "occurrence": {
+          "minimum": 0,
+          "title": "Occurrence",
+          "type": "integer"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "wellbore",
+        "occurrence",
+        "reason"
+      ],
+      "title": "NotComputedRow",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "An acceptance record (E120 C2): one outcome version's built-in rule over one exact result version of one\npublication, with the bound input versions, as its declarer could read them; never changed. `reason` is set exactly\nwhen the verdict is `not_compared`, or `rejected` for validity or inputs (outcome-reasons.json `checks`).",
+  "properties": {
+    "schema": {
+      "const": "ophiolite.outcome-check/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "outcome": {
+      "$ref": "#/$defs/CheckedOutcome"
+    },
+    "evaluator": {
+      "$ref": "#/$defs/CheckEvaluator"
+    },
+    "result": {
+      "$ref": "#/$defs/CheckedResult"
+    },
+    "publication": {
+      "$ref": "#/$defs/CheckedPublication"
+    },
+    "inputs": {
+      "items": {
+        "$ref": "#/$defs/CheckedInput"
+      },
+      "maxItems": 4096,
+      "title": "Inputs",
+      "type": "array"
+    },
+    "evaluated_as": {
+      "$ref": "#/$defs/EvaluatedAs"
+    },
+    "verdict": {
+      "enum": [
+        "accepted",
+        "rejected",
+        "not_compared"
+      ],
+      "title": "Verdict",
+      "type": "string"
+    },
+    "reason": {
+      "anyOf": [
+        {
+          "enum": [
+            "rows_missing",
+            "rows_unexpected",
+            "rows_duplicated",
+            "rows_mismatched",
+            "inputs",
+            "unit_mismatch",
+            "no_validity",
+            "nothing_computed"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reason"
+    },
+    "rows": {
+      "$ref": "#/$defs/CheckRows"
+    },
+    "at": {
+      "title": "At",
+      "type": "number"
+    }
+  },
+  "required": [
+    "schema",
+    "outcome",
+    "evaluator",
+    "result",
+    "publication",
+    "inputs",
+    "evaluated_as",
+    "verdict",
+    "rows",
+    "at"
+  ],
+  "title": "OutcomeCheck",
+  "type": "object"
+}

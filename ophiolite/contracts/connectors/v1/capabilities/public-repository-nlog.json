@@ -1,0 +1,131 @@
+{
+  "schema": "ophiolite.connector-capability/1",
+  "id": "public-repository-nlog",
+  "display_name": "NLOG public repository",
+  "kind": "source",
+  "summary": "Boreholes from NLOG, the Dutch oil and gas portal: position, tops, deviation surveys and LAS logs, each with NLOG named as the source and the terms of use.",
+  "host": {
+    "name": "NLOG (www.nlog.nl, www.gdngeoservices.nl)",
+    "versions": [
+      "2026-10-12"
+    ],
+    "os": [
+      "linux"
+    ]
+  },
+  "routes": [
+    {
+      "profile": "well-location/1",
+      "data": "Well position (OSDU Wellbore)",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "explicit",
+      "losses": [
+        "Position from the coordinates NLOG recorded at submission (RD or ED50-UTM31); otherwise NLOG's map point in ED50-UTM31, to the nearest metre",
+        "Elevation reference is not stated",
+        "Read from NLOG's public services as NLOG serves them on the day; an older version is kept only once copied in",
+        "Every copy carries NLOG's source sentence, retrieval date and terms link"
+      ],
+      "unsupported": [
+        "tie-in points (kept in the record, not added as stations)",
+        "long stratigraphic unit names (unit codes only)",
+        "checkshots",
+        "core tables",
+        "2D seismic lines"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-10-12",
+        "evidence": "connectors:tests/test_repository_nlog.py (recorded NLOG exchanges, 12 October 2026)"
+      }
+    },
+    {
+      "profile": "well-tops-csv/1",
+      "data": "Well tops (OSDU WellboreMarkerSet 1.5.1)",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "explicit",
+      "losses": [
+        "Tops of NLOG's preferred interpretation only; no base row is added",
+        "Depth basis is not stated",
+        "Read from NLOG's public services as NLOG serves them on the day; an older version is kept only once copied in",
+        "Every copy carries NLOG's source sentence, retrieval date and terms link"
+      ],
+      "unsupported": [
+        "tie-in points (kept in the record, not added as stations)",
+        "long stratigraphic unit names (unit codes only)",
+        "checkshots",
+        "core tables",
+        "2D seismic lines"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-10-12",
+        "evidence": "connectors:tests/test_repository_nlog.py (recorded NLOG exchanges, 12 October 2026)"
+      }
+    },
+    {
+      "profile": "deviation-csv/1",
+      "data": "Deviation survey (OSDU WellboreTrajectory 1.4.0)",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "explicit",
+      "losses": [
+        "Azimuth reference is not stated; NLOG's north reference code and convergence are kept in the record",
+        "Depth unit is metres only when NLOG's end depth matches the deepest top and station",
+        "Read from NLOG's public services as NLOG serves them on the day; an older version is kept only once copied in",
+        "Every copy carries NLOG's source sentence, retrieval date and terms link"
+      ],
+      "unsupported": [
+        "tie-in points (kept in the record, not added as stations)",
+        "long stratigraphic unit names (unit codes only)",
+        "checkshots",
+        "core tables",
+        "2D seismic lines"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-10-12",
+        "evidence": "connectors:tests/test_repository_nlog.py (recorded NLOG exchanges, 12 October 2026)"
+      }
+    },
+    {
+      "profile": "las2/1",
+      "data": "Logs, LAS (OSDU WellLog 1.5.0)",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "explicit",
+      "losses": [
+        "The exact bytes NLOG serves; composite logs by default, other LAS files on request",
+        "Read from NLOG's public services as NLOG serves them on the day; an older version is kept only once copied in",
+        "Every copy carries NLOG's source sentence, retrieval date and terms link"
+      ],
+      "unsupported": [
+        "tie-in points (kept in the record, not added as stations)",
+        "long stratigraphic unit names (unit codes only)",
+        "checkshots",
+        "core tables",
+        "2D seismic lines"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-10-12",
+        "evidence": "connectors:tests/test_repository_nlog.py (recorded NLOG exchanges, 12 October 2026)"
+      }
+    }
+  ],
+  "redistribution": "NLOG disclaimer: \"Users are also permitted to copy, duplicate, process or edit the information and/or layout, provided NLOG.NL is quoted as the source.\"",
+  "example": null
+}

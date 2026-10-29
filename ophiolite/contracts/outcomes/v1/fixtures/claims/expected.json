@@ -1,0 +1,11 @@
+{
+ "schema": "ophiolite.outcome-claim-fixtures/1",
+ "valid": [
+  "claimed",
+  "refused"
+ ],
+ "invalid": [
+  "unknown-key",
+  "no-state"
+ ]
+}

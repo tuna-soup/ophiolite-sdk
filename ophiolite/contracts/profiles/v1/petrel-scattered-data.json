@@ -1,0 +1,39 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "petrel-scattered-data/1",
+  "kind": "source",
+  "lifecycle": "preview",
+  "display_name": "Petrel scattered-data map",
+  "description": "A Petrel \"scattered data\" export (version 6: x, y, z with column and row), kept byte for byte; it lands as a regular grid when every row sits on its declared lattice, else as a point set with the sentence why.",
+  "serves": [
+    "ophiolite.scientific-asset/1"
+  ],
+  "connector": {
+    "scientific_profile": "regular-grid-surface-source/1",
+    "source_schema": "Petrel/scattered-data/version-6",
+    "mapping_version": "regular-grid-surface/1",
+    "history": "retained-exact-read"
+  },
+  "role": "artifact",
+  "media_types": [
+    "text/plain"
+  ],
+  "normalized_profile": "ophiolite.regular-grid-surface/1",
+  "normalized_profiles": [
+    "ophiolite.regular-grid-surface/1",
+    "ophiolite.point-set/1"
+  ],
+  "context_schema": "ophiolite.typed-context/1",
+  "representation_rules": {
+    "artifact_kind_by_origin": {
+      "source-reference": "original",
+      "retained-capture": "original",
+      "managed-derived": "derived-artifact"
+    },
+    "normalized": 1,
+    "total": 2
+  },
+  "table_target": {
+    "none": "not-a-table"
+  }
+}

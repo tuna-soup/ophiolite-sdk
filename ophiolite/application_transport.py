@@ -4,7 +4,7 @@ import math
 import re
 from .errors import (AuthenticationRequired,PermissionRefused,Unavailable,IntegrityConflict,
                      CapacityExceeded,Refused,Busy,ShareOutcomeUnknown,VerificationFailed,
-                     SourceNeedsReview,SourceRevisionUnavailable,SourceDetached,SourceSignInRowsDiffer,SOURCE_GUIDE)
+                     SourceNeedsReview,SourceRevisionUnavailable,SourceDetached,SourceSignInRowsDiffer,SOURCE_GUIDE,RightsConflict,RightsEnded)
 
 MAX_RESPONSE=48*1024*1024  # bounded JSON envelope including a 32 MiB base64 artifact
 SHARE_RECOVERY='Read the current recipients first with client.grants(asset), then decide and call share again with the full intended audience and expected_generation from that snapshot.'
@@ -52,7 +52,9 @@ def delay(response):
 ENVELOPE_LIMIT=16*1024  # an error body is small; never read more of a refusal than this
 CODE=re.compile(r'^[A-Za-z0-9_.-]{1,64}$')
 STAGE=re.compile(r'^[a-z][a-z-]{0,39}$')
-FIELD=re.compile(r'^[a-z][a-z0-9_.]{0,63}$')
+FIELD=re.compile(r'^(?=.{1,64}$)[a-z][a-z0-9_.]*(?:\[\d{1,4}\][a-z0-9_.]*)*$')  # E119a: an indexed path (members[1]) too
+REASON=re.compile(r'^[a-z0-9][a-z0-9_.:-]{0,79}$')  # E119a: a refusal's closed reason (well-set:duplicate-wellbore)
+DAY=re.compile(r'^\d{4}-\d\d-\d\d$')  # E35a: a rights refusal's last permitted day
 
 
 async def bounded(response):
@@ -91,17 +93,19 @@ def envelope(response,raw=None):
     if isinstance(body.get('code'),str) and CODE.match(body['code']):meta['code']=body['code']
     if isinstance(body.get('stage'),str) and STAGE.match(body['stage']):meta['stage']=body['stage']  # E51a
     if isinstance(body.get('field'),str) and FIELD.match(body['field']):meta['field']=body['field']  # E96: the one field a check refusal names
+    if isinstance(body.get('reason'),str) and REASON.match(body['reason']):meta['reason']=body['reason']  # E119a: every refusal that states its closed reason
     if meta.get('code') in ('procedure-refused','procedure-run-refused'):  # E105b: the closed reason, and E105a's rule and path when the contract refused; E106: a run's
         for key in ('reason','rule'):
             if isinstance(body.get(key),str) and CODE.match(body[key]):meta[key]=body[key]
         if isinstance(body.get('path'),str) and len(body['path'])<=300:meta['path']=body['path']
+    if meta.get('code')=='rights-ended' and isinstance(body.get('last_day'),str) and DAY.match(body['last_day']):meta['last_day']=body['last_day']  # E35a
     return meta
 
 
 def carried(meta):
     """The error keyword arguments a parsed envelope supplies (E51a: also the server's own sentence and a credential's stage)."""
     return {'remedy':meta.get('remedy'),'docs':meta.get('docs'),'request_id':meta.get('request_id'),'stage':meta.get('stage'),'server_message':meta.get('message'),
-            'details':{'field':meta['field']} if 'field' in meta else ({k:meta[k] for k in ('reason','rule','path') if k in meta} or None)}
+            'details':{k:meta[k] for k in ('field','reason','rule','path') if k in meta} or None}  # E119a: a refusal's field and reason together
 
 
 def status(response,operation,raw=None):
@@ -117,6 +121,11 @@ def status(response,operation,raw=None):
         recovery=extra.get('remedy') or ''
         if source is Busy:raise Busy(message,recovery,status=code,retry_after=delay(response),code=meta['code'],**extra)
         raise source(message,recovery,status=code,code=meta['code'],**extra)
+    if meta.get('code')=='rights-ended':  # E35a (D10): the server's sentence, and the last permitted day
+        raise RightsEnded(meta.get('message') or 'The rights to use this data ended.',meta.get('remedy',''),status=code,code=meta['code'],
+                          last_day=meta.get('last_day'),**carried(meta))
+    if meta.get('code')=='rights-conflict':
+        raise RightsConflict(meta.get('message') or 'The rights changed since you read them.',meta.get('remedy',''),status=code,code=meta['code'],**carried(meta))
     if operation=='share' and code>=500:
         raise ShareOutcomeUnknown('The sharing outcome is unknown.',SHARE_RECOVERY,status=code,**carried(meta))
     if operation=='share' and code==409:
@@ -132,6 +141,7 @@ def status(response,operation,raw=None):
     if code==413:message=upload_limit(meta) or message
     if meta.get('code') in UPLOAD_CODES and meta.get('message'):message=meta['message']  # E54: the server's sentence for a file sent in parts
     if meta.get('code') in ('procedure-refused','procedure-run-refused') and meta.get('message'):message=meta['message']  # E105b, E106: the server's closed sentence
+    if 'reason' in meta and meta.get('message'):message=meta['message']  # E119a: a refusal with a closed reason is stated in the server's own sentence
     raise kind(message,recovery,status=code,code=meta.get('code'),**carried(meta))
 
 

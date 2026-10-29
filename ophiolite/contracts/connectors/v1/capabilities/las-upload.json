@@ -23,7 +23,6 @@
       ],
       "unsupported": [
         "LAS 3",
-        "wrapped LAS with repeated curve names",
         "automatic re-upload"
       ],
       "qualification": {

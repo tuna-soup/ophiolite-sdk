@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/trajectory-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.trajectory/1",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -108,6 +108,45 @@
         "profile"
       ],
       "title": "Reference",
+      "type": "object"
+    },
+    "ResqmlInterpretation": {
+      "additionalProperties": false,
+      "description": "E124 s1 (A1-1): the executable identity of the RESQML package reader (Connectors resqml_package) for the outputs\nit lands; additive beside the LAS and typed readers, whose literals are unchanged.",
+      "properties": {
+        "reader": {
+          "const": "asset_connectors.resqml_package/1",
+          "title": "Reader",
+          "type": "string"
+        },
+        "mapping": {
+          "enum": [
+            "trajectory/1",
+            "well-path/1",
+            "well-log/1"
+          ],
+          "title": "Mapping",
+          "type": "string"
+        },
+        "parsing_policy": {
+          "const": "resqml-exact/1",
+          "title": "Parsing Policy",
+          "type": "string"
+        },
+        "null_policy": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Null Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reader",
+        "mapping",
+        "parsing_policy",
+        "null_policy"
+      ],
+      "title": "ResqmlInterpretation",
       "type": "object"
     },
     "Station": {
@@ -268,7 +307,10 @@
             "model-section/1",
             "seismic-section/1",
             "time-depth/1",
-            "feature-set/1"
+            "feature-set/1",
+            "well-path/1",
+            "well-set/1",
+            "well-residual/1"
           ],
           "title": "Mapping",
           "type": "string"
@@ -311,7 +353,15 @@
       "type": "string"
     },
     "interpretation": {
-      "$ref": "#/$defs/TypedInterpretation"
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TypedInterpretation"
+        },
+        {
+          "$ref": "#/$defs/ResqmlInterpretation"
+        }
+      ],
+      "title": "Interpretation"
     },
     "schema": {
       "const": "ophiolite.trajectory/1",

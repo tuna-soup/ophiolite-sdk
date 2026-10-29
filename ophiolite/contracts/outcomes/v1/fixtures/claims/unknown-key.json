@@ -1,0 +1,24 @@
+{
+ "schema": "ophiolite.outcome-claim/1",
+ "outcome": {
+  "id": "outcome-tops-within-5m",
+  "version": 1
+ },
+ "result": {
+  "asset_id": "residuals-a",
+  "revision": "2222222222222222222222222222222222222222222222222222222222222222"
+ },
+ "check": {
+  "id": "check-a",
+  "key": "4444444444444444444444444444444444444444444444444444444444444444"
+ },
+ "delivery_id": "5d0c1f6e-7a2b-4c39-8e41-0b9a6f3d2c11",
+ "destination": {
+  "procedure_digest": "6666666666666666666666666666666666666666666666666666666666666666",
+  "label": "Team database"
+ },
+ "state": "claimed",
+ "reason": null,
+ "sentence": "Delivered as Tops within 5 m: Accepted under version 1; the delivery may start.",
+ "actor": "alice"
+}

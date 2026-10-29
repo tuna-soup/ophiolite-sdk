@@ -70,3 +70,15 @@ def test_upload_local_limits_send_nothing(tmp_path,damage):
         client=Client('http://localhost','p',http=http)
         with pytest.raises(ValidationFailed):client.upload_las(source,**options)
     assert not called
+
+
+def test_a_refusal_with_a_closed_reason_keeps_the_servers_sentence_reason_and_indexed_field():
+    """E119a slice 1: a two-member well set whose second member is refused reaches the caller as the server's own
+    sentence, with its closed reason and the indexed field, not the generic refusal."""
+    sentence='Member 2: The trajectory is not a revision of that wellbore.'
+    body={'code':'INVALID_ARGUMENT','message':sentence,'request_id':'r-1','reason':'well-set:not-of-wellbore','field':'members[1]'}
+    with pytest.raises(Refused) as no:policy.status(httpx.Response(400,json=body),'upload')
+    assert (str(no.value).split('\n')[0],no.value.details,no.value.server_message)==(sentence,{'field':'members[1]','reason':'well-set:not-of-wellbore'},sentence)
+    for bad in ({'reason':'Not A Key'},{'field':'members[x]'},{'reason':'x'*81}):  # malformed detail is dropped, never trusted
+        with pytest.raises(Refused) as no:policy.status(httpx.Response(400,json={**body,**bad}),'upload')
+        assert not set(bad)&set(no.value.details or {})

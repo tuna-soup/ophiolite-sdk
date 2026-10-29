@@ -1,0 +1,97 @@
+{
+  "schema": "ophiolite.basis-keys/1",
+  "id": "ophiolite.basis-keys/1",
+  "title": "Basis items: what a file states or leaves open about its coordinate system, vertical values, datum and units, and the declared keys beneath each (E123)",
+  "items": [
+    {
+      "id": "crs",
+      "label": "Coordinate system",
+      "description": "The map coordinate system the x and y values are in.",
+      "keys": [
+        "crs"
+      ],
+      "compare": "exact"
+    },
+    {
+      "id": "vertical_domain",
+      "label": "Vertical values",
+      "description": "Whether the vertical values are depth, elevation or time.",
+      "keys": [
+        "z_meaning",
+        "z_domain"
+      ],
+      "compare": "exact"
+    },
+    {
+      "id": "vertical_datum",
+      "label": "Vertical datum",
+      "description": "The level the vertical values are measured from.",
+      "keys": [
+        "vertical_datum",
+        "datum",
+        "depth_datum",
+        "tvdss_datum"
+      ],
+      "compare": "nfc-trimmed"
+    },
+    {
+      "id": "units.xy",
+      "label": "Map unit",
+      "description": "The unit of the x and y values.",
+      "keys": [
+        "xy_unit"
+      ],
+      "compare": "exact"
+    },
+    {
+      "id": "units.depth",
+      "label": "Depth unit",
+      "description": "The unit of depths.",
+      "keys": [
+        "depth_unit"
+      ],
+      "compare": "exact"
+    },
+    {
+      "id": "units.time",
+      "label": "Time unit",
+      "description": "The unit of times.",
+      "keys": [
+        "time_unit"
+      ],
+      "compare": "exact"
+    },
+    {
+      "id": "units.z",
+      "label": "Vertical unit",
+      "description": "The unit of the vertical values; what they measure is the file's own vertical values item.",
+      "keys": [
+        "z_unit"
+      ],
+      "compare": "exact"
+    }
+  ],
+  "own": [
+    "positive",
+    "md_reference",
+    "depth_basis",
+    "azimuth_reference",
+    "depth_type",
+    "time_kind",
+    "seismic_reference_elevation",
+    "corners",
+    "column_start",
+    "encoding",
+    "layer"
+  ],
+  "compare": {
+    "exact": "equal only when the stated texts are identical",
+    "nfc-trimmed": "equal only when identical after Unicode NFC normalisation and trimming; never case-folded or looked up"
+  },
+  "notes": [
+    "An item is one quantity: two units a file declares at once are two items, and no equivalence between units.z, units.depth and units.time is inferred.",
+    "Own keys are never grouped; each file is asked for them itself.",
+    "unknown and an absent value are both unstated.",
+    "Nothing is converted: values compare as stated."
+  ]
+}

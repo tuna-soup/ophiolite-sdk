@@ -1,0 +1,15 @@
+"""$label."""
+from ophiolite import procedure, readers, writers
+
+
+@procedure
+def main(inputs, settings):
+    """Read the wavelet with ophiolite.readers and write it again with the Ophiolite writer.
+
+    `values` holds the writer's arguments, made from everything the reader found. Your calculation goes where it is
+    marked: change `values` before they are written."""
+    found = readers.read(inputs['data'][0])
+    values = {'wavelet': list(found.samples), 'kind': found.wavelet_kind, 'dt': found.dt, 't0': found.t0, 'polarity': found.polarity,
+              'frequency_hz': found.frequency_hz, 'corners_hz': None if found.corners_hz is None else list(found.corners_hz)}
+    # Your calculation: change values here.
+    return {'data': writers.write_wavelet(**values)}

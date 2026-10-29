@@ -1,0 +1,83 @@
+{
+  "data": {
+    "stations": [
+      {
+        "md": 0.0,
+        "inclination": 0.0,
+        "azimuth": 0.0
+      },
+      {
+        "md": 500.0,
+        "inclination": 12.5,
+        "azimuth": 45.0
+      },
+      {
+        "md": 1000.0,
+        "inclination": null,
+        "azimuth": 47.5
+      },
+      {
+        "md": 1500.0,
+        "inclination": 30.0,
+        "azimuth": 50.0
+      }
+    ],
+    "depth_unit": "m",
+    "azimuth_reference": "grid-north",
+    "depth_datum": "KB"
+  },
+  "pass": {
+    "stations": [
+      {
+        "md": 0.0,
+        "inclination": 0.0,
+        "azimuth": 0.0
+      },
+      {
+        "md": 500.0,
+        "inclination": 12.5,
+        "azimuth": 45.5
+      },
+      {
+        "md": 1000.0,
+        "inclination": null,
+        "azimuth": 47.5
+      },
+      {
+        "md": 1500.0,
+        "inclination": 30.0,
+        "azimuth": 50.0
+      }
+    ],
+    "depth_unit": "m",
+    "azimuth_reference": "grid-north",
+    "depth_datum": "KB"
+  },
+  "differ": {
+    "stations": [
+      {
+        "md": 0.0,
+        "inclination": 0.0,
+        "azimuth": 0.0
+      },
+      {
+        "md": 500.0,
+        "inclination": 12.5,
+        "azimuth": 45.0
+      },
+      {
+        "md": 1000.0,
+        "inclination": null,
+        "azimuth": 47.5
+      },
+      {
+        "md": 1500.0,
+        "inclination": 33.0,
+        "azimuth": 50.0
+      }
+    ],
+    "depth_unit": "m",
+    "azimuth_reference": "grid-north",
+    "depth_datum": "KB"
+  }
+}

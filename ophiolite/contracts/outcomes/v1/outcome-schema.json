@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/outcomes/v1/outcome-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.outcome/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "OutcomeDestination": {
+      "additionalProperties": false,
+      "properties": {
+        "procedure": {
+          "description": "The name of the catalogue send procedure that delivers it",
+          "pattern": "^[a-z0-9][a-z0-9-]{0,62}(/[a-z0-9][a-z0-9-]{0,62})?$",
+          "title": "Procedure",
+          "type": "string"
+        },
+        "label": {
+          "description": "The destination as a person reads it; no address or secret",
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "procedure",
+        "label"
+      ],
+      "title": "OutcomeDestination",
+      "type": "object"
+    },
+    "OutcomeRule": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "description": "A built-in rule (rules.json); membership is the server's check",
+          "maxLength": 80,
+          "pattern": "^[a-z0-9][a-z0-9.-]*/[0-9]+$",
+          "title": "Name",
+          "type": "string"
+        },
+        "settings": {
+          "additionalProperties": true,
+          "description": "The rule's settings; which keys and values a rule takes is the server's check",
+          "title": "Settings",
+          "type": "object"
+        }
+      },
+      "required": [
+        "name",
+        "settings"
+      ],
+      "title": "OutcomeRule",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "An outcome as declared: what a result of `kind` must satisfy, by which built-in rule and settings, from which\ninputs, and where it is delivered. The server adds the id, version, declarer and time.",
+  "properties": {
+    "schema": {
+      "const": "ophiolite.outcome/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "label": {
+      "description": "How people name it (\"Tops within 5 m\"); it must read as words",
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Label",
+      "type": "string"
+    },
+    "kind": {
+      "description": "The result kind it is declared over (rules.json `kinds`)",
+      "maxLength": 80,
+      "pattern": "^[a-z0-9][a-z0-9.-]*/[0-9]+$",
+      "title": "Kind",
+      "type": "string"
+    },
+    "rule": {
+      "$ref": "#/$defs/OutcomeRule"
+    },
+    "inputs": {
+      "description": "The input kinds, sorted; they must equal the rule's inputs exactly",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 16,
+      "title": "Inputs",
+      "type": "array"
+    },
+    "destination": {
+      "$ref": "#/$defs/OutcomeDestination"
+    }
+  },
+  "required": [
+    "schema",
+    "label",
+    "kind",
+    "rule",
+    "inputs",
+    "destination"
+  ],
+  "title": "OutcomeDeclaration",
+  "type": "object"
+}

@@ -25,7 +25,8 @@ def init(python, name, folder):
 
 def installed_outside(python, cwd):
     where = subprocess.run([python, '-c', 'import ophiolite;print(ophiolite.__file__)'], cwd=cwd, env=clean_env(), capture_output=True, text=True).stdout.strip()
-    return where and not where.startswith(str(ROOT))
+    # The checkout's source package, not ROOT: public CI builds its wheel venv inside the checkout (.wheel/, item 85).
+    return where and not where.startswith(str(ROOT / 'ophiolite') + os.sep)
 
 
 def test_init_scaffolds_every_template_from_the_installed_wheel(tmp_path):

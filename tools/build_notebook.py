@@ -25,6 +25,19 @@ def build(source,metadata=None):
     return json.dumps({'cells':cells,'metadata':{'kernelspec':{'display_name':'Python 3','language':'python','name':'python3'},'language_info':{'name':'python','version':'3'},**(metadata or {'template_version':'0.1.0'})},'nbformat':4,'nbformat_minor':5},indent=2)+'\n'
 
 
+CORE={'slug','title','sentence','modes','data'};ADAPTED={'attribution','data_terms','minimum_sdk'};ATTRIBUTION={'title','author','licence','url','commit'}
+
+
+def validate(entry):
+    """E126b (D3): the core keys always; an adapted notebook's attribution, data terms and minimum SDK all or none."""
+    slug=entry.get('slug');keys=set(entry)
+    if not CORE<=keys:raise ValueError(f'The gallery entry {slug} lacks '+', '.join(sorted(CORE-keys)))
+    if keys-CORE-ADAPTED:raise ValueError(f'The gallery entry {slug} has unknown keys '+', '.join(sorted(keys-CORE-ADAPTED)))
+    if keys&ADAPTED and keys&ADAPTED!=ADAPTED:raise ValueError(f'The gallery entry {slug} states '+', '.join(sorted(keys&ADAPTED))+' without '+', '.join(sorted(ADAPTED-keys)))
+    if 'attribution' in entry and (not isinstance(entry['attribution'],dict) or set(entry['attribution'])!=ATTRIBUTION or not all(isinstance(v,str) and v for v in entry['attribution'].values())):
+        raise ValueError(f'The gallery entry {slug} needs attribution with '+', '.join(sorted(ATTRIBUTION)))
+
+
 def gallery():
     """(script, notebook, metadata) for every gallery entry, in listing order; a missing or unlisted entry is refused."""
     directory=ROOT/'notebooks';listing=json.loads((directory/'gallery.json').read_text())
@@ -33,6 +46,7 @@ def gallery():
     folders=sorted(p.name for p in directory.iterdir() if p.is_dir() and not p.name.startswith('.'))
     unlisted=sorted(set(folders)-set(slugs))
     if unlisted:raise ValueError('Notebook folders not listed in notebooks/gallery.json: '+', '.join(unlisted))
+    for entry in listing['notebooks']:validate(entry)
     for slug in slugs:
         script=directory/slug/'notebook.py'
         if not script.is_file():raise ValueError(f'The gallery entry {slug} has no notebooks/{slug}/notebook.py')

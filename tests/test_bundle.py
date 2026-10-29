@@ -218,14 +218,23 @@ def test_bundle_two_refusals(tmp_path, case):
     with pytest.raises((VerificationFailed, Refused)): bundle.open_bundle(root)
 
 
+def _history():  # H56 (D3): an old SDK commit in either layout (tools/history.py)
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('sdk_history', Path(__file__).resolve().parents[1] / 'tools/history.py')
+    module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+    return module
+
+
 def test_released_reader_refuses_bundle_two_by_its_major(tmp_path):
     """The released E18 reader (SDK 23c0acd, frozen byte for byte in tests/frozen) refuses 2.0
     before reading any content. Its message is the generic "not an Ophiolite portable bundle"
     (it predates schema /2); it never misreads a typed asset as a curve."""
     import importlib.util, subprocess
     frozen_path = Path(__file__).parent / 'frozen/bundle_1_0.py'
-    released = subprocess.run(['git', '-C', str(Path(__file__).parents[1]), 'show', '23c0acd:ophiolite/bundle.py'], capture_output=True)
-    if released.returncode == 0: assert released.stdout == frozen_path.read_bytes()  # full clones prove the copy is exact
+    history = _history()
+    released = history.show(Path(__file__).parents[1], '23c0acd', 'ophiolite/bundle.py')
+    if released is not None: assert released == frozen_path.read_bytes()  # full clones prove the copy is exact
+    else: assert not history.FULL, history.missing('23c0acd')
     spec = importlib.util.spec_from_file_location('ophiolite._frozen_bundle', frozen_path); frozen = importlib.util.module_from_spec(spec); spec.loader.exec_module(frozen)
     root = bundle.write_bundle(tmp_path / 'b', typed_items()).path
     with pytest.raises(VerificationFailed, match='not an Ophiolite portable bundle'): frozen.open_bundle(root)

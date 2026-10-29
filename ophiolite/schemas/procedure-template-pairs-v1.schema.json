@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ophiolite.procedure-template-pairs/1",
+  "title": "The step and kind pairs `ophiolite procedures new` can start (E112 s0)",
+  "description": "SDK-local: which step x kind pairs have a start, and the sentence each other pair says. Every step x every kind is in exactly one of listed and refused; that, and agreement with the procedure rules, is checked by the loader (ophiolite.procedure_templates).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "rules_version", "kinds", "listed", "refused"],
+  "properties": {
+    "schema": {"const": "ophiolite.procedure-template-pairs/1"},
+    "rules_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "kinds": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {"pattern": "^[a-z0-9][a-z0-9.-]*/[0-9]+$"},
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["word"],
+        "properties": {"word": {"type": "string", "pattern": "^[a-z][a-z0-9-]{1,30}$"}}
+      }
+    },
+    "listed": {"type": "array", "items": {"$ref": "#/$defs/pair"}},
+    "refused": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["step", "kind", "sentence"],
+        "properties": {
+          "step": {"$ref": "#/$defs/step"},
+          "kind": {"type": "string"},
+          "sentence": {"type": "string", "minLength": 1, "maxLength": 200}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "step": {"enum": ["read", "source", "process", "send", "check"]},
+    "pair": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["step", "kind"],
+      "properties": {"step": {"$ref": "#/$defs/step"}, "kind": {"type": "string"}}
+    }
+  }
+}

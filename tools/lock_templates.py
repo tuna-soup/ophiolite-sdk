@@ -5,31 +5,54 @@ reference is replaced with the independently qualified public source SHA whose
 metadata must match that wheel; package versions and platform markers are kept.
 """
 import argparse
+import re
 import subprocess
 import tempfile
+import tomllib
 import zipfile
 from email import message_from_bytes
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 
 
+def resolution_metadata(pyproject,extras):
+    """E126b (D2): what resolving the SDK line reads: requires-python, the base dependencies and the named extras."""
+    project=tomllib.loads(pyproject.decode())['project'];optional=project.get('optional-dependencies',{})
+    return {'requires-python':project.get('requires-python'),'dependencies':project.get('dependencies',[]),'extras':{name:optional.get(name) for name in sorted(extras)}}
+
+
+def requested_extras(first):
+    match=re.match(r'ophiolite\[([^\]]*)\]',first)
+    return [name.strip() for name in match.group(1).split(',')] if match else []
+
+
+def check_metadata(accepted,current,extras):
+    if resolution_metadata(accepted,extras)!=resolution_metadata(current,extras):raise ValueError('SDK metadata changed; qualify a new source pin before locking templates.')
+
+
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--template',action='append');args=parser.parse_args()
-    wheel=ROOT/'dist/ophiolite-0.1.0-py3-none-any.whl'
+    version=re.search(r"""^__version__\s*=\s*['"]([^'"]+)['"]""",(ROOT/'ophiolite/_version.py').read_text(),re.M).group(1)  # E17p D3: the release name
+    wheel=ROOT/('dist/ophiolite-%s-py3-none-any.whl'%version)
     if not wheel.is_file():raise SystemExit('Build the SDK wheel first.')
     accepted='622b528bb70318d322b52bf090ed0395515c1f76'  # E31: the SDK with publish_derived, init and the packaged templates
-    accepted_metadata=subprocess.check_output(['git','show',accepted+':pyproject.toml'],cwd=ROOT)
-    if accepted_metadata!=(ROOT/'pyproject.toml').read_bytes():raise ValueError('SDK metadata changed; qualify a new source pin before locking templates.')
+    import importlib.util  # H56 (D3, D17): the accepted commit in either layout (tools/history.py)
+    spec=importlib.util.spec_from_file_location('sdk_history',ROOT/'tools/history.py');history=importlib.util.module_from_spec(spec);spec.loader.exec_module(history)
+    accepted_metadata=history.show(ROOT,accepted,'pyproject.toml')
+    if accepted_metadata is None:raise SystemExit(history.missing(accepted))
     with zipfile.ZipFile(wheel) as archive:
-        metadata=message_from_bytes(archive.read('ophiolite-0.1.0.dist-info/METADATA'))
-        if metadata['Name']!='ophiolite' or metadata['Version']!='0.1.0':raise ValueError('Unexpected SDK wheel')
+        metadata=message_from_bytes(archive.read('ophiolite-%s.dist-info/METADATA'%version))
+        if metadata['Name']!='ophiolite' or metadata['Version']!=version:raise ValueError('Unexpected SDK wheel')
     for name in args.template or ['agent-workflow','notebook','derive-and-publish','map-application','sync-worker']:
         directory=ROOT/'ophiolite/templates'/name
         source=(directory/'requirements.in').read_text();first=source.splitlines()[0]
         if not first.endswith('@'+accepted):raise ValueError('Template SDK pin differs from the qualified source')
+        check_metadata(accepted_metadata,(ROOT/'pyproject.toml').read_bytes(),requested_extras(first))  # E126b (D2): only what resolution reads
         with tempfile.TemporaryDirectory(prefix='ophiolite-template-lock-') as temporary:
             request=Path(temporary)/'requirements.in';locked=Path(temporary)/'requirements.lock'
             request.write_text(source.replace(first,first.split(' @ ')[0]+' @ '+wheel.as_uri(),1))
+            current=directory/'requirements.lock'  # E126b (D2): uv prefers the versions already locked
+            if current.is_file():locked.write_text('\n'.join(line for line in current.read_text().splitlines() if not line.startswith(('#','ophiolite')))+'\n')
             subprocess.run(['uv','pip','compile','--python-version','3.10','--universal','--no-header','--no-annotate',str(request),'-o',str(locked)],check=True,stdout=subprocess.DEVNULL)
             lines=locked.read_text().splitlines()
             output='\n'.join(first if line.startswith('ophiolite') else line for line in lines)+'\n'

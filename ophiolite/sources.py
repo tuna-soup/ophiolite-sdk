@@ -30,6 +30,7 @@ from .models.api import OrgConnectionsPage, SourceBrowsePage, SourceExportAnswer
 SUPPORTED = 'sql-wells/1'
 TABLE = 'table/1'  # E50b1: any approved table, read as a table
 PROFILES = (SUPPORTED, TABLE)
+FILE_FORMATS = ('parquet', 'geoparquet', 'csv')  # E58b: a table has no positions, so the server refuses geoparquet in words
 LOGICAL = ('text', 'integer', 'float', 'decimal', 'boolean', 'date', 'timestamp', 'timestamptz')
 CHECKSUM_SCOPE = 'sha256 covers the source payload, not the transformed frame values'
 MAPPED = ('well_id', 'name', 'operator', 'x', 'y', 'depth')
@@ -97,6 +98,23 @@ class Source:
             warnings.warn('The revision covers only the columns read; not read: %s.' % named, UserWarning, stacklevel=2)
         return snapshot
 
+    def download(self, destination, format='parquet', expect_revision=None):
+        """E58b: this SQL table (table/1) as one Parquet or CSV file at `destination` (see SourceSnapshot.download).
+        `sources/export-file` takes no precondition (the server reads as `sources/export` does): the revision it wrote is
+        compared here, and with `expect_revision` a different one is SourceRevisionDiffers; nothing is saved then."""
+        from .client import save_verified, written
+        if self.profile != TABLE:
+            raise _refuse(SourceNotSupported, 'Only a SQL table read as a table (%s) is downloaded as a file; this source is %s.' % (TABLE, self.profile),
+                          'Read it with source.read() instead.', 'source-not-supported')
+        if format not in FILE_FORMATS: raise Refused('Download a table as one of %s.' % ', '.join(FILE_FORMATS))
+        answer = {}
+        raw = self._client._post_file('sources', 'export-file', {'id': self.id, 'format': format}, answer)
+        revision = answer.get('x-ophiolite-revision')
+        if not revision: raise VerificationFailed('The download does not say which revision it was written from; nothing was saved.')
+        if expect_revision is not None and revision != expect_revision:
+            raise SourceRevisionDiffers(expect_revision, revision)
+        return save_verified(destination, written(raw, answer.get('x-content-sha256')))
+
     def describe(self, expect_revision=None):
         """What this table holds — columns and types, the mapping, CRS, row count, nulls — without keeping its rows.
         It verifies like read() and costs one full read. A table/1 table: its columns, key, declarations, the columns
@@ -133,11 +151,12 @@ def _encoded(logical, value):
     return isinstance(value, bool)  # boolean
 
 
-def verified_data_table(data):
+def verified_data_table(data, schema='ophiolite.table/1'):
     """(columns, read column names, rows as lists) of a decoded table/1 document, after the structural checks: the
     documented schema and encoding, unique column names, a logical type on every column read and none on a column not
-    read, a key of columns read, one value per column read in every row, and every value encoded as its column's type."""
-    if not isinstance(data, dict) or data.get('schema') != 'ophiolite.table/1':
+    read, a key of columns read, one value per column read in every row, and every value encoded as its column's type.
+    E58b: a kept table (`ophiolite.table-file/1`) holds its columns and rows in the same encoding and is checked the same way."""
+    if not isinstance(data, dict) or data.get('schema') != schema:
         raise VerificationFailed('The source payload is not the documented table.')
     if data.get('encoding') != 'table-encoding/1':
         raise VerificationFailed('The table is written in an encoding this SDK does not read (%s); upgrade ophiolite to read it.' % str(data.get('encoding'))[:40])
@@ -177,7 +196,7 @@ class SourceSnapshot:
         self.id, self.name, self.profile = source.id, source.name, manifest['reference']['profile']
         self.authority, self.key = manifest['reference']['authority'], manifest['reference']['key']
         self.revision, self.sha256, self.bytes = manifest['reference']['revision'], digest, manifest['bytes']
-        self.manifest = manifest
+        self.manifest, self._source = manifest, source
         if self.profile == TABLE: return self._table(data)
         schema, original, rows, mapping = verified_table(data)
         self.mapping, self.crs = mapping, mapping.get('crs')
@@ -198,6 +217,14 @@ class SourceSnapshot:
 
     def __len__(self):
         return len(self.rows)
+
+    def download(self, destination, format='parquet'):
+        """E58b: save this table as one file (`format` parquet or csv) at `destination`, written by the server from the
+        rows `sources/export` reads now. The body is checked against its stated SHA-256 and the revision it was written
+        from must be this snapshot's: when the selection has moved since this read, SourceRevisionDiffers; when it can no
+        longer be read (removed, needs review, the source answers other rows), the server's refusal. Either way nothing
+        is saved at `destination`."""
+        return self._source.download(destination, format=format, expect_revision=self.revision)
 
     def __repr__(self):
         return 'SourceSnapshot(%r, %d rows, %s, revision %s)' % (self.name, len(self.rows), self.crs, self.revision[:12])

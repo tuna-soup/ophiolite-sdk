@@ -97,3 +97,50 @@ def test_a_row_without_an_end_comes_back_with_an_explicit_none():
     http, _ = gateway()
     rows = connect(URL, Credential.bearer('oph_key_example'), http).projects()
     assert rows == [{**PROJECTS[0], 'access_ends_at': None}, PROJECTS[1]] and 'access_ends_at' not in PROJECTS[0]
+
+
+# --- E67b C8: teams and the access history read with an access key --------------------------------------------------
+
+def history_gateway():
+    seen = []
+    def handle(request):
+        seen.append((request.url.path, dict(request.headers), json.loads(request.content or b'{}')))
+        if request.url.path.endswith('/teams'): return httpx.Response(200, json={'teams': []})
+        return httpx.Response(200, json={'entries': [], 'next_cursor': None, 'as_of': '2026-10-20T00:00:00Z', 'earlier_changes_may_be_incomplete': None,
+                                         'not_inspectable': 0})
+    return REAL_CLIENT(transport=httpx.MockTransport(handle)), seen
+
+
+def test_a_saved_sign_in_is_not_used_for_teams_or_the_access_history_and_nothing_is_sent(tmp_path):
+    """The saved sign-in (bearer plus X-Ophiolite-Application-Grant) is refused by the server on these reads; the SDK says
+    so before sending it. An access key is what they take."""
+    from ophiolite import Client
+    from ophiolite.access_history import ACCESS_KEY_NEEDED
+    http, seen = history_gateway()
+    saved = Credential.from_file(cache(tmp_path), http=http)  # a saved sign-in for project 'test'
+    client, account = Client(URL, 'test', saved, http), Account(URL, saved, http)
+    for call in (client.access_history, client.access_teams, lambda: client.export_access_history('csv', tmp_path / 'h.csv'),
+                 lambda: account.teams('o'), lambda: account.team('o', 't'), lambda: account.person_history('o', 'bob'),
+                 lambda: account.export_person_history('o', 'bob', 'csv', tmp_path / 'b.csv')):
+        with pytest.raises(Refused) as refused: call()
+        assert (refused.value.code, refused.value.message) == ('access-key-required', ACCESS_KEY_NEEDED)
+    assert seen == [] and not (tmp_path / 'h.csv').exists() and not (tmp_path / 'b.csv').exists()
+
+
+def test_the_person_history_names_the_organisation_and_never_a_project():
+    http, seen = history_gateway()
+    connect(URL, Credential.bearer('oph_key_example'), http).person_history('o', 'bob', kinds=['key_created'], since='2026-10-01', until='2026-11-01', project='p')
+    [(path, headers, body)] = seen
+    assert path == '/api/v1/organizations/person-history' and headers['authorization'] == 'Bearer oph_key_example'
+    assert body == {'organization_id': 'o', 'user_id': 'bob', 'limit': 100,
+                    'filters': {'kinds': ['key_created'], 'from': '2026-10-01', 'to': '2026-11-01', 'project': 'p'}}
+
+
+def test_the_cli_page_documents_reading_access_history_and_teams():
+    from pathlib import Path
+    text = (Path(__file__).resolve().parents[1] / 'docs/cli.md').read_text()
+    section = text.split('## Reading access history and teams', 1)[1].split('\n## ', 1)[0]
+    for words in ('ophiolite access-history', 'ophiolite teams', '--project', '--person', '--export', 'Client.access_history', 'Client.access_teams',
+                  'Client.export_access_history', 'Account.teams', 'Account.team', 'Account.person_history', 'access key',
+                  'a saved sign-in is refused', 'HISTORY_GRANT_REFUSED', 'HISTORY_AGENT_REFUSED'):
+        assert words in section, words

@@ -1,0 +1,24 @@
+"""$label."""
+from ophiolite import procedure, readers, writers
+
+AXES = ('domain', 'first_sample', 'sample_interval', 'horizontal', 'horizontal_first', 'horizontal_step')
+
+
+def refuse(what):
+    raise ValueError(f'This start writes with ophiolite.writers.write_seismic_section, which {what}; change the start to say what to keep.')
+
+
+@procedure
+def main(inputs, settings):
+    """Read the seismic section with ophiolite.readers and write it again with the Ophiolite writer.
+
+    `values` holds the writer's arguments, made from everything the reader found (the sample and trace counts come
+    from the grid). Your calculation goes where it is marked: change `values` before they are written. A part of the
+    file the writer has no place for stops the run with a sentence, so nothing is left out without your knowing."""
+    found = readers.read(inputs['data'][0])
+    if found.polarity is None: refuse('always writes a polarity line, and this section has none')
+    if found.origin == 'not-stated': refuse("has no place for the line 'origin not-stated'")
+    values = {'section': [list(row) for row in found.grid], 'polarity': found.polarity, 'origin': found.origin,
+              **{key: found.axes[key] for key in AXES}}
+    # Your calculation: change values here.
+    return {'data': writers.write_seismic_section(**values)}

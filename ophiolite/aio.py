@@ -8,7 +8,10 @@ import anyio
 import httpx
 from . import _client_header  # E93
 from . import _core
+from . import _ranges  # E100d1
 from .client import Client, CurveSet, PROFILES
+from .client import (PROVENANCE_BYTES,NO_SOURCE_RECORDS,_provenance_path,_provenance_of,_no_provenance_route,  # E122 s5b
+                     _source_record_of,_warn_source_records_omitted)
 from .errors import (AuthenticationRequired,PermissionRefused,Unavailable,IntegrityConflict,
                      CapacityExceeded,Refused,Incompatible,Busy,VerificationFailed,OphioliteError)
 
@@ -123,13 +126,22 @@ class AsyncClient(Client):
             _core.refuse_windows_only(_core.verify_descriptor(data,self.project,asset,revision,curve))
             raw=_core.rules.artifact(data)
             normalized=next(r for r in data['representations'] if r['kind']=='normalized')
-            if artifact is None:artifact=await self._get(path+'/representations/'+quote(raw['id'],safe='')+query,raw['bytes'])
+            if artifact is None:artifact=await self._artifact(path+'/representations/'+quote(raw['id'],safe='')+query,raw['bytes'])
             _core.verify_bytes(raw,artifact)
             body=await self._get(path+'/representations/'+quote(normalized['id'],safe='')+query,normalized['bytes'])
             model,view=_core.verify_pair(data,body,artifact,curve,strict_interpretation=strict_interpretation)
             descriptors.append(model);views.append(view)
             wire_descriptors.append(data);wire_curves.append(json.loads(body))
         return CurveSet(descriptors,views,artifact,url=self.url,project=self.project,wire_descriptors=wire_descriptors,wire_curves=wire_curves)
+
+    async def _artifact(self,path,size):
+        """E100d1: Client._artifact with the same checks."""
+        if size<=_ranges.WHOLE_BYTES:return await self._get(path,size)
+        parts,out=_ranges.Parts(size=size),bytearray()
+        while parts.pending():
+            answer={}
+            out.extend(parts.accept(await self._get(path,parts.part_bytes,ranged=parts.range(),answer=answer),answer))
+        return bytes(out)
 
     async def curve_window(self,asset,revision,curve,top,base,*,level=None,rows=None,max_pages=64):
         """E100a: Client.curve_window with the same checks."""
@@ -168,7 +180,23 @@ class AsyncClient(Client):
         chosen=self._slice_choice(slices)
         volume=await self.read_data(asset,revision)
         read=[await self.read_slice(asset,revision,axis,label,volume=volume) for axis,label in chosen]
-        return await anyio.to_thread.run_sync(lambda:write_bundle(destination,[({'asset_id':asset,'revision':revision,'curves':[],'slices':[{'axis':a,'label':l} for a,l in chosen]},(volume,read))]))
+        state={}
+        volume.source_record=await self._source_record(asset,revision,state)  # E122 s5b
+        _warn_source_records_omitted(state.get('omitted'))
+        return await anyio.to_thread.run_sync(lambda:write_bundle(destination,[({'asset_id':asset,'revision':revision,'curves':[],'slices':[{'axis':a,'label':l} for a,l in chosen]},(volume,read))],
+                                                                  source_records_omitted=state.get('omitted')))
+
+    async def provenance(self,asset,revision):
+        """E122 s5b: same as Client.provenance, awaited."""
+        return _provenance_of(await self._json(_provenance_path(self.prefix,asset,revision),PROVENANCE_BYTES),asset,revision)
+
+    async def _source_record(self,asset,revision,state):
+        if state.get('omitted'):return None
+        try:found=await self.provenance(asset,revision)
+        except Unavailable as error:
+            if not _no_provenance_route(error):raise
+            state['omitted']=NO_SOURCE_RECORDS;return None
+        return _source_record_of(found)
 
     async def read_many(self,selections,**options):
         results=[None]*len(selections)

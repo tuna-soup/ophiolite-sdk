@@ -1,0 +1,16 @@
+"""$label."""
+import json
+from pathlib import Path
+
+from ophiolite import procedure, writers
+
+
+@procedure
+def main(inputs, settings):
+    """Read sample.json from the folder the system's configuration names, and write $words with the Ophiolite writer.
+
+    To read your own system, change how `values` is made below: ask the system for the data and put it into the
+    writer's arguments (data/source/sample.json shows them). Keep passwords in the configuration file, never here."""
+    folder = Path(inputs['system'].config['folder'])
+    values = json.loads((folder / 'sample.json').read_text(encoding='utf-8'))
+    return {'data': writers.$writer(**values)}

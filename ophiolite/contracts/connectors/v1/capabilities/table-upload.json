@@ -1,0 +1,79 @@
+{
+  "schema": "ophiolite.connector-capability/1",
+  "id": "table-upload",
+  "display_name": "Table file upload (CSV, Excel, Parquet)",
+  "kind": "source",
+  "summary": "Upload a CSV, Excel or Parquet table and keep it as it is: the original file, the reading choices and the column declarations you made; nothing is mapped to wells unless you choose it.",
+  "host": {
+    "name": "Web browser",
+    "versions": [],
+    "os": [
+      "browser"
+    ]
+  },
+  "redistribution": "Ophiolite source in this repository; Excel and Parquet files are read with openpyxl (MIT), xlrd (BSD) and pyarrow (Apache-2.0), installed with the server.",
+  "example": "ophiolite read-data --asset <id> --revision <rev> --output folder",
+  "routes": [
+    {
+      "profile": "table-csv/1",
+      "data": "Table",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "Text formatting is kept only in the exact original"
+      ],
+      "unsupported": [
+        "more than 100,000 rows or 128 columns"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    },
+    {
+      "profile": "table-excel/1",
+      "data": "Table",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "Text formatting is kept only in the exact original",
+        "Formulas are kept only in the exact original; the table holds their stored values",
+        "Cell styles, merged cells and other sheets are kept only in the exact original"
+      ],
+      "unsupported": [
+        "more than 100,000 rows or 128 columns",
+        "more than one sheet in one table"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    },
+    {
+      "profile": "table-parquet/1",
+      "data": "Table",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "Columns of nested or unsupported types are listed as not read and kept only in the exact original"
+      ],
+      "unsupported": [
+        "more than 100,000 rows or 128 columns",
+        "nested types (list, struct, map) as columns"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    }
+  ]
+}

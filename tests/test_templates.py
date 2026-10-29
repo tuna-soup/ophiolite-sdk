@@ -12,11 +12,14 @@ NAMES=('agent-workflow','notebook','derive-and-publish','map-application','sync-
 
 
 def test_template_versions_follow_sdk_and_have_real_commands():
-    source_version=re.search(r'^version = "([^"]+)"',(ROOT/'pyproject.toml').read_text(),re.M).group(1)
+    # E17p D3: the SDK version is the release name, read from _version.py; a template keeps the version of the SDK
+    # commit its requirements.in locks (E31's accepted 0.1.0), which no longer moves with the release
+    source_version=re.search(r"""^__version__ = '([^']+)'""",(ROOT/'ophiolite/_version.py').read_text(),re.M).group(1)
     assert source_version==__version__
+    assert 'dynamic = ["version"]' in (ROOT/'pyproject.toml').read_text()
     for name in NAMES:
         directory=ROOT/'ophiolite/templates'/name;metadata=json.loads((directory/'template.json').read_text())
-        assert metadata['template_version']==metadata['sdk_version']==source_version
+        assert metadata['template_version']==metadata['sdk_version']=='0.1.0'
         assert metadata['test_command']==(['python','tools/test.py'] if name=='map-application' else ['python','-m','pytest','-q','tests'])
         assert 'template_version' in (directory/'README.md').read_text()
         assert 'file://' not in (directory/'requirements.lock').read_text()

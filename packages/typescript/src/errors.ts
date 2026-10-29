@@ -33,6 +33,26 @@ export class Busy extends OphioliteError {
 export class ShareOutcomeUnknown extends OphioliteError {
   constructor() { super("The sharing response did not complete.", "share-outcome-unknown", "Read the current grants before deciding whether to share again."); }
 }
+/** E35a: a rights basis governing the data ended; the message is the server's sentence, lastDay the last permitted day (YYYY-MM-DD). */
+export class RightsEnded extends PermissionRefused {
+  readonly code = "rights-ended";
+  constructor(readonly sentence: string, readonly lastDay?: string, status = 403) { super(status); this.message = sentence; }
+}
+export class RightsConflict extends IntegrityConflict {
+  readonly code = "rights-conflict";
+  constructor(readonly sentence: string, status = 409) { super(status); this.message = sentence; }
+}
+/** E35a: the category of a refusal whose envelope names a rights code; every other refusal keeps its status category. */
+export function refusalError(status: number, body: unknown): OphioliteError {
+  const envelope = typeof body === "object" && body !== null ? body as Record<string, unknown> : {};
+  const sentence = typeof envelope.message === "string" && envelope.message.length > 0 && envelope.message.length <= 1000 ? envelope.message : undefined;
+  if (envelope.code === "rights-ended") {
+    const day = typeof envelope.last_day === "string" && /^\d{4}-\d\d-\d\d$/.test(envelope.last_day) ? envelope.last_day : undefined;
+    return new RightsEnded(sentence ?? "The rights to use this data ended.", day, status);
+  }
+  if (envelope.code === "rights-conflict") return new RightsConflict(sentence ?? "The rights changed since you read them.", status);
+  return httpError(status);
+}
 export function httpError(status: number): OphioliteError {
   if (status === 401) return new AuthenticationRequired(status);
   if (status === 403) return new PermissionRefused(status);

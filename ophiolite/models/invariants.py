@@ -91,17 +91,23 @@ def asset(value):
     typed = 'type' in value['scientific']
     recipe = 'recipe_schema' in profiles.get(value['profile'], {})  # E23a: read through an import recipe
     packaged = profiles.get(value['profile'], {}).get('package') == 'without-recipe'  # E56: a Shapefile read from its members
-    require((recipe or packaged) == (value.get('package') is not None), 'A package is present exactly when the interpretation is recipe- or package-based')
+    kept = value['interpretation'].get('parsing_policy') == 'table-file/1'  # E58b: a kept table, the original with its table-interpretation.json
+    require(kept == (value['scientific'].get('type') == 'table'), 'Scientific context and interpretation disagree')
+    require((recipe or packaged or kept) == (value.get('package') is not None), 'A package is present exactly when the interpretation is recipe- or package-based')
     require(packaged == (value['interpretation'].get('parsing_policy') == 'package-strict/1'), 'Interpretation is not the one this profile declares')
     if value.get('package') is not None:
-        require((value['package']['recipe'] is None) == packaged, 'A recipe pin belongs to a recipe read and to nothing else')
+        require((value['package']['recipe'] is None) == (packaged or kept), 'A recipe pin belongs to a recipe read and to nothing else')
     if typed and recipe:
         require(value['interpretation'].get('mapping') == profiles[value['profile']]['connector']['mapping_version'], 'Scientific context and interpretation disagree')
+    elif kept:
+        require(value['interpretation'].get('mapping') == 'table/1', 'Scientific context and interpretation disagree')
     elif typed:
         mapping = {'well-tops': 'well-tops/1', 'trajectory': 'trajectory/1', 'regular-grid-surface': 'regular-grid-surface/1',
                    'triangulated-surface': 'triangulated-surface/1', 'point-set': 'point-set/1', 'polyline-set': 'polyline-set/1', 'seismic-volume': 'seismic-volume/1',
                    'wavelet': 'wavelet/1', 'model-section': 'model-section/1', 'seismic-section': 'seismic-section/1',
-                   'well-location': 'well-location/1', 'time-depth': 'time-depth/1', 'feature-set': 'feature-set/1'}  # E53; E74b: a position file or a corrected position; E56
+                   'well-location': 'well-location/1', 'time-depth': 'time-depth/1', 'feature-set': 'feature-set/1',
+                   'well-path': 'well-path/1', 'well-set': 'well-set/1',
+                   'well-residual': 'well-residual/1'}  # E53; E74b: a position file or a corrected position; E56; E125 s3a; E119a; E119b
         require(value['interpretation'].get('mapping') == mapping.get(value['scientific']['type']), 'Scientific context and interpretation disagree')
     else:
         context(value['scientific'])
@@ -130,7 +136,7 @@ def asset(value):
     require(raw['profile']==value['profile'] and normalized['profile'] in profile.get('normalized_profiles',[profile['normalized_profile']]), 'Representation profiles must be the asset profile and its normalized profile')
     if 'curve' in value['scientific']:  # E100b: a curve is stored as columns exactly when it is read in windows (as the gateway)
         require((normalized['profile']=='ophiolite.curve-columns/1')==(value['scientific'].get('read')=='windows'), 'A curve is stored as columns exactly when it is read in windows')
-    declared=profile['connector']['mapping_version'] if recipe else ((profiles.get(profile['normalized_profile']) or {}).get('interpretation') or {}).get('mapping')
+    declared=profile['connector']['mapping_version'] if recipe else ((profiles.get(normalized['profile']) or {}).get('interpretation') or {}).get('mapping')  # E123 s1c: of the stored form
     require(value['interpretation'].get('mapping')==declared, 'Interpretation is not the one this profile declares')
     if recipe or packaged: package(value, raw)
     if value['origin']=='managed-derived': require(value['revision']==raw['sha256'], 'Derived revision must identify the exact artifact')
@@ -309,12 +315,52 @@ def typed_payload(value):
         require(len(depth) == len(time) == c['count'] >= 2 and (velocity is None) == (not c['velocity_provided']) and (velocity is None or len(velocity) == len(depth)), 'Pairs and their context disagree')
         require(all(a < b for a, b in zip(depth, depth[1:])) and all(a < b for a, b in zip(time, time[1:])), 'Depth and time must strictly increase')
         require(c['depth_range'] == [depth[0], depth[-1]] and c['time_range'] == [time[0], time[-1]], 'Pairs and their ranges disagree')
+    elif kind == 'well-path':  # E125 s3a: stations in file order, measured depth strictly increasing; TVDSS range is [min, max]
+        stations = value['stations']; md = [s['md'] for s in stations]; tvdss = [s['tvdss'] for s in stations]
+        require(all(math.isfinite(s[k]) for s in stations for k in ('md', 'x', 'y', 'tvdss')), 'Every station needs finite numbers')
+        require(len(stations) == c['count'] >= 1 and c['md_range'] == [md[0], md[-1]] and c['tvdss_range'] == [min(tvdss), max(tvdss)], 'Stations and their context disagree')
+        require(all(a < b for a, b in zip(md, md[1:])), 'Measured depth must strictly increase')
+    elif kind == 'well-set':  # E119a (4-10): each wellbore once, a frame exactly with a trajectory, counts as the context says
+        members = value['members']; placed = [m['trajectory'] is not None for m in members]
+        require(len({m['wellbore'] for m in members}) == len(members), 'A wellbore appears twice in the set')
+        require(all((m['frame'] is not None) == p for m, p in zip(members, placed)), 'A member has a frame without a trajectory, or a trajectory without a frame')
+        require(c['count'] == len(members) and c['with_trajectory'] == sum(placed) and c['without_trajectory'] == len(members) - sum(placed), 'Members and their context disagree')
+    elif kind == 'well-residual':  # E119b (5-9): each row a residual or a reason; the residual is top.md - md of the used crossing
+        well_residual(value, c)
+    elif kind == 'table':  # E58b: a kept table; its rows, columns and coverage agree with the context
+        read = [col['name'] for col in value['columns'] if col['read']]
+        require(len(value['rows']) == len(value['source_rows']) == c['rows'] and len(value['columns']) == c['columns'], 'Rows, columns and their context disagree')
+        require(c['coverage']['read'] == read and [n['name'] for n in c['coverage']['not_read']] == [col['name'] for col in value['columns'] if not col['read']],
+                'The columns read and their coverage disagree')
 
 
 GEOMETRY_DEPTH = {'Point': 0, 'MultiPoint': 1, 'LineString': 1, 'MultiLineString': 2, 'Polygon': 2, 'MultiPolygon': 3}
 GEOMETRY_FAMILY = {'Point': 'point', 'MultiPoint': 'point', 'LineString': 'line', 'MultiLineString': 'line', 'Polygon': 'polygon', 'MultiPolygon': 'polygon'}
 KIND_CHECK = {'text': lambda v: isinstance(v, str), 'date': lambda v: isinstance(v, str), 'boolean': lambda v: isinstance(v, bool),
               'integer': lambda v: type(v) is int, 'number': lambda v: type(v) in (int, float)}
+
+
+RESIDUAL_BETWEEN = ('grazing', 'along-surface', 'uncertain', 'many-crossings')  # E119b: the reasons that carry `between`
+
+
+def well_residual(value, c):
+    """E119b: the rules of Platform's WellResidual the schema cannot state (the generator emits no if/then)."""
+    rows = value['rows']
+    for r in rows:
+        crossings, used, top = r['crossings'], r['used'], r['top']
+        require((r['occurrence'] == 0) == (top is None), 'A row has a top exactly when its occurrence is not 0')
+        require(all(a['md'] < b['md'] for a, b in zip(crossings, crossings[1:])), 'Crossings are listed in increasing measured depth')
+        require((r['residual'] is None) != (r['reason'] is None) and (used is None) == (r['residual'] is None), 'A row gives a residual or a reason, not both')
+        if r['residual'] is not None:
+            require(top is not None and used < len(crossings), 'A residual names a crossing that is not listed')
+            require(abs(r['residual'] - (top['md'] - crossings[used]['md'])) <= 1e-9, "A residual is not its top's measured depth minus the used crossing's")
+        require(r['trajectory'] is not None or r['reason'] in ('no-trajectory', 'no-top'), 'A row without a trajectory gives no-trajectory or no-top')
+        between = r['between']
+        require((between is not None) == (r['reason'] in RESIDUAL_BETWEEN) and (between is None or between[0] <= between[1]), 'A between range is given exactly for the reasons that carry one')
+    computed = sum(r['residual'] is not None for r in rows)
+    members = {r['wellbore'] for r in rows}; placed = {r['wellbore'] for r in rows if r['residual'] is not None}
+    require((c['count'], c['computed'], c['not_computed'], c['members'], c['members_not_computed']) ==
+            (len(rows), computed, len(rows) - computed, len(members), len(members - placed)), 'Rows and their context disagree')
 
 
 def feature_set(value, c):

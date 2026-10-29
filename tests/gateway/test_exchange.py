@@ -221,11 +221,40 @@ def test_a_well_log_needs_its_curves_and_reads_with_them(keyed, tmp_path):
     assert cannot.sentence == 'This kind of item cannot be received by this script yet: name the curves to receive a well log.'
     got = ex.get(log.asset_id, output=tmp_path / 'o', curves=['GR'])
     assert got.outcome == 'got' and (tmp_path / 'o/artifact.las').read_bytes() == LAS_TEXT.encode()
-    assert got.sentence == 'Got Gamma log, version 1. You now hold it; saved in %s.' % (tmp_path / 'o')  # a single upload has no `history`: it is version 1
+    assert got.sentence == 'Got Gamma log, version 1 by Alice, just now. You now hold it; saved in %s.' % (tmp_path / 'o')  # an upload answers result-history since E108 S2 (D6): version 1, its uploader
 
 
-def test_a_newer_version_of_an_upload_is_detected_and_not_received(keyed, tmp_path):
-    """Stop rule 9 (E53 merged): a real successor made by the upload-append writer."""
+LAS_TWO = LAS_TEXT.replace('100 0\n101 -999.25\n102 30\n', '100 12.5\n101 18\n102 -999.25\n')
+
+
+def test_a_well_logs_version_two_is_received_with_its_curves(keyed, tmp_path):
+    """E108 S3 (D8', S3R-3): the selected-curves read of an upload's version 2. bob holds version 1 of alice's log, she adds
+    version 2 with other GR values; his check names it and his get with curves=['GR'] writes version 2's values (literals
+    from LAS_TWO). The number comes from history: a curve read's descriptor carries no `history` (row 8-7), and the
+    refusal that stood on this path could never fire (it read `wire_descriptors`, which the data does not have)."""
+    web = keyed
+    alice, bob_key = client(web, key(web, 'alice')), key(web, 'bob')
+    first = alice.upload_data(LAS_TEXT.encode(), profile='las2/1', filename='gamma.las', name='Gamma log', attribution='Synthetic', audience=['bob'],
+                              rights_confirmed=True, command_id='e108s3-las1')
+    alice.share(first, read=['bob'], reuse=['bob'], expected_generation=alice.grants(first).generation)
+    bob = client(web, bob_key).exchange(tmp_path / 'bob')
+    assert bob.get(first.asset_id, output=tmp_path / 'one', curves=['GR']).sentence.startswith('Got Gamma log, version 1 by Alice')
+    second = alice.upload_data(LAS_TWO.encode(), profile='las2/1', filename='gamma.las', name='Gamma log', attribution='Synthetic', audience=['bob'],
+                               rights_confirmed=True, command_id='e108s3-las2', append_to=first.asset_id, expected_parent=first.revision)
+    assert (second.asset_id, second.revision) == (first.asset_id, hashlib.sha256(LAS_TWO.encode()).hexdigest())
+    assert bob.check().sentence.startswith('1 newer: Gamma log, version 2 by Alice')
+    got = bob.get(first.asset_id, output=tmp_path / 'two', curves=['GR'])
+    assert (got.outcome, got.sentence) == ('got', 'Got Gamma log, version 2 by Alice, just now. You now hold it; saved in %s.' % (tmp_path / 'two'))
+    assert (tmp_path / 'two/artifact.las').read_bytes() == LAS_TWO.encode()
+    [curve] = [json.loads(p.read_text()) for p in sorted((tmp_path / 'two').glob('curve*.json'))]
+    assert (curve['curve'], curve['values']) == ('GR', [12.5, 18.0, None])
+    assert bob.held()[first.asset_id]['revision'] == second.revision
+
+
+def test_a_newer_version_of_an_upload_is_detected_and_received(keyed, tmp_path):
+    """Stop rule 9 (E53 merged): a real successor made by the upload-append writer. E108 S3 (D8', M8') amends E70a's adapter
+    row 127 by name: the newer version is received like any other (it was cannot-read-here). Mutation: the successor
+    refusal restored (red)."""
     from project_gateway.tests.test_section_types import WAVELET
     from project_gateway.tests.test_section_publication import WAVELET_2
     web = keyed
@@ -233,12 +262,13 @@ def test_a_newer_version_of_an_upload_is_detected_and_not_received(keyed, tmp_pa
     first = alice.upload_data(WAVELET, profile='wavelet-text/1', name='Wavelet', attribution='Synthetic', audience=[], rights_confirmed=True, command_id='e70a-w1')
     ex = alice.exchange(tmp_path / 'w')
     assert ex.get(first.asset_id, output=tmp_path / 'o').outcome == 'got'
-    alice.upload_data(WAVELET_2, profile='wavelet-text/1', name='Wavelet', attribution='Synthetic', audience=[], rights_confirmed=True, command_id='e70a-w2',
-                      append_to=first.asset_id, expected_parent=first.revision)
-    assert ex.check().sentence.startswith('1 newer: Wavelet')
-    cannot = refused('cannot-read-here', lambda: ex.get(first.asset_id, output=tmp_path / 'o'))
-    assert cannot.sentence == 'This kind of item cannot be received by this script yet: a newer version of an uploaded file cannot be received yet.'
-    assert (tmp_path / 'o/original').read_bytes() == WAVELET and ex.held()[first.asset_id]['revision'] == first.revision
+    second = alice.upload_data(WAVELET_2, profile='wavelet-text/1', name='Wavelet', attribution='Synthetic', audience=[], rights_confirmed=True,
+                               command_id='e70a-w2', append_to=first.asset_id, expected_parent=first.revision)
+    assert ex.check().sentence.startswith('1 newer: Wavelet, version 2')
+    got = ex.get(first.asset_id, output=tmp_path / 'o')
+    assert (got.outcome, got.sentence) == ('got', 'Got Wavelet, version 2 by Alice, just now. You now hold it; saved in %s.' % (tmp_path / 'o'))
+    assert (tmp_path / 'o/original').read_bytes() == WAVELET_2 and ex.held()[first.asset_id]['revision'] == second.revision != first.revision
+    assert ex.get(first.asset_id, output=tmp_path / 'o').outcome == 'already-latest'
 
 
 def test_a_seismic_volume_is_described_not_received(keyed, tmp_path):

@@ -4,3 +4,5 @@ matplotlib
 nbclient
 ipykernel
 jupyterlab
+lasio
+wellpathpy

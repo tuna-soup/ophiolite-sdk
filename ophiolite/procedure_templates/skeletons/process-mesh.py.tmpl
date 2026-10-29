@@ -1,0 +1,19 @@
+"""$label."""
+from ophiolite import procedure, readers, writers
+
+SPATIAL = ('crs', 'xy_unit', 'z_unit', 'z_meaning', 'positive', 'vertical_datum')
+
+
+@procedure
+def main(inputs, settings):
+    """Read the triangulated surface with ophiolite.readers and write it again with the Ophiolite writer.
+
+    `values` holds the writer's arguments, made from everything the reader found. Your calculation goes where it is
+    marked: change `values` before they are written."""
+    version = inputs['data'][0]
+    found = readers.read(version)
+    values = {'vertices': [(x, y, z) for x, y, z, _ in found.vertices], 'triangles': [list(t) for t in found.triangles],
+              'attributes': {name: [v[3][i] for v in found.vertices] for i, name in enumerate(found.attributes)} or None,
+              **{key: version.declared.get(key, 'unknown') for key in SPATIAL}}
+    # Your calculation: change values here.
+    return {'data': writers.write_mesh(**values)}

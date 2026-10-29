@@ -16,7 +16,7 @@ def source(monkeypatch):
         'registry-schema.json':b'{"type":"object"}','profile-schema.json':b'{"type":"object"}'}}
     def git(root,*args):
         if args[0]=='status':return b'dirty' if state['dirty'] else b''
-        if args[0]=='rev-parse':return (('a'*40 if args[1]=='HEAD' else 'd'*40 if args[1]=='c'*40+':contracts' else 'b'*40)+'\n').encode()
+        if args[0]=='rev-parse':return (('a'*40 if args[1]=='HEAD' else 'd'*40 if args[1] in ('c'*40+':contracts','c'*40+':./contracts') else 'b'*40)+'\n').encode()
         names=sorted(state['files']);objects={hashlib.sha1(name.encode()).hexdigest():name for name in names}
         if args[0]=='ls-tree':return b'\0'.join(state['mode']+b' blob '+digest.encode()+b'\tcontracts/'+name.encode() for digest,name in objects.items())+b'\0'
         if args[0]=='cat-file':return state['files'][objects[args[2]]]

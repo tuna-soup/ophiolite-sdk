@@ -1,0 +1,50 @@
+{
+  "vertices": [
+    [
+      0.0,
+      0.0,
+      1500.0
+    ],
+    [
+      50.0,
+      0.0,
+      1510.0
+    ],
+    [
+      0.0,
+      50.0,
+      null
+    ],
+    [
+      50.0,
+      50.0,
+      1525.0
+    ]
+  ],
+  "triangles": [
+    [
+      0,
+      1,
+      2
+    ],
+    [
+      1,
+      3,
+      2
+    ]
+  ],
+  "attributes": {
+    "amplitude": [
+      1.5,
+      null,
+      0.0,
+      2.25
+    ]
+  },
+  "crs": "EPSG:28992",
+  "xy_unit": "m",
+  "z_unit": "m",
+  "z_meaning": "depth",
+  "positive": "down",
+  "vertical_datum": "NAP"
+}

@@ -1,0 +1,76 @@
+{
+  "document": {
+    "schema": "ophiolite.well-residual/1",
+    "correspondence": {
+      "formation": "DCC"
+    },
+    "display_unit": "m",
+    "surface": {
+      "asset_id": "synthetic-grid",
+      "revision": "5555555555555555555555555555555555555555555555555555555555555555"
+    },
+    "rows": [
+      {
+        "wellbore": "wellbore-1a2b3c4d5e6f708192a3b4c5d6e7f809",
+        "occurrence": 1,
+        "top": {
+          "asset_id": "synthetic-tops",
+          "revision": "3333333333333333333333333333333333333333333333333333333333333333",
+          "index": 0,
+          "md": 1250.5
+        },
+        "trajectory": {
+          "asset_id": "synthetic-trajectory",
+          "revision": "1111111111111111111111111111111111111111111111111111111111111111"
+        },
+        "crossings": [
+          {
+            "md": 1248.25,
+            "low": 1248.245,
+            "high": 1248.255
+          }
+        ],
+        "used": 0,
+        "residual": 2.25,
+        "unit": "m",
+        "reason": null,
+        "between": null
+      },
+      {
+        "wellbore": "wellbore-2b3c4d5e6f708192a3b4c5d6e7f8091a",
+        "occurrence": 1,
+        "top": {
+          "asset_id": "synthetic-tops-2",
+          "revision": "4444444444444444444444444444444444444444444444444444444444444444",
+          "index": 2,
+          "md": 1302.0
+        },
+        "trajectory": {
+          "asset_id": "synthetic-trajectory-2",
+          "revision": "2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        "crossings": [],
+        "used": null,
+        "residual": null,
+        "unit": "m",
+        "reason": "grazing",
+        "between": [
+          1301.2,
+          1301.9
+        ]
+      },
+      {
+        "wellbore": "wellbore-3c4d5e6f708192a3b4c5d6e7f8091a2b",
+        "occurrence": 0,
+        "top": null,
+        "trajectory": null,
+        "crossings": [],
+        "used": null,
+        "residual": null,
+        "unit": "m",
+        "reason": "no-top",
+        "between": null
+      }
+    ]
+  }
+}

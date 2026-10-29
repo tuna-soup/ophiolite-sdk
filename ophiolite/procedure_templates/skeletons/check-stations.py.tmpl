@@ -1,0 +1,29 @@
+"""$label."""
+import ophiolite
+from ophiolite import procedure
+from ophiolite.residuals import read_survey
+
+
+def _apart(a, b, around):
+    """How far apart two angles are, in degrees; azimuths are compared around the circle."""
+    gap = abs(a - b) % 360 if around else abs(a - b)
+    return min(gap, 360 - gap) if around else gap
+
+
+@procedure
+def main(inputs, settings, reference):
+    """Compare the survey with the reference survey station by station (same measured depth). A station differs when
+    its inclination or azimuth is more than `tolerance` degrees from the reference's, when an angle is missing on one
+    side only, or when only one side has the station. Surveys in different depth units are not compared."""
+    data = inputs['data'][0]
+    if data.declared.get('depth_unit') != reference.declared.get('depth_unit'): return ophiolite.compared('not_compared')
+    mine = {s['md']: s for s in read_survey(data.path, data.declared)['stations']}
+    theirs = {s['md']: s for s in read_survey(reference.path, reference.declared)['stations']}
+    depths, differed = set(mine) | set(theirs), 0
+    for md in depths:
+        if md not in mine or md not in theirs: differed += 1; continue
+        for key, around in (('inclination', False), ('azimuth', True)):
+            a, b = mine[md][key], theirs[md][key]
+            if (a is None) != (b is None) or (a is not None and _apart(a, b, around) > settings['tolerance']):
+                differed += 1; break
+    return ophiolite.compared('passed' if differed == 0 else 'differed', compared=len(depths), differed=differed)

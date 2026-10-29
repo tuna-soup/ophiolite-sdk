@@ -262,3 +262,154 @@ def test_the_publication_line_is_a_snapshot():
 def test_no_publication_line_for_data_that_is_not_plain():
     r, _ = published(of_entity={'when': float('inf')})
     assert receipt_line(r) is None and 'publish_derived' not in r._repr_html_()
+
+
+# -- "Run again" (E112 s3): runs and recipes on this computer; the rendered line is executed, never matched as text alone --
+
+import json
+import shutil
+
+import ophiolite
+from ophiolite import procedures, recipe_runs
+from ophiolite.presentation import NO_LINE, PresentedRecipe, PresentedRun
+from test_recipe_runs import GRID, RECIPE, SET, SET2, world  # noqa: F401 (s2's fake project, a fixture)
+
+BUNDLE = Path(ophiolite.__file__).resolve().parent / 'contracts/procedures/v1/fixtures/bundles/depth-shift'
+SHIFTED = 'name,md\nTop Chalk,1003\nBase Chalk,1202.5\n'  # 1000.5 and 1200 shifted by 2.5 m (7-M5): literals, not the first run's output
+RUN_TEXT = 'Result Shift tops by a fixed depth Ran Shift tops by a fixed depth, version 1, on this computer: made Well tops (CSV). Nothing was published.'
+
+
+def again(result, summary='Run again'):
+    found = re.search(r'<summary>' + summary + r'</summary><p>.*?</p><pre>(.*?)</pre>', result._repr_html_(), re.S)
+    return _html.unescape(found.group(1)) if found else None
+
+
+def shifting(tmp_path):
+    """The depth-shift bundle in a folder whose name holds a quote, and a tops file with its declarations."""
+    folder = shutil.copytree(BUNDLE, tmp_path / "Ann's shift", ignore=shutil.ignore_patterns('__pycache__'))
+    (tmp_path / 'in').mkdir()
+    (tmp_path / 'in/tops.csv').write_text('name,md\nTop Chalk,1000.5\nBase Chalk,1200\n')
+    (tmp_path / 'in/other.csv').write_text('name,md\nTop Chalk,1.0\n')
+    (tmp_path / 'in/tops.json').write_text(json.dumps({'depth_unit': 'm', 'depth_basis': 'md'}))
+    return folder
+
+
+def ran(tmp_path):
+    folder = shifting(tmp_path)
+    inputs, settings = {'tops': [tmp_path / 'in/tops.csv']}, ['shift=2.5']
+    result = procedures.run(folder, tmp_path / 'out', inputs, kinds={'tops': 'well-tops-csv/1'}, declared={'tops': tmp_path / 'in/tops.json'},
+                            settings=settings)
+    inputs['tops'][0] = tmp_path / 'in/other.csv'; settings[0] = 'shift=9'  # the caller's objects change after the call (7-M4)
+    return folder, result
+
+
+def execute(line, output):
+    scope = {'procedures': procedures, 'new_output': output}
+    exec('result = ' + line, scope)
+    return scope['result']
+
+
+def test_the_run_again_line_runs_the_same_version_on_the_inputs_it_ran_with(tmp_path):
+    # mutations: the line built from the caller's live objects (other.csv, shift=9); a path written with %s or '%s' (the quote)
+    folder, result = ran(tmp_path)
+    line = again(result)
+    assert result.again == line  # the notebook's way to the same text
+    second = execute(line, tmp_path / 'again')
+    assert (tmp_path / 'out/shifted.csv').read_text() == SHIFTED and (tmp_path / 'again/shifted.csv').read_text() == SHIFTED
+    assert second['run']['inputs'] == result['run']['inputs'] and second['run']['settings'] == result['run']['settings']
+    assert line.startswith('procedures.run(%r, new_output, inputs=' % str(folder.resolve())) and line.endswith(
+        ", settings=['shift=2.5'], expected_digest=%r)" % result['run']['procedure']['digest'])
+
+
+def test_the_run_again_line_refuses_once_the_procedure_changed(tmp_path):
+    # mutation: no expected_digest in the line -> the edited procedure runs
+    folder, result = ran(tmp_path)
+    (folder / 'procedure.py').write_text((folder / 'procedure.py').read_text() + '\n# edited\n')
+    with pytest.raises(procedures.NotRun) as error: execute(again(result), tmp_path / 'again')
+    assert error.value.code == 'changed-before-run' and not (tmp_path / 'again').exists()
+
+
+def test_a_run_is_still_its_dict_and_its_card_shows_words_only(tmp_path):
+    folder, result = ran(tmp_path)
+    plain = json.loads(json.dumps(result))
+    assert type(result) is PresentedRun and result == plain and json.dumps(result) == json.dumps(dict(result))
+    raw = result._repr_html_()
+    assert visible(raw) == RUN_TEXT + ' Run again Technical details'  # mutation: a path, the digest or the raw sentence shown
+    for hidden in (result['run']['procedure']['digest'], str(tmp_path), 'well-tops-csv/1', 'shifted.csv'):
+        assert hidden not in visible(raw) and hidden in _html.unescape(raw)
+
+
+def test_a_check_run_reads_project_versions_so_its_card_says_why_there_is_no_line(tmp_path):
+    from ophiolite import procedure_templates as templates, writers
+    templates.make(tmp_path / 'check', 'check', 'well-tops')
+    paths = []
+    for name in ('data', 'reference'):
+        written = writers.write_tops([{'name': 'NU', 'md': 1203.5}], depth_unit='m', depth_basis='same-as-log')
+        (tmp_path / (name + '.csv')).write_bytes(written.bytes)
+        paths.append(procedures.ProjectInput(str(tmp_path / (name + '.csv')), 'well-tops-csv/1', written.declared, name + '-item', name[0] * 64))
+    result = procedures.run(tmp_path / 'check', tmp_path / 'out', {'data': [paths[0]], 'reference': [paths[1]]})
+    raw, text = result._repr_html_(), visible(result._repr_html_())
+    assert again(result) is None and NO_LINE['project'] in text and 'version 1, on this computer: passed. Nothing was published.' in text
+    assert 'ophiolite checks publish out' not in text and 'ophiolite checks publish out' in raw  # the command: Technical details only
+
+
+@pytest.mark.parametrize('change, why', [(lambda call: call.update(declared={'tops': object()}), 'plain'),
+                                         (lambda call: call.update(settings=['note=' + 'x' * 4096]), 'long'),
+                                         (lambda call: None, None)])
+def test_a_run_with_an_argument_that_is_not_plain_or_too_long_has_no_line_and_says_why(tmp_path, change, why):
+    # mutation: the reason left out (a card with no line and no word why)
+    folder, result = ran(tmp_path)
+    call = dict(result._call); change(call)
+    card = PresentedRun.present(dict(result), call, 'Shift tops by a fixed depth')
+    assert (again(card) is None) == (why is not None)
+    assert (NO_LINE[why] in visible(card._repr_html_())) if why else not any(s in card._repr_html_() for s in NO_LINE.values())
+
+
+# recipes: s2's fake project (`world`); the line never carries yes, set_aside or wait (s3-D2)
+
+def recipe(w, **kw):
+    inputs = {'selection': SET, 'surface': GRID, 'team_db': str(w.db)}
+    result = recipe_runs.run(w, w.recipe, w.work, inputs, **kw)
+    inputs['selection'] = SET2  # the caller's dict changes after the call
+    return result
+
+
+def test_a_finished_recipe_runs_again_with_its_inputs_and_asks_again_about_trust(world):
+    # mutations: yes carried into the line; the line built from the caller's live dict (SET2)
+    result = recipe(world, yes=True)
+    line = again(result)
+    assert line == 'recipe_runs.run(client, %r, new_work, inputs=%r)' % (str(world.recipe), {'selection': SET, 'surface': GRID, 'team_db': str(world.db)})
+    exec(line, {'recipe_runs': recipe_runs, 'client': world, 'new_work': world.tmp / 'again-3'})
+    bound = json.loads((world.tmp / 'again-3/journal.json').read_text())['bindings']
+    assert bound['selection']['text'] == SET and world.residual_seen[-1]['yes'] is False and len(world.residual_seen) == 2
+
+
+def test_a_recipe_card_shows_steps_in_words_and_a_line_only_when_finished(world):
+    # mutation: the line shown for every recipe state
+    doc = json.loads(json.dumps(RECIPE))
+    doc['name'] = 'residual-report-2'  # identifier-shaped: not shown
+    ids = {'run': 'r-1a', 'publish': 'p-2b', 'states': 's-3c', 'send': 'd-4d'}
+    for step in doc['steps']:
+        step['id'] = ids[step['id']]
+        for value in step['with'].values():
+            if isinstance(value, dict) and 'from' in value: value['from'] = ids[value['from']]
+    world.recipe.write_text(json.dumps(doc))
+    world.residual_plan = ['untrusted']
+    failed = recipe(world)
+    text = visible(failed._repr_html_())
+    assert again(failed) is None and text == ('Result A recipe Stopped at step 1 of 4 (Residual report). Run the same command again to continue. '
+                                              '1. Residual report: Needs attention 2. Publish the result: Waiting 3. Outcome states: Waiting '
+                                              '4. Deliver: Waiting Technical details')
+    for hidden in list(ids.values()) + ['residual-report-2', 'residuals', 'not trusted', 'failed', str(world.work)]:
+        assert hidden not in text  # mutation: the step id or kind put in the step line
+    world.plan['deliver'] = ['unknown']
+    unknown = recipe(world, yes=True)
+    assert unknown['state'] == 'unknown' and again(unknown) is None and 'Run the same command again to ask again.' in visible(unknown._repr_html_())
+    aside = recipe(world, set_aside='d-4d')
+    assert aside['state'] == 'finished' and again(aside) is not None and '4. Deliver: Set aside' in visible(aside._repr_html_())
+    assert type(aside) is PresentedRecipe and aside == json.loads(json.dumps(aside))
+
+
+def test_a_send_card_still_says_send_again(tmp_path):
+    _, e = folder(tmp_path)
+    assert line(e.send(V2, **ARGS)) is not None  # the summary "Send again" (7-P1)

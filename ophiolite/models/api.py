@@ -194,6 +194,7 @@ class RestrictedResultSummary(ResultSummary):
 class UploadResult(Contract):
     asset_id: str
     revision: str
+    sha256: str | None = None  # E108: the stored bytes' digest the receipt names (None: a server from before E108); kept as given, checked by its users
     name: str
     can_share: bool
     acquisition: dict
@@ -227,6 +228,10 @@ class UploadRequest(Contract):
     # E53: a new version of your own uploaded wavelet, model or section (both or neither; sent only when used).
     append_to: str | None = Field(default=None, min_length=1, max_length=160)
     expected_parent: str | None = Field(default=None, pattern='^[0-9a-f]{64}$')
+    # E107a C6b: the original staged beside this file under the same command ({stage, sha256, bytes}; sent only when used).
+    provenance: dict | None = None
+    # E122 s6: the application object this file was sent from (s4a's source block; sent only when used).
+    source: dict | None = None
 
     @model_validator(mode='after')
     def appended(self):
@@ -271,12 +276,16 @@ class PublicationReceipt(Contract):
     method: MethodRecord
     command_id: str
     outcome: RunOutcome | None = Field(None, repr=False)  # E106: only a run's output carries one; the frozen repr stays
+    republished: bool | None = Field(None, repr=False)  # E120: only a "Publish for" of the earlier version carries it
+    source_change: Literal['unchanged', 'changed', 'new'] | None = Field(None, repr=False)  # E122 s4a: only a send naming its source
 
     @model_serializer(mode='wrap')
     def _without_absent_outcome(self, handler):
-        """E106: a receipt that is not a run's output dumps exactly as before."""
+        """E106: a receipt that is not a run's output dumps exactly as before (E120: nor one that was not published again)."""
         data = handler(self)
         if self.outcome is None: data.pop('outcome', None)
+        if self.republished is None: data.pop('republished', None)
+        if self.source_change is None: data.pop('source_change', None)
         return data
 
 
@@ -653,7 +662,8 @@ class TableImportsListAnswer(Contract):
     imports: list[TableImportSummary]
 
 # E55: folder uploads (upload-runs/*), the fields the SDK and the command line read; other fields are kept.
-UploadRunFileState = Literal['waiting', 'reading', 'added', 'already-here', 'needs-decision', 'not-read', 'not-supported', 'cancelled']
+UploadRunFileState = Literal['waiting', 'reading', 'added', 'already-here', 'needs-decision', 'not-read', 'not-supported', 'cancelled',
+                             'needs-procedure', 'converting', 'converted']  # E107a: a file read on your computer by a read procedure
 
 
 class UploadRunCounts(Contract):
@@ -665,6 +675,34 @@ class UploadRunCounts(Contract):
     not_read: int
     not_supported: int
     cancelled: int
+    needs_procedure: int | None = None  # E107a: sent only to a client that says it reads them (`reads`)
+    converting: int | None = None
+    converted: int | None = None
+
+
+class ReadVersion(Contract):
+    """E107a: a read procedure version that recognises a file, which you may run on your computer."""
+    digest: str
+    label: str
+    version_label: str | None = None
+    version: int
+    added_by_name: str | None = None
+    sentence: str
+
+
+class UploadRunOutput(Contract):
+    """E107a: one file a read procedure made, as the report shows it. E124 s1: also an item read from a package
+    (`output` its id); E127 s1a: also a file a catalogue manifest lists (`output` is `listed-<n>`). The outcomes are
+    the gateway's (operation_models.UploadRunOutput)."""
+    output: str | None = None
+    role: str
+    label: str
+    kind: str
+    outcome: Literal['added', 'already-here', 'not-landed', 'planned', 'cancelled', 'expired']
+    asset_id: str | None = None
+    revision: str | None = None
+    line: str | None = None
+    sentence: str | None = None
 
 
 class UploadRunFile(Contract):
@@ -686,6 +724,9 @@ class UploadRunFile(Contract):
     declared: dict | None = None
     proposal: dict | None = None
     association: dict | None = None
+    procedures: list[ReadVersion] | None = None  # E107a: on a needs-procedure row
+    outputs: list[UploadRunOutput] | None = None  # E107a: on a row read on your computer
+    conversion: dict | None = None
 
 
 class UploadRunSummary(Contract):
@@ -696,6 +737,7 @@ class UploadRunSummary(Contract):
     label: str
     files: int
     counts: UploadRunCounts
+    outputs_added: int | None = None  # E107a
 
 
 class UploadRun(UploadRunSummary):
@@ -733,6 +775,7 @@ class UploadCheckAnswer(Contract):
     asks: list[dict]
     refusal: dict | None = None
     fetched: UploadCheckFetched | UploadCheckBucketFetched | None = None
+    procedures: list[ReadVersion] | None = None  # E107a: for a check that says it reads them
 
 
 class UploadRunStep(Contract):
@@ -742,6 +785,34 @@ class UploadRunStep(Contract):
     send: dict | None = None
     file: UploadRunFile
     session: dict | None = None
+
+
+class UploadRunConversionRole(Contract):
+    role: str
+    label: str
+    kind: str
+    outcome: Literal['added', 'already-here'] | None = None
+
+
+class UploadRunConversionState(Contract):
+    """E107a: upload-runs/convert's conversion: which outputs are in and which role to send next."""
+    id: str
+    ordinal: int
+    state: Literal['declared', 'partial', 'complete', 'refused', 'cancelled']
+    sentence: str | None = None
+    done: int
+    of: int
+    roles: list[UploadRunConversionRole]
+    next: str | None = None
+
+
+class UploadRunConversion(Contract):
+    """E107a: upload-runs/convert and convert-output."""
+    run_id: str
+    conversion: UploadRunConversionState
+    file: UploadRunFile
+    counts: UploadRunCounts
+    outputs_added: int | None = None
 
 
 class OrgConnectionYou(Contract):
@@ -946,3 +1017,179 @@ class LayoutImportOutcome(Contract):
 
 class LayoutImported(Contract):
     outcomes: list[LayoutImportOutcome]
+
+
+# --- E60: public repositories (public-repositories/*), the fields the SDK reads ---------------------------------------
+
+class RepositoryTerms(Contract):
+    licence_id: str
+    url: str
+    sentence: str
+    summary: str
+    clause: str
+
+
+class RepositoryService(Contract):
+    service: str
+    display_name: str
+    terms: RepositoryTerms
+    boreholes_per_run: int | None
+    include: list[str]
+    kind: Literal['boreholes', 'features'] = 'boreholes'
+    address: str | None = None
+    features_per_run: int | None = None
+
+
+class RepositoryCatalogue(Contract):
+    """public-repositories/catalogue: the services this deployment reads."""
+    services: list[RepositoryService]
+    origins: list[dict]
+
+
+class RepositoryWell(Contract):
+    entity_id: str
+    name: str
+
+
+class RepositoryBorehole(Contract):
+    code: str
+    name: str | None
+    field: str | None
+    operator: str | None
+    public_since: str | None
+    side: str | None
+    in_project: bool
+    well: RepositoryWell | None
+
+
+class RepositorySearch(Contract):
+    """public-repositories/search: nothing is kept."""
+    service: str
+    items: list[RepositoryBorehole]
+
+
+class RepositoryPreviewItem(Contract):
+    code: str
+    outcome: str | None
+    in_project: bool
+    well: RepositoryWell | None
+
+
+class RepositoryPreview(Contract):
+    """public-repositories/preview: what would come in; nothing is kept."""
+    service: str
+    items: list[RepositoryPreviewItem]
+
+
+class RepositoryNotRead(Contract):
+    code: str
+    name: str | None
+    kind: str | None
+    outcome: str
+
+
+class RepositoryImport(Contract):
+    """public-repositories/import: the started run (driven with upload-runs/file, repository true) and what was not listed."""
+    run: UploadRun
+    not_read: list[RepositoryNotRead]
+
+
+class RepositoryLicence(Contract):
+    href: str
+    title: str | None
+    where: Literal['collection', 'landing']
+
+
+class RepositoryCollection(Contract):
+    id: str
+    title: str | None
+    storage_crs: str
+    crs: list[str]
+
+
+class RepositoryCollections(Contract):
+    """public-repositories/collections: what a features service lists; nothing is kept."""
+    service: str
+    address: str
+    protocol: Literal['ogc-api-features', 'wfs']
+    title: str | None
+    listed: bool
+    display_name: str
+    licence: RepositoryLicence | None
+    licence_sentence: str | None
+    collections: list[RepositoryCollection]
+
+
+class RepositoryFeaturesPreview(Contract):
+    """public-repositories/features-preview: one collection; no feature is read and nothing is kept."""
+    service: str
+    address: str
+    collection: str
+    title: str | None
+    storage_crs: str
+    crs: list[str]
+    licence: RepositoryLicence | None
+    licence_sentence: str | None
+    can_bring_in: bool
+    features_per_run: int
+
+
+class RepositoryFeaturesCollection(Contract):
+    id: str
+    title: str | None
+    count: int
+    capped: bool
+
+
+class RepositoryFeaturesImport(Contract):
+    """public-repositories/features-import: the started run (driven with upload-runs/file, repository true), the licence
+    the service states and what each collection held."""
+    run: UploadRun
+    licence: RepositoryLicence | None
+    licence_sentence: str | None
+    collections: list[RepositoryFeaturesCollection]
+
+
+class RepositoryCheckFile(Contract):
+    code: str
+    name: str
+    kind: str
+    asset_id: str
+    revision: str
+    state: Literal['unchanged', 'update_available', 'needs-review', 'missing']
+    changed: list[Literal['bytes', 'meaning']]
+
+
+class RepositoryCheck(Contract):
+    """public-repositories/check: a report only; nothing is replaced, appended or moved."""
+    service: str
+    checked_at: float
+    sentence: str
+    files: list[RepositoryCheckFile]
+
+
+class PublicSourceDocument(Contract):
+    upstream_item: str
+    retained_revision: str = Field(pattern='^[0-9a-f]{64}$')
+
+
+class PublicSourceRecord(Contract):
+    service_id: str
+    licence_id: str
+    terms_url: str
+    document: PublicSourceDocument
+    retrieved_at: float
+
+
+class PublicSourceLine(Contract):
+    service_id: str
+    licence_id: str
+    terms_url: str
+    sentence: str | None
+    documents: list[str]
+
+
+class PublicSources(Contract):
+    """E60 C5d (asset 1.20.0): the public sources a derived revision was made from, with the sentence a page shows."""
+    records: list[PublicSourceRecord] = Field(min_length=1, max_length=64)
+    lines: list[PublicSourceLine] = Field(min_length=1, max_length=64)

@@ -85,10 +85,20 @@ def test_an_upload_without_a_derivation_reads_normally(published,tmp_path):
     assert open_bundle(tmp_path/'u').assets[0].curves['GR'].view.values==[0,None,30]
 
 
+def _history():  # H56 (D3): an old SDK commit in either layout (tools/history.py)
+    import importlib.util
+    spec=importlib.util.spec_from_file_location('sdk_history',ROOT/'tools/history.py')
+    module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+    return module
+
+
 def test_the_frozen_pre_e30_reader_refuses_a_2_manifest_with_one_outcome(published,tmp_path):
     alice,_,seen,_,receipt=published
-    try:archive=subprocess.run(['git','-C',str(ROOT),'archive','--format=tar',FROZEN,'ophiolite'],capture_output=True,check=True).stdout
-    except (subprocess.CalledProcessError,FileNotFoundError):pytest.skip('The pre-E30 SDK commit is not in this checkout')
+    history=_history();commit=history.resolve(ROOT,FROZEN)
+    if commit is None:
+        assert not history.FULL,history.missing(FROZEN)
+        pytest.skip('The pre-E30 SDK commit is not in this checkout')
+    archive=subprocess.run(['git','-C',str(ROOT),'archive','--format=tar',commit,'ophiolite'],capture_output=True,check=True).stdout
     tarfile.open(fileobj=io.BytesIO(archive)).extractall(tmp_path/'frozen',filter='data')
     alice.export([(receipt.asset_id,receipt.revision,None)],tmp_path/'bundle')
     alice.export([(seen.asset_id,seen.revision,['GR'])],tmp_path/'upload')

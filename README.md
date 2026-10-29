@@ -12,6 +12,12 @@ Python 3.10 or later is required. Install from a reviewed commit of this reposit
 python -m pip install 'git+https://github.com/tuna-soup/ophiolite-sdk@<reviewed-commit>'
 ```
 
+Once a release is published, the same SDK is on PyPI under the release name:
+
+```sh
+python -m pip install 'ophiolite==<release>'
+```
+
 The SDK accepts an explicit existing scoped bearer credential.
 Browser login can also obtain and privately store an approved application credential.
 Do not put credentials in source files or logs.

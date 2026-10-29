@@ -1,0 +1,95 @@
+{
+  "schema": "ophiolite.scientific-asset/1",
+  "asset_id": "synthetic-well-residual",
+  "revision": "7fb0a64733861e079ef869052c37e92f124e40879bb46389c2a2396fc7a850f2",
+  "project_id": "synthetic-project",
+  "authority": "ophiolite:uploaded",
+  "origin": "retained-capture",
+  "custodian": "ophiolite:managed",
+  "source_reference": {
+    "authority": "ophiolite:uploaded",
+    "key": "synthetic-well-residual",
+    "revision": "7fb0a64733861e079ef869052c37e92f124e40879bb46389c2a2396fc7a850f2",
+    "profile": "well-residual/1"
+  },
+  "profile": "well-residual/1",
+  "scientific": {
+    "type": "well-residual",
+    "count": 3,
+    "computed": 1,
+    "not_computed": 2,
+    "members": 3,
+    "members_not_computed": 2,
+    "formation": "DCC",
+    "display_unit": "m",
+    "fidelity": {
+      "status": "assessed",
+      "preserved": [
+        "rows in order",
+        "the formation, the display unit and the surface",
+        "crossings and residuals as written"
+      ],
+      "losses": [
+        "Text formatting (whitespace, quoting, line endings, number spelling) is kept only in the exact original"
+      ],
+      "unknown_context": []
+    }
+  },
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "mapping": "well-residual/1",
+    "parsing_policy": "typed-strict/1",
+    "null_policy": "empty cell or declared NODATA value is missing; never zero-filled"
+  },
+  "interpretation_evidence": "live",
+  "recorded_interpretation": null,
+  "representations": [
+    {
+      "id": "artifact",
+      "kind": "original",
+      "media_type": "application/json",
+      "profile": "well-residual/1",
+      "bytes": 1307,
+      "sha256": "7fb0a64733861e079ef869052c37e92f124e40879bb46389c2a2396fc7a850f2",
+      "available": true,
+      "losses": []
+    },
+    {
+      "id": "data",
+      "kind": "normalized",
+      "media_type": "application/json",
+      "profile": "ophiolite.well-residual/1",
+      "bytes": 2943,
+      "sha256": "522a3a15300a8f07dadc84da6c055808d3370b8f233bef61b1b0eb30d4835172",
+      "available": true,
+      "losses": [
+        "Text formatting (whitespace, quoting, line endings, number spelling) is kept only in the exact original"
+      ]
+    }
+  ],
+  "retention": {
+    "mode": "retained",
+    "policy": "until authorized lifecycle operation",
+    "historical_reads": "while-retained-and-authorized"
+  },
+  "relationships": {
+    "well_log": null
+  },
+  "parents": [],
+  "provenance": {
+    "evidence": "source-declared",
+    "method": null,
+    "code_reference": null,
+    "environment_reference": null,
+    "omissions": [
+      "Synthetic offline fixture, not a server publication"
+    ]
+  },
+  "supported_operations": [
+    "read",
+    "export"
+  ],
+  "authorization": {
+    "status": "not-evaluated"
+  }
+}

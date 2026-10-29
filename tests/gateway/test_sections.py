@@ -41,7 +41,7 @@ def test_append_derive_read_back_and_import(web, tmp_path):
     assert syn.tuning_thickness(read).trace == 13 and alice.read_data(made.asset_id, made.revision).grid == model.grid
 
     bundle = alice.export([(first.asset_id, first.revision, None), (made.asset_id, made.revision, None), (synthetic.asset_id, synthetic.revision, None)], tmp_path / 'b')
-    assert bundle.manifest['bundle_version'] == '2.5.0'
+    assert bundle.manifest['bundle_version'] == '2.10.0'  # E122 s5b: uploads carry their source records
     imported = alice.import_bundle(bundle.path, audience=[], attribution='Imported', rights_confirmed=True)
     assert [(r['type'], r['state']) for r in imported] == [('wavelet', 'imported'), ('model-section', 'imported'), ('seismic-section', 'refused')]
     assert imported[2]['reason'] == NOT_IMPORTED_SYNTHETIC

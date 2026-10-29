@@ -1,0 +1,673 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/scientific/v1/basis-groups.json",
+  "x-ophiolite": {
+    "id": "ophiolite.basis-groups/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "BasisAnswer": {
+      "additionalProperties": false,
+      "properties": {
+        "block": {
+          "title": "Block",
+          "type": "string"
+        },
+        "item": {
+          "enum": [
+            "crs",
+            "vertical_domain",
+            "vertical_datum",
+            "units.xy",
+            "units.depth",
+            "units.time",
+            "units.z"
+          ],
+          "title": "Item",
+          "type": "string"
+        },
+        "value": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Value",
+          "type": "string"
+        },
+        "by": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "By",
+          "type": "string"
+        },
+        "kept": {
+          "default": "answer",
+          "enum": [
+            "answer",
+            "project-default"
+          ],
+          "title": "Kept",
+          "type": "string"
+        }
+      },
+      "required": [
+        "block",
+        "item",
+        "value",
+        "by"
+      ],
+      "title": "BasisAnswer",
+      "type": "object"
+    },
+    "BasisBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "state": {
+          "const": "stated",
+          "title": "State",
+          "type": "string"
+        },
+        "members": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "title": "Members",
+          "type": "array"
+        },
+        "stated": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Stated",
+          "type": "object"
+        },
+        "asks": {
+          "items": {
+            "enum": [
+              "crs",
+              "vertical_domain",
+              "vertical_datum",
+              "units.xy",
+              "units.depth",
+              "units.time",
+              "units.z"
+            ],
+            "type": "string"
+          },
+          "title": "Asks",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "state",
+        "members",
+        "stated",
+        "asks"
+      ],
+      "title": "BasisBlock",
+      "type": "object"
+    },
+    "BasisConflict": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "item": {
+          "enum": [
+            "crs",
+            "vertical_domain",
+            "vertical_datum",
+            "units.xy",
+            "units.depth",
+            "units.time",
+            "units.z"
+          ],
+          "title": "Item",
+          "type": "string"
+        },
+        "stated": {
+          "title": "Stated",
+          "type": "string"
+        },
+        "answered": {
+          "title": "Answered",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "item",
+        "stated",
+        "answered"
+      ],
+      "title": "BasisConflict",
+      "type": "object"
+    },
+    "BasisDecision": {
+      "additionalProperties": false,
+      "properties": {
+        "proposal": {
+          "title": "Proposal",
+          "type": "string"
+        },
+        "choice": {
+          "enum": [
+            "confirm",
+            "decline"
+          ],
+          "title": "Choice",
+          "type": "string"
+        }
+      },
+      "required": [
+        "proposal",
+        "choice"
+      ],
+      "title": "BasisDecision",
+      "type": "object"
+    },
+    "BasisMember": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        },
+        "kind": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        },
+        "stated": {
+          "additionalProperties": {
+            "$ref": "#/$defs/BasisStated"
+          },
+          "title": "Stated",
+          "type": "object"
+        },
+        "asks": {
+          "items": {
+            "enum": [
+              "crs",
+              "vertical_domain",
+              "vertical_datum",
+              "units.xy",
+              "units.depth",
+              "units.time",
+              "units.z"
+            ],
+            "type": "string"
+          },
+          "title": "Asks",
+          "type": "array"
+        },
+        "keys": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Keys",
+          "type": "object"
+        },
+        "accepts": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Accepts",
+          "type": "object"
+        },
+        "overrides": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Overrides",
+          "type": "object"
+        },
+        "defaults": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Defaults",
+          "type": "object"
+        }
+      },
+      "required": [
+        "path",
+        "kind",
+        "keys"
+      ],
+      "title": "BasisMember",
+      "type": "object"
+    },
+    "BasisPlan": {
+      "additionalProperties": false,
+      "properties": {
+        "members": {
+          "items": {
+            "$ref": "#/$defs/BasisMember"
+          },
+          "title": "Members",
+          "type": "array"
+        },
+        "blocks": {
+          "items": {
+            "$ref": "#/$defs/BasisBlock"
+          },
+          "title": "Blocks",
+          "type": "array"
+        },
+        "proposals": {
+          "items": {
+            "$ref": "#/$defs/BasisProposal"
+          },
+          "title": "Proposals",
+          "type": "array"
+        },
+        "singles": {
+          "items": {
+            "$ref": "#/$defs/BasisSingle"
+          },
+          "title": "Singles",
+          "type": "array"
+        }
+      },
+      "required": [
+        "members",
+        "blocks",
+        "proposals",
+        "singles"
+      ],
+      "title": "BasisPlan",
+      "type": "object"
+    },
+    "BasisProposal": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "folder": {
+          "title": "Folder",
+          "type": "string"
+        },
+        "members": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "title": "Members",
+          "type": "array"
+        },
+        "asks": {
+          "items": {
+            "enum": [
+              "crs",
+              "vertical_domain",
+              "vertical_datum",
+              "units.xy",
+              "units.depth",
+              "units.time",
+              "units.z"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Asks",
+          "type": "array"
+        },
+        "stated": {
+          "additionalProperties": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "title": "Stated",
+          "type": "object"
+        },
+        "not_applicable": {
+          "additionalProperties": {
+            "items": {
+              "enum": [
+                "crs",
+                "vertical_domain",
+                "vertical_datum",
+                "units.xy",
+                "units.depth",
+                "units.time",
+                "units.z"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Not Applicable",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "folder",
+        "members",
+        "asks",
+        "stated",
+        "not_applicable"
+      ],
+      "title": "BasisProposal",
+      "type": "object"
+    },
+    "BasisQuestion": {
+      "additionalProperties": false,
+      "properties": {
+        "target": {
+          "title": "Target",
+          "type": "string"
+        },
+        "item": {
+          "enum": [
+            "crs",
+            "vertical_domain",
+            "vertical_datum",
+            "units.xy",
+            "units.depth",
+            "units.time",
+            "units.z"
+          ],
+          "title": "Item",
+          "type": "string"
+        },
+        "members": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Members",
+          "type": "array"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reason"
+        },
+        "suggested": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BasisSuggestion"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "target",
+        "item",
+        "members",
+        "reason",
+        "suggested"
+      ],
+      "title": "BasisQuestion",
+      "type": "object"
+    },
+    "BasisResolved": {
+      "additionalProperties": false,
+      "properties": {
+        "proposals": {
+          "additionalProperties": {
+            "enum": [
+              "proposed",
+              "confirmed",
+              "declined"
+            ],
+            "type": "string"
+          },
+          "title": "Proposals",
+          "type": "object"
+        },
+        "per_member": {
+          "additionalProperties": {
+            "additionalProperties": {
+              "$ref": "#/$defs/BasisValue"
+            },
+            "type": "object"
+          },
+          "title": "Per Member",
+          "type": "object"
+        },
+        "conflicts": {
+          "items": {
+            "$ref": "#/$defs/BasisConflict"
+          },
+          "title": "Conflicts",
+          "type": "array"
+        },
+        "questions": {
+          "items": {
+            "$ref": "#/$defs/BasisQuestion"
+          },
+          "title": "Questions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "proposals",
+        "per_member",
+        "conflicts",
+        "questions"
+      ],
+      "title": "BasisResolved",
+      "type": "object"
+    },
+    "BasisSingle": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "asks": {
+          "items": {
+            "enum": [
+              "crs",
+              "vertical_domain",
+              "vertical_datum",
+              "units.xy",
+              "units.depth",
+              "units.time",
+              "units.z"
+            ],
+            "type": "string"
+          },
+          "title": "Asks",
+          "type": "array"
+        }
+      },
+      "required": [
+        "path",
+        "asks"
+      ],
+      "title": "BasisSingle",
+      "type": "object"
+    },
+    "BasisSource": {
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "value": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "value"
+      ],
+      "title": "BasisSource",
+      "type": "object"
+    },
+    "BasisStated": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Value",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/BasisSource"
+          },
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "BasisStated",
+      "type": "object"
+    },
+    "BasisSuggestion": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "title": "Value",
+          "type": "string"
+        },
+        "class": {
+          "const": "project-default",
+          "title": "Class",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "class"
+      ],
+      "title": "BasisSuggestion",
+      "type": "object"
+    },
+    "BasisValue": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        },
+        "class": {
+          "enum": [
+            "stated",
+            "override",
+            "declared",
+            "project-default",
+            "unknown",
+            "not_applicable"
+          ],
+          "title": "Class",
+          "type": "string"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source"
+        }
+      },
+      "required": [
+        "value",
+        "class",
+        "source"
+      ],
+      "title": "BasisValue",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "One grouping as published: the plan, the person's decisions and answers, and what they resolve to.",
+  "properties": {
+    "schema": {
+      "const": "ophiolite.basis-groups/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "plan": {
+      "$ref": "#/$defs/BasisPlan"
+    },
+    "decisions": {
+      "items": {
+        "$ref": "#/$defs/BasisDecision"
+      },
+      "title": "Decisions",
+      "type": "array"
+    },
+    "answers": {
+      "items": {
+        "$ref": "#/$defs/BasisAnswer"
+      },
+      "title": "Answers",
+      "type": "array"
+    },
+    "resolved": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BasisResolved"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "schema",
+    "plan",
+    "decisions",
+    "answers",
+    "resolved"
+  ],
+  "title": "BasisGrouping",
+  "type": "object"
+}

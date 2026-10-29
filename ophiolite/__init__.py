@@ -24,6 +24,12 @@ def __getattr__(name):
     if name == 'procedure':  # E105a: the decorator that marks a procedure's entry function
         from .procedures import procedure
         return procedure
+    if name == 'compared':  # E110 (D9): what a check's entry returns
+        from .procedures import compared
+        return compared
+    if name in ('delivered', 'refused', 'not_delivered', 'unknown'):  # E109 (D3): what a send's entry and its reconcile return
+        from . import procedures
+        return getattr(procedures, name)
     if name == 'WrittenOriginal':  # E30b
         from .writers import WrittenOriginal
         return WrittenOriginal

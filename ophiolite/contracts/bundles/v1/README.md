@@ -24,3 +24,17 @@ Checksums prove integrity of the copy, not authorship or scientific correctness.
 Exported copies cannot be recalled; holding one grants no new upstream, sharing or
 AI-training rights. Bundle 1.0 is additive-extensible: new optional fields raise the
 minor version; a breaking change raises the major.
+
+## 1.10 / 2.10 — source records (E122 s5b)
+
+An asset entry may carry `source_record`: where that exact revision came from, as the exporting gateway served it
+(`ophiolite.source-provenance/1`, [schema](../../scientific/v1/source-provenance.json)), unchanged, wrapped with the
+`asset_id` and `revision` it was served for (the record itself names neither). The wrapper has exactly `schema`,
+`asset_id`, `revision` and `record`; the sentence the gateway words it with, who read it and whether the item is now
+gone are not carried. A revision stored before records began carries no key. Exporters write minor 10 only when a
+record travels; the major is the content's (1.10 for well logs, 2.10 for typed data). When the exporting server has no
+source records, `observations.source_records_omitted` says so and the minor follows the observation rule (1.1 / 2.1).
+
+Readers check before using the asset: the wrapper's four keys and schema, its identity equal to the entry's, the
+record valid against its schema (every object closed), and a version of at least 1.10 / 2.10. Released readers before
+1.10 ignore the key and open the bundle as they did ([fixture](fixtures/manifest-source-records.json)).

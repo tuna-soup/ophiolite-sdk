@@ -33,6 +33,6 @@ def test_a_catalogue_refusal_keeps_the_servers_sentence_reason_rule_and_path():
         application_transport.status(answer(400, {'code': 'procedure-refused', 'reason': 'invalid', 'rule': 'label-snake', 'path': '/settings/0/label',
                                                   'message': 'A label is words.'}), 'register')
     assert (str(caught.value), caught.value.details) == ('A label is words.', {'reason': 'invalid', 'rule': 'label-snake', 'path': '/settings/0/label'})
-    with pytest.raises(IntegrityConflict) as caught:  # another code: its reason is not read
+    with pytest.raises(IntegrityConflict) as caught:  # E119a (ruling 23 Oct): another code's closed reason is read too, with its sentence
         application_transport.status(answer(409, {'code': 'conflict', 'reason': 'version-not-higher', 'message': 'Other.'}), 'register')
-    assert caught.value.details == {} and str(caught.value) == 'The request conflicts with the stored result.'
+    assert caught.value.details == {'reason': 'version-not-higher'} and str(caught.value) == 'Other.'

@@ -1,0 +1,36 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "petrel-horizon-ilxl/1",
+  "kind": "source",
+  "lifecycle": "preview",
+  "display_name": "Petrel horizon points with inline and crossline",
+  "description": "A Petrel horizon export of \"INLINE : n XLINE : n x y z\" rows with its CRS metadata, kept byte for byte and read through an import recipe (inline and crossline as number attributes).",
+  "serves": [
+    "ophiolite.scientific-asset/1"
+  ],
+  "connector": {
+    "scientific_profile": "point-set-source/2",
+    "source_schema": "Petrel/horizon/INLINE-XLINE-x-y-z",
+    "mapping_version": "point-set/2",
+    "history": "retained-exact-read"
+  },
+  "role": "artifact",
+  "media_types": [
+    "text/plain"
+  ],
+  "normalized_profile": "ophiolite.point-set/2",
+  "context_schema": "ophiolite.point-set/2",
+  "recipe_schema": "ophiolite.import-recipe/1",
+  "representation_rules": {
+    "artifact_kind_by_origin": {
+      "source-reference": "original",
+      "retained-capture": "original",
+      "managed-derived": "derived-artifact"
+    },
+    "normalized": 1,
+    "total": 2
+  },
+  "table_target": {
+    "none": "read-by-recipe"
+  }
+}

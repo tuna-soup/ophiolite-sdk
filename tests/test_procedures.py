@@ -34,7 +34,7 @@ def test_the_shared_invalid_fixtures_give_the_platform_sentences_through_the_sdk
     raw = (FIXTURES / 'invalid' / f'{name}.json').read_bytes()
     verdict = procedures.validate(folder_with(tmp_path, name, raw, EXPECTED['members'][case['base']]))
     assert (verdict['valid'], verdict['code'], verdict['field'], verdict['sentence'], verdict['rules_version']) == (
-        False, case['code'], case['field'], case['sentence'], '1.0.0')
+        False, case['code'], case['field'], case['sentence'], '1.3.0')  # E120 s3: rules 1.3.0
 
 
 @pytest.mark.parametrize('step', sorted(EXPECTED['members']))
@@ -44,7 +44,7 @@ def test_the_shared_valid_fixtures_are_valid_through_the_sdk(tmp_path, step):
 
 
 def test_the_sample_bundles_have_their_literal_digests():
-    assert procedures.digest(FIXTURES / 'bundles/depth-shift') == '560a8af5fd9a7206b9af0bc04006c36daab12576eecf9eb96396ec3d6ef475bf'
+    assert procedures.digest(FIXTURES / 'bundles/depth-shift') == 'edf8668204255edd264cccb9f91d941c4c28d34312f9e264de10d4df31c5dda7'
     assert procedures.digest(FIXTURES / 'bundles/team-las') == '81cb03b2aa046fd8eb5e8176b859059fb027061d42ad5a35c1c70e2848a18f17'
     verdict = procedures.validate(FIXTURES / 'bundles/depth-shift')
     assert verdict['sentence'] == 'Valid: Shift tops by a fixed depth, version 1. It reads Well tops (CSV) and makes Well tops (CSV).'

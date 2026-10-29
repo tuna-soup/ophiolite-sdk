@@ -29,7 +29,9 @@ TYPED_ORIGINALS = {'well-tops-csv/1': 'original.csv', 'deviation-csv/1': 'origin
                    'opendtect-faultsticks/1': 'original.txt', 'wavelet-text/1': 'original.txt', 'model-section-text/1': 'original.txt', 'seismic-section-text/1': 'original.txt',
                    'time-depth-csv/1': 'original.csv', 'zmap-plus-grid/1': 'original.zmap', 'cps3-ascii-grid/1': 'original.cps3', 'irap-ascii-grid/1': 'original.irap',
                    'geojson/1': 'original.geojson', 'ogc-geopackage/1': 'original.gpkg',  # E56
-                   'petrel-points-attributes/1': 'original.txt', 'opendtect-horizon-ascii/1': 'original.txt', 'esri-shapefile/1': 'original.shp'}  # E23c: package primaries
+                   'petrel-points-attributes/1': 'original.txt', 'opendtect-horizon-ascii/1': 'original.txt', 'esri-shapefile/1': 'original.shp',  # E23c: package primaries
+                   'petrel-horizon-ilxl/1': 'original.txt',  # E123 s1b
+                   'petrel-scattered-data/1': 'original.txt'}  # E123 s1c: a grid or a point set, by its content
 NEWER_TYPES = {'triangulated-surface': 2, 'point-set': 2, 'polyline-set': 3, 'seismic-slice': 3, 'wavelet': 5, 'model-section': 5, 'seismic-section': 5, 'time-depth': 6,
                'feature-set': 7}  # the 2.x minor that introduced them
 # E56: grids of the new formats are a known type with an original an older reader cannot send back; they need 2.7 too
@@ -38,6 +40,17 @@ TYPES_2 = ('well-log', 'well-tops', 'trajectory', 'regular-grid-surface', 'trian
            'wavelet', 'model-section', 'seismic-section', 'time-depth', 'feature-set')  # 2.5 (E53); 2.6 (E57); 2.7 (E56)
 NOT_IMPORTED_PACKAGE = 'Importing a file that comes with companion files is not available yet.'
 PACKAGE_TYPES, PACKAGE_ROLES, PACKAGE_MINOR = ('point-set', 'feature-set'), ('package', 'companion', 'interpretation'), 8  # E23c (bundle 2.8)
+PROVENANCE_MINOR = 9  # E107a C6b (bundle 2.9): the original a file read on a computer was read from, beside its recorded reading
+PROVENANCE_SHAPE = 'A file read on a computer carries its kept original once, beside the reading that names it, and on no curve.'
+PROVENANCE_OTHER = 'The original kept beside this file is not the one its reading names.'
+# E122 s5b (bundle 1.10 / 2.10): an asset may carry its version's source record inline, as the gateway served it; the
+# major stays the content's, released readers ignore the key. `provenance` above stays E107a's kept original.
+SOURCE_RECORD_MINOR = 10
+SOURCE_RECORD_SCHEMA = 'ophiolite.source-provenance/1'
+SOURCE_OTHER = 'A source record belongs to another exact revision.'
+SOURCE_SHAPE = 'A source record is not an ophiolite.source-provenance/1 record.'
+SOURCE_MINOR = 'A source record needs bundle version 1.10 or 2.10.'
+SOURCE_TOO_LARGE = "The selection's records exceed the supported bundle manifest size."
 NOT_IMPORTED_SYNTHETIC = ('A synthetic section is not imported: its model and wavelet are not part of the project it would join. '
                           'Import them and compute it again.')
 SLICE_NAME = re.compile(r'^slice-(inline|crossline|sample)-(-?[0-9]{1,9})\.json$')
@@ -48,6 +61,63 @@ MAX_MANIFEST_BYTES = 1024 * 1024
 PATH = re.compile(r'^assets/[0-9]{1,3}/[A-Za-z0-9._-]{1,120}$')
 NOTICE = ('Checksums show the integrity of this copy, not authorship or scientific correctness. '
           'Exported copies cannot be recalled; holding one grants no new upstream, sharing or AI-training rights.')
+
+
+def recorded_reading(descriptor):
+    """E107a (B2): the reading an item records: its own (`acquisition.read_by`), or the one its import kept as recorded
+    (`acquisition.origin.read_by`); None for any other item."""
+    acquisition = descriptor.get('acquisition') if isinstance(descriptor, dict) else None
+    if not isinstance(acquisition, dict): return None
+    return acquisition.get('read_by') or (acquisition.get('origin') or {}).get('read_by')
+
+
+def recorded_source(descriptor):
+    """E108 S1 (5R-8): the source procedure an item records: its own (`acquisition.sourced_by`), or the one its import
+    kept as recorded (`acquisition.origin.sourced_by`); None for any other item."""
+    acquisition = descriptor.get('acquisition') if isinstance(descriptor, dict) else None
+    if not isinstance(acquisition, dict): return None
+    return acquisition.get('sourced_by') or (acquisition.get('origin') or {}).get('sourced_by')
+
+
+def _listed_provenance(descriptor):
+    """(sha256, bytes) of the `provenance` row the descriptor's manifest lists, None when it lists none, or False
+    without a manifest (a descriptor served before E107a, or a fixture)."""
+    manifest = descriptor.get('manifest')
+    if not isinstance(manifest, dict): return False
+    row = next((r for r in manifest.get('representations') or [] if isinstance(r, dict) and r.get('id') == 'provenance'), None)
+    return None if row is None else (row.get('sha256'), row.get('bytes'))
+
+
+def _kept_of(read, descriptor):
+    """C6b (writer): (bytes, reading, file name) of a read whose original was kept, or None. The bytes are bound to the
+    reading's original and to the manifest listing before anything is written (B1)."""
+    raw = getattr(read, 'provenance', None)
+    if raw is None: return None
+    record = recorded_reading(descriptor)
+    listed = _listed_provenance(descriptor)
+    found = (hashlib.sha256(raw).hexdigest(), len(raw))
+    if not isinstance(record, dict) or found != ((record.get('original') or {}).get('sha256'), (record.get('original') or {}).get('bytes')) \
+            or listed is None or (listed is not False and listed != found) or record.get('kept') not in (None, found[0]):
+        raise VerificationFailed(PROVENANCE_OTHER)
+    suffix = PurePosixPath(record['original'].get('name') or '').suffix.lower()
+    return raw, record, 'provenance' + (suffix if re.fullmatch(r'\.[a-z0-9]{1,8}', suffix) else '.bin')
+
+
+def _kept_check(entry, files, content, descriptor):
+    """C6b (reader, B1): exactly one `provenance` file, on no curve, beside the entry's reading; the reading is the one the
+    descriptor records; the bytes are the reading's original and the row the descriptor's manifest lists."""
+    listed = [f for f in files if f.get('role') == 'provenance']
+    if 'read_by' not in entry: return None, None  # a provenance file without a reading is an unknown role (refused above)
+    record = entry['read_by']
+    if len(listed) != 1 or listed[0].get('curve') is not None or not isinstance(record, dict): raise VerificationFailed(PROVENANCE_SHAPE)
+    if record != recorded_reading(descriptor): raise VerificationFailed('The manifest disagrees with a descriptor (read_by).')
+    raw = content['provenance'][None]
+    found = (hashlib.sha256(raw).hexdigest(), len(raw))
+    original = record.get('original') if isinstance(record.get('original'), dict) else {}
+    named = _listed_provenance(descriptor)
+    if found != (original.get('sha256'), original.get('bytes')) or named is None or (named is not False and named != found) or record.get('kept') not in (None, found[0]):
+        raise VerificationFailed(PROVENANCE_OTHER)
+    return raw, record
 
 
 def _finite_json(raw, what):
@@ -89,6 +159,8 @@ class BundleAsset:
         self.parent_visibility = entry['parent_visibility']; self.original = original; self.curves = curves
         self.type = entry.get('type', 'well-log'); self.data = data; self.relationships = entry.get('relationships')
         self.package = None  # 2.8 (E23c): the source package, its companions and interpretation (bundle_package.Package)
+        self.provenance, self.read_by = None, None  # 2.9 (E107a): the kept original a file read on a computer was read from, and that reading
+        self.source_record = None  # 1.10/2.10 (E122 s5b): the version's source-provenance/1 record as served, or None
 
 
 class Bundle:
@@ -116,7 +188,10 @@ class Bundle:
         return {'bundle_version': self.manifest['bundle_version'], 'scope': self.manifest['scope'], 'assets': len(self.assets),
                 'curves': sum(len(a.curves) for a in self.assets), 'types': sorted({a.type for a in self.assets}), 'unlisted_files': self.unlisted,
                 'groups': self.manifest['groups'], 'recommendations': self.manifest['recommendations'],
-                **({'entities_omitted': (self.manifest.get('observations') or {})['entities_omitted']} if (self.manifest.get('observations') or {}).get('entities_omitted') else {})}
+                **({'entities_omitted': (self.manifest.get('observations') or {})['entities_omitted']} if (self.manifest.get('observations') or {}).get('entities_omitted') else {}),
+                **({'source_records': sum(a.source_record is not None for a in self.assets)} if any(a.source_record is not None for a in self.assets) else {}),
+                **({'source_records_omitted': (self.manifest.get('observations') or {})['source_records_omitted']}
+                   if (self.manifest.get('observations') or {}).get('source_records_omitted') else {})}  # E122 s5b: only when there is something to say
 
 
 def _check_manifest(manifest):
@@ -234,6 +309,7 @@ def open_bundle(path):
     entries = _check_manifest(manifest)
     selection = manifest.get('selection')
     if not isinstance(selection, list) or len(selection) != len(entries): raise VerificationFailed('The selection and the assets disagree.')
+    records = [_source_record_of(manifest, entry) for entry in entries]  # E122 s5b (D4): before any content is used
     seen, total, loaded = set(), 0, []
     for index, entry in enumerate(entries):
         files = entry.get('files')
@@ -267,10 +343,13 @@ def open_bundle(path):
         if kind == 'seismic-slice':  # 2.3: slices of a volume; the original is named by digest, not carried
             loaded.append(_slice_asset(entry, chosen, content, files)); continue
         known = {'original', 'descriptor', 'normalized'} | (set(PACKAGE_ROLES) if kind in PACKAGE_TYPES else set())  # 2.8 (E23c)
+        if manifest['schema'] == SCHEMA_2 and 'read_by' in entry: known.add('provenance')  # 2.9 (E107a): only beside a reading
         if roles.count('original') != 1 or set(roles) - known:
             raise VerificationFailed('Bundle 1.0 carries exactly one original per asset and only known file roles.')
         if kind != 'well-log':
-            loaded.append(_typed_asset(entry, chosen, content, files, kind, raw_by_path.__getitem__)); continue
+            typed = _typed_asset(entry, chosen, content, files, kind, raw_by_path.__getitem__)
+            typed.provenance, typed.read_by = _kept_check(entry, files, content, typed.data._wire_descriptor)
+            loaded.append(typed); continue
         if sorted(content.get('descriptor', {})) != sorted(chosen.get('curves') or []) or sorted(content.get('normalized', {})) != sorted(chosen.get('curves') or []):
             raise VerificationFailed('The curve files are not exactly the selected curves.')
         original = content.get('original', {}).get(None)
@@ -289,14 +368,56 @@ def open_bundle(path):
             model, view = _core.verify_pair(wire_descriptor, body, original, name)
             curves[name] = Curve(model, view, wire_descriptor, wire_view)
         if not curves: raise VerificationFailed('An asset carries no curves.')
-        loaded.append(BundleAsset(entry, original, curves))
+        las = BundleAsset(entry, original, curves)
+        las.provenance, las.read_by = _kept_check(entry, files, content, next(iter(curves.values())).wire_descriptor)
+        loaded.append(las)
     _check_groups(manifest, entries)
     entities, relationships = _check_graph(manifest, entries)
     listed = seen | {'manifest.json'}
     unlisted = sorted(p.relative_to(root).as_posix() for p in root.rglob('*') if p.is_file() and p.relative_to(root).as_posix() not in listed)
+    for asset, record in zip(loaded, records): asset.source_record = record  # one loaded asset per entry, in order
     bundle = Bundle(root, manifest, loaded, unlisted)
     bundle.entities, bundle.relationships = entities, relationships
     return bundle
+
+
+def _text(value, most, nullable=False):
+    return (nullable and value is None) or (isinstance(value, str) and 0 < len(value) <= most)
+
+
+def _closed(value, required, optional=()):
+    return isinstance(value, dict) and set(required) <= set(value) <= set(required) | set(optional)
+
+
+def _digest(value):
+    return isinstance(value, str) and re.fullmatch(r'[0-9a-f]{64}', value) is not None
+
+
+def source_record_valid(record):
+    """`ophiolite.source-provenance/1` as its schema says, on the parsed dict, which it never changes: every object
+    closed, the required keys, constants, the id scheme, digests and lengths; a path's `part` optional. (The generated
+    models are open, so they are not the check here.)"""
+    if not _closed(record, ('schema', 'identity', 'content', 'context')) or record['schema'] != SOURCE_RECORD_SCHEMA: return False
+    identity, content, context = record['identity'], record['content'], record['context']
+    if not (_closed(identity, ('source_system', 'source_instance', 'id_scheme', 'source_object_id')) and _text(identity['source_system'], 160)
+            and _text(identity['source_instance'], 160, True) and identity['id_scheme'] in ('source-native', 'source-path', 'none')): return False
+    named = identity['source_object_id']
+    if named is not None and not ((_closed(named, ('path',), ('part',)) and _text(named['path'], 1024) and _text(named.get('part'), 128, True))
+                                  or (_closed(named, ('container', 'id')) and _text(named['container'], 256, True) and _text(named['id'], 256))): return False
+    return (_closed(content, ('content_sha256', 'source_version')) and _digest(content['content_sha256']) and _text(content['source_version'], 256, True)
+            and _closed(context, ('comparison', 'context_sha256')) and context['comparison'] == 'comparison/1' and _digest(context['context_sha256']))
+
+
+def _source_record_of(manifest, entry):
+    """E122 s5b (D4): an entry's `source_record`, checked: the served identity of this exact revision, a valid record,
+    in a bundle whose version says it may carry records; None when the entry has none."""
+    if not isinstance(entry, dict) or 'source_record' not in entry: return None
+    if int(manifest['bundle_version'].split('.')[1]) < SOURCE_RECORD_MINOR: raise VerificationFailed(SOURCE_MINOR)
+    held = entry['source_record']
+    if not _closed(held, ('schema', 'asset_id', 'revision', 'record')) or held['schema'] != SOURCE_RECORD_SCHEMA: raise VerificationFailed(SOURCE_SHAPE)
+    if (held['asset_id'], held['revision']) != (entry.get('asset_id'), entry.get('revision')): raise VerificationFailed(SOURCE_OTHER)
+    if not source_record_valid(held['record']): raise VerificationFailed(SOURCE_SHAPE)  # its lengths bound its size
+    return held['record']
 
 
 def _check_graph(manifest, entries):
@@ -370,7 +491,8 @@ def _check_groups(manifest, entries):
 
 def _typed_asset(entry, chosen, content, files, kind, raw_of):
     from . import _core, bundle_package
-    if chosen.get('curves') != [] or [r for r in roles_of(files) if r not in PACKAGE_ROLES] != ['descriptor', 'normalized', 'original'] or any(item.get('curve') is not None for item in files):
+    if chosen.get('curves') != [] or [r for r in roles_of(files) if r not in PACKAGE_ROLES + ('provenance',)] != ['descriptor', 'normalized', 'original'] \
+            or any(item.get('curve') is not None for item in files if item.get('role') != 'provenance'):  # 2.9: the kept original is checked with its reading
         raise VerificationFailed('A typed asset carries exactly one original, one descriptor and one data file, and no curves.')
     wire_descriptor = _finite_json(content['descriptor'][None], 'A descriptor'); body = content['normalized'][None]; _finite_json(body, 'Typed data')
     if (wire_descriptor.get('asset_id'), wire_descriptor.get('revision')) != (entry.get('asset_id'), entry.get('revision')):
@@ -423,11 +545,13 @@ def roles_of(files):
     return sorted(item.get('role') for item in files)
 
 
-def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=None, graph=None, entities_omitted=None):
+def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=None, graph=None, entities_omitted=None, source_records_omitted=None):
     """Write verified exact reads [(selection, CurveSet-like)] atomically. Internal to export."""
     destination = Path(destination)
     if destination.exists(): raise Refused('The destination already exists; choose a new folder.')
     if not 0 < len(items) <= MAX_ASSETS: raise Refused('Export between 1 and %d exact revisions.' % MAX_ASSETS)
+    if any(getattr(read, 'type', None) == 'well-path' for _, read in items):  # E125 s3a: refused before anything is written
+        raise Refused('A well path given as positions is not exported in a bundle yet; export it on its own as the original file.')
     parent = destination.parent; parent.mkdir(parents=True, exist_ok=True)
     for stale in parent.glob('.' + destination.name + '.staging-*'):  # abandoned interrupted exports only
         try: owner = int((stale / '.owner').read_text())
@@ -450,6 +574,7 @@ def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=
             if curve is not None: entry['curve'] = curve
             return entry
         typed_bundle = any(hasattr(read, '_wire_data_bytes') or isinstance(read, tuple) for _, read in items) or bool(graph)  # entities need 2.4
+        typed_bundle = typed_bundle or any(getattr(read, 'provenance', None) is not None for _, read in items)  # B3: a kept original needs schema 2 (2.9)
         for index, (chosen, read) in enumerate(items):
             folder = 'assets/%d/' % index
             if isinstance(read, tuple):  # E16: (volume description, [slices]) — the original is named, not carried
@@ -482,6 +607,8 @@ def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=
                                'omissions': list(first.get('provenance', {}).get('omissions', [])),
                                'losses': sorted({loss for r in first.get('representations', []) for loss in r.get('losses', [])})})
                 if block is not None: assets[-1]['package'] = block
+                kept = _kept_of(read, first)
+                if kept is not None: files.append(put(folder + kept[2], kept[0], 'provenance')); assets[-1]['read_by'] = kept[1]  # 2.9 (E107a)
                 selection.append({**chosen, 'curves': []}); continue
             files = [put(folder + 'original.las', read.artifact, 'original')]
             first = read._wire_descriptors[0]
@@ -496,13 +623,21 @@ def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=
                            'files': files, 'history': first.get('history'), 'parents': first.get('parents', []),
                            'parent_visibility': first.get('parent_visibility', 'complete'), 'omissions': omissions, 'losses': losses})
             if typed_bundle: assets[-1]['type'] = 'well-log'
+            kept = _kept_of(read, first)
+            if kept is not None: files.append(put(folder + kept[2], kept[0], 'provenance')); assets[-1]['read_by'] = kept[1]  # 2.9 (E107a)
             selection.append(chosen)
+        for (_, read), entry in zip(items, assets):  # E122 s5b (D1): the served record, as the client was answered for this version
+            held = getattr(read[0] if isinstance(read, tuple) else read, 'source_record', None)
+            if held is not None: entry['source_record'] = held
         observations = {**({'groups': groups} if groups else {}), **({'groups_omitted': groups_omitted} if groups_omitted else {}),
-                        **({'entities_omitted': entities_omitted} if entities_omitted else {})}  # E22b: why no wells travel
+                        **({'entities_omitted': entities_omitted} if entities_omitted else {}),  # E22b: why no wells travel
+                        **({'source_records_omitted': source_records_omitted} if source_records_omitted else {})}  # E122 s5b: why no records travel
         # The lowest version that expresses this content: 1.x for well logs, 2.x for typed data;
         # the minor rises only for observations (1) or the newer types (2), so older readers keep working.
         minor = max([1 if observations else 0, 4 if graph else 0] + [max(NEWER_TYPES.get(a.get('type'), 0), NEWER_PROFILES.get(a.get('profile'), 0)) for a in assets]
-                    + [PACKAGE_MINOR for a in assets if 'package' in a])  # E23c: 2.8 only for an asset with a package
+                    + [PACKAGE_MINOR for a in assets if 'package' in a]  # E23c: 2.8 only for an asset with a package
+                    + [PROVENANCE_MINOR for a in assets if 'read_by' in a]  # E107a: 2.9 only for an asset with a kept original
+                    + [SOURCE_RECORD_MINOR for a in assets if 'source_record' in a])  # E122 s5b: 1.10/2.10 only when a record travels
         version = ('2' if typed_bundle else '1') + f'.{minor}.0'
         manifest = {'schema': SCHEMA_2 if typed_bundle else SCHEMA, 'bundle_version': version, 'created_at': datetime.now(timezone.utc).isoformat(timespec='seconds'),
                     'exporter': {'name': 'ophiolite-sdk', 'version': __version__}, 'scope': 'selection', 'selection': selection, 'assets': assets,
@@ -510,6 +645,7 @@ def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=
                     **({'entities': graph['entities'], 'relationships': graph['relationships']} if graph else {}),
                     'limits': {'max_assets': MAX_ASSETS, 'max_file_bytes': MAX_FILE_BYTES, 'max_total_bytes': MAX_TOTAL_BYTES}, 'notice': NOTICE}
         raw = (json.dumps(manifest, indent=2, allow_nan=False) + '\n').encode()
+        if len(raw) > MAX_MANIFEST_BYTES and any('source_record' in a for a in assets): raise Refused(SOURCE_TOO_LARGE)  # E122 s5b: before anything is visible
         fd = os.open(staging / 'manifest.json', os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
         with os.fdopen(fd, 'wb') as out: out.write(raw)
         (staging / '.owner').unlink()
@@ -618,6 +754,10 @@ def import_plan(bundle, well_logs):
                 well_log = {'asset_id': target[0], 'revision': target[1]}
         steps.append({**step, 'state': 'ready', 'original': asset.original, 'profile': profile, 'declared': declared, 'well_log': well_log,
                       'filename': PurePosixPath(original['path']).name, 'name': name[:160]})
+        if asset.provenance is not None:  # B2 (E107a): the kept original goes back as the re-uploaded original's attachment, the reading as recorded
+            steps[-1]['provenance'] = asset.provenance; steps[-1]['origin'] = {**step['origin'], 'read_by': asset.read_by}
+        if recorded_source(wire) is not None:  # E108 S1 (5R-8): the source procedure that made it, as the exporting project recorded it
+            steps[-1]['origin'] = {**steps[-1]['origin'], 'sourced_by': recorded_source(wire)}
     return steps
 
 

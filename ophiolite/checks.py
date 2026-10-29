@@ -2,7 +2,12 @@
 of a result or of an implementation, and compare a result with a file you trust (the comparison is kept for you only).
 
 `ophiolite checks publish | list | compare | publishers` prints these in words; a refusal's sentence never names a
-field path, which is in `--json` (`error.field`) instead. The sentences are a closed copy keyed by the server's field."""
+field path, which is in `--json` (`error.field`) instead. The sentences are a closed copy keyed by the server's field.
+
+E110 (D7, D9): a check folder that `ophiolite procedures run` wrote for a check procedure holds a `procedure-report`
+check.json (the version checked, the procedure digest, the reference, the settings, the outcome and the counts). `checks
+publish` sends it on purpose, after refusing locally what the server refuses (M5: the counts and outcome rules); the
+server stores it as reported, never checked by the server, and reads its labels from the catalogue."""
 import base64
 import datetime
 import hashlib
@@ -23,7 +28,7 @@ PUBLISH_REFUSED = {
     'schema': 'Not published: the check does not have the shape of a check record.',
     'publisher': 'Not published: a check is published by the credential that sends it.',
     'tolerance': 'Not published: the allowed difference is not a number of at least 0 in the compared unit.',
-    'size': 'Not published: a file of the check is larger than 2 MiB.',
+    'size': 'Not published: a file of the check is larger than 8 MiB.',
     'fixture.digest': 'Not published: the fixture file does not match the recorded file.',
     'reference.digest': 'Not published: the reference file does not match the recorded file.',
     'output.digest': 'Not published: the output file is not what this release produces from the fixture.',
@@ -36,9 +41,11 @@ PUBLISH_REFUSED = {
     'request': 'Not published: this command id was used for another request.',
     'interpretation': 'Not published: the grid comes with declarations no reader reads.',
 }
+REPORT_REFUSED = {k: v for k, v in PUBLISH_REFUSED.items() if k not in ('schema', 'kind')}  # E110: the server's own sentence for those
+REPORT_FIELDS = ('kind', 'subject', 'procedure_digest', 'reference', 'settings', 'outcome', 'counts')
 COMPARE_REFUSED = {
     'limit': 'You have saved 20 comparisons on this result. Ask a project administrator to review them.',
-    'size': 'Not compared: the file is larger than 2 MB.',
+    'size': 'Not compared: the file is larger than 8 MiB.',
     'tolerance': 'Not compared: the allowed difference is not a number of at least 0 in the compared unit.',
     'schema': 'Not compared: a grid needs its coordinate system, units and datum confirmed (--interpretation).',
     'interpretation': 'Not compared: the confirmed declarations are not ones a reader reads.',
@@ -60,6 +67,23 @@ REASON = {  # a check's reference, as the story says it
     'too_large': 'The reference is larger than 2 MB.',
     'empty': 'The reference has no values.',
     'no_such_curve': 'The reference has no such curve.',
+    # E110: the tops and trajectory gates
+    'unit_unknown': 'A depth unit is not known; nothing is converted.',
+    'depth_basis_unknown': 'Only tops declared same-as-log, measured along the log\'s depths, are compared today.',  # adhoc-e121-words: the Platform's (E121 B8, O9)
+    'depth_basis_mismatch': 'The picks are measured on different depths.',
+    'wellbore_mismatch': 'The file names another well.',
+    'magnetic_north': 'A survey refers to magnetic north; nothing is corrected.',
+    'azimuth_reference_unknown': 'A survey does not say which north its azimuths refer to.',
+    'azimuth_reference_mismatch': 'The surveys refer to different norths; nothing is converted.',
+    'grid_unknown': 'Grid north is compared only on one known projected grid.',
+    'datum_unknown': 'A survey does not say which depth datum it starts from.',
+    'datum_mismatch': 'The surveys start from different depth datums.',
+    'missing_angles': 'A station has no inclination or azimuth.',
+    'start_not_at_datum': 'A survey does not start at its depth datum.',
+    # E119b: the residual gates
+    'ambiguous_rows': 'A wellbore and top occurrence appear more than once in one of the results.',
+    'correspondence_mismatch': 'The results are for different formations.',
+    'inputs_differ': 'The results were computed from different surface, tops or trajectory versions.',
 }
 FILE_REASON = {  # your file, as `checks compare` says it
     'axis_mismatch': 'Not compared: the depth samples differ; nothing is resampled.',
@@ -71,6 +95,8 @@ FILE_REASON = {  # your file, as `checks compare` says it
     'too_large': 'Not compared: the file is larger than 2 MB.',
     'empty': 'Not compared: the file has no values.',
 }
+FILE_REASON.update({key: 'Not compared: ' + text[0].lower() + text[1:] for key, text in REASON.items() if key not in FILE_REASON and key not in (
+    'another_kind', 'unreadable', 'no_such_curve')})  # E110: the gates read as the story says them
 UNIT_WORDS = {'m': 'metres', 'ft': 'feet', 'ms': 'milliseconds', 's': 'seconds'}
 
 
@@ -87,6 +113,14 @@ def in_words(error, sentences, number=None):
     text = sentences[name] % (number or 'another release') if '%s' in sentences[name] else sentences[name]
     return type(error)(text, status=error.status, code=error.code, details=error.details, remedy=error.remedy, docs=error.docs,
                        request_id=error.request_id, server_message=error.server_message)
+
+
+def server_words(error):
+    """E110 (D7): a report's catalogue, slot or settings refusal in the server's own sentence, which names the procedure
+    or the setting; the category, code, field and request id stay on the error."""
+    if not error.server_message: return error
+    return type(error)(error.server_message, status=error.status, code=error.code, details=error.details, remedy=error.remedy,
+                       docs=error.docs, request_id=error.request_id, server_message=error.server_message)
 
 
 def canonical(value):
@@ -117,14 +151,40 @@ def one_file(folder, stem):
     return found[0].read_bytes()
 
 
+def report_refusal(report):
+    """E110 (D4, M5, 2-M5): why a procedure report would be refused, as a sentence, or None. The server refuses the same."""
+    if not isinstance(report, dict) or set(report) - set(REPORT_FIELDS) or report.get('kind') != 'procedure-report':
+        return 'The check folder does not hold a procedure report.'
+    outcome, counts = report.get('outcome'), report.get('counts')
+    if outcome not in OUTCOME: return 'The outcome must be passed, differed or not compared.'
+    if counts is None: return None
+    whole = lambda v: isinstance(v, int) and not isinstance(v, bool) and v >= 0
+    if outcome == 'not_compared': return 'Nothing was compared, so no counts are reported.'
+    if not isinstance(counts, dict) or set(counts) != {'compared', 'differed'} or not all(whole(counts[k]) for k in counts):
+        return 'Counts are two whole numbers of at least 0: how many were compared and how many differed.'
+    if counts['differed'] > counts['compared']: return 'More differed than were compared.'
+    if (counts['differed'] == 0) != (outcome == 'passed'): return 'None differed exactly when the check passed.'
+    return None
+
+
+def report_body(report):
+    """The `procedure-report` publish request for a run folder's check.json; its command id is the body's digest."""
+    refusal = report_refusal(report)
+    if refusal: raise Refused('Not published: ' + refusal[0].lower() + refusal[1:])
+    body = {k: report[k] for k in REPORT_FIELDS if k in report}
+    return {'command_id': command_for('report-', body), **body}
+
+
 def publish_body(folder):
-    """The publish request for one check directory: the record, its three files and the executable request."""
+    """The publish request for one check directory: the record, its three files and the executable request (E110: or a
+    procedure report, when check.json is one)."""
     folder = Path(folder)
     try:
         record = json.loads((folder / 'check.json').read_text())
         request = json.loads((folder / 'request.json').read_text()) if (folder / 'request.json').is_file() else None
         interpretation = json.loads((folder / 'interpretation.json').read_text()) if (folder / 'interpretation.json').is_file() else None
     except ValueError: raise Refused('%s: check.json, request.json or interpretation.json is not JSON.' % folder.name) from None
+    if isinstance(record, dict) and record.get('kind') == 'procedure-report': return report_body(record)
     body = {'record': record, 'files': {'fixture': b64(one_file(folder, 'fixture')), 'reference': b64(one_file(folder, 'reference')),
                                         'output': b64((folder / 'output.json').read_bytes())}}
     if request is not None: body['request'] = request
@@ -155,6 +215,9 @@ class CheckClient:
         The server repeats the calculation when it runs this implementation and release ("checked by the server");
         otherwise the record is stored as reported. A refusal names its field in `error.details['field']`."""
         body = publish_body(folder)
+        if body.get('kind') == 'procedure-report':  # E110 (D9): sent on purpose; stored as reported
+            try: return self._post('checks', 'publish', body, retry=True)
+            except OphioliteError as error: raise in_words(error, REPORT_REFUSED) if field(error) not in ('schema', 'kind') else server_words(error) from None
         number = (body['record'].get('subject') or {}).get('release_number')
         try: return self._post('checks', 'publish', body, retry=True)
         except OphioliteError as error: raise in_words(error, PUBLISH_REFUSED, number) from None
@@ -183,7 +246,10 @@ class CheckClient:
                 **({'interpretation': interpretation} if interpretation is not None else {})}
         body = {'command_id': command_id or command_for('compare-', body), **body}
         try: return self._post('checks', 'compare', body, retry=True)
-        except OphioliteError as error: raise in_words(error, COMPARE_REFUSED) from None
+        except OphioliteError as error:
+            if field(error) == 'tolerance' and error.server_message:  # adhoc-e121-words (E121 O2): the server's reason, units named
+                raise in_words(error, {'tolerance': 'Not compared: ' + error.server_message[0].lower() + error.server_message[1:]}) from None
+            raise in_words(error, COMPARE_REFUSED) from None
 
     def check_publishers(self, action='list', principal=None, *, kind='person'):
         """Who may publish checks besides the project's administrators: {publishers: [{principal, kind, granted_by, at}]}.
@@ -200,7 +266,9 @@ class CheckClient:
 def plain(number):
     number = float('%.10g' % number)  # 30.0004 - 30.0 reads 0.0004
     text = format(number, 'f').rstrip('0').rstrip('.') if number else '0'
-    if float(text) != number: text = format(number, '.17f').rstrip('0').rstrip('.')
+    if float(text) != number:  # E110: the fewest decimals that read back the number (a distance of 51.00077574 m)
+        tries = [format(number, '.%df' % places).rstrip('0').rstrip('.') for places in range(7, 18)]
+        text = next((t for t in tries if float(t) == number), tries[-1])
     return text
 
 
@@ -225,8 +293,45 @@ def bound(limit):
     return 'Within %s%s' % (plain(limit['value']), unit_of(limit))
 
 
+PLACES = {'series-compare/1': 'depths', 'grid-compare/1': 'cells', 'tops-compare/1': 'picks', 'trajectory-compare/1': 'stations',
+          'residual-compare/1': 'rows'}  # E119b
+READ_AS = {'cells': 'a grid', 'picks': 'a tops file', 'stations': 'a deviation survey', 'rows': 'a residual result'}
+ROWS_HEADING = 'Rows that differ (wellbore | surface | pick MD | residual, result / reference | class):'
+
+
+def residual_rows(d):
+    """D-9 (E119b): one line per differing pick of a residual comparison, in the columns of ROWS_HEADING: the wellbore,
+    the formation the surface represents, the top's measured depth, each side's residual in metres (or its reason, or
+    "-" where the side has no such row) and what differs. The `--json` answer carries the same rows."""
+    def side(residual, reason, present):
+        if not present: return '-'
+        return '%s m' % plain(residual) if residual is not None else reason
+    lines = []
+    for row in d.get('first') or []:
+        mine = row['result_residual'] is not None or row['result_reason'] is not None
+        theirs = row['reference_residual'] is not None or row['reference_reason'] is not None
+        kind = ('only in the reference' if not mine else 'only in the result' if not theirs
+                else 'reason differs' if row['result_reason'] != row['reference_reason'] else 'residual differs')
+        md = '-' if row.get('md') is None else '%s m' % plain(row['md'])
+        lines.append('  %s | %s | %s | %s / %s | %s' % (row['wellbore'], d.get('formation') or '-', md, side(row['result_residual'], row['result_reason'], mine),
+                                                       side(row['reference_residual'], row['reference_reason'], theirs), kind))
+    shown = len(lines)
+    if d.get('count', 0) > shown: lines.append('  and %d more (--json lists the first %d).' % (d['count'] - shown, shown))
+    return [ROWS_HEADING] + lines if lines else []
+
+
 def places(record):
-    return 'cells' if record.get('rules_id') == 'grid-compare/1' else 'depths'
+    """E110 (7-7): what a rule counts; a rule this SDK does not know counts "values", never depths."""
+    rules = record.get('rules_id')
+    return 'depths' if rules is None else PLACES.get(rules, 'values')
+
+
+def unpaired(d):
+    """E110 (7-7): picks on one side only and stations past the reference survey."""
+    count = lambda n, word: '%d %s' % (n, word if n == 1 else word + 's')  # noqa: E731
+    return ((['%s only in the reference.' % count(d['missing'], 'pick')] if d.get('missing') else [])
+            + (['%s only in the result.' % count(d['extra'], 'pick')] if d.get('extra') else [])
+            + (['%s beyond the reference survey.' % count(d['outside'], 'station')] if d.get('outside') else []))
 
 
 def outcome_lines(record):
@@ -235,14 +340,36 @@ def outcome_lines(record):
     if record['outcome'] == 'passed': return [bound(limit) + '.']
     if record['outcome'] == 'not_compared': return [REASON.get(record.get('reason'), 'The values could not be compared.')]
     d = record.get('differences') or {}
-    if d.get('largest') is None: first = 'Values are missing at %d of %d %s.' % (d.get('count', 0), d.get('total', 0), places(record))
-    else: first = 'Largest difference %s%s, at %d of %d %s.' % (plain(d['largest']), unit_of(limit), d.get('count', 0), d.get('total', 0), places(record))
+    if d.get('largest') is None and places(record) in ('depths', 'cells'): first = 'Values are missing at %d of %d %s.' % (d.get('count', 0), d.get('total', 0), places(record))
+    elif d.get('largest') is None: first = 'Different at %d of %d %s.' % (d.get('count', 0), d.get('total', 0), places(record))
+    else: first = 'Largest %s %s%s, at %d of %d %s.' % ('distance' if places(record) == 'stations' else 'difference', plain(d['largest']), unit_of(limit),
+                                                     d.get('count', 0), d.get('total', 0), places(record))
     text = bound(limit)
-    return [first, 'Allowed: ' + text[0].lower() + text[1:] + '.']
+    return [first] + unpaired(d) + ['Allowed: ' + text[0].lower() + text[1:] + '.']
+
+
+def report_lines(report, names=None):
+    """E110 (D7): "Reported check by <name> with <procedure> version <label | number>: <outcome>.", the counts when the
+    procedure gave them, then "Ophiolite did not repeat this check."; never "Checked"."""
+    who = (names or {}).get((report.get('recorded_by') or {}).get('id')) or 'a project member'
+    procedure = report.get('procedure') or {}
+    label = procedure.get('label') if readable(procedure.get('label')) else 'a procedure'
+    version = procedure.get('version_label') if readable(procedure.get('version_label')) else procedure.get('version_number')
+    lines = ['Reported check by %s with %s version %s: %s.' % (who, label, version, OUTCOME.get(report['outcome'], 'not compared'))]
+    counts = report.get('counts')
+    if counts: lines.append('%d of %d differed.' % (counts['differed'], counts['compared']))
+    return lines + [NOT_REPEATED]
+
+
+def readable(text):
+    """A label that reads as a name: plain words, not an identifier (no underscore, no slash, no long digit or hex run)."""
+    import re
+    return isinstance(text, str) and 0 < len(text.strip()) <= 200 and not re.search(r'[_/\\@]|[0-9a-f]{6,}|^[a-z0-9.-]+$', text)
 
 
 def record_lines(record, names=None):
     """A witnessed, reported or personal record in words: never "Checked against" for one the server did not repeat."""
+    if record.get('variant') == 'procedure-report': return report_lines(record, names)  # E110
     fixture = (record.get('fixture') or {}).get('display_name') or NOT_RECORDED
     if record['witness'] == 'personal':
         return ['Compared with a file on %s: %s.' % (day(record['at']), OUTCOME[record['outcome']])] + outcome_lines(record) + [SAVED_HERE]
@@ -283,15 +410,17 @@ def compare_lines(found, curve=None, method=None, unit=None):
     if found['outcome'] == 'passed': first = ['The values match exactly.' if limit is None or limit['value'] == 0 else bound(limit) + '.']
     elif found['outcome'] == 'differed':
         d = found.get('differences') or {}
-        if d.get('largest') is None: text = 'Values are missing at %d of %d %s' % (d.get('count', 0), d.get('total', 0), places(found))
+        if d.get('largest') is None and places(found) in ('depths', 'cells'): text = 'Values are missing at %d of %d %s' % (d.get('count', 0), d.get('total', 0), places(found))
+        elif d.get('largest') is None: text = 'Different at %d of %d %s' % (d.get('count', 0), d.get('total', 0), places(found))
         else: text = 'Differs by at most %s%s, at %d of %d %s' % (plain(d['largest']), unit_of(limit, unit), d.get('count', 0), d.get('total', 0), places(found))
         where = d.get('changed_range')
         if where and all(isinstance(v, (int, float)) for v in where) and where[0] != where[1]: text += ' (between %s and %s)' % (plain(where[0]), plain(where[1]))
-        first = [text + '.']
+        first = [text + '.'] + unpaired(d)
+        if found.get('rules_id') == 'residual-compare/1': first += residual_rows(d)  # D-9: one row per differing pick
     else:
         reason = found.get('reason')
         if found.get('sentence'): first = [found['sentence']]
-        elif reason == 'unreadable': first = ['Not compared: the file could not be read as %s.' % ('a grid' if places(found) == 'cells' else 'a well log')]
+        elif reason == 'unreadable': first = ['Not compared: the file could not be read as %s.' % READ_AS.get(places(found), 'a well log')]
         elif reason == 'no_such_curve': first = ['Not compared: the file has no curve called %s.' % (curve or 'that name')]
         else: first = [FILE_REASON.get(reason, 'Not compared: the values could not be compared.')]
         if found.get('fields'): first.append('Declarations concerned: %s.' % ', '.join(found['fields']))
@@ -300,6 +429,8 @@ def compare_lines(found, curve=None, method=None, unit=None):
 
 def published_line(stored):
     """"Published 2 checks for Ophiolite 2026.10.60: 2 checked by the server." for the records one publish stored."""
+    if stored and all(r.get('variant') == 'procedure-report' for r in stored):  # E110: reported, never repeated
+        return 'Published %d reported check%s; Ophiolite did not repeat %s.' % (len(stored), '' if len(stored) == 1 else 's', 'it' if len(stored) == 1 else 'them')
     numbers = sorted({r['subject'].get('release_number') for r in stored if r['subject'].get('release_number')})
     server = sum(r['witness'] == 'server' for r in stored)
     parts = ['%d checked by the server' % server] if server else []

@@ -1,0 +1,500 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/assets/v1/well-residual-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.well-residual/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "Fidelity": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "const": "assessed",
+          "title": "Status",
+          "type": "string"
+        },
+        "preserved": {
+          "items": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Preserved",
+          "type": "array"
+        },
+        "losses": {
+          "items": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Losses",
+          "type": "array"
+        },
+        "unknown_context": {
+          "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Unknown Context",
+          "type": "array"
+        },
+        "decisions": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 512,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 64,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decisions"
+        }
+      },
+      "required": [
+        "status",
+        "preserved",
+        "losses",
+        "unknown_context"
+      ],
+      "title": "Fidelity",
+      "type": "object"
+    },
+    "Reference": {
+      "additionalProperties": false,
+      "properties": {
+        "authority": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Authority",
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "profile": {
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+          "title": "Profile",
+          "type": "string"
+        }
+      },
+      "required": [
+        "authority",
+        "key",
+        "revision",
+        "profile"
+      ],
+      "title": "Reference",
+      "type": "object"
+    },
+    "ResidualCrossing": {
+      "additionalProperties": false,
+      "description": "A crossing of the surface with the trajectory: its measured depth bracketed to 0.01 m (metres).",
+      "properties": {
+        "md": {
+          "title": "Md",
+          "type": "number"
+        },
+        "low": {
+          "title": "Low",
+          "type": "number"
+        },
+        "high": {
+          "title": "High",
+          "type": "number"
+        }
+      },
+      "required": [
+        "md",
+        "low",
+        "high"
+      ],
+      "title": "ResidualCrossing",
+      "type": "object"
+    },
+    "ResidualTop": {
+      "additionalProperties": false,
+      "description": "The top a row is for: its tops version, its position in that version (0-based) and its measured depth (metres).",
+      "properties": {
+        "asset_id": {
+          "pattern": "^[A-Za-z0-9._:-]{1,128}$",
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "pattern": "^[A-Za-z0-9._:-]{1,128}$",
+          "title": "Revision",
+          "type": "string"
+        },
+        "index": {
+          "minimum": 0,
+          "title": "Index",
+          "type": "integer"
+        },
+        "md": {
+          "title": "Md",
+          "type": "number"
+        }
+      },
+      "required": [
+        "asset_id",
+        "revision",
+        "index",
+        "md"
+      ],
+      "title": "ResidualTop",
+      "type": "object"
+    },
+    "ResidualVersion": {
+      "additionalProperties": false,
+      "description": "One exact version: the surface of a residual result, or a row's trajectory.",
+      "properties": {
+        "asset_id": {
+          "pattern": "^[A-Za-z0-9._:-]{1,128}$",
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "pattern": "^[A-Za-z0-9._:-]{1,128}$",
+          "title": "Revision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "asset_id",
+        "revision"
+      ],
+      "title": "ResidualVersion",
+      "type": "object"
+    },
+    "TypedInterpretation": {
+      "additionalProperties": false,
+      "description": "The executable identity of the typed reader (Connectors typed_reader; E56: feature_files for feature sets).",
+      "properties": {
+        "reader": {
+          "enum": [
+            "asset_connectors.typed_reader/1",
+            "asset_connectors.feature_files/1"
+          ],
+          "title": "Reader",
+          "type": "string"
+        },
+        "mapping": {
+          "enum": [
+            "well-tops/1",
+            "trajectory/1",
+            "regular-grid-surface/1",
+            "triangulated-surface/1",
+            "point-set/1",
+            "polyline-set/1",
+            "seismic-volume/1",
+            "well-location/1",
+            "wavelet/1",
+            "model-section/1",
+            "seismic-section/1",
+            "time-depth/1",
+            "feature-set/1",
+            "well-path/1",
+            "well-set/1",
+            "well-residual/1"
+          ],
+          "title": "Mapping",
+          "type": "string"
+        },
+        "parsing_policy": {
+          "const": "typed-strict/1",
+          "title": "Parsing Policy",
+          "type": "string"
+        },
+        "null_policy": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Null Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reader",
+        "mapping",
+        "parsing_policy",
+        "null_policy"
+      ],
+      "title": "TypedInterpretation",
+      "type": "object"
+    },
+    "WellResidualContext": {
+      "additionalProperties": false,
+      "description": "The counts of a residual result: its rows computed and not computed, its wellbores and those with no residual,\nthe formation the surface represents and the unit depths are shown in (typed-context 1.9.0). Values are metres.",
+      "properties": {
+        "type": {
+          "const": "well-residual",
+          "title": "Type",
+          "type": "string"
+        },
+        "count": {
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        },
+        "computed": {
+          "maximum": 10000,
+          "minimum": 0,
+          "title": "Computed",
+          "type": "integer"
+        },
+        "not_computed": {
+          "maximum": 10000,
+          "minimum": 0,
+          "title": "Not Computed",
+          "type": "integer"
+        },
+        "members": {
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Members",
+          "type": "integer"
+        },
+        "members_not_computed": {
+          "maximum": 10000,
+          "minimum": 0,
+          "title": "Members Not Computed",
+          "type": "integer"
+        },
+        "formation": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Formation",
+          "type": "string"
+        },
+        "display_unit": {
+          "enum": [
+            "m",
+            "ft"
+          ],
+          "title": "Display Unit",
+          "type": "string"
+        },
+        "fidelity": {
+          "$ref": "#/$defs/Fidelity"
+        }
+      },
+      "required": [
+        "type",
+        "count",
+        "computed",
+        "not_computed",
+        "members",
+        "members_not_computed",
+        "formation",
+        "display_unit",
+        "fidelity"
+      ],
+      "title": "WellResidualContext",
+      "type": "object"
+    },
+    "WellResidualRow": {
+      "additionalProperties": false,
+      "description": "One top of one wellbore: the residual (top md minus the used crossing's md, metres) or the reason there is none.",
+      "properties": {
+        "wellbore": {
+          "pattern": "^wellbore-[0-9a-f]{32}$",
+          "title": "Wellbore",
+          "type": "string"
+        },
+        "occurrence": {
+          "description": "0 exactly when the wellbore has no top of the formation; otherwise 1 to k in md order.",
+          "maximum": 10000,
+          "minimum": 0,
+          "title": "Occurrence",
+          "type": "integer"
+        },
+        "top": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ResidualTop"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "trajectory": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ResidualVersion"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "crossings": {
+          "items": {
+            "$ref": "#/$defs/ResidualCrossing"
+          },
+          "maxItems": 64,
+          "title": "Crossings",
+          "type": "array"
+        },
+        "used": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The crossing the residual uses, exactly when there is a residual.",
+          "title": "Used"
+        },
+        "residual": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Residual"
+        },
+        "unit": {
+          "const": "m",
+          "title": "Unit",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "enum": [
+                "grazing",
+                "along-surface",
+                "uncertain",
+                "no-surface-data",
+                "ends-above",
+                "starts-below",
+                "no-trajectory",
+                "no-top",
+                "many-crossings"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reason"
+        },
+        "between": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "number"
+              },
+              "maxItems": 2,
+              "minItems": 2,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Measured depths a <= b, exactly for grazing, along-surface, uncertain and many-crossings.",
+          "title": "Between"
+        }
+      },
+      "required": [
+        "wellbore",
+        "occurrence",
+        "top",
+        "trajectory",
+        "crossings",
+        "used",
+        "residual",
+        "unit",
+        "reason",
+        "between"
+      ],
+      "title": "WellResidualRow",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "E119b: a residual result as published (rows in order, the surface they are measured against); values are metres.",
+  "properties": {
+    "representation": {
+      "const": "normalized",
+      "title": "Representation",
+      "type": "string"
+    },
+    "source": {
+      "$ref": "#/$defs/Reference"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "interpretation": {
+      "$ref": "#/$defs/TypedInterpretation"
+    },
+    "schema": {
+      "const": "ophiolite.well-residual/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "context": {
+      "$ref": "#/$defs/WellResidualContext"
+    },
+    "surface": {
+      "$ref": "#/$defs/ResidualVersion"
+    },
+    "rows": {
+      "items": {
+        "$ref": "#/$defs/WellResidualRow"
+      },
+      "maxItems": 10000,
+      "minItems": 1,
+      "title": "Rows",
+      "type": "array"
+    }
+  },
+  "required": [
+    "representation",
+    "source",
+    "source_sha256",
+    "interpretation",
+    "schema",
+    "context",
+    "surface",
+    "rows"
+  ],
+  "title": "WellResidual",
+  "type": "object"
+}

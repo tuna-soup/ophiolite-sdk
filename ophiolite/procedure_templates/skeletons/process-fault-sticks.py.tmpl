@@ -1,0 +1,25 @@
+"""$label."""
+from ophiolite import procedure, readers, writers
+
+SPATIAL = ('crs', 'xy_unit', 'z_unit', 'z_meaning', 'positive', 'vertical_datum')
+
+
+@procedure
+def main(inputs, settings):
+    """Read the fault sticks with ophiolite.readers and write them again with the Ophiolite writer.
+
+    `values` holds the writer's arguments, made from everything the reader found. Your calculation goes where it is
+    marked: change `values` before they are written. A part of the file the writer has no place for stops the run
+    with a sentence, so nothing is left out without your knowing."""
+    version = inputs['data'][0]
+    found = readers.read(version)
+    sticks = []
+    for x, y, z, stick, node in found.points:
+        if node is not None:
+            raise ValueError('This start writes with ophiolite.writers.write_sticks, which has no place for a node field; '
+                             'change the start to say what to keep.')
+        if not sticks or sticks[-1]['index'] != stick: sticks.append({'index': stick, 'points': []})  # in file order
+        sticks[-1]['points'].append((x, y, z))
+    values = {'sticks': sticks, **{key: version.declared.get(key, 'unknown') for key in SPATIAL}}
+    # Your calculation: change values here.
+    return {'data': writers.write_sticks(**values)}

@@ -1,0 +1,23 @@
+"""$label."""
+from ophiolite import procedure, readers, writers
+
+SPATIAL = ('crs', 'xy_unit', 'z_unit', 'z_meaning', 'positive', 'vertical_datum')
+
+
+@procedure
+def main(inputs, settings):
+    """Read the grid with ophiolite.readers and write it again with the Ophiolite writer.
+
+    `values` holds the writer's arguments, made from everything the reader found. Your calculation goes where it is
+    marked: change `values` before they are written. A part of the file the writer has no place for stops the run
+    with a sentence, so nothing is left out without your knowing."""
+    version = inputs['data'][0]
+    found = readers.read(version)
+    if found.nodata is None:
+        raise ValueError('This start writes with ophiolite.writers.write_grid, which always writes a NODATA value, '
+                         'and this grid has none; change the start to say what to keep.')
+    values = {'values': [list(row) for row in found.cells], 'ncols': found.ncols, 'nrows': found.nrows, 'x_origin': found.x,
+              'y_origin': found.y, 'cell_size': found.cell_size, 'registration': found.registration, 'nodata': found.nodata,
+              **{key: version.declared.get(key, 'unknown') for key in SPATIAL}}
+    # Your calculation: change values here.
+    return {'data': writers.write_grid(**values)}

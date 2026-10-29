@@ -1,0 +1,21 @@
+{
+  "section": [
+    [
+      0.0,
+      0.5,
+      -0.25
+    ],
+    [
+      0.125,
+      -1.0,
+      0.75
+    ]
+  ],
+  "domain": "time",
+  "first_sample": 1.0,
+  "sample_interval": 0.004,
+  "horizontal": "trace-number",
+  "horizontal_first": 1.0,
+  "horizontal_step": 1.0,
+  "polarity": "impedance-increase-positive"
+}

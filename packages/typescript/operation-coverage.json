@@ -324,6 +324,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/organizations/handover-preview",
+    "function": "postOrganizationsHandoverPreview",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/organizations/history",
     "function": "postOrganizationsHistory",
     "request": "schema",
@@ -384,6 +390,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/organizations/person-history",
+    "function": "postOrganizationsPersonHistory",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/organizations/project-create",
     "function": "postOrganizationsProjectCreate",
     "request": "schema",
@@ -392,6 +404,48 @@
   {
     "operation": "POST /api/v1/organizations/rename",
     "function": "postOrganizationsRename",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/organizations/team",
+    "function": "postOrganizationsTeam",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/organizations/team-adopt",
+    "function": "postOrganizationsTeamAdopt",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/organizations/team-create",
+    "function": "postOrganizationsTeamCreate",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/organizations/team-delete",
+    "function": "postOrganizationsTeamDelete",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/organizations/team-member",
+    "function": "postOrganizationsTeamMember",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/organizations/team-rename",
+    "function": "postOrganizationsTeamRename",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/organizations/teams",
+    "function": "postOrganizationsTeams",
     "request": "schema",
     "response": "schema"
   },
@@ -432,6 +486,30 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/access/history",
+    "function": "postProjectsProjectAccessHistory",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/access/team-grant",
+    "function": "postProjectsProjectAccessTeamGrant",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/access/team-ungrant",
+    "function": "postProjectsProjectAccessTeamUngrant",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/access/teams",
+    "function": "postProjectsProjectAccessTeams",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/activity",
     "function": "postProjectsProjectActivity",
     "request": "schema",
@@ -440,6 +518,18 @@
   {
     "operation": "POST /api/v1/projects/{project}/activity/attempts",
     "function": "postProjectsProjectActivityAttempts",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/activity/deliver",
+    "function": "postProjectsProjectActivityDeliver",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/activity/deliveries",
+    "function": "postProjectsProjectActivityDeliveries",
     "request": "schema",
     "response": "schema"
   },
@@ -1140,6 +1230,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/las-uploads/check-member",
+    "function": "postProjectsProjectLasUploadsCheckMember",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/las-uploads/finish",
     "function": "postProjectsProjectLasUploadsFinish",
     "request": "schema",
@@ -1184,6 +1280,12 @@
   {
     "operation": "POST /api/v1/projects/{project}/las-uploads/policy-preview",
     "function": "postProjectsProjectLasUploadsPolicyPreview",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/las-uploads/provenance-stage",
+    "function": "postProjectsProjectLasUploadsProvenanceStage",
     "request": "schema",
     "response": "schema"
   },
@@ -1416,6 +1518,78 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/outcomes/claims",
+    "function": "postProjectsProjectOutcomesClaims",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/outcomes/declare",
+    "function": "postProjectsProjectOutcomesDeclare",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/outcomes/deliver-as",
+    "function": "postProjectsProjectOutcomesDeliverAs",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/outcomes/disable",
+    "function": "postProjectsProjectOutcomesDisable",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/outcomes/enable",
+    "function": "postProjectsProjectOutcomesEnable",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/outcomes/evaluate",
+    "function": "postProjectsProjectOutcomesEvaluate",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/outcomes/get",
+    "function": "postProjectsProjectOutcomesGet",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/outcomes/list",
+    "function": "postProjectsProjectOutcomesList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/outcomes/revise",
+    "function": "postProjectsProjectOutcomesRevise",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/outcomes/states",
+    "function": "postProjectsProjectOutcomesStates",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/outcomes/withdraw",
+    "function": "postProjectsProjectOutcomesWithdraw",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/procedure-runs/cancel",
+    "function": "postProjectsProjectProcedureRunsCancel",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/procedure-runs/get",
     "function": "postProjectsProjectProcedureRunsGet",
     "request": "schema",
@@ -1472,6 +1646,54 @@
   {
     "operation": "POST /api/v1/projects/{project}/procedures/withdraw",
     "function": "postProjectsProjectProceduresWithdraw",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/public-repositories/catalogue",
+    "function": "postProjectsProjectPublicRepositoriesCatalogue",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/public-repositories/check",
+    "function": "postProjectsProjectPublicRepositoriesCheck",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/public-repositories/collections",
+    "function": "postProjectsProjectPublicRepositoriesCollections",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/public-repositories/features-import",
+    "function": "postProjectsProjectPublicRepositoriesFeaturesImport",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/public-repositories/features-preview",
+    "function": "postProjectsProjectPublicRepositoriesFeaturesPreview",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/public-repositories/import",
+    "function": "postProjectsProjectPublicRepositoriesImport",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/public-repositories/preview",
+    "function": "postProjectsProjectPublicRepositoriesPreview",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/public-repositories/search",
+    "function": "postProjectsProjectPublicRepositoriesSearch",
     "request": "schema",
     "response": "schema"
   },
@@ -1764,6 +1986,24 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/rights/attach",
+    "function": "postProjectsProjectRightsAttach",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/rights/get",
+    "function": "postProjectsProjectRightsGet",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/rights/renew",
+    "function": "postProjectsProjectRightsRenew",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/runners/cancel",
     "function": "postProjectsProjectRunnersCancel",
     "request": "schema",
@@ -1800,6 +2040,18 @@
     "response": "schema"
   },
   {
+    "operation": "GET /api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/export",
+    "function": "getProjectsProjectScientificAssetsAssetRevisionsRevisionExport",
+    "request": "explicitly-untyped",
+    "response": "explicitly-untyped"
+  },
+  {
+    "operation": "GET /api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/provenance",
+    "function": "getProjectsProjectScientificAssetsAssetRevisionsRevisionProvenance",
+    "request": "explicitly-untyped",
+    "response": "schema"
+  },
+  {
     "operation": "GET /api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/representations/{representation}",
     "function": "getProjectsProjectScientificAssetsAssetRevisionsRevisionRepresentationsRepresentation",
     "request": "explicitly-untyped",
@@ -1820,6 +2072,54 @@
   {
     "operation": "POST /api/v1/projects/{project}/search/query",
     "function": "postProjectsProjectSearchQuery",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/service-accounts/administrators",
+    "function": "postProjectsProjectServiceAccountsAdministrators",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/service-accounts/adopt",
+    "function": "postProjectsProjectServiceAccountsAdopt",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/service-accounts/create",
+    "function": "postProjectsProjectServiceAccountsCreate",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/service-accounts/disable",
+    "function": "postProjectsProjectServiceAccountsDisable",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/service-accounts/key-create",
+    "function": "postProjectsProjectServiceAccountsKeyCreate",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/service-accounts/key-list",
+    "function": "postProjectsProjectServiceAccountsKeyList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/service-accounts/key-remove",
+    "function": "postProjectsProjectServiceAccountsKeyRemove",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/service-accounts/list",
+    "function": "postProjectsProjectServiceAccountsList",
     "request": "schema",
     "response": "schema"
   },
@@ -1910,6 +2210,12 @@
   {
     "operation": "POST /api/v1/projects/{project}/sources/export",
     "function": "postProjectsProjectSourcesExport",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/sources/export-file",
+    "function": "postProjectsProjectSourcesExportFile",
     "request": "schema",
     "response": "schema"
   },
@@ -2232,6 +2538,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/upload-runs/basis",
+    "function": "postProjectsProjectUploadRunsBasis",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/upload-runs/cancel",
     "function": "postProjectsProjectUploadRunsCancel",
     "request": "schema",
@@ -2240,6 +2552,24 @@
   {
     "operation": "POST /api/v1/projects/{project}/upload-runs/check",
     "function": "postProjectsProjectUploadRunsCheck",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/upload-runs/convert",
+    "function": "postProjectsProjectUploadRunsConvert",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/upload-runs/convert-original",
+    "function": "postProjectsProjectUploadRunsConvertOriginal",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/upload-runs/convert-output",
+    "function": "postProjectsProjectUploadRunsConvertOutput",
     "request": "schema",
     "response": "schema"
   },

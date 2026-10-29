@@ -23,7 +23,7 @@
   "projects": "List the projects a credential reaches (no configuration or project needed)",
   "publish": "Publish the prepared result; does not share it",
   "publish-derived": "Publish a file you derived from exact revisions, with its declared method (a command id or a work folder is required)",
-  "read-data": "Read well tops, a trajectory or a horizon grid at an exact revision and save it",
+  "read-data": "Read well tops, a trajectory, a horizon grid or a kept table at an exact revision and save it; --format parquet, geoparquet or csv saves one file",
   "recover": "Recover a saved exact request from its private work folder",
   "remake": "Make an exact result version again and compare; nothing is saved without --save",
   "run": "Execute your prepared Python script on this computer",

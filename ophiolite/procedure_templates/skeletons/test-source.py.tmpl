@@ -1,0 +1,22 @@
+"""Runs this procedure on its sample system (a folder) on this computer (nothing is published): python -m pytest -q tests"""
+import json
+import shutil
+from pathlib import Path
+
+from ophiolite import procedures
+
+HERE = Path(__file__).resolve().parents[1]
+
+
+def copy(tmp_path):
+    """The procedure as it is now, without what running its tests leaves beside it."""
+    return shutil.copytree(HERE, tmp_path / 'procedure', ignore=shutil.ignore_patterns('__pycache__', '.pytest_cache'))
+
+
+def test_it_makes_${ident}_from_its_sample_system(tmp_path):
+    system = tmp_path / 'system.json'
+    system.write_text(json.dumps({'folder': str(HERE / 'data' / 'source')}))
+    ran = procedures.run(copy(tmp_path), tmp_path / 'out', systems={'system': system})
+    made = ran['run']['outputs']['data']
+    assert made['profile'] == '$profile' and made['declared'] == $declared
+    assert (tmp_path / 'out' / made['file']).read_bytes()

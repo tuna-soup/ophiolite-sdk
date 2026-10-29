@@ -3,11 +3,11 @@
   "$id": "https://ophiolite.dev/contracts/bundles/v2/manifest-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.portable-bundle/2",
-    "version": "2.8.0",
+    "version": "2.10.0",
     "lifecycle": "preview"
   },
   "title": "PortableBundleManifestV2",
-  "description": "The entry point of a portable bundle directory: an exact selection of scientific revisions with their files, digests, served context, permitted lineage, omissions and losses. Bundle 2 adds typed assets (well tops, trajectories, regular-grid surfaces) beside curves. Readers accept the majors they know and refuse others; 1.x readers refuse 2.0. Checksums show integrity, not authorship or scientific correctness. Unknown fields are extensions and are kept.",
+  "description": "The entry point of a portable bundle directory: an exact selection of scientific revisions with their files, digests, served context, permitted lineage, omissions and losses. Bundle 2 adds typed assets (well tops, trajectories, regular-grid surfaces) beside curves. Readers accept the majors they know and refuse others; 1.x readers refuse 2.0. Checksums show integrity, not authorship or scientific correctness. Unknown fields are extensions and are kept. 2.9 (E107a): a file read on a computer may carry the original it was read from (one provenance file) beside the recorded reading (read_by).",
   "type": "object",
   "required": [
     "schema",
@@ -123,6 +123,12 @@
           "minLength": 1,
           "maxLength": 200,
           "description": "Why groups were not observed (for example, the exporting credential may not list them); never silently empty."
+        },
+        "source_records_omitted": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160,
+          "description": "1.10/2.10 (E122 s5b): why no source records travel although the exporter writes them (for example, this server has no source records); never silently empty."
         }
       }
     },
@@ -351,7 +357,8 @@
             "slice",
             "package",
             "companion",
-            "interpretation"
+            "interpretation",
+            "provenance"
           ]
         },
         "curve": {
@@ -375,7 +382,8 @@
             "enum": [
               "package",
               "companion",
-              "interpretation"
+              "interpretation",
+              "provenance"
             ]
           }
         },
@@ -384,7 +392,7 @@
         ]
       },
       "then": {
-        "description": "2.8 (E23c): a package, companion or interpretation file belongs to the asset, never to a curve.",
+        "description": "2.8 (E23c): a package, companion or interpretation file belongs to the asset, never to a curve; 2.9 (E107a): so does a provenance file.",
         "not": {
           "required": [
             "curve"
@@ -565,13 +573,64 @@
         "package": {
           "$ref": "#/$defs/BundlePackageV2",
           "description": "2.8 (E23c): present only on a point-set or feature-set read from a source package."
+        },
+        "source_record": {
+          "$ref": "#/$defs/BundleSourceRecord"
+        },
+        "read_by": {
+          "type": "object",
+          "required": [
+            "digest",
+            "label",
+            "version",
+            "original"
+          ],
+          "description": "2.9 (E107a): the read procedure version that made this file on a computer, as the exporting project recorded it (acquisition.read_by); an import keeps it as recorded, never as a reading of its own.",
+          "properties": {
+            "digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "label": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "original": {
+              "type": "object",
+              "required": [
+                "name",
+                "bytes",
+                "sha256"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                },
+                "bytes": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              }
+            }
+          }
         }
       },
       "if": {
         "type": "object"
       },
       "then": {
-        "description": "2.8 (E23c) value rules: a package block only on a point set or feature set; package, companion and interpretation files only with a package block; the package file and the interpretation file at most once, companions at most 8; no member listed twice.",
+        "description": "2.8 (E23c) value rules: a package block only on a point set or feature set; package, companion and interpretation files only with a package block; the package file and the interpretation file at most once, companions at most 8; no member listed twice. 2.9 (E107a): a provenance file only with read_by, at most once.",
         "allOf": [
           {
             "if": {
@@ -687,8 +746,82 @@
                 }
               }
             }
+          },
+          {
+            "if": {
+              "properties": {
+                "files": {
+                  "contains": {
+                    "properties": {
+                      "role": {
+                        "const": "provenance"
+                      }
+                    },
+                    "required": [
+                      "role"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "files"
+              ]
+            },
+            "then": {
+              "required": [
+                "read_by"
+              ]
+            }
+          },
+          {
+            "properties": {
+              "files": {
+                "contains": {
+                  "properties": {
+                    "role": {
+                      "const": "provenance"
+                    }
+                  },
+                  "required": [
+                    "role"
+                  ]
+                },
+                "minContains": 0,
+                "maxContains": 1
+              }
+            }
           }
         ]
+      }
+    },
+    "BundleSourceRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "asset_id",
+        "revision",
+        "record"
+      ],
+      "description": "1.10/2.10 (E122 s5b): where this exact revision came from, the ophiolite.source-provenance/1 record the exporting gateway served for it, unchanged, with the identity it was served for (the record names none). Only on a revision that has a record; a revision stored before records began carries no key. A reader binds asset_id and revision to the asset entry's own and refuses a record in a bundle below 1.10/2.10.",
+      "properties": {
+        "schema": {
+          "const": "ophiolite.source-provenance/1"
+        },
+        "asset_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "record": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "An ophiolite.source-provenance/1 record (contracts/scientific/v1/source-provenance.json), validated against that schema; it is not repeated here."
+        }
       }
     },
     "BundleHistoryV2": {

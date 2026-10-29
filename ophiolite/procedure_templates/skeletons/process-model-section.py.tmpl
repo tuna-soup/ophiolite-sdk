@@ -1,0 +1,17 @@
+"""$label."""
+from ophiolite import procedure, readers, writers
+
+AXES = ('domain', 'first_sample', 'sample_interval', 'horizontal', 'horizontal_first', 'horizontal_step')
+
+
+@procedure
+def main(inputs, settings):
+    """Read the rock model section with ophiolite.readers and write it again with the Ophiolite writer.
+
+    `values` holds the writer's arguments, made from everything the reader found (the sample and trace counts come
+    from the grid). Your calculation goes where it is marked: change `values` before they are written."""
+    found = readers.read(inputs['data'][0])
+    values = {'model': [{'index': index, 'vp': vp, 'density': density, 'name': name} for index, vp, density, name in found.rocks],
+              'grid': [list(row) for row in found.grid], **{key: found.axes[key] for key in AXES}}
+    # Your calculation: change values here.
+    return {'data': writers.write_model_section(**values)}

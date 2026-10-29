@@ -1,0 +1,75 @@
+{
+  "schema": "ophiolite.connector-capability/1",
+  "id": "sqlserver-wells",
+  "display_name": "SQL Server well headers and tables",
+  "kind": "source",
+  "summary": "Operator-approved SQL Server tables of well locations and headers through a reviewed mapping, or any table as it is with the person's declarations; read only.",
+  "host": {
+    "name": "SQL Server",
+    "versions": [
+      "2022"
+    ],
+    "os": [
+      "linux"
+    ]
+  },
+  "routes": [
+    {
+      "profile": "sql-wells/1",
+      "data": "Well locations and headers",
+      "direction": "read",
+      "exact_old_revisions": "unavailable",
+      "change_detection": "polling",
+      "losses": [
+        "Only mapped columns are read",
+        "Coordinates are as stored; the declared CRS is not transformed",
+        "Tables are read in pages of 1,000 rows inside one snapshot-isolation transaction, up to 100,000 rows and 64 MiB; a database without snapshot isolation is inspected but not captured",
+        "datetime2 and datetimeoffset values keep six fraction digits; the seventh fraction digit is dropped",
+        "char and nchar values keep their trailing padding"
+      ],
+      "unsupported": [
+        "writes",
+        "Windows, Kerberos or Entra ID sign-in",
+        "named instances and failover partners",
+        "unencrypted connections",
+        "change data capture",
+        "schema changes without a new reviewed mapping"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-10-11",
+        "evidence": "connectors:tests/test_sqlserver.py"
+      }
+    },
+    {
+      "profile": "table/1",
+      "data": "Any table, as its columns and rows",
+      "direction": "read",
+      "exact_old_revisions": "unavailable",
+      "change_detection": "polling",
+      "losses": [
+        "Columns of types outside the eight logical types (geography, xml, varbinary and others) are listed as not read; their values are not delivered and a change in them is not detected",
+        "Declared units, descriptions, missing-value markers and coordinates are annotations; no value is converted",
+        "A table is read once inside one snapshot-isolation transaction, up to 100,000 rows, 64 MiB and 128 columns; a database without snapshot isolation is inspected but not captured",
+        "char and nchar values keep their trailing padding"
+      ],
+      "unsupported": [
+        "writes",
+        "change data capture",
+        "paging past the bounds",
+        "schema changes without a new reviewed declaration"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    }
+  ],
+  "redistribution": "Ophiolite source; the SQL Server is customer-operated. The python-tds (MIT) and pyOpenSSL (Apache-2.0) drivers are installed with the `databases` extra.",
+  "example": null
+}

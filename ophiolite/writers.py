@@ -350,3 +350,17 @@ def write_location(x, y, *, crs=None, elevation_reference=None, filename='locati
     reference = _choice(elevation_reference, ELEVATION_REFERENCES, 'elevation reference')
     text = '{"crs":"%s","elevation_reference":"%s","x":%s,"y":%s}\n' % (crs, reference, x_text, y_text)
     return WrittenOriginal(text.encode(), 'well-location/1', {}, filename)
+
+
+def well_residual(document, *, filename='residuals.json'):
+    """A residual result (E119b, `well-residual/1`): the document `ophiolite.residuals.compute` makes, as UTF-8 JSON of
+    at most 8 MiB (D-36 (a)). It is published only by a procedure run; nothing is declared beside it. Every number must be finite."""
+    import json
+    if not isinstance(document, dict) or document.get('schema') != 'ophiolite.well-residual/1':
+        raise ValidationFailed(['Give the residual document as ophiolite.residuals.compute makes it.'])
+    try: raw = (json.dumps(document, indent=2, allow_nan=False, ensure_ascii=False) + '\n').encode('utf-8')
+    except ValueError: raise ValidationFailed(['A residual result holds only finite numbers.']) from None
+    if len(raw) > 8 * 1024 * 1024:
+        from .residuals import limits
+        raise ValidationFailed([limits(len(document.get('rows') or ()), len(raw))])
+    return WrittenOriginal(raw, 'well-residual/1', {}, filename)

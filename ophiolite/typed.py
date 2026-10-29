@@ -10,9 +10,13 @@ import math
 from .errors import Refused
 from . import recipes
 from .transform import vertical_depth as _vertical_depth
+from . import geometry as _geometry  # E119a: the one trajectory geometry
+from . import sources as _sources  # E58b: a kept table is read with the frame code of tables read as tables
 
 TYPES = ('well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-volume',
-         'wavelet', 'model-section', 'seismic-section', 'well-location', 'time-depth', 'feature-set')
+         'wavelet', 'model-section', 'seismic-section', 'well-location', 'time-depth', 'feature-set', 'table', 'well-path',
+         'well-residual',  # E119b
+         'well-set')  # E119a s1
 WAVELET_DT = (0.0005, 0.01)  # E53 D7: a bounded spectrum (at most 1001 bins of 1 Hz)
 WAVELET_SAMPLES = (3, 4095)
 
@@ -439,6 +443,86 @@ class TimeDepth(TypedData):
         return '<TimeDepth %d pairs, %s %s depth, %s %s time>' % (c['count'], c['depth_type'], c['depth_unit'], c['time_kind'], c['time_unit'])
 
 
+
+class WellPath(TypedData):
+    """A well path given as positions (E125 s3a): stations in file order, measured depth strictly increasing, each with
+    x (easting) and y (northing) in the declared coordinate system and map unit, and TVDSS, positive downward below the
+    declared datum, in the depth unit. The coordinate system, units and datums are the uploader's declarations; "unknown"
+    stays unknown and nothing is converted or reprojected. `tvdss_range` in the context is the smallest and largest TVDSS."""
+    type = 'well-path'
+
+    @property
+    def stations(self): return self.data['stations']
+
+    def __len__(self): return len(self.stations)
+
+    def to_frame(self):
+        pd = self._pandas()
+        return pd.DataFrame({key: pd.array([s[key] for s in self.stations], dtype='float64') for key in ('md', 'x', 'y', 'tvdss')})
+
+    def __repr__(self):
+        c = self.context
+        return '<WellPath %d stations, %s, MD from %s, TVDSS below %s>' % (c['count'], c['crs'], c['md_reference'], c['tvdss_datum'])
+
+
+class WellResidual(TypedData):
+    """A residual result (E119b): one row per top in order, each the residual top.md - md of the used crossing of the
+    surface in metres, or a reason it was not computed (with the depth range between, for the reasons that carry one).
+    `display_unit` is how the result is shown; the values are metres and nothing is converted."""
+    type = 'well-residual'
+
+    @property
+    def rows(self): return self.data['rows']
+
+    @property
+    def surface(self): return self.data['surface']
+
+    def __len__(self): return len(self.rows)
+
+    def to_frame(self):
+        pd = self._pandas()
+        rows = self.rows
+        return pd.DataFrame({'wellbore': pd.array([r['wellbore'] for r in rows], dtype='string'),
+                             'occurrence': pd.array([r['occurrence'] for r in rows], dtype='Int64'),
+                             'top_md': pd.array([r['top']['md'] if r['top'] else None for r in rows], dtype='Float64'),
+                             'crossing_md': pd.array([r['crossings'][r['used']]['md'] if r['used'] is not None else None for r in rows], dtype='Float64'),
+                             'residual': pd.array([r['residual'] for r in rows], dtype='Float64'),
+                             'reason': pd.array([r['reason'] for r in rows], dtype='string')})
+
+    def __repr__(self):
+        c = self.context
+        return '<WellResidual %s: %d of %d rows computed, %d wellbores>' % (c['formation'], c['computed'], c['count'], c['members'])
+
+
+class WellSet(TypedData):
+    """A well set (E119a): its author's own list of wellbores under their wells, each with the exact trajectory version
+    and the frame that places it in the world, or neither. Read as it was saved; private to its author in this version
+    (`client.well_sets`)."""
+    type = 'well-set'
+
+    @property
+    def label(self): return self.data['label']
+
+    @property
+    def members(self): return self.data['members']
+
+    def __len__(self): return len(self.members)
+
+    def to_frame(self):
+        pd = self._pandas()
+        members = self.members
+        traj = lambda m, k: m['trajectory'][k] if m['trajectory'] else None
+        return pd.DataFrame({'well': pd.array([m['well'] for m in members], dtype='string'),
+                             'wellbore': pd.array([m['wellbore'] for m in members], dtype='string'),
+                             'trajectory': pd.array([traj(m, 'asset_id') for m in members], dtype='string'),
+                             'revision': pd.array([traj(m, 'revision') for m in members], dtype='string'),
+                             'crs': pd.array([m['frame']['crs'] if m['frame'] else None for m in members], dtype='string')})
+
+    def __repr__(self):
+        c = self.context
+        return '<WellSet %r: %d wellbores, %d with a trajectory>' % (self.label, c['count'], c['with_trajectory'])
+
+
 class FeatureSet(TypedData):
     """Map features (E56): points, lines or polygons of one family from a Shapefile, a GeoPackage layer or a GeoJSON file,
     in file order with their coordinates as stored (nothing reprojected, rings not reoriented) and their attribute values
@@ -473,27 +557,80 @@ class FeatureSet(TypedData):
         return '<FeatureSet %d features, %s, %s>' % (c['count'], '/'.join(c['geometry_types']) or 'no geometry', c['crs'])
 
 
+class Table(TypedData):
+    """A table kept as it is (E58b): the exact original file, and every column, the key, the declarations (unit,
+    meaning, missing-value marker per column) and the rows of the columns read, in file order, as the server stored them.
+    Values are as the file wrote them: a declared missing-value marker stays a value until `to_frame(missing="declared")`.
+    `rows` are dicts by column name (integers as int, decimals and dates as their exact text); `not_read` lists the
+    columns whose type is not read, and reading such a table warns once naming them. `download` saves it as Parquet or
+    CSV, written by the server; no pyarrow is needed here."""
+    type = 'table'
+    _frame = staticmethod(_sources._table_frame)  # the one frame code of tables read as tables (E50b1)
+
+    def __init__(self, descriptor, data, original, **kwargs):
+        super().__init__(descriptor, data, original, **kwargs)
+        columns, read, rows = _sources.verified_data_table(data, schema='ophiolite.table-file/1')
+        logical = [c['logical'] for c in columns if c['read']]
+        self.columns, self.read_columns = [dict(c) for c in columns], read
+        self.key = tuple(data['key']) if data['key'] is not None else None
+        self.declarations = data['declarations']
+        coordinates = self.declarations.get('coordinates')
+        self.crs = coordinates['crs'] if coordinates else None
+        self.not_read = [{'name': c['name'], 'db_type': c['db_type']} for c in columns if not c['read']]
+        self.rows = [{name: _sources._decoded(kind, value) for name, kind, value in zip(read, logical, row)} for row in rows]
+        self.source_rows = list(data['source_rows'])
+        self.profile = self.context['profile']
+        wire = kwargs.get('wire_descriptor') or {}
+        self.asset_id, self.revision = wire.get('asset_id'), wire.get('revision')
+        self.sha256 = next((r['sha256'] for r in wire.get('representations', ()) if r.get('kind') == 'normalized'), None)
+        if self.not_read:
+            import warnings
+            warnings.warn('Not read: %s; their type is not supported yet.' % ', '.join('%s (%s)' % (c['name'], c['db_type']) for c in self.not_read),
+                          UserWarning, stacklevel=4)
+
+    def __len__(self): return len(self.rows)
+
+    @property
+    def units(self):
+        """{column: unit} as declared; a column without a declared unit is left out."""
+        return {name: note['unit'] for name, note in (self.declarations.get('columns') or {}).items() if note.get('unit')}
+
+    def to_frame(self, missing=None, decimal='exact'):
+        """A DataFrame of the columns read, typed as a table read as a table (string, Int64, Float64, Decimal objects,
+        datetimes): `missing="declared"` sets values equal to a column's declared marker to NA, `decimal="float"` turns
+        decimals into floats (lossy); both are recorded in `frame.attrs["transformations"]` and `rows` never changes."""
+        pd = self._pandas()
+        if missing not in (None, 'declared') or decimal not in ('exact', 'float'):
+            raise Refused('Use missing=None or "declared", and decimal="exact" or "float".')
+        return type(self)._frame(self, pd, missing, decimal)
+
+    def download(self, destination, format='parquet'):
+        """Save this exact revision as one Parquet or CSV file at `destination` (Client.export_file); checked against the
+        digest and the revision the server states, or nothing is saved."""
+        client = getattr(self, '_client', None)
+        if client is None: raise Refused('This table was not read from a server; read it with client.read_data(asset, revision).')
+        return client.export_file(self.asset_id, self.revision, destination, format=format)
+
+    def __repr__(self):
+        return '<Table %d rows, %d columns read%s, %s>' % (len(self.rows), len(self.read_columns),
+                                                          ', %d not read' % len(self.not_read) if self.not_read else '', self.profile)
+
+
 CLASSES = {'well-tops': WellTops, 'trajectory': Trajectory, 'regular-grid-surface': GridSurface,
            'triangulated-surface': TriangulatedSurface, 'point-set': PointSet, 'polyline-set': PolylineSet, 'seismic-volume': SeismicVolume,
            'wavelet': Wavelet, 'model-section': ModelSection, 'seismic-section': SeismicSection, 'well-location': WellLocation,
-           'time-depth': TimeDepth, 'feature-set': FeatureSet}
+           'time-depth': TimeDepth, 'feature-set': FeatureSet, 'table': Table, 'well-path': WellPath,
+           'well-residual': WellResidual,  # E119b
+           'well-set': WellSet}  # E119a s1
 
 
 def minimum_curvature(stations):
+    """[{md, dtvd, dnorth, deast}]: each station's offsets from the first by minimum curvature, computed by the one
+    trajectory geometry (`ophiolite.geometry`, E119a). Refuses a missing angle; no dogleg limit applies here."""
     if any(s['inclination'] is None or s['azimuth'] is None for s in stations):
         raise Refused('A station has no inclination or azimuth; the calculation needs every angle.')
-    out = [{'md': stations[0]['md'], 'dtvd': 0.0, 'dnorth': 0.0, 'deast': 0.0}]
-    for a, b in zip(stations, stations[1:]):
-        i1, i2 = math.radians(a['inclination']), math.radians(b['inclination'])
-        a1, a2 = math.radians(a['azimuth']), math.radians(b['azimuth'])
-        dmd = b['md'] - a['md']
-        dl = math.acos(max(-1.0, min(1.0, math.cos(i2 - i1) - math.sin(i1) * math.sin(i2) * (1 - math.cos(a2 - a1)))))
-        rf = 1.0 if dl < 1e-9 else 2 / dl * math.tan(dl / 2)
-        p = out[-1]
-        out.append({'md': b['md'], 'dtvd': p['dtvd'] + dmd / 2 * (math.cos(i1) + math.cos(i2)) * rf,
-                    'dnorth': p['dnorth'] + dmd / 2 * (math.sin(i1) * math.cos(a1) + math.sin(i2) * math.cos(a2)) * rf,
-                    'deast': p['deast'] + dmd / 2 * (math.sin(i1) * math.sin(a1) + math.sin(i2) * math.sin(a2)) * rf})
-    return out
+    return [{'md': s['md'], 'dtvd': tvd, 'dnorth': north, 'deast': east}
+            for s, (east, north, tvd) in zip(stations, _geometry.minimum_curvature(stations))]
 
 
 # E30b: each type writes the exact file an upload of that type would be (ophiolite.writers); publish it with

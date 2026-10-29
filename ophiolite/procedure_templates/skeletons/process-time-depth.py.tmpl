@@ -1,0 +1,26 @@
+"""$label."""
+from ophiolite import procedure, readers, writers
+
+
+def refuse(what):
+    raise ValueError(f'This start writes with ophiolite.writers.write_time_depth, which {what}; change the start to say what to keep.')
+
+
+@procedure
+def main(inputs, settings):
+    """Read the time-depth table with ophiolite.readers and write it again with the Ophiolite writer.
+
+    `values` holds the writer's arguments, made from everything the reader found. Your calculation goes where it is
+    marked: change `values` before they are written. A part of the file the writer has no place for stops the run
+    with a sentence, so nothing is left out without your knowing."""
+    version = inputs['data'][0]
+    found = readers.read(version)
+    columns = [name.lower() for name in found.columns]
+    if 'velocity' in columns and all(row[columns.index('velocity')] is None for row in found.rows):
+        refuse('writes no velocity column when every velocity cell is empty')
+    at = {name: columns.index(name) for name in columns}
+    values = {'pairs': [tuple(row[at[name]] for name in ('depth', 'time', 'velocity') if name in at) for row in found.rows],
+              **{key: version.declared.get(key, 'unknown') for key in ('depth_type', 'depth_unit', 'time_kind', 'time_unit')},
+              **{key: version.declared[key] for key in ('datum', 'seismic_reference_elevation') if key in version.declared}}
+    # Your calculation: change values here.
+    return {'data': writers.write_time_depth(**values)}

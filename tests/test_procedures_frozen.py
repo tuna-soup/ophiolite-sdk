@@ -90,4 +90,27 @@ def test_the_help_of_every_command_before_e106_is_unchanged(monkeypatch):
         with contextlib.redirect_stdout(text):
             with pytest.raises(SystemExit): cli.parser().parse_args(['procedures', verb, '--help'])
         found[verb] = text.getvalue()
-    assert found == frozen['help'] and len(found) == 9
+    run, was = found.pop('run').split('\n\n', 1), frozen['help'].pop('run').split('\n\n', 1)  # E110 (D9): run gains only these two
+    assert run[1].replace(RUN_ADDED, '') == was[1] and RUN_ADDED in run[1]  # adhoc-e121-identity: --item names @ASSET:REVISION
+    assert ' '.join(run[0].split()) == ' '.join(was[0].split()).replace(
+        '[--setting SETTING]', '[--setting SETTING] [--item SLOT=ITEM[@N]|SLOT=@ASSET:REVISION] [--reference FILE|ITEM@N]')
+    new, was = found.pop('new').split('  --step'), frozen['help'].pop('new').split('  --step')  # E112 s0: --kind joins, --label is optional
+    assert ' '.join(new[0].split()) == ' '.join(was[0].split()).replace('--label LABEL', '[--kind KIND] [--label LABEL]')
+    assert new[1].split('\n')[0] == was[1].split('\n')[0] and NEW_KIND in new[1] and NEW_LABEL in new[1]
+    assert found == frozen['help'] and len(found) == 7
+
+
+NEW_KIND = '''  --kind KIND           What the procedure reads, makes or sends: a word such as well-tops or las
+'''
+NEW_LABEL = '''  --label LABEL         What the procedure does, in words a person reads (default: from --step and
+                        --kind)
+'''
+
+
+RUN_ADDED = '''  --item SLOT=ITEM[@N]|SLOT=@ASSET:REVISION
+                        With --from-project: a project version to run on, by name and version
+                        number (default: its latest), or exactly as @ASSET:REVISION
+  --reference FILE|ITEM@N
+                        With --from-project, for a check procedure: the reference, a file on this
+                        computer or a project version
+'''

@@ -112,6 +112,121 @@
       "sentence": "See where the wells you may read are located, draw them, and read one well's data together with its wellbores'.",
       "modes": ["synthetic", "live"],
       "data": "Three synthetic wells, one with a wellbore and a log, or the wells you may read in your project; reading changes nothing."
+    },
+    {
+      "slug": "a-spreadsheet-and-a-database-joined",
+      "title": "A spreadsheet and a database, joined",
+      "sentence": "Keep a spreadsheet as it is with its units and missing-value marker, read a database table, and join the two on the well name.",
+      "modes": ["synthetic", "live"],
+      "data": "A synthetic six-sample spreadsheet and a three-well database made on your computer; keeping the spreadsheet creates a table only you can see until you share it."
+    },
+    {
+      "slug": "wells-from-sql-server-and-oracle",
+      "title": "Wells from SQL Server and Oracle",
+      "sentence": "Read the same table of wells from a SQL Server and an Oracle database at their recorded revisions and check that both give the same wells at the same coordinates.",
+      "modes": ["synthetic", "live"],
+      "data": "Three Groningen wells typed as each system returns them; in a project, the two SQL sources you selected, read only."
+    },
+    {
+      "slug": "public-repository-to-map",
+      "title": "Wells from NLOG on a map",
+      "sentence": "Search the Dutch oil and gas portal NLOG for wells, see what it holds for each one, bring their positions into your project and draw them on a map.",
+      "modes": ["synthetic", "live"],
+      "data": "What NLOG listed for the HON-GT wells on 1 October 2026 (Source: NLOG.NL), or NLOG itself through your project; bringing wells in creates wells only you can see until you share them."
+    },
+    {
+      "slug": "petrophysical-calculations",
+      "title": "Petrophysical calculations",
+      "sentence": "Shale volume and density porosity from a log in your project with the notebook's own functions, published back as a result that names the exact log version it came from.",
+      "modes": ["synthetic", "live"],
+      "data": "A synthetic five-sample gamma-ray log, or the longest gamma-ray log in your project (the original used the Volve well 15/9-19).",
+      "attribution": {
+        "author": "Andy McDonald",
+        "licence": "MIT",
+        "url": "https://github.com/andymcdgeo/Petrophysics-Python-Series",
+        "commit": "b6bcfb17f026e8b612cf64ed24d408bb69290d4e",
+        "title": "05 - Petrophysical Calculations"
+      },
+      "data_terms": "Volve data is Equinor's, under the Equinor Open Data Licence (https://cdn.equinor.com/files/h61q9gi9/global/de6532f6134b9a953f6c41bac47a0c055a3712d3.pdf): credit Equinor and the Volve licence partners. It is not part of the notebook or of Ophiolite; in your project the notebook fetches it from the source repository at the pinned commit and checks its SHA-256.",
+      "minimum_sdk": "The first Ophiolite SDK release after 2026.10.96 (it adds the lasio and DataFrame adapters); requirements.txt installs it."
+    },
+    {
+      "slug": "working-with-lasio",
+      "title": "Working with lasio",
+      "sentence": "A log from your project as a lasio LASFile: every lasio cell of the original runs on it after one changed line.",
+      "modes": ["synthetic", "live"],
+      "data": "A synthetic five-sample gamma-ray log, or the longest gamma-ray log in your project (the original used the Volve well 15/9-19).",
+      "attribution": {
+        "author": "Andy McDonald",
+        "licence": "MIT",
+        "url": "https://github.com/andymcdgeo/Petrophysics-Python-Series",
+        "commit": "b6bcfb17f026e8b612cf64ed24d408bb69290d4e",
+        "title": "07 - Working With LASIO"
+      },
+      "data_terms": "Volve data is Equinor's, under the Equinor Open Data Licence (https://cdn.equinor.com/files/h61q9gi9/global/de6532f6134b9a953f6c41bac47a0c055a3712d3.pdf): credit Equinor and the Volve licence partners. It is not part of the notebook or of Ophiolite; in your project the notebook fetches it from the source repository at the pinned commit and checks its SHA-256.",
+      "minimum_sdk": "The first Ophiolite SDK release after 2026.10.96 (it adds the lasio and DataFrame adapters); requirements.txt installs it."
+    },
+    {
+      "slug": "csv-file-to-las-file",
+      "title": "CSV file to LAS file",
+      "sentence": "Build a LAS file from a table with lasio and upload it to your project as an original in one call.",
+      "modes": ["synthetic", "live"],
+      "data": "A three-row table written in the notebook, or in your project the Volve well 15/9-19 table fetched from the source repository.",
+      "attribution": {
+        "author": "Andy McDonald",
+        "licence": "MIT",
+        "url": "https://github.com/andymcdgeo/Petrophysics-Python-Series",
+        "commit": "b6bcfb17f026e8b612cf64ed24d408bb69290d4e",
+        "title": "22 - CSV File to LAS File"
+      },
+      "data_terms": "Volve data is Equinor's, under the Equinor Open Data Licence (https://cdn.equinor.com/files/h61q9gi9/global/de6532f6134b9a953f6c41bac47a0c055a3712d3.pdf): credit Equinor and the Volve licence partners. It is not part of the notebook or of Ophiolite; in your project the notebook fetches it from the source repository at the pinned commit and checks its SHA-256.",
+      "minimum_sdk": "The first Ophiolite SDK release after 2026.10.96 (it adds the lasio and DataFrame adapters); requirements.txt installs it."
+    },
+    {
+      "slug": "well-paths-with-wellpathpy",
+      "title": "Well paths with wellpathpy",
+      "sentence": "A deviation survey becomes a well path with wellpathpy, and the same survey kept in your project gives the same positions through Ophiolite.",
+      "modes": ["synthetic", "live"],
+      "data": "A five-station survey written in the notebook, or in your project the Volve well 15/9-F-12 survey fetched from the source repository.",
+      "attribution": {
+        "author": "Andy McDonald",
+        "licence": "MIT",
+        "url": "https://github.com/andymcdgeo/Petrophysics-Python-Series",
+        "commit": "b6bcfb17f026e8b612cf64ed24d408bb69290d4e",
+        "title": "31 - Creating Well Paths with wellpathpy"
+      },
+      "data_terms": "Volve data is Equinor's, under the Equinor Open Data Licence (https://cdn.equinor.com/files/h61q9gi9/global/de6532f6134b9a953f6c41bac47a0c055a3712d3.pdf): credit Equinor and the Volve licence partners. It is not part of the notebook or of Ophiolite; in your project the notebook fetches it from the source repository at the pinned commit and checks its SHA-256.",
+      "minimum_sdk": "The first Ophiolite SDK release after 2026.10.96 (it adds the lasio and DataFrame adapters); requirements.txt installs it."
+    },
+    {
+      "slug": "start-a-procedure-from-a-template",
+      "title": "Start a procedure from a template",
+      "sentence": "Make a working procedure for a step and a kind of data, valid as it is made, and see which pairs have a start.",
+      "modes": [
+        "synthetic",
+        "live"
+      ],
+      "data": "None: the starts carry their own sample data; nothing is added to a project in either mode."
+    },
+    {
+      "slug": "a-recipe-runs-again",
+      "title": "A recipe runs again",
+      "sentence": "Write the residual report's steps as a recipe, check it, and in your project run it step by step, continuing after a stop.",
+      "modes": [
+        "synthetic",
+        "live"
+      ],
+      "data": "A recipe written in the notebook; in your project the well set and the surface you name, and the residual procedure your project holds."
+    },
+    {
+      "slug": "run-it-again",
+      "title": "Run it again",
+      "sentence": "Run a procedure on your computer, then run its card's \"Run again\" line: the same tops again, and a refusal once the procedure changed.",
+      "modes": [
+        "synthetic",
+        "live"
+      ],
+      "data": "Two synthetic formation tops and a procedure made from the well-tops template; nothing is added to a project in either mode."
     }
   ]
 }

@@ -13,10 +13,10 @@ class CurveColumnsHeader(Contract):
     representation: Literal['normalized'] = Field(...)
     curve: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     unit: Annotated[str, Field(max_length=128)] = Field(...)
-    context: CurveContext = Field(...)
+    context: CurveContext | ResqmlCurveContext = Field(...)
     source: Reference = Field(...)
     source_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
-    interpretation: Interpretation = Field(...)
+    interpretation: Interpretation | ResqmlInterpretation = Field(...)
     count: Annotated[int, Field(ge=0, le=4000000)] = Field(...)
     encoding: Literal['f64le'] = Field(...)
 
@@ -39,6 +39,19 @@ class Reference(Contract):
     key: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     profile: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] = Field(...)
+
+class ResqmlCurveContext(Contract):
+    depth_index: Literal['md'] = Field(...)
+    depth_unit: Annotated[str, Field(max_length=128)] = Field(...)
+    depth_reference: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    depth_stored_as: Literal['lattice', 'hdf5'] = Field(...)
+    missing_value_policy: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+
+class ResqmlInterpretation(Contract):
+    reader: Literal['asset_connectors.resqml_package/1'] = Field(...)
+    mapping: Literal['trajectory/1', 'well-path/1', 'well-log/1'] = Field(...)
+    parsing_policy: Literal['resqml-exact/1'] = Field(...)
+    null_policy: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
 
 class ScientificContext(Contract):
     curve: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
@@ -158,7 +171,7 @@ class PackageInterpretation(Contract):
 
 class TypedInterpretation(Contract):
     reader: Literal['asset_connectors.typed_reader/1', 'asset_connectors.feature_files/1'] = Field(...)
-    mapping: Literal['well-tops/1', 'trajectory/1', 'regular-grid-surface/1', 'triangulated-surface/1', 'point-set/1', 'polyline-set/1', 'seismic-volume/1', 'well-location/1', 'wavelet/1', 'model-section/1', 'seismic-section/1', 'time-depth/1', 'feature-set/1'] = Field(...)
+    mapping: Literal['well-tops/1', 'trajectory/1', 'regular-grid-surface/1', 'triangulated-surface/1', 'point-set/1', 'polyline-set/1', 'seismic-volume/1', 'well-location/1', 'wavelet/1', 'model-section/1', 'seismic-section/1', 'time-depth/1', 'feature-set/1', 'well-path/1', 'well-set/1', 'well-residual/1'] = Field(...)
     parsing_policy: Literal['typed-strict/1'] = Field(...)
     null_policy: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
 
@@ -193,7 +206,7 @@ class GridContext(Contract):
 
 class ImportRecipe2(Contract):
     schema_: Literal['ophiolite.import-recipe/2'] = Field(..., alias='schema')
-    profile: Literal['petrel-points-attributes/1', 'opendtect-horizon-ascii/1'] = Field(...)
+    profile: Literal['petrel-points-attributes/1', 'petrel-horizon-ilxl/1', 'opendtect-horizon-ascii/1'] = Field(...)
     parsing: RecipeParsing = Field({'delimiter': 'whitespace', 'missing': []})
     columns: Annotated[list[RecipeColumn], Field(min_length=2, max_length=64)] = Field(...)
     fields: RecipeFields = Field({'crs': None, 'xy_unit': None, 'z_unit': None, 'z_meaning': None, 'positive': None, 'vertical_datum': None})
@@ -282,7 +295,7 @@ class SelectionDescriptor(Contract):
 
 class ImportRecipe(Contract):
     schema_: Literal['ophiolite.import-recipe/1'] = Field(..., alias='schema')
-    profile: Literal['petrel-points-attributes/1', 'opendtect-horizon-ascii/1'] = Field(...)
+    profile: Literal['petrel-points-attributes/1', 'petrel-horizon-ilxl/1', 'opendtect-horizon-ascii/1'] = Field(...)
     parsing: RecipeParsing = Field({'delimiter': 'whitespace', 'missing': []})
     columns: Annotated[list[RecipeColumn], Field(min_length=2, max_length=64)] = Field(...)
     fields: RecipeFields = Field({'crs': None, 'xy_unit': None, 'z_unit': None, 'z_meaning': None, 'positive': None, 'vertical_datum': None})
@@ -388,7 +401,7 @@ class RecipeFidelity(Contract):
     column_labels: Annotated[list[Annotated[str, Field(min_length=1, max_length=256)]], Field(max_length=64)] | None = Field(None)
 
 class RecipeInterpretation(Contract):
-    reader: Literal['asset_connectors.petrel_points/1', 'asset_connectors.opendtect_horizon/1'] = Field(...)
+    reader: Literal['asset_connectors.petrel_points/1', 'asset_connectors.petrel_horizon/1', 'asset_connectors.opendtect_horizon/1'] = Field(...)
     mapping: Literal['point-set/2'] = Field(...)
     parsing_policy: Literal['import-recipe/1', 'import-recipe/2'] = Field(...)
     null_policy: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
@@ -445,10 +458,16 @@ class PolylineSet(Contract):
     representation: Literal['normalized'] = Field(...)
     source: Reference = Field(...)
     source_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
-    interpretation: TypedInterpretation = Field(...)
+    interpretation: TypedInterpretation | ResqmlSpatialInterpretation | PetrelPackageInterpretation = Field(...)
     schema_: Literal['ophiolite.polyline-set/1'] = Field(..., alias='schema')
     context: PolylineContext = Field(...)
     sticks: Annotated[list[Stick], Field(min_length=1, max_length=20000)] = Field(...)
+
+class PetrelPackageInterpretation(Contract):
+    reader: Literal['asset_connectors.petrel_faults/1'] = Field(...)
+    mapping: Literal['polyline-set/1'] = Field(...)
+    parsing_policy: Literal['package-strict/1'] = Field(...)
+    null_policy: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
 
 class PolylineContext(Contract):
     crs: Annotated[str, Field(pattern='^(EPSG:[0-9]{4,6}|unknown)$')] = Field(...)
@@ -464,11 +483,19 @@ class PolylineContext(Contract):
     fidelity: Fidelity = Field(...)
     type: Literal['polyline-set'] = Field(...)
     sticks: Annotated[int, Field(ge=1, le=20000)] = Field(...)
-    points: Annotated[int, Field(ge=2, le=200000)] = Field(...)
+    points: Annotated[int, Field(ge=1, le=200000)] = Field(...)
+
+class ResqmlSpatialInterpretation(Contract):
+    reader: Literal['asset_connectors.resqml_package/1'] = Field(...)
+    mapping: Literal['triangulated-surface/1', 'polyline-set/1'] = Field(...)
+    parsing_policy: Literal['resqml-exact/1'] = Field(...)
+    null_policy: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
 
 class Stick(Contract):
     index: int = Field(...)
-    points: Annotated[list[XYZ], Field(min_length=2, max_length=200000)] = Field(...)
+    points: Annotated[list[XYZ], Field(min_length=1, max_length=200000)] = Field(...)
+    fault: Annotated[str, Field(min_length=1, max_length=128)] = Field(None)
+    stick: int = Field(None)
 
 class XYZ(Contract):
     x: float = Field(...)
@@ -479,10 +506,12 @@ class ScientificAsset(Contract):
     package: PackageRecord | None = Field(None)
     manifest: Annotated[RevisionManifest | RevisionManifestV2 | RevisionManifestV3 | RevisionManifestV4, Field(discriminator='schema_')] | None = Field(None)
     derivation: DerivationInfo | None = Field(None)
+    public_sources: PublicSources | None = Field(None)
     acquisition: Acquisition | None = Field(None)
     relationships: Relationships | None = Field(None)
     display: Display | None = Field(None)
     history: History | None = Field(None)
+    residual_validity: ResidualValidity | None = Field(None)
     schema_: Literal['ophiolite.scientific-asset/1'] = Field(..., alias='schema')
     asset_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
@@ -492,8 +521,8 @@ class ScientificAsset(Contract):
     custodian: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(...)
     source_reference: Reference | None = Field(...)
     profile: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] = Field(...)
-    scientific: ScientificContext | TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext | RecipePointContext | WellLocationContext | WaveletContext | ModelSectionContext | SeismicSectionContext | TimeDepthContext | FeatureContext = Field(...)
-    interpretation: Interpretation | TypedInterpretation | RecipeInterpretation | PackageInterpretation = Field(...)
+    scientific: ScientificContext | TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext | RecipePointContext | WellLocationContext | WaveletContext | ModelSectionContext | SeismicSectionContext | TimeDepthContext | FeatureContext | TableFileContext | WellPathContext | WellSetContext | WellResidualContext = Field(...)
+    interpretation: Interpretation | TypedInterpretation | RecipeInterpretation | PackageInterpretation | TableInterpretation | PetrelPackageInterpretation = Field(...)
     interpretation_evidence: Literal['live', 'recorded', 'recorded-differs', 'not-recorded'] = Field('live')
     recorded_interpretation: RecordedInterpretation | None = Field(None)
     representations: Annotated[list[Representation], Field(min_length=2, max_length=8)] = Field(...)
@@ -514,6 +543,9 @@ class Acquisition(Contract):
     rights: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     origin: ImportOrigin | TableImportOrigin | None = Field(None)
     via: Via | None = Field(None)
+    read_by: ReadBy | None = Field(None)
+    sourced_by: SourcedBy | None = Field(None)
+    listed_in: ListedIn | None = Field(None)
 
 class ArrayNode(Contract):
     type: Literal['array'] = Field(...)
@@ -626,6 +658,8 @@ class ImportOrigin(Contract):
     asset_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     exporter: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    read_by: ReadBy | None = Field(None)
+    sourced_by: SourcedBy | None = Field(None)
 
 class IntegerLeaf(Contract):
     type: Literal['integer'] = Field(...)
@@ -648,6 +682,40 @@ class LineageReference(Contract):
     key: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     profile: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] | None = Field(None)
+
+class ListedIn(Contract):
+    format: Literal['osd.manifest/1', 'osd.manifest/2', 'osd.manifest/3', 'osd.manifest/4'] = Field(...)
+    catalogue_url: Annotated[str, Field(pattern='^https://[^\\s/?#@]+(/\\S*)?$', max_length=160)] = Field(...)
+    collection_id: Annotated[str, Field(pattern='^[a-z0-9-]+--[a-z0-9-]+$', max_length=256)] = Field(...)
+    record_id: Annotated[str, Field(pattern='^[a-z0-9]+(-[a-z0-9]+)*/[a-z0-9]+(-[a-z0-9]+)*$')] = Field(...)
+    access: Literal['anonymous', 'registration', 'api', 'request', 'purchase'] = Field(...)
+    item_id: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(None)
+    asset_key: Annotated[str, Field(pattern='^[^/\\\\][^\\\\]*$', max_length=256)] = Field(...)
+    sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    snapshot: ListedSnapshot | None = Field(None)
+    licence: ListedLicence = Field(...)
+
+class ListedLicence(Contract):
+    name: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    spdx: Annotated[str, Field(min_length=1, max_length=128)] | None = Field(None)
+    url: Annotated[str, Field(pattern='^https?://', max_length=2048)] | None = Field(None)
+    redistribution: Literal['allowed', 'restricted', 'forbidden', 'unknown'] = Field(...)
+    attribution: Literal['required', 'not-required', 'unknown'] | None = Field(...)
+    share_alike: bool | None = Field(None)
+    statement: Annotated[str, Field(max_length=300)] | None = Field(None)
+    terms: ListedTerms | None = Field(None)
+
+class ListedSnapshot(Contract):
+    source_commit: Annotated[str, Field(pattern='^[0-9a-f]{40}$')] | None = Field(...)
+    verification_commit: Annotated[str, Field(pattern='^[0-9a-f]{40}$')] | None = Field(...)
+    built_at: Annotated[str, Field(pattern='^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$', max_length=40)] = Field(...)
+    records_digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+
+class ListedTerms(Contract):
+    stated: Annotated[str, Field(min_length=1, max_length=600)] = Field(...)
+    duration: Annotated[str, Field(min_length=1, max_length=600)] | None = Field(None)
+    review_before_publication: bool | None = Field(None)
+    expires: Annotated[str, Field(pattern='^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$')] | None = Field(None)
 
 class MadeAgain(Contract):
     commitment: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
@@ -753,6 +821,46 @@ class Provenance(Contract):
     environment_reference: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(...)
     omissions: Annotated[list[Annotated[str, Field(min_length=1, max_length=512)]], Field(max_length=32)] = Field(...)
 
+class PublicSourceDocument(Contract):
+    upstream_item: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    retained_revision: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+
+class PublicSourceLine(Contract):
+    service_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    licence_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    terms_url: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    sentence: Annotated[str, Field(max_length=1000)] | None = Field(...)
+    documents: Annotated[list[Annotated[str, Field(min_length=1, max_length=512)]], Field(max_length=64)] = Field(...)
+
+class PublicSourceRecord(Contract):
+    service_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    licence_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    terms_url: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    document: PublicSourceDocument = Field(...)
+    retrieved_at: float = Field(...)
+
+class PublicSources(Contract):
+    records: Annotated[list[PublicSourceRecord], Field(min_length=1, max_length=64)] = Field(...)
+    lines: Annotated[list[PublicSourceLine], Field(min_length=1, max_length=64)] = Field(...)
+
+class ReadBy(Contract):
+    digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    label: Annotated[str, Field(min_length=1, max_length=100)] = Field(...)
+    version_label: Annotated[str, Field(min_length=1, max_length=100)] | None = Field(...)
+    version: Annotated[int, Field(ge=1)] = Field(...)
+    rules_version: Annotated[str, Field(min_length=1, max_length=40)] = Field(...)
+    runner: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    original: ReadOriginal = Field(...)
+    conversion: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    role: Annotated[str, Field(min_length=1, max_length=64)] = Field(...)
+    settings: dict[str, bool | int | float | Annotated[str, Field(max_length=1000)]] | None = Field(None)
+    kept: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] | None = Field(None)
+
+class ReadOriginal(Contract):
+    name: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    bytes: Annotated[int, Field(ge=1)] = Field(...)
+    sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+
 class RecipePin(Contract):
     reference: RecipeReference | None = Field(...)
     sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
@@ -784,6 +892,9 @@ class Representation(Contract):
     sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
     available: bool = Field(...)
     losses: Annotated[list[Annotated[str, Field(min_length=1, max_length=512)]], Field(max_length=32)] = Field(...)
+
+class ResidualValidity(Contract):
+    state: Literal['valid', 'invalid'] = Field(...)
 
 class Retention(Contract):
     mode: Literal['upstream-only', 'retained'] = Field(...)
@@ -863,9 +974,51 @@ class SeismicSectionContext(Contract):
     minimum: float = Field(...)
     maximum: float = Field(...)
 
+class SourcedBy(Contract):
+    digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    label: Annotated[str, Field(min_length=1, max_length=100)] = Field(...)
+    version_label: Annotated[str, Field(min_length=1, max_length=100)] | None = Field(...)
+    version: Annotated[int, Field(ge=1)] = Field(...)
+    rules_version: Annotated[str, Field(min_length=1, max_length=40)] = Field(...)
+    runner: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    system: Annotated[str, Field(min_length=1, max_length=100)] = Field(...)
+    role: Annotated[str, Field(min_length=1, max_length=64)] = Field(...)
+
 class StringLeaf(Contract):
     type: Literal['string'] = Field(...)
     value: Annotated[str, Field(max_length=1024)] = Field(...)
+
+class TableFileContext(Contract):
+    type: Literal['table'] = Field(...)
+    format: Literal['csv', 'xls', 'xlsx', 'parquet'] = Field(...)
+    profile: Literal['table-csv/1', 'table-excel/1', 'table-parquet/1'] = Field(...)
+    decisions: Annotated[list[TableFileDecision], Field(min_length=1, max_length=16)] = Field(...)
+    sheet: str | None = Field(None)
+    sheets: Annotated[list[str], Field(max_length=1000)] | None = Field(None)
+    preamble: Annotated[list[list[str]], Field(max_length=1000)] | None = Field(None)
+    geo: dict[str, Any] | None = Field(None)
+    rows: Annotated[int, Field(ge=0, le=100000)] = Field(...)
+    columns: Annotated[int, Field(ge=1, le=128)] = Field(...)
+    coverage: TableFileCoverage = Field(...)
+    quantities: dict[str, Annotated[str, Field(min_length=1, max_length=128)]] = Field(...)
+    fidelity: Fidelity = Field(...)
+
+class TableFileCoverage(Contract):
+    read: Annotated[list[Annotated[str, Field(min_length=1, max_length=1024)]], Field(max_length=128)] = Field(...)
+    not_read: Annotated[list[TableFileNotRead], Field(max_length=128)] = Field(...)
+
+class TableFileDecision(Contract):
+    field: Literal['format', 'encoding', 'delimiter', 'decimal_mark', 'sheet', 'header_row', 'not_read', 'formulas', 'merged_cells', 'positions'] = Field(...)
+    status: Literal['decided'] = Field(...)
+    value: str | int | list[str] | None = Field(...)
+    class_: Literal['declared', 'previously-reviewed', 'project-default', 'inferred', 'none'] = Field(..., alias='class')
+    sentence: Annotated[str, Field(min_length=1, max_length=2000)] = Field(...)
+    technical: dict[str, Any] = Field(...)
+
+class TableFileNotRead(Contract):
+    name: Annotated[str, Field(min_length=1, max_length=1024)] = Field(...)
+    db_type: Annotated[str, Field(max_length=256)] = Field(...)
+    reason: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
 
 class TableImportOrigin(Contract):
     kind: Literal['table-file'] = Field(...)
@@ -875,6 +1028,13 @@ class TableImportOrigin(Contract):
     sheet: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(...)
     header_row: Annotated[int, Field(ge=1)] | None = Field(...)
     source_rows: Annotated[list[Annotated[list[Annotated[int, Field(ge=1)]], Field(min_length=2, max_length=2)]], Field(min_length=1, max_length=10000)] = Field(...)
+    interpretation_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] | None = Field(None)
+
+class TableInterpretation(Contract):
+    reader: Literal['asset_connectors.table_files/1'] = Field(...)
+    mapping: Literal['table/1'] = Field(...)
+    parsing_policy: Literal['table-file/1'] = Field(...)
+    null_policy: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
 
 class TimeDepthContext(Contract):
     type: Literal['time-depth'] = Field(...)
@@ -898,6 +1058,7 @@ class TopsContext(Contract):
     tvd_provided: bool = Field(...)
     md_range: Annotated[list[float], Field(min_length=2, max_length=2)] = Field(...)
     fidelity: Fidelity = Field(...)
+    depth_datum: Annotated[str, Field(min_length=1, max_length=128)] = Field(None)
 
 class TrajectoryContext(Contract):
     type: Literal['trajectory'] = Field(...)
@@ -947,6 +1108,36 @@ class WellLocationContext(Contract):
 class WellLogLink(Contract):
     asset_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
     revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+
+class WellPathContext(Contract):
+    type: Literal['well-path'] = Field(...)
+    crs: Annotated[str, Field(pattern='^(EPSG:[0-9]{4,6}|unknown)$')] = Field(...)
+    xy_unit: Annotated[str, Field(pattern='^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$')] = Field(...)
+    depth_unit: Annotated[str, Field(pattern='^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$')] = Field(...)
+    md_reference: Literal['KB', 'DF', 'RT', 'GL', 'MSL', 'unknown'] = Field(...)
+    tvdss_datum: Literal['MSL', 'unknown'] = Field(...)
+    count: Annotated[int, Field(ge=1, le=10000)] = Field(...)
+    md_range: Annotated[list[float], Field(min_length=2, max_length=2)] = Field(...)
+    tvdss_range: Annotated[list[float], Field(min_length=2, max_length=2)] = Field(...)
+    fidelity: Fidelity = Field(...)
+
+class WellResidualContext(Contract):
+    type: Literal['well-residual'] = Field(...)
+    count: Annotated[int, Field(ge=1, le=10000)] = Field(...)
+    computed: Annotated[int, Field(ge=0, le=10000)] = Field(...)
+    not_computed: Annotated[int, Field(ge=0, le=10000)] = Field(...)
+    members: Annotated[int, Field(ge=1, le=10000)] = Field(...)
+    members_not_computed: Annotated[int, Field(ge=0, le=10000)] = Field(...)
+    formation: Annotated[str, Field(min_length=1, max_length=64)] = Field(...)
+    display_unit: Literal['m', 'ft'] = Field(...)
+    fidelity: Fidelity = Field(...)
+
+class WellSetContext(Contract):
+    type: Literal['well-set'] = Field(...)
+    count: Annotated[int, Field(ge=1, le=29)] = Field(...)
+    with_trajectory: Annotated[int, Field(ge=0, le=29)] = Field(...)
+    without_trajectory: Annotated[int, Field(ge=0, le=29)] = Field(...)
+    fidelity: Fidelity = Field(...)
 
 class XY(Contract):
     x: float = Field(...)
@@ -1023,6 +1214,43 @@ class AssetSummary(Contract):
     allowed_operations: Annotated[list[Literal['read', 'export', 'use-as-input']], Field(max_length=3)] = Field(...)
     display: Display | None = Field(None)
 
+class TableFile(Contract):
+    schema_: Literal['ophiolite.table-file/1'] = Field(..., alias='schema')
+    representation: Literal['normalized'] = Field(...)
+    source: Reference = Field(...)
+    source_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    interpretation: TableInterpretation = Field(...)
+    interpretation_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    context: TableFileContext = Field(...)
+    source_rows: Annotated[list[Annotated[int, Field(ge=1)]], Field(max_length=100000)] = Field(...)
+    encoding: Literal['table-encoding/1'] = Field(...)
+    columns: Annotated[list[TableFileColumn], Field(min_length=1, max_length=128)] = Field(...)
+    key: Annotated[list[Annotated[str, Field(min_length=1, max_length=1024)]], Field(min_length=1, max_length=128)] | None = Field(...)
+    declarations: TableFileDeclarations = Field(...)
+    rows: Annotated[list[list[str | bool | int | float | None]], Field(max_length=100000)] = Field(...)
+
+class TableFileAnnotation(Contract):
+    description: Annotated[str, Field(min_length=1, max_length=128)] | None = Field(...)
+    unit: Annotated[str, Field(min_length=1, max_length=32)] | None = Field(...)
+    missing: Annotated[str, Field(min_length=1, max_length=40)] | None = Field(...)
+
+class TableFileColumn(Contract):
+    name: Annotated[str, Field(min_length=1, max_length=1024)] = Field(...)
+    db_type: Annotated[str, Field(max_length=256)] = Field(...)
+    logical: Literal['text', 'integer', 'float', 'decimal', 'boolean', 'date', 'timestamp', 'timestamptz'] | None = Field(...)
+    nullable: bool = Field(...)
+    comment: str | None = Field(...)
+    read: bool = Field(...)
+
+class TableFileCoordinates(Contract):
+    x: Annotated[str, Field(min_length=1, max_length=1024)] = Field(...)
+    y: Annotated[str, Field(min_length=1, max_length=1024)] = Field(...)
+    crs: Annotated[str, Field(pattern='^EPSG:[0-9]{4,6}$')] = Field(...)
+
+class TableFileDeclarations(Contract):
+    columns: dict[str, TableFileAnnotation] = Field(...)
+    coordinates: TableFileCoordinates | None = Field(...)
+
 class Table(Contract):
     schema_: Literal['ophiolite.table/1'] = Field(..., alias='schema')
     encoding: Literal['table-encoding/1'] = Field(...)
@@ -1071,7 +1299,7 @@ class Trajectory(Contract):
     representation: Literal['normalized'] = Field(...)
     source: Reference = Field(...)
     source_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
-    interpretation: TypedInterpretation = Field(...)
+    interpretation: TypedInterpretation | ResqmlInterpretation = Field(...)
     schema_: Literal['ophiolite.trajectory/1'] = Field(..., alias='schema')
     context: TrajectoryContext = Field(...)
     stations: Annotated[list[Station], Field(min_length=1, max_length=10000)] = Field(...)
@@ -1086,7 +1314,7 @@ class TriangulatedSurface(Contract):
     representation: Literal['normalized'] = Field(...)
     source: Reference = Field(...)
     source_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
-    interpretation: TypedInterpretation = Field(...)
+    interpretation: TypedInterpretation | ResqmlSpatialInterpretation = Field(...)
     schema_: Literal['ophiolite.triangulated-surface/1'] = Field(..., alias='schema')
     context: MeshContext = Field(...)
     vertices: Annotated[list[Annotated[list[float | None], Field(min_length=3, max_length=3)]], Field(min_length=3, max_length=200000)] = Field(...)
@@ -1094,7 +1322,7 @@ class TriangulatedSurface(Contract):
     attributes: Annotated[list[Attribute], Field(max_length=16)] = Field(...)
 
 class TypedContext(Contract):
-    context: Annotated[TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext | WellLocationContext | WaveletContext | ModelSectionContext | SeismicSectionContext | TimeDepthContext | FeatureContext, Field(discriminator='type')] = Field(...)
+    context: Annotated[TopsContext | TrajectoryContext | GridContext | MeshContext | PointContext | PolylineContext | SeismicContext | WellLocationContext | WaveletContext | ModelSectionContext | SeismicSectionContext | TimeDepthContext | FeatureContext | WellPathContext | WellSetContext | WellResidualContext, Field(discriminator='type')] = Field(...)
 
 class Wavelet(Contract):
     representation: Literal['normalized'] = Field(...)
@@ -1151,6 +1379,105 @@ class WellLocationUpload(Contract):
     x: float = Field(...)
     y: float = Field(...)
 
+class WellPath(Contract):
+    representation: Literal['normalized'] = Field(...)
+    source: Reference = Field(...)
+    source_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    interpretation: TypedInterpretation | ResqmlInterpretation = Field(...)
+    schema_: Literal['ophiolite.well-path/1'] = Field(..., alias='schema')
+    context: WellPathContext = Field(...)
+    stations: Annotated[list[WellPathStation], Field(min_length=1, max_length=10000)] = Field(...)
+
+class WellPathStation(Contract):
+    md: float = Field(...)
+    x: float = Field(...)
+    y: float = Field(...)
+    tvdss: float = Field(...)
+
+class WellResidual(Contract):
+    representation: Literal['normalized'] = Field(...)
+    source: Reference = Field(...)
+    source_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    interpretation: TypedInterpretation = Field(...)
+    schema_: Literal['ophiolite.well-residual/1'] = Field(..., alias='schema')
+    context: WellResidualContext = Field(...)
+    surface: ResidualVersion = Field(...)
+    rows: Annotated[list[WellResidualRow], Field(min_length=1, max_length=10000)] = Field(...)
+
+class ResidualCrossing(Contract):
+    md: float = Field(...)
+    low: float = Field(...)
+    high: float = Field(...)
+
+class ResidualTop(Contract):
+    asset_id: Annotated[str, Field(pattern='^[A-Za-z0-9._:-]{1,128}$')] = Field(...)
+    revision: Annotated[str, Field(pattern='^[A-Za-z0-9._:-]{1,128}$')] = Field(...)
+    index: Annotated[int, Field(ge=0)] = Field(...)
+    md: float = Field(...)
+
+class ResidualVersion(Contract):
+    asset_id: Annotated[str, Field(pattern='^[A-Za-z0-9._:-]{1,128}$')] = Field(...)
+    revision: Annotated[str, Field(pattern='^[A-Za-z0-9._:-]{1,128}$')] = Field(...)
+
+class WellResidualRow(Contract):
+    wellbore: Annotated[str, Field(pattern='^wellbore-[0-9a-f]{32}$')] = Field(...)
+    occurrence: Annotated[int, Field(ge=0, le=10000)] = Field(...)
+    top: ResidualTop | None = Field(...)
+    trajectory: ResidualVersion | None = Field(...)
+    crossings: Annotated[list[ResidualCrossing], Field(max_length=64)] = Field(...)
+    used: Annotated[int, Field(ge=0)] | None = Field(...)
+    residual: float | None = Field(...)
+    unit: Literal['m'] = Field(...)
+    reason: Literal['grazing', 'along-surface', 'uncertain', 'no-surface-data', 'ends-above', 'starts-below', 'no-trajectory', 'no-top', 'many-crossings'] | None = Field(...)
+    between: Annotated[list[float], Field(min_length=2, max_length=2)] | None = Field(...)
+
+class WellSet(Contract):
+    representation: Literal['normalized'] = Field(...)
+    source: Reference = Field(...)
+    source_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    interpretation: TypedInterpretation = Field(...)
+    schema_: Literal['ophiolite.well-set/1'] = Field(..., alias='schema')
+    context: WellSetContext = Field(...)
+    label: Annotated[str, Field(min_length=1, max_length=80)] = Field(...)
+    members: Annotated[list[WellSetMember], Field(min_length=1, max_length=29)] = Field(...)
+
+class WellSetDepthReference(Contract):
+    name: Annotated[str, Field(min_length=1, max_length=64)] = Field(...)
+    elevation: float = Field(...)
+    datum: Annotated[str, Field(min_length=1, max_length=64)] = Field(...)
+
+class WellSetFrame(Contract):
+    crs: Annotated[str, Field(pattern='^EPSG:[0-9]{4,6}$')] = Field(...)
+    wellhead: WellSetPoint = Field(...)
+    depth_reference: WellSetDepthReference = Field(...)
+    north: WellSetNorth = Field(...)
+    tie_in: WellSetTieIn | None = Field(...)
+    source: Annotated[str, Field(max_length=200)] = Field(...)
+
+class WellSetMember(Contract):
+    well: Annotated[str, Field(pattern='^well-[0-9a-f]{32}$')] = Field(...)
+    wellbore: Annotated[str, Field(pattern='^wellbore-[0-9a-f]{32}$')] = Field(...)
+    trajectory: WellSetTrajectory | None = Field(...)
+    frame: WellSetFrame | None = Field(...)
+
+class WellSetNorth(Contract):
+    survey_basis: Annotated[str, Field(pattern='^(true-north|grid:EPSG:[0-9]{4,6})$')] = Field(...)
+    rotation_deg: Annotated[float, Field(ge=-10, le=10)] = Field(...)
+
+class WellSetPoint(Contract):
+    x: float = Field(...)
+    y: float = Field(...)
+
+class WellSetTieIn(Contract):
+    md: Annotated[float, Field(gt=0)] = Field(...)
+    tvd: float = Field(...)
+    east: float = Field(...)
+    north: float = Field(...)
+
+class WellSetTrajectory(Contract):
+    asset_id: Annotated[str, Field(pattern='^[A-Za-z0-9._:-]{1,128}$')] = Field(...)
+    revision: Annotated[str, Field(pattern='^[A-Za-z0-9._:-]{1,128}$')] = Field(...)
+
 class WellTops(Contract):
     representation: Literal['normalized'] = Field(...)
     source: Reference = Field(...)
@@ -1204,6 +1531,13 @@ class BundleAsset(Contract):
     parent_visibility: Literal['complete', 'restricted'] = Field(...)
     omissions: list[str] = Field(...)
     losses: list[str] = Field(...)
+    source_record: BundleSourceRecord = Field(None)
+
+class BundleSourceRecord(Contract):
+    schema_: Literal['ophiolite.source-provenance/1'] = Field(..., alias='schema')
+    asset_id: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
+    revision: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    record: dict[str, Any] = Field(...)
 
 class BundleHistory(Contract):
     number: Annotated[int, Field(ge=1)] = Field(...)
@@ -1248,7 +1582,7 @@ class BundleSelectedV2(Contract):
 
 class BundleFileV2(Contract):
     path: Annotated[str, Field(pattern='^assets/[0-9]{1,3}/[A-Za-z0-9._-]{1,120}$')] = Field(...)
-    role: Literal['original', 'descriptor', 'normalized', 'slice', 'package', 'companion', 'interpretation'] = Field(...)
+    role: Literal['original', 'descriptor', 'normalized', 'slice', 'package', 'companion', 'interpretation', 'provenance'] = Field(...)
     curve: Annotated[str, Field(min_length=1, max_length=80)] = Field(None)
     sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
     bytes: Annotated[int, Field(ge=0, le=33554432)] = Field(...)
@@ -1270,6 +1604,8 @@ class BundleAssetV2(Contract):
     original: BundleAssetV2Original = Field(None)
     slices: Annotated[list[BundleSliceV2], Field(min_length=1, max_length=64)] = Field(None)
     package: BundlePackageV2 = Field(None)
+    source_record: BundleSourceRecord = Field(None)
+    read_by: BundleAssetV2Read_By = Field(None)
 
 class BundleHistoryV2(Contract):
     number: Annotated[int, Field(ge=1)] = Field(...)
@@ -1379,6 +1715,108 @@ class IdentityChange(Contract):
     at: Annotated[str, Field(pattern='^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$')] = Field(...)
     before: Identity = Field(...)
     after: Identity = Field(...)
+
+class OutcomeCheck(Contract):
+    schema_: Literal['ophiolite.outcome-check/1'] = Field(..., alias='schema')
+    outcome: CheckedOutcome = Field(...)
+    evaluator: CheckEvaluator = Field(...)
+    result: CheckedResult = Field(...)
+    publication: CheckedPublication = Field(...)
+    inputs: Annotated[list[CheckedInput], Field(max_length=4096)] = Field(...)
+    evaluated_as: EvaluatedAs = Field(...)
+    verdict: Literal['accepted', 'rejected', 'not_compared'] = Field(...)
+    reason: Literal['rows_missing', 'rows_unexpected', 'rows_duplicated', 'rows_mismatched', 'inputs', 'unit_mismatch', 'no_validity', 'nothing_computed'] | None = Field(None)
+    rows: CheckRows = Field(...)
+    at: float = Field(...)
+
+class CheckEvaluator(Contract):
+    contract: Literal['outcome-evaluator/1'] = Field(...)
+    rule_version: Literal[1] = Field(...)
+
+class CheckRows(Contract):
+    computed: Annotated[int, Field(ge=0)] = Field(...)
+    passing: Annotated[int, Field(ge=0)] = Field(...)
+    failing_count: Annotated[int, Field(ge=0)] = Field(...)
+    failing: Annotated[list[FailingRow], Field(max_length=20)] = Field(...)
+    not_computed: Annotated[list[NotComputedRow], Field(max_length=20)] = Field(...)
+
+class CheckedInput(Contract):
+    slot: Annotated[str, Field(min_length=1)] = Field(...)
+    asset_id: Annotated[str, Field(min_length=1)] = Field(...)
+    revision: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+
+class CheckedOutcome(Contract):
+    id: Annotated[str, Field(min_length=1, max_length=64)] = Field(...)
+    version: Annotated[int, Field(ge=1)] = Field(...)
+    rule: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*/[0-9]+$', max_length=80)] = Field(...)
+    settings_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+
+class CheckedPublication(Contract):
+    run: Annotated[str, Field(min_length=1)] = Field(...)
+    role: Annotated[str, Field(min_length=1)] = Field(...)
+    seq: Annotated[int, Field(ge=1)] = Field(...)
+
+class CheckedResult(Contract):
+    asset_id: Annotated[str, Field(min_length=1)] = Field(...)
+    revision: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    display_unit: Literal['m', 'ft'] = Field(...)
+
+class EvaluatedAs(Contract):
+    person: Annotated[str, Field(min_length=1)] = Field(...)
+
+class FailingRow(Contract):
+    wellbore: str = Field(...)
+    occurrence: Annotated[int, Field(ge=0)] = Field(...)
+    residual: float | None = Field(...)
+    reason: str | None = Field(...)
+
+class NotComputedRow(Contract):
+    wellbore: str = Field(...)
+    occurrence: Annotated[int, Field(ge=0)] = Field(...)
+    reason: str = Field(...)
+
+class OutcomeClaim(Contract):
+    schema_: Literal['ophiolite.outcome-claim/1'] = Field(..., alias='schema')
+    outcome: ClaimedOutcome = Field(...)
+    result: ClaimedResult = Field(...)
+    check: ClaimedCheck | None = Field(...)
+    delivery_id: str | None = Field(...)
+    destination: ClaimedDestination = Field(...)
+    state: Literal['claimed', 'refused'] = Field(...)
+    reason: Annotated[str, Field(max_length=64)] | None = Field(...)
+    sentence: Annotated[str, Field(max_length=4000)] = Field(...)
+
+class ClaimedCheck(Contract):
+    id: Annotated[str, Field(min_length=1, max_length=64)] = Field(...)
+    key: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+
+class ClaimedDestination(Contract):
+    procedure_digest: Annotated[str, Field(min_length=1, max_length=64)] = Field(...)
+    label: Annotated[str, Field(min_length=1, max_length=80)] = Field(...)
+
+class ClaimedOutcome(Contract):
+    id: Annotated[str, Field(min_length=1, max_length=64)] = Field(...)
+    version: Annotated[int, Field(ge=0)] = Field(...)
+
+class ClaimedResult(Contract):
+    asset_id: Annotated[str, Field(min_length=1, max_length=200)] = Field(...)
+    revision: Annotated[str, Field(min_length=1, max_length=200)] = Field(...)
+
+class OutcomeDeclaration(Contract):
+    schema_: Literal['ophiolite.outcome/1'] = Field(..., alias='schema')
+    label: Annotated[str, Field(min_length=1, max_length=80)] = Field(...)
+    kind: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*/[0-9]+$', max_length=80)] = Field(...)
+    rule: OutcomeRule = Field(...)
+    inputs: Annotated[list[str], Field(max_length=16)] = Field(...)
+    destination: OutcomeDestination = Field(...)
+
+class OutcomeDestination(Contract):
+    procedure: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9-]{0,62}(/[a-z0-9][a-z0-9-]{0,62})?$')] = Field(...)
+    label: Annotated[str, Field(min_length=1, max_length=80)] = Field(...)
+
+class OutcomeRule(Contract):
+    name: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*/[0-9]+$', max_length=80)] = Field(...)
+    settings: dict[str, Any] = Field(...)
 
 class ContractProfile(Contract):
     schema_: Literal['ophiolite.contract-profile/1'] = Field(..., alias='schema')
@@ -1505,19 +1943,108 @@ class RegistryKind(Contract):
     id: Literal['revision', 'well', 'wellbore', 'result-group'] = Field(...)
     title: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
 
+class BasisGrouping(Contract):
+    schema_: Literal['ophiolite.basis-groups/1'] = Field(..., alias='schema')
+    plan: BasisPlan = Field(...)
+    decisions: list[BasisDecision] = Field(...)
+    answers: list[BasisAnswer] = Field(...)
+    resolved: BasisResolved | None = Field(...)
+
+class BasisAnswer(Contract):
+    block: str = Field(...)
+    item: Literal['crs', 'vertical_domain', 'vertical_datum', 'units.xy', 'units.depth', 'units.time', 'units.z'] = Field(...)
+    value: Annotated[str, Field(min_length=1, max_length=256)] = Field(...)
+    by: Annotated[str, Field(min_length=1, max_length=256)] = Field(...)
+    kept: Literal['answer', 'project-default'] = Field('answer')
+
+class BasisBlock(Contract):
+    id: str = Field(...)
+    state: Literal['stated'] = Field(...)
+    members: Annotated[list[str], Field(min_length=2)] = Field(...)
+    stated: dict[str, str] = Field(...)
+    asks: list[Literal['crs', 'vertical_domain', 'vertical_datum', 'units.xy', 'units.depth', 'units.time', 'units.z']] = Field(...)
+
+class BasisConflict(Contract):
+    path: str = Field(...)
+    item: Literal['crs', 'vertical_domain', 'vertical_datum', 'units.xy', 'units.depth', 'units.time', 'units.z'] = Field(...)
+    stated: str = Field(...)
+    answered: str = Field(...)
+
+class BasisDecision(Contract):
+    proposal: str = Field(...)
+    choice: Literal['confirm', 'decline'] = Field(...)
+
+class BasisMember(Contract):
+    path: Annotated[str, Field(min_length=1, max_length=1024)] = Field(...)
+    kind: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+    stated: dict[str, BasisStated] = Field(None)
+    asks: list[Literal['crs', 'vertical_domain', 'vertical_datum', 'units.xy', 'units.depth', 'units.time', 'units.z']] = Field(None)
+    keys: dict[str, list[str]] = Field(...)
+    accepts: dict[str, list[str]] = Field(None)
+    overrides: dict[str, str] = Field(None)
+    defaults: dict[str, str] = Field(None)
+
+class BasisPlan(Contract):
+    members: list[BasisMember] = Field(...)
+    blocks: list[BasisBlock] = Field(...)
+    proposals: list[BasisProposal] = Field(...)
+    singles: list[BasisSingle] = Field(...)
+
+class BasisProposal(Contract):
+    id: str = Field(...)
+    folder: str = Field(...)
+    members: Annotated[list[str], Field(min_length=2)] = Field(...)
+    asks: Annotated[list[Literal['crs', 'vertical_domain', 'vertical_datum', 'units.xy', 'units.depth', 'units.time', 'units.z']], Field(min_length=1)] = Field(...)
+    stated: dict[str, dict[str, str]] = Field(...)
+    not_applicable: dict[str, list[Literal['crs', 'vertical_domain', 'vertical_datum', 'units.xy', 'units.depth', 'units.time', 'units.z']]] = Field(...)
+
+class BasisQuestion(Contract):
+    target: str = Field(...)
+    item: Literal['crs', 'vertical_domain', 'vertical_datum', 'units.xy', 'units.depth', 'units.time', 'units.z'] = Field(...)
+    members: Annotated[list[str], Field(min_length=1)] = Field(...)
+    reason: str | None = Field(...)
+    suggested: BasisSuggestion | None = Field(...)
+
+class BasisResolved(Contract):
+    proposals: dict[str, Literal['proposed', 'confirmed', 'declined']] = Field(...)
+    per_member: dict[str, dict[str, BasisValue]] = Field(...)
+    conflicts: list[BasisConflict] = Field(...)
+    questions: list[BasisQuestion] = Field(...)
+
+class BasisSingle(Contract):
+    path: str = Field(...)
+    asks: list[Literal['crs', 'vertical_domain', 'vertical_datum', 'units.xy', 'units.depth', 'units.time', 'units.z']] = Field(...)
+
+class BasisSource(Contract):
+    source: Annotated[str, Field(min_length=1, max_length=256)] = Field(...)
+    value: Annotated[str, Field(min_length=1, max_length=256)] = Field(...)
+
+class BasisStated(Contract):
+    value: Annotated[str, Field(min_length=1, max_length=256)] = Field(...)
+    sources: list[BasisSource] = Field(None)
+
+class BasisSuggestion(Contract):
+    value: str = Field(...)
+    class_: Literal['project-default'] = Field(..., alias='class')
+
+class BasisValue(Contract):
+    value: str | None = Field(...)
+    class_: Literal['stated', 'override', 'declared', 'project-default', 'unknown', 'not_applicable'] = Field(..., alias='class')
+    source: str | None = Field(...)
+
 class CheckRecord(Contract):
     schema_: Literal['ophiolite.check/1'] = Field(..., alias='schema')
     subject: Annotated[CheckImplementationSubject | CheckResultSubject, Field(discriminator='kind')] = Field(...)
     fixture: CheckFixture | None = Field(...)
     reference: CheckReference = Field(...)
     output_digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
-    rules_id: Literal['series-compare/1', 'grid-compare/1'] = Field(...)
+    rules_id: Literal['series-compare/1', 'grid-compare/1', 'tops-compare/1', 'trajectory-compare/1', 'residual-compare/1'] = Field(...)
     tolerance: Annotated[AbsoluteTolerance | RelativeTolerance, Field(discriminator='kind')] | None = Field(...)
     request_digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] | None = Field(...)
     interpretation_digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] | None = Field(...)
     outcome: Literal['passed', 'differed', 'not_compared'] = Field(...)
-    reason: Literal['axis_mismatch', 'unit_mismatch', 'context_mismatch', 'shape_mismatch', 'another_kind', 'declarations_missing', 'declarations_incompatible', 'unreadable', 'too_large', 'empty', 'no_such_curve'] | None = Field(...)
-    differences: CheckDifferences | None = Field(...)
+    reason: Literal['axis_mismatch', 'unit_mismatch', 'context_mismatch', 'shape_mismatch', 'another_kind', 'declarations_missing', 'declarations_incompatible', 'unreadable', 'too_large', 'empty', 'no_such_curve', 'unit_unknown', 'depth_basis_unknown', 'depth_basis_mismatch', 'wellbore_mismatch', 'magnetic_north', 'azimuth_reference_unknown', 'azimuth_reference_mismatch', 'grid_unknown', 'datum_unknown', 'datum_mismatch', 'missing_angles', 'start_not_at_datum', 'reported_not_compared', 'ambiguous_rows', 'correspondence_mismatch', 'inputs_differ'] | None = Field(...)
+    differences: CheckDifferences | TopsDifferences | TrajectoryDifferences | ResidualDifferences | None = Field(...)
     witness: Literal['server', 'claimed', 'personal'] | None = Field(None)
     recorded_by: CheckPrincipal | None = Field(None)
     command_id: Annotated[str, Field(min_length=1, max_length=128)] | None = Field(None)
@@ -1579,9 +2106,178 @@ class RelativeTolerance(Contract):
     kind: Literal['relative'] = Field(...)
     value: Annotated[float, Field(ge=0)] = Field(...)
 
+class ResidualDifferences(Contract):
+    count: Annotated[int, Field(ge=0)] = Field(...)
+    total: Annotated[int, Field(ge=0)] = Field(...)
+    largest: float | None = Field(...)
+    missing: Annotated[int, Field(ge=0)] = Field(...)
+    extra: Annotated[int, Field(ge=0)] = Field(...)
+    reasons_differ: Annotated[int, Field(ge=0)] = Field(...)
+    formation: Annotated[str, Field(min_length=1, max_length=64)] = Field(...)
+    first: Annotated[list[ResidualPair], Field(max_length=20)] = Field(...)
+
+class ResidualPair(Contract):
+    wellbore: Annotated[str, Field(pattern='^wellbore-[0-9a-f]{32}$')] = Field(...)
+    occurrence: Annotated[int, Field(ge=0, le=10000)] = Field(...)
+    md: float | None = Field(...)
+    result_residual: float | None = Field(...)
+    reference_residual: float | None = Field(...)
+    result_reason: Literal['grazing', 'along-surface', 'uncertain', 'no-surface-data', 'ends-above', 'starts-below', 'no-trajectory', 'no-top', 'many-crossings'] | None = Field(...)
+    reference_reason: Literal['grazing', 'along-surface', 'uncertain', 'no-surface-data', 'ends-above', 'starts-below', 'no-trajectory', 'no-top', 'many-crossings'] | None = Field(...)
+
+class TopsDifferences(Contract):
+    count: Annotated[int, Field(ge=0)] = Field(...)
+    total: Annotated[int, Field(ge=0)] = Field(...)
+    largest: float | None = Field(...)
+    missing: Annotated[int, Field(ge=0)] = Field(...)
+    extra: Annotated[int, Field(ge=0)] = Field(...)
+    first: Annotated[list[TopsPick], Field(max_length=20)] = Field(...)
+
+class TopsPick(Contract):
+    name: Annotated[str, Field(min_length=1, max_length=200)] = Field(...)
+    result_md: float | None = Field(...)
+    reference_md: float | None = Field(...)
+
+class TrajectoryDifferences(Contract):
+    count: Annotated[int, Field(ge=0)] = Field(...)
+    total: Annotated[int, Field(ge=0)] = Field(...)
+    largest: float | None = Field(...)
+    outside: Annotated[int, Field(ge=0)] = Field(...)
+    first: Annotated[list[TrajectoryStation], Field(max_length=20)] = Field(...)
+
+class TrajectoryStation(Contract):
+    md: float = Field(...)
+    distance: float | None = Field(...)
+
 class CheckRefusal(Contract):
-    field: Literal['permission', 'schema', 'publisher', 'tolerance', 'interpretation', 'fixture.digest', 'reference.digest', 'output.digest', 'rights', 'release.digest', 'implementation.script_sha256', 'outcome', 'timeout', 'capacity', 'limit', 'size', 'request'] = Field(...)
+    field: Literal['permission', 'schema', 'publisher', 'tolerance', 'interpretation', 'fixture.digest', 'reference.digest', 'output.digest', 'rights', 'release.digest', 'implementation.script_sha256', 'outcome', 'timeout', 'capacity', 'limit', 'size', 'request', 'kind'] = Field(...)
     message: Annotated[str, Field(min_length=1, max_length=500)] = Field(...)
+
+class ReportCounts(Contract):
+    compared: Annotated[int, Field(ge=0)] = Field(...)
+    differed: Annotated[int, Field(ge=0)] = Field(...)
+
+class ReportFileReference(Contract):
+    kind: Literal['file'] = Field(...)
+    name: Annotated[str, Field(min_length=1, max_length=200)] = Field(...)
+    digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+
+class ReportProcedure(Contract):
+    digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    label: Annotated[str, Field(min_length=1, max_length=200)] = Field(...)
+    version_label: Annotated[str, Field(min_length=1, max_length=80)] | None = Field(None)
+    version_number: Annotated[int, Field(ge=1)] = Field(...)
+
+class ReportVersionReference(Contract):
+    kind: Literal['project-version'] = Field(...)
+    asset_id: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+    revision: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+
+class ProcedureReportRecord(Contract):
+    schema_: Literal['ophiolite.check/1'] = Field(..., alias='schema')
+    variant: Literal['procedure-report'] = Field(...)
+    subject: CheckResultSubject = Field(...)
+    procedure: ReportProcedure = Field(...)
+    reference: Annotated[ReportFileReference | ReportVersionReference, Field(discriminator='kind')] = Field(...)
+    settings: dict[str, Annotated[str, Field(max_length=500)] | bool | int | float | None] = Field(...)
+    settings_digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    outcome: Literal['passed', 'differed', 'not_compared'] = Field(...)
+    counts: ReportCounts | None = Field(...)
+    reason: Literal['reported_not_compared'] | None = Field(...)
+    witness: Literal['claimed'] | None = Field(None)
+    recorded_by: CheckPrincipal | None = Field(None)
+    command_id: Annotated[str, Field(min_length=1, max_length=128)] | None = Field(None)
+    at: float | None = Field(None)
+
+class LocalFrame(Contract):
+    operation: Literal['resqml-local-frame'] = Field(...)
+    applied: bool = Field(...)
+    source: FrameSource = Field(...)
+    projected_crs: Annotated[str, Field(pattern='^(EPSG:[0-9]{4,6}|unknown)$')] = Field(...)
+    vertical_crs: Annotated[str, Field(pattern='^(EPSG:[0-9]{4,6}|unknown)$')] = Field(...)
+    parameters: FrameParameters = Field(...)
+    formula: Literal['rotate-then-offset'] = Field(...)
+    accuracy_m: float | None = Field(...)
+
+class FrameParameters(Contract):
+    x_offset: float = Field(...)
+    y_offset: float = Field(...)
+    z_offset: float = Field(...)
+    areal_rotation_rad: float = Field(...)
+    z_increasing_downward: bool = Field(...)
+    xy_unit: Annotated[str, Field(min_length=1, max_length=256)] = Field(...)
+    z_unit: Annotated[str, Field(min_length=1, max_length=256)] = Field(...)
+
+class FrameSource(Contract):
+    crs_uuid: Annotated[str, Field(pattern='^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')] = Field(...)
+    title: Annotated[str, Field(min_length=1, max_length=256)] = Field(...)
+
+class ResqmlObject(Contract):
+    schema_: Literal['ophiolite.resqml-object/1'] = Field(..., alias='schema')
+    profile: Literal['resqml-epc/1'] = Field(...)
+    package: Package = Field(...)
+    package_digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    output: Annotated[str, Field(min_length=38, max_length=64)] = Field(...)
+    source_uuid: Annotated[str, Field(pattern='^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')] = Field(...)
+    kind: Annotated[str, Field(pattern='^[A-Z][A-Za-z0-9]{1,63}$')] = Field(...)
+    variant: Literal['V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'V7', 'V8', 'V9', 'V10', 'V11', 'V12', 'V13', 'V14', 'V15', 'F-rep', 'F-ctx'] = Field(...)
+    name: Annotated[str, Field(min_length=1, max_length=256)] = Field(...)
+    lands_on: Literal['well-path', 'trajectory', 'well-log', 'triangulated-surface', 'polyline-set'] = Field(...)
+    losses: Annotated[list[Literal['angles-from-tangents']], Field(max_length=8)] = Field(...)
+    parts: Annotated[list[Annotated[str, Field(pattern='^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')]], Field(max_length=64)] = Field(...)
+    local_frame: LocalFrame | None = Field(...)
+    reader: Literal['asset_connectors.resqml_package/1'] = Field(...)
+
+class Member(Contract):
+    name: Annotated[str, Field(min_length=1, max_length=256)] = Field(...)
+    role: Literal['epc', 'h5'] = Field(...)
+    sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+
+class Package(Contract):
+    name: Annotated[str, Field(min_length=1, max_length=256)] = Field(...)
+    sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    members: Annotated[list[Member], Field(min_length=1, max_length=8)] = Field(...)
+
+class ResqmlRead(Contract):
+    schema_: Literal['ophiolite.resqml-read/1'] = Field(..., alias='schema')
+    profile: Literal['resqml-epc/1'] = Field(...)
+    package: Package = Field(...)
+    outputs: Annotated[list[Output], Field(max_length=5000)] = Field(...)
+    absorbed: Annotated[list[Absorbed], Field(max_length=5000)] = Field(...)
+    not_read: Annotated[list[NotRead], Field(max_length=5000)] = Field(...)
+    context: Annotated[list[Context], Field(max_length=64)] = Field(...)
+
+class Absorbed(Contract):
+    uuid: Annotated[str, Field(pattern='^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')] = Field(...)
+    kind: Annotated[str, Field(pattern='^[A-Z][A-Za-z0-9]{1,63}$')] = Field(...)
+    into: Annotated[str, Field(min_length=38, max_length=64)] = Field(...)
+
+class Context(Contract):
+    kind: Annotated[str, Field(pattern='^[A-Z][A-Za-z0-9]{1,63}$')] = Field(...)
+    count: Annotated[int, Field(ge=1)] = Field(...)
+
+class Item(Contract):
+    asset_id: Annotated[str, Field(min_length=1, max_length=256)] = Field(...)
+    revision: Annotated[str, Field(min_length=1, max_length=256)] = Field(...)
+
+class NotRead(Contract):
+    uuid: Annotated[str, Field(pattern='^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')] = Field(...)
+    kind: Annotated[str, Field(pattern='^[A-Z][A-Za-z0-9]{1,63}$')] = Field(...)
+    variant: Literal['V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'V7', 'V8', 'V9', 'V10', 'V11', 'V12', 'V13', 'V14', 'V15', 'F-rep', 'F-ctx'] = Field(...)
+    name: Annotated[str, Field(min_length=1, max_length=256)] = Field(...)
+    code: Literal['frame-without-values', 'lattice-without-values', 'markers-not-read', 'no-real-object', 'not-read-yet', 'property-not-on-frame-nodes', 'reservoir-grid', 'rotated-lattice'] = Field(...)
+    reason: Annotated[str, Field(min_length=1, max_length=256)] = Field(...)
+
+class Output(Contract):
+    output: Annotated[str, Field(min_length=38, max_length=64)] = Field(...)
+    source_uuid: Annotated[str, Field(pattern='^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')] = Field(...)
+    kind: Annotated[str, Field(pattern='^[A-Z][A-Za-z0-9]{1,63}$')] = Field(...)
+    variant: Literal['V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'V7', 'V8', 'V9', 'V10', 'V11', 'V12', 'V13', 'V14', 'V15', 'F-rep', 'F-ctx'] = Field(...)
+    name: Annotated[str, Field(min_length=1, max_length=256)] = Field(...)
+    lands_on: Literal['well-path', 'trajectory', 'well-log', 'triangulated-surface', 'polyline-set'] = Field(...)
+    losses: Annotated[list[Literal['angles-from-tangents']], Field(max_length=8)] = Field(...)
+    parts: Annotated[list[Annotated[str, Field(pattern='^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')]], Field(max_length=64)] = Field(...)
+    item: Item | None = Field(...)
 
 class ScalarMap(Contract):
     kind: Literal['scalar-map'] = Field(...)
@@ -1599,6 +2295,34 @@ class ScalarGrid(Contract):
     step_y: Annotated[float, Field(gt=0)] = Field(None)
     values: Annotated[list[float | Literal['NaN']], Field(min_length=1, max_length=100000)] = Field(...)
     metadata_json: Annotated[str, Field(min_length=2)] = Field(...)
+
+class SourceProvenance(Contract):
+    schema_: Literal['ophiolite.source-provenance/1'] = Field(..., alias='schema')
+    identity: SourceIdentity = Field(...)
+    content: SourceContent = Field(...)
+    context: SourceContext = Field(...)
+
+class SourceContent(Contract):
+    content_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    source_version: Annotated[str, Field(min_length=1, max_length=256)] | None = Field(...)
+
+class SourceContext(Contract):
+    comparison: Literal['comparison/1'] = Field(...)
+    context_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+
+class SourceIdentity(Contract):
+    source_system: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
+    source_instance: Annotated[str, Field(min_length=1, max_length=160)] | None = Field(...)
+    id_scheme: Literal['source-native', 'source-path', 'none'] = Field(...)
+    source_object_id: SourcePath | SourceNative | None = Field(...)
+
+class SourceNative(Contract):
+    container: Annotated[str, Field(min_length=1, max_length=256)] | None = Field(...)
+    id: Annotated[str, Field(min_length=1, max_length=256)] = Field(...)
+
+class SourcePath(Contract):
+    path: Annotated[str, Field(min_length=1, max_length=1024)] = Field(...)
+    part: Annotated[str, Field(min_length=1, max_length=128)] | None = Field(None)
 
 class WellCurve(Contract):
     kind: Literal['curve'] = Field(...)
@@ -1831,6 +2555,7 @@ class PortableBundleManifestLimits(Contract):
 class PortableBundleManifestObservations(Contract):
     groups: Annotated[list[BundleGroup], Field(max_length=128)] = Field(None)
     groups_omitted: Annotated[str, Field(min_length=1, max_length=200)] = Field(None)
+    source_records_omitted: Annotated[str, Field(min_length=1, max_length=160)] = Field(None)
 
 class BundleGroupRecommended1(Contract):
     asset_position: Annotated[int, Field(ge=0, le=127)] = Field(...)
@@ -1851,6 +2576,7 @@ class PortableBundleManifestV2Limits(Contract):
 class PortableBundleManifestV2Observations(Contract):
     groups: Annotated[list[BundleGroupV2], Field(max_length=128)] = Field(None)
     groups_omitted: Annotated[str, Field(min_length=1, max_length=200)] = Field(None)
+    source_records_omitted: Annotated[str, Field(min_length=1, max_length=160)] = Field(None)
 
 class PortableBundleManifestV2EntitiesItem(Contract):
     entity_id: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
@@ -1871,6 +2597,12 @@ class BundleAssetV2Original(Contract):
     sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
     bytes: Annotated[int, Field(ge=0)] = Field(...)
     included: Literal[False] = Field(...)
+
+class BundleAssetV2Read_By(Contract):
+    digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    label: Annotated[str, Field(min_length=1, max_length=100)] = Field(...)
+    version: Annotated[int, Field(ge=1)] = Field(...)
+    original: BundleAssetV2Read_ByOriginal = Field(...)
 
 class BundleGroupV2Recommended1(Contract):
     asset_position: Annotated[int, Field(ge=0, le=127)] = Field(...)
@@ -1923,6 +2655,11 @@ class BundleAssetV2RelationshipsWell_Log2(Contract):
     asset_id: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
     revision: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
 
+class BundleAssetV2Read_ByOriginal(Contract):
+    name: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
+    bytes: Annotated[int, Field(ge=1)] = Field(...)
+    sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+
 class CurvewindowIdentityNativeQualification(Contract):
     kind: Literal['trajectory', 'datum'] = Field(...)
     revision: Annotated[str, Field(max_length=1024)] = Field(...)
@@ -1935,6 +2672,8 @@ CurveColumnsHeader.model_rebuild()
 CurveContext.model_rebuild()
 Interpretation.model_rebuild()
 Reference.model_rebuild()
+ResqmlCurveContext.model_rebuild()
+ResqmlInterpretation.model_rebuild()
 ScientificContext.model_rebuild()
 ApplicationCurve.model_rebuild()
 Curvewindow.model_rebuild()
@@ -1979,7 +2718,9 @@ PointSet.model_rebuild()
 Attribute.model_rebuild()
 PointContext.model_rebuild()
 PolylineSet.model_rebuild()
+PetrelPackageInterpretation.model_rebuild()
 PolylineContext.model_rebuild()
+ResqmlSpatialInterpretation.model_rebuild()
 Stick.model_rebuild()
 XYZ.model_rebuild()
 ScientificAsset.model_rebuild()
@@ -2004,6 +2745,10 @@ IntegerLeaf.model_rebuild()
 LineRange.model_rebuild()
 LineageEntry.model_rebuild()
 LineageReference.model_rebuild()
+ListedIn.model_rebuild()
+ListedLicence.model_rebuild()
+ListedSnapshot.model_rebuild()
+ListedTerms.model_rebuild()
 MadeAgain.model_rebuild()
 ManifestArtifact.model_rebuild()
 ManifestRepresentation.model_rebuild()
@@ -2023,12 +2768,19 @@ Parameters.model_rebuild()
 Person.model_rebuild()
 ProcedureRunner.model_rebuild()
 Provenance.model_rebuild()
+PublicSourceDocument.model_rebuild()
+PublicSourceLine.model_rebuild()
+PublicSourceRecord.model_rebuild()
+PublicSources.model_rebuild()
+ReadBy.model_rebuild()
+ReadOriginal.model_rebuild()
 RecipePin.model_rebuild()
 RecipeReference.model_rebuild()
 RecordedInterpretation.model_rebuild()
 Relationships.model_rebuild()
 ReleaseRecord.model_rebuild()
 Representation.model_rebuild()
+ResidualValidity.model_rebuild()
 Retention.model_rebuild()
 RevisionManifest.model_rebuild()
 RevisionManifestV2.model_rebuild()
@@ -2036,8 +2788,14 @@ RevisionManifestV3.model_rebuild()
 RevisionManifestV4.model_rebuild()
 SeismicContext.model_rebuild()
 SeismicSectionContext.model_rebuild()
+SourcedBy.model_rebuild()
 StringLeaf.model_rebuild()
+TableFileContext.model_rebuild()
+TableFileCoverage.model_rebuild()
+TableFileDecision.model_rebuild()
+TableFileNotRead.model_rebuild()
 TableImportOrigin.model_rebuild()
+TableInterpretation.model_rebuild()
 TimeDepthContext.model_rebuild()
 TopsContext.model_rebuild()
 TrajectoryContext.model_rebuild()
@@ -2046,6 +2804,9 @@ Via.model_rebuild()
 WaveletContext.model_rebuild()
 WellLocationContext.model_rebuild()
 WellLogLink.model_rebuild()
+WellPathContext.model_rebuild()
+WellResidualContext.model_rebuild()
+WellSetContext.model_rebuild()
 XY.model_rebuild()
 SeismicSection.model_rebuild()
 SeismicSlice.model_rebuild()
@@ -2055,6 +2816,11 @@ SeismicVolume.model_rebuild()
 Chunk.model_rebuild()
 HeaderPositions.model_rebuild()
 AssetSummary.model_rebuild()
+TableFile.model_rebuild()
+TableFileAnnotation.model_rebuild()
+TableFileColumn.model_rebuild()
+TableFileCoordinates.model_rebuild()
+TableFileDeclarations.model_rebuild()
 Table.model_rebuild()
 TableReadColumn.model_rebuild()
 TableNotReadColumn.model_rebuild()
@@ -2072,12 +2838,28 @@ LocationSource.model_rebuild()
 StoredPoint.model_rebuild()
 Transformation.model_rebuild()
 WellLocationUpload.model_rebuild()
+WellPath.model_rebuild()
+WellPathStation.model_rebuild()
+WellResidual.model_rebuild()
+ResidualCrossing.model_rebuild()
+ResidualTop.model_rebuild()
+ResidualVersion.model_rebuild()
+WellResidualRow.model_rebuild()
+WellSet.model_rebuild()
+WellSetDepthReference.model_rebuild()
+WellSetFrame.model_rebuild()
+WellSetMember.model_rebuild()
+WellSetNorth.model_rebuild()
+WellSetPoint.model_rebuild()
+WellSetTieIn.model_rebuild()
+WellSetTrajectory.model_rebuild()
 WellTops.model_rebuild()
 Top.model_rebuild()
 PortableBundleManifest.model_rebuild()
 BundleSelected.model_rebuild()
 BundleFile.model_rebuild()
 BundleAsset.model_rebuild()
+BundleSourceRecord.model_rebuild()
 BundleHistory.model_rebuild()
 BundleParent.model_rebuild()
 BundleGroup.model_rebuild()
@@ -2102,6 +2884,24 @@ SourceRevision.model_rebuild()
 Entity.model_rebuild()
 Identity.model_rebuild()
 IdentityChange.model_rebuild()
+OutcomeCheck.model_rebuild()
+CheckEvaluator.model_rebuild()
+CheckRows.model_rebuild()
+CheckedInput.model_rebuild()
+CheckedOutcome.model_rebuild()
+CheckedPublication.model_rebuild()
+CheckedResult.model_rebuild()
+EvaluatedAs.model_rebuild()
+FailingRow.model_rebuild()
+NotComputedRow.model_rebuild()
+OutcomeClaim.model_rebuild()
+ClaimedCheck.model_rebuild()
+ClaimedDestination.model_rebuild()
+ClaimedOutcome.model_rebuild()
+ClaimedResult.model_rebuild()
+OutcomeDeclaration.model_rebuild()
+OutcomeDestination.model_rebuild()
+OutcomeRule.model_rebuild()
 ContractProfile.model_rebuild()
 ConnectorSemantics.model_rebuild()
 RepresentationRules.model_rebuild()
@@ -2116,6 +2916,21 @@ ManagedReference.model_rebuild()
 RelationshipRegistry.model_rebuild()
 Predicate.model_rebuild()
 RegistryKind.model_rebuild()
+BasisGrouping.model_rebuild()
+BasisAnswer.model_rebuild()
+BasisBlock.model_rebuild()
+BasisConflict.model_rebuild()
+BasisDecision.model_rebuild()
+BasisMember.model_rebuild()
+BasisPlan.model_rebuild()
+BasisProposal.model_rebuild()
+BasisQuestion.model_rebuild()
+BasisResolved.model_rebuild()
+BasisSingle.model_rebuild()
+BasisSource.model_rebuild()
+BasisStated.model_rebuild()
+BasisSuggestion.model_rebuild()
+BasisValue.model_rebuild()
 CheckRecord.model_rebuild()
 AbsoluteTolerance.model_rebuild()
 CheckDifferences.model_rebuild()
@@ -2127,9 +2942,38 @@ CheckResultSubject.model_rebuild()
 CheckRights.model_rebuild()
 CheckSample.model_rebuild()
 RelativeTolerance.model_rebuild()
+ResidualDifferences.model_rebuild()
+ResidualPair.model_rebuild()
+TopsDifferences.model_rebuild()
+TopsPick.model_rebuild()
+TrajectoryDifferences.model_rebuild()
+TrajectoryStation.model_rebuild()
 CheckRefusal.model_rebuild()
+ReportCounts.model_rebuild()
+ReportFileReference.model_rebuild()
+ReportProcedure.model_rebuild()
+ReportVersionReference.model_rebuild()
+ProcedureReportRecord.model_rebuild()
+LocalFrame.model_rebuild()
+FrameParameters.model_rebuild()
+FrameSource.model_rebuild()
+ResqmlObject.model_rebuild()
+Member.model_rebuild()
+Package.model_rebuild()
+ResqmlRead.model_rebuild()
+Absorbed.model_rebuild()
+Context.model_rebuild()
+Item.model_rebuild()
+NotRead.model_rebuild()
+Output.model_rebuild()
 ScalarMap.model_rebuild()
 ScalarGrid.model_rebuild()
+SourceProvenance.model_rebuild()
+SourceContent.model_rebuild()
+SourceContext.model_rebuild()
+SourceIdentity.model_rebuild()
+SourceNative.model_rebuild()
+SourcePath.model_rebuild()
 WellCurve.model_rebuild()
 TableTarget.model_rebuild()
 Pending.model_rebuild()
@@ -2167,6 +3011,7 @@ PortableBundleManifestV2EntitiesItem.model_rebuild()
 PortableBundleManifestV2RelationshipsItem.model_rebuild()
 BundleAssetV2Relationships.model_rebuild()
 BundleAssetV2Original.model_rebuild()
+BundleAssetV2Read_By.model_rebuild()
 BundleGroupV2Recommended1.model_rebuild()
 BundleRecipePinV2Reference1.model_rebuild()
 ContractProfileTable_Target1.model_rebuild()
@@ -2177,5 +3022,6 @@ PortableBundleManifestV2RelationshipsItemSubject.model_rebuild()
 PortableBundleManifestV2RelationshipsItemObject.model_rebuild()
 PortableBundleManifestV2RelationshipsItemEvidence1.model_rebuild()
 BundleAssetV2RelationshipsWell_Log2.model_rebuild()
+BundleAssetV2Read_ByOriginal.model_rebuild()
 CurvewindowIdentityNativeQualification.model_rebuild()
 PortableBundleManifestV2RelationshipsItemEvidence1Source.model_rebuild()

@@ -1,0 +1,1219 @@
+{
+ "schema": "ophiolite.trajectory-geometry-fixture/1",
+ "note": "E119a C4: crossings() against closed forms (ophiolite-sdk/tests/fixtures/well_geometry/closed_forms.py states each). Expected measured depths within 0.01 m; `reasons` are the rows in order; `between` the literal ends where a row has them.",
+ "cases": [
+  {
+   "name": "vertical, 30 m east of a node",
+   "test": 1,
+   "closed_form": "z = md - 7.5 = 1192.5 + 30 tan 5: md = 1200 + 30 tan 5",
+   "trajectory": {
+    "context": {
+     "type": "trajectory",
+     "depth_unit": "m",
+     "angle_unit": "deg",
+     "azimuth_reference": "grid-north",
+     "depth_datum": "KB"
+    },
+    "stations": [
+     {
+      "md": 0,
+      "inclination": 0,
+      "azimuth": 0,
+      "tvd": null
+     },
+     {
+      "md": 2000,
+      "inclination": 0,
+      "azimuth": 0,
+      "tvd": null
+     }
+    ]
+   },
+   "frame": {
+    "crs": "EPSG:23031",
+    "wellhead": {
+     "x": 600030.0,
+     "y": 5900000.0
+    },
+    "depth_reference": {
+     "name": "KB",
+     "elevation": 7.5,
+     "datum": "NAP"
+    },
+    "north": {
+     "survey_basis": "grid:EPSG:23031",
+     "rotation_deg": 0
+    },
+    "tie_in": null,
+    "source": "closed form"
+   },
+   "surface": "slope-5deg",
+   "crossings": [
+    1202.6246599057777
+   ],
+   "reasons": [],
+   "between": null
+  },
+  {
+   "name": "slant 30 degrees, azimuth 60",
+   "test": 1,
+   "closed_form": "md cos 30 - 7.5 = 1192.5 + tan 5 md sin 30 sin 60",
+   "trajectory": {
+    "context": {
+     "type": "trajectory",
+     "depth_unit": "m",
+     "angle_unit": "deg",
+     "azimuth_reference": "grid-north",
+     "depth_datum": "KB"
+    },
+    "stations": [
+     {
+      "md": 0,
+      "inclination": 30,
+      "azimuth": 60,
+      "tvd": null
+     },
+     {
+      "md": 2000,
+      "inclination": 30,
+      "azimuth": 60,
+      "tvd": null
+     }
+    ]
+   },
+   "frame": {
+    "crs": "EPSG:23031",
+    "wellhead": {
+     "x": 600000.0,
+     "y": 5900000.0
+    },
+    "depth_reference": {
+     "name": "KB",
+     "elevation": 7.5,
+     "datum": "NAP"
+    },
+    "north": {
+     "survey_basis": "grid:EPSG:23031",
+     "rotation_deg": 0
+    },
+    "tie_in": null,
+    "source": "closed form"
+   },
+   "surface": "slope-5deg",
+   "crossings": [
+    1449.0273805222844
+   ],
+   "reasons": [],
+   "between": null
+  },
+  {
+   "name": "build 10 degrees per 30 m, azimuth 120",
+   "test": 2,
+   "closed_form": "R = 30/rad(10); s = md - 1156: 1148.5 + R sin(s/R) = 1192.5 + tan 5 sin 120 R (1 - cos(s/R)), on the segment from 1186 to 1216",
+   "trajectory": {
+    "context": {
+     "type": "trajectory",
+     "depth_unit": "m",
+     "angle_unit": "deg",
+     "azimuth_reference": "grid-north",
+     "depth_datum": "KB"
+    },
+    "stations": [
+     {
+      "md": 0,
+      "inclination": 0,
+      "azimuth": 120,
+      "tvd": null
+     },
+     {
+      "md": 1156.0,
+      "inclination": 0,
+      "azimuth": 120,
+      "tvd": null
+     },
+     {
+      "md": 1186.0,
+      "inclination": 10,
+      "azimuth": 120,
+      "tvd": null
+     },
+     {
+      "md": 1216.0,
+      "inclination": 20,
+      "azimuth": 120,
+      "tvd": null
+     },
+     {
+      "md": 1246.0,
+      "inclination": 30,
+      "azimuth": 120,
+      "tvd": null
+     },
+     {
+      "md": 1276.0,
+      "inclination": 40,
+      "azimuth": 120,
+      "tvd": null
+     },
+     {
+      "md": 1456.0,
+      "inclination": 40,
+      "azimuth": 120,
+      "tvd": null
+     }
+    ]
+   },
+   "frame": {
+    "crs": "EPSG:23031",
+    "wellhead": {
+     "x": 600000.0,
+     "y": 5900000.0
+    },
+    "depth_reference": {
+     "name": "KB",
+     "elevation": 7.5,
+     "datum": "NAP"
+    },
+    "north": {
+     "survey_basis": "grid:EPSG:23031",
+     "rotation_deg": 0
+    },
+    "tie_in": null,
+    "source": "closed form"
+   },
+   "surface": "slope-5deg",
+   "crossings": [
+    1200.9535554759364
+   ],
+   "reasons": [],
+   "between": null
+  },
+  {
+   "name": "fold: a slant through a crest",
+   "test": 3,
+   "closed_form": "z = md cos 60 - 7.5, x = 600000 + md sin 60; S = 550 + |x - 601000|: md = 1007.5 + 550 over (cos 60 + sin 60), and (992.5 - 550) over (sin 60 - cos 60)",
+   "trajectory": {
+    "context": {
+     "type": "trajectory",
+     "depth_unit": "m",
+     "angle_unit": "deg",
+     "azimuth_reference": "grid-north",
+     "depth_datum": "KB"
+    },
+    "stations": [
+     {
+      "md": 0,
+      "inclination": 60,
+      "azimuth": 90,
+      "tvd": null
+     },
+     {
+      "md": 1400,
+      "inclination": 60,
+      "azimuth": 90,
+      "tvd": null
+     }
+    ]
+   },
+   "frame": {
+    "crs": "EPSG:23031",
+    "wellhead": {
+     "x": 600000.0,
+     "y": 5900000.0
+    },
+    "depth_reference": {
+     "name": "KB",
+     "elevation": 7.5,
+     "datum": "NAP"
+    },
+    "north": {
+     "survey_basis": "grid:EPSG:23031",
+     "rotation_deg": 0
+    },
+    "tie_in": null,
+    "source": "closed form"
+   },
+   "surface": "fold",
+   "crossings": [
+    1140.1691327885262,
+    1208.9324823492286
+   ],
+   "reasons": [],
+   "between": null,
+   "crest_md": 1154.7005383792516
+  },
+  {
+   "name": "three roots in one first interval",
+   "test": 4,
+   "closed_form": "f alternates -0.05, +0.05 at nodes 0.3 m apart: roots at the midpoints 4.9, 5.2, 5.5, 5.8",
+   "trajectory": {
+    "context": {
+     "type": "trajectory",
+     "depth_unit": "m",
+     "angle_unit": "deg",
+     "azimuth_reference": "grid-north",
+     "depth_datum": "KB"
+    },
+    "stations": [
+     {
+      "md": 0,
+      "inclination": 90,
+      "azimuth": 90,
+      "tvd": null
+     },
+     {
+      "md": 10,
+      "inclination": 90,
+      "azimuth": 90,
+      "tvd": null
+     }
+    ]
+   },
+   "frame": {
+    "crs": "EPSG:23031",
+    "wellhead": {
+     "x": 600000.0,
+     "y": 5900000.0
+    },
+    "depth_reference": {
+     "name": "KB",
+     "elevation": 7.5,
+     "datum": "NAP"
+    },
+    "north": {
+     "survey_basis": "grid:EPSG:23031",
+     "rotation_deg": 0
+    },
+    "tie_in": null,
+    "source": "closed form"
+   },
+   "surface": "three-roots",
+   "crossings": [
+    4.9,
+    5.2,
+    5.5,
+    5.8
+   ],
+   "reasons": [],
+   "between": null
+  },
+  {
+   "name": "roots 0.05 m apart",
+   "test": 5,
+   "closed_form": "f = 0.5 at every node but -d at x = 600005.41 (1 m nodes): roots at 5.41 -/+ d/(0.5 + d) = 5.385, 5.435",
+   "trajectory": {
+    "context": {
+     "type": "trajectory",
+     "depth_unit": "m",
+     "angle_unit": "deg",
+     "azimuth_reference": "grid-north",
+     "depth_datum": "KB"
+    },
+    "stations": [
+     {
+      "md": 0,
+      "inclination": 90,
+      "azimuth": 90,
+      "tvd": null
+     },
+     {
+      "md": 10,
+      "inclination": 90,
+      "azimuth": 90,
+      "tvd": null
+     }
+    ]
+   },
+   "frame": {
+    "crs": "EPSG:23031",
+    "wellhead": {
+     "x": 600000.0,
+     "y": 5900000.0
+    },
+    "depth_reference": {
+     "name": "KB",
+     "elevation": 7.5,
+     "datum": "NAP"
+    },
+    "north": {
+     "survey_basis": "grid:EPSG:23031",
+     "rotation_deg": 0
+    },
+    "tie_in": null,
+    "source": "closed form"
+   },
+   "surface": "close-0.05",
+   "crossings": [
+    5.385,
+    5.4350000000000005
+   ],
+   "reasons": [],
+   "between": null
+  },
+  {
+   "name": "roots 0.005 m apart",
+   "test": 5,
+   "closed_form": "as above with d/(0.5 + d) = 0.0025: roots 5.4075, 5.4125 (two crossings, or a grazing or uncertain row; never one)",
+   "trajectory": {
+    "context": {
+     "type": "trajectory",
+     "depth_unit": "m",
+     "angle_unit": "deg",
+     "azimuth_reference": "grid-north",
+     "depth_datum": "KB"
+    },
+    "stations": [
+     {
+      "md": 0,
+      "inclination": 90,
+      "azimuth": 90,
+      "tvd": null
+     },
+     {
+      "md": 10,
+      "inclination": 90,
+      "azimuth": 90,
+      "tvd": null
+     }
+    ]
+   },
+   "frame": {
+    "crs": "EPSG:23031",
+    "wellhead": {
+     "x": 600000.0,
+     "y": 5900000.0
+    },
+    "depth_reference": {
+     "name": "KB",
+     "elevation": 7.5,
+     "datum": "NAP"
+    },
+    "north": {
+     "survey_basis": "grid:EPSG:23031",
+     "rotation_deg": 0
+    },
+    "tie_in": null,
+    "source": "closed form"
+   },
+   "surface": "close-0.005",
+   "crossings": [
+    5.4075,
+    5.4125000000000005
+   ],
+   "reasons": [],
+   "between": null
+  },
+  {
+   "name": "near miss at 0.008 m",
+   "test": 6,
+   "closed_form": "f = 0.008 + 0.492 |x - 600005.41|: within 0.01 m for |md - 5.41| <= 0.002/0.492",
+   "trajectory": {
+    "context": {
+     "type": "trajectory",
+     "depth_unit": "m",
+     "angle_unit": "deg",
+     "azimuth_reference": "grid-north",
+     "depth_datum": "KB"
+    },
+    "stations": [
+     {
+      "md": 0,
+      "inclination": 90,
+      "azimuth": 90,
+      "tvd": null
+     },
+     {
+      "md": 10,
+      "inclination": 90,
+      "azimuth": 90,
+      "tvd": null
+     }
+    ]
+   },
+   "frame": {
+    "crs": "EPSG:23031",
+    "wellhead": {
+     "x": 600000.0,
+     "y": 5900000.0
+    },
+    "depth_reference": {
+     "name": "KB",
+     "elevation": 7.5,
+     "datum": "NAP"
+    },
+    "north": {
+     "survey_basis": "grid:EPSG:23031",
+     "rotation_deg": 0
+    },
+    "tie_in": null,
+    "source": "closed form"
+   },
+   "surface": "near-miss",
+   "crossings": [],
+   "reasons": [
+    "grazing",
+    "starts-below"
+   ],
+   "between": [
+    5.405934959349594,
+    5.4140650406504065
+   ]
+  },
+  {
+   "name": "midpoint 0.0099 m, ends 0.012 m",
+   "test": 7,
+   "closed_form": "f = 0.0099 + |md - t|, t = 5.5 + 1/512: 0.0099 at the middle of [5.5, 5.5 + 1/256] and 0.01185 at its ends; within 0.01 m only for |md - t| <= 0.0001, narrower than W_MIN, so never certified near",
+   "trajectory": {
+    "context": {
+     "type": "trajectory",
+     "depth_unit": "m",
+     "angle_unit": "deg",
+     "azimuth_reference": "grid-north",
+     "depth_datum": "KB"
+    },
+    "stations": [
+     {
+      "md": 0,
+      "inclination": 90,
+      "azimuth": 90,
+      "tvd": null
+     },
+     {
+      "md": 10,
+      "inclination": 90,
+      "azimuth": 90,
+      "tvd": null
+     }
+    ]
+   },
+   "frame": {
+    "crs": "EPSG:23031",
+    "wellhead": {
+     "x": 600000.0,
+     "y": 5900000.0
+    },
+    "depth_reference": {
+     "name": "KB",
+     "elevation": 7.5,
+     "datum": "NAP"
+    },
+    "north": {
+     "survey_basis": "grid:EPSG:23031",
+     "rotation_deg": 0
+    },
+    "tie_in": null,
+    "source": "closed form"
+   },
+   "surface": "proximity",
+   "crossings": [],
+   "reasons": [
+    "starts-below"
+   ],
+   "between": null
+  },
+  {
+   "name": "parallel at 0.008 m over 3 m",
+   "test": 8,
+   "closed_form": "f = 0.008 for x in [600004, 600007], 0.5 at the other nodes: within 0.01 m for md in [4 - 0.002/0.492, 7 + 0.002/0.492]",
+   "trajectory": {
+    "context": {
+     "type": "trajectory",
+     "depth_unit": "m",
+     "angle_unit": "deg",
+     "azimuth_reference": "grid-north",
+     "depth_datum": "KB"
+    },
+    "stations": [
+     {
+      "md": 0,
+      "inclination": 90,
+      "azimuth": 90,
+      "tvd": null
+     },
+     {
+      "md": 10,
+      "inclination": 90,
+      "azimuth": 90,
+      "tvd": null
+     }
+    ]
+   },
+   "frame": {
+    "crs": "EPSG:23031",
+    "wellhead": {
+     "x": 600000.0,
+     "y": 5900000.0
+    },
+    "depth_reference": {
+     "name": "KB",
+     "elevation": 7.5,
+     "datum": "NAP"
+    },
+    "north": {
+     "survey_basis": "grid:EPSG:23031",
+     "rotation_deg": 0
+    },
+    "tie_in": null,
+    "source": "closed form"
+   },
+   "surface": "parallel",
+   "crossings": [],
+   "reasons": [
+    "along-surface",
+    "starts-below"
+   ],
+   "between": [
+    3.9959349593495936,
+    7.004065040650406
+   ]
+  },
+  {
+   "name": "a 2 m near run beside a crossing",
+   "test": "absorption",
+   "closed_form": "f = -0.5 at x = 600003, 0.008 at 600004 to 600006, 0.5 at 600007: one crossing at 3 + 0.5/0.508 (the monotone interval [3, 4]); f stays within 0.01 m from there to 6 + 0.002/0.492, a root-free near run from the crossing interval's end 4 that is longer than STEP_M, so it stays a row (D8 step 3, amended at slice 3)",
+   "trajectory": {
+    "context": {
+     "type": "trajectory",
+     "depth_unit": "m",
+     "angle_unit": "deg",
+     "azimuth_reference": "grid-north",
+     "depth_datum": "KB"
+    },
+    "stations": [
+     {
+      "md": 0,
+      "inclination": 90,
+      "azimuth": 90,
+      "tvd": null
+     },
+     {
+      "md": 10,
+      "inclination": 90,
+      "azimuth": 90,
+      "tvd": null
+     }
+    ]
+   },
+   "frame": {
+    "crs": "EPSG:23031",
+    "wellhead": {
+     "x": 600000.0,
+     "y": 5900000.0
+    },
+    "depth_reference": {
+     "name": "KB",
+     "elevation": 7.5,
+     "datum": "NAP"
+    },
+    "north": {
+     "survey_basis": "grid:EPSG:23031",
+     "rotation_deg": 0
+    },
+    "tie_in": null,
+    "source": "closed form"
+   },
+   "surface": "approach-long",
+   "crossings": [
+    3.984251968503937
+   ],
+   "reasons": [
+    "along-surface"
+   ],
+   "between": [
+    4.0,
+    6.004065040650406
+   ]
+  },
+  {
+   "name": "near zero at the stations, 0.3 m between",
+   "test": 9,
+   "closed_form": "tie-in md 990 at tvd 1000; inclination 87.7 to md 1000, an arc to 92.3 at md 1030 (sagitta 0.301 m), then straight: the flat surface is 1e-6 m above z(1000) = z(1030); crossings at 1000 - 1e-6/cos 87.7 and 1030 + 1e-6/cos 87.7",
+   "trajectory": {
+    "context": {
+     "type": "trajectory",
+     "depth_unit": "m",
+     "angle_unit": "deg",
+     "azimuth_reference": "grid-north",
+     "depth_datum": "KB"
+    },
+    "stations": [
+     {
+      "md": 990,
+      "inclination": 87.7,
+      "azimuth": 90,
+      "tvd": null
+     },
+     {
+      "md": 1000,
+      "inclination": 87.7,
+      "azimuth": 90,
+      "tvd": null
+     },
+     {
+      "md": 1030,
+      "inclination": 92.3,
+      "azimuth": 90,
+      "tvd": null
+     },
+     {
+      "md": 1040,
+      "inclination": 92.3,
+      "azimuth": 90,
+      "tvd": null
+     }
+    ]
+   },
+   "frame": {
+    "crs": "EPSG:23031",
+    "wellhead": {
+     "x": 600000.0,
+     "y": 5900000.0
+    },
+    "depth_reference": {
+     "name": "KB",
+     "elevation": 7.5,
+     "datum": "NAP"
+    },
+    "north": {
+     "survey_basis": "grid:EPSG:23031",
+     "rotation_deg": 0
+    },
+    "tie_in": {
+     "md": 990,
+     "tvd": 1000,
+     "east": 0,
+     "north": 0
+    },
+    "source": "closed form"
+   },
+   "surface": "near-zero",
+   "crossings": [
+    999.9999750820998,
+    1030.0000249179002
+   ],
+   "reasons": [],
+   "between": null
+  },
+  {
+   "name": "arc into a steep neighbour cell",
+   "test": 10,
+   "closed_form": "horizontal turn of radius 1 m, apex at md 1000.5 where x = Cx + 1; x = Cx + cos(md - 1000.5); the cell column at Cx + cos 0.5 + 0.01 changes the gradient from 1 to 10; f = 0.05 - 10 (x - column) east of it: crossings at 1000.5 -/+ acos(cos 0.5 + 0.015)",
+   "trajectory": {
+    "context": {
+     "type": "trajectory",
+     "depth_unit": "m",
+     "angle_unit": "deg",
+     "azimuth_reference": "grid-north",
+     "depth_datum": "KB"
+    },
+    "stations": [
+     {
+      "md": 990,
+      "inclination": 90,
+      "azimuth": 45,
+      "tvd": null
+     },
+     {
+      "md": 999.7146018366026,
+      "inclination": 90,
+      "azimuth": 45,
+      "tvd": null
+     },
+     {
+      "md": 1001.2853981633975,
+      "inclination": 90,
+      "azimuth": 315,
+      "tvd": null
+     },
+     {
+      "md": 1010,
+      "inclination": 90,
+      "azimuth": 315,
+      "tvd": null
+     }
+    ]
+   },
+   "frame": {
+    "crs": "EPSG:23031",
+    "wellhead": {
+     "x": 600000.0,
+     "y": 5900000.0
+    },
+    "depth_reference": {
+     "name": "KB",
+     "elevation": 7.5,
+     "datum": "NAP"
+    },
+    "north": {
+     "survey_basis": "grid:EPSG:23031",
+     "rotation_deg": 0
+    },
+    "tie_in": {
+     "md": 990,
+     "tvd": 1000,
+     "east": 0,
+     "north": 0
+    },
+    "source": "closed form"
+   },
+   "surface": "steep-neighbour",
+   "crossings": [
+    1000.0322445377982,
+    1000.9677554622018
+   ],
+   "reasons": [],
+   "between": null
+  },
+  {
+   "name": "disc touches a hole the path never enters",
+   "test": 11,
+   "closed_form": "slant 30, azimuth 60, passing 0.3 m north-west of the corner (600400, 5900300) of the first hole at md 1000; crossing as the slant",
+   "trajectory": {
+    "context": {
+     "type": "trajectory",
+     "depth_unit": "m",
+     "angle_unit": "deg",
+     "azimuth_reference": "grid-north",
+     "depth_datum": "KB"
+    },
+    "stations": [
+     {
+      "md": 0,
+      "inclination": 30,
+      "azimuth": 60,
+      "tvd": null
+     },
+     {
+      "md": 1455,
+      "inclination": 30,
+      "azimuth": 60,
+      "tvd": null
+     }
+    ]
+   },
+   "frame": {
+    "crs": "EPSG:23031",
+    "wellhead": {
+     "x": 599966.8372981078,
+     "y": 5900050.259807621
+    },
+    "depth_reference": {
+     "name": "KB",
+     "elevation": 7.5,
+     "datum": "NAP"
+    },
+    "north": {
+     "survey_basis": "grid:EPSG:23031",
+     "rotation_deg": 0
+    },
+    "tie_in": null,
+    "source": "closed form"
+   },
+   "surface": "hole",
+   "crossings": [
+    1445.5239215571921
+   ],
+   "reasons": [],
+   "between": null
+  },
+  {
+   "name": "path enters a hole",
+   "test": 12,
+   "closed_form": "as test 11 to md 1600: no surface data from x = 600600, md = (600600 - x0)/(sin 30 sin 60)",
+   "trajectory": {
+    "context": {
+     "type": "trajectory",
+     "depth_unit": "m",
+     "angle_unit": "deg",
+     "azimuth_reference": "grid-north",
+     "depth_datum": "KB"
+    },
+    "stations": [
+     {
+      "md": 0,
+      "inclination": 30,
+      "azimuth": 60,
+      "tvd": null
+     },
+     {
+      "md": 1600,
+      "inclination": 30,
+      "azimuth": 60,
+      "tvd": null
+     }
+    ]
+   },
+   "frame": {
+    "crs": "EPSG:23031",
+    "wellhead": {
+     "x": 599966.8372981078,
+     "y": 5900050.259807621
+    },
+    "depth_reference": {
+     "name": "KB",
+     "elevation": 7.5,
+     "datum": "NAP"
+    },
+    "north": {
+     "survey_basis": "grid:EPSG:23031",
+     "rotation_deg": 0
+    },
+    "tie_in": null,
+    "source": "closed form"
+   },
+   "surface": "hole",
+   "crossings": [
+    1445.5239215571921
+   ],
+   "reasons": [
+    "no-surface-data"
+   ],
+   "between": null,
+   "entry_md": 1462.226625513172
+  },
+  {
+   "name": "root at a grid corner on a first-interval end",
+   "test": 13,
+   "closed_form": "vertical at the node of depth 1192.5: md 1200.000",
+   "trajectory": {
+    "context": {
+     "type": "trajectory",
+     "depth_unit": "m",
+     "angle_unit": "deg",
+     "azimuth_reference": "grid-north",
+     "depth_datum": "KB"
+    },
+    "stations": [
+     {
+      "md": 0,
+      "inclination": 0,
+      "azimuth": 0,
+      "tvd": null
+     },
+     {
+      "md": 2000,
+      "inclination": 0,
+      "azimuth": 0,
+      "tvd": null
+     }
+    ]
+   },
+   "frame": {
+    "crs": "EPSG:23031",
+    "wellhead": {
+     "x": 600000.0,
+     "y": 5900000.0
+    },
+    "depth_reference": {
+     "name": "KB",
+     "elevation": 7.5,
+     "datum": "NAP"
+    },
+    "north": {
+     "survey_basis": "grid:EPSG:23031",
+     "rotation_deg": 0
+    },
+    "tie_in": null,
+    "source": "closed form"
+   },
+   "surface": "slope-5deg",
+   "crossings": [
+    1200.0
+   ],
+   "reasons": [],
+   "between": null
+  },
+  {
+   "name": "wholly above",
+   "test": 14,
+   "closed_form": "vertical to md 1000: z <= 992.5 < 1192.5",
+   "trajectory": {
+    "context": {
+     "type": "trajectory",
+     "depth_unit": "m",
+     "angle_unit": "deg",
+     "azimuth_reference": "grid-north",
+     "depth_datum": "KB"
+    },
+    "stations": [
+     {
+      "md": 0,
+      "inclination": 0,
+      "azimuth": 0,
+      "tvd": null
+     },
+     {
+      "md": 1000,
+      "inclination": 0,
+      "azimuth": 0,
+      "tvd": null
+     }
+    ]
+   },
+   "frame": {
+    "crs": "EPSG:23031",
+    "wellhead": {
+     "x": 600000.0,
+     "y": 5900000.0
+    },
+    "depth_reference": {
+     "name": "KB",
+     "elevation": 7.5,
+     "datum": "NAP"
+    },
+    "north": {
+     "survey_basis": "grid:EPSG:23031",
+     "rotation_deg": 0
+    },
+    "tie_in": null,
+    "source": "closed form"
+   },
+   "surface": "slope-5deg",
+   "crossings": [],
+   "reasons": [
+    "ends-above"
+   ],
+   "between": null
+  },
+  {
+   "name": "wholly below",
+   "test": 14,
+   "closed_form": "vertical from a tie-in at md 1300, tvd 1300: z >= 1292.5 > 1192.5",
+   "trajectory": {
+    "context": {
+     "type": "trajectory",
+     "depth_unit": "m",
+     "angle_unit": "deg",
+     "azimuth_reference": "grid-north",
+     "depth_datum": "KB"
+    },
+    "stations": [
+     {
+      "md": 1300,
+      "inclination": 0,
+      "azimuth": 0,
+      "tvd": null
+     },
+     {
+      "md": 2000,
+      "inclination": 0,
+      "azimuth": 0,
+      "tvd": null
+     }
+    ]
+   },
+   "frame": {
+    "crs": "EPSG:23031",
+    "wellhead": {
+     "x": 600000.0,
+     "y": 5900000.0
+    },
+    "depth_reference": {
+     "name": "KB",
+     "elevation": 7.5,
+     "datum": "NAP"
+    },
+    "north": {
+     "survey_basis": "grid:EPSG:23031",
+     "rotation_deg": 0
+    },
+    "tie_in": {
+     "md": 1300,
+     "tvd": 1300,
+     "east": 0,
+     "north": 0
+    },
+    "source": "closed form"
+   },
+   "surface": "slope-5deg",
+   "crossings": [],
+   "reasons": [
+    "starts-below"
+   ],
+   "between": null
+  },
+  {
+   "name": "one-row grid",
+   "test": 15,
+   "closed_form": "no cell",
+   "trajectory": {
+    "context": {
+     "type": "trajectory",
+     "depth_unit": "m",
+     "angle_unit": "deg",
+     "azimuth_reference": "grid-north",
+     "depth_datum": "KB"
+    },
+    "stations": [
+     {
+      "md": 0,
+      "inclination": 0,
+      "azimuth": 0,
+      "tvd": null
+     },
+     {
+      "md": 2000,
+      "inclination": 0,
+      "azimuth": 0,
+      "tvd": null
+     }
+    ]
+   },
+   "frame": {
+    "crs": "EPSG:23031",
+    "wellhead": {
+     "x": 600000.0,
+     "y": 5900000.0
+    },
+    "depth_reference": {
+     "name": "KB",
+     "elevation": 7.5,
+     "datum": "NAP"
+    },
+    "north": {
+     "survey_basis": "grid:EPSG:23031",
+     "rotation_deg": 0
+    },
+    "tie_in": null,
+    "source": "closed form"
+   },
+   "surface": "one-row",
+   "crossings": [],
+   "reasons": [
+    "no-surface-data"
+   ],
+   "between": [
+    0.0,
+    0.5
+   ]
+  },
+  {
+   "name": "one-column grid",
+   "test": 15,
+   "closed_form": "no cell",
+   "trajectory": {
+    "context": {
+     "type": "trajectory",
+     "depth_unit": "m",
+     "angle_unit": "deg",
+     "azimuth_reference": "grid-north",
+     "depth_datum": "KB"
+    },
+    "stations": [
+     {
+      "md": 0,
+      "inclination": 0,
+      "azimuth": 0,
+      "tvd": null
+     },
+     {
+      "md": 2000,
+      "inclination": 0,
+      "azimuth": 0,
+      "tvd": null
+     }
+    ]
+   },
+   "frame": {
+    "crs": "EPSG:23031",
+    "wellhead": {
+     "x": 600000.0,
+     "y": 5900000.0
+    },
+    "depth_reference": {
+     "name": "KB",
+     "elevation": 7.5,
+     "datum": "NAP"
+    },
+    "north": {
+     "survey_basis": "grid:EPSG:23031",
+     "rotation_deg": 0
+    },
+    "tie_in": null,
+    "source": "closed form"
+   },
+   "surface": "one-column",
+   "crossings": [],
+   "reasons": [
+    "no-surface-data"
+   ],
+   "between": [
+    0.0,
+    0.5
+   ]
+  },
+  {
+   "name": "smooth near miss with its band edge at md 1203.37",
+   "test": 18,
+   "closed_form": "tie-in md 1100 at tvd 1100; straight at inclination 90 - deg(0.01 (m90 - 1190)) to md 1190, an arc of radius 100 m (0.01 rad/m) through 90 degrees at m90 = 1203.37 + 100 acos(1 - 0.001/100) to md 1220, then straight; the flat surface is 0.009 m below the arc's deepest point: |f| <= 0.01 exactly for md in [1203.37, 1203.37 + 2 (m90 - 1203.37)]",
+   "trajectory": {
+    "context": {
+     "type": "trajectory",
+     "depth_unit": "m",
+     "angle_unit": "deg",
+     "azimuth_reference": "grid-north",
+     "depth_datum": "KB"
+    },
+    "stations": [
+     {
+      "md": 1100,
+      "inclination": 82.08331954994215,
+      "azimuth": 90,
+      "tvd": null
+     },
+     {
+      "md": 1190,
+      "inclination": 82.08331954994215,
+      "azimuth": 90,
+      "tvd": null
+     },
+     {
+      "md": 1220,
+      "inclination": 99.27205340386683,
+      "azimuth": 90,
+      "tvd": null
+     },
+     {
+      "md": 1240,
+      "inclination": 99.27205340386683,
+      "azimuth": 90,
+      "tvd": null
+     }
+    ]
+   },
+   "frame": {
+    "crs": "EPSG:23031",
+    "wellhead": {
+     "x": 600000.0,
+     "y": 5900000.0
+    },
+    "depth_reference": {
+     "name": "KB",
+     "elevation": 7.5,
+     "datum": "NAP"
+    },
+    "north": {
+     "survey_basis": "grid:EPSG:23031",
+     "rotation_deg": 0
+    },
+    "tie_in": {
+     "md": 1100,
+     "tvd": 1100,
+     "east": 0,
+     "north": 0
+    },
+    "source": "closed form"
+   },
+   "surface": "near-miss-smooth",
+   "crossings": [],
+   "reasons": [
+    "grazing",
+    "ends-above"
+   ],
+   "between": [
+    1203.37,
+    1204.2644279363553
+   ]
+  }
+ ]
+}

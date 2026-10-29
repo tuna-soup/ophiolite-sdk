@@ -1,0 +1,24 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "ophiolite.well-residual/1",
+  "kind": "normalized",
+  "lifecycle": "preview",
+  "display_name": "Residual result",
+  "description": "The rows of a residual result as published, in order, with the surface, the formation and the display unit, and the counts of rows computed and not computed and of selected wellbores; depths and residuals are metres; nothing is looked up, recomputed or defaulted.",
+  "payload_schema": "ophiolite.well-residual/1",
+  "role": "normalized",
+  "media_types": [
+    "application/json"
+  ],
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "parsing_policy": "typed-strict/1",
+    "mapping": "well-residual/1"
+  },
+  "mappings": [
+    "ophiolite.mapping/typed-standards/1"
+  ],
+  "table_target": {
+    "none": "not-a-table"
+  }
+}

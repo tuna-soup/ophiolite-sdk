@@ -6,6 +6,7 @@ from types import SimpleNamespace
 import math
 import os
 from pathlib import Path
+import shlex
 import subprocess
 import uuid
 import sys
@@ -152,7 +153,8 @@ def parser():
     steps=procs.add_subparsers(dest='procedure_action',required=True)
     made=steps.add_parser('new',parents=[common],help='Write a starting procedure folder')
     made.add_argument('folder',type=Path);made.add_argument('--step',required=True,choices=['read','source','process','send','check'])
-    made.add_argument('--label',required=True,help='What the procedure does, in words a person reads')
+    made.add_argument('--kind',default=None,help='What the procedure reads, makes or sends: a word such as well-tops or las')
+    made.add_argument('--label',help='What the procedure does, in words a person reads (default: from --step and --kind)')
     checked=steps.add_parser('validate',parents=[common],help='Say whether Ophiolite would accept a procedure folder, and why not')
     checked.add_argument('folder',type=Path)
     ran=steps.add_parser('run',parents=[common],help='Run a procedure on local files; writes its outputs and run.json into a new folder')
@@ -166,6 +168,8 @@ def parser():
     ran.add_argument('--declared',action='append',default=[],help='SLOT=PATH: a JSON file of that data\'s declarations')
     ran.add_argument('--system',action='append',default=[],help='SLOT=PATH: a local JSON file with a source\'s connection settings (never recorded)')
     ran.add_argument('--setting',action='append',default=[],help='NAME=VALUE; once per setting')
+    ran.add_argument('--item',action='append',default=[],metavar='SLOT=ITEM[@N]|SLOT=@ASSET:REVISION',help='With --from-project: a project version to run on, by name and version number (default: its latest), or exactly as @ASSET:REVISION')  # E110 (D9)
+    ran.add_argument('--reference',metavar='FILE|ITEM@N',help='With --from-project, for a check procedure: the reference, a file on this computer or a project version')
     for p in (ran,):p.add_argument('--configuration',type=Path,default=Path('configuration.json'));p.add_argument('--credentials',type=Path)
     catalogue=lambda name,help:steps.add_parser(name,parents=[common],help=help)  # E105b: the project's catalogue (needs the project's configuration)
     reg=catalogue('register','Register a procedure folder as a private version of this project')
@@ -183,6 +187,7 @@ def parser():
     other.add_argument('--version',type=int,help='Run this version of the procedure instead of the one that made it')
     other.add_argument('--folder',type=Path,help='Run a local procedure folder (it must be a version in the project)')
     again.add_argument('--output',type=Path,required=True,help='A new folder for the outputs');again.add_argument('--name')
+    again.add_argument('--for',dest='for_',metavar='OUTCOME',help='Publish the same result again for this outcome, so its current version checks it')  # E120
     again.add_argument('--yes',action='store_true',help='Trust the version without asking (recorded as your trust)')
     for p in (reg,shown,one,published,again)+tuple(steps.choices[n] for n in ('enable','withdraw','trust')):
         p.add_argument('--configuration',type=Path,default=Path('configuration.json'));p.add_argument('--credentials',type=Path)
@@ -197,10 +202,12 @@ def parser():
     export.add_argument('--asset',required=True,action='append',help='Repeat --asset and --revision once per exact revision');export.add_argument('--revision',required=True,action='append')
     export.add_argument('--curve',action='append',help='Well log curves; omit for well tops, trajectories and grids');export.add_argument('--output',type=Path,required=True)
     export.add_argument('--no-groups',action='store_true',help='Leave out the result groups observed at export time')
-    typed=sub.add_parser('read-data',help='Read well tops, a trajectory or a horizon grid at an exact revision and save it')
+    typed=sub.add_parser('read-data',help='Read well tops, a trajectory, a horizon grid or a kept table at an exact revision and save it; --format parquet, geoparquet or csv saves one file')
     typed.add_argument('--configuration',type=Path,default=Path('configuration.json'))
     typed.add_argument('--credentials',type=Path)
-    typed.add_argument('--asset',required=True);typed.add_argument('--revision',required=True);typed.add_argument('--output',type=Path,required=True)
+    typed.add_argument('--asset',required=True);typed.add_argument('--revision',required=True);typed.add_argument('--output','--out',type=Path,required=True)
+    typed.add_argument('--format',choices=['parquet','geoparquet','csv'],help='Save the revision as this one file at --output (a table, tops, a trajectory, a point set or a well log), checked against the file the server holds')
+    typed.add_argument('--curve',action='append',help='--format with a well log: the curves to save (repeat); omitted, every stored curve')
     derived=sub.add_parser('publish-derived',help='Publish a file you derived from exact revisions, with its declared method (a command id or a work folder is required)')
     derived.add_argument('--configuration',type=Path,default=Path('configuration.json'));derived.add_argument('--credentials',type=Path)
     derived.add_argument('file',type=Path,help='The derived file (LAS 2.0 or one of the typed formats)')
@@ -269,6 +276,19 @@ def parser():
     sources.add_argument('--require-all-columns',action='store_true',help='read: refuse (nothing written) when a column of the table is not read')
     orgs=project(sub.add_parser('org-connections',help="Your organisation's database connections that you use or administer, with your own readiness"))
     orgs.add_argument('action',choices=['list']);orgs.add_argument('--organization',required=True,help='The organisation id')
+    # E67b: who had access to what, and when, and the teams (read verbs; an access key, never a saved sign-in)
+    history=project(sub.add_parser('access-history',help='Who had access to what, and when: the project\'s history (administrators) or one person\'s (organisation owners), or a CSV or JSON Lines file'))
+    which=history.add_mutually_exclusive_group(required=True)
+    which.add_argument('--project',action='store_true',help='The history of the configuration\'s project')
+    which.add_argument('--person',metavar='USER_ID',help='One person\'s history in the organisation given with --organization')
+    history.add_argument('--organization',help='--person: the organisation id')
+    history.add_argument('--kind',action='append',metavar='KIND',help='Only entries of this kind (repeat)')
+    history.add_argument('--since',help='From this instant or day (inclusive), UTC');history.add_argument('--until',help='Before this instant or day, UTC')
+    history.add_argument('--export',choices=['csv','jsonl'],help='Write the whole history as one file (needs --out)')
+    history.add_argument('--out',type=Path,help='--export: the file to write')
+    teams=project(sub.add_parser('teams',help='The teams: the project\'s (administrators), or an organisation\'s with --organization (owners)'))
+    teams.add_argument('--organization',help='The organisation id: its teams (owners)')
+    teams.add_argument('--team',help='With --organization: one team\'s people and projects')
     # E94: how a result was made, what changed, what depends on it, and making it again
     story=project(sub.add_parser('story',help='How an exact result version was made: its inputs and their inputs, a page at a time'))
     story.add_argument('asset');story.add_argument('revision');story.add_argument('--cursor',help='The next_cursor of the previous page')
@@ -329,6 +349,15 @@ def parser():
     who.add_argument('--snapshot',type=Path,help='Change the snapshot you reviewed (from --show --json) instead of reading it now')
     who.add_argument('--reason',help='Why, when the change is narrower (kept with the change)')
     who.add_argument('--dry-run',action='store_true',help='Say who would be told and who would lose access; change nothing')
+    held_rights=project(sub.add_parser('rights',help='The rights to use data: show them, or attach or renew them (project administrators, or who added the original; E35a)'))
+    held_rights.add_argument('action',choices=['show','attach','renew'])
+    held_rights.add_argument('--kind',choices=['upload','release','connection'],required=True,help='What the rights are for')
+    held_rights.add_argument('--ref',required=True,help='The original\'s asset id, the release id, or the connection id')
+    held_rights.add_argument('--key',help='connection: the target\'s key inside the connection')
+    held_rights.add_argument('--uses',help='attach, renew: what they permit, from read,derive,export,model-use (comma-separated)')
+    held_rights.add_argument('--last-day',help='attach, renew: the last permitted day, YYYY-MM-DD (UTC)')
+    held_rights.add_argument('--delete-on-end',action='store_true',help='attach, renew: remove the data when the rights end')
+    held_rights.add_argument('--generation',type=int,help='renew: the generation you read (default: read it now)')
     layouts=project(sub.add_parser('layouts',help='The project\'s layouts: list, show NAME, rename NAME NEW, retire NAME, use-again NAME, export [NAME...] --out FILE, import FILE, keep CONNECTION TABLE, update NAME, reconnect NAME CONNECTION TABLE (E89)'))
     layouts.add_argument('action',choices=['list','show','rename','retire','use-again','export','import','keep','update','reconnect'])
     layouts.add_argument('names',nargs='*',metavar='ARG',help='the layout name and what the action takes')
@@ -343,13 +372,71 @@ def parser():
     upload.add_argument('--audience',action='append',metavar='WHO',help='Who can see the files: project, me, or project members by id (PERSON or ID,ID; repeat); without it, the project\'s setting for new files (E90)')
     upload.add_argument('--use-project-defaults',action='store_true',help='Keep the project\'s default for every field a file leaves open (E90); --declare KIND:KEY=project-default keeps one')
     upload.add_argument('--well-notes',default='',help='Well context notes kept with every file')
+    upload.add_argument('--source',dest='source_name',metavar='NAME',help='Name where these files come from ("Petrel export"); sending them again under this name reports each file unchanged, changed or new')
+    sent=upload.add_mutually_exclusive_group()
+    sent.add_argument('--complete',dest='send',action='store_const',const='complete',help='With --source: this is everything in that source; a file it sent before and this send does not list is marked gone (nothing is removed). A source emptied completely is not marked gone')
+    sent.add_argument('--incremental',dest='send',action='store_const',const='incremental',help='With --source: only some files of that source; nothing is marked gone (the default)')
+    upload.add_argument('--scope',metavar='DIR',help='With --source --complete: the folder inside the source this send is complete for, like wells/las')
     upload.add_argument('--rights-confirmed',action='store_true',help='I have permission to retain these files, derive results and share within this audience')
     upload.add_argument('--declare',action='append',default=[],metavar='KIND:KEY=VALUE',help='Say what the values of that kind\'s files mean (repeat); other kinds are not touched')
+    shared_basis=upload.add_mutually_exclusive_group()  # E123 S3b
+    shared_basis.add_argument('--share-basis',dest='share_basis',action='store_const',const=True,help='The files the report proposes share one coordinate system, units and datum: answer them once with --basis')
+    shared_basis.add_argument('--own-basis',dest='share_basis',action='store_const',const=False,help='The files the report proposes each have their own: --basis answers them one by one')
+    upload.add_argument('--basis',action='append',default=[],metavar='ITEM=VALUE',help='Answer a basis question for every file that asks it, ITEM in words: coordinate system, map unit, vertical unit, vertical values, vertical datum, depth unit or time unit (repeat)')
     upload.add_argument('--skip-decisions',action='store_true',help='Skip every file that still needs a decision')
     upload.add_argument('--associate-matches',action='store_true',help='Link each file to the one wellbore whose name its header names')
     upload.add_argument('--report',type=Path,help='Write the report to this .csv (or .json) file')
+    upload.add_argument('--fidelity',type=Path,help='For a catalogue manifest on this computer: write the catalogue\'s fidelity document (osd.fidelity/1) to this .json file, after the report')
     upload.add_argument('--new',action='store_true',help='Start another upload instead of continuing the unfinished upload of this folder')
     upload.add_argument('--layout',metavar='NAME',help='A table file: add it with this project layout\'s mapping (E89). Without it a table that matches a layout is not added')
+    # E60: public repositories (NLOG): the same words as client.public_repositories
+    repos=project(sub.add_parser('repositories',help='Public repositories (NLOG): search SERVICE --name N, bring-in SERVICE CODE... --audience P, check SERVICE [CODE...]'))
+    repos.add_argument('action',choices=['search','bring-in','check'])
+    repos.add_argument('service',help='The public repository, for example nlog')
+    repos.add_argument('codes',nargs='*',metavar='CODE',help='bring-in, check: the boreholes, by the service\'s code')
+    repos.add_argument('--name',help='search: a borehole name or code (at least three characters)')
+    repos.add_argument('--field',help='search: a field\'s name, exactly as the service lists it')
+    repos.add_argument('--side',choices=['ON','OFF'],help='search: ON (on land) or OFF (offshore)')
+    repos.add_argument('--include',action='append',metavar='KIND',choices=['location','tops','survey','logs','all-logs'],help='bring-in: what to bring in (repeat; default: position, tops, survey and composite logs)')
+    repos.add_argument('--audience',action='append',default=[],metavar='PERSON',help='bring-in: a project member who may read what comes in (repeat)')
+    repos.add_argument('--report',type=Path,help='bring-in: write the report to this .csv (or .json) file')
+    # E107a: a file of a folder upload that can be read on your computer, read here with one of the project's read procedures
+    intake=sub.add_parser('intake',help='Read a file of an upload on this computer with a read procedure of the project, and send what it made')
+    reads=intake.add_subparsers(dest='intake_action',required=True)
+    readp=project(reads.add_parser('read',parents=[common],help='Run the read procedure listed for FILE of upload RUN on this computer and send each file it made into that upload'))
+    readp.add_argument('run',metavar='RUN',help='The upload (its run id, as the upload report prints it)')
+    readp.add_argument('file',type=Path,metavar='FILE',help='The file on this computer: the one chosen for that upload')
+    readp.add_argument('--keep-original',action='store_true',help='Also keep the original beside what was read from it')
+    readp.add_argument('--version',metavar='DIGEST',help='The read procedure version to run, when several can read the file')
+    readp.add_argument('--folder',type=Path,help='Where the file\'s read state is kept (default: this computer\'s Ophiolite state folder)')
+    readp.add_argument('--setting',action='append',default=[],metavar='NAME=VALUE',help='A setting of the read procedure; once per setting')
+    readp.add_argument('--yes',action='store_true',help='Trust the version without asking (recorded as your trust)')
+    # E108: a source procedure of the project runs on this computer and its results are added to the project
+    source=sub.add_parser('source',help='Run a source procedure of the project on this computer and add what it reads from a team\'s system')
+    sourced=source.add_subparsers(dest='source_action',required=True)
+    srun=project(sourced.add_parser('run',parents=[common],help='Run the highest enabled version of NAME (or --version) and add each file it makes through one upload'))
+    srun.add_argument('name',metavar='NAME',help='The procedure\'s name in the project\'s catalogue')
+    srun.add_argument('--system',action='append',default=[],metavar='SLOT=FILE',help='The local JSON file with the system\'s configuration (never sent)')
+    srun.add_argument('--setting',action='append',default=[],metavar='NAME=VALUE',help='A setting of the procedure; once per setting')
+    srun.add_argument('--system-label',help='The team\'s system in words, as people read it in the project (default: the procedure\'s name for it)')
+    srun.add_argument('--folder',type=Path,help='A new folder that keeps the files the run made (default: removed after the upload)')
+    srun.add_argument('--work',type=Path,default=Path('.ophiolite-held'),help='The folder that remembers what earlier runs added, so a later run sends new versions (default .ophiolite-held, as check/get/send)')
+    srun.add_argument('--version',type=int,help='This version number (your own private ones included)')
+    srun.add_argument('--yes',action='store_true',help='Trust the version without asking (recorded as your trust)')
+    srun.add_argument('--attribution',help='Where these files come from; without it, the project\'s source attribution')
+    srun.add_argument('--audience',action='append',metavar='WHO',help='Who can see the files: project, me, or project members by id (repeat); without it, the project\'s setting')
+    # E109: a send procedure of the project delivers exact versions to a team's system, from this computer
+    deliver=project(sub.add_parser('deliver',help='Deliver exact versions to a team\'s system with a send procedure of the project, from this computer'))
+    deliver.add_argument('name',metavar='NAME',help='The send procedure\'s name in the project\'s catalogue')
+    deliver.add_argument('--system',action='append',default=[],metavar='SLOT=FILE',help='The local JSON file with the team system\'s configuration (never sent)')
+    deliver.add_argument('--item',action='append',default=[],metavar='SLOT=ITEM[@N]|SLOT=@ASSET:REVISION',help='The item to deliver and its version number (default: its latest when chosen), or exactly as @ASSET:REVISION; repeat per version')
+    deliver.add_argument('--version',type=int,help='This version of the procedure (your own private ones included)')
+    deliver.add_argument('--yes',action='store_true',help='Trust the procedure version without asking (recorded as your trust)')
+    deliver.add_argument('--setting',action='append',default=[],metavar='NAME=VALUE',help='A setting of the procedure; once per setting')
+    deliver.add_argument('--wait',type=float,metavar='S',help='How long to wait for a delivery still running on this computer, in seconds')
+    deliver.add_argument('--set-aside',action='store_true',help='Leave an unknown outcome as unknown and clear it on this computer')
+    deliver.add_argument('--as',dest='as_',metavar='OUTCOME',help='Deliver as this outcome: sent only when the project accepts the version under it for this destination (E120)')
+    deliver.add_argument('--work',type=Path,default=Path('.ophiolite-held'),help='The folder that keeps this computer\'s pending deliveries (default .ophiolite-held)')
     init=sub.add_parser('init',help='Start an application from a packaged template (map-application, derive-and-publish, sync-worker, notebook, agent-workflow)')
     init.add_argument('template',nargs='?',help='The template name; omit with --list');init.add_argument('--output',type=Path,help='An empty or new folder (default: ./TEMPLATE)')
     init.add_argument('--list',action='store_true',help='List the packaged templates')
@@ -384,7 +471,7 @@ def parser():
     cc.add_argument('--tolerance',type=float,help='The allowed difference in the compared unit (default: exactly equal)')
     cc.add_argument('--relative',action='store_true',help='--tolerance is a fraction of each value instead')
     cc.add_argument('--unit',help='The unit of --tolerance, when the file does not say it')
-    cc.add_argument('--interpretation',type=Path,help='A grid: a .json with the confirmed crs, horizontal_unit, value_unit, value_meaning, direction and vertical_datum')
+    cc.add_argument('--interpretation',type=Path,help='A .json of confirmed declarations. A grid: crs, horizontal_unit, value_unit, value_meaning, direction and vertical_datum. Tops: depth_unit, depth_basis (only same-as-log compares today) and wellbore_confirmed: true; no depth_datum. A survey: depth_unit, azimuth_reference, depth_datum, grid_crs for grid north, and wellbore_confirmed: true')
     cc.add_argument('--command-id',help='The same id answers the same comparison')
     pub=verbs.add_parser('publishers',help='Who may publish checks besides the project administrators (administrators only)')
     pv=pub.add_subparsers(dest='change',required=True)
@@ -393,6 +480,64 @@ def parser():
         if name!='list':
             one.add_argument('principal',help='The member id, or a workload client id with --workload')
             one.add_argument('--workload',action='store_true',help='The principal is a workload client id')
+    # E120: outcomes: what the project accepts for a kind of result and where it is delivered; s1: the states of a result
+    outs=sub.add_parser('outcomes',help='Outcomes: what this project accepts for residual results and where they are delivered (administrators change them)')
+    overbs=outs.add_subparsers(dest='action',required=True)
+    overb=lambda name,help:project(overbs.add_parser(name,help=help,parents=[common]))
+    for name,help in (('declare','Declare an outcome over residual results; it is enabled at version 1'),
+                      ('revise','Revise an outcome: its next version, from the same options; earlier versions are kept')):
+        o=overb(name,help)
+        if name=='revise':o.add_argument('outcome',help='The outcome\'s name, as listed')
+        o.add_argument('--label',required=name=='declare',help='Its name in words, such as "Tops within 5 m" (revise: a new name)')
+        o.add_argument('--tolerance',type=float,required=name=='declare',help='Every computed residual must be within this')
+        o.add_argument('--unit',choices=['m','ft'],default='m' if name=='declare' else None,help='The unit of --tolerance (default m)')
+        o.add_argument('--not-computed',dest='not_computed',choices=['allowed','refused'],default='allowed' if name=='declare' else None,
+                       help='Whether rows with no computed residual are allowed (default allowed)')
+        o.add_argument('--procedure',required=name=='declare',help='The send procedure that delivers it, by its name in the catalogue')
+        o.add_argument('--destination',required=name=='declare',help='Where it is delivered, in words (no address), such as "Team database"')
+    for name,help in (('enable','Enable an outcome'),('disable','Disable an outcome; it is kept and can be enabled again'),
+                      ('withdraw','Withdraw an outcome for good; its name is free again'),('get','One outcome with every version and every action')):
+        overb(name,help).add_argument('outcome',help='The outcome\'s name, as listed')
+    overb('list','The outcomes of this project')
+    for name,help in (('states','The outcome states of one result version: accepted, rejected or not checked, in words'),
+                      ('evaluate','Evaluate the outcomes over one result version where no record exists yet, then its states')):
+        overb(name,help).add_argument('item',metavar='ITEM[@N]|@ASSET:REVISION',help='The result by its name, and its version number (default: its latest); or exactly, as @ASSET:REVISION')
+    # E119b: residuals at wells, run on this computer from the project's catalogue (nothing is published)
+    resid=sub.add_parser('residuals',help='Residuals at wells: run a residual procedure on a well selection and a surface, on this computer')
+    rr=project(resid.add_subparsers(dest='action',required=True).add_parser('run',parents=[common],
+               help='Bind the selection, its linked tops and the surface, then run the residual procedure; writes residuals.json, publishes nothing'))
+    rr.add_argument('name',help='The residual procedure, by its name in the catalogue (such as residual-at-wells)')
+    rr.add_argument('--selection',required=True,metavar='@ASSET:REVISION',help='The saved well selection version')
+    rr.add_argument('--surface',required=True,metavar='@ASSET:REVISION',help='The grid surface version')
+    rr.add_argument('--formation',required=True,help='The formation the surface represents, as the tops name it')
+    rr.add_argument('--display-unit',dest='display_unit',choices=['m','ft'],default='m',help='Show depths in metres or feet (default m)')
+    rr.add_argument('--output',type=Path,required=True,help='A new folder for the run')
+    rr.add_argument('--version',type=int,help='The procedure version (default: the newest you may run)')
+    rr.add_argument('--yes',action='store_true',help='Run a version you have not trusted without asking')
+    # E112 s2: a recipe runs the steps a person would type, one journaled step at a time, and resumes in its work folder
+    recipes=sub.add_parser('recipes',help='Run a recipe (the residual report again) step by step, and continue it after a stop')
+    rverbs=recipes.add_subparsers(dest='action',required=True)
+    rrun=project(rverbs.add_parser('run',parents=[common],help='Run RECIPE in --work; the same command again continues from the first step not finished'))
+    rrun.add_argument('recipe',type=Path,help='The recipe file (ophiolite.recipe/1)')
+    rrun.add_argument('--work',type=Path,required=True,help='The work folder: a new one, or the one this run of the recipe started in')
+    rrun.add_argument('--input',action='append',default=[],metavar='NAME=VALUE',help='A recipe input: an item as ITEM, ITEM@N or @ASSET:REVISION, a file as its path (repeat)')
+    rrun.add_argument('--set-aside',dest='set_aside',metavar='STEP',help='Set aside the delivery step STEP whose outcome is unknown, then continue')
+    rrun.add_argument('--wait',type=float,default=0,help='Seconds a delivery may wait for its outcome (default 0)')
+    rrun.add_argument('--yes',action='store_true',help='Run procedure versions you have not trusted')
+    rshow=rverbs.add_parser('show',parents=[common],help='Where the recipe in WORK is, step by step; reads this computer only')
+    rshow.add_argument('work',type=Path,help='The work folder')
+    # E129 Sa: a starter pack (osd.starter/1) of one catalogue record, built from a pack definition
+    starter=sub.add_parser('starter',help='Build a starter pack of one catalogue record from a pack definition, then finalise it with its artefact keys')
+    sverbs=starter.add_subparsers(dest='action',required=True)
+    sbuild=project(sverbs.add_parser('build',parents=[common],help='Land the inputs, then write starter.json (unpublished, no keys), its fidelity document and the python target; the same command again continues'))
+    sbuild.add_argument('definition',type=Path,help='The pack definition (ophiolite.starter-definition/1, JSON)')
+    sbuild.add_argument('--out',type=Path,required=True,help='The pack folder: a new one, or the one this build started in')
+    sbuild.add_argument('--catalogue',type=Path,required=True,help="The catalogue's built records.json")
+    sbuild.add_argument('--verification',type=Path,required=True,help='The folder of verification results (<record id with / as __>.json)')
+    sbuild.add_argument('--custody',type=Path,required=True,help='The folder of custody documents (<sha256>.json)')
+    sfinal=sverbs.add_parser('finalise',parents=[common],help="Write each artefact's key from its held custody document; reads this computer only")
+    sfinal.add_argument('out',type=Path,help='The pack folder starter build wrote')
+    sfinal.add_argument('--custody',type=Path,required=True,help='The folder of custody documents, with the derived ones the upload of files/ wrote')
     skills=sub.add_parser('skills',help='Locate packaged SDK guidance')
     skills.add_subparsers(dest='action',required=True).add_parser('path')
     return parser
@@ -581,6 +726,94 @@ def _checks(args,client):
     return done(args,told.publisher_line({'principal':args.principal},names,'can' if args.change=='add' else 'can no longer'),answer)
 
 
+def _output_parent(output):
+    """adhoc-e121-words (E121 O4): a run's --output folder is made new, inside a folder that must exist; a missing one
+    is refused by name before anything runs (it used to stop late as a local failure)."""
+    parent=Path(output).absolute().parent
+    if not parent.is_dir():raise Refused('Not run: the folder %s for --output does not exist; create it first.' % parent)
+
+
+def _residuals(args,client):
+    """E119b: residuals run NAME --selection --surface --formation --output. Refusals are the binding's sentences."""
+    from . import residuals
+    _output_parent(args.output)
+    def ask(question):
+        print(question['text']+' [y/N] ',end='',flush=True)
+        return sys.stdin.readline().strip().lower() in ('y','yes')
+    result=residuals.run(client,args.name,args.output,args.selection,args.surface,args.formation,display_unit=args.display_unit,
+                         version=args.version,yes=args.yes,prompt=ask if sys.stdin.isatty() else None)
+    return done(args,result['sentence'],{'ran':True,**result})
+
+
+def _starter(args,client=None):
+    """E129 Sa: starter build DEFINITION --out --catalogue --verification --custody, and starter finalise OUT --custody
+    (offline). Refusals are the pack's sentences; exit 1 refused, 3 access, 4 a newer version in the project."""
+    from . import starter
+    if args.action=='finalise':
+        doc=starter.finalise(args.out,args.custody)
+        return done(args,'Finalised %s: %d artefact keys written; it stays unpublished.' % (doc['id'],len(doc['targets'][0]['artefacts'])),{'finalised':True,'id':doc['id'],'starter':str(args.out/'starter.json')})
+    doc=starter.build(client,args.definition,args.out,catalogue=args.catalogue,verification=args.verification,custody=args.custody)
+    return done(args,'Built %s in %s: %d inputs landed, %d artefacts in files/ (unpublished, no keys yet).' % (doc['id'],args.out,len(doc['inputs']),len(doc['targets'][0]['artefacts'])),
+                {'built':True,'id':doc['id'],'starter':str(args.out/'starter.json')})
+
+
+def _recipes(args,client=None):
+    """E112 s2: recipes run RECIPE --work W --input NAME=VALUE (exit 0 finished or set aside, 1 refused, failed or
+    stopped, 4 a delivery's outcome unknown) and recipes show W (offline: the journal in words; --json the journal)."""
+    from . import procedures,recipe_runs
+    def refuse(error):
+        if args.json:print(json.dumps({'error':{'code':error.code,'message':str(error),'field':error.field,'details':error.details}},indent=2,default=str))
+        else:print(str(error),file=sys.stderr)
+        raise SystemExit(EXIT['refused'])
+    try:
+        if args.action=='show':
+            shown=recipe_runs.show(args.work)
+            return done(args,'\n'.join(shown['lines']),shown['journal'])
+        inputs={}
+        for given in args.input:
+            name,sep,value=given.partition('=')
+            if not (sep and name and value):raise Refused('Give each recipe input as --input NAME=VALUE.')
+            if name in inputs:raise Refused('The input %s is given twice; give each input once.' % name)
+            inputs[name]=value
+        said=recipe_runs.run(client,args.recipe,args.work,inputs,set_aside=args.set_aside,yes=args.yes,wait=args.wait)
+    except procedures.NotRun as error:refuse(error)
+    done(args,said['sentence'],said)
+    if said['state']=='unknown':raise SystemExit(EXIT['conflict'])
+    if said['state']!='finished':raise SystemExit(EXIT['refused'])
+    return said
+
+
+def _outcomes(args,client):
+    """E120: outcomes declare | revise | enable | disable | withdraw | list | get | states | evaluate. Words by default; each verb's
+    documented JSON under --json. An outcome is named by its name; its id is in --json."""
+    from . import outcomes as told
+    if args.action=='list':
+        found=client.outcome_list()
+        return done(args,'\n'.join(told.summary_line(o) for o in found) or 'This project has no outcomes yet.',{'outcomes':found})
+    if args.action=='declare':
+        o=client.outcome_declare(told.residual_declaration(args.label,args.tolerance,args.unit,args.procedure,args.destination,args.not_computed))
+        return done(args,'Declared '+told.summary_line(o),o)
+    if args.action in ('states','evaluate'):  # E120 s1
+        found=(client.outcome_states if args.action=='states' else client.outcome_evaluate)(*client.result_version(args.item))
+        return done(args,told.state_lines(found),found)
+    named=client.outcome_named(args.outcome)
+    if args.action=='get':
+        o=client.outcome_get(named['outcome_id'])
+        lines=[told.summary_line(o)]+['Version %d, declared by %s.' % (v['version'],v['declared_by']) for v in o['versions']]
+        lines+=['%d. %s by %s (version %d).' % (a['n'],a['action'].capitalize(),a['by'],a['version']) for a in o['actions']]
+        return done(args,'\n'.join(lines),o)
+    if args.action=='revise':
+        current=named['declaration'];settings=current['rule']['settings']
+        declaration=told.residual_declaration(args.label or current['label'],settings['tolerance']['value'] if args.tolerance is None else args.tolerance,
+                                              args.unit or settings['tolerance']['unit'],args.procedure or current['destination']['procedure'],
+                                              args.destination or current['destination']['label'],args.not_computed or settings['not_computed'])
+        o=client.outcome_revise(named['outcome_id'],declaration)
+        return done(args,'Revised '+told.summary_line(o),o)
+    o=getattr(client,'outcome_'+args.action)(named['outcome_id'])
+    text={'enable':'"%s" is enabled.','disable':'"%s" is disabled; it is kept and can be enabled again.','withdraw':'"%s" is withdrawn; its name is free again.'}[args.action]
+    return done(args,text % o['label'],o)
+
+
 def _curves(args,client):
     """E100a: ophiolite curves window; --json prints the same document as CurveWindow.to_dict()."""
     if args.output is not None and (args.output.exists() or args.output.is_symlink()):raise Refused('The output file already exists; choose a new file.')
@@ -591,6 +824,31 @@ def _curves(args,client):
     what='%d samples (exact)' % len(window) if window.exact else '%d blocks at level %d (for display; read the exact curve for analysis)' % (len(window),window.level)
     return done(args,'%s %s..%s %s: %s in %d page%s%s' % (args.curve,args.top,args.base,window.depth_unit or 'depth unit unknown',what,window.pages,'' if window.pages==1 else 's',
                                                         ' - written to %s' % args.output if args.output else ''),document)
+
+
+def _access(args,client):
+    """E67b: access-history and teams, with the client's credential (an access key; a saved sign-in is refused)."""
+    from .account import Account
+    account=lambda:Account(client.url,client.credential,client.http)
+    if args.command=='teams':
+        if args.team and not args.organization:raise Refused('Give --team with --organization.')
+        if args.organization and args.team:
+            team=account().team(args.organization,args.team)
+            return done(args,'\n'.join([team.get('name') or args.team]+['  '+(m.get('name') or m.get('user_id')) for m in team.get('members',[])]),{'team':team})
+        rows=account().teams(args.organization) if args.organization else client.access_teams()
+        return done(args,'\n'.join(r.get('name') or r.get('id') for r in rows) or 'No team.',{'teams':rows})
+    if args.person and not args.organization:raise Refused('Give --person with --organization.')
+    if (args.export is None)!=(args.out is None):raise Refused('Give --export and --out together.')
+    filters={'kinds':args.kind,'since':args.since,'until':args.until}
+    if args.export:
+        out=(client.export_access_history(args.export,args.out,**filters) if args.project
+             else account().export_person_history(args.organization,args.person,args.export,args.out,**filters))
+        return done(args,'Access history saved to '+str(out),{'out':str(out)})
+    entries=client.access_history(**filters) if args.project else account().person_history(args.organization,args.person,**filters)
+    def line(e):
+        parts=e.get('parts') or {}
+        return ' '.join(x for x in (e.get('at'),e.get('kind'),parts.get('actor'),parts.get('subject'),parts.get('team'),parts.get('project'),parts.get('key')) if x)
+    return done(args,'\n'.join(line(e) for e in entries) or 'No access history.',{'entries':entries})
 
 
 def _journey(args,client):
@@ -723,6 +981,33 @@ def _storage(args,client):
     return report
 
 
+def _repositories(args,client):
+    """E60: repositories search SERVICE --name N | --field F [--side ON|OFF]; bring-in SERVICE CODE... [--include K] --audience P
+    [--report FILE] (exits 0 when every file is added or already here and nothing was left unread, 4 otherwise);
+    check SERVICE [CODE...]. --json prints what client.public_repositories answers."""
+    repos=client.public_repositories
+    if args.action!='search' and (args.name or args.field or args.side):raise Refused('Only search takes --name, --field or --side.')
+    if args.action!='bring-in' and (args.include or args.audience or args.report):raise Refused('Only bring-in takes --include, --audience or --report.')
+    if args.action=='search':
+        if args.codes:raise Refused('search takes --name or --field, not codes.')
+        rows=repos.search(args.service,name=args.name,field=args.field,side=args.side)
+        lines=['%d well%s found' % (len(rows),'' if len(rows)==1 else 's')]+['%s  %s  %s  %s  %s%s' % (r['code'],r['name'] or '',r['field'] or '',r['operator'] or '',
+               r['public_since'] or '','  Already in this project' if r['in_project'] else '') for r in rows]
+        return done(args,'\n'.join(lines),{'service':args.service,'items':rows})
+    if args.action=='check':
+        answer=repos.check(args.service,args.codes or None)
+        lines=[answer['sentence']]+['  %s/%s: %s%s' % (f['code'],f['name'],f['state'],' ('+', '.join(f['changed'])+')' if f['changed'] else '') for f in answer['files'] if f['state']!='unchanged']
+        return done(args,'\n'.join(lines),answer)
+    if not args.codes:raise Refused('Name the boreholes: ophiolite repositories bring-in %s CODE...' % args.service)
+    def progress(report):
+        if not args.json:print('Adding files... %d of %d.' % (sum(v for k,v in report.counts.items() if k!='not-sent'),report.view['files']),file=sys.stderr,flush=True)
+    report=repos.bring_in(args.service,args.codes,include=args.include,audience=args.audience,progress=progress)
+    if args.report:report.save(args.report)
+    done(args,report.text()+('\nReport written to %s' % args.report if args.report else ''),report.to_dict())
+    report.exit_code=0 if report.ok else EXIT['conflict']
+    return report
+
+
 def _counted(counts):
     return '%d added, %d already here, %d skipped' % (counts['created'],counts['already_here'],counts['skipped'])
 
@@ -806,6 +1091,37 @@ def _templates(args,client):
     return answer
 
 
+DAY_MONTHS=('January','February','March','April','May','June','July','August','September','October','November','December')
+
+
+def day_words(day):
+    """E35a (F16): '31 December 2026' for the last permitted day '2026-12-31' (a date, not an instant: no zone)."""
+    from datetime import date
+    try:d=date.fromisoformat(day)
+    except (TypeError,ValueError):return str(day)
+    return '%d %s %d'%(d.day,DAY_MONTHS[d.month-1],d.year)
+
+
+def _rights(args,client):
+    """E35a: show, attach or renew the rights to use data, in the deployment's labels (F18); ids only with --json."""
+    target=dict(key=args.key)
+    if args.action=='show':state=client.rights(args.kind,args.ref,**target)
+    else:
+        if not (args.uses and args.last_day):raise Refused('Give --uses and --last-day.')
+        change=dict(uses=[u for u in args.uses.split(',') if u],last_day=args.last_day,delete_on_end=args.delete_on_end,**target)
+        if args.action=='attach':state=client.attach_rights(args.kind,args.ref,**change)
+        else:
+            generation=args.generation if args.generation is not None else ((client.rights(args.kind,args.ref,**target).get('basis') or {}).get('generation'))
+            if generation is None:raise Refused('No rights are recorded for this yet; attach them first.')
+            state=client.renew_rights(args.kind,args.ref,expected_generation=generation,**change)
+    basis=state.get('basis')
+    if basis is None:return done(args,'No rights are recorded for this.',{'rights':state})
+    shown=['Permitted: '+basis['uses_words'],'Last day: '+day_words(basis['last_day'])+(' (ended)' if basis['ended'] else '')]
+    if basis['delete_on_end']:shown.append('The data is removed when the rights end.')
+    if 'receipt_words' in state:shown.insert(0,state['receipt_words'])
+    return done(args,'\n'.join(shown),{'rights':state})
+
+
 def _audience(args,client):
     """E90: who can see an uploaded original; --set (and --build-on) previews the change with both generations and
     applies exactly that snapshot; --dry-run stops after the preview."""
@@ -840,10 +1156,60 @@ def _named_wells(client,run):
     return '%s Run: ophiolite wells from-run %s' % (line,' '.join(proposal['runs'])) if line else None
 
 
+def _intake(args,client):
+    """E107a: `intake read RUN FILE`: the read procedure runs on this computer and what it made is sent into the upload."""
+    from . import intake,procedures
+    def ask(question):
+        print(question['text']+' [y/N] ',end='',flush=True)
+        return sys.stdin.readline().strip().lower() in ('y','yes')
+    try:
+        result=intake.read(client,args.run,args.file,keep_original=args.keep_original,version=args.version,folder=args.folder,settings=args.setting,
+                           prompt=ask if sys.stdin.isatty() else None,yes=args.yes)
+    except procedures.NotRun as error:
+        if args.json:print(json.dumps({'error':{'code':error.code,'message':str(error),'field':error.field,'details':error.details}},indent=2,default=str))
+        else:print(str(error),file=sys.stderr)
+        if getattr(error,'kept',None):print(procedures.KEPT.format(path=shlex.quote(error.kept)),file=sys.stderr)
+        raise SystemExit(EXIT['refused'])
+    except Exception as error:  # B6 rev 5 (R4-3): the upload failed after the procedure ran; where its outputs are kept, then the error
+        if getattr(error,'kept',None):print(procedures.KEPT.format(path=shlex.quote(error.kept)),file=sys.stderr)
+        raise
+    report=result['report']
+    payload={k:v for k,v in result.items() if k!='report'}
+    return done(args,result['sentence']+'\n'+report.text(),{**payload,'report':report.view})
+
+
+def _source(args,client):
+    """E108: `source run NAME`: the source procedure runs on this computer and what it made is added through one upload."""
+    from . import procedures
+    def ask(question):
+        print(question['text']+' [y/N] ',end='',flush=True)
+        return sys.stdin.readline().strip().lower() in ('y','yes')
+    try:
+        result=client.source_run(args.name,_slots(args.system,'--system'),settings=args.setting,system_label=args.system_label,version=args.version,
+                                 prompt=ask if sys.stdin.isatty() else None,yes=args.yes,folder=args.folder,attribution=args.attribution,
+                                 audience=_audience_given(args.audience),work=args.work)
+    except procedures.NotRun as error:
+        if args.json:print(json.dumps({'error':{'code':error.code,'message':str(error),'field':error.field,'details':error.details}},indent=2,default=str))
+        else:print(str(error),file=sys.stderr)
+        if getattr(error,'kept',None):print(procedures.KEPT.format(path=shlex.quote(error.kept)),file=sys.stderr)
+        raise SystemExit(EXIT['refused'])
+    except Exception as error:  # B6 rev 5 (R4-3): the upload failed after the procedure ran; where its outputs are kept, then the error
+        if getattr(error,'kept',None):print(procedures.KEPT.format(path=shlex.quote(error.kept)),file=sys.stderr)
+        raise
+    report=result['report']
+    if report is None:  # E108 S2: an unchanged run sends nothing
+        done(args,result['sentence']+'\n'+result['outcome_sentence'],{'sentence':result['sentence'],'run':result['run'],'outcome':result['outcome'],'outcome_sentence':result['outcome_sentence']});return
+    kept=procedures.KEPT.format(path=shlex.quote(result['kept'])) if result.get('kept') else None  # B6 rev 4 (3): only the outputs, never the log
+    done(args,result['sentence']+'\n'+report.text()+('\n'+kept if kept else ''),{'sentence':result['sentence'],'run':result['run'],'report':report.view,'kept':result.get('kept')})
+    if not report.ok:raise SystemExit(EXIT['conflict'])  # as an upload: the report says what became of each file
+    return result
+
+
 def _upload(args,client):
     """E55: upload a folder or a .zip; exit 0 when every file is added or already here, 4 when any is not (the report
     is still written), 1 on a refusal before anything was sent."""
     if not args.rights_confirmed:raise Refused('Confirm with --rights-confirmed that you may retain these files, derive results and share them within the audience.')
+    if args.fidelity:_fidelity_target(args)
     tabled=_layout_upload(args,client)
     if tabled is not None:return tabled
     runs=client.upload_runs
@@ -853,20 +1219,46 @@ def _upload(args,client):
     try:
         report=runs.upload(args.path if is_address(args.path) else Path(args.path),attribution=args.attribution,audience=_audience_given(args.audience),rights_confirmed=True,
                            well_notes=args.well_notes,declare=_declarations(args.declare),skip_decisions=args.skip_decisions,associate_matches=args.associate_matches,new=args.new,
-                           progress=progress,use_project_defaults=args.use_project_defaults)
+                           progress=progress,use_project_defaults=args.use_project_defaults,**({'source_name':args.source_name} if args.source_name else {}),
+                           **({'send':args.send} if args.send else {}),**({'scope':args.scope} if args.scope else {}),
+                           **({'share_basis':args.share_basis} if args.share_basis is not None else {}),**({'basis':_basis_answers(args.basis)} if args.basis else {}))
     except Refused as error:
         if str(error)!=NO_ATTRIBUTION:raise
         if args.json:print(json.dumps({'error':{'code':'usage','message':NO_ATTRIBUTION}},indent=2))
         else:print(NO_ATTRIBUTION,file=sys.stderr)
         raise SystemExit(EXIT['usage'])
     if args.report:report.save(args.report)
+    if args.fidelity:runs.fidelity(report,args.path,args.fidelity)  # E127 s2: after the report, which stays when this is refused
     wells=_named_wells(client,report.run_id)
-    done(args,report.text()+('\n'+wells if wells else '')+('\nReport written to %s' % args.report if args.report else ''),{'upload':report.view})
+    done(args,report.text()+('\n'+wells if wells else '')+('\nReport written to %s' % args.report if args.report else '')
+         +('\nFidelity document written to %s' % args.fidelity if args.fidelity else ''),{'upload':report.view,**({'fidelity':str(args.fidelity)} if args.fidelity else {})})
     report.exit_code=0 if report.ok else EXIT['conflict']
     return report
 
 
+def _basis_answers(given):
+    """E123 S3b: --basis ITEM=VALUE, repeated, as {item: value}; an item by its words or id, checked before anything is sent."""
+    from .upload_runs import basis_item
+    out={}
+    for text in given:
+        if '=' not in text:raise Refused('Give each basis answer as ITEM=VALUE, like "coordinate system=EPSG:23031".')
+        item,value=text.split('=',1)
+        out[basis_item(item)]=value.strip()
+    return out
+
+
 TABLE_FILES=('.csv','.txt','.tsv','.xlsx','.xls')
+
+
+def _fidelity_target(args):
+    """E127 s2 (D7): --fidelity is refused before anything is sent when it would overwrite the report or what is uploaded,
+    or when the path is a table file (no catalogue manifest)."""
+    from .fidelity import ADDRESS, outside
+    from .upload_runs import is_address
+    if is_address(args.path):raise Refused(ADDRESS)
+    if args.report and Path(args.report).resolve()==Path(args.fidelity).resolve():raise Refused('--fidelity and --report name the same file; choose two files.')
+    outside(args.path,args.fidelity)
+    if Path(args.path).is_file() and Path(args.path).suffix.lower() in TABLE_FILES:raise Refused('--fidelity is for a catalogue manifest; a table file has none.')
 
 
 def _layout_upload(args,client):
@@ -1217,9 +1609,10 @@ def _catalogue(args,client):
             def ask(question):
                 print(question['text']+' [y/N] ',end='',flush=True)
                 return sys.stdin.readline().strip().lower() in ('y','yes')
+            _output_parent(args.output)
             result=client.procedure_run(args.from_project,args.output,_slots(args.input,'--input',many=True),version=args.version,yes=args.yes,
                                         prompt=ask if sys.stdin.isatty() else None,kinds=_slots(args.kind,'--kind'),declared=_slots(args.declared,'--declared'),
-                                        systems=_slots(args.system,'--system'),settings=args.setting)
+                                        systems=_slots(args.system,'--system'),settings=args.setting,items=args.item,reference=args.reference)
             return done(args,result['sentence'],{'ran':True,**result})
         if args.procedure_action=='publish':  # E106
             result=client.procedure_publish(args.folder,name=args.name)
@@ -1228,8 +1621,9 @@ def _catalogue(args,client):
             def ask(question):
                 print(question['text']+' [y/N] ',end='',flush=True)
                 return sys.stdin.readline().strip().lower() in ('y','yes')
+            _output_parent(args.output)
             result=client.procedure_again(args.result,args.revision,args.output,version=args.version,folder=args.folder,yes=args.yes,
-                                          prompt=ask if sys.stdin.isatty() else None,name=args.name)
+                                          prompt=ask if sys.stdin.isatty() else None,name=args.name,for_=args.for_)
             return done(args,result['ran']+'\n'+result['sentence'],result)
         chosen=client.procedure_version(args.name,args.version)
         if args.procedure_action=='show':
@@ -1251,8 +1645,16 @@ def _procedures(args):
     """E105a: procedures new|validate|run. The default line is words only; identifiers, digests, field paths and
     what the procedure printed are under --json (and in log.txt beside a run's outputs)."""
     from . import procedures
+    if args.procedure_action=='new':
+        from . import procedure_templates
+        refused=None if args.kind is None and args.step=='process' else procedure_templates.refusal(args.step,args.kind or procedure_templates.DEFAULT)  # E112 s1: process with no --kind keeps E105a's start
+        if refused:  # E112 s0: checked before procedures.new, so no folder is made
+            if args.json:print(json.dumps({'error':{'code':'usage','message':refused}},indent=2))
+            else:print(refused,file=sys.stderr)
+            raise SystemExit(EXIT['usage'])
+        if args.label is None:args.label=procedure_templates.default_label(args.step,procedure_templates.resolve_kind(args.kind or procedure_templates.DEFAULT))
     if args.procedure_action in ('validate','new'):
-        try:verdict=procedures.validate(args.folder) if args.procedure_action=='validate' else procedures.new(args.folder,args.step,args.label)
+        try:verdict=procedures.validate(args.folder) if args.procedure_action=='validate' else procedures.new(args.folder,args.step,args.label,kind=args.kind)
         except procedures.NotRun as error:verdict={'valid':False,'sentence':str(error),'code':error.code,'field':error.field,'rules_version':procedures.contract().RULES_VERSION}
         manifest=verdict.pop('manifest',None) or {}
         payload={**verdict,**({'name':manifest['name'],'version':manifest['version']} if manifest else {})}
@@ -1263,6 +1665,7 @@ def _procedures(args):
         if not verdict['valid']:raise SystemExit(EXIT['refused'])
         return payload
     if args.folder is None:raise SystemExit('Name the procedure folder, or run one from the project with --from-project NAME.')
+    _output_parent(args.output)
     try:
         result=procedures.run(args.folder,args.output,_slots(args.input,'--input',many=True),kinds=_slots(args.kind,'--kind'),
                               declared=_slots(args.declared,'--declared'),systems=_slots(args.system,'--system'),settings=args.setting)
@@ -1273,6 +1676,30 @@ def _procedures(args):
     return done(args,result['sentence'],{'ran':True,**result})
 
 
+def _deliver(args,client=None):
+    """E109: `deliver NAME --system SLOT=FILE --item SLOT=ITEM[@N]`: the send procedure runs once on this computer and
+    its outcome is reported to the project. Exit 0 when sent or set aside, 4 when not sent, unknown or not recorded yet, 1 on a
+    refusal (nothing launched, or a pending delivery that is never sent again)."""
+    from . import procedures
+    def refuse(error):
+        if args.json:print(json.dumps({'error':{'code':error.code,'message':str(error),'field':error.field,'details':error.details}},indent=2,default=str))
+        else:print(str(error),file=sys.stderr)
+        raise SystemExit(EXIT['refused'])
+    if client is None:return None
+    def ask(question):
+        print(question['text']+' [y/N] ',end='',flush=True)
+        return sys.stdin.readline().strip().lower() in ('y','yes')
+    try:
+        result=client.deliver(args.name,systems=_slots(args.system,'--system'),items=args.item,settings=args.setting,work=args.work,wait=args.wait or 0,
+                              prompt=ask if sys.stdin.isatty() else None,yes=args.yes,version=args.version,set_aside=args.set_aside,
+                              as_=args.as_)
+    except procedures.NotRun as error:refuse(error)
+    done(args,result['sentence'],{k:result[k] for k in ('sentence','delivery_id','state','items','destination','reported')})
+    if args.set_aside:return result  # D8: set aside on purpose; the outcome stays unknown in the project
+    if not (result['reported'] and result['state']=='confirmed'):raise SystemExit(EXIT['conflict'])
+    return result
+
+
 def main(argv=None):
     from . import _client_header
     token=_client_header._NAME.set('ophiolite-cli')  # E93: the command line names itself on every gateway request
@@ -1281,12 +1708,15 @@ def main(argv=None):
 
 
 def _main(argv=None):
-    args=parser().parse_args(argv)
+    made=parser();args=made.parse_args(argv)
+    if args.command=='upload' and (args.send or args.scope) and not args.source_name:made.error('--complete, --incremental and --scope go with --source NAME')  # E122 s2: exit 2, nothing sent
     if args.command in ('projects','orgs'):return _discover(args)
     if args.command=='init':return _init(args)  # E31: offline; copies packaged files only
     if args.command=='skills':
         return done(args,str(files('ophiolite').joinpath('skills')),{'path':str(files('ophiolite').joinpath('skills'))})
     if args.command=='targets':return _targets(args)  # E86: offline; reads the packaged contracts only
+    if args.command=='recipes' and args.action=='show':return _recipes(args)  # E112 s2: offline; reads the journal only
+    if args.command=='starter' and args.action=='finalise':return _starter(args)  # E129 Sa: offline; reads local files only
     if args.command=='procedures' and not _catalogue_verb(args):return _procedures(args)  # E105a: offline; reads and runs local files only
     if args.command=='bundle':
         # Offline: no configuration, credentials or network are read.
@@ -1348,13 +1778,23 @@ def _main(argv=None):
         if args.command=='curves':return _curves(args,client)
         if args.command in ('entities','wells','changes','sources','org-connections','well-imports','story','what-changed','dependents','remake','import'):return _journey(args,client)
         if args.command=='checks':return _checks(args,client)
+        if args.command=='outcomes':return _outcomes(args,client)  # E120
+        if args.command=='residuals':return _residuals(args,client)  # E119b
+        if args.command=='recipes':return _recipes(args,client)  # E112 s2
+        if args.command=='starter':return _starter(args,client)  # E129 Sa
+        if args.command in ('access-history','teams'):return _access(args,client)  # E67b
         if args.command=='procedures':return _catalogue(args,client)  # E105b: the project's catalogue
         if args.command in ('check','get','send'):return _exchange(args,client)
         if args.command=='upload':return _upload(args,client)
+        if args.command=='intake':return _intake(args,client)  # E107a
+        if args.command=='source':return _source(args,client)  # E108
+        if args.command=='deliver':return _deliver(args,client)  # E109
         if args.command=='new-data':return _new_data(args,client)
         if args.command=='audience':return _audience(args,client)
+        if args.command=='rights':return _rights(args,client)  # E35a
         if args.command in ('templates','template','sample'):return _templates(args,client)
         if args.command=='layouts':return _layouts(args,client)
+        if args.command=='repositories':return _repositories(args,client)
         if args.command=='publish-derived':  # E30b
             from .writers import WrittenOriginal
             parents=[tuple(p.split(':',1)) for p in args.parents]
@@ -1369,7 +1809,13 @@ def _main(argv=None):
             receipt=WorkFolder(client,args.work).publish_derived(written,**options) if args.work else client.publish_derived(written,command_id=args.command_id,**options)
             return done(args,'Published %s as version %d of %s - it is private until you share it.' % (args.name,receipt.revision_number,receipt.asset_id),
                         {'published':receipt.model_dump(mode='json',by_alias=True)})
+        if args.command=='read-data' and args.format:  # E58b: one file written by the server, verified before it is kept
+            if args.output.exists():raise Refused('The output file already exists; choose a new name.')
+            saved=client.export_file(args.asset,args.revision,args.output,format=args.format,curves=args.curve)
+            return done(args,'Saved %s as %s - written from revision %s and checked against the file the server holds.' % (saved,args.format.replace('geoparquet','GeoParquet').replace('parquet','Parquet').replace('csv','CSV'),args.revision),
+                        {'saved':str(saved),'format':args.format,'revision':args.revision})
         if args.command=='read-data':
+            if args.curve:raise Refused('--curve chooses curves of a file saved with --format.')
             data=client.read_data(args.asset,args.revision)
             if args.output.exists():raise Refused('The output folder already exists; choose a new folder.')
             args.output.mkdir(parents=True)

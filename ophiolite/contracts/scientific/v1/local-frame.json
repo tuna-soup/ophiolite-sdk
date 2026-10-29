@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/scientific/v1/local-frame.json",
+  "x-ophiolite": {
+    "id": "ophiolite.local-frame/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "FrameParameters": {
+      "additionalProperties": false,
+      "properties": {
+        "x_offset": {
+          "title": "X Offset",
+          "type": "number"
+        },
+        "y_offset": {
+          "title": "Y Offset",
+          "type": "number"
+        },
+        "z_offset": {
+          "title": "Z Offset",
+          "type": "number"
+        },
+        "areal_rotation_rad": {
+          "title": "Areal Rotation Rad",
+          "type": "number"
+        },
+        "z_increasing_downward": {
+          "title": "Z Increasing Downward",
+          "type": "boolean"
+        },
+        "xy_unit": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Xy Unit",
+          "type": "string"
+        },
+        "z_unit": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Z Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "x_offset",
+        "y_offset",
+        "z_offset",
+        "areal_rotation_rad",
+        "z_increasing_downward",
+        "xy_unit",
+        "z_unit"
+      ],
+      "title": "FrameParameters",
+      "type": "object"
+    },
+    "FrameSource": {
+      "additionalProperties": false,
+      "properties": {
+        "crs_uuid": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "title": "Crs Uuid",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "crs_uuid",
+        "title"
+      ],
+      "title": "FrameSource",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "How a package's local coordinates were placed: resolved exactly into a catalogued projected CRS, or kept local.",
+  "properties": {
+    "operation": {
+      "const": "resqml-local-frame",
+      "title": "Operation",
+      "type": "string"
+    },
+    "applied": {
+      "title": "Applied",
+      "type": "boolean"
+    },
+    "source": {
+      "$ref": "#/$defs/FrameSource"
+    },
+    "projected_crs": {
+      "pattern": "^(EPSG:[0-9]{4,6}|unknown)$",
+      "title": "Projected Crs",
+      "type": "string"
+    },
+    "vertical_crs": {
+      "pattern": "^(EPSG:[0-9]{4,6}|unknown)$",
+      "title": "Vertical Crs",
+      "type": "string"
+    },
+    "parameters": {
+      "$ref": "#/$defs/FrameParameters"
+    },
+    "formula": {
+      "const": "rotate-then-offset",
+      "title": "Formula",
+      "type": "string"
+    },
+    "accuracy_m": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Accuracy M"
+    }
+  },
+  "required": [
+    "operation",
+    "applied",
+    "source",
+    "projected_crs",
+    "vertical_crs",
+    "parameters",
+    "formula",
+    "accuracy_m"
+  ],
+  "title": "LocalFrame",
+  "type": "object"
+}

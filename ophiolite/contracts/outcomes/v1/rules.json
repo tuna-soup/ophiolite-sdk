@@ -1,0 +1,22 @@
+{
+ "schema": "ophiolite.outcome-rules/1",
+ "id": "ophiolite.outcome-rules/1",
+ "rules_version": "1.0.0",
+ "description": "What an outcome (ophiolite.outcome/1, E120) may be declared over: each result kind with a built-in rule, the rule's settings and the input kinds a result of that kind must be made from. A kind joins only when its epic ships a rule; any change to a list changes rules_version.",
+ "kinds": {
+  "well-residual/1": {
+   "words": "residual results",
+   "inputs": {"selection": "well-set/1", "tops": "well-tops-csv/1", "surface": "esri-ascii-grid/1", "trajectories": "deviation-csv/1"},
+   "inputs_source": "E119b's residual_procedure slots (contracts/procedures/v1/rules.json), copied as literals until E119b slice 1 merges (ruling (a), 23 Oct 2026); a parity test keeps them equal",
+   "rules": {
+    "well-residual-within/1": {
+     "words": "every computed residual within {tolerance}",
+     "settings": {
+      "tolerance": {"type": "quantity", "units": ["m", "ft"], "minimum": 0},
+      "not_computed": {"type": "choice", "choices": ["allowed", "refused"]}
+     }
+    }
+   }
+  }
+ }
+}

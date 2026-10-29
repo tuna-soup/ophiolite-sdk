@@ -1,0 +1,35 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "well-residual/1",
+  "kind": "source",
+  "lifecycle": "preview",
+  "display_name": "Residual result (JSON)",
+  "description": "A residual per top: for each selected wellbore and each top of one formation, the top's measured depth minus the measured depth where one surface crosses the wellbore's trajectory, in metres, or the reason none is given, as one UTF-8 JSON document of at most 8 MiB, kept byte for byte. Published only by a procedure run, never uploaded, whole or in parts.",
+  "serves": [
+    "ophiolite.scientific-asset/1"
+  ],
+  "connector": {
+    "scientific_profile": "well-residual/1",
+    "source_schema": "JSON/ophiolite.well-residual/1",
+    "mapping_version": "well-residual/1",
+    "history": "retained-exact-read"
+  },
+  "role": "artifact",
+  "media_types": [
+    "application/json"
+  ],
+  "normalized_profile": "ophiolite.well-residual/1",
+  "context_schema": "ophiolite.typed-context/1",
+  "representation_rules": {
+    "artifact_kind_by_origin": {
+      "source-reference": "original",
+      "retained-capture": "original",
+      "managed-derived": "derived-artifact"
+    },
+    "normalized": 1,
+    "total": 2
+  },
+  "table_target": {
+    "none": "not-a-table"
+  }
+}

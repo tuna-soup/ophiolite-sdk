@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.33.0",
+  "version": "1.78.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -37,7 +37,7 @@
     },
     {
       "id": "ophiolite.scientific-asset/1",
-      "version": "1.21.0",
+      "version": "1.32.0",
       "lifecycle": "preview",
       "path": "assets/v1/schema.json",
       "title": "ScientificAsset",
@@ -69,7 +69,7 @@
     },
     {
       "id": "ophiolite.curve-columns/1",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "lifecycle": "preview",
       "path": "assets/v1/curve-columns-header-schema.json",
       "title": "CurveColumnsHeader",
@@ -85,11 +85,11 @@
     },
     {
       "id": "ophiolite.typed-context/1",
-      "version": "1.6.0",
+      "version": "1.10.0",
       "lifecycle": "preview",
       "path": "assets/v1/typed-context-schema.json",
       "title": "TypedContext",
-      "description": "Observed and declared context of a typed asset (tops, trajectory, grid, triangulated surface, point set, fault sticks, seismic volume, wavelet, rock model section, seismic section, time-depth table, feature set) with its fidelity report."
+      "description": "Observed and declared context of a typed asset (tops, trajectory, grid, triangulated surface, point set, fault sticks, seismic volume, wavelet, rock model section, seismic section, time-depth table, feature set, well path given as positions, well set, residual result) with its fidelity report."
     },
     {
       "id": "ophiolite.well-tops/1",
@@ -101,7 +101,7 @@
     },
     {
       "id": "ophiolite.trajectory/1",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "lifecycle": "preview",
       "path": "assets/v1/trajectory-schema.json",
       "title": "Trajectory",
@@ -117,7 +117,7 @@
     },
     {
       "id": "ophiolite.triangulated-surface/1",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "lifecycle": "preview",
       "path": "assets/v1/triangulated-surface-schema.json",
       "title": "TriangulatedSurface",
@@ -173,7 +173,7 @@
     },
     {
       "id": "ophiolite.portable-bundle/1",
-      "version": "1.1.0",
+      "version": "1.10.0",
       "lifecycle": "preview",
       "path": "bundles/v1/manifest-schema.json",
       "title": "PortableBundleManifest",
@@ -181,15 +181,15 @@
     },
     {
       "id": "ophiolite.portable-bundle/2",
-      "version": "2.8.0",
+      "version": "2.10.0",
       "lifecycle": "preview",
       "path": "bundles/v2/manifest-schema.json",
       "title": "PortableBundleManifestV2",
-      "description": "Portable bundle 2: exact selected revisions of well logs, well tops, trajectories, regular-grid surfaces, meshes, point sets, fault sticks, seismic slices, wavelets, rock model sections, seismic sections, time-depth tables and feature sets with files, digests, served context, permitted lineage and relationships; 2.8 (E23c) carries the source package, its companion members and the interpretation of a recipe-read point set or a Shapefile-read feature set."
+      "description": "Portable bundle 2: exact selected revisions of well logs, well tops, trajectories, regular-grid surfaces, meshes, point sets, fault sticks, seismic slices, wavelets, rock model sections, seismic sections, time-depth tables and feature sets with files, digests, served context, permitted lineage and relationships; 2.8 (E23c) carries the source package, its companion members and the interpretation of a recipe-read point set or a Shapefile-read feature set; 2.9 (E107a) carries the original a file read on a computer was read from, beside the recorded reading; 1.10/2.10 (E122 s5b) carry each exported revision's source record as the gateway served it."
     },
     {
       "id": "ophiolite.polyline-set/1",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "lifecycle": "preview",
       "path": "assets/v1/polyline-set-schema.json",
       "title": "PolylineSet",
@@ -218,6 +218,14 @@
       "path": "assets/v1/table-payload-schema.json",
       "title": "Table",
       "description": "A table from a connected SQL database: every column with its database and logical type, the declared key, the person's declarations and the rows read, in canonical order (ADR 0020, E50b1)."
+    },
+    {
+      "id": "ophiolite.table-file/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/table-file-schema.json",
+      "title": "TableFile",
+      "description": "A table file kept as it is (E58b): the normalized content read from the exact original under its table-interpretation.json, whose SHA-256 it names: every column, the key, the declarations and the rows in file order with their source rows."
     },
     {
       "id": "ophiolite.wavelet/1",
@@ -250,6 +258,30 @@
       "path": "assets/v1/time-depth-schema.json",
       "title": "TimeDepth",
       "description": "A normalized time-depth table: depth and time pairs in file order, both strictly increasing, with the stated velocity column, the declared depth type, time kind, units and datum, source reference, digest and reader identity (E57)."
+    },
+    {
+      "id": "ophiolite.well-path/1",
+      "version": "1.1.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/well-path-schema.json",
+      "title": "WellPath",
+      "description": "A normalized well path given as positions: stations of measured depth, easting x, northing y and TVDSS (positive downward below the declared datum) in file order with strictly increasing measured depth, the declared CRS, units and references, source reference, digest and reader identity (E125 s3a). Nothing is converted or turned into angles."
+    },
+    {
+      "id": "ophiolite.well-set/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/well-set-schema.json",
+      "title": "WellSet",
+      "description": "A well set as uploaded: its label and 1 to 29 members in order, each a well and a wellbore by id with one exact trajectory revision and its frame (coordinate system, wellhead, depth reference, north and an optional tie-in), or neither (E119a). Nothing is looked up, converted or filled in."
+    },
+    {
+      "id": "ophiolite.well-residual/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/well-residual-schema.json",
+      "title": "WellResidual",
+      "description": "A residual result as a procedure run publishes it: the formation, the display unit, the surface revision and up to 10 000 rows in order, each a wellbore occurrence with its top, trajectory and crossings and either a residual in metres (the top's measured depth minus the used crossing's) or one of nine reasons none is given (E119b). Nothing is looked up, recomputed or converted."
     },
     {
       "id": "ophiolite.feature-set/1",
@@ -309,11 +341,75 @@
     },
     {
       "id": "ophiolite.check/1",
-      "version": "1.0.0",
+      "version": "1.2.0",
       "lifecycle": "preview",
       "path": "scientific/v1/check.json",
       "title": "CheckRecord",
       "description": "One comparison of an output with a reference under stated rules and a tolerance: what was compared, the outcome and its differences, and who witnessed it (server, claimed or personal); a refusal names one field (E96)."
+    },
+    {
+      "id": "ophiolite.source-provenance/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "scientific/v1/source-provenance.json",
+      "title": "SourceProvenance",
+      "description": "Where one version came from, in three parts kept apart: identity (source system from ophiolite.source-systems/1, instance, id scheme, source object id), content (the bytes' sha256, the source's version) and context (the comparison/1 digest of how the bytes were read); observation is joined from the run, never stored (E122)."
+    },
+    {
+      "id": "ophiolite.outcome/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "outcomes/v1/outcome-schema.json",
+      "title": "OutcomeDeclaration",
+      "description": "An outcome as declared over a kind of result: a built-in rule and its settings (ophiolite.outcome-rules/1), the input kinds a result must be made from and the send procedure and destination label it is delivered by; the server adds the id, version, declarer and time (E120)."
+    },
+    {
+      "id": "ophiolite.outcome-check/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "outcomes/v1/outcome-check-schema.json",
+      "title": "OutcomeCheck",
+      "description": "An acceptance record: one outcome version's built-in rule over one exact result version of one publication, with the bound input versions, as its declarer could read them; the verdict, its reason and the rows, never changed (E120)."
+    },
+    {
+      "id": "ophiolite.outcome-claim/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "outcomes/v1/outcome-claim-schema.json",
+      "title": "OutcomeClaim",
+      "description": "A \"Deliver as\" claim: the outcome version, the exact result version, the acceptance record and the destination it was judged on, and its verdict; a claimed claim binds the delivery id the gate issued, a refused one keeps its reason and sentence and launched nothing; never changed (E120)."
+    },
+    {
+      "id": "ophiolite.resqml-read/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "scientific/v1/resqml-read.json",
+      "title": "ResqmlRead",
+      "description": "One read of one RESQML package: every part is an output (<uuid>/<role>), absorbed into a log, not read with its variant, code and sentence, or counted as context; nothing silently dropped (E124)."
+    },
+    {
+      "id": "ophiolite.local-frame/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "scientific/v1/local-frame.json",
+      "title": "LocalFrame",
+      "description": "How a package's local coordinates were placed: rotate then offset into a catalogued projected CRS, exactly, or kept local and said so (E124)."
+    },
+    {
+      "id": "ophiolite.resqml-object/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "scientific/v1/resqml-object.json",
+      "title": "ResqmlObject",
+      "description": "What one output landed from a RESQML package was read from: the package by its members' digests, the object and its role, its losses and parts, and the local frame of a well path or survey; no values (E124)."
+    },
+    {
+      "id": "ophiolite.basis-groups/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "scientific/v1/basis-groups.json",
+      "title": "BasisGrouping",
+      "description": "Files that state the same basis, or leave it open in one folder, asked once: stated blocks, proposals and singles; per member and item the stated value, then the file's override, then the confirmed answer, then unknown; conflicts shown, nothing converted (E123)."
     },
     {
       "id": "ophiolite.derivation/1",
@@ -404,6 +500,14 @@
       "description": "Well records read through a reviewed customer mapping from a SQL table; current values only.",
       "lifecycle": "preview",
       "path": "profiles/v1/sql-wells.json"
+    },
+    {
+      "id": "resqml-epc/1",
+      "kind": "source",
+      "display_name": "RESQML package (.epc with its .h5)",
+      "description": "A RESQML 2.0.1 package and its HDF5 file, kept byte for byte; well paths, deviation surveys and well logs are read from it and stored with what was read and what was not. Not served through the scientific-asset envelope yet (E124).",
+      "lifecycle": "preview",
+      "path": "profiles/v1/resqml-epc.json"
     },
     {
       "id": "table/1",
@@ -532,6 +636,30 @@
       "description": "A Petrel \"Points with attributes\" export with its README and CRS metadata, kept byte for byte and read through an import recipe (number, text and category attributes).",
       "lifecycle": "preview",
       "path": "profiles/v1/petrel-points-attributes.json"
+    },
+    {
+      "id": "petrel-horizon-ilxl/1",
+      "kind": "source",
+      "display_name": "Petrel horizon points with inline and crossline",
+      "description": "A Petrel horizon export of \"INLINE : n XLINE : n x y z\" rows with its CRS metadata, kept byte for byte and read through an import recipe (inline and crossline as number attributes).",
+      "lifecycle": "preview",
+      "path": "profiles/v1/petrel-horizon-ilxl.json"
+    },
+    {
+      "id": "petrel-scattered-data/1",
+      "kind": "source",
+      "display_name": "Petrel scattered-data map",
+      "description": "A Petrel \"scattered data\" export (version 6: x, y, z with column and row), kept byte for byte; it lands as a regular grid when every row sits on its declared lattice, else as a point set with the sentence why.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/petrel-scattered-data.json"
+    },
+    {
+      "id": "petrel-faultsticks/1",
+      "kind": "source",
+      "display_name": "Fault sticks (Petrel)",
+      "description": "A Petrel fault-stick export (INLINE- inline crossline x y z fault stick) with the .crsmeta.xml beside it, kept byte for byte and read without an import recipe; each run of rows with one fault name and stick number is a stick, in file order.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/petrel-faultsticks.json"
     },
     {
       "id": "opendtect-horizon-ascii/1",
@@ -670,6 +798,54 @@
       "path": "profiles/v1/time-depth.json"
     },
     {
+      "id": "well-path-positions-csv/1",
+      "kind": "source",
+      "display_name": "Well path (positions, CSV)",
+      "description": "A well path given as positions: CSV with the columns md, x, y and tvdss, kept byte for byte. x is easting and y northing; TVDSS is positive downward below the declared datum. Detected from the header md,x,y,tvdss in that order; any order is read once the kind is chosen.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/well-path-positions-csv.json"
+    },
+    {
+      "id": "ophiolite.well-path/1",
+      "kind": "normalized",
+      "display_name": "Well path (positions)",
+      "description": "Stations of measured depth, easting x, northing y and TVDSS in file order with strictly increasing measured depth, and the declared CRS, map unit, depth unit, measured-depth reference (KB, DF, RT, GL, MSL) and TVDSS datum (MSL); nothing is converted, filled in or turned into angles.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/well-path.json"
+    },
+    {
+      "id": "well-set/1",
+      "kind": "source",
+      "display_name": "Well set (JSON)",
+      "description": "An author's own list of wellbores, each with the exact trajectory revision and the frame that places it (CRS, wellhead, depth reference, north, tie-in), as one UTF-8 JSON document of at most 256 KiB, kept byte for byte. Saved in one request, never in parts; private to its author in this version.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/well-set.json"
+    },
+    {
+      "id": "ophiolite.well-set/1",
+      "kind": "normalized",
+      "display_name": "Well set",
+      "description": "The label and the members of a well set as uploaded, in order, with the counts of members with and without a trajectory; nothing is looked up, transformed or defaulted.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/well-set-normalized.json"
+    },
+    {
+      "id": "well-residual/1",
+      "kind": "source",
+      "display_name": "Residual result (JSON)",
+      "description": "A residual per top: for each selected wellbore and each top of one formation, the top's measured depth minus the measured depth where one surface crosses the wellbore's trajectory, in metres, or the reason none is given, as one UTF-8 JSON document of at most 8 MiB, kept byte for byte. Published only by a procedure run, never uploaded, whole or in parts.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/well-residual.json"
+    },
+    {
+      "id": "ophiolite.well-residual/1",
+      "kind": "normalized",
+      "display_name": "Residual result",
+      "description": "The rows of a residual result as published, in order, with the surface, the formation and the display unit, and the counts of rows computed and not computed and of selected wellbores; depths and residuals are metres; nothing is looked up, recomputed or defaulted.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/well-residual-normalized.json"
+    },
+    {
       "id": "zmap-plus-grid/1",
       "kind": "source",
       "display_name": "Horizon grid (ZMAP+)",
@@ -724,6 +900,38 @@
       "description": "Every feature of one map layer in file order with its stored coordinates (axes and ring orientation as stored), its attribute values by field and the stated or declared coordinate system; nothing is converted.",
       "lifecycle": "preview",
       "path": "profiles/v1/feature-set.json"
+    },
+    {
+      "id": "table-csv/1",
+      "kind": "source",
+      "display_name": "Table (separated text)",
+      "description": "A table file of separated text columns (CSV, tab-separated, ...), kept byte for byte as the person added it, with its reading choices and declarations beside it.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/table-csv.json"
+    },
+    {
+      "id": "table-excel/1",
+      "kind": "source",
+      "display_name": "Table (Excel workbook)",
+      "description": "One sheet of an Excel workbook (.xls or .xlsx), kept byte for byte as the person added it, with its reading choices and declarations beside it.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/table-excel.json"
+    },
+    {
+      "id": "table-parquet/1",
+      "kind": "source",
+      "display_name": "Table (Parquet)",
+      "description": "A Parquet file, kept byte for byte as the person added it, with its declarations beside it.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/table-parquet.json"
+    },
+    {
+      "id": "ophiolite.table-file/1",
+      "kind": "normalized",
+      "display_name": "Kept table",
+      "description": "Every column of a kept table (read or not, with its type), its declarations and the rows of the columns read in file order with each row's own line or sheet row; values as ADR 0020 writes them, a declared missing-value marker kept as a value.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/table-file.json"
     }
   ],
   "documents": [
@@ -792,6 +1000,13 @@
       "kind": "fixture",
       "path": "assets/v1/fixtures/capture.json",
       "schema": "ophiolite.scientific-asset/1"
+    },
+    {
+      "id": "ophiolite.fixture/assets/sourced-by.json/1",
+      "kind": "fixture",
+      "path": "assets/v1/fixtures/sourced-by.json",
+      "schema": "ophiolite.scientific-asset/1",
+      "title": "E108: an uploaded item made by a source procedure from a team's system (acquisition.sourced_by); validated by the server and the SDK"
     },
     {
       "id": "ophiolite.fixture/assets/derived.json/1",
@@ -908,6 +1123,27 @@
       "schema": "ophiolite.portable-bundle/2"
     },
     {
+      "id": "ophiolite.fixture/bundles/manifest-provenance.json/2",
+      "kind": "fixture",
+      "path": "bundles/v2/fixtures/manifest-provenance.json",
+      "title": "Portable bundle 2.9 manifest fixture: a file read on a computer with the original it was read from and the recorded reading (E107a)",
+      "schema": "ophiolite.portable-bundle/2"
+    },
+    {
+      "id": "ophiolite.fixture/bundles/manifest-source-records.json/1",
+      "kind": "fixture",
+      "path": "bundles/v1/fixtures/manifest-source-records.json",
+      "title": "Portable bundle 1.10 manifest fixture: a well log with the source-path record the gateway served for its revision (E122 s5b)",
+      "schema": "ophiolite.portable-bundle/1"
+    },
+    {
+      "id": "ophiolite.fixture/bundles/manifest-source-records.json/2",
+      "kind": "fixture",
+      "path": "bundles/v2/fixtures/manifest-source-records.json",
+      "title": "Portable bundle 2.10 manifest fixture: a point set sent from QGIS with its application record, and one stored before records began with none (E122 s5b)",
+      "schema": "ophiolite.portable-bundle/2"
+    },
+    {
       "id": "ophiolite.fixture/bundles/manifest-v1-version-2-8.json/1",
       "kind": "fixture",
       "path": "bundles/v1/fixtures/manifest-v1-version-2-8.json",
@@ -980,6 +1216,18 @@
       "title": "File readers: every upload kind, how it is recognised, its limits, declared fields, OSDU kind and fixture (E55)"
     },
     {
+      "id": "ophiolite.reader-plan/1",
+      "kind": "vocabulary",
+      "path": "connectors/v1/reader-plan.json",
+      "title": "Readers planned but not available yet: what each will read, where it lands and why it waits; a planned reader refuses with its own sentence (E123)"
+    },
+    {
+      "id": "ophiolite.resqml-kinds/1",
+      "kind": "vocabulary",
+      "path": "connectors/v1/resqml-kinds.json",
+      "title": "How the RESQML package reader treats each object: variants by kind and predicate, in order, with a fallback; what is read, absorbed, not read (code and sentence) or context (E124)"
+    },
+    {
       "id": "ophiolite.connector-capability/file-geotiff/1",
       "kind": "capability",
       "path": "connectors/v1/capabilities/file-geotiff.json",
@@ -1014,6 +1262,36 @@
       "kind": "capability",
       "path": "connectors/v1/capabilities/postgresql-tables.json",
       "title": "PostgreSQL tables: types, directions, change detection, losses and qualification"
+    },
+    {
+      "id": "ophiolite.connector-capability/table-upload/1",
+      "kind": "capability",
+      "path": "connectors/v1/capabilities/table-upload.json",
+      "title": "Table file upload (CSV, Excel, Parquet): types, directions, change detection, losses and qualification"
+    },
+    {
+      "id": "ophiolite.connector-capability/sqlserver-wells/1",
+      "kind": "capability",
+      "path": "connectors/v1/capabilities/sqlserver-wells.json",
+      "title": "SQL Server well headers and tables: types, directions, change detection, losses and qualification; OSDU kind: none (a source connector)"
+    },
+    {
+      "id": "ophiolite.connector-capability/oracle-wells/1",
+      "kind": "capability",
+      "path": "connectors/v1/capabilities/oracle-wells.json",
+      "title": "Oracle well headers and tables: types, directions, change detection, losses and qualification; OSDU kind: none (a source connector)"
+    },
+    {
+      "id": "ophiolite.connector-capability/public-repository-nlog/1",
+      "kind": "capability",
+      "path": "connectors/v1/capabilities/public-repository-nlog.json",
+      "title": "NLOG (public repository): types, directions, change detection, losses and qualification"
+    },
+    {
+      "id": "ophiolite.connector-capability/public-repository-ogc-features/1",
+      "kind": "capability",
+      "path": "connectors/v1/capabilities/public-repository-ogc-features.json",
+      "title": "Features services (public repository): types, directions, change detection, losses and qualification"
     },
     {
       "id": "ophiolite.connector-capability/qgis/1",
@@ -1315,6 +1593,110 @@
       "kind": "vocabulary",
       "path": "vocabulary/v1/coordinate-systems.json",
       "title": "Coordinate systems: code, name, convertible, declarable and inferable subsets, area of use; with the EPSG Dataset notice (E44, E86)"
+    },
+    {
+      "id": "ophiolite.rights-basis/1",
+      "kind": "vocabulary",
+      "path": "profiles/v1/rights-basis.json",
+      "title": "Rights basis: permitted uses, targets, parent kinds and the merge rule for what is made from several sources (E35a)"
+    },
+    {
+      "id": "ophiolite.source-systems/1",
+      "kind": "vocabulary",
+      "path": "profiles/v1/source-systems.json",
+      "title": "Source systems: the closed list a provenance record's source system is one of, four exact names (E127: osd-catalogue) and three prefixes with a lower-case suffix (E122)"
+    },
+    {
+      "id": "ophiolite.basis-keys/1",
+      "kind": "vocabulary",
+      "path": "vocabulary/v1/basis-keys.json",
+      "title": "Basis items: coordinate system, vertical values, vertical datum and the unit of each quantity, with the declared keys beneath each and the keys a file keeps as its own (E123)"
+    },
+    {
+      "id": "ophiolite.well-set-reasons/1",
+      "kind": "vocabulary",
+      "path": "vocabulary/v1/well-set-reasons.json",
+      "title": "Well-set refusals: the closed keys a refused well set names, the reader's shape keys and the Gateway's keys, with their sentences (E119a)"
+    },
+    {
+      "id": "ophiolite.well-residual-reasons/1",
+      "kind": "vocabulary",
+      "path": "vocabulary/v1/well-residual-reasons.json",
+      "title": "Residual reasons: the closed keys a residual row names when it gives no residual, with one sentence each (E119b)"
+    },
+    {
+      "id": "ophiolite.outcome-rules/1",
+      "kind": "policy",
+      "path": "outcomes/v1/rules.json",
+      "title": "What an outcome may be declared over: each result kind, its built-in rules with their settings, and the input kinds, under one rules_version (E120)"
+    },
+    {
+      "id": "ophiolite.outcome-reasons/1",
+      "kind": "vocabulary",
+      "path": "vocabulary/v1/outcome-reasons.json",
+      "title": "Outcome refusals: the closed reasons a declaration or an action on an outcome is refused for, one sentence each (E120)"
+    },
+    {
+      "id": "ophiolite.fixture/outcomes/tops-within-5m.json/1",
+      "kind": "fixture",
+      "path": "outcomes/v1/fixtures/valid/tops-within-5m.json",
+      "title": "A valid outcome: Tops within 5 m over residual results, delivered to the team database (E120)",
+      "schema": "ophiolite.outcome/1"
+    },
+    {
+      "id": "ophiolite.fixture/outcomes/tops-within-1m.json/1",
+      "kind": "fixture",
+      "path": "outcomes/v1/fixtures/valid/tops-within-1m.json",
+      "title": "The same outcome revised to 1 m (E120)",
+      "schema": "ophiolite.outcome/1"
+    },
+    {
+      "id": "ophiolite.fixture/outcomes/expected.json/1",
+      "kind": "fixture",
+      "path": "outcomes/v1/fixtures/expected.json",
+      "title": "The outcome fixtures: which are valid and, for each invalid one, the one reason it is refused for (E120)"
+    },
+    {
+      "id": "ophiolite.fixture/outcomes/unknown-key.json/1",
+      "kind": "fixture",
+      "path": "outcomes/v1/fixtures/invalid/unknown-key.json",
+      "title": "An outcome refused for one field only: an undeclared field (E120)"
+    },
+    {
+      "id": "ophiolite.fixture/outcomes/rule-version-2.json/1",
+      "kind": "fixture",
+      "path": "outcomes/v1/fixtures/invalid/rule-version-2.json",
+      "title": "An outcome refused for one field only: a rule that is not built in (E120)"
+    },
+    {
+      "id": "ophiolite.fixture/outcomes/no-not-computed.json/1",
+      "kind": "fixture",
+      "path": "outcomes/v1/fixtures/invalid/no-not-computed.json",
+      "title": "An outcome refused for one field only: a missing setting (E120)"
+    },
+    {
+      "id": "ophiolite.fixture/outcomes/without-well-set.json/1",
+      "kind": "fixture",
+      "path": "outcomes/v1/fixtures/invalid/without-well-set.json",
+      "title": "An outcome refused for one field only: a missing input kind (E120)"
+    },
+    {
+      "id": "ophiolite.fixture/outcomes/with-las2.json/1",
+      "kind": "fixture",
+      "path": "outcomes/v1/fixtures/invalid/with-las2.json",
+      "title": "An outcome refused for one field only: an input kind the rule does not read (E120)"
+    },
+    {
+      "id": "ophiolite.fixture/outcomes/identifier-label.json/1",
+      "kind": "fixture",
+      "path": "outcomes/v1/fixtures/invalid/identifier-label.json",
+      "title": "An outcome refused for one field only: a label written as an identifier (E120)"
+    },
+    {
+      "id": "ophiolite.fixture/outcomes/address-in-destination.json/1",
+      "kind": "fixture",
+      "path": "outcomes/v1/fixtures/invalid/address-in-destination.json",
+      "title": "An outcome refused for one field only: a destination label with an address (E120)"
     }
   ]
 }

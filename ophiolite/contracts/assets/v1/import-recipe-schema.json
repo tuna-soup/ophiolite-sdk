@@ -427,6 +427,7 @@
     "profile": {
       "enum": [
         "petrel-points-attributes/1",
+        "petrel-horizon-ilxl/1",
         "opendtect-horizon-ascii/1"
       ],
       "title": "Profile",

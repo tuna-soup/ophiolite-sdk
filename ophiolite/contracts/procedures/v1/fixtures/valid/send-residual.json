@@ -1,0 +1,37 @@
+{
+  "schema": "ophiolite.procedure/1",
+  "name": "tops-to-team-database",
+  "label": "Residuals to the team database",
+  "version": 1,
+  "step": "send",
+  "inputs": [
+    {
+      "slot": "residuals",
+      "label": "Residuals to deliver",
+      "class": "version",
+      "kinds": [
+        "well-residual/1"
+      ],
+      "cardinality": "one"
+    },
+    {
+      "slot": "db",
+      "label": "Team database",
+      "class": "system",
+      "config_keys": [
+        "host",
+        "database",
+        "schema"
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "role": "delivery",
+      "label": "Delivered residuals",
+      "class": "delivery"
+    }
+  ],
+  "entry": "procedure:send",
+  "reconcile": "procedure:reconcile"
+}

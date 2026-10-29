@@ -110,3 +110,13 @@ The interpretation of an import recipe 2 (attributed events) travels in a portab
 then an exporter refuses it. Not carried: the private recipe asset (only its pin and rules), display names of the
 people who decided. Carried as before and stated here: the descriptor's `authorization.evaluated_for` and a group
 recommendation's `by` name the exporter's account; the source files are kept byte for byte and may contain names.
+
+## 2.10 — source records (E122 s5b)
+
+The same rule as [1.10](../v1/README.md#110--210--source-records-e122-s5b): an asset entry may carry `source_record`,
+the revision's `ophiolite.source-provenance/1` record as the gateway served it, unchanged, wrapped with its `asset_id`
+and `revision`; exporters write 2.10 only when a record travels (any typed content, an entity graph or a kept original
+keeps the major at 2), and `observations.source_records_omitted` when the server has no source records. The record
+names a source system, its instance and a path or native id, which may contain names; it carries no words, reader or
+person. Readers before 2.10 open such a bundle exactly as the same export without records
+([fixture](fixtures/manifest-source-records.json)).

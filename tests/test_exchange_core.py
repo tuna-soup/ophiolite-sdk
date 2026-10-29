@@ -188,13 +188,39 @@ def test_a_transport_call_without_a_parent_is_never_made(project, tmp_path):
     assert not [c for c in project.calls if c[0] == 'publish']
 
 
-def test_duplicate_content_names_the_earlier_version(project, tmp_path):
+OCT10 = 1791633600.0  # 10 October 2026, 12:00 UTC: 11 October in Kiritimati (UTC+14)
+
+
+def test_duplicate_content_names_the_earlier_version(project, tmp_path, monkeypatch):
+    """E108 S3 (D5's SDK half, M8'): an earlier version's content again is `earlier-version` with that version's day, in UTC
+    (S3R-5: the process runs at UTC+14, where the instant is 11 October); without a day, the number alone. The head's
+    content stays nothing-changed. Mutations: every match treated as the head (nothing-changed); the day in local time."""
+    import time
+    project.items['poro']['versions'][0]['at'] = OCT10
     project.add('poro', V2, name='Porosity'); project.add('poro', V3, name='Porosity')
     e = ex(project, tmp_path / 'w'); e.get('poro', output=tmp_path / 'o')    # holds v3
-    same = refused('nothing-changed', lambda: e.send(V1, name='Porosity', profile='table/1', how='edit', based_on=['poro'], of='poro'))
-    assert same.sentence == 'This is the same as version 1; nothing was sent.'   # not "version 3"
+    monkeypatch.setenv('TZ', 'Pacific/Kiritimati'); time.tzset()
+    try:
+        assert time.localtime(OCT10).tm_mday == 11  # precondition: local time and UTC disagree on the day
+        earlier = refused('earlier-version', lambda: e.send(V1, name='Porosity', profile='table/1', how='edit', based_on=['poro'], of='poro'))
+    finally:
+        monkeypatch.undo(); time.tzset()
+    assert earlier.sentence == 'This content was version 1 on 10 October 2026.' and exit_code(earlier) == 4   # not "version 3"
+    assert earlier.technical['code'] == 'revision-conflict'
+    project.items['poro']['versions'][0]['at'] = None
+    undated = refused('earlier-version', lambda: e.send(V1, name='Porosity', profile='table/1', how='edit', based_on=['poro'], of='poro'))
+    assert undated.sentence == 'This content was version 1.'
     local = refused('nothing-changed', lambda: e.send(V3, name='Porosity', profile='table/1', how='edit', based_on=['poro'], of='poro'))
-    assert local.sentence == 'This is the same as version 3; nothing was sent.' and len([c for c in project.calls if c[0] == 'publish']) == 1
+    assert local.sentence == 'This is the same as version 3; nothing was sent.' and len([c for c in project.calls if c[0] == 'publish']) == 2
+
+
+def test_the_heads_content_from_an_older_holder_is_nothing_changed(project, tmp_path):
+    """E108 S3: a folder holding version 1 sends the head's content: the server refuses it as a duplicate and history says
+    it is the head, so nothing-changed names version 2 (never earlier-version). Mutation: a head match treated as earlier."""
+    e = ex(project, tmp_path / 'w'); e.get('poro', output=tmp_path / 'o')    # holds v1
+    project.add('poro', V2, name='Porosity', at=OCT10)
+    same = refused('nothing-changed', lambda: e.send(V2, name='Porosity', profile='table/1', how='edit', based_on=['poro'], of='poro'))
+    assert same.sentence == 'This is the same as version 2; nothing was sent.'
 
 
 # -- expected: the version a send builds on (E104 C1) --------------------------------------------------
@@ -489,7 +515,7 @@ def test_a_host_sentence_table_replaces_every_sentence(project, tmp_path):
 
 def test_outcomes_are_the_closed_list():
     assert set(exchange.OUTCOMES) == {'nothing-new', 'updates', 'access-changed', 'got', 'already-latest', 'not-visible', 'cannot-read-here', 'damaged',
-                                      'map-unavailable', 'sent-new', 'sent-version', 'newer-version-exists', 'nothing-changed', 'access-refused', 'not-valid',
+                                      'map-unavailable', 'sent-new', 'sent-version', 'newer-version-exists', 'nothing-changed', 'earlier-version', 'access-refused', 'not-valid',
                                       'not-held', 'too-large', 'outcome-unknown', 'abandoned', 'folder-busy', 'rate-limited', 'sign-in-needed', 'could-not-reach'}
     assert isinstance(Outcome('got', 's'), Outcome)
 

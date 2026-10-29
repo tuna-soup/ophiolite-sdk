@@ -1,7 +1,7 @@
 {
   "schema": "ophiolite.procedure-rules/1",
-  "rules_version": "1.0.0",
-  "description": "The literal lists, limits and sentences contracts/procedures/v1/procedure.py applies to a procedure (E105a). Any change to a list or a sentence changes rules_version; the same rules_version gives the same verdict wherever the validator runs.",
+  "rules_version": "1.3.0",
+  "description": "The literal lists, limits and sentences contracts/procedures/v1/procedure.py applies to a procedure (E105a), and contracts/procedures/v1/delivery.py to the delivery a send procedure returns (E109, 1.1.0); the one shape of a residual procedure (E119b, 1.2.0); a residual result may be sent (E120, 1.3.0). Any change to a list or a sentence changes rules_version; the same rules_version gives the same verdict wherever the validator runs.",
   "steps": ["read", "source", "process", "send", "check"],
   "step_words": {
     "read": "reads a file",
@@ -10,10 +10,10 @@
     "send": "sends data elsewhere",
     "check": "compares data with a reference"
   },
-  "process_kinds": ["points-csv/1", "mesh-text/1", "esri-ascii-grid/1", "well-tops-csv/1", "deviation-csv/1", "opendtect-faultsticks/1", "las2/1", "well-location/1", "wavelet-text/1", "model-section-text/1", "seismic-section-text/1", "time-depth-csv/1"],
+  "process_kinds": ["points-csv/1", "mesh-text/1", "esri-ascii-grid/1", "well-tops-csv/1", "deviation-csv/1", "opendtect-faultsticks/1", "las2/1", "well-location/1", "wavelet-text/1", "model-section-text/1", "seismic-section-text/1", "time-depth-csv/1", "well-residual/1"],
   "read_source_kinds": ["points-csv/1", "mesh-text/1", "esri-ascii-grid/1", "well-tops-csv/1", "deviation-csv/1", "opendtect-faultsticks/1", "las2/1", "well-location/1", "wavelet-text/1", "model-section-text/1", "time-depth-csv/1"],
-  "process_input_kinds": ["points-csv/1", "mesh-text/1", "esri-ascii-grid/1", "well-tops-csv/1", "deviation-csv/1", "opendtect-faultsticks/1", "las2/1", "well-location/1", "wavelet-text/1", "model-section-text/1", "seismic-section-text/1", "time-depth-csv/1"],
-  "send_kinds": ["points-csv/1", "mesh-text/1", "esri-ascii-grid/1", "well-tops-csv/1", "deviation-csv/1", "opendtect-faultsticks/1", "las2/1", "well-location/1", "wavelet-text/1", "model-section-text/1", "seismic-section-text/1", "time-depth-csv/1"],
+  "process_input_kinds": ["points-csv/1", "mesh-text/1", "esri-ascii-grid/1", "well-tops-csv/1", "deviation-csv/1", "opendtect-faultsticks/1", "las2/1", "well-location/1", "wavelet-text/1", "model-section-text/1", "seismic-section-text/1", "time-depth-csv/1", "well-set/1"],
+  "send_kinds": ["points-csv/1", "mesh-text/1", "esri-ascii-grid/1", "well-tops-csv/1", "deviation-csv/1", "opendtect-faultsticks/1", "las2/1", "well-location/1", "wavelet-text/1", "model-section-text/1", "seismic-section-text/1", "time-depth-csv/1", "well-residual/1"],
   "kind_words": {
     "points-csv/1": "Point set (CSV)",
     "mesh-text/1": "Triangulated surface (text)",
@@ -26,9 +26,28 @@
     "wavelet-text/1": "Wavelet (text)",
     "model-section-text/1": "Rock model section (text)",
     "seismic-section-text/1": "Seismic section (text)",
-    "time-depth-csv/1": "Time-depth table (CSV)"
+    "time-depth-csv/1": "Time-depth table (CSV)",
+    "well-set/1": "Well set (JSON)",
+    "well-residual/1": "Residual result (JSON)"
   },
   "setting_types": ["number", "integer", "string", "choice", "boolean"],
+  "send_systems": 1,
+  "delivery_states": ["confirmed", "not-sent", "unknown"],
+  "residual_procedure": {
+    "description": "E119b D1: a procedure with any well-residual/1 output has exactly these slots, settings and one output. Slots named in pinned are bound but not parents of the result (ruling R-2); empty in this version, so the selection is a parent and the result stays with its author (Q-1, private mode).",
+    "slots": {
+      "selection": {"kind": "well-set/1", "cardinality": "one"},
+      "tops": {"kind": "well-tops-csv/1", "cardinality": "many"},
+      "surface": {"kind": "esri-ascii-grid/1", "cardinality": "one"},
+      "trajectories": {"kind": "deviation-csv/1", "cardinality": "many"}
+    },
+    "settings": {
+      "formation": {"type": "string", "characters": 64},
+      "display_unit": {"type": "choice", "choices": ["m", "ft"]}
+    },
+    "output": "well-residual/1",
+    "pinned": []
+  },
   "units": ["API", "V/V", "g/cm3", "gAPI", "ohm.m", "us/ft", "us/m", "m", "ft", "s", "ms", "us", "Hz", "deg", "%", "m/s", "ft/s", "kg/m3"],
   "secret_words": ["key", "password", "token", "secret"],
   "limits": {
@@ -46,7 +65,8 @@
     "extensions": 16,
     "head_patterns": 16,
     "max_head_bytes": 65536,
-    "version": 1000000
+    "version": 1000000,
+    "delivery_items": 1000000
   },
   "where": {
     "procedure": "the procedure",
@@ -88,6 +108,20 @@
     "bad-default": "Not valid: {where} has a default value that does not fit it.",
     "bad-choices": "Not valid: {where} needs at least two choices, each with a distinct value and a readable label.",
     "bad-entry": "Not valid: the entry must name a Python file of this folder and a function in it, as module:function.",
+    "bad-reconcile": "Not valid: reconcile must name a Python file of this folder and a function in it, as module:function.",
+    "reconcile-not-send": "Not valid: only a send procedure may name a reconcile function.",
+    "residual-slot-missing": "Not valid: a procedure that makes residual results reads a well set, tops, one surface and trajectories; one of them is missing.",
+    "residual-slot-extra": "Not valid: a procedure that makes residual results reads only a well set, tops, one surface and trajectories.",
+    "residual-slot-kind": "Not valid: {where} reads a type of data a procedure that makes residual results does not read there.",
+    "residual-cardinality": "Not valid: {where} takes one item where a procedure that makes residual results takes many, or many where it takes one.",
+    "residual-settings": "Not valid: a procedure that makes residual results has exactly two settings: the formation (a text) and how depths are shown (m or ft).",
+    "residual-outputs": "Not valid: a procedure that makes residual results makes exactly one result, the residuals.",
+    "delivery-not-object": "Not valid: a delivery must be written as a JSON object.",
+    "delivery-unknown-field": "Not valid: a delivery holds only its delivery id, its state and its item count.",
+    "delivery-missing-field": "Not valid: a delivery is missing its delivery id, its state or its item count.",
+    "delivery-bad-id": "Not valid: a delivery id is a random identifier (UUID version 4) in lowercase.",
+    "delivery-bad-state": "Not valid: a delivery's state is confirmed, not-sent or unknown.",
+    "delivery-bad-count": "Not valid: a delivery's item count is a whole number from 0 to 1000000.",
     "missing-file": "Not valid: the entry names a Python file that is not in this folder.",
     "no-manifest": "Not valid: this folder has no procedure.json.",
     "bad-member": "Not valid: this folder holds something that is not a plain text file, or a name Ophiolite does not accept.",

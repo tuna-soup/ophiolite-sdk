@@ -86,6 +86,21 @@ def _got(f):
     return text + (' It is a GeoTIFF generated from the stored map, not the file that was imported.' if f.get('map') else '')
 
 
+MONTHS = ('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December')
+
+
+def _day(at):
+    """'10 October 2026': the UTC calendar day of a version's time, as the server says it (E108 D5); None when unknown."""
+    if not isinstance(at, (int, float)) or isinstance(at, bool): return None
+    day = time.gmtime(at)
+    return '%d %s %d' % (day.tm_mday, MONTHS[day.tm_mon - 1], day.tm_year)
+
+
+def _earlier(f):
+    if not f.get('number'): return 'This content was an earlier version.'
+    return 'This content was version %d on %s.' % (f['number'], f['day']) if f.get('day') else 'This content was version %d.' % f['number']
+
+
 def _newer(f):
     if not f.get('number'):
         return 'A newer version was added first. Your change was not sent. Either get the latest version and look at it, or send yours as a new item.'
@@ -109,6 +124,7 @@ SENTENCES = {
                               'Sent %s as a new version. The earlier version is kept.' % f['name'],
     'newer-version-exists': lambda f: _newer(f),
     'nothing-changed': lambda f: 'This is the same as version %d; nothing was sent.' % f['number'] if f.get('number') else 'This is the same as the version you hold; nothing was sent.',
+    'earlier-version': _earlier,  # E108 S3 (D5's SDK half): the server's sentence for an earlier version's content
     'access-refused': lambda f: ('The project did not allow this with this access key, so nothing was sent. '
                                  "Check that the key is for this project and can write, or ask the item's author."),
     'not-valid': lambda f: 'The project refused this: %s. Nothing was sent.' % f['reasons'],
@@ -160,6 +176,7 @@ Damaged = _refusal('damaged', VerificationFailed)
 MapUnavailable = _refusal('map-unavailable', Unavailable)
 NewerVersionExists = _refusal('newer-version-exists', IntegrityConflict)
 NothingChanged = _refusal('nothing-changed', IntegrityConflict)
+EarlierVersion = _refusal('earlier-version', IntegrityConflict)
 AccessRefused = _refusal('access-refused', PermissionRefused)
 NotValid = _refusal('not-valid', Refused)
 NotHeld = _refusal('not-held', Refused)
@@ -169,7 +186,7 @@ FolderBusy = _refusal('folder-busy', Busy)
 RateLimited = _refusal('rate-limited', Busy)
 SignInNeeded = _refusal('sign-in-needed', AuthenticationRequired)
 CouldNotReach = _refusal('could-not-reach', Busy)
-REFUSALS = {c.outcome: c for c in (NotVisible, CannotReadHere, Damaged, MapUnavailable, NewerVersionExists, NothingChanged, AccessRefused, NotValid,
+REFUSALS = {c.outcome: c for c in (NotVisible, CannotReadHere, Damaged, MapUnavailable, NewerVersionExists, NothingChanged, EarlierVersion, AccessRefused, NotValid,
                                    NotHeld, TooLarge, OutcomeUnknown, FolderBusy, RateLimited, SignInNeeded, CouldNotReach)}
 
 
@@ -464,6 +481,25 @@ class Exchange:
         finally:
             if lock is not None: lock.__exit__(None, None, None)
 
+    def read_exact(self, item, revision, output):
+        """E109 D6: read one exact version of `item` (an inventory entry) into `output`, a new folder, for a delivery.
+        The held record is neither read nor changed and the folder is not locked: what this folder holds stays what
+        `get` last took. A seismic volume is refused with `get`'s reason. Returns the transport's answer."""
+        output = Path(output).expanduser().absolute()
+        if output.exists() or output.is_symlink(): raise ValueError('read_exact writes into a new folder')
+        name = self._name(item)
+        staging = output.with_name('.%s.partial-%s' % (output.name, uuid.uuid4().hex[:8]))
+        try:
+            try: got = self.transport.fetch(item, revision, staging)
+            except ExchangeRefused as refusal: self._raise(refusal.outcome, {**refusal.facts, 'name': name}, refusal.technical)
+            except Exception as error: self._transport_error(error, refused='not-visible', invalid='could-not-reach', facts={'name': name})
+            staging.mkdir(mode=0o700, exist_ok=True)
+            os.replace(staging, output)
+        except BaseException:
+            shutil.rmtree(staging, ignore_errors=True)
+            raise
+        return got
+
     def get(self, item_id, *, output=None, **how):
         """Fetch, persist into `output` (when given), then advance the record."""
         got = self.fetch(item_id, output=output, **how)
@@ -471,12 +507,15 @@ class Exchange:
 
     # send to project
 
-    def send(self, data, *, name, profile, how, based_on=(), of=None, declare=None, extra=None, expected=None):
+    def send(self, data, *, name, profile, how, based_on=(), of=None, declare=None, extra=None, expected=None, source=None):
         """Publish `data` as a new item, or (with `of`, a held item) as its next version. The parent is the version
         this folder holds, never the project's head; `based_on` are held items. The complete request is saved before
         it is sent, so running the same send again after a crash never publishes twice. `expected` (with `of`) is the
         revision the caller built on: when this folder holds another one, nothing is sent (E104). It only refuses, is
-        not part of the saved request, and a retry of an unfinished send never reads it."""
+        not part of the saved request, and a retry of an unfinished send never reads it. E122 s4a: `source` names the
+        application object the data came from ({system: 'application:<client id>', instance, container, id, as_new}); it
+        is saved in the request only when given. Without `of` or `as_new` the project decides: a new item, the next
+        version of the item this object sent before, or nothing changed (the folder then holds that item)."""
         if isinstance(data, (str, Path)): data = Path(data).read_bytes()
         if not isinstance(data, (bytes, bytearray)) or not data: self._raise('not-valid', {'reasons': 'the file is empty'})
         data = bytes(data)
@@ -487,10 +526,12 @@ class Exchange:
                                     'name between 1 and 32 items it is based on, each once'),
                                    (declare is None or isinstance(declare, dict), 'give declarations as names and values'),
                                    (extra is None or isinstance(extra, dict), 'give extra details as names and values')) if not ok]
+        if source is not None and not isinstance(source, dict): reasons.append('give the source as names and values')
         if reasons: self._raise('not-valid', {'reasons': '; '.join(reasons)})
         if len(data) > MAX_SEND: self._raise('too-large', {})
         request = {'name': name, 'profile': profile, 'how': how, 'based_on': list(based_on), 'of': of, 'declare': dict(declare or {}),
                    'extra': json.loads(json.dumps(extra or {}, sort_keys=True)), 'sha256': hashlib.sha256(data).hexdigest(), 'bytes': len(data)}
+        if source is not None: request['source'] = json.loads(json.dumps(source, sort_keys=True))  # E122 s4a: only when given (R13)
         with self._locked():
             record = self._load()
             pending, first = record.get('pending'), False
@@ -504,6 +545,9 @@ class Exchange:
                 missing = [i for i in ([of] if of is not None else []) + list(based_on) if i not in record['items']]
                 if missing:
                     self._raise('not-held', {'name': self._name(record['items'].get(missing[0]), 'that item')}, {'asset_id': missing[0]})
+                if of is not None and record['items'][of].get('kind') == 'uploaded':  # E121 B7: an upload's next version is an upload
+                    self._raise('not-valid', {'reasons': '%s is an upload, which does not take a sent version; send this as a new item based on it'
+                                              % self._name(record['items'][of])})
                 if expected is not None and of is None:
                     self._raise('not-valid', {'reasons': 'name the item this is a new version of, together with the version it builds on'})
                 if expected is not None and expected != record['items'][of]['revision']:  # before same_content: identical bytes are still refused
@@ -535,8 +579,11 @@ class Exchange:
                                                     'note': (record['items'].get(receipt['asset_id']) or {}).get('note')}
             record['pending'] = None
             self._save(record)
-            code = 'sent-version' if pending['request'].get('of') is not None else 'sent-new'
+            change = receipt.get('source_change')  # E122 s4a: what the project decided for a send naming its source
+            code = 'sent-version' if pending['request'].get('of') is not None or change == 'changed' else 'sent-new'
             facts = {**facts, 'number': number}
+            if change == 'unchanged':
+                self._raise('nothing-changed', facts, {'asset_id': receipt['asset_id'], 'revision': receipt['revision'], 'command_id': pending['command_id']})
             return Outcome(code, self._say(code, facts), facts, {'asset_id': receipt['asset_id'], 'revision': receipt['revision'], 'command_id': pending['command_id']})
 
     def _clear(self):
@@ -550,8 +597,10 @@ class Exchange:
         digest = hashlib.sha256(data).hexdigest()
         if versions:
             same = [v for v in versions if v.get('revision') == digest]
-            if same: self._raise('nothing-changed', {**facts, 'number': same[0].get('number')}, error=error)
             head = versions[-1]
+            if same and same[0] is not head:  # E108 D5: an earlier version's content is named as that version, with its day
+                self._raise('earlier-version', {**facts, 'number': same[0].get('number'), 'day': _day(same[0].get('at'))}, error=error)
+            if same: self._raise('nothing-changed', {**facts, 'number': same[0].get('number')}, error=error)
             if held and head.get('revision') != held.get('revision'):
                 self._raise('newer-version-exists', {**facts, **{k: v for k, v in self._who(head).items() if v is not None}}, error=error)
         self._raise('newer-version-exists', facts, error=error)  # history unavailable: the number-free sentence
@@ -569,9 +618,6 @@ class Exchange:
 # -- the SDK's transport (E70a C3) ------------------------------------------------------------------------
 # Everything below reaches the project through ophiolite.Client; its imports stay inside the methods so the core
 # above remains importable without httpx or pydantic.
-
-UPLOAD_SUCCESSOR = 'a newer version of an uploaded file cannot be received yet'
-
 
 class ClientTransport:
     """check, get and send over an ophiolite.Client: the inventory, result history, exact reads and derived
@@ -604,9 +650,9 @@ class ClientTransport:
     def history(self, item):
         if item.get('kind') == 'external-scalar-map':  # numbers only: a map's history names no author or time (E71a C1)
             page = self._exact('catalog', 'history', {'asset': {'project_id': self.project, 'asset_id': item['asset_id']}})
-            numbers = sorted(int(r['revision']) for r in page.get('revisions', []) if str(r.get('revision', '')).isdigit())
+            numbers = sorted(int(r['revision']) for r in page.get('revisions', []) if str(r.get('revision', '')).isascii() and str(r.get('revision', '')).isdigit())
             return [{'number': n, 'revision': str(n), 'by': None, 'at': None} for n in numbers]
-        if item.get('kind') != 'derived': raise Refused('Only derived results list their versions here.')
+        if item.get('kind') not in ('derived', 'uploaded'): raise Refused('Only results and uploads list their versions here.')  # E108 (D6)
         page = self.client._post('applications', 'result-history', {'asset_id': item['asset_id']})
         names = (page.get('display') or {}).get('member_names') or {}
         return [{'number': r.get('number'), 'revision': r.get('revision'), 'by': names.get(r.get('by')), 'at': r.get('published_at')}
@@ -620,7 +666,6 @@ class ClientTransport:
         if curves:
             data = self.client.read(asset, revision, list(curves))
             descriptor = data.wire_descriptors[0] if getattr(data, 'wire_descriptors', None) else {}
-            self._successor(kind, descriptor)
             if output is not None: data.save(output)
             return {'content': data, 'number': self._number(kind, descriptor)}
         from .errors import Incompatible
@@ -630,7 +675,6 @@ class ClientTransport:
                 raise CannotReadHere('', {'reason': 'name the curves to receive a well log'}) from None
             raise
         descriptor = data._wire_descriptor
-        self._successor(kind, descriptor)
         if data.type == 'seismic-volume': raise CannotReadHere('', {'reason': 'a seismic volume is described here, not received; read its slices in Python'})
         if output is not None:
             output.mkdir(mode=0o700)
@@ -659,26 +703,26 @@ class ClientTransport:
             output.mkdir(mode=0o700)
             (output / 'map.tif').write_bytes(raw); (output / 'source.txt').write_bytes(source)
             (output / 'manifest.json').write_text(json.dumps(reply['manifest'], indent=2, sort_keys=True) + '\n')
-        return {'content': raw, 'number': int(revision) if str(revision).isdigit() else None, 'facts': {'map': True}}
+        return {'content': raw, 'number': int(revision) if str(revision).isascii() and str(revision).isdigit() else None, 'facts': {'map': True}}
 
     @staticmethod
     def _number(kind, descriptor):
-        """The version number a descriptor states; an upload without `history` is its only version (E53 adds it from 2)."""
+        """The version number a descriptor states; an upload without `history` is its only version (E53 adds it from 2).
+        E108 S3 (D8') amends E70a's adapter row 127 by name: an upload's newer version is read like any other version (it
+        was refused cannot-read-here); a declaration-only one is found by its own revision (B3)."""
         number = (descriptor.get('history') or {}).get('number')
         return number if number is not None or kind != 'uploaded' else 1
-
-    @staticmethod
-    def _successor(kind, descriptor):
-        if kind == 'uploaded' and (descriptor.get('history') or {}).get('number', 1) > 1:
-            raise CannotReadHere('', {'reason': UPLOAD_SUCCESSOR})  # E53: until receiving one is supported (A2)
 
     def publish(self, data, request, resolved, command_id):
         from .writers import WrittenOriginal
         written = WrittenOriginal(data, request['profile'], dict(request.get('declare') or {}), 'derived')
         receipt = self.client.publish_derived(written, name=request['name'], from_=[(p['asset_id'], p['revision']) for p in resolved['parents']],
                                               method={'name': request['how'], 'declared': False}, command_id=command_id,
-                                              new_version_of=request.get('of'), expected_parent=resolved.get('expected_parent'))
-        return {'asset_id': receipt.asset_id, 'revision': receipt.revision, 'number': receipt.revision_number}
+                                              new_version_of=request.get('of'), expected_parent=resolved.get('expected_parent'),
+                                              **({'source': request['source']} if request.get('source') is not None else {}))
+        answer = {'asset_id': receipt.asset_id, 'revision': receipt.revision, 'number': receipt.revision_number}
+        if receipt.source_change is not None: answer['source_change'] = receipt.source_change
+        return answer
 
     def same_content(self, held, request):
         return request['sha256'] == held.get('revision')

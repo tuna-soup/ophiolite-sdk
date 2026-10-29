@@ -1,0 +1,46 @@
+"""$label."""
+from ophiolite import procedure, readers, writers
+
+# What ophiolite.writers.write_curves writes on each ~Well line: (unit, description); STRT, STOP and STEP carry the
+# depth unit and their values come from the depths.
+WELL_LINES = {'STRT': (True, 'start'), 'STOP': (True, 'stop'), 'STEP': (True, 'step'), 'NULL': (False, 'missing'), 'WELL': (False, 'well')}
+
+
+def refuse(what):
+    raise ValueError(f'This start writes with ophiolite.writers.write_curves, which {what}; change the start to say what to keep.')
+
+
+@procedure
+def main(inputs, settings):
+    """Read the LAS file with ophiolite.readers and write it again with the Ophiolite writer.
+
+    `values` holds the writer's arguments, made from everything the reader found. Your calculation goes where it is
+    marked: change `values` before they are written. The writer writes LAS 2.0 with its own ~Well lines and
+    descriptions, so a file with more (COMP or UWI lines, ~Parameter lines, its own descriptions) stops the run with
+    a sentence, and nothing is left out without your knowing."""
+    found = readers.read(inputs['data'][0])
+    for part, lines in (('~Curve', found.curves), ('~Well', found.well)):
+        names = [line[0].upper() for line in lines]
+        twice = next((line[0] for line, name in zip(lines, names) if names.count(name) > 1), None)
+        if twice is not None: refuse(f"has no place for a second {part} line named '{twice}'")
+    index, unit = found.curves[0][0], found.curves[0][1]
+    if index.upper() != 'DEPT': refuse(f"always names the index curve DEPT, and this file names it '{index}'")
+    well = {line[0].upper(): line for line in found.well}
+    for name, line in well.items():
+        if name not in WELL_LINES: refuse(f"has no place for the ~Well line '{line[0]}'")
+        depth_unit, description = WELL_LINES[name]
+        if line[1] != (unit if depth_unit else ''): refuse(f"writes the ~Well line '{line[0]}' with the unit '{unit if depth_unit else ''}', not '{line[1]}'")
+        if line[3] != description: refuse(f"writes its own description of the ~Well line '{line[0]}', not '{line[3]}'")
+    if 'WELL' not in well: refuse('always writes a WELL line, and this file has none')
+    if found.parameters: refuse('has no place for ~Parameter lines')
+    for mnemonic, _, api, description in found.curves:
+        if api: refuse(f"has no place for the API code of the curve '{mnemonic}'")
+        if description != ('depth' if mnemonic is index else mnemonic): refuse(f"writes its own description of the curve '{mnemonic}', not '{description}'")
+    try: null = float(found.null)
+    except ValueError: refuse(f"writes a number as the NULL value, not '{found.null}'")
+    values = {'depth': [row[0] for row in found.data],
+              'curves': {mnemonic: (unit_, [row[i] for row in found.data]) for i, (mnemonic, unit_, _, _) in enumerate(found.curves) if i},
+              'depth_unit': unit or 'unknown', 'well': well['WELL'][2], 'null_marker': null,
+              'notes': [line.strip() for line in found.other or () if line.strip()]}
+    # Your calculation: change values here.
+    return {'data': writers.write_curves(**values)}

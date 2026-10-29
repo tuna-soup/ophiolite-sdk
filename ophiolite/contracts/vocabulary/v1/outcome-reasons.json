@@ -1,0 +1,34 @@
+{
+ "schema": "ophiolite.outcome-reasons/1",
+ "id": "ophiolite.outcome-reasons/1",
+ "description": "E120. `reasons`: why an outcome declaration, a change or a read of states was refused, one closed key per check, one sentence each; nothing was stored. `checks`: why an acceptance record (ophiolite.outcome-check/1) is rejected for its validity or inputs, or not compared, one closed key each, with the words a person reads after \"Rejected\" or \"Not checked\".",
+ "reasons": {
+  "schema": "The declaration does not have the outcome's shape.",
+  "rule": "There is no such built-in rule for this kind of result.",
+  "settings": "The rule's settings are not the ones it takes.",
+  "inputs": "The inputs are not the ones the rule reads.",
+  "label": "The name of an outcome must read as words, for example \"Tops within 5 m\".",
+  "destination": "The destination must name a send procedure and a label that reads as words, with no address or secret in it.",
+  "permission": "Only a project administrator can declare or change outcomes.",
+  "withdrawn": "This outcome was withdrawn; it can no longer be changed.",
+  "label-taken": "Another outcome in this project already has this name.",
+  "unchanged": "This version already says exactly this; nothing was changed.",
+  "not-found": "There is no such outcome in this project.",
+  "request": "This command id was used for another request.",
+  "result": "You cannot read this result version, so it has no outcome states for you.",
+  "not-again": "Publish for an outcome is for an output of a run made again; nothing was published.",
+  "kind": "This outcome is not declared over this kind of result; nothing was published.",
+  "disabled": "This outcome is disabled; nothing was published.",
+  "answered": "This output was already answered; run again to publish for this outcome."
+ },
+ "checks": {
+  "rows_missing": "rows missing: the result leaves out rows its selection requires",
+  "rows_unexpected": "rows unexpected: the result has rows its selection does not require",
+  "rows_duplicated": "rows duplicated: the result gives a row of its selection more than once",
+  "rows_mismatched": "rows mismatched: a row's top, trajectory or reason, or the result's settings, are not the run's",
+  "inputs": "made without {kinds}",
+  "unit_mismatch": "units disagree: the outcome is in {outcome_unit}, the result in {result_unit}",
+  "no_validity": "the result has no record of whether its rows are the run's",
+  "nothing_computed": "no row of the result has a computed residual"
+ }
+}

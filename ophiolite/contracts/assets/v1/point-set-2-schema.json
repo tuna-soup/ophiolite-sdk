@@ -517,11 +517,12 @@
     },
     "RecipeInterpretation": {
       "additionalProperties": false,
-      "description": "The executable identity of a recipe reader (Connectors petrel_points / opendtect_horizon).",
+      "description": "The executable identity of a recipe reader (Connectors petrel_points / petrel_horizon / opendtect_horizon).",
       "properties": {
         "reader": {
           "enum": [
             "asset_connectors.petrel_points/1",
+            "asset_connectors.petrel_horizon/1",
             "asset_connectors.opendtect_horizon/1"
           ],
           "title": "Reader",

@@ -1,0 +1,353 @@
+{
+ "schema": "ophiolite.procedure-template-pairs/1",
+ "rules_version": "1.3.0",
+ "kinds": {
+  "points-csv/1": {
+   "word": "points"
+  },
+  "mesh-text/1": {
+   "word": "mesh"
+  },
+  "esri-ascii-grid/1": {
+   "word": "grid"
+  },
+  "well-tops-csv/1": {
+   "word": "well-tops"
+  },
+  "deviation-csv/1": {
+   "word": "deviation"
+  },
+  "opendtect-faultsticks/1": {
+   "word": "fault-sticks"
+  },
+  "las2/1": {
+   "word": "las"
+  },
+  "well-location/1": {
+   "word": "well-location"
+  },
+  "wavelet-text/1": {
+   "word": "wavelet"
+  },
+  "model-section-text/1": {
+   "word": "model-section"
+  },
+  "seismic-section-text/1": {
+   "word": "seismic-section"
+  },
+  "time-depth-csv/1": {
+   "word": "time-depth"
+  },
+  "well-set/1": {
+   "word": "well-set"
+  },
+  "well-residual/1": {
+   "word": "residual"
+  }
+ },
+ "listed": [
+  {
+   "step": "read",
+   "kind": "points-csv/1"
+  },
+  {
+   "step": "read",
+   "kind": "mesh-text/1"
+  },
+  {
+   "step": "read",
+   "kind": "esri-ascii-grid/1"
+  },
+  {
+   "step": "read",
+   "kind": "well-tops-csv/1"
+  },
+  {
+   "step": "read",
+   "kind": "deviation-csv/1"
+  },
+  {
+   "step": "read",
+   "kind": "opendtect-faultsticks/1"
+  },
+  {
+   "step": "read",
+   "kind": "las2/1"
+  },
+  {
+   "step": "read",
+   "kind": "well-location/1"
+  },
+  {
+   "step": "read",
+   "kind": "wavelet-text/1"
+  },
+  {
+   "step": "read",
+   "kind": "model-section-text/1"
+  },
+  {
+   "step": "read",
+   "kind": "time-depth-csv/1"
+  },
+  {
+   "step": "source",
+   "kind": "points-csv/1"
+  },
+  {
+   "step": "source",
+   "kind": "mesh-text/1"
+  },
+  {
+   "step": "source",
+   "kind": "esri-ascii-grid/1"
+  },
+  {
+   "step": "source",
+   "kind": "well-tops-csv/1"
+  },
+  {
+   "step": "source",
+   "kind": "deviation-csv/1"
+  },
+  {
+   "step": "source",
+   "kind": "opendtect-faultsticks/1"
+  },
+  {
+   "step": "source",
+   "kind": "las2/1"
+  },
+  {
+   "step": "source",
+   "kind": "well-location/1"
+  },
+  {
+   "step": "source",
+   "kind": "wavelet-text/1"
+  },
+  {
+   "step": "source",
+   "kind": "model-section-text/1"
+  },
+  {
+   "step": "source",
+   "kind": "time-depth-csv/1"
+  },
+  {
+   "step": "process",
+   "kind": "points-csv/1"
+  },
+  {
+   "step": "process",
+   "kind": "mesh-text/1"
+  },
+  {
+   "step": "process",
+   "kind": "esri-ascii-grid/1"
+  },
+  {
+   "step": "process",
+   "kind": "well-tops-csv/1"
+  },
+  {
+   "step": "process",
+   "kind": "deviation-csv/1"
+  },
+  {
+   "step": "process",
+   "kind": "opendtect-faultsticks/1"
+  },
+  {
+   "step": "process",
+   "kind": "las2/1"
+  },
+  {
+   "step": "process",
+   "kind": "well-location/1"
+  },
+  {
+   "step": "process",
+   "kind": "wavelet-text/1"
+  },
+  {
+   "step": "process",
+   "kind": "model-section-text/1"
+  },
+  {
+   "step": "process",
+   "kind": "seismic-section-text/1"
+  },
+  {
+   "step": "process",
+   "kind": "time-depth-csv/1"
+  },
+  {
+   "step": "send",
+   "kind": "points-csv/1"
+  },
+  {
+   "step": "send",
+   "kind": "mesh-text/1"
+  },
+  {
+   "step": "send",
+   "kind": "esri-ascii-grid/1"
+  },
+  {
+   "step": "send",
+   "kind": "well-tops-csv/1"
+  },
+  {
+   "step": "send",
+   "kind": "deviation-csv/1"
+  },
+  {
+   "step": "send",
+   "kind": "opendtect-faultsticks/1"
+  },
+  {
+   "step": "send",
+   "kind": "las2/1"
+  },
+  {
+   "step": "send",
+   "kind": "well-location/1"
+  },
+  {
+   "step": "send",
+   "kind": "wavelet-text/1"
+  },
+  {
+   "step": "send",
+   "kind": "model-section-text/1"
+  },
+  {
+   "step": "send",
+   "kind": "seismic-section-text/1"
+  },
+  {
+   "step": "send",
+   "kind": "time-depth-csv/1"
+  },
+  {
+   "step": "send",
+   "kind": "well-residual/1"
+  },
+  {
+   "step": "check",
+   "kind": "well-tops-csv/1"
+  },
+  {
+   "step": "check",
+   "kind": "deviation-csv/1"
+  }
+ ],
+ "refused": [
+  {
+   "step": "read",
+   "kind": "seismic-section-text/1",
+   "sentence": "Synthetic sections are made in Ophiolite; they cannot be read from a file."
+  },
+  {
+   "step": "read",
+   "kind": "well-set/1",
+   "sentence": "Well sets are chosen in Ophiolite; a procedure can use one as an input but cannot read, make or send one."
+  },
+  {
+   "step": "read",
+   "kind": "well-residual/1",
+   "sentence": "Residual results are made in Ophiolite by the residual procedure; they cannot be read from a file."
+  },
+  {
+   "step": "source",
+   "kind": "seismic-section-text/1",
+   "sentence": "Synthetic sections are made in Ophiolite; they cannot be read from a file."
+  },
+  {
+   "step": "source",
+   "kind": "well-set/1",
+   "sentence": "Well sets are chosen in Ophiolite; a procedure can use one as an input but cannot read, make or send one."
+  },
+  {
+   "step": "source",
+   "kind": "well-residual/1",
+   "sentence": "Residual results are made in Ophiolite by the residual procedure; they cannot be read from a file."
+  },
+  {
+   "step": "process",
+   "kind": "well-set/1",
+   "sentence": "Well sets are chosen in Ophiolite; a procedure can use one as an input but cannot read, make or send one."
+  },
+  {
+   "step": "process",
+   "kind": "well-residual/1",
+   "sentence": "Residual results have one fixed procedure shape; start from the reference procedure for residuals at wells instead."
+  },
+  {
+   "step": "send",
+   "kind": "well-set/1",
+   "sentence": "Well sets are chosen in Ophiolite; a procedure can use one as an input but cannot read, make or send one."
+  },
+  {
+   "step": "check",
+   "kind": "points-csv/1",
+   "sentence": "There is no check template for points yet; check templates compare well tops and deviation surveys."
+  },
+  {
+   "step": "check",
+   "kind": "mesh-text/1",
+   "sentence": "There is no check template for mesh yet; check templates compare well tops and deviation surveys."
+  },
+  {
+   "step": "check",
+   "kind": "esri-ascii-grid/1",
+   "sentence": "There is no check template for grid yet; check templates compare well tops and deviation surveys."
+  },
+  {
+   "step": "check",
+   "kind": "opendtect-faultsticks/1",
+   "sentence": "There is no check template for fault-sticks yet; check templates compare well tops and deviation surveys."
+  },
+  {
+   "step": "check",
+   "kind": "las2/1",
+   "sentence": "There is no check template for las yet; check templates compare well tops and deviation surveys."
+  },
+  {
+   "step": "check",
+   "kind": "well-location/1",
+   "sentence": "There is no check template for well-location yet; check templates compare well tops and deviation surveys."
+  },
+  {
+   "step": "check",
+   "kind": "wavelet-text/1",
+   "sentence": "There is no check template for wavelet yet; check templates compare well tops and deviation surveys."
+  },
+  {
+   "step": "check",
+   "kind": "model-section-text/1",
+   "sentence": "There is no check template for model-section yet; check templates compare well tops and deviation surveys."
+  },
+  {
+   "step": "check",
+   "kind": "seismic-section-text/1",
+   "sentence": "There is no check template for seismic-section yet; check templates compare well tops and deviation surveys."
+  },
+  {
+   "step": "check",
+   "kind": "time-depth-csv/1",
+   "sentence": "There is no check template for time-depth yet; check templates compare well tops and deviation surveys."
+  },
+  {
+   "step": "check",
+   "kind": "well-set/1",
+   "sentence": "There is no check template for well-set yet; check templates compare well tops and deviation surveys."
+  },
+  {
+   "step": "check",
+   "kind": "well-residual/1",
+   "sentence": "There is no check template for residual yet; check templates compare well tops and deviation surveys."
+  }
+ ]
+}

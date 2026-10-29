@@ -1,0 +1,88 @@
+{
+  "schema": "ophiolite.connector-capability/1",
+  "id": "oracle-wells",
+  "display_name": "Oracle well headers and tables",
+  "kind": "source",
+  "summary": "Operator-approved Oracle tables of well locations and headers through a reviewed mapping, or any table as it is with the person's declarations; read only.",
+  "host": {
+    "name": "Oracle Database",
+    "versions": [
+      "23ai Free"
+    ],
+    "os": [
+      "linux"
+    ]
+  },
+  "routes": [
+    {
+      "profile": "sql-wells/1",
+      "data": "Well locations and headers",
+      "direction": "read",
+      "exact_old_revisions": "unavailable",
+      "change_detection": "polling",
+      "losses": [
+        "Only mapped columns are read",
+        "Coordinates are as stored; the declared CRS is not transformed",
+        "Tables are read in pages of 1,000 rows inside one read-only transaction, up to 100,000 rows and 64 MiB",
+        "A read that outlasts the undo is refused: \"The table changed while it was read; read it again\"",
+        "TIMESTAMP values keep six fraction digits; further fraction digits are dropped",
+        "TIMESTAMP WITH TIME ZONE and WITH LOCAL TIME ZONE columns refuse the read when they hold a value (the driver returns no zone)",
+        "An empty string is NULL in Oracle, so an empty identity refuses the read and an empty name is missing",
+        "CHAR and NCHAR values keep their trailing padding",
+        "Unquoted names are upper case: a configured name is used as written when it exists, else upper case; column names are as stored",
+        "Oracle connections check the certificate's subject name; alternative names are not checked by the driver",
+        "A statement the server does not interrupt can run past the time limit"
+      ],
+      "unsupported": [
+        "writes",
+        "operating-system, Kerberos, wallet-only or proxy sign-in",
+        "connect descriptors, TNS aliases, SIDs and failover address lists",
+        "listener redirects",
+        "unencrypted connections",
+        "Oracle Client (thick mode)",
+        "change data capture",
+        "schema changes without a new reviewed mapping"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-10-11",
+        "evidence": "connectors:tests/test_oracle.py"
+      }
+    },
+    {
+      "profile": "table/1",
+      "data": "Any table, as its columns and rows",
+      "direction": "read",
+      "exact_old_revisions": "unavailable",
+      "change_detection": "polling",
+      "losses": [
+        "Columns of types outside the eight logical types (spatial geometry, XMLTYPE, BLOB, CLOB, RAW and others) are listed as not read; their values are not delivered and a change in them is not detected",
+        "Declared units, descriptions, missing-value markers and coordinates are annotations; no value is converted",
+        "A table is read once inside one read-only transaction, up to 100,000 rows, 64 MiB and 128 columns",
+        "DATE is a timestamp with its time of day; TIMESTAMP WITH TIME ZONE values are delivered in UTC without their original offset",
+        "An empty string is NULL in Oracle",
+        "CHAR and NCHAR values keep their trailing padding",
+        "Oracle connections check the certificate's subject name; alternative names are not checked by the driver",
+        "A statement the server does not interrupt can run past the time limit"
+      ],
+      "unsupported": [
+        "writes",
+        "change data capture",
+        "paging past the bounds",
+        "years before 1",
+        "schema changes without a new reviewed declaration"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    }
+  ],
+  "redistribution": "Ophiolite source; the Oracle Database is customer-operated. The python-oracledb driver (UPL-1.0 or Apache-2.0) is installed with the `databases` extra and runs in thin mode, without Oracle Client libraries.",
+  "example": null
+}

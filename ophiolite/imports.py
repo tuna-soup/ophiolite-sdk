@@ -18,10 +18,10 @@ from .well_imports import _checked
 
 FINAL = ('complete', 'complete-with-skipped', 'cancelled', 'incomplete')
 STOPPED = ('paused', 'resumable', 'needs-review')
-TARGETS = ('wells', 'well-tops', 'deviation-survey', 'point-set', 'time-depth')
+TARGETS = ('wells', 'well-tops', 'deviation-survey', 'point-set', 'time-depth', 'table')  # E58b: `table` keeps the file as it is
 NOUNS = {'wells': ('well', 'wells'), 'well-tops': ('top', 'tops'), 'time-depth': ('depth and time pair', 'depth and time pairs'),
-         'deviation-survey': ('survey station', 'survey stations'), 'point-set': ('point', 'points')}
-SET_NOUN = {'well-tops': 'tops', 'time-depth': 'time-depth', 'deviation-survey': 'deviation survey', 'point-set': 'points'}
+         'deviation-survey': ('survey station', 'survey stations'), 'point-set': ('point', 'points'), 'table': ('row', 'rows')}
+SET_NOUN = {'well-tops': 'tops', 'time-depth': 'time-depth', 'deviation-survey': 'deviation survey', 'point-set': 'points', 'table': 'table'}
 SET_HEAD = {'well-tops': 'Tops', 'time-depth': 'Time-depth pairs', 'deviation-survey': 'Deviation surveys', 'point-set': 'Point sets'}
 VALUE_WORDS = {'not-numeric': 'is not a number', 'non-finite': 'is not a finite number', 'value-missing': 'is empty',
                'out-of-range': 'is outside the range this field allows', 'not-increasing': 'is not larger than in the row before',
@@ -265,14 +265,17 @@ class Imports:
             if answer['state'] in FINAL or answer['state'] in STOPPED: return answer
         raise VerificationFailed('The import did not finish in %d steps; run it again to continue.' % max_steps)
 
-    def from_table(self, source, target=None, mapping=None, *, declarations=None, name=None, reading=None, well=None, separate=None,
+    def from_table(self, source, target=None, mapping=None, *, declarations=None, columns=None, name=None, reading=None, well=None, separate=None,
                    authority=None, audience=(), command_id=None, dry_run=False, progress=None, on_start=None, layout=None):
         """Read, preview and (unless dry_run) start and run: returns {'read', 'preview', 'run'} ('run' is None for a dry
         run, which adds nothing). `mapping` is {field: column}; omitted, the table must be in the target's standard layout.
         E89: `layout` names a project layout these columns are; its mapping is used and the landing records it (the target
         is the layout's). A project layout is never used unless named: a table that matches one without a mapping or
-        `layout` is refused with the layout's name."""
+        `layout` is refused with the layout's name.
+        E58b: `target="table"` keeps the file as it is (no mapping needed); `columns` gives what each column holds,
+        {column: {'unit', 'quantity', 'missing', 'description'}}; read it back with client.read_data(asset, revision)."""
         from .layouts import Layouts, needs_decision
+        notes = dict(columns or {})  # `columns` below is the table's own column names
         read = self.read(source, name=name, reading=reading)
         if read.get('columns') is None: raise Refused('Answer the questions about how to read this table first: give reading=%s.' % sorted(
             d['field'] for d in read['context'].get('decisions', []) if d.get('status') == 'needs-decision'))
@@ -287,6 +290,7 @@ class Imports:
             if target is not None and target != chosen['target']: raise Refused('The layout "%s" holds %s, not %s.' % (chosen['name'], chosen['target'], target))
             target = chosen['target']
         if target is None: raise Refused('Say what the table holds: one of %s.' % ', '.join(TARGETS))
+        if target == 'table' and mapping is None and chosen is None: mapping = {}
         standard = next((l for l in read.get('layouts') or [] if l['target'] == target), None) if chosen is None else None
         if mapping is None and standard is None and chosen is None:
             offered = [m for m in Layouts(self.client).match(columns, target)]
@@ -298,7 +302,7 @@ class Imports:
             if column not in columns: raise Refused('This table has no column named %r. Its columns: %s.' % (column, ', '.join(columns)))
         kept = (chosen['layout'].get('declarations') if chosen else (standard or {}).get('declarations')) or {}
         declared = {**kept, **(declarations or {})}
-        body = {'fields': fields, **(declared if target == 'wells' else {'declarations': declared})}
+        body = {'fields': fields, **(declared if target == 'wells' else {'declarations': declared}), **({'columns': notes} if notes else {})}
         options = {'reading': reading, 'well': well, 'separate': separate, 'authority': authority,
                    'layout': {'id': chosen['asset_id'], 'version': chosen['version'], 'generation': chosen['generation']} if chosen else None}
         review = self.preview(read, target, body, **options)

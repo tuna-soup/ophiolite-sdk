@@ -23,6 +23,37 @@ distributions and their included notices. See each requirements.lock and the Rea
 package-lock.json for exact resolved packages. This bounded SDK/template input
 audit does not qualify the complete E17 open-source distribution.
 
+## Third-party code: lasio's LAS patterns (E128 s3)
+
+`ophiolite/readers/las.py` copies, as regular-expression strings, the LAS header-line patterns of lasio 0.32
+(`lasio.reader.configure_metadata_patterns`) and its default data substitutions (`lasio.defaults.READ_SUBS`), so that
+a LAS file is split where the platform's lasio-based reader splits it. lasio is not a dependency of the SDK and is not
+imported. These patterns are not original Ophiolite work and are used under lasio's MIT License:
+
+```text
+MIT License
+
+Copyright (c) 2013-2020 Kent Inverarity and contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
 ## Third-party data: the HON-GT-01 gamma-ray excerpt (E52)
 
 `ophiolite/contracts/scientific/v1/fixtures/hon-gt-01-gamma-ray-excerpt.las` (SHA-256 `8f7dce3351e8dba04479cb0b0714c49cb3a210f2b2b6e7279f07f37d7c222515`)

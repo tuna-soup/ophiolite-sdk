@@ -45,7 +45,7 @@ def test_check_get_and_send_from_the_command_line(run, tmp_path):
     pid = parent.asset_id
     assert run(ka, 'a', 'check') == (0, 'You hold nothing yet. This first check noted the 1 item you can see; the next check lists what is new.', '')
     assert run(ka, 'a', 'get', '--item', pid, '--output', str(tmp_path / 'pa')) == (
-        0, 'Got Picked points, version 1. You now hold it; saved in %s.' % (tmp_path / 'pa'), '')
+        0, 'Got Picked points, version 1 by Alice, just now. You now hold it; saved in %s.' % (tmp_path / 'pa'), '')
     assert run(ka, 'a', 'get', '--item', pid, '--output', str(tmp_path / 'pa')) == (
         0, 'You already hold the latest version of Picked points, saved in %s.' % (tmp_path / 'pa'), '')
     v1, v2, v3 = (tmp_path / n for n in ('v1.csv', 'v2.csv', 'v3.csv'))
@@ -83,12 +83,12 @@ def test_check_get_and_send_from_the_command_line(run, tmp_path):
     code, out, err = run(ka, 'a', 'get', '--item', log.asset_id, '--output', str(tmp_path / 'log'), '--curve', 'GR', '--json')
     shown = json.loads(out)
     assert code == 0 and set(shown) == {'outcome', 'sentence', 'facts', 'technical'} and shown['outcome'] == 'got'
-    assert shown['sentence'] == 'Got Gamma log, version 1. You now hold it; saved in %s.' % (tmp_path / 'log') and shown['facts']['name'] == 'Gamma log'
+    assert shown['sentence'] == 'Got Gamma log, version 1 by Alice, just now. You now hold it; saved in %s.' % (tmp_path / 'log') and shown['facts']['name'] == 'Gamma log'
     remove(web, 'alice', ka['id'])
     assert run(ka, 'a', 'check') == (3, '', 'Your access key is not accepted any more. Ask for a new one.')
 
 
-EXITS = {'not-visible': 4, 'cannot-read-here': 1, 'damaged': 1, 'map-unavailable': 4, 'newer-version-exists': 4, 'nothing-changed': 4, 'access-refused': 3,
+EXITS = {'not-visible': 4, 'cannot-read-here': 1, 'damaged': 1, 'map-unavailable': 4, 'newer-version-exists': 4, 'nothing-changed': 4, 'earlier-version': 4, 'access-refused': 3,
          'not-valid': 1, 'not-held': 1, 'too-large': 1, 'outcome-unknown': 5, 'folder-busy': 5, 'rate-limited': 5, 'sign-in-needed': 3, 'could-not-reach': 5}
 
 
@@ -104,7 +104,7 @@ FACTS = {'name': 'Top Chalk', 'number': 2, 'who': 'Alice Example', 'when': '5 mi
 
 def test_the_default_layer_says_none_of_the_internal_words():
     texts = [exchange.SENTENCES[code](dict(FACTS)) for code in exchange.SENTENCES if code != 'cannot-read-here']
-    texts.append(exchange.SENTENCES['cannot-read-here']({'reason': exchange.UPLOAD_SUCCESSOR}))
+    texts.append(exchange.SENTENCES['cannot-read-here']({'reason': 'name the curves to receive a well log'}))  # E108 S3: UPLOAD_SUCCESSOR is gone
     sub = next(a for a in cli.parser()._actions if a.dest == 'command')
     for verb in ('check', 'get', 'send'):
         texts.append(sub.choices[verb].format_help().split('options:')[0].split('\n', 1)[1])  # the verb's description and arguments

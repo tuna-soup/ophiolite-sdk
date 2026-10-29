@@ -1,0 +1,29 @@
+{
+  "schema": "ophiolite.rights-basis/1",
+  "id": "ophiolite.rights-basis/1",
+  "title": "Rights basis: the dates, permitted uses and deletion-on-end that govern a source and everything made from it",
+  "description": "A rights basis attaches to an original, a reviewed release or a managed connection target. Each attach or renewal is a numbered version; a stored revision is bound to the versions it was made under and keeps them (a renewal binds only what is made after it). Made from several sources, a revision may be used until the earliest end, for the uses every source permits, and is deleted at the end when any source asks.",
+  "targets": [
+    {"kind": "upload", "label": "An original kept in the project"},
+    {"kind": "release", "label": "A reviewed release"},
+    {"kind": "connection", "label": "A managed connection target"}
+  ],
+  "uses": [
+    {"id": "read", "label": "Read data"},
+    {"id": "derive", "label": "Create derived results"},
+    {"id": "export", "label": "Export data"},
+    {"id": "model-use", "label": "Use with models"}
+  ],
+  "parent_kinds": ["upload", "release", "connection", "asset", "none"],
+  "carriers": ["uploaded", "derived", "capture"],
+  "end": {
+    "stored_as": "the first instant after the last permitted day (00:00 UTC of the next day)",
+    "last_day_rule": "error_policy.last_day"
+  },
+  "merge": {
+    "effective_until": "earliest",
+    "uses": "intersection",
+    "delete_on_end": "any",
+    "publication_requires": "derive"
+  }
+}

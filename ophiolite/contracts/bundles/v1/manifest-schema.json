@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/bundles/v1/manifest-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.portable-bundle/1",
-    "version": "1.1.0",
+    "version": "1.10.0",
     "lifecycle": "preview"
   },
   "title": "PortableBundleManifest",
@@ -123,6 +123,12 @@
           "minLength": 1,
           "maxLength": 200,
           "description": "Why groups were not observed (for example, the exporting credential may not list them); never silently empty."
+        },
+        "source_records_omitted": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160,
+          "description": "1.10/2.10 (E122 s5b): why no source records travel although the exporter writes them (for example, this server has no source records); never silently empty."
         }
       }
     }
@@ -279,6 +285,39 @@
           "items": {
             "type": "string"
           }
+        },
+        "source_record": {
+          "$ref": "#/$defs/BundleSourceRecord"
+        }
+      }
+    },
+    "BundleSourceRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "asset_id",
+        "revision",
+        "record"
+      ],
+      "description": "1.10/2.10 (E122 s5b): where this exact revision came from, the ophiolite.source-provenance/1 record the exporting gateway served for it, unchanged, with the identity it was served for (the record names none). Only on a revision that has a record; a revision stored before records began carries no key. A reader binds asset_id and revision to the asset entry's own and refuses a record in a bundle below 1.10/2.10.",
+      "properties": {
+        "schema": {
+          "const": "ophiolite.source-provenance/1"
+        },
+        "asset_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "record": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "An ophiolite.source-provenance/1 record (contracts/scientific/v1/source-provenance.json), validated against that schema; it is not repeated here."
         }
       }
     },

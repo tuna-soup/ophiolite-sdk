@@ -1,0 +1,22 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "resqml-epc/1",
+  "kind": "source",
+  "lifecycle": "preview",
+  "display_name": "RESQML package (.epc with its .h5)",
+  "description": "A RESQML 2.0.1 package and its HDF5 file, kept byte for byte; well paths, deviation surveys and well logs are read from it and stored with what was read and what was not. Not served through the scientific-asset envelope yet (E124).",
+  "connector": {
+    "scientific_profile": "resqml-package/1",
+    "source_schema": "RESQML/2.0.1-EPC+HDF5",
+    "mapping_version": "resqml-exact/1",
+    "history": "retained-exact-read"
+  },
+  "role": "artifact",
+  "media_types": [
+    "application/x-resqml+zip",
+    "application/x-hdf5"
+  ],
+  "table_target": {
+    "none": "not-a-table"
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "schema": "ophiolite.procedure/1",
+  "name": "residual-at-wells",
+  "label": "Residual at wells",
+  "version": 1,
+  "version_label": "First release",
+  "step": "process",
+  "inputs": [
+    {
+      "slot": "selection",
+      "label": "Wells to compare",
+      "class": "version",
+      "kinds": [
+        "well-set/1"
+      ],
+      "cardinality": "one"
+    },
+    {
+      "slot": "tops",
+      "label": "Tops of the wells",
+      "class": "version",
+      "kinds": [
+        "well-tops-csv/1"
+      ],
+      "cardinality": "many"
+    },
+    {
+      "slot": "surface",
+      "label": "Surface to compare with",
+      "class": "version",
+      "kinds": [
+        "esri-ascii-grid/1"
+      ],
+      "cardinality": "one"
+    }
+  ],
+  "outputs": [
+    {
+      "role": "residuals",
+      "label": "Residuals at wells",
+      "class": "version",
+      "kind": "well-residual/1"
+    }
+  ],
+  "settings": [
+    {
+      "key": "formation",
+      "label": "Formation the surface represents",
+      "type": "string"
+    },
+    {
+      "key": "display_unit",
+      "label": "Show depths in",
+      "type": "choice",
+      "default": "m",
+      "choices": [
+        {
+          "value": "m",
+          "label": "Metres"
+        },
+        {
+          "value": "ft",
+          "label": "Feet"
+        }
+      ]
+    }
+  ],
+  "entry": "procedure:residuals",
+  "licence": "MIT"
+}

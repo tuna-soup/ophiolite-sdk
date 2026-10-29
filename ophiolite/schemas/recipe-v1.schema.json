@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/schemas/recipe-v1.schema.json",
+  "title": "ophiolite.recipe/1",
+  "description": "A recipe: the steps a person would type, in order (E112 s2). ophiolite.recipe_runs.check is the validation path; this schema documents it and is held to it by a parity corpus. References to inputs and earlier steps, and the secret-key rule, are checked in code only.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "name", "inputs", "steps"],
+  "properties": {
+    "schema": {"const": "ophiolite.recipe/1"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 80},
+    "inputs": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 16,
+      "propertyNames": {"pattern": "^[a-z][a-z0-9_]{0,30}$"},
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type"],
+        "properties": {"type": {"enum": ["item", "file"]}}
+      }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "step", "with"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z][a-z0-9-]{0,30}$"},
+          "step": {"enum": ["residuals", "publish", "states", "deliver"]},
+          "with": {"type": "object"}
+        },
+        "allOf": [
+          {"if": {"properties": {"step": {"const": "residuals"}}}, "then": {"properties": {"with": {"$ref": "#/$defs/residuals"}}}},
+          {"if": {"properties": {"step": {"const": "publish"}}}, "then": {"properties": {"with": {"$ref": "#/$defs/publish"}}}},
+          {"if": {"properties": {"step": {"const": "states"}}}, "then": {"properties": {"with": {"$ref": "#/$defs/states"}}}},
+          {"if": {"properties": {"step": {"const": "deliver"}}}, "then": {"properties": {"with": {"$ref": "#/$defs/deliver"}}}}
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "text160": {"type": "string", "minLength": 1, "maxLength": 160},
+    "version": {"type": "integer", "minimum": 1},
+    "input": {"type": "object", "additionalProperties": false, "required": ["input"], "properties": {"input": {"type": "string"}}},
+    "from": {"type": "object", "additionalProperties": false, "required": ["from"], "properties": {"from": {"type": "string"}}},
+    "role": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "role"],
+      "properties": {"from": {"type": "string"}, "role": {"type": "string", "pattern": "^[a-z][a-z0-9_-]{0,63}$"}}
+    },
+    "residuals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["procedure", "version", "selection", "surface", "formation"],
+      "properties": {
+        "procedure": {"$ref": "#/$defs/text160"},
+        "version": {"$ref": "#/$defs/version"},
+        "selection": {"$ref": "#/$defs/input"},
+        "surface": {"$ref": "#/$defs/input"},
+        "formation": {"type": "string", "minLength": 1, "maxLength": 64},
+        "display_unit": {"enum": ["m", "ft"]}
+      }
+    },
+    "publish": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["run", "name"],
+      "properties": {
+        "run": {"$ref": "#/$defs/from"},
+        "name": {"$ref": "#/$defs/text160"},
+        "for": {"type": "string", "minLength": 1, "maxLength": 80}
+      }
+    },
+    "states": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["result"],
+      "properties": {"result": {"$ref": "#/$defs/role"}}
+    },
+    "deliver": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["procedure", "item", "systems"],
+      "properties": {
+        "procedure": {"$ref": "#/$defs/text160"},
+        "version": {"$ref": "#/$defs/version"},
+        "item": {"$ref": "#/$defs/role"},
+        "as": {"type": "string", "minLength": 1, "maxLength": 80},
+        "systems": {
+          "type": "object",
+          "minProperties": 1,
+          "maxProperties": 8,
+          "propertyNames": {"pattern": "^[a-z][a-z0-9_]{0,30}$"},
+          "additionalProperties": {"$ref": "#/$defs/input"}
+        },
+        "settings": {
+          "type": "object",
+          "maxProperties": 32,
+          "propertyNames": {"pattern": "^[a-z][a-z0-9_]{0,30}$"},
+          "additionalProperties": {"type": "string", "maxLength": 1000}
+        }
+      }
+    }
+  }
+}

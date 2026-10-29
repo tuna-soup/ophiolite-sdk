@@ -393,3 +393,53 @@ def test_bundle_show_of_an_older_bundle_is_words_too(tmp_path,capsys):
     root=bundle.write_bundle(tmp_path/'old',typed_items()).path
     assert _shown(capsys,root)==OLD_WORDS
     assert json.loads(_shown(capsys,root,'--details'))['types']==['regular-grid-surface','trajectory','well-log','well-tops']
+
+
+# ---------------------------------------------------------------- E35a C3: ophiolite rights show|attach|renew
+
+RIGHTS_BASIS={'id':'b1','target_kind':'upload','target_ref':'a1','key':None,'generation':3,'version':3,'uses':['read','derive','export','model-use'],
+              'uses_words':'Read data, Create derived results, Export data, Use with models','last_day':'2026-12-31','last_day_words':'31 December 2026',
+              'ended':False,'delete_on_end':False}
+
+
+def _rights_cli(tmp_path,monkeypatch,state,*argv):
+    config=configuration(tmp_path);calls=[]
+    class FakeClient:
+        def __init__(self,*a,**k):pass
+        def __enter__(self):return self
+        def __exit__(self,*a):return False
+        def rights(self,kind,ref,**kw):calls.append(('rights',kind,ref,kw));return state
+        def attach_rights(self,kind,ref,**kw):calls.append(('attach',kind,ref,kw));return {'basis':state['basis'],'renewal':False,'reconciled':[],'receipt_words':'Rights recorded.'}
+        def renew_rights(self,kind,ref,**kw):calls.append(('renew',kind,ref,kw));return {'basis':state['basis'],'renewal':True,'reconciled':[],'receipt_words':'Rights renewed.'}
+    monkeypatch.setattr(cli,'Client',FakeClient);monkeypatch.setattr(cli.Credential,'from_file',staticmethod(lambda path:object()))
+    payload=cli.main(['rights',*argv,'--configuration',str(config)])
+    return calls,payload
+
+
+def test_rights_show_prints_the_labels_and_the_last_day_as_a_date_and_no_identifier(tmp_path,monkeypatch,capsys):
+    """F16, F18: 'Last day: 31 December 2026' from the date (not an instant), the S11 labels; ids only with --json."""
+    calls,_=_rights_cli(tmp_path,monkeypatch,{'basis':RIGHTS_BASIS,'can_change':True},'show','--kind','upload','--ref','a1')
+    out=capsys.readouterr().out
+    assert out=='Permitted: Read data, Create derived results, Export data, Use with models\nLast day: 31 December 2026\n'
+    assert 'b1' not in out and 'a1' not in out and calls==[('rights','upload','a1',{'key':None})]
+    assert cli.day_words('2027-01-01')=='1 January 2027' and cli.day_words('2026-02-28')=='28 February 2026'
+    _rights_cli(tmp_path,monkeypatch,{'basis':{**RIGHTS_BASIS,'ended':True,'delete_on_end':True},'can_change':False},'show','--kind','upload','--ref','a1')
+    assert capsys.readouterr().out.splitlines()[1:]==['Last day: 31 December 2026 (ended)','The data is removed when the rights end.']
+    _rights_cli(tmp_path,monkeypatch,{'basis':None,'can_change':True},'show','--kind','connection','--ref','c1','--key','curve')
+    assert capsys.readouterr().out=='No rights are recorded for this.\n'
+    _rights_cli(tmp_path,monkeypatch,{'basis':RIGHTS_BASIS,'can_change':True},'show','--kind','upload','--ref','a1','--json')
+    assert json.loads(capsys.readouterr().out)['rights']['basis']['id']=='b1'
+
+
+def test_rights_attach_and_renew_send_what_was_given_and_renew_reads_the_generation(tmp_path,monkeypatch,capsys):
+    state={'basis':RIGHTS_BASIS,'can_change':True}
+    calls,_=_rights_cli(tmp_path,monkeypatch,state,'attach','--kind','release','--ref','r1','--uses','read,export','--last-day','2026-12-31','--delete-on-end')
+    assert calls==[('attach','release','r1',{'uses':['read','export'],'last_day':'2026-12-31','delete_on_end':True,'key':None})]
+    assert capsys.readouterr().out.splitlines()[0]=='Rights recorded.'
+    calls,_=_rights_cli(tmp_path,monkeypatch,state,'renew','--kind','release','--ref','r1','--uses','read','--last-day','2027-06-30')
+    assert calls==[('rights','release','r1',{'key':None}),('renew','release','r1',{'expected_generation':3,'uses':['read'],'last_day':'2027-06-30','delete_on_end':False,'key':None})]
+    calls,_=_rights_cli(tmp_path,monkeypatch,state,'renew','--kind','release','--ref','r1','--uses','read','--last-day','2027-06-30','--generation','2')
+    assert [c[0] for c in calls]==['renew'] and calls[0][3]['expected_generation']==2  # the generation you read, not read again
+    with pytest.raises(Refused,match='--uses and --last-day'):_rights_cli(tmp_path,monkeypatch,state,'attach','--kind','release','--ref','r1')
+    with pytest.raises(Refused,match='attach them first'):
+        _rights_cli(tmp_path,monkeypatch,{'basis':None,'can_change':True},'renew','--kind','release','--ref','r1','--uses','read','--last-day','2027-06-30')

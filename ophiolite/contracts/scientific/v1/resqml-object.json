@@ -1,0 +1,332 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/scientific/v1/resqml-object.json",
+  "x-ophiolite": {
+    "id": "ophiolite.resqml-object/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "FrameParameters": {
+      "additionalProperties": false,
+      "properties": {
+        "x_offset": {
+          "title": "X Offset",
+          "type": "number"
+        },
+        "y_offset": {
+          "title": "Y Offset",
+          "type": "number"
+        },
+        "z_offset": {
+          "title": "Z Offset",
+          "type": "number"
+        },
+        "areal_rotation_rad": {
+          "title": "Areal Rotation Rad",
+          "type": "number"
+        },
+        "z_increasing_downward": {
+          "title": "Z Increasing Downward",
+          "type": "boolean"
+        },
+        "xy_unit": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Xy Unit",
+          "type": "string"
+        },
+        "z_unit": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Z Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "x_offset",
+        "y_offset",
+        "z_offset",
+        "areal_rotation_rad",
+        "z_increasing_downward",
+        "xy_unit",
+        "z_unit"
+      ],
+      "title": "FrameParameters",
+      "type": "object"
+    },
+    "FrameSource": {
+      "additionalProperties": false,
+      "properties": {
+        "crs_uuid": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "title": "Crs Uuid",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "crs_uuid",
+        "title"
+      ],
+      "title": "FrameSource",
+      "type": "object"
+    },
+    "LocalFrame": {
+      "additionalProperties": false,
+      "description": "How a package's local coordinates were placed: resolved exactly into a catalogued projected CRS, or kept local.",
+      "properties": {
+        "operation": {
+          "const": "resqml-local-frame",
+          "title": "Operation",
+          "type": "string"
+        },
+        "applied": {
+          "title": "Applied",
+          "type": "boolean"
+        },
+        "source": {
+          "$ref": "#/$defs/FrameSource"
+        },
+        "projected_crs": {
+          "pattern": "^(EPSG:[0-9]{4,6}|unknown)$",
+          "title": "Projected Crs",
+          "type": "string"
+        },
+        "vertical_crs": {
+          "pattern": "^(EPSG:[0-9]{4,6}|unknown)$",
+          "title": "Vertical Crs",
+          "type": "string"
+        },
+        "parameters": {
+          "$ref": "#/$defs/FrameParameters"
+        },
+        "formula": {
+          "const": "rotate-then-offset",
+          "title": "Formula",
+          "type": "string"
+        },
+        "accuracy_m": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Accuracy M"
+        }
+      },
+      "required": [
+        "operation",
+        "applied",
+        "source",
+        "projected_crs",
+        "vertical_crs",
+        "parameters",
+        "formula",
+        "accuracy_m"
+      ],
+      "title": "LocalFrame",
+      "type": "object"
+    },
+    "Member": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "epc",
+            "h5"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "role",
+        "sha256"
+      ],
+      "title": "Member",
+      "type": "object"
+    },
+    "Package": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "members": {
+          "items": {
+            "$ref": "#/$defs/Member"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Members",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "sha256",
+        "members"
+      ],
+      "title": "Package",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "What one landed output was read from: the package, the object and its role. The artifact of the output's revision.",
+  "properties": {
+    "schema": {
+      "const": "ophiolite.resqml-object/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "profile": {
+      "const": "resqml-epc/1",
+      "title": "Profile",
+      "type": "string"
+    },
+    "package": {
+      "$ref": "#/$defs/Package"
+    },
+    "package_digest": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Package Digest",
+      "type": "string"
+    },
+    "output": {
+      "maxLength": 64,
+      "minLength": 38,
+      "title": "Output",
+      "type": "string"
+    },
+    "source_uuid": {
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "title": "Source Uuid",
+      "type": "string"
+    },
+    "kind": {
+      "pattern": "^[A-Z][A-Za-z0-9]{1,63}$",
+      "title": "Kind",
+      "type": "string"
+    },
+    "variant": {
+      "enum": [
+        "V1",
+        "V2",
+        "V3",
+        "V4",
+        "V5",
+        "V6",
+        "V7",
+        "V8",
+        "V9",
+        "V10",
+        "V11",
+        "V12",
+        "V13",
+        "V14",
+        "V15",
+        "F-rep",
+        "F-ctx"
+      ],
+      "title": "Variant",
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 256,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "lands_on": {
+      "enum": [
+        "well-path",
+        "trajectory",
+        "well-log",
+        "triangulated-surface",
+        "polyline-set"
+      ],
+      "title": "Lands On",
+      "type": "string"
+    },
+    "losses": {
+      "items": {
+        "const": "angles-from-tangents",
+        "type": "string"
+      },
+      "maxItems": 8,
+      "title": "Losses",
+      "type": "array"
+    },
+    "parts": {
+      "items": {
+        "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+        "type": "string"
+      },
+      "maxItems": 64,
+      "title": "Parts",
+      "type": "array"
+    },
+    "local_frame": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/LocalFrame"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "reader": {
+      "const": "asset_connectors.resqml_package/1",
+      "title": "Reader",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema",
+    "profile",
+    "package",
+    "package_digest",
+    "output",
+    "source_uuid",
+    "kind",
+    "variant",
+    "name",
+    "lands_on",
+    "losses",
+    "parts",
+    "local_frame",
+    "reader"
+  ],
+  "title": "ResqmlObject",
+  "type": "object"
+}

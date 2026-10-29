@@ -107,8 +107,9 @@ def test_the_receipt_must_name_the_parents_sent_and_a_kept_copy_by_its_source_re
 # --- E53: wavelet, model section and seismic section ----------------------------------------------------------------
 
 def read_back(written):
-    """The pinned Connectors reader, as the server runs it on an upload."""
-    from asset_connectors.typed_reader import read_typed
+    """The pinned Connectors reader, as the server runs it on an upload. The public SDK repository has no Connectors
+    (item 85): there the writer half of a test still runs and the reader half is skipped."""
+    read_typed = pytest.importorskip('asset_connectors.typed_reader').read_typed
     return read_typed(written.profile, written.bytes, written.declared)
 
 
@@ -188,7 +189,7 @@ def test_geographic_bounds_are_accepted_up_to_the_edge(crs, x, y):
 def test_geographic_bounds_are_refused_just_outside(crs, x, y):
     with pytest.raises(ValidationFailed) as error: writers.write_location(x, y, crs=crs, elevation_reference='MSL')
     assert error.value.violations == ('Longitude and latitude are outside their range for this coordinate reference system.',)
-    from asset_connectors.typed_reader import read_typed  # the reader refuses the same file
+    read_typed = pytest.importorskip('asset_connectors.typed_reader').read_typed  # the reader refuses the same file
     with pytest.raises(Exception, match='outside their range'):
         read_typed('well-location/1', ('{"crs":"%s","elevation_reference":"MSL","x":%r,"y":%r}' % (crs, x, y)).encode(), {})
 

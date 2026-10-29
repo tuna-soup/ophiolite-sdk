@@ -1,0 +1,382 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/scientific/v1/resqml-read.json",
+  "x-ophiolite": {
+    "id": "ophiolite.resqml-read/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "Absorbed": {
+      "additionalProperties": false,
+      "properties": {
+        "uuid": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "title": "Uuid",
+          "type": "string"
+        },
+        "kind": {
+          "pattern": "^[A-Z][A-Za-z0-9]{1,63}$",
+          "title": "Kind",
+          "type": "string"
+        },
+        "into": {
+          "maxLength": 64,
+          "minLength": 38,
+          "title": "Into",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uuid",
+        "kind",
+        "into"
+      ],
+      "title": "Absorbed",
+      "type": "object"
+    },
+    "Context": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "pattern": "^[A-Z][A-Za-z0-9]{1,63}$",
+          "title": "Kind",
+          "type": "string"
+        },
+        "count": {
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "count"
+      ],
+      "title": "Context",
+      "type": "object"
+    },
+    "Item": {
+      "additionalProperties": false,
+      "properties": {
+        "asset_id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "asset_id",
+        "revision"
+      ],
+      "title": "Item",
+      "type": "object"
+    },
+    "Member": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "epc",
+            "h5"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "role",
+        "sha256"
+      ],
+      "title": "Member",
+      "type": "object"
+    },
+    "NotRead": {
+      "additionalProperties": false,
+      "properties": {
+        "uuid": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "title": "Uuid",
+          "type": "string"
+        },
+        "kind": {
+          "pattern": "^[A-Z][A-Za-z0-9]{1,63}$",
+          "title": "Kind",
+          "type": "string"
+        },
+        "variant": {
+          "enum": [
+            "V1",
+            "V2",
+            "V3",
+            "V4",
+            "V5",
+            "V6",
+            "V7",
+            "V8",
+            "V9",
+            "V10",
+            "V11",
+            "V12",
+            "V13",
+            "V14",
+            "V15",
+            "F-rep",
+            "F-ctx"
+          ],
+          "title": "Variant",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "code": {
+          "enum": [
+            "frame-without-values",
+            "lattice-without-values",
+            "markers-not-read",
+            "no-real-object",
+            "not-read-yet",
+            "property-not-on-frame-nodes",
+            "reservoir-grid",
+            "rotated-lattice"
+          ],
+          "title": "Code",
+          "type": "string"
+        },
+        "reason": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uuid",
+        "kind",
+        "variant",
+        "name",
+        "code",
+        "reason"
+      ],
+      "title": "NotRead",
+      "type": "object"
+    },
+    "Output": {
+      "additionalProperties": false,
+      "properties": {
+        "output": {
+          "maxLength": 64,
+          "minLength": 38,
+          "title": "Output",
+          "type": "string"
+        },
+        "source_uuid": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "title": "Source Uuid",
+          "type": "string"
+        },
+        "kind": {
+          "pattern": "^[A-Z][A-Za-z0-9]{1,63}$",
+          "title": "Kind",
+          "type": "string"
+        },
+        "variant": {
+          "enum": [
+            "V1",
+            "V2",
+            "V3",
+            "V4",
+            "V5",
+            "V6",
+            "V7",
+            "V8",
+            "V9",
+            "V10",
+            "V11",
+            "V12",
+            "V13",
+            "V14",
+            "V15",
+            "F-rep",
+            "F-ctx"
+          ],
+          "title": "Variant",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "lands_on": {
+          "enum": [
+            "well-path",
+            "trajectory",
+            "well-log",
+            "triangulated-surface",
+            "polyline-set"
+          ],
+          "title": "Lands On",
+          "type": "string"
+        },
+        "losses": {
+          "items": {
+            "const": "angles-from-tangents",
+            "type": "string"
+          },
+          "maxItems": 8,
+          "title": "Losses",
+          "type": "array"
+        },
+        "parts": {
+          "items": {
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "type": "string"
+          },
+          "maxItems": 64,
+          "title": "Parts",
+          "type": "array"
+        },
+        "item": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Item"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "output",
+        "source_uuid",
+        "kind",
+        "variant",
+        "name",
+        "lands_on",
+        "losses",
+        "parts",
+        "item"
+      ],
+      "title": "Output",
+      "type": "object"
+    },
+    "Package": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "members": {
+          "items": {
+            "$ref": "#/$defs/Member"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Members",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "sha256",
+        "members"
+      ],
+      "title": "Package",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "One read of one RESQML package, as published: what was read, absorbed, not read, and counted as context.",
+  "properties": {
+    "schema": {
+      "const": "ophiolite.resqml-read/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "profile": {
+      "const": "resqml-epc/1",
+      "title": "Profile",
+      "type": "string"
+    },
+    "package": {
+      "$ref": "#/$defs/Package"
+    },
+    "outputs": {
+      "items": {
+        "$ref": "#/$defs/Output"
+      },
+      "maxItems": 5000,
+      "title": "Outputs",
+      "type": "array"
+    },
+    "absorbed": {
+      "items": {
+        "$ref": "#/$defs/Absorbed"
+      },
+      "maxItems": 5000,
+      "title": "Absorbed",
+      "type": "array"
+    },
+    "not_read": {
+      "items": {
+        "$ref": "#/$defs/NotRead"
+      },
+      "maxItems": 5000,
+      "title": "Not Read",
+      "type": "array"
+    },
+    "context": {
+      "items": {
+        "$ref": "#/$defs/Context"
+      },
+      "maxItems": 64,
+      "title": "Context",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema",
+    "profile",
+    "package",
+    "outputs",
+    "absorbed",
+    "not_read",
+    "context"
+  ],
+  "title": "ResqmlRead",
+  "type": "object"
+}

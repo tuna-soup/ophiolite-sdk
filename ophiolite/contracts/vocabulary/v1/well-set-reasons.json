@@ -1,0 +1,185 @@
+{
+  "schema": "ophiolite.well-set-reasons/1",
+  "id": "ophiolite.well-set-reasons/1",
+  "title": "Well-set refusals: the closed keys a refused well set names (reason \"well-set:<key>\"), in two sections: the reader's shape keys and the Gateway's keys (E119a)",
+  "sections": [
+    {
+      "id": "reader",
+      "owner": "asset_connectors.well_set.REASONS",
+      "description": "The shape of the document, read by the Connectors reader without a coordinate library or a project lookup. A sentence that starts in lower case follows \"Member <n> \" (counted from 1) or \"The set \".",
+      "keys": [
+        {
+          "key": "too-large",
+          "sentence": "A well set is at most 256 KiB."
+        },
+        {
+          "key": "not-json",
+          "sentence": "A well set is one JSON object in UTF-8 text."
+        },
+        {
+          "key": "unknown-key",
+          "sentence": "has a field that well-set/1 does not read."
+        },
+        {
+          "key": "missing-key",
+          "sentence": "misses a field that well-set/1 requires."
+        },
+        {
+          "key": "schema",
+          "sentence": "The document does not say \"schema\": \"ophiolite.well-set/1\"."
+        },
+        {
+          "key": "label",
+          "sentence": "The label must be text of 1 to 80 characters."
+        },
+        {
+          "key": "member-count",
+          "sentence": "A well set has 1 to 29 members."
+        },
+        {
+          "key": "member",
+          "sentence": "is not an object with well, wellbore, trajectory and frame."
+        },
+        {
+          "key": "entity-id",
+          "sentence": "does not name a well and a wellbore by their project ids."
+        },
+        {
+          "key": "duplicate-wellbore",
+          "sentence": "names a wellbore an earlier member already names."
+        },
+        {
+          "key": "trajectory",
+          "sentence": "names its trajectory without an asset id and a revision."
+        },
+        {
+          "key": "frame-without-trajectory",
+          "sentence": "has a frame but no trajectory; a frame places a trajectory."
+        },
+        {
+          "key": "trajectory-without-frame",
+          "sentence": "has a trajectory but no frame; the frame says where it starts and how it is oriented."
+        },
+        {
+          "key": "crs",
+          "sentence": "states its coordinate system other than as EPSG:<code>."
+        },
+        {
+          "key": "not-finite",
+          "sentence": "holds a value that is not a finite number."
+        },
+        {
+          "key": "depth-reference",
+          "sentence": "names its depth reference or datum other than as text of 1 to 64 characters."
+        },
+        {
+          "key": "datum-unknown",
+          "sentence": "gives its depth reference elevation above an unknown datum; name the datum."
+        },
+        {
+          "key": "north-missing",
+          "sentence": "does not say how its azimuths relate to grid north (frame.north)."
+        },
+        {
+          "key": "survey-basis",
+          "sentence": "states its survey basis other than as true-north or grid:EPSG:<code>."
+        },
+        {
+          "key": "rotation-range",
+          "sentence": "rotates its azimuths by more than 10 degrees either way."
+        },
+        {
+          "key": "rotation-on-grid",
+          "sentence": "is surveyed on the grid of its own coordinate system, so its rotation must be 0."
+        },
+        {
+          "key": "tie-in-md",
+          "sentence": "ties in at a measured depth that is not above 0."
+        },
+        {
+          "key": "source",
+          "sentence": "describes its source in more than 200 characters."
+        }
+      ]
+    },
+    {
+      "id": "gateway",
+      "owner": "project_gateway.well_sets",
+      "description": "What only the Gateway can decide: the readable label, saving on this deployment, the one request, and from slice 1 the private ceiling, each member's well, wellbore and trajectory, rights and the coordinate system.",
+      "keys": [
+        {
+          "key": "not-available",
+          "sentence": "Well sets cannot be saved on this deployment yet."
+        },
+        {
+          "key": "one-request",
+          "sentence": "A well set is saved in one request, not in parts."
+        },
+        {
+          "key": "unreadable-label",
+          "sentence": "Use a label people can read, such as Groningen residual wells."
+        },
+        {
+          "key": "private-only",
+          "sentence": "A well set stays with its author in this version."
+        },
+        {
+          "key": "well-unreadable",
+          "sentence": "You cannot read the well this member names."
+        },
+        {
+          "key": "wellbore-unreadable",
+          "sentence": "You cannot read the wellbore this member names, or it was removed."
+        },
+        {
+          "key": "not-part-of",
+          "sentence": "The wellbore is not part of the well this member names."
+        },
+        {
+          "key": "not-of-wellbore",
+          "sentence": "The trajectory revision does not belong to the wellbore this member names."
+        },
+        {
+          "key": "wrong-profile",
+          "sentence": "The trajectory is not a deviation survey."
+        },
+        {
+          "key": "withdrawn",
+          "sentence": "The trajectory revision was withdrawn."
+        },
+        {
+          "key": "trajectory-unusable",
+          "sentence": "You can read the trajectory but not use it in your own results."
+        },
+        {
+          "key": "rights-ended",
+          "sentence": "The rights to use the trajectory ended."
+        },
+        {
+          "key": "rights-refused",
+          "sentence": "The rights recorded for the trajectory do not allow results derived from it."
+        },
+        {
+          "key": "rights-missing",
+          "sentence": "The trajectory has no rights record."
+        },
+        {
+          "key": "crs-not-projected",
+          "sentence": "The coordinate system is not a projected one."
+        },
+        {
+          "key": "crs-not-metres",
+          "sentence": "The coordinate system does not have metre axes."
+        },
+        {
+          "key": "changed",
+          "sentence": "A member changed while the set was being saved; nothing was saved. Try again."
+        },
+        {
+          "key": "derive",
+          "sentence": "A well set is not made by a procedure."
+        }
+      ]
+    }
+  ]
+}

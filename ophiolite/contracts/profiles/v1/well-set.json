@@ -1,0 +1,35 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "well-set/1",
+  "kind": "source",
+  "lifecycle": "preview",
+  "display_name": "Well set (JSON)",
+  "description": "An author's own list of wellbores, each with the exact trajectory revision and the frame that places it (CRS, wellhead, depth reference, north, tie-in), as one UTF-8 JSON document of at most 256 KiB, kept byte for byte. Saved in one request, never in parts; private to its author in this version.",
+  "serves": [
+    "ophiolite.scientific-asset/1"
+  ],
+  "connector": {
+    "scientific_profile": "well-set/1",
+    "source_schema": "JSON/ophiolite.well-set/1",
+    "mapping_version": "well-set/1",
+    "history": "retained-exact-read"
+  },
+  "role": "artifact",
+  "media_types": [
+    "application/json"
+  ],
+  "normalized_profile": "ophiolite.well-set/1",
+  "context_schema": "ophiolite.typed-context/1",
+  "representation_rules": {
+    "artifact_kind_by_origin": {
+      "source-reference": "original",
+      "retained-capture": "original",
+      "managed-derived": "derived-artifact"
+    },
+    "normalized": 1,
+    "total": 2
+  },
+  "table_target": {
+    "none": "not-a-table"
+  }
+}

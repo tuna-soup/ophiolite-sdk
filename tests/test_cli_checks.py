@@ -104,6 +104,17 @@ def test_checks_help_lists_its_verbs_and_the_publishers_three():
     assert list(next(a for a in verbs['publishers']._actions if a.dest == 'change').choices) == ['list', 'add', 'remove']
 
 
+def test_e121_o3_compare_interpretation_help_names_tops_and_their_declarations():
+    """E121 O3 (brief 449e2e96): tops comparisons require --interpretation too. Mutation: restore the grid-only help -> red."""
+    checks_parser = next(a for a in cli.parser()._actions if a.dest == 'command').choices['checks']
+    compare = next(a for a in checks_parser._actions if a.dest == 'action').choices['compare']
+    [option] = [a for a in compare._actions if '--interpretation' in a.option_strings]
+    assert option.help == ('A .json of confirmed declarations. A grid: crs, horizontal_unit, value_unit, value_meaning, direction and '
+                           'vertical_datum. Tops: depth_unit, depth_basis (only same-as-log compares today) and wellbore_confirmed: true; '
+                           'no depth_datum. A survey: depth_unit, azimuth_reference, depth_datum, grid_crs for grid north, and '
+                           'wellbore_confirmed: true')
+
+
 def test_the_four_routes_are_allowed_and_no_other():
     for op in ('publish', 'list', 'compare', 'publishers'): assert operation_path('p', 'checks', op) == '/api/v1/projects/p/checks/' + op
     with pytest.raises(Refused): operation_path('p', 'checks', 'delete')

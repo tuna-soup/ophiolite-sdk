@@ -130,3 +130,19 @@ def test_a_publish_of_a_run_made_again_resumes_with_its_earlier_result(world, se
     monkeypatch.setattr(procedures, 'before_report', lambda state: None)
     answer = setting['tina'].procedure_publish(tmp_path / 'again')
     assert answer['outputs'][0]['outcome'] == 'same' and runs(world) == 2
+
+
+def test_an_ordinary_run_again_keeps_its_input_record_and_output_bytes(world, setting, tmp_path, original):
+    """E120 s6 t3 (D-19, round 8 rows 2-2 and 4-2): passing the server's wellbore through leaves an ordinary run made
+    again as it was. The input record is a frozen literal (its key set exactly; `file` after the run's temporary
+    download directory), and the output is the shift's literal bytes (1000.5 and 1200 less 2.5 m), not a second run.
+    Mutation: add `wellbore` to run.json's input record → the key set differs → red."""
+    _, receipt = original
+    again(setting, tmp_path, receipt)
+    [used] = json.loads((tmp_path / 'again/run.json').read_text())['inputs']['tops']
+    assert sorted(used) == ['asset_id', 'declared', 'file', 'kind', 'revision', 'sha256']
+    assert os.path.basename(used['file']) == 'tops-0.csv' and os.path.basename(os.path.dirname(used['file'])).startswith('ophiolite-inputs-')
+    assert (used['asset_id'], used['revision'], used['kind'], used['declared']) == \
+        (setting['tops']['asset_id'], setting['tops']['revision'], 'well-tops-csv/1', {'depth_unit': 'm', 'depth_basis': 'same-as-log'})
+    assert used['sha256'] == 'bccf61bf244a0fc06d3a489d23f581fef9e51eaa3bdd97830e36dd175f285a9f'
+    assert (tmp_path / 'again/shifted.csv').read_bytes() == b'name,md\nTop Chalk,998\nBase Chalk,1197.5\n'

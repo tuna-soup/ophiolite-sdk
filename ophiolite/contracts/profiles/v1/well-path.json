@@ -1,0 +1,24 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "ophiolite.well-path/1",
+  "kind": "normalized",
+  "lifecycle": "preview",
+  "display_name": "Well path (positions)",
+  "description": "Stations of measured depth, easting x, northing y and TVDSS in file order with strictly increasing measured depth, and the declared CRS, map unit, depth unit, measured-depth reference (KB, DF, RT, GL, MSL) and TVDSS datum (MSL); nothing is converted, filled in or turned into angles.",
+  "payload_schema": "ophiolite.well-path/1",
+  "role": "normalized",
+  "media_types": [
+    "application/json"
+  ],
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "parsing_policy": "typed-strict/1",
+    "mapping": "well-path/1"
+  },
+  "mappings": [
+    "ophiolite.mapping/typed-standards/1"
+  ],
+  "table_target": {
+    "none": "normalized-form"
+  }
+}

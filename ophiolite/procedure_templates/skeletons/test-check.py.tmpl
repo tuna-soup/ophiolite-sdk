@@ -1,0 +1,24 @@
+"""Runs this check on its sample against a matching and a differing reference on this computer (nothing is
+published): python -m pytest -q tests"""
+import shutil
+from pathlib import Path
+
+from ophiolite import procedures
+
+HERE = Path(__file__).resolve().parents[1]
+DECLARED = $declared
+
+
+def check(tmp_path, reference):
+    folder = shutil.copytree(HERE, tmp_path / 'procedure', ignore=shutil.ignore_patterns('__pycache__', '.pytest_cache'))
+    data = procedures.ProjectInput(str(HERE / 'data' / 'data$extension'), '$profile', DECLARED, 'sample-data', 'a' * 64)
+    other = procedures.ProjectInput(str(HERE / 'data' / reference), '$profile', DECLARED, 'sample-reference', 'b' * 64)
+    return procedures.run(folder, tmp_path / 'out', {'data': [data], 'reference': [other]})['report']
+
+
+def test_it_passes_against_the_matching_reference(tmp_path):
+    assert check(tmp_path, 'reference-pass$extension')['outcome'] == 'passed'
+
+
+def test_it_differs_from_the_differing_reference(tmp_path):
+    assert check(tmp_path, 'reference-differ$extension')['outcome'] == 'differed'

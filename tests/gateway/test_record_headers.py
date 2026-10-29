@@ -2,6 +2,8 @@
 `through` and its sentence; an active trace is the row's trace context."""
 import json
 
+from ophiolite import __version__
+
 from test_in_process_publish import web, shared, app, service, client  # noqa: F401
 
 
@@ -19,8 +21,8 @@ def test_the_python_library_is_named_on_the_row_and_in_its_sentence(web):  # noq
     alice.upload_las(LAS.encode(), name='Header input', attribution='Original synthetic fixture', audience=['alice'], rights_confirmed=True, command_id='header-upload')
     (row,) = actions(web)[before:]
     through = row['data']['record']['through']
-    assert through['raw'] == 'ophiolite-python/0.1.0' and through['client'] == 'ophiolite-python' and through['version'] == '0.1.0'
-    assert record.through_words(through) == 'Through the Python library 0.1.0'
+    assert through['raw'] == 'ophiolite-python/' + __version__ and through['client'] == 'ophiolite-python' and through['version'] == __version__
+    assert record.through_words(through) == 'Through the Python library ' + __version__
     assert row['data']['record']['trace_context'] is None  # no active trace: none recorded
 
 

@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/polyline-set-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.polyline-set/1",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -71,6 +71,41 @@
         "unknown_context"
       ],
       "title": "Fidelity",
+      "type": "object"
+    },
+    "PetrelPackageInterpretation": {
+      "additionalProperties": false,
+      "description": "E123 S1f-a (D3b): the Petrel fault-stick reader's identity, read from its package (the export and its CRS\ncompanion); polyline sets only (polyline-set 1.1.0).",
+      "properties": {
+        "reader": {
+          "const": "asset_connectors.petrel_faults/1",
+          "title": "Reader",
+          "type": "string"
+        },
+        "mapping": {
+          "const": "polyline-set/1",
+          "title": "Mapping",
+          "type": "string"
+        },
+        "parsing_policy": {
+          "const": "package-strict/1",
+          "title": "Parsing Policy",
+          "type": "string"
+        },
+        "null_policy": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Null Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reader",
+        "mapping",
+        "parsing_policy",
+        "null_policy"
+      ],
+      "title": "PetrelPackageInterpretation",
       "type": "object"
     },
     "PolylineContext": {
@@ -175,7 +210,7 @@
         },
         "points": {
           "maximum": 200000,
-          "minimum": 2,
+          "minimum": 1,
           "title": "Points",
           "type": "integer"
         }
@@ -236,8 +271,47 @@
       "title": "Reference",
       "type": "object"
     },
+    "ResqmlSpatialInterpretation": {
+      "additionalProperties": false,
+      "description": "E124 s2a (D4): the RESQML package reader's identity for the spatial models it lands (triangulated surfaces, and\npolyline sets in s2b); beside S1's ResqmlInterpretation so the schemas A1 stepped stay as they are.",
+      "properties": {
+        "reader": {
+          "const": "asset_connectors.resqml_package/1",
+          "title": "Reader",
+          "type": "string"
+        },
+        "mapping": {
+          "enum": [
+            "triangulated-surface/1",
+            "polyline-set/1"
+          ],
+          "title": "Mapping",
+          "type": "string"
+        },
+        "parsing_policy": {
+          "const": "resqml-exact/1",
+          "title": "Parsing Policy",
+          "type": "string"
+        },
+        "null_policy": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Null Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reader",
+        "mapping",
+        "parsing_policy",
+        "null_policy"
+      ],
+      "title": "ResqmlSpatialInterpretation",
+      "type": "object"
+    },
     "Stick": {
       "additionalProperties": false,
+      "description": "1.1.0 (E123 S1f-a, D3): `index` is the stick's ordinal; `fault` and `stick` are the fault name and stick number\nas the file states them, absent when it states none (never null); a stick may be one point.",
       "properties": {
         "index": {
           "title": "Index",
@@ -248,9 +322,19 @@
             "$ref": "#/$defs/XYZ"
           },
           "maxItems": 200000,
-          "minItems": 2,
+          "minItems": 1,
           "title": "Points",
           "type": "array"
+        },
+        "fault": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Fault",
+          "type": "string"
+        },
+        "stick": {
+          "title": "Stick",
+          "type": "integer"
         }
       },
       "required": [
@@ -286,7 +370,10 @@
             "model-section/1",
             "seismic-section/1",
             "time-depth/1",
-            "feature-set/1"
+            "feature-set/1",
+            "well-path/1",
+            "well-set/1",
+            "well-residual/1"
           ],
           "title": "Mapping",
           "type": "string"
@@ -353,7 +440,18 @@
       "type": "string"
     },
     "interpretation": {
-      "$ref": "#/$defs/TypedInterpretation"
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TypedInterpretation"
+        },
+        {
+          "$ref": "#/$defs/ResqmlSpatialInterpretation"
+        },
+        {
+          "$ref": "#/$defs/PetrelPackageInterpretation"
+        }
+      ],
+      "title": "Interpretation"
     },
     "schema": {
       "const": "ophiolite.polyline-set/1",

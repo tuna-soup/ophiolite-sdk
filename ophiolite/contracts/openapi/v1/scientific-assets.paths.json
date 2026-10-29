@@ -806,6 +806,336 @@
           }
         }
       }
+    },
+    "/api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/export": {
+      "get": {
+        "description": "E58b: an exact revision as a Parquet, GeoParquet or CSV file, written from its stored representations",
+        "parameters": [
+          {
+            "name": "project",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "asset",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "revision",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "parquet",
+                "geoparquet",
+                "csv"
+              ],
+              "default": "parquet"
+            },
+            "description": "GeoParquet 1.1.0 for point sets only."
+          },
+          {
+            "name": "curves",
+            "in": "query",
+            "required": false,
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "A LAS log: the curves to export (repeat the parameter); every stored curve when omitted."
+          }
+        ],
+        "security": [
+          {
+            "scopedBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The file",
+            "headers": {
+              "Content-Disposition": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Content-SHA256": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "SHA-256 of the body"
+              },
+              "X-Ophiolite-Revision": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The exact revision the file was written from"
+              }
+            },
+            "content": {
+              "application/vnd.apache.parquet": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Versioned error; see README",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Busy: retry the same exact request after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/provenance": {
+      "get": {
+        "description": "E122 s0: where an exact revision came from: its source record (identity, content, context), the observation joined from its creating run, and one sentence",
+        "parameters": [
+          {
+            "name": "project",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "asset",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "revision",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "scopedBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Where this version came from",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "schema",
+                    "asset_id",
+                    "revision",
+                    "record",
+                    "observation",
+                    "words"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "schema": {
+                      "const": "ophiolite.source-provenance/1"
+                    },
+                    "asset_id": {
+                      "type": "string"
+                    },
+                    "revision": {
+                      "type": "string"
+                    },
+                    "record": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "description": "The stored record (ophiolite.source-provenance/1 in the contracts registry: identity, content, context), or null for a version stored before records were kept"
+                    },
+                    "observation": {
+                      "type": "object",
+                      "required": [
+                        "reader",
+                        "read_at",
+                        "declared_by",
+                        "procedure_digest"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "run_id": {
+                          "type": "string",
+                          "description": "The run that created this version (absent when it was made outside a run)"
+                        },
+                        "path": {
+                          "type": "string",
+                          "description": "The file's path in that run"
+                        },
+                        "reader": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "required": [
+                            "id",
+                            "identity"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "identity": {
+                              "type": "string",
+                              "pattern": "^[0-9a-f]{64}$"
+                            }
+                          }
+                        },
+                        "read_at": {
+                          "type": [
+                            "number",
+                            "null"
+                          ]
+                        },
+                        "declared_by": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "procedure_digest": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      }
+                    },
+                    "words": {
+                      "type": "string",
+                      "description": "The one sentence saying where this version came from; clients show it as served"
+                    },
+                    "gone": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "description": "E122 s2: the item is marked gone from a source because the source's last complete send did not list it (nothing was removed); null otherwise",
+                      "required": [
+                        "source",
+                        "path",
+                        "run_id",
+                        "marked_at",
+                        "sentence"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "source": {
+                          "type": "string"
+                        },
+                        "path": {
+                          "type": "string"
+                        },
+                        "run_id": {
+                          "type": "string",
+                          "description": "The complete send that did not list it"
+                        },
+                        "marked_at": {
+                          "type": "number"
+                        },
+                        "sentence": {
+                          "type": "string",
+                          "description": "Composed by the server; clients show it as served"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Versioned error; see README",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Busy: retry the same exact request after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

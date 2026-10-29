@@ -1,0 +1,23 @@
+"""Runs this procedure on its sample on this computer (nothing is published): python -m pytest -q tests"""
+import shutil
+from pathlib import Path
+
+from ophiolite import procedures
+
+HERE = Path(__file__).resolve().parents[1]
+SAMPLE, DECLARED = HERE / 'data' / '$file', HERE / 'data' / 'declared.json'
+
+
+def copy(tmp_path):
+    """The procedure as it is now, without what running its tests leaves beside it."""
+    return shutil.copytree(HERE, tmp_path / 'procedure', ignore=shutil.ignore_patterns('__pycache__', '.pytest_cache'))
+
+
+def test_it_makes_${ident}_from_its_sample(tmp_path):
+    """The start writes back what it read. When you put your calculation in procedure.py, change the last line to
+    check what it makes."""
+    ran = procedures.run(copy(tmp_path), tmp_path / 'out', {'data': [SAMPLE]}, kinds={'data': '$profile'},
+                         declared={'data': str(DECLARED)} if DECLARED.exists() else None)
+    made = ran['run']['outputs']['data']
+    assert made['profile'] == '$profile' and made['declared'] == $declared
+    assert (tmp_path / 'out' / made['file']).read_bytes() == SAMPLE.read_bytes()

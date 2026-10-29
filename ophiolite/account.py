@@ -10,6 +10,7 @@ from urllib.parse import quote
 import httpx
 from . import _client_header  # E93
 from ._core import origin
+from .access_history import AccessHistoryAccount  # E67b: teams and a person's access history (owners)
 from .errors import AuthenticationRequired, PermissionRefused, Refused, Unavailable
 from .models.api import OrganizationsPage, ProjectsPage
 
@@ -22,7 +23,7 @@ def checked(model, page, message):
     return page
 
 
-class Account:
+class Account(AccessHistoryAccount):
     def __init__(self, url, credential, http=None):
         self.url, self.credential = origin(url), credential
         if credential is None: raise Refused('Choose a credential (a project access key or a saved sign-in).')

@@ -1,0 +1,14 @@
+"""$label."""
+from ophiolite import procedure, readers, writers
+
+
+@procedure
+def main(inputs, settings):
+    """Read the well location with ophiolite.readers and write it again with the Ophiolite writer.
+
+    `values` holds the writer's arguments, made from everything the reader found. Your calculation goes where it is
+    marked: change `values` before they are written."""
+    found = readers.read(inputs['data'][0])
+    values = {'x': found.x, 'y': found.y, 'crs': found.crs, 'elevation_reference': found.elevation_reference}
+    # Your calculation: change values here.
+    return {'data': writers.write_location(**values)}

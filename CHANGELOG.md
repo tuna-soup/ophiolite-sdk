@@ -5,6 +5,158 @@
 Supported 0.x client over preview contracts, installable from reviewed source.
 No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
 
+- What is gone from a source (E122 slice 2): `ophiolite upload PATH --source NAME --complete` says the folder is
+  everything in that source (`--scope DIR` for one folder of it); a file the source sent before and this send does not
+  list is marked gone (nothing is removed), and the report prints the server's sentence as served, e.g. "Not in this
+  complete send of Petrel export, so marked gone from the source: `wells/b.las`. Nothing was removed." `--incremental`
+  (the default) marks nothing; a source emptied completely is not marked gone. `--complete`, `--incremental` or
+  `--scope` without `--source` is a usage error (exit 2, nothing sent). `upload(source_name=, send=, scope=)` sends the
+  fields only when given; `Provenance.gone` is the served flag (source, path, run, time and sentence) or None. An
+  unfinished upload is continued only when its source name, send and scope are the ones given (an SDK of 2026.10.117
+  or earlier continues by its listing, and the send then finishes as it was declared).
+- `ophiolite outcomes` declares what a project accepts for residual results (E120 slice 0, contract
+  `ophiolite.outcome/1`): `declare --label "Tops within 5 m" --tolerance 5 --procedure NAME --destination NAME`
+  (project administrators) prints 'Declared "Tops within 5 m" (enabled, version 1): residual results, every computed
+  residual within 5 m; rows not computed are allowed; delivered to Team database.'; `revise NAME` writes the next
+  version only when something differs, `enable`, `disable` and `withdraw NAME` change its state (a withdrawn name is
+  free again), `list` and `get NAME` read it for every member, with every version and action. Names are words and are
+  compared without case. `Client.outcome_declare/revise/enable/disable/withdraw/list/get/named` do the same and
+  `ophiolite.outcomes.residual_declaration` builds the declaration. A refusal keeps the server's sentence and its closed
+  reason in `error.details['reason']` (`outcome-refused`); a permission refusal exits 3. Nothing is evaluated or
+  gated in this slice.
+- The well-residual/1 contract (E119b slice 0): `validate.typed_pair` reads an `ophiolite.well-residual/1` pair (one
+  row per top, each the residual top MD minus the used crossing's MD in metres, or one of nine reasons it was not
+  computed) as `typed.WellResidual` (`rows`, `surface`, `to_frame()`), and refuses a payload whose digests are valid but
+  whose rows disagree: "A residual is not its top's measured depth minus the used crossing's", "A row gives a residual
+  or a reason, not both", "Rows and their context disagree". A tops context may state its `depth_datum`. A deployment
+  refuses to save a residual result in this version; a procedure run publishes one from slice 1.
+- Residual at wells, the reference procedure (E119b slice 2): `ophiolite.residuals.reference_path()` is the packaged
+  procedure `residual-at-wells` (settings `formation` and `display_unit` only). `residuals.prepare(client, selection,
+  surface, formation)` binds before anything is computed: the tops linked to each member's wellbore are found through
+  every association page, and it refuses with one sentence when two tops sets are linked to one wellbore, no selected
+  wellbore has a top named the formation, no member has a trajectory, the selection needs more than 32 versions, a
+  member's tops are not in metres or name another depth datum than its trajectory (compared without case or spaces),
+  or the geometry cannot place a member. `residuals.run` runs the procedure through `procedure_run`, and
+  `ophiolite residuals run NAME --selection @ASSET:REVISION --surface @ASSET:REVISION --formation DCC --output FOLDER`
+  does the same from the command line (nothing is published); the result is
+  `ophiolite.well-residual/1` with one row per top named the formation (occurrences in md order, ties in file order):
+  the residual top MD minus the nearest crossing's MD (the shallower on a tie), or a reason it was not computed, with
+  `between` for `grazing`, `along-surface`, `uncertain` and `many-crossings` (more than 64 crossings) and none for
+  `no-surface-data`. `writers.well_residual(document)` writes the document. No GDAL is needed.
+- The well-set/1 contract (E119a slice 0): `validate.typed_pair` reads an `ophiolite.well-set/1` pair (a label and 1 to
+  29 members, each a well and a wellbore by id with one trajectory revision and its frame, or neither) and refuses a
+  payload whose digests are valid but whose members disagree: "A wellbore appears twice in the set", "A member has a
+  frame without a trajectory, or a trajectory without a frame", "Members and their context disagree". A deployment
+  refuses to save a set in this version; saving and reading one back come with slice 1.
+- Private well sets (E119a slice 1): `client.well_sets` saves a set (`save`), adds its next version (`new_version`),
+  lists your sets (`list`) and reads one at an exact version as `typed.WellSet` (`label`, `members`, `to_frame()`).
+  `from_list(label, wellbores, frames=, choose=)` builds the document from wellbores: each takes the well it is part
+  of and its one deviation survey; where a wellbore has two or more trajectory versions it is refused until `choose`
+  names one by its label, and the refusal lists the versions by readable label or "Trajectory version of <date>",
+  never by an identifier. A set is saved with no audience and stays with its author: the server checks every member
+  (well and wellbore readable and associated, trajectory a usable deviation survey of that wellbore, frame CRS
+  projected in metres) and refuses each sharing route. A server refusal reads as the server's own sentence, member by member, with its closed reason and field
+  (`members[1]`) in `Refused.details`; this holds for every refusal that states a closed reason.
+- One trajectory geometry, and a member placed in the world (E119a slice 2): `ophiolite.geometry` runs the contract
+  module `contracts/geometry/v1/trajectory.py`, the file the Platform runs too (`minimum_curvature`, `interpolate`,
+  `place`, `offset_bound`, `refusals()`). `Trajectory.minimum_curvature()`, `typed.minimum_curvature` and
+  `transform.vertical_depth` now compute through it and give the same results as before within 1e-9 m, with the same
+  refusals and no new dogleg limit. `client.well_sets.bind(well_set, member, surface)` checks one member again on the
+  server (as at saving; nothing is stored), reads its trajectory at the saved version and returns `Bound`: `stations`
+  `(md, x, y, z)` in the frame's coordinate system with z the depth below the frame's datum, `positions(mds)` and
+  `surface_sign`. Otherwise it refuses with one sentence naming the member: the server's reason (`well-set:<key>`) or
+  what the geometry cannot place (`geometry:<key>`: north, datum, coordinate system, units, a surface in time, tie-in).
+- Every crossing, or why not (E119a slice 3): `ophiolite.intersection.crossings(bound, surface)` takes a member bound
+  with `client.well_sets.bind` and the grid surface read with `client.read_data`, and returns every crossing the one
+  geometry can prove (`md`, bracketed by `low` and `high` to 0.01 m) or rows naming why a crossing is not given, one of
+  `grazing`, `along-surface` ("within 0.01 m of the surface from about <a> to about <b>"), `uncertain`,
+  `no-surface-data`, `ends-above`, `starts-below` and `no-trajectory` (`bound` None), with `coverage` and the
+  evaluation count. `intersection.nearest(result, md)` picks the crossing nearest a measured depth (the shallower on a
+  tie) only with full coverage and no blocking row, and otherwise names the reason; `intersection.reasons()` gives each
+  reason's sentence. A surface the member cannot be placed against is refused as `bind` refuses it (`geometry:<key>`).
+- `ophiolite upload FOLDER --source NAME` names where the files come from (E122 slice 1): sending the folder again
+  under the same name prints the project's sentence after the report line, "Compared with the last send of Petrel
+  export: 2 unchanged, 1 changed, 0 new."; an unchanged file is not added again and a changed one is its result's
+  next version. `UploadRuns.upload(..., source_name=NAME)` does the same and `Report.text` prints the served sentence as
+  served; without a name the report is the line it was. The `deliver --item` label is not part of this slice.
+- `ophiolite deliver` recovers a delivery whose computer stopped (E109 slice 2, no contract change): the next run of
+  the same procedure in the folder never runs the writer again. It calls the manifest's `reconcile` (`module:function`,
+  run from the pinned copy only with the attempt's configuration), whose `delivered(items=N)` is sent,
+  `ophiolite.not_delivered()` not sent (only after the destination committed a tombstone for the id), and anything
+  else, `ophiolite.unknown()` or an error included, "Outcome unknown for ... It was not sent again."; without a
+  `reconcile` the outcome stays unknown. `--wait SECONDS` waits for a writer still running on this computer ("This
+  delivery is still running on this computer; try again when it has finished."), and `--set-aside` records the
+  outcome as unknown in the project and moves `attempt.json` to `set-aside.json`, exit 0. The tops-to-team-db example
+  declares `reconcile` (a `withdrawn` row in `team.deliveries`, which gains a nullable `items` column).
+- `ophiolite deliver NAME --system SLOT=FILE --item SLOT=ITEM[@N]` delivers (E109 slice 1, no contract change): a send
+  procedure of the project's catalogue (`--version`, `--yes` as for `source run`) runs once on this computer with exact
+  versions (read by `Exchange.read_exact`, which never changes what the folder holds) and its outcome is reported to
+  the project: "Sent to Team tops database by Tops to team DB on this computer: 3 items.", "Not sent to ...", or
+  "Outcome unknown for ..." when the writer said nothing valid; exit 0 only when sent and recorded. The entry is
+  `entry(inputs, settings, delivery)` with `delivery.id` and `delivery.system`; it returns `ophiolite.delivered(items=N)`
+  or `ophiolite.refused(reason)` (the reason stays on this computer). The attempt is written under
+  `.ophiolite-held/deliveries/` before the writer starts and holds no configuration; a delivery whose outcome is not
+  known yet is never sent again ("This delivery's outcome is not known yet; it cannot be sent again."). Refused before
+  anything starts: Windows, an unbound or ambiguous item, an unreadable version, a setting that looks like an address or
+  a password, and the catalogue's own refusals. `--set-aside` comes with a later release. `procedures new --step send`
+  writes a send scaffold; `ophiolite.testing.MemoryDeliveries` keeps deliveries by the server's rules for tests.
+- A send procedure names its destination and returns a delivery (E109 slice 0, contract only; procedure rules 1.1.0,
+  registry 1.46.0). A send procedure reads one or more versions and at most one team's system, and may name a
+  `reconcile` function (`module:function` of its folder); `ophiolite procedures validate` says "Valid: Tops to team DB,
+  version 1. It reads Well tops (CSV) and Team tops database and makes a delivery." and refuses two systems or a bad
+  `reconcile` in words. `ophiolite.models.delivery` holds the closed payload `ophiolite.delivery/1` (`Delivery`:
+  `delivery_id`, `state` confirmed, not-sent or unknown, `items` 0 to 1,000,000), checked by the packaged contract file
+  `contracts/procedures/v1/delivery.py` (the server runs the same file), and the report body `DeliveryObservation`
+  (profile `procedure-delivery/1`). `ophiolite deliver NAME --system SLOT=FILE --item SLOT=ITEM[@N]` exists and refuses
+  with "Delivering to a team's system is not available on this deployment yet." (reason code `not-available-yet`,
+  exit 1), reading and writing nothing; running a send procedure with `procedures run` is still a later release. The
+  generated client gains `activity/deliver` and `activity/deliveries`, which the server does not serve yet.
+- The upload receipt carries the digest of the stored bytes (E108 slice 0, additive): `UploadResult.sha256` is the
+  server's `sha256` field, or `None` from a server before E108; it is kept as given, beside `revision`, which may differ
+  from it when a version's identity is given by a rule. A scientific asset's `acquisition.sourced_by` (scientific-asset/1
+  1.25.0, registry 1.39.0) names the source procedure that made an uploaded file from a team's system. A bundle import
+  keeps it as the exporting project recorded it, in `acquisition.origin.sourced_by` (E108 slice 1; scientific-asset/1
+  1.26.0, registry 1.40.0). `ophiolite source run NAME --system SLOT=FILE` (`Client.source_run`) runs a source
+  procedure of the project on this computer and adds what it makes through one upload: each file names the version,
+  the team's system in words (`--system-label`, default the procedure's name for it) and its output role, and the
+  server records `sourced_by` from its catalogue. The configuration, log.txt and run.json are never sent. A setting
+  whose resolved value (a default included) looks like an address or a password is refused before the run ("A setting
+  looks like an address or a password; put it in the system configuration on this computer."). E108 slice 1: the first
+  run; a later run that finds a changed version comes with a later slice. E108 slice 1 (amendment B6): a run whose
+  files are not all added, or whose upload fails after the procedure ran, keeps **only the outputs** in a new folder
+  and returns its path (`kept`, also on the exception) with the line "The files the procedure made are kept in PATH.
+  To add them by hand: ophiolite upload PATH"; its log.txt and run.json are never in that folder. The report names
+  each file by its output label; a system label that does not read as a name is shown as "a team's system" (the folder
+  as "Team system") while `source.system` keeps it exactly; a version that is not available is named by its label or
+  "this procedure" (the catalogue name stays in `--json`'s details). New reason codes a source file may end with:
+  `source-changed`, `source-shared`, `source-audience`, `source-withdrawn` and `source-several`, each with its sentence.
+  E108 slice 2: a later run becomes a version. `source run --work DIR` (default `.ophiolite-held`, as
+  `check`/`get`/`send`; `Client.source_run(work=)`) remembers each output's item and version by procedure, system and
+  role: a run whose files and declarations equal the held ones sends nothing ("nothing-changed"); otherwise each file
+  is sent as the next version of its item, and a version added meanwhile is E70's `newer-version-exists`, named from
+  the item's history. A run that stops part way is completed by the next one under the same command id without running
+  the procedure again. A receipt is checked by its `sha256` when the server gives one (`publish.receipt_matches`),
+  since a version added by upload has a revision that is not the bytes' digest. An uploaded item's history is readable
+  (`kind` `uploaded`). New reason codes: `newer-version`, `earlier-version`, `version-refused` (registry 1.41.0).
+  E108 slice 3: a colleague receives the newer version. `check` names a version 2 added by upload or by a later source
+  run, and `get` saves it with its number (a well log with its curves; a version 2 that changed only its declarations
+  keeps the same file and a new descriptor). This amends E70a's adapter row 127 (the refusal of a newer version of an
+  uploaded item, `cannot-read-here`, is gone). Sending content equal to an earlier version, not the latest, is the new
+  outcome `earlier-version` ("This content was version N on D.", the day in UTC; exit 4), apart from `nothing-changed`
+  for the latest version's content. The What's next card gives such a version its kind's command (registry 1.42.0:
+  qgis-reach/1 drops its `uploaded-successor` row).
+- Tables kept as they are and file downloads (E58b, preview API): `client.imports.from_table(path, "table",
+  columns={column: {'unit', 'quantity', 'missing', 'description'}})` keeps a CSV, Excel or Parquet file as it is;
+  `client.read_data(asset, revision)` returns `Table` (`rows`, `columns`, `key`, `declarations`, `units`, `not_read`
+  with one warning naming those columns, and `to_frame(missing=, decimal=)` on the frame code of SQL tables read as
+  tables). `client.export_file(asset, revision, path, format=, curves=)` and `Table.download(path, format=)` save an
+  exact revision (a kept table, tops, a trajectory, a point set or a LAS log) as one Parquet, GeoParquet (point sets)
+  or CSV file written by the server; `source.read().download(path, format=)` saves a connected SQL table. Every
+  download is checked against the digest and the revision the server states, through the same partial-file rule as
+  `download_original`, and nothing is saved otherwise; a connected selection that moved since the read is
+  `SourceRevisionDiffers`, one that can no longer be read keeps the server's refusal. No pyarrow is needed to download.
+  Command line: `ophiolite read-data --asset A --revision R --format parquet|geoparquet|csv --out FILE [--curve C]`.
+  Gallery: "A spreadsheet and a database, joined".
 - A scientific read refused with 422 (`Incompatible`) now carries the server's own sentence as its message when the
   server gives one (for example why an export cannot be written); without one, the message stays "This scientific
   context is not supported." (H48).
@@ -42,6 +194,8 @@ No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
   `2026-11-15T00:00:00Z`); `--json` carries the instant. The gallery notebook "Who has access, and until when" reads
   your own ends and, for a project administrator, who has access through what and until when (`access/effective`);
   the synthetic server answers both. No SDK write method sets an end date.
+- Wells from SQL Server and Oracle (E61): a source selected from a SQL Server or Oracle table reads like any other
+  (`client.source(id).read(expect_revision=...).to_frame()`). Gallery: "Wells from SQL Server and Oracle".
 - Grids and GIS files (E56, preview API): `client.read_data` returns `FeatureSet` for map features from a Shapefile,
   a GeoPackage layer or a GeoJSON file (`features` in file order with coordinates as stored, `fields`, `to_frame()`
   with one row per feature), checked offline against the server's rules; ZMAP+, CPS-3 and IRAP grids read as

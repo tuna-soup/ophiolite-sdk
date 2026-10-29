@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/triangulated-surface-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.triangulated-surface/1",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -274,6 +274,44 @@
       "title": "Reference",
       "type": "object"
     },
+    "ResqmlSpatialInterpretation": {
+      "additionalProperties": false,
+      "description": "E124 s2a (D4): the RESQML package reader's identity for the spatial models it lands (triangulated surfaces, and\npolyline sets in s2b); beside S1's ResqmlInterpretation so the schemas A1 stepped stay as they are.",
+      "properties": {
+        "reader": {
+          "const": "asset_connectors.resqml_package/1",
+          "title": "Reader",
+          "type": "string"
+        },
+        "mapping": {
+          "enum": [
+            "triangulated-surface/1",
+            "polyline-set/1"
+          ],
+          "title": "Mapping",
+          "type": "string"
+        },
+        "parsing_policy": {
+          "const": "resqml-exact/1",
+          "title": "Parsing Policy",
+          "type": "string"
+        },
+        "null_policy": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Null Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reader",
+        "mapping",
+        "parsing_policy",
+        "null_policy"
+      ],
+      "title": "ResqmlSpatialInterpretation",
+      "type": "object"
+    },
     "TypedInterpretation": {
       "additionalProperties": false,
       "description": "The executable identity of the typed reader (Connectors typed_reader; E56: feature_files for feature sets).",
@@ -300,7 +338,10 @@
             "model-section/1",
             "seismic-section/1",
             "time-depth/1",
-            "feature-set/1"
+            "feature-set/1",
+            "well-path/1",
+            "well-set/1",
+            "well-residual/1"
           ],
           "title": "Mapping",
           "type": "string"
@@ -343,7 +384,15 @@
       "type": "string"
     },
     "interpretation": {
-      "$ref": "#/$defs/TypedInterpretation"
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TypedInterpretation"
+        },
+        {
+          "$ref": "#/$defs/ResqmlSpatialInterpretation"
+        }
+      ],
+      "title": "Interpretation"
     },
     "schema": {
       "const": "ophiolite.triangulated-surface/1",

@@ -1,0 +1,502 @@
+{
+ "schema": "ophiolite.trajectory-geometry-fixture/1",
+ "note": "E119a C1 test 3: place() against closed forms (README.md), within 0.01 m. Wellhead (236512.4, 583104.75) in EPSG:28992; depth reference KB 7.92 m above NAP; z is depth below NAP, positive down.",
+ "cases": [
+  {
+   "name": "vertical",
+   "closed_form": "x, y = wellhead; z = md - 7.92",
+   "trajectory": {
+    "context": {
+     "type": "trajectory",
+     "depth_unit": "m",
+     "angle_unit": "deg",
+     "azimuth_reference": "grid-north",
+     "depth_datum": "KB"
+    },
+    "stations": [
+     {
+      "md": 0,
+      "inclination": 0,
+      "azimuth": 0,
+      "tvd": null
+     },
+     {
+      "md": 500,
+      "inclination": 0,
+      "azimuth": 0,
+      "tvd": null
+     }
+    ]
+   },
+   "frame": {
+    "crs": "EPSG:28992",
+    "wellhead": {
+     "x": 236512.4,
+     "y": 583104.75
+    },
+    "depth_reference": {
+     "name": "KB",
+     "elevation": 7.92,
+     "datum": "NAP"
+    },
+    "north": {
+     "survey_basis": "grid:EPSG:28992",
+     "rotation_deg": 0
+    },
+    "tie_in": null,
+    "source": "closed form"
+   },
+   "surface": {
+    "crs": "EPSG:28992",
+    "xy_unit": "m",
+    "z_unit": "m",
+    "z_meaning": "depth",
+    "positive": "down",
+    "vertical_datum": "NAP"
+   },
+   "mds": [
+    0,
+    137.5,
+    500
+   ],
+   "positions": [
+    [
+     236512.4,
+     583104.75,
+     -7.92
+    ],
+    [
+     236512.4,
+     583104.75,
+     129.58
+    ],
+    [
+     236512.4,
+     583104.75,
+     492.08
+    ]
+   ],
+   "surface_sign": 1
+  },
+  {
+   "name": "slant 30 degrees, azimuth 60",
+   "closed_form": "x = x0 + md sin30 sin60; y = y0 + md sin30 cos60; z = md cos30 - 7.92",
+   "trajectory": {
+    "context": {
+     "type": "trajectory",
+     "depth_unit": "m",
+     "angle_unit": "deg",
+     "azimuth_reference": "grid-north",
+     "depth_datum": "KB"
+    },
+    "stations": [
+     {
+      "md": 0,
+      "inclination": 30,
+      "azimuth": 60,
+      "tvd": null
+     },
+     {
+      "md": 400,
+      "inclination": 30,
+      "azimuth": 60,
+      "tvd": null
+     }
+    ]
+   },
+   "frame": {
+    "crs": "EPSG:28992",
+    "wellhead": {
+     "x": 236512.4,
+     "y": 583104.75
+    },
+    "depth_reference": {
+     "name": "KB",
+     "elevation": 7.92,
+     "datum": "NAP"
+    },
+    "north": {
+     "survey_basis": "grid:EPSG:28992",
+     "rotation_deg": 0
+    },
+    "tie_in": null,
+    "source": "closed form"
+   },
+   "surface": {
+    "crs": "EPSG:28992",
+    "xy_unit": "m",
+    "z_unit": "m",
+    "z_meaning": "elevation",
+    "positive": "up",
+    "vertical_datum": "NAP"
+   },
+   "mds": [
+    0,
+    100,
+    250.5,
+    400
+   ],
+   "positions": [
+    [
+     236512.4,
+     583104.75,
+     -7.92
+    ],
+    [
+     236555.70127018922,
+     583129.75,
+     78.68254037844387
+    ],
+    [
+     236620.869681824,
+     583167.375,
+     209.0193636480019
+    ],
+    [
+     236685.60508075688,
+     583204.75,
+     338.4901615137755
+    ]
+   ],
+   "surface_sign": -1
+  },
+  {
+   "name": "build 10 degrees per 30 m, azimuth 120",
+   "closed_form": "R = 30/rad(10); h = R(1 - cos(md/R)); x = x0 + h sin120; y = y0 + h cos120; z = R sin(md/R) - 7.92",
+   "trajectory": {
+    "context": {
+     "type": "trajectory",
+     "depth_unit": "m",
+     "angle_unit": "deg",
+     "azimuth_reference": "grid-north",
+     "depth_datum": "KB"
+    },
+    "stations": [
+     {
+      "md": 0,
+      "inclination": 0,
+      "azimuth": 120,
+      "tvd": null
+     },
+     {
+      "md": 30,
+      "inclination": 10,
+      "azimuth": 120,
+      "tvd": null
+     },
+     {
+      "md": 60,
+      "inclination": 20,
+      "azimuth": 120,
+      "tvd": null
+     },
+     {
+      "md": 90,
+      "inclination": 30,
+      "azimuth": 120,
+      "tvd": null
+     }
+    ]
+   },
+   "frame": {
+    "crs": "EPSG:28992",
+    "wellhead": {
+     "x": 236512.4,
+     "y": 583104.75
+    },
+    "depth_reference": {
+     "name": "KB",
+     "elevation": 7.92,
+     "datum": "NAP"
+    },
+    "north": {
+     "survey_basis": "grid:EPSG:28992",
+     "rotation_deg": 0
+    },
+    "tie_in": null,
+    "source": "closed form"
+   },
+   "surface": {
+    "crs": "EPSG:28992",
+    "xy_unit": "m",
+    "z_unit": "m",
+    "z_meaning": "elevation",
+    "positive": "up",
+    "vertical_datum": "NAP"
+   },
+   "mds": [
+    15,
+    45,
+    75,
+    90
+   ],
+   "positions": [
+    [
+     236512.96645268242,
+     583104.4229583914,
+     7.060968659306239
+    ],
+    [
+     236517.4722406697,
+     583101.821540484,
+     36.56771682594161
+    ],
+    [
+     236526.3469105563,
+     583096.6977474359,
+     64.7227282286917
+    ],
+    [
+     236532.34329785945,
+     583093.2357316123,
+     78.02366926962347
+    ]
+   ],
+   "surface_sign": -1
+  },
+  {
+   "name": "convergence +1.5 degrees from true north",
+   "closed_form": "as the slant, at grid azimuth 60 + 1.5",
+   "trajectory": {
+    "context": {
+     "type": "trajectory",
+     "depth_unit": "m",
+     "angle_unit": "deg",
+     "azimuth_reference": "true-north",
+     "depth_datum": "KB"
+    },
+    "stations": [
+     {
+      "md": 0,
+      "inclination": 30,
+      "azimuth": 60,
+      "tvd": null
+     },
+     {
+      "md": 400,
+      "inclination": 30,
+      "azimuth": 60,
+      "tvd": null
+     }
+    ]
+   },
+   "frame": {
+    "crs": "EPSG:28992",
+    "wellhead": {
+     "x": 236512.4,
+     "y": 583104.75
+    },
+    "depth_reference": {
+     "name": "KB",
+     "elevation": 7.92,
+     "datum": "NAP"
+    },
+    "north": {
+     "survey_basis": "true-north",
+     "rotation_deg": 1.5
+    },
+    "tie_in": null,
+    "source": "closed form"
+   },
+   "surface": {
+    "crs": "EPSG:28992",
+    "xy_unit": "m",
+    "z_unit": "m",
+    "z_meaning": "elevation",
+    "positive": "up",
+    "vertical_datum": "NAP"
+   },
+   "mds": [
+    0,
+    100,
+    250.5,
+    400
+   ],
+   "positions": [
+    [
+     236512.4,
+     583104.75,
+     -7.92
+    ],
+    [
+     236556.34085563308,
+     583128.6079380129,
+     78.68254037844387
+    ],
+    [
+     236622.4718433609,
+     583164.5141347225,
+     209.0193636480019
+    ],
+    [
+     236688.16342253238,
+     583200.1817520519,
+     338.4901615137755
+    ]
+   ],
+   "surface_sign": -1
+  },
+  {
+   "name": "tie-in at md 25 with (0.11, -0.07)",
+   "closed_form": "x = x0 + 0.11; y = y0 - 0.07; z = 24.98 + (md - 25) - 7.92",
+   "trajectory": {
+    "context": {
+     "type": "trajectory",
+     "depth_unit": "m",
+     "angle_unit": "deg",
+     "azimuth_reference": "grid-north",
+     "depth_datum": "KB"
+    },
+    "stations": [
+     {
+      "md": 25,
+      "inclination": 0,
+      "azimuth": 0,
+      "tvd": 24.98
+     },
+     {
+      "md": 125,
+      "inclination": 0,
+      "azimuth": 0,
+      "tvd": null
+     }
+    ]
+   },
+   "frame": {
+    "crs": "EPSG:28992",
+    "wellhead": {
+     "x": 236512.4,
+     "y": 583104.75
+    },
+    "depth_reference": {
+     "name": "KB",
+     "elevation": 7.92,
+     "datum": "NAP"
+    },
+    "north": {
+     "survey_basis": "grid:EPSG:28992",
+     "rotation_deg": 0
+    },
+    "tie_in": {
+     "md": 25,
+     "tvd": 24.98,
+     "east": 0.11,
+     "north": -0.07
+    },
+    "source": "closed form"
+   },
+   "surface": {
+    "crs": "EPSG:28992",
+    "xy_unit": "m",
+    "z_unit": "m",
+    "z_meaning": "elevation",
+    "positive": "up",
+    "vertical_datum": "NAP"
+   },
+   "mds": [
+    25,
+    75,
+    125
+   ],
+   "positions": [
+    [
+     236512.50999999998,
+     583104.68,
+     17.060000000000002
+    ],
+    [
+     236512.50999999998,
+     583104.68,
+     67.06
+    ],
+    [
+     236512.50999999998,
+     583104.68,
+     117.06
+    ]
+   ],
+   "surface_sign": -1
+  },
+  {
+   "name": "tie-in turned with the stations, rotation -2 degrees",
+   "closed_form": "tie-in (3.0, -2.0) turned by -2: e = 3 cos(-2) - 2 sin(-2), n = -2 cos(-2) - 3 sin(-2); then a straight slant 30 degrees at grid azimuth 45 - 2",
+   "trajectory": {
+    "context": {
+     "type": "trajectory",
+     "depth_unit": "m",
+     "angle_unit": "deg",
+     "azimuth_reference": "true-north",
+     "depth_datum": "KB"
+    },
+    "stations": [
+     {
+      "md": 40,
+      "inclination": 30,
+      "azimuth": 45,
+      "tvd": 38.5
+     },
+     {
+      "md": 140,
+      "inclination": 30,
+      "azimuth": 45,
+      "tvd": null
+     }
+    ]
+   },
+   "frame": {
+    "crs": "EPSG:28992",
+    "wellhead": {
+     "x": 236512.4,
+     "y": 583104.75
+    },
+    "depth_reference": {
+     "name": "KB",
+     "elevation": 7.92,
+     "datum": "NAP"
+    },
+    "north": {
+     "survey_basis": "true-north",
+     "rotation_deg": -2.0
+    },
+    "tie_in": {
+     "md": 40,
+     "tvd": 38.5,
+     "east": 3.0,
+     "north": -2.0
+    },
+    "source": "closed form"
+   },
+   "surface": {
+    "crs": "EPSG:28992",
+    "xy_unit": "m",
+    "z_unit": "m",
+    "z_meaning": "elevation",
+    "positive": "up",
+    "vertical_datum": "NAP"
+   },
+   "mds": [
+    40,
+    90.5,
+    140
+   ],
+   "positions": [
+    [
+     236515.46797147446,
+     583102.8559168361,
+     30.58
+    ],
+    [
+     236532.68843006605,
+     583121.3225978019,
+     74.31428289111416
+    ],
+    [
+     236549.5678894776,
+     583139.423601917,
+     117.18254037844387
+    ]
+   ],
+   "surface_sign": -1
+  }
+ ]
+}

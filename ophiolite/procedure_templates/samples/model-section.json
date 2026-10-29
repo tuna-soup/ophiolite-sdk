@@ -1,0 +1,39 @@
+{
+  "model": [
+    {
+      "index": 0,
+      "name": "Shale",
+      "vp": 2800.0,
+      "density": 2350.0
+    },
+    {
+      "index": 1,
+      "name": "Sandstone",
+      "vp": 3400.0,
+      "density": 2250.0
+    }
+  ],
+  "grid": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      1
+    ],
+    [
+      1,
+      1,
+      1
+    ]
+  ],
+  "domain": "depth",
+  "first_sample": 1000.0,
+  "sample_interval": 10.0,
+  "horizontal": "distance",
+  "horizontal_first": 0.0,
+  "horizontal_step": 25.0
+}

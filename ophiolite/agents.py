@@ -27,13 +27,25 @@ from .errors import (OphioliteError, AuthenticationRequired, PermissionRefused, 
                      Refused, Busy)
 
 CHANGES = ('applications/configure', 'applications/start', 'applications/publish', 'applications/share', 'runners/submit', 'runners/cancel',
-           'results/remake-run')  # E94: run an approved calculation again; a person saves
+           'results/remake-run',  # E94: run an approved calculation again; a person saves
+           'procedures/register', 'procedure-runs/report',  # E111: a private version of exact bytes; a run whose outputs publish under its approval
+           'upload-runs/start',  # E111 s2 (P-10): one file read with a procedure; its file, convert and output steps run under this approval
+           'outcomes/deliver-as', 'procedures/trust')  # E111 s4b (R4-10): a delivery as an outcome; trust in exactly one procedure version
 
 
 class PlanDeclined(OphioliteError): code = 'plan-declined'
 class PlanExpired(OphioliteError): code = 'plan-expired'
 class BudgetExhausted(OphioliteError): code = 'budget-exhausted'
 class CommandOwned(IntegrityConflict): code = 'command-owned'
+
+
+class _AgentAuth:
+    """E111 s4a (D-A3): the `Client` credential of `AgentClient.reads`: the agent's headers, asked again on every request."""
+    def __init__(self, agent):
+        self.agent = agent
+
+    def headers(self, url, project):
+        return dict(self.agent._auth())
 
 
 class AgentClient:
@@ -53,12 +65,43 @@ class AgentClient:
     def _auth(self):
         return self._credential.headers(self.url, self.project) if self._credential else self._headers
 
-    def _post(self, area, operation, body, plan=None, evidence=None):
+    @property
+    def reads(self):
+        """E111 s4a (D-A3): a read-only `Client` acting with this agent's credential, so `residuals.prepare(agent, ...)`
+        and `agent.well_sets.bind` read as for a person; the gateway decides as the agent's person within its project and
+        read scope. Every request asks `_auth()` again (an assistant sign-in is refreshed); a write it sends is refused."""
+        if getattr(self, '_reads', None) is None:
+            from .client import Client
+            self._reads = Client(self.url, self.project, credential=_AgentAuth(self), http=self.http)
+        return self._reads
+
+    @property
+    def well_sets(self):
+        """E111 s4a: read and check your person's well sets (`ophiolite.well_sets.WellSets`; read and bind)."""
+        return self.reads.well_sets
+
+    def read_data(self, asset, revision):
+        """E111 s4a: an exact version, as `Client.read_data` reads it."""
+        return self.reads.read_data(asset, revision)
+
+    def _entities(self, operation, body):
+        return self.reads._entities(operation, body)
+
+    def _download_version(self, *args, **kwargs):
+        return self.reads._download_version(*args, **kwargs)
+
+    def _post(self, area, operation, body, plan=None, evidence=None, raw=None):
         headers = _client_header.stamp({**self._auth(), **({'X-Ophiolite-Plan': plan} if plan else {}),
                                         **({'X-Ophiolite-Evidence': evidence} if evidence else {})})  # E93; E95
+        url = '%s/api/v1/projects/%s/%s/%s' % (self.url, self.project, area, operation)
         try:
-            response = self.http.post('%s/api/v1/projects/%s/%s/%s' % (self.url, self.project, area, operation),
-                                      json={'project_id': self.project, **body}, headers=headers)
+            if raw is None:
+                response = self.http.post(url, json={'project_id': self.project, **body}, headers=headers)
+            else:  # E111: an octet-stream step; its request travels whole in X-Ophiolite-Upload, as publications/derive reads it
+                import base64
+                from .publish import json_bytes
+                upload = base64.b64encode(json_bytes({'project_id': self.project, **body})).decode()
+                response = self.http.post(url, content=raw, headers={**headers, 'Content-Type': 'application/octet-stream', 'X-Ophiolite-Upload': upload})
         except httpx.HTTPError:
             raise Unavailable('Cannot reach the service. Check its address and network connection.', code='unreachable') from None
         if response.status_code == 200: return response.json()
@@ -91,7 +134,7 @@ class AgentClient:
         """Propose the exact request. `evidence` (E95), when given: `instruction` (what the person asked, as you received
         it), `model` ({provider, id, label?}), `conversation` ({kind, reference, label?}) and `client` (product/version).
         The answer's `evidence` is the record's id; pass it to `wait` and `execute`."""
-        if operation not in CHANGES: raise Refused('Agents change application configurations, runs, publications, recipients, runner jobs and recalculations only.')
+        if operation not in CHANGES: raise Refused('Agents change application configurations, runs, publications, recipients, runner jobs, recalculations, procedure runs, deliveries as an outcome and trust in a procedure version only.')
         body = {'operation': operation, 'request': {'project_id': self.project, **request}, 'summary': summary}
         if evidence is not None:
             body['evidence'] = evidence
@@ -119,6 +162,13 @@ class AgentClient:
         """Execute the approved plan; `evidence` is the record id `propose` answered (sent as X-Ophiolite-Evidence)."""
         area, name = operation.split('/', 1)
         return self._post(area, name, request, plan, evidence)
+
+    def execute_step(self, operation, request, plan, evidence=None, *, raw=None):
+        """E111: one step an approved plan covers (a report's `publications/derive` per output), sent under the parent
+        plan: JSON, or with `raw` the file's bytes and the request in X-Ophiolite-Upload. The request must equal the step
+        the approval names, field for field; sending it again answers the recorded receipt and never runs twice."""
+        area, name = operation.split('/', 1)
+        return self._post(area, name, request, plan, evidence, raw)
 
     def run(self, operation, request, summary='', *, evidence=None, **wait):
         """Propose, wait for approval, execute. Safe to repeat: the same request is the same plan."""

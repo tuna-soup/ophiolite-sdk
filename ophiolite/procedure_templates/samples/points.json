@@ -1,0 +1,32 @@
+{
+  "points": [
+    [
+      100.0,
+      200.0,
+      -1250.5
+    ],
+    [
+      110.0,
+      205.0,
+      null
+    ],
+    [
+      120.0,
+      210.0,
+      -1262.0
+    ]
+  ],
+  "attributes": {
+    "porosity": [
+      0.21,
+      0.18,
+      null
+    ]
+  },
+  "crs": "EPSG:28992",
+  "xy_unit": "m",
+  "z_unit": "m",
+  "z_meaning": "elevation",
+  "positive": "up",
+  "vertical_datum": "NAP"
+}

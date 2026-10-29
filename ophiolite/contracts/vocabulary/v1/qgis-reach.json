@@ -49,6 +49,54 @@
               }
             }
           ]
+        },
+        {
+          "profile": "well-set/1",
+          "noun": "well sets",
+          "asset_kind": "well-set",
+          "routes": [
+            {
+              "route": "features",
+              "state": "not-yet",
+              "transport": null,
+              "asset_kinds": [
+                "well-set"
+              ],
+              "slice": null
+            }
+          ]
+        },
+        {
+          "profile": "well-residual/1",
+          "noun": "residual results",
+          "asset_kind": "well-residual",
+          "routes": [
+            {
+              "route": "features",
+              "state": "not-yet",
+              "transport": null,
+              "asset_kinds": [
+                "well-residual"
+              ],
+              "slice": null
+            }
+          ]
+        },
+        {
+          "profile": "resqml-epc/1",
+          "noun": "RESQML packages",
+          "asset_kind": "trajectory",
+          "routes": [
+            {
+              "route": "features",
+              "state": "not-yet",
+              "transport": null,
+              "asset_kinds": [
+                "trajectory"
+              ],
+              "slice": null
+            }
+          ]
         }
       ]
     },
@@ -120,6 +168,22 @@
               }
             }
           ]
+        },
+        {
+          "profile": "well-path-positions-csv/1",
+          "noun": "well paths",
+          "asset_kind": "well-path",
+          "routes": [
+            {
+              "route": "features",
+              "state": "not-yet",
+              "transport": null,
+              "asset_kinds": [
+                "well-path"
+              ],
+              "slice": null
+            }
+          ]
         }
       ]
     },
@@ -189,6 +253,22 @@
                   "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
                 ]
               }
+            }
+          ]
+        },
+        {
+          "profile": "petrel-faultsticks/1",
+          "noun": "Petrel fault sticks",
+          "asset_kind": "polyline-set",
+          "routes": [
+            {
+              "route": "features",
+              "state": "not-yet",
+              "transport": null,
+              "asset_kinds": [
+                "polyline-set"
+              ],
+              "slice": null
             }
           ]
         },
@@ -445,6 +525,55 @@
           ]
         },
         {
+          "profile": "petrel-horizon-ilxl/1",
+          "noun": "Petrel horizon points",
+          "asset_kind": "point-set",
+          "routes": [
+            {
+              "route": "features",
+              "state": "open",
+              "transport": "ogc-api-features",
+              "asset_kinds": [
+                "point-set"
+              ],
+              "collections": [
+                "point-sets"
+              ],
+              "layer": "Point sets",
+              "slice": "E65",
+              "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)",
+              "client": {
+                "name": "QGIS",
+                "versions": [
+                  "4.2.2"
+                ],
+                "platforms": [
+                  "linux"
+                ],
+                "limits": [
+                  "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "profile": "petrel-scattered-data/1",
+          "noun": "Petrel scattered-data maps",
+          "asset_kind": "regular-grid-surface",
+          "routes": [
+            {
+              "route": "raster",
+              "state": "not-yet",
+              "transport": null,
+              "asset_kinds": [
+                "regular-grid-surface"
+              ],
+              "slice": null
+            }
+          ]
+        },
+        {
           "profile": "opendtect-horizon-ascii/1",
           "noun": "horizons",
           "asset_kind": "point-set",
@@ -663,13 +792,23 @@
       "curves_required": true
     },
     {
-      "asset_kind": "well-tops",
+      "asset_kind": "well-path",
       "mode": "get",
       "curves_required": false
     },
     {
-      "asset_kind": "uploaded-successor",
-      "mode": "none",
+      "asset_kind": "well-residual",
+      "mode": "get",
+      "curves_required": false
+    },
+    {
+      "asset_kind": "well-set",
+      "mode": "get",
+      "curves_required": false
+    },
+    {
+      "asset_kind": "well-tops",
+      "mode": "get",
       "curves_required": false
     },
     {

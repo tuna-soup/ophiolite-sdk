@@ -1,0 +1,50 @@
+{
+  "schema": "ophiolite.well-residual-reasons/1",
+  "id": "ophiolite.well-residual-reasons/1",
+  "title": "Residual reasons: the closed keys a residual row names when it gives no residual, with one sentence each (E119b)",
+  "sections": [
+    {
+      "id": "reasons",
+      "owner": "asset_connectors.typed_reader.RESIDUAL_REASONS",
+      "description": "Why a row of a residual result has no residual. The first seven are E119a's crossing reasons, copied as literals (the parity test with E119a's REASONS is E119b slice 2's); no-top and many-crossings are E119b's. A sentence names no wellbore and no formation (those stay under Technical details); <a> and <b> are the measured depths of the row's between, in metres, and appear only in the four keys that carry one.",
+      "keys": [
+        {
+          "key": "grazing",
+          "sentence": "Not computed: the path comes within 0.01 m of the surface from <a> m to <b> m, and no crossing is proven."
+        },
+        {
+          "key": "along-surface",
+          "sentence": "Not computed: the path runs within 0.01 m of the surface from <a> m to <b> m, and no crossing is proven."
+        },
+        {
+          "key": "uncertain",
+          "sentence": "Not computed: a crossing is possible between <a> m and <b> m but could not be proven."
+        },
+        {
+          "key": "no-surface-data",
+          "sentence": "Not computed: the surface has no data where the path would cross it."
+        },
+        {
+          "key": "ends-above",
+          "sentence": "Not computed: the path ends above the surface."
+        },
+        {
+          "key": "starts-below",
+          "sentence": "Not computed: the path starts below the surface."
+        },
+        {
+          "key": "no-trajectory",
+          "sentence": "Not computed: this wellbore has no trajectory in the selection."
+        },
+        {
+          "key": "no-top",
+          "sentence": "Not computed: this wellbore has no top of the chosen formation."
+        },
+        {
+          "key": "many-crossings",
+          "sentence": "Not computed: the path crosses the surface more than 64 times between <a> m and <b> m."
+        }
+      ]
+    }
+  ]
+}

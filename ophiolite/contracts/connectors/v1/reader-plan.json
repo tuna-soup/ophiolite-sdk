@@ -1,0 +1,16 @@
+{
+  "schema": "ophiolite.reader-plan/1",
+  "description": "Readers planned but not available yet (E123). A planned reader is not in registry.json and is never offered for upload; asked to read, it refuses with its own sentence and reads nothing. A reader that lands on more than one type names the others in lands_on_also (E124). A slice that brings the reader deletes its row here and adds its registry entry in the same commit.",
+  "readers": [
+    {
+      "id": "zgy/1",
+      "label": "A ZGY seismic cube",
+      "lands_on": "seismic-volume",
+      "status": "deferred",
+      "opens_with": "E123 SZ",
+      "evidence": {
+        "reason": "Deferred on 22 Oct 2026 for three reasons. The real-data fixture planned for Petrel exports publishes its seismic as SEG-Y, not ZGY. The closure of pyzgy 0.1.1 includes segyio, which is LGPL-3.0, so the library can only be an optional extra outside the image (gate Z0). How a ZGY cube lands on seismic-volume is not decided (K5, gate Z2). A rights-recorded test cube is gate Z1."
+      }
+    }
+  ]
+}

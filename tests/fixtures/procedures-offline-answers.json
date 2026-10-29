@@ -7,7 +7,7 @@
   "new-process-json": {
     "exit": 0,
     "stderr": "",
-    "stdout": "{\n  \"valid\": true,\n  \"rules_version\": \"1.0.0\",\n  \"digest\": \"d48a9b4b6b2b374b5bda5ca49f075a3fdefce4dff9accdf155896f2b273813df\",\n  \"sentence\": \"Valid: Shift tops by a fixed depth, version 1. It reads Well tops (CSV) and makes Well tops (CSV).\",\n  \"name\": \"fresh\",\n  \"version\": 1\n}\n"
+    "stdout": "{\n  \"valid\": true,\n  \"rules_version\": \"1.3.0\",\n  \"digest\": \"d48a9b4b6b2b374b5bda5ca49f075a3fdefce4dff9accdf155896f2b273813df\",\n  \"sentence\": \"Valid: Shift tops by a fixed depth, version 1. It reads Well tops (CSV) and makes Well tops (CSV).\",\n  \"name\": \"fresh\",\n  \"version\": 1\n}\n"
   },
   "run-bad-setting-json": {
     "exit": 1,
@@ -27,12 +27,12 @@
   "validate-label-snake": {
     "exit": 1,
     "stderr": "",
-    "stdout": "{\n  \"valid\": false,\n  \"rules_version\": \"1.0.0\",\n  \"sentence\": \"Not valid: setting 1 needs a readable label, for example \\\"Depth shift\\\".\",\n  \"code\": \"unreadable-label\",\n  \"field\": \"/settings/0/label\"\n}\n"
+    "stdout": "{\n  \"valid\": false,\n  \"rules_version\": \"1.3.0\",\n  \"sentence\": \"Not valid: setting 1 needs a readable label, for example \\\"Depth shift\\\".\",\n  \"code\": \"unreadable-label\",\n  \"field\": \"/settings/0/label\"\n}\n"
   },
   "validate-missing-folder": {
     "exit": 1,
     "stderr": "",
-    "stdout": "{\n  \"valid\": false,\n  \"rules_version\": \"1.0.0\",\n  \"sentence\": \"Not valid: this folder has no procedure.json.\",\n  \"code\": \"no-manifest\",\n  \"field\": \"\"\n}\n"
+    "stdout": "{\n  \"valid\": false,\n  \"rules_version\": \"1.3.0\",\n  \"sentence\": \"Not valid: this folder has no procedure.json.\",\n  \"code\": \"no-manifest\",\n  \"field\": \"\"\n}\n"
   },
   "validate-no-manifest": {
     "exit": 1,
@@ -47,6 +47,6 @@
   "validate-valid-json": {
     "exit": 0,
     "stderr": "",
-    "stdout": "{\n  \"valid\": true,\n  \"rules_version\": \"1.0.0\",\n  \"digest\": \"560a8af5fd9a7206b9af0bc04006c36daab12576eecf9eb96396ec3d6ef475bf\",\n  \"sentence\": \"Valid: Shift tops by a fixed depth, version 1. It reads Well tops (CSV) and makes Well tops (CSV).\",\n  \"name\": \"depth-shift\",\n  \"version\": 1\n}\n"
+    "stdout": "{\n  \"valid\": true,\n  \"rules_version\": \"1.3.0\",\n  \"digest\": \"edf8668204255edd264cccb9f91d941c4c28d34312f9e264de10d4df31c5dda7\",\n  \"sentence\": \"Valid: Shift tops by a fixed depth, version 1. It reads Well tops (CSV) and makes Well tops (CSV).\",\n  \"name\": \"depth-shift\",\n  \"version\": 1\n}\n"
   }
 }

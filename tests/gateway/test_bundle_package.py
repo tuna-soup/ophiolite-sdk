@@ -59,7 +59,7 @@ def projection(opened):
 def test_alice_and_bob_export_the_same_package_and_others_are_refused(web, package, tmp_path):
     alice, bob, asset, revision = package
     mine = alice.export([(asset, revision, None)], tmp_path / 'alice'); theirs = bob.export([(asset, revision, None)], tmp_path / 'bob')
-    assert mine.manifest['bundle_version'] == '2.8.0' and projection(open_bundle(mine.path)) == projection(open_bundle(theirs.path))
+    assert mine.manifest['bundle_version'] == '2.10.0' and projection(open_bundle(mine.path)) == projection(open_bundle(theirs.path))
     descriptor = lambda o: json.loads((o.path / 'assets/0/descriptor.json').read_text())
     assert (descriptor(mine)['authorization']['evaluated_for'], descriptor(theirs)['authorization']['evaluated_for']) == ('alice', 'bob')  # differ, and that is all
     [a] = open_bundle(theirs.path).assets
@@ -146,4 +146,4 @@ def test_an_export_without_a_package_is_as_before(web, package, tmp_path):
     log = alice.upload_data(las.encode(), profile='las2/1', name='Plain', attribution='Synthetic', audience=['bob'], rights_confirmed=True, command_id='c4-plain')
     sent = []; web.c.event_hooks['request'].append(lambda r: sent.append(r.url.path))
     opened = alice.export([(log.asset_id, log.revision, ['GR'])], tmp_path / 'plain')
-    assert opened.manifest['bundle_version'] == '1.0.0' and not [p for p in sent if '/representations/package' in p or '/representations/companion' in p]
+    assert opened.manifest['bundle_version'] == '1.10.0' and not [p for p in sent if '/representations/package' in p or '/representations/companion' in p]

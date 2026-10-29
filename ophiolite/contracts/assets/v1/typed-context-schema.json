@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/typed-context-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.typed-context/1",
-    "version": "1.6.0",
+    "version": "1.10.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -969,7 +969,7 @@
         },
         "points": {
           "maximum": 200000,
-          "minimum": 2,
+          "minimum": 1,
           "title": "Points",
           "type": "integer"
         }
@@ -1394,6 +1394,12 @@
         },
         "fidelity": {
           "$ref": "#/$defs/Fidelity"
+        },
+        "depth_datum": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Depth Datum",
+          "type": "string"
         }
       },
       "required": [
@@ -1627,6 +1633,211 @@
       "title": "WellLocationContext",
       "type": "object"
     },
+    "WellPathContext": {
+      "additionalProperties": false,
+      "description": "The declared and observed context of a well path given as positions (ophiolite.well-path/1). x is easting and y\nnorthing (longitude and latitude in a geographic CRS), whatever the CRS's own axis order, in `xy_unit`. Measured depth\nis measured from `md_reference` (KB kelly bushing, DF drill floor, RT rotary table, GL ground level, MSL mean sea\nlevel) and TVDSS is positive downward below `tvdss_datum` (a negative value is above it), both in `depth_unit`. What\nthe uploader did not declare is \"unknown\", never a default.",
+      "properties": {
+        "type": {
+          "const": "well-path",
+          "title": "Type",
+          "type": "string"
+        },
+        "crs": {
+          "pattern": "^(EPSG:[0-9]{4,6}|unknown)$",
+          "title": "Crs",
+          "type": "string"
+        },
+        "xy_unit": {
+          "description": "The unit of x and y.",
+          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+          "title": "Xy Unit",
+          "type": "string"
+        },
+        "depth_unit": {
+          "description": "The unit of measured depth and TVDSS.",
+          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+          "title": "Depth Unit",
+          "type": "string"
+        },
+        "md_reference": {
+          "description": "What measured depth is measured from.",
+          "enum": [
+            "KB",
+            "DF",
+            "RT",
+            "GL",
+            "MSL",
+            "unknown"
+          ],
+          "title": "Md Reference",
+          "type": "string"
+        },
+        "tvdss_datum": {
+          "description": "What TVDSS is measured below; positive downward.",
+          "enum": [
+            "MSL",
+            "unknown"
+          ],
+          "title": "Tvdss Datum",
+          "type": "string"
+        },
+        "count": {
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        },
+        "md_range": {
+          "description": "The first and last measured depth.",
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "title": "Md Range",
+          "type": "array"
+        },
+        "tvdss_range": {
+          "description": "The smallest and largest TVDSS (not the first and last).",
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "title": "Tvdss Range",
+          "type": "array"
+        },
+        "fidelity": {
+          "$ref": "#/$defs/Fidelity"
+        }
+      },
+      "required": [
+        "type",
+        "crs",
+        "xy_unit",
+        "depth_unit",
+        "md_reference",
+        "tvdss_datum",
+        "count",
+        "md_range",
+        "tvdss_range",
+        "fidelity"
+      ],
+      "title": "WellPathContext",
+      "type": "object"
+    },
+    "WellResidualContext": {
+      "additionalProperties": false,
+      "description": "The counts of a residual result: its rows computed and not computed, its wellbores and those with no residual,\nthe formation the surface represents and the unit depths are shown in (typed-context 1.9.0). Values are metres.",
+      "properties": {
+        "type": {
+          "const": "well-residual",
+          "title": "Type",
+          "type": "string"
+        },
+        "count": {
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        },
+        "computed": {
+          "maximum": 10000,
+          "minimum": 0,
+          "title": "Computed",
+          "type": "integer"
+        },
+        "not_computed": {
+          "maximum": 10000,
+          "minimum": 0,
+          "title": "Not Computed",
+          "type": "integer"
+        },
+        "members": {
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Members",
+          "type": "integer"
+        },
+        "members_not_computed": {
+          "maximum": 10000,
+          "minimum": 0,
+          "title": "Members Not Computed",
+          "type": "integer"
+        },
+        "formation": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Formation",
+          "type": "string"
+        },
+        "display_unit": {
+          "enum": [
+            "m",
+            "ft"
+          ],
+          "title": "Display Unit",
+          "type": "string"
+        },
+        "fidelity": {
+          "$ref": "#/$defs/Fidelity"
+        }
+      },
+      "required": [
+        "type",
+        "count",
+        "computed",
+        "not_computed",
+        "members",
+        "members_not_computed",
+        "formation",
+        "display_unit",
+        "fidelity"
+      ],
+      "title": "WellResidualContext",
+      "type": "object"
+    },
+    "WellSetContext": {
+      "additionalProperties": false,
+      "description": "The counts of a well set: its members, those with a trajectory and those without (typed-context 1.8.0).",
+      "properties": {
+        "type": {
+          "const": "well-set",
+          "title": "Type",
+          "type": "string"
+        },
+        "count": {
+          "maximum": 29,
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        },
+        "with_trajectory": {
+          "maximum": 29,
+          "minimum": 0,
+          "title": "With Trajectory",
+          "type": "integer"
+        },
+        "without_trajectory": {
+          "maximum": 29,
+          "minimum": 0,
+          "title": "Without Trajectory",
+          "type": "integer"
+        },
+        "fidelity": {
+          "$ref": "#/$defs/Fidelity"
+        }
+      },
+      "required": [
+        "type",
+        "count",
+        "with_trajectory",
+        "without_trajectory",
+        "fidelity"
+      ],
+      "title": "WellSetContext",
+      "type": "object"
+    },
     "XY": {
       "additionalProperties": false,
       "properties": {
@@ -1665,6 +1876,9 @@
           "triangulated-surface": "#/$defs/MeshContext",
           "wavelet": "#/$defs/WaveletContext",
           "well-location": "#/$defs/WellLocationContext",
+          "well-path": "#/$defs/WellPathContext",
+          "well-residual": "#/$defs/WellResidualContext",
+          "well-set": "#/$defs/WellSetContext",
           "well-tops": "#/$defs/TopsContext"
         },
         "propertyName": "type"
@@ -1708,6 +1922,15 @@
         },
         {
           "$ref": "#/$defs/FeatureContext"
+        },
+        {
+          "$ref": "#/$defs/WellPathContext"
+        },
+        {
+          "$ref": "#/$defs/WellSetContext"
+        },
+        {
+          "$ref": "#/$defs/WellResidualContext"
         }
       ],
       "title": "Context"

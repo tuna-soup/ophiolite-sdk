@@ -1,0 +1,129 @@
+{
+  "schema": "ophiolite.portable-bundle/2",
+  "bundle_version": "2.10.0",
+  "created_at": "2026-10-27T00:00:00Z",
+  "exporter": {
+    "name": "ophiolite-sdk",
+    "version": "0.1.0"
+  },
+  "scope": "selection",
+  "selection": [
+    {
+      "asset_id": "qgis-points",
+      "revision": "abababababababababababababababababababababababababababababababab",
+      "curves": []
+    },
+    {
+      "asset_id": "older-points",
+      "revision": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+      "curves": []
+    }
+  ],
+  "assets": [
+    {
+      "asset_id": "qgis-points",
+      "revision": "abababababababababababababababababababababababababababababababab",
+      "origin": "retained-capture",
+      "profile": "points-csv/1",
+      "name": "Wells sent from QGIS",
+      "files": [
+        {
+          "path": "assets/0/original.csv",
+          "role": "original",
+          "sha256": "abababababababababababababababababababababababababababababababab",
+          "bytes": 400
+        },
+        {
+          "path": "assets/0/descriptor.json",
+          "role": "descriptor",
+          "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "bytes": 2000
+        },
+        {
+          "path": "assets/0/data.json",
+          "role": "normalized",
+          "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "bytes": 900
+        }
+      ],
+      "history": null,
+      "parents": [],
+      "parent_visibility": "complete",
+      "relationships": {
+        "well_log": null
+      },
+      "omissions": [],
+      "losses": [],
+      "type": "point-set",
+      "source_record": {
+        "schema": "ophiolite.source-provenance/1",
+        "asset_id": "qgis-points",
+        "revision": "abababababababababababababababababababababababababababababababab",
+        "record": {
+          "schema": "ophiolite.source-provenance/1",
+          "identity": {
+            "source_system": "application:qgis-plugin",
+            "source_instance": "/projects/groningen.qgz",
+            "id_scheme": "source-native",
+            "source_object_id": {
+              "container": "layer-7",
+              "id": "42"
+            }
+          },
+          "content": {
+            "content_sha256": "abababababababababababababababababababababababababababababababab",
+            "source_version": null
+          },
+          "context": {
+            "comparison": "comparison/1",
+            "context_sha256": "efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef"
+          }
+        }
+      }
+    },
+    {
+      "asset_id": "older-points",
+      "revision": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+      "origin": "retained-capture",
+      "profile": "points-csv/1",
+      "name": "Stored before records began",
+      "files": [
+        {
+          "path": "assets/1/original.csv",
+          "role": "original",
+          "sha256": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+          "bytes": 300
+        },
+        {
+          "path": "assets/1/descriptor.json",
+          "role": "descriptor",
+          "sha256": "cececececececececececececececececececececececececececececececece",
+          "bytes": 2000
+        },
+        {
+          "path": "assets/1/data.json",
+          "role": "normalized",
+          "sha256": "dededededededededededededededededededededededededededededededede",
+          "bytes": 700
+        }
+      ],
+      "history": null,
+      "parents": [],
+      "parent_visibility": "complete",
+      "relationships": {
+        "well_log": null
+      },
+      "omissions": [],
+      "losses": [],
+      "type": "point-set"
+    }
+  ],
+  "groups": null,
+  "recommendations": null,
+  "limits": {
+    "max_assets": 128,
+    "max_file_bytes": 33554432,
+    "max_total_bytes": 536870912
+  },
+  "notice": "Checksums show integrity, not authorship or scientific correctness."
+}

@@ -1,0 +1,15 @@
+"""$label."""
+import json
+from pathlib import Path
+
+from ophiolite import procedure, writers
+
+
+@procedure
+def main(inputs, settings):
+    """Read the file and write $words with the Ophiolite writer.
+
+    This start reads a JSON file that holds the writer's arguments; data/sample.json shows the layout. To read your own
+    files, change how `values` is made below: parse your layout into the same arguments."""
+    values = json.loads(Path(inputs['file'][0].path).read_text(encoding='utf-8'))
+    return {'data': writers.$writer(**values)}

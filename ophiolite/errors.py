@@ -25,6 +25,16 @@ class IntegrityConflict(OphioliteError): code='integrity-conflict'
 class CapacityExceeded(VerificationFailed): code='capacity-exceeded'
 class Incompatible(OphioliteError): code='incompatible-context'
 class Refused(OphioliteError): code='INVALID_ARGUMENT'
+class RightsConflict(IntegrityConflict): code='rights-conflict'  # E35a: the rights changed since you read them (or already exist)
+
+class RightsEnded(PermissionRefused):
+    """E35a: a rights basis governing the data ended. The message is the server's sentence; `last_day` the last permitted day (YYYY-MM-DD)."""
+    code='rights-ended'
+
+    def __init__(self,message,recovery='',*,last_day=None,**kw):
+        super().__init__(message,recovery,**kw)
+        self.last_day=last_day
+
 class ResyncRequired(OphioliteError): code='resync-required'  # E28: the server no longer holds this cursor (CURSOR_EXPIRED)
 class AxisMismatch(OphioliteError):
     code='axis-mismatch'

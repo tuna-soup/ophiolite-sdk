@@ -42,12 +42,22 @@ def every_file(folder):
     return b''.join(p.read_bytes() for p in sorted(Path(folder).rglob('*')) if p.is_file())
 
 
+def _history():  # H56 (D3): an old SDK commit in either layout (tools/history.py)
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('sdk_history', Path(__file__).resolve().parents[2] / 'tools/history.py')
+    module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+    return module
+
+
 def older_reader(tmp_path, bundle):
     """Open a bundle with the SDK the lock pinned before E94, in a separate interpreter."""
     target = tmp_path / 'older'
     if not target.exists():
-        try: archive = subprocess.run(['git', '-C', str(ROOT), 'archive', '--format=tar', OLDER, 'ophiolite'], capture_output=True, check=True).stdout
-        except (subprocess.CalledProcessError, FileNotFoundError): pytest.skip('The older SDK commit is not in this checkout')
+        history = _history(); commit = history.resolve(ROOT, OLDER)
+        if commit is None:
+            assert not history.FULL, history.missing(OLDER)
+            pytest.skip('The older SDK commit is not in this checkout')
+        archive = subprocess.run(['git', '-C', str(ROOT), 'archive', '--format=tar', commit, 'ophiolite'], capture_output=True, check=True).stdout
         tarfile.open(fileobj=io.BytesIO(archive)).extractall(target, filter='data')
     probe = ('import sys,json\nfrom ophiolite.bundle import open_bundle\n'
              'try:open_bundle(sys.argv[1]);print(json.dumps(["opened"]))\n'

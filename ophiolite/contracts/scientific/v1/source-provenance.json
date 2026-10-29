@@ -1,0 +1,201 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/scientific/v1/source-provenance.json",
+  "x-ophiolite": {
+    "id": "ophiolite.source-provenance/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "SourceContent": {
+      "additionalProperties": false,
+      "properties": {
+        "content_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Content Sha256",
+          "type": "string"
+        },
+        "source_version": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Version"
+        }
+      },
+      "required": [
+        "content_sha256",
+        "source_version"
+      ],
+      "title": "SourceContent",
+      "type": "object"
+    },
+    "SourceContext": {
+      "additionalProperties": false,
+      "properties": {
+        "comparison": {
+          "const": "comparison/1",
+          "title": "Comparison",
+          "type": "string"
+        },
+        "context_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Context Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "comparison",
+        "context_sha256"
+      ],
+      "title": "SourceContext",
+      "type": "object"
+    },
+    "SourceIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "source_system": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Source System",
+          "type": "string"
+        },
+        "source_instance": {
+          "anyOf": [
+            {
+              "maxLength": 160,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Instance"
+        },
+        "id_scheme": {
+          "enum": [
+            "source-native",
+            "source-path",
+            "none"
+          ],
+          "title": "Id Scheme",
+          "type": "string"
+        },
+        "source_object_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourcePath"
+            },
+            {
+              "$ref": "#/$defs/SourceNative"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Object Id"
+        }
+      },
+      "required": [
+        "source_system",
+        "source_instance",
+        "id_scheme",
+        "source_object_id"
+      ],
+      "title": "SourceIdentity",
+      "type": "object"
+    },
+    "SourceNative": {
+      "additionalProperties": false,
+      "properties": {
+        "container": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Container"
+        },
+        "id": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "container",
+        "id"
+      ],
+      "title": "SourceNative",
+      "type": "object"
+    },
+    "SourcePath": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        },
+        "part": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Part"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "title": "SourcePath",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "ophiolite.source-provenance/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "identity": {
+      "$ref": "#/$defs/SourceIdentity"
+    },
+    "content": {
+      "$ref": "#/$defs/SourceContent"
+    },
+    "context": {
+      "$ref": "#/$defs/SourceContext"
+    }
+  },
+  "required": [
+    "schema",
+    "identity",
+    "content",
+    "context"
+  ],
+  "title": "SourceProvenance",
+  "type": "object"
+}

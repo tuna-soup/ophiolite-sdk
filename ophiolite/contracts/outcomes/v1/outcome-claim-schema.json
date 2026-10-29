@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/outcomes/v1/outcome-claim-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.outcome-claim/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "ClaimedCheck": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The acceptance record (ophiolite.outcome-check/1) the claim binds",
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "key": {
+          "description": "Its acceptance key",
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "key"
+      ],
+      "title": "ClaimedCheck",
+      "type": "object"
+    },
+    "ClaimedDestination": {
+      "additionalProperties": false,
+      "properties": {
+        "procedure_digest": {
+          "description": "The catalogue send procedure version the delivery runs",
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Procedure Digest",
+          "type": "string"
+        },
+        "label": {
+          "description": "The destination label the delivery reports",
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "procedure_digest",
+        "label"
+      ],
+      "title": "ClaimedDestination",
+      "type": "object"
+    },
+    "ClaimedOutcome": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "version": {
+          "description": "The outcome version the claim was judged under; 0 when no such outcome exists",
+          "minimum": 0,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "version"
+      ],
+      "title": "ClaimedOutcome",
+      "type": "object"
+    },
+    "ClaimedResult": {
+      "additionalProperties": false,
+      "properties": {
+        "asset_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "asset_id",
+        "revision"
+      ],
+      "title": "ClaimedResult",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "A \"Deliver as <outcome>\" claim (E120 C4, D7): the outcome version, the exact result version, the acceptance\nrecord and the destination it was judged on, and its verdict. A `claimed` claim binds a delivery id the gate\nissued and the record that accepted the result; a `refused` claim keeps its reason and sentence, binds no delivery\nid and launched nothing. Never changed.",
+  "properties": {
+    "schema": {
+      "const": "ophiolite.outcome-claim/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "outcome": {
+      "$ref": "#/$defs/ClaimedOutcome"
+    },
+    "result": {
+      "$ref": "#/$defs/ClaimedResult"
+    },
+    "check": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ClaimedCheck"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "delivery_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The delivery id the gate issued (uuid4), for a claimed claim only",
+      "title": "Delivery Id"
+    },
+    "destination": {
+      "$ref": "#/$defs/ClaimedDestination"
+    },
+    "state": {
+      "enum": [
+        "claimed",
+        "refused"
+      ],
+      "title": "State",
+      "type": "string"
+    },
+    "reason": {
+      "anyOf": [
+        {
+          "maxLength": 64,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Why it was refused: result, not-found, withdrawn, disabled, before, conflict, not_evaluated, rejected, a reason of outcome-reasons.json `checks`, or destination",
+      "title": "Reason"
+    },
+    "sentence": {
+      "description": "What the person reads",
+      "maxLength": 4000,
+      "title": "Sentence",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema",
+    "outcome",
+    "result",
+    "check",
+    "delivery_id",
+    "destination",
+    "state",
+    "reason",
+    "sentence"
+  ],
+  "title": "OutcomeClaim",
+  "type": "object"
+}

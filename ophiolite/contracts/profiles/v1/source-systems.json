@@ -1,0 +1,18 @@
+{
+  "schema": "ophiolite.source-systems/1",
+  "id": "ophiolite.source-systems/1",
+  "title": "Source systems: the closed list of where an element can come from (E122)",
+  "description": "A source-provenance record names one of these. An exact name is one kind of source; a prefixed name is one source of that kind, named by a lower-case suffix (letters, digits, dot, underscore, hyphen). The list grows by registry change only; the gateway refuses to start on any other list.",
+  "exact": [
+    {"id": "upload", "label": "Files added to the project"},
+    {"id": "petrel-export", "label": "A Petrel export"},
+    {"id": "resqml-package", "label": "A RESQML package"},
+    {"id": "osd-catalogue", "label": "The Open Subsurface Data catalogue"}
+  ],
+  "prefixed": [
+    {"prefix": "connection:", "label": "A managed connection, by its kind"},
+    {"prefix": "application:", "label": "An application, by its client id"},
+    {"prefix": "public-repository:", "label": "A public repository, by its name"}
+  ],
+  "suffix": "^[a-z0-9._-]{1,128}$"
+}

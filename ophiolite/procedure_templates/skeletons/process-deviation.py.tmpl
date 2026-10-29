@@ -1,0 +1,24 @@
+"""$label."""
+from ophiolite import procedure, readers, writers
+
+
+def refuse(what):
+    raise ValueError(f'This start writes with ophiolite.writers.write_survey, which {what}; change the start to say what to keep.')
+
+
+@procedure
+def main(inputs, settings):
+    """Read the deviation survey with ophiolite.readers and write it again with the Ophiolite writer.
+
+    `values` holds the writer's arguments, made from everything the reader found. Your calculation goes where it is
+    marked: change `values` before they are written. A part of the file the writer has no place for stops the run
+    with a sentence, so nothing is left out without your knowing."""
+    version = inputs['data'][0]
+    found = readers.read(version)
+    columns = [name.lower() for name in found.columns]
+    if 'tvd' in columns and all(row[columns.index('tvd')] is None for row in found.rows):
+        refuse('writes no tvd column when every tvd cell is empty')
+    values = {'stations': [dict(zip(columns, row)) for row in found.rows],
+              **{key: version.declared.get(key, 'unknown') for key in ('depth_unit', 'azimuth_reference', 'depth_datum')}}
+    # Your calculation: change values here.
+    return {'data': writers.write_survey(**values)}

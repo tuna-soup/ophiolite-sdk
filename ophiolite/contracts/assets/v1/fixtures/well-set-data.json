@@ -1,0 +1,101 @@
+{
+  "schema": "ophiolite.well-set/1",
+  "representation": "normalized",
+  "source": {
+    "authority": "ophiolite:uploaded",
+    "key": "synthetic-well-set",
+    "revision": "dec2da68f54ab40448b4af9a73aef4dc2636e34882e14bfc0cc097885d29074d",
+    "profile": "well-set/1"
+  },
+  "source_sha256": "dec2da68f54ab40448b4af9a73aef4dc2636e34882e14bfc0cc097885d29074d",
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "mapping": "well-set/1",
+    "parsing_policy": "typed-strict/1",
+    "null_policy": "empty cell or declared NODATA value is missing; never zero-filled"
+  },
+  "context": {
+    "type": "well-set",
+    "count": 3,
+    "with_trajectory": 2,
+    "without_trajectory": 1,
+    "fidelity": {
+      "status": "assessed",
+      "preserved": [
+        "the label",
+        "members in order",
+        "trajectory revisions and frames as written"
+      ],
+      "losses": [
+        "Text formatting (whitespace, quoting, line endings, number spelling) is kept only in the exact original"
+      ],
+      "unknown_context": []
+    }
+  },
+  "label": "Residual wells",
+  "members": [
+    {
+      "well": "well-0a1b2c3d4e5f60718293a4b5c6d7e8f9",
+      "wellbore": "wellbore-1a2b3c4d5e6f708192a3b4c5d6e7f809",
+      "trajectory": {
+        "asset_id": "synthetic-trajectory",
+        "revision": "1111111111111111111111111111111111111111111111111111111111111111"
+      },
+      "frame": {
+        "crs": "EPSG:28992",
+        "wellhead": {
+          "x": 236512.4,
+          "y": 583104.75
+        },
+        "depth_reference": {
+          "name": "KB",
+          "elevation": 7.92,
+          "datum": "NAP"
+        },
+        "north": {
+          "survey_basis": "grid:EPSG:28992",
+          "rotation_deg": 0
+        },
+        "tie_in": {
+          "md": 1250.5,
+          "tvd": 1248.1,
+          "east": 12.3,
+          "north": -4.6
+        },
+        "source": "NLOG wellbore header"
+      }
+    },
+    {
+      "well": "well-0a1b2c3d4e5f60718293a4b5c6d7e8f9",
+      "wellbore": "wellbore-2b3c4d5e6f708192a3b4c5d6e7f8091a",
+      "trajectory": {
+        "asset_id": "synthetic-trajectory-2",
+        "revision": "2222222222222222222222222222222222222222222222222222222222222222"
+      },
+      "frame": {
+        "crs": "EPSG:28992",
+        "wellhead": {
+          "x": 236512.4,
+          "y": 583104.75
+        },
+        "depth_reference": {
+          "name": "KB",
+          "elevation": 7.92,
+          "datum": "NAP"
+        },
+        "north": {
+          "survey_basis": "true-north",
+          "rotation_deg": -1.25
+        },
+        "tie_in": null,
+        "source": ""
+      }
+    },
+    {
+      "well": "well-1b2c3d4e5f60718293a4b5c6d7e8f90a",
+      "wellbore": "wellbore-3c4d5e6f708192a3b4c5d6e7f8091a2b",
+      "trajectory": null,
+      "frame": null
+    }
+  ]
+}

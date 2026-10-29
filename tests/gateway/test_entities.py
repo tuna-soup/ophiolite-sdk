@@ -57,8 +57,8 @@ def test_an_export_carries_the_entities_and_navigates_offline(web, tmp_path):
     bore = alice.create_entity('wellbore', 'W-2', authority='nlog', key='W-200-1', part_of=well, statement='Report', audience=[])
     alice.of_entity(log.asset_id, log.revision, bore)
     mine = alice.export([(log.asset_id, log.revision, ['GR'])], tmp_path / 'alice')
-    assert mine.manifest['bundle_version'] == '2.4.0' and {e.entity_id for e in mine.entities} == {well.entity_id, bore.entity_id}
+    assert mine.manifest['bundle_version'] == '2.10.0' and {e.entity_id for e in mine.entities} == {well.entity_id, bore.entity_id}
     offline = open_bundle(tmp_path / 'alice')
     assert [(a.asset_id, a.revision) for a in offline.assets_of(bore.entity_id)] == [(log.asset_id, log.revision)] and offline.entity(bore.entity_id).well_id() == well.entity_id
     theirs = bob.export([(log.asset_id, log.revision, ['GR'])], tmp_path / 'bob')  # Bob may not read the wellbore: nothing about it travels
-    assert theirs.manifest['bundle_version'] == '1.0.0' and theirs.entities == []
+    assert theirs.manifest['bundle_version'] == '1.10.0' and theirs.entities == []  # E122 s5b: the upload's source record travels

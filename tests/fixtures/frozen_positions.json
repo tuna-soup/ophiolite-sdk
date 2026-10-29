@@ -1,0 +1,669 @@
+{
+ "schema": "ophiolite-sdk.frozen-positions/1",
+ "note": "E119a slice 2 (C3 test 1): synthetic surveys only (HON-GT-01, NLOG data, is frozen in test_geometry_parity.py beside the literals of test_transform.py); outputs of ophiolite.transform.vertical_depth and ophiolite.typed.minimum_curvature / Trajectory.minimum_curvature computed by the SDK code at the parent commit, before they were re-pointed to contracts/geometry/v1/trajectory.py. Numbers must stay within 1e-9 m; everything else exactly.",
+ "parent_commit": "3f204fefb6ff2ae856ac4d50612731a249f8f70a",
+ "cases": [
+  {
+   "name": "circular build (from_file absent)",
+   "call": "vertical_depth",
+   "stations": [
+    {
+     "md": 0,
+     "inclination": 0,
+     "azimuth": 45
+    },
+    {
+     "md": 1570.7963267948965,
+     "inclination": 90,
+     "azimuth": 45
+    }
+   ],
+   "mds": [
+    0,
+    523.5987755982989,
+    785.3981633974482,
+    1570.7963267948965
+   ],
+   "options": {},
+   "result": {
+    "calculated": [
+     0.0,
+     499.99999999999994,
+     707.1067811865473,
+     999.9999999999998
+    ],
+    "from_file": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "beyond": 0,
+    "notes": []
+   }
+  },
+  {
+   "name": "supplied and calculated apart (from_file, beyond)",
+   "call": "vertical_depth",
+   "stations": [
+    {
+     "md": 0,
+     "inclination": 60,
+     "azimuth": 0,
+     "tvd": 0
+    },
+    {
+     "md": 100,
+     "inclination": 60,
+     "azimuth": 0,
+     "tvd": 49
+    },
+    {
+     "md": 200,
+     "inclination": 60,
+     "azimuth": 0
+    }
+   ],
+   "mds": [
+    50,
+    150,
+    250
+   ],
+   "options": {},
+   "result": {
+    "calculated": [
+     25.000000000000007,
+     75.00000000000003,
+     null
+    ],
+    "from_file": [
+     24.5,
+     null,
+     null
+    ],
+    "beyond": 1,
+    "notes": []
+   }
+  },
+  {
+   "name": "origin not stated",
+   "call": "vertical_depth",
+   "stations": [
+    {
+     "md": 500,
+     "inclination": 0,
+     "azimuth": 0
+    },
+    {
+     "md": 600,
+     "inclination": 0,
+     "azimuth": 0
+    }
+   ],
+   "mds": [
+    550
+   ],
+   "options": {},
+   "refused": "The survey starts at 500 m and gives no vertical depth there, so its starting depth is not known."
+  },
+  {
+   "name": "origin from the file",
+   "call": "vertical_depth",
+   "stations": [
+    {
+     "md": 500,
+     "inclination": 0,
+     "azimuth": 0,
+     "tvd": 480.0
+    },
+    {
+     "md": 600,
+     "inclination": 0,
+     "azimuth": 0
+    }
+   ],
+   "mds": [
+    550
+   ],
+   "options": {},
+   "result": {
+    "calculated": [
+     530.0
+    ],
+    "from_file": [
+     null
+    ],
+    "beyond": 0,
+    "notes": []
+   }
+  },
+  {
+   "name": "origin supplied",
+   "call": "vertical_depth",
+   "stations": [
+    {
+     "md": 500,
+     "inclination": 0,
+     "azimuth": 0
+    },
+    {
+     "md": 600,
+     "inclination": 0,
+     "azimuth": 0
+    }
+   ],
+   "mds": [
+    550
+   ],
+   "options": {
+    "origin_tvd": 470.0
+   },
+   "result": {
+    "calculated": [
+     520.0
+    ],
+    "from_file": [
+     null
+    ],
+    "beyond": 0,
+    "notes": []
+   }
+  },
+  {
+   "name": "plateau reversal (notes)",
+   "call": "vertical_depth",
+   "stations": [
+    {
+     "md": 0,
+     "inclination": 90,
+     "azimuth": 10,
+     "tvd": 10
+    },
+    {
+     "md": 50,
+     "inclination": 90,
+     "azimuth": 10,
+     "tvd": 9.5
+    }
+   ],
+   "mds": [
+    0,
+    25,
+    50
+   ],
+   "options": {},
+   "result": {
+    "calculated": [
+     10.0,
+     10.000000000000002,
+     10.000000000000004
+    ],
+    "from_file": [
+     10.0,
+     9.75,
+     9.5
+    ],
+    "beyond": 0,
+    "notes": [
+     "The survey's vertical depth decreases between measured depth 0 and 50."
+    ]
+   }
+  },
+  {
+   "name": "units differ",
+   "call": "vertical_depth",
+   "stations": [
+    {
+     "md": 0,
+     "inclination": 90,
+     "azimuth": 10,
+     "tvd": 10
+    },
+    {
+     "md": 50,
+     "inclination": 90,
+     "azimuth": 10,
+     "tvd": 9.5
+    }
+   ],
+   "mds": [
+    10
+   ],
+   "options": {
+    "survey_unit": "m",
+    "log_unit": "ft"
+   },
+   "refused": "The survey is in m and the log in ft; change one to match first."
+  },
+  {
+   "name": "one station",
+   "call": "vertical_depth",
+   "stations": [
+    {
+     "md": 0,
+     "inclination": 90,
+     "azimuth": 10,
+     "tvd": 10
+    }
+   ],
+   "mds": [
+    0
+   ],
+   "options": {},
+   "refused": "The survey has one station; vertical depth needs at least two."
+  },
+  {
+   "name": "depths do not increase",
+   "call": "vertical_depth",
+   "stations": [
+    {
+     "md": 50,
+     "inclination": 90,
+     "azimuth": 10,
+     "tvd": 9.5
+    },
+    {
+     "md": 0,
+     "inclination": 90,
+     "azimuth": 10,
+     "tvd": 10
+    }
+   ],
+   "mds": [
+    0
+   ],
+   "options": {},
+   "refused": "The survey's measured depths do not increase, so vertical depth cannot be calculated."
+  },
+  {
+   "name": "missing angle",
+   "call": "vertical_depth",
+   "stations": [
+    {
+     "md": 0,
+     "inclination": 0,
+     "azimuth": 0
+    },
+    {
+     "md": 10,
+     "inclination": null,
+     "azimuth": 0
+    }
+   ],
+   "mds": [
+    5
+   ],
+   "options": {},
+   "refused": "A survey station has no inclination or azimuth; the calculation needs every angle."
+  },
+  {
+   "name": "build and turn across north, interior and outside",
+   "call": "vertical_depth",
+   "stations": [
+    {
+     "md": 0,
+     "inclination": 0,
+     "azimuth": 0
+    },
+    {
+     "md": 100,
+     "inclination": 30,
+     "azimuth": 359
+    },
+    {
+     "md": 200,
+     "inclination": 45,
+     "azimuth": 1
+    },
+    {
+     "md": 300,
+     "inclination": 45,
+     "azimuth": 5
+    }
+   ],
+   "mds": [
+    -1,
+    0,
+    50,
+    100,
+    150,
+    250,
+    300,
+    301
+   ],
+   "options": {},
+   "result": {
+    "calculated": [
+     null,
+     0.0,
+     49.430796473268465,
+     95.49296585513721,
+     137.03823753254505,
+     209.96734399575735,
+     245.32986324762481,
+     null
+    ],
+    "from_file": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    "beyond": 1,
+    "notes": []
+   }
+  },
+  {
+   "name": "dogleg 179.89 degrees",
+   "call": "vertical_depth",
+   "stations": [
+    {
+     "md": 0,
+     "inclination": 0,
+     "azimuth": 0
+    },
+    {
+     "md": 10,
+     "inclination": 179.89,
+     "azimuth": 0
+    }
+   ],
+   "mds": [
+    2.5,
+    5,
+    10
+   ],
+   "options": {},
+   "result": {
+    "calculated": [
+     2.2510858927547233,
+     3.185043810938877,
+     0.006114844206214696
+    ],
+    "from_file": [
+     null,
+     null,
+     null
+    ],
+    "beyond": 0,
+    "notes": []
+   }
+  },
+  {
+   "name": "dogleg 179.89 degrees",
+   "call": "minimum_curvature",
+   "stations": [
+    {
+     "md": 0,
+     "inclination": 0,
+     "azimuth": 0
+    },
+    {
+     "md": 10,
+     "inclination": 179.89,
+     "azimuth": 0
+    }
+   ],
+   "result": [
+    {
+     "md": 0,
+     "dtvd": 0.0,
+     "dnorth": 0.0,
+     "deast": 0.0
+    },
+    {
+     "md": 10,
+     "dtvd": 0.006114844206214696,
+     "dnorth": 6.370084686971833,
+     "deast": 0.0
+    }
+   ]
+  },
+  {
+   "name": "dogleg 179.9 degrees",
+   "call": "vertical_depth",
+   "stations": [
+    {
+     "md": 0,
+     "inclination": 0,
+     "azimuth": 0
+    },
+    {
+     "md": 10,
+     "inclination": 179.9,
+     "azimuth": 0
+    }
+   ],
+   "mds": [
+    2.5,
+    5,
+    10
+   ],
+   "options": {},
+   "result": {
+    "calculated": [
+     2.2510590717860923,
+     3.184867020370619,
+     0.005558640868851174
+    ],
+    "from_file": [
+     null,
+     null,
+     null
+    ],
+    "beyond": 0,
+    "notes": []
+   }
+  },
+  {
+   "name": "dogleg 179.9 degrees",
+   "call": "minimum_curvature",
+   "stations": [
+    {
+     "md": 0,
+     "inclination": 0,
+     "azimuth": 0
+    },
+    {
+     "md": 10,
+     "inclination": 179.9,
+     "azimuth": 0
+    }
+   ],
+   "result": [
+    {
+     "md": 0,
+     "dtvd": 0.0,
+     "dnorth": 0.0,
+     "deast": 0.0
+    },
+    {
+     "md": 10,
+     "dtvd": 0.005558640868851174,
+     "dnorth": 6.369731615313566,
+     "deast": 0.0
+    }
+   ]
+  },
+  {
+   "name": "dogleg 179.95 degrees",
+   "call": "vertical_depth",
+   "stations": [
+    {
+     "md": 0,
+     "inclination": 0,
+     "azimuth": 0
+    },
+    {
+     "md": 10,
+     "inclination": 179.95,
+     "azimuth": 0
+    }
+   ],
+   "mds": [
+    2.5,
+    5,
+    10
+   ],
+   "options": {},
+   "result": {
+    "calculated": [
+     2.250924947385758,
+     3.1839829985513117,
+     0.0027785492444661756
+    ],
+    "from_file": [
+     null,
+     null,
+     null
+    ],
+    "beyond": 0,
+    "notes": []
+   }
+  },
+  {
+   "name": "dogleg 179.95 degrees",
+   "call": "minimum_curvature",
+   "stations": [
+    {
+     "md": 0,
+     "inclination": 0,
+     "azimuth": 0
+    },
+    {
+     "md": 10,
+     "inclination": 179.95,
+     "azimuth": 0
+    }
+   ],
+   "result": [
+    {
+     "md": 0,
+     "dtvd": 0.0,
+     "dnorth": 0.0,
+     "deast": 0.0
+    },
+    {
+     "md": 10,
+     "dtvd": 0.002778549244466175,
+     "dnorth": 6.367965390871586,
+     "deast": 0.0
+    }
+   ]
+  },
+  {
+   "name": "build and turn across north",
+   "call": "minimum_curvature",
+   "stations": [
+    {
+     "md": 0,
+     "inclination": 0,
+     "azimuth": 0
+    },
+    {
+     "md": 100,
+     "inclination": 30,
+     "azimuth": 359
+    },
+    {
+     "md": 200,
+     "inclination": 45,
+     "azimuth": 1
+    },
+    {
+     "md": 300,
+     "inclination": 45,
+     "azimuth": 5
+    }
+   ],
+   "result": [
+    {
+     "md": 0,
+     "dtvd": 0.0,
+     "dnorth": 0.0,
+     "deast": 0.0
+    },
+    {
+     "md": 100,
+     "dtvd": 95.49296585513721,
+     "dnorth": 25.583366019634443,
+     "deast": -0.44655931495507584
+    },
+    {
+     "md": 200,
+     "dtvd": 174.60482474388988,
+     "dnorth": 86.27878479974063,
+     "deast": -0.26478772324142996
+    },
+    {
+     "md": 300,
+     "dtvd": 245.32986324762481,
+     "dnorth": 156.86387235852146,
+     "deast": 3.4344199662132944
+    }
+   ]
+  },
+  {
+   "name": "slant",
+   "call": "minimum_curvature",
+   "stations": [
+    {
+     "md": 0,
+     "inclination": 60,
+     "azimuth": 0
+    },
+    {
+     "md": 100,
+     "inclination": 60,
+     "azimuth": 0
+    },
+    {
+     "md": 200,
+     "inclination": 60,
+     "azimuth": 0
+    }
+   ],
+   "result": [
+    {
+     "md": 0,
+     "dtvd": 0.0,
+     "dnorth": 0.0,
+     "deast": 0.0
+    },
+    {
+     "md": 100,
+     "dtvd": 50.000000000000014,
+     "dnorth": 86.60254037844386,
+     "deast": 0.0
+    },
+    {
+     "md": 200,
+     "dtvd": 100.00000000000003,
+     "dnorth": 173.20508075688772,
+     "deast": 0.0
+    }
+   ]
+  },
+  {
+   "name": "missing angle",
+   "call": "minimum_curvature",
+   "stations": [
+    {
+     "md": 0,
+     "inclination": 0,
+     "azimuth": 0
+    },
+    {
+     "md": 10,
+     "inclination": null,
+     "azimuth": 0
+    }
+   ],
+   "refused": "A station has no inclination or azimuth; the calculation needs every angle."
+  }
+ ]
+}

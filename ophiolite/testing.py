@@ -308,19 +308,12 @@ def _envelope(message,code):
 
 
 def read_las(raw):
-    """The few facts of a LAS 2.0 file written by ophiolite.writers (or the synthetic original) the fixture serves:
-    the NULL text, the curves with their units (the first is the depth index) and the rows. Not a general reader."""
-    section='';null='-999.25';curves={};order=[];rows=[]
-    for line in raw.decode('ascii').splitlines():
-        if not line.strip() or line.lstrip().startswith('#'):continue
-        if line.startswith('~'):section=line[1].upper();continue
-        if section=='W' and line.split('.',1)[0].strip()=='NULL':null=line.split('.',1)[1].split(':',1)[0].strip()
-        elif section=='C':
-            name,rest=line.split('.',1);name=name.strip();curves[name]=rest.split(' ',1)[0].split(':',1)[0].strip();order.append(name)
-        elif section=='A':rows.append([float(v) for v in line.split()])
-    marker=float(null)
-    columns={name:[None if r[i]==marker else r[i] for r in rows] for i,name in enumerate(order)}
-    return {'null':null,'index':order[0],'curves':curves,'columns':columns}
+    """The few facts of a LAS 2.0 file the fixture serves: the NULL text, the curves with their units (the first is the
+    depth index) and the columns. A view over ophiolite.readers (E128 s4); a refusal passes through as ReadRefused."""
+    from .readers import las
+    result=las._parse(raw,None);order=[c[0] for c in result.curves]
+    return {'null':result.null,'index':order[0],'curves':{c[0]:c[1] for c in result.curves},
+            'columns':{name:[row[i] for row in result.data] for i,name in enumerate(order)}}
 
 
 def _normalized(ident,version,las,curve):
@@ -394,6 +387,17 @@ def _entity_reads(operation, request, log):
     return 200, {'schema':'ophiolite.entity-assets/1','entity':ref(document),'items':items,'next_cursor':None}
 
 
+def _associations(request, log):
+    """E126a: entities/associations for the synthetic log, filed on Synthetic well 1's wellbore (as entities/assets says)."""
+    assets = request.get('asset_ids')
+    if request.get('kind') not in (None, 'wellbore') or (assets is not None and log['asset_id'] not in assets): return 200, {'items':[], 'next_cursor':None}
+    _, page = _entity_reads('assets', {'entity_id':BORE['entity_id']}, log)
+    return 200, {'items':[dict(item, entity=dict(BORE)) for item in page['items']], 'next_cursor':None}
+
+
+SYNTHETIC_WORDS = 'Synthetic §words — 7'  # E122 s0: the synthetic server's provenance sentence
+
+
 @contextmanager
 def synthetic_server():
     """The templates' and the gallery's synthetic server: one synthetic gamma-ray log (curve-a), the application journal,
@@ -435,6 +439,9 @@ def synthetic_server():
                 return 200, changed
             if route == exact + '/representations/las': return 200, original
             if route == exact + '/representations/curve': return 200, raw
+            if route == exact + '/provenance':  # E122 s0: a deliberately unusual sentence, so a client that composes its own is seen
+                return 200, {'schema':'ophiolite.source-provenance/1', 'asset_id':descriptor['asset_id'], 'revision':descriptor['revision'], 'record':None,
+                             'observation':{'reader':None, 'read_at':None, 'declared_by':None, 'procedure_digest':None}, 'words':SYNTHETIC_WORDS}
             if route.startswith(prefix + '/'):  # E52: a derived publication made against this server
                 found = applications.scientific(route[len(prefix) + 1:], parse_qs(parsed.query), _owner(token))
                 if found is not None: return found
@@ -453,6 +460,9 @@ def synthetic_server():
         if method == 'POST' and route.endswith(('/entities/get', '/entities/assets')):  # E66: a well's data with its wellbore's
             if not token: return 401, {'error':'Sign in again.'}
             return _entity_reads(route.rsplit('/', 1)[-1], json.loads(body or b'{}'), summary)
+        if method == 'POST' and route.endswith('/entities/associations'):  # E126a: which well a log is of (ophiolite.lasio)
+            if not token: return 401, {'error':'Sign in again.'}
+            return _associations(json.loads(body or b'{}'), summary)
         if method == 'POST' and '/results/' in route:  # E94: how a result was made, from the fixture's own records
             if not token: return 401, {'error':'Sign in again.'}
             return _results(route.rsplit('/', 1)[-1], json.loads(body or b'{}'), _owner(token), applications, summary)
@@ -610,6 +620,42 @@ def _results(operation, request, owner, applications, log):
 
 def _owner(token):
     return token.removeprefix('Bearer ').removeprefix('oph_api_').removeprefix('provider-').split(':')[0]
+
+
+class MemoryDeliveries:
+    """E109: an in-memory stand-in for the project's delivery record (`activity/deliver`), for testing a send procedure
+    and `deliver` offline. It keeps the server's rules (D4, D5): one reporter per delivery id with the same refs,
+    procedure and destination; unknown -> confirmed or not-sent, unknown -> unknown unchanged, a final state never left;
+    a report id replayed with the same outcome is accepted again. Refusals raise the SDK's errors with the server's words."""
+    FINAL = 'This delivery already has its outcome; it cannot change.'
+    REUSED = 'This report id was already used for a different outcome of this delivery.'
+    OTHER_REPORTER = 'Only the person who started this delivery can record its outcome.'
+    OTHER_DATA = 'This delivery was recorded with other data.'
+
+    def __init__(self):
+        self.events = []  # (reporter, body) in the order recorded
+
+    def report(self, body, reporter):
+        from .errors import PermissionRefused, Refused
+        from .models.delivery import DeliveryObservation
+        data = DeliveryObservation.model_validate(body).model_dump()
+        delivery, ident = data['delivery'], data['delivery']['delivery_id']
+        mine = [(who, e) for who, e in self.events if e['delivery']['delivery_id'] == ident]
+        if mine and mine[0][0] != reporter: raise PermissionRefused(self.OTHER_REPORTER, status=403)
+        if mine and any(mine[0][1][k] != data[k] for k in ('project_id', 'refs', 'procedure', 'destination')): raise Refused(self.OTHER_DATA, status=400)
+        same = [e for _, e in mine if e['event_id'] == data['event_id']]
+        if same:
+            if same[0]['delivery'] != delivery: raise Refused(self.REUSED, status=400)
+            verdict = 'replay'
+        elif not mine: verdict = 'append'
+        elif mine[-1][1]['delivery']['state'] in ('confirmed', 'not-sent'): raise Refused(self.FINAL, status=400)
+        elif delivery['state'] == 'unknown': verdict = 'unchanged'
+        else: verdict = 'append'
+        if verdict == 'append': self.events.append((reporter, data))
+        return {'accepted': True, 'delivery_id': ident, 'state': delivery['state'], 'verdict': verdict}
+
+    def states(self, delivery_id):
+        return [e['delivery']['state'] for _, e in self.events if e['delivery']['delivery_id'] == delivery_id]
 
 
 if __name__=='__main__':

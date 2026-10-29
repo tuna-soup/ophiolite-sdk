@@ -200,6 +200,18 @@
       "normalized_profile": "ophiolite.regular-grid-surface/1"
     },
     {
+      "profile": "petrel-scattered-data/1",
+      "osdu": "none: a file format; its normalized profile is ophiolite.regular-grid-surface/1, or ophiolite.point-set/1 when its rows are not on the declared lattice",
+      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "normalized_profile": "ophiolite.regular-grid-surface/1"
+    },
+    {
+      "profile": "petrel-faultsticks/1",
+      "osdu": "none: a file format; its normalized profile is ophiolite.polyline-set/1",
+      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "normalized_profile": "ophiolite.polyline-set/1"
+    },
+    {
       "profile": "esri-shapefile/1",
       "osdu": "none: a file format; its normalized profile is ophiolite.feature-set/1",
       "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
@@ -216,6 +228,57 @@
       "osdu": "none: a file format; its normalized profile is ophiolite.feature-set/1",
       "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
       "normalized_profile": "ophiolite.feature-set/1"
+    },
+    {
+      "profile": "ophiolite.well-path/1",
+      "osdu": "work-product-component--WellboreTrajectory 1.x (AvailableTrajectoryStationProperties MD, X, Y, TVDSS; the station positions without inclination and azimuth)",
+      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "energistics": "RESQML 2.0.1 WellboreTrajectoryRepresentation with explicit positions (candidate; E124)",
+      "differences": [
+        "The CRS, units, measured-depth reference and TVDSS datum are the uploader's statements; unstated ones stay unknown, never defaulted.",
+        "Positions only: no inclination, azimuth or minimum-curvature result is computed or stored.",
+        "x is easting and y northing whatever the CRS's own axis order."
+      ]
+    },
+    {
+      "profile": "well-path-positions-csv/1",
+      "osdu": "none: a text format; its normalized profile is ophiolite.well-path/1",
+      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "normalized_profile": "ophiolite.well-path/1"
+    },
+    {
+      "profile": "ophiolite.well-set/1",
+      "osdu": "none: OSDU has no author-owned list of wellbores with a chosen trajectory revision and frame per member; the nearest are work-product--WorkProduct (a grouping of components) and master-data--Wellbore with its projected location",
+      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "energistics": "none: RESQML 2.0.1 groups wellbores in a WellboreFrameRepresentation per wellbore, not as a set (candidate; E124)",
+      "differences": [
+        "A member names a well and a wellbore by their project ids and, optionally, one exact trajectory revision; the server checks each against the project from slice 1.",
+        "The frame (CRS, wellhead, depth reference, north and tie-in) is the author's statement for that member; nothing is looked up or defaulted.",
+        "Private to its author in this version; no sharing."
+      ]
+    },
+    {
+      "profile": "well-set/1",
+      "osdu": "none: a JSON document of this program; its normalized profile is ophiolite.well-set/1",
+      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "normalized_profile": "ophiolite.well-set/1"
+    },
+    {
+      "profile": "ophiolite.well-residual/1",
+      "osdu": "none: OSDU has no record of a surface-to-marker misfit per wellbore; the nearest are work-product-component--WellboreMarkerSet (the tops) and work-product-component--SeismicHorizon (the surface), each without the difference",
+      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "energistics": "none: RESQML 2.0.1 has WellboreMarkerFrameRepresentation and HorizonInterpretation, but no residual between them",
+      "differences": [
+        "A row names a wellbore by its project id, one top of the chosen formation by its tops version and index, and the trajectory version used.",
+        "The residual is the top's measured depth minus the measured depth where the surface crosses the trajectory, in metres; or one of nine closed reasons why there is none.",
+        "Published only by a procedure run; never uploaded."
+      ]
+    },
+    {
+      "profile": "well-residual/1",
+      "osdu": "none: a JSON document of this program, written by a procedure run; its normalized profile is ophiolite.well-residual/1",
+      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "normalized_profile": "ophiolite.well-residual/1"
     }
   ],
   "licences": "The standards are referenced by name only; no schema text is copied."

@@ -1,7 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { Client, VerificationFailed, Refused, AuthenticationRequired, PermissionRefused, IntegrityConflict, CapacityExceeded, Busy, Unavailable } from "../src/client.js";
+import { Client, VerificationFailed, Refused, AuthenticationRequired, PermissionRefused, IntegrityConflict, CapacityExceeded, Busy, Unavailable, PROFILES } from "../src/client.js";
 import { decode, fixture, server } from "./helpers.js";
+
+const withoutProfiles = (url: string) => url.replace(/&profiles=[^&]*/, "");
 
 test("exact scientific read validates and preserves every coordinate and null", async () => {
   const rows = await fixture("recordings/synthetic-read.json");
@@ -9,8 +11,9 @@ test("exact scientific read validates and preserves every coordinate and null", 
   const normalized = JSON.parse(new TextDecoder().decode(decode(rows[3].body_base64)));
   let calls = 0, corrupt = false;
   const app = await server((req,res) => {
-    calls++; const row = rows.find((r: any) => r.path === req.url);
-    assert(row); assert.equal(req.headers["authorization"], undefined); assert.equal(req.headers["x-csrf-token"], "test-csrf");
+    // The recording is shared with the Python client, which also asks for profile /4 (E106); this client asks for /1-/3.
+    calls++; const row = rows.find((r: any) => withoutProfiles(r.path) === withoutProfiles(req.url!));
+    assert(row); if (row.path.includes("profiles=")) assert.equal(new URL(req.url!, "http://x").searchParams.get("profiles"), PROFILES); assert.equal(req.headers["authorization"], undefined); assert.equal(req.headers["x-csrf-token"], "test-csrf");
     let bytes = decode(row.body_base64); if (corrupt && req.url?.includes("/representations/")) bytes = bytes.slice(1);
     res.writeHead(row.status,{"Content-Type":"application/json"}); res.end(bytes);
   });

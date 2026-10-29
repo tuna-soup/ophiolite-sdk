@@ -412,6 +412,44 @@
       }
     },
     {
+      "profile": "petrel-horizon-ilxl/1",
+      "data": "Point set",
+      "direction": "read",
+      "exact_old_revisions": "unavailable",
+      "change_detection": "none",
+      "losses": [
+        "Attributes beyond the height are properties",
+        "Display styling is QGIS-side and not returned"
+      ],
+      "unsupported": [
+        "editing in place",
+        "sending a layer from QGIS"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-10-11",
+        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)"
+      },
+      "reach": {
+        "route": "features",
+        "collections": [
+          "point-sets"
+        ],
+        "layer": "Point sets",
+        "asset_kinds": [
+          "point-set"
+        ],
+        "transport": "ogc-api-features",
+        "slice": "E65",
+        "client_limits": [
+          "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
+        ]
+      }
+    },
+    {
       "profile": "opendtect-horizon-ascii/1",
       "data": "Point set",
       "direction": "read",

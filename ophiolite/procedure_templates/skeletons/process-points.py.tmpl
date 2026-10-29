@@ -1,0 +1,22 @@
+"""$label."""
+from ophiolite import procedure, readers, writers
+
+SPATIAL = ('crs', 'xy_unit', 'z_unit', 'z_meaning', 'positive', 'vertical_datum')
+
+
+@procedure
+def main(inputs, settings):
+    """Read the point set with ophiolite.readers and write it again with the Ophiolite writer.
+
+    `values` holds the writer's arguments, made from everything the reader found. Your calculation goes where it is
+    marked: change `values` before they are written."""
+    version = inputs['data'][0]
+    found = readers.read(version)
+    columns = [name.lower() for name in found.columns]
+    axes = [columns.index(name) for name in ('x', 'y', 'z') if name in columns]
+    named = [(i, written) for i, (name, written) in enumerate(zip(columns, found.columns)) if name not in ('x', 'y', 'z')]
+    values = {'points': [tuple(row[i] for i in axes) for row in found.rows],
+              'attributes': {written: [row[i] for row in found.rows] for i, written in named} or None,
+              **{key: version.declared.get(key, 'unknown') for key in SPATIAL}}
+    # Your calculation: change values here.
+    return {'data': writers.write_points(**values)}

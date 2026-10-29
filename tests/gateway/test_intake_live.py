@@ -84,7 +84,7 @@ def test_the_command_line_adds_one_file_and_exits_by_outcome(keyed, tmp_path, mo
 def test_a_declaration_the_kind_does_not_take_is_refused_naming_what_it_takes(keyed, tmp_path):
     log = requests(keyed)
     with pytest.raises(Refused) as error: keyed_client(keyed).upload(tmp_path, declare={'well-tops-csv/1': {'crs': 'EPSG:28992'}}, **SETTINGS)
-    assert str(error.value) == 'Well tops (CSV) files do not take crs; they take depth_unit, depth_basis.'
+    assert str(error.value) == 'Well tops (CSV) files do not take crs; they take depth_unit, depth_basis, depth_datum.'
     with pytest.raises(Refused, match='No kind of file is named tops'): keyed_client(keyed).upload(tmp_path, declare={'tops': {}}, **SETTINGS)
     assert log == []
 

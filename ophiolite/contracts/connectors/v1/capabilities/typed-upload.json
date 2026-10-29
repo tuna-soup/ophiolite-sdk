@@ -3,7 +3,7 @@
   "id": "typed-upload",
   "display_name": "Tops, survey, time-depth, grid, fault and seismic upload",
   "kind": "source",
-  "summary": "Upload well tops, deviation surveys, time-depth tables, horizon grids, triangulated surfaces, point sets, fault sticks, SEG-Y seismic volumes, or Petrel and OpendTect horizon point exports; declared context stays as declared.",
+  "summary": "Upload well tops, deviation surveys, well paths given as positions, well sets (refused until saving opens), time-depth tables, horizon grids, triangulated surfaces, point sets, fault sticks, SEG-Y seismic volumes, or Petrel and OpendTect horizon point exports; declared context stays as declared.",
   "host": {
     "name": "Web browser",
     "versions": [],
@@ -175,8 +175,75 @@
       "unsupported": [
         "CRS transformation",
         "unit conversion",
+        "time-to-depth"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    },
+    {
+      "profile": "petrel-horizon-ilxl/1",
+      "data": "Petrel horizon points with inline and crossline",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "Number spelling and spacing are kept only in the exact original"
+      ],
+      "unsupported": [
+        "CRS transformation",
+        "unit conversion",
         "time-to-depth",
-        "inline/crossline horizons"
+        "a coordinate system stated without an EPSG code"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    },
+    {
+      "profile": "petrel-scattered-data/1",
+      "data": "Petrel scattered-data map (a grid or points, by its content)",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "Text formatting is kept only in the exact original"
+      ],
+      "unsupported": [
+        "CRS transformation",
+        "unit conversion",
+        "interpolation",
+        "inferring a grid the header does not declare"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    },
+    {
+      "profile": "petrel-faultsticks/1",
+      "data": "Petrel fault sticks with their fault names and stick numbers",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "Inline and crossline per point are kept only in the exact original",
+        "Text formatting is kept only in the exact original"
+      ],
+      "unsupported": [
+        "CRS transformation",
+        "unit conversion",
+        "time-to-depth",
+        "a coordinate system stated without an EPSG code",
+        "joining sticks of one fault that the file writes apart"
       ],
       "qualification": {
         "status": "unverified",
@@ -197,8 +264,7 @@
       "unsupported": [
         "CRS transformation",
         "unit conversion",
-        "time-to-depth",
-        "inline/crossline horizons"
+        "time-to-depth"
       ],
       "qualification": {
         "status": "unverified",
@@ -373,6 +439,74 @@
         "mixed geometry kinds",
         "CRS transformation",
         "nested property values"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    },
+    {
+      "profile": "well-path-positions-csv/1",
+      "data": "Well path (positions)",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "Text formatting is kept only in the exact original"
+      ],
+      "unsupported": [
+        "inclination and azimuth (use a deviation survey)",
+        "conversion between units or datums",
+        "more than 10,000 stations"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    },
+    {
+      "profile": "well-set/1",
+      "data": "Well set",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "JSON formatting is kept only in the exact original"
+      ],
+      "unsupported": [
+        "saving on this deployment (a set is read, then refused, in this version)",
+        "sending in parts",
+        "sharing with others",
+        "more than 29 members",
+        "documents above 256 KiB"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    },
+    {
+      "profile": "resqml-epc/1",
+      "data": "Well paths, deviation surveys and well logs from a RESQML package",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "Inclination and azimuth are computed from the package's tangent vectors; the package states no angles",
+        "Objects other than well paths, trajectories with tangents and well logs are listed as not read, by uuid"
+      ],
+      "unsupported": [
+        "horizons, faults and grids (a later slice)",
+        "rotated lattices",
+        "packages above 32 MiB with the .h5",
+        "sending in parts",
+        "bundle export of the items read from a package"
       ],
       "qualification": {
         "status": "unverified",

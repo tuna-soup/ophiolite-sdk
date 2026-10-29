@@ -41,14 +41,23 @@ def schemas():
     from project_gateway.scientific_assets import (Asset, AssetSummary, Curve, ScientificContext, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface,
                                                    PointSet, PolylineSet, SeismicVolume, SeismicSlice, ImportRecipe, PointSet2,
                                                    ImportRecipe2, WellLocationUpload, WellLocation, Wavelet, ModelSection, SeismicSection, TimeDepth, FeatureSet)
+    from project_gateway.scientific_assets import WellPath  # E125 s3a
+    from project_gateway.scientific_assets import WellSet  # E119a
+    from project_gateway.scientific_assets import WellResidual  # E119b
     from project_gateway.domain import RelationshipRegistry, Entity, EntityAssets, Lineage
     from project_gateway.scientific_assets import DerivationRecord, Parameters  # E94
     from project_gateway.scientific_assets import DerivationRecordV2  # E106
     from project_gateway.scientific_assets import CheckRecord  # E96
     from project_gateway.scientific_assets import CurveColumnsHeader  # E100b
+    from project_gateway.scientific_assets import TableFile  # E58b
+    from project_gateway.source_provenance import SourceProvenance  # E122
+    from project_gateway.basis_groups import BasisGrouping  # E123
+    from project_gateway.outcomes import OutcomeCheck, OutcomeClaim, OutcomeDeclaration  # E120
+    from project_gateway.resqml_read import LocalFrame, ResqmlObject, ResqmlRead  # E124
     for model in (CheckRecord, DerivationRecord, DerivationRecordV2, Parameters, Asset, Curve, ScientificContext, AssetSummary, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface, PointSet, PolylineSet, SeismicVolume, SeismicSlice,
                   RelationshipRegistry, Entity, EntityAssets, Lineage, ImportRecipe, PointSet2, WellLocationUpload, WellLocation,
-                   Wavelet, ModelSection, SeismicSection, TimeDepth, FeatureSet, ImportRecipe2, CurveColumnsHeader):  # E53; E57; E56; E23b; E100b
+                  Wavelet, ModelSection, SeismicSection, TimeDepth, FeatureSet, ImportRecipe2, CurveColumnsHeader, TableFile, SourceProvenance, WellPath, BasisGrouping, WellSet,
+                  WellResidual, OutcomeDeclaration, OutcomeCheck, OutcomeClaim, ResqmlRead, LocalFrame, ResqmlObject):  # E53; E57; E56; E23b; E100b; E58b; E122; E125 s3a; E123; E119a; E119b; E120 (s3: the claim); E124 (s1: the object)
         write(CONTRACTS / model.CONTRACT['path'], model.model_json_schema())
 
 
@@ -111,9 +120,39 @@ def fixtures(target=FIX):
           'supported_operations':['read','export','use-as-input'],'authorization':{'status':'not-evaluated'}}
         Asset.model_validate(descriptor)
         write(FIX / f'{name}.json', descriptor)
+    sourced(FIX)
     typed(FIX)
     recipe_points(FIX)
     write(FIX/'expected.json', {'axis':[100,101,102,103,104], 'values':[2,12,None,32,40], 'changes':[{'index':0,'value':2.0},{'index':1,'value':12.0},{'index':3,'value':32.0}]})
+
+
+def sourced(FIX):
+    """E108: the capture descriptor as a procedure-sourced upload; acquisition.sourced_by names the run."""
+    from project_gateway.scientific_assets import Asset
+    descriptor = {**json.loads((FIX / 'capture.json').read_text()), 'asset_id': 'sourced-a'}
+    descriptor['acquisition'] = {'kind': 'user-upload', 'filename': 'headers.csv', 'attribution': 'Synthetic team survey share',
+        'well_notes': '', 'identity': 'alice', 'uploaded_at': 1792483200.0,
+        'rights': 'User declares retention, derivation and sharing within the selected audience are permitted',
+        'sourced_by': {'digest': '7ac382330ee3f77a80d1f6db3f95155f61561703eb4667fc7dd77f7d8feecf6f', 'label': 'Survey share',
+                       'version_label': '2', 'version': 2, 'rules_version': '1.0.0', 'runner': 'alice',
+                       'system': 'Team survey share', 'role': 'well_headers'}}
+    Asset.model_validate(descriptor)
+    write(FIX / 'sourced-by.json', descriptor)
+
+
+# E119b: the residual result of the TYPED fixture (also ophiolite-connectors/tests/fixtures/well_residual/three-rows.json).
+WELL_RESIDUAL = (b'{"schema":"ophiolite.well-residual/1","correspondence":{"formation":"DCC"},"display_unit":"m",'
+                 b'"surface":{"asset_id":"synthetic-grid","revision":"' + b'5' * 64 + b'"},"rows":['
+                 b'{"wellbore":"wellbore-1a2b3c4d5e6f708192a3b4c5d6e7f809","occurrence":1,'
+                 b'"top":{"asset_id":"synthetic-tops","revision":"' + b'3' * 64 + b'","index":0,"md":1250.5},'
+                 b'"trajectory":{"asset_id":"synthetic-trajectory","revision":"' + b'1' * 64 + b'"},'
+                 b'"crossings":[{"md":1248.25,"low":1248.245,"high":1248.255}],"used":0,"residual":2.25,"unit":"m","reason":null,"between":null},'
+                 b'{"wellbore":"wellbore-2b3c4d5e6f708192a3b4c5d6e7f8091a","occurrence":1,'
+                 b'"top":{"asset_id":"synthetic-tops-2","revision":"' + b'4' * 64 + b'","index":2,"md":1302.0},'
+                 b'"trajectory":{"asset_id":"synthetic-trajectory-2","revision":"' + b'2' * 64 + b'"},'
+                 b'"crossings":[],"used":null,"residual":null,"unit":"m","reason":"grazing","between":[1301.2,1301.9]},'
+                 b'{"wellbore":"wellbore-3c4d5e6f708192a3b4c5d6e7f8091a2b","occurrence":0,"top":null,"trajectory":null,'
+                 b'"crossings":[],"used":null,"residual":null,"unit":"m","reason":"no-top","between":null}]}')
 
 
 TYPED = {
@@ -141,6 +180,25 @@ TYPED = {
                     b'{"type":"Feature","geometry":{"type":"Polygon","coordinates":[[[547895.5,5818925.0],[554184.5,5818925.0],[554184.5,5824973.0],[547895.5,5818925.0]]]},'
                     b'"properties":{"FIELD_CODE":"HORIZON","FIELD_NAME":"Horizon","WELLS":3}},'
                     b'{"type":"Feature","geometry":null,"properties":{"FIELD_CODE":"SPG","FIELD_NAME":"Sprang","WELLS":null}}]}', {}),
+    # E125 s3a: a hand-written well path given as positions; TVDSS rises and falls, so its range is not [first, last].
+    'well-path': ('well-path-positions-csv/1', 'text/csv', b'md,x,y,tvdss\n0,1000.0,2000.0,50.0\n150,1000.0,2000.0,-12.5\n400.5,1003.25,2010.5,300.25\n'
+                  b'800,1010.0,2030.0,610.75\n1100.25,1020.5,2055.25,480.5\n',
+                  {'crs': 'EPSG:23031', 'xy_unit': 'm', 'depth_unit': 'm', 'md_reference': 'KB', 'tvdss_datum': 'MSL'}),
+    # E119a: a hand-written well set; one member placed on its own grid with a tie-in, one surveyed to true north, one without a trajectory.
+    'well-set': ('well-set/1', 'application/json',
+                 b'{"schema":"ophiolite.well-set/1","label":"Residual wells","members":['
+                 b'{"well":"well-0a1b2c3d4e5f60718293a4b5c6d7e8f9","wellbore":"wellbore-1a2b3c4d5e6f708192a3b4c5d6e7f809",'
+                 b'"trajectory":{"asset_id":"synthetic-trajectory","revision":"' + b'1' * 64 + b'"},'
+                 b'"frame":{"crs":"EPSG:28992","wellhead":{"x":236512.4,"y":583104.75},"depth_reference":{"name":"KB","elevation":7.92,"datum":"NAP"},'
+                 b'"north":{"survey_basis":"grid:EPSG:28992","rotation_deg":0},"tie_in":{"md":1250.5,"tvd":1248.1,"east":12.3,"north":-4.6},"source":"NLOG wellbore header"}},'
+                 b'{"well":"well-0a1b2c3d4e5f60718293a4b5c6d7e8f9","wellbore":"wellbore-2b3c4d5e6f708192a3b4c5d6e7f8091a",'
+                 b'"trajectory":{"asset_id":"synthetic-trajectory-2","revision":"' + b'2' * 64 + b'"},'
+                 b'"frame":{"crs":"EPSG:28992","wellhead":{"x":236512.4,"y":583104.75},"depth_reference":{"name":"KB","elevation":7.92,"datum":"NAP"},'
+                 b'"north":{"survey_basis":"true-north","rotation_deg":-1.25},"tie_in":null,"source":""}},'
+                 b'{"well":"well-1b2c3d4e5f60718293a4b5c6d7e8f90a","wellbore":"wellbore-3c4d5e6f708192a3b4c5d6e7f8091a2b","trajectory":null,"frame":null}]}', {}),
+    # E119b: a hand-written residual result over that set: one residual (1250.5 - 1248.25 = 2.25 m), one top with a
+    # grazing path, and the member without a trajectory, which has no top of the formation (no-top takes precedence).
+    'well-residual': ('well-residual/1', 'application/json', WELL_RESIDUAL, {}),
 }
 
 
@@ -399,12 +457,17 @@ def openapi():
 
 
 READERS_PATH = CONTRACTS / 'connectors/v1/readers.json'
+READER_PLAN_PATH = CONTRACTS / 'connectors/v1/reader-plan.json'  # E123: readers planned but not available yet
+RESQML_KINDS_PATH = CONTRACTS / 'connectors/v1/resqml-kinds.json'  # E124: how the RESQML package reader treats each object
 
 
 def reader_registry():
-    """E55: the served copy of the Connectors reader registry, byte for byte."""
-    from asset_connectors import readers
+    """E55: the served copy of the Connectors reader registry, byte for byte; E123: and of its reader plan; E124: and of
+    the RESQML variant map."""
+    from asset_connectors import planned_readers, readers, resqml_kinds
     READERS_PATH.write_bytes(readers.raw())
+    READER_PLAN_PATH.write_bytes(planned_readers.raw())
+    RESQML_KINDS_PATH.write_bytes(resqml_kinds.raw())
 
 
 TARGETS = {'table-target-schema.json': 'targets/table-target-schema.json',  # E86: served path -> Connectors package path

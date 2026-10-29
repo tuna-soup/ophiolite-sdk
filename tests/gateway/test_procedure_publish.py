@@ -117,6 +117,25 @@ def test_a_run_on_a_project_version_publishes_once_with_a_4_record_the_sdk_verif
     assert again['outputs'][0]['receipt'] == output['receipt'] and (runs(world), published(world)) == (1, 1)
 
 
+def test_a_two_slot_runs_parents_are_in_the_manifests_slot_order(world, setting, tmp_path):
+    """E111 s1 (ophiolite-13, 24 October, from e119bs4 on the real Gateway): the manifest names 'tops' before 'anchor';
+    run.json keeps its inputs sorted ('anchor' first). The publish names the parents in the manifest's order, the order
+    the Gateway checks. Mutation: build the parents in run.json's order → refused, "not the one the run reported (inputs)"."""
+    folder = bundle(tmp_path)
+    manifest = json.loads((folder / 'procedure.json').read_text())
+    manifest['inputs'].append({'slot': 'anchor', 'label': 'Tops kept in place', 'class': 'version', 'kinds': ['well-tops-csv/1'], 'cardinality': 'one'})
+    (folder / 'procedure.json').write_text(json.dumps(manifest, indent=2))
+    setting['alice'].procedure_enable(setting['tina'].procedure_register(folder)['digest'])
+    tops, anchor = setting['tops'], upload(setting['bob'], raw=TOPS + b'Top Rotliegend,1500\n', command='tops-b')
+    setting['bob'].procedure_run('depth-shift', tmp_path / 'out', {'tops': ['@%(asset_id)s:%(revision)s' % tops], 'anchor': ['@%(asset_id)s:%(revision)s' % anchor]},
+                                 settings=['shift=2.5', 'mode=subtract', 'note=run_7f3a_b9'], yes=True)
+    assert list(json.loads((tmp_path / 'out/run.json').read_text())['inputs']) == ['anchor', 'tops']
+    answer = setting['bob'].procedure_publish(tmp_path / 'out', name='Shifted chalk')
+    [output] = answer['outputs']
+    assert (output['outcome'], answer['run']['state'], published(world)) == ('published', 'complete', 1)
+    assert procedures.run_parents(manifest, json.loads((tmp_path / 'out/run.json').read_text())) == [tops, anchor]
+
+
 LOG_PROCEDURE = {'schema': 'ophiolite.procedure/1', 'name': 'gamma-copy', 'label': 'Copy gamma ray', 'version': 1, 'step': 'process',
                  'inputs': [{'slot': 'log', 'label': 'Gamma-ray log', 'class': 'version', 'kinds': ['las2/1'], 'cardinality': 'one'}],
                  'outputs': [{'role': 'copy', 'label': 'Gamma ray copy', 'class': 'version', 'kind': 'las2/1'}], 'settings': [],
@@ -246,3 +265,13 @@ def test_inputs_read_with_other_declarations_than_the_project_keeps_are_not_publ
     path.write_text(json.dumps(record))
     with pytest.raises(NotRun) as caught: setting['bob'].procedure_publish(tmp_path / 'out')
     assert caught.value.code == 'inputs-differ' and published(world) == 0
+    # E121 B9: the sentence says what differs; the details name the version and the declaration that differs
+    assert str(caught.value) == 'Not published: the project describes tops differently from what the run used (its declarations); run it again.'
+    used = record['inputs']['tops'][0]
+    assert caught.value.details == {'index': 0, 'asset_id': used['asset_id'], 'revision': used['revision'],
+                                    'kind': {'run': used['kind'], 'project': used['kind']}, 'declared_keys': ['depth_unit']}
+    project_kind, used['kind'] = used['kind'], 'points-csv/1'  # as if read as another type too
+    path.write_text(json.dumps(record))
+    with pytest.raises(NotRun) as caught: setting['bob'].procedure_publish(tmp_path / 'out')
+    assert str(caught.value) == ('Not published: the project describes tops differently from what the run used (its type and its declarations); '
+                                 'run it again.') and caught.value.details['kind'] == {'run': 'points-csv/1', 'project': project_kind}

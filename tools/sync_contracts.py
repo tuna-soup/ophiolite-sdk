@@ -10,11 +10,19 @@ ROOT = Path(__file__).resolve().parents[1]
 def git(root, *args):
     return subprocess.check_output(['git', '-C', str(root), *args])
 
+def history():
+    # H56 (D3, D17): an old Platform commit in either layout (this directory's history.py)
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('sdk_history', Path(__file__).with_name('history.py'))
+    module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+    return module
+
 def snapshot(source):
-    if git(source, 'status', '--porcelain').strip():
+    # '.' and './contracts': the source directory, whether it is the Platform repository or its monorepo directory (H56)
+    if git(source, 'status', '--porcelain', '--', '.').strip():
         raise ValueError('Contract source checkout must be clean')
     commit = git(source, 'rev-parse', 'HEAD').decode().strip()
-    tree = git(source, 'rev-parse', 'HEAD:contracts').decode().strip()
+    tree = git(source, 'rev-parse', 'HEAD:./contracts').decode().strip()
     paths = git(source, 'ls-tree', '-rz', 'HEAD', 'contracts').split(b'\0')
     files = {}
     for row in filter(None, paths):
@@ -71,7 +79,8 @@ def main():
         actual = {p.relative_to(destination).as_posix(): p.read_bytes() for p in destination.rglob('*') if p.is_file()}
         # An unchanged tree can be sourced from an earlier immutable Platform commit.
         old = json.loads(actual['SOURCE.json'])
-        if git(args.source, 'rev-parse', old['platform_commit']+':contracts').decode().strip() != old['contracts_tree']:
+        recorded = history().resolve(args.source, old['platform_commit']) or old['platform_commit']
+        if git(args.source, 'rev-parse', recorded+':./contracts').decode().strip() != old['contracts_tree']:
             raise ValueError('Recorded contract source tree does not match commit')
         new = json.loads(files['SOURCE.json'])
         new['platform_commit'] = old['platform_commit']

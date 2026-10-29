@@ -1,0 +1,17 @@
+"""$label."""
+import ophiolite
+from ophiolite import procedure
+from ophiolite.residuals import read_tops
+
+
+@procedure
+def main(inputs, settings, reference):
+    """Compare the tops with the reference tops of the same name. A top differs when its measured depth is more than
+    `tolerance` from the reference's, or when only one side has it. Tops in different depth units are not compared."""
+    data = inputs['data'][0]
+    if data.declared.get('depth_unit') != reference.declared.get('depth_unit'): return ophiolite.compared('not_compared')
+    mine = {top['name']: top['md'] for top in read_tops(data.path)}
+    theirs = {top['name']: top['md'] for top in read_tops(reference.path)}
+    names = set(mine) | set(theirs)
+    differed = sum(1 for name in names if name not in mine or name not in theirs or abs(mine[name] - theirs[name]) > settings['tolerance'])
+    return ophiolite.compared('passed' if differed == 0 else 'differed', compared=len(names), differed=differed)

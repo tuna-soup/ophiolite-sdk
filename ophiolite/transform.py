@@ -6,33 +6,13 @@ server: depth along a survey by minimum curvature.
 from the survey's angles, interpolated along the arc between stations) and `from_file` (the survey's own vertical depth,
 interpolated linearly between stations that state it; a gap where one does not). A start is never assumed: the first
 station is at measured depth 0, or the survey states its vertical depth there, or the caller supplies one. Nothing is
-extrapolated past the last station, and no datum offset (such as NAP) is applied."""
-import math
+extrapolated past the last station, and no datum offset (such as NAP) is applied.
 
+E119a: the calculation is the one trajectory geometry (`ophiolite.geometry`, the contract module the Platform runs
+too); this module keeps its checks, its sentences and the survey's own depths. As before, no dogleg limit applies here.
+"""
+from . import geometry
 from .errors import Refused
-
-
-def _tangent(inclination, azimuth):
-    i, a = math.radians(inclination), math.radians(azimuth)
-    return (math.sin(i) * math.sin(a), math.sin(i) * math.cos(a), math.cos(i))  # east, north, down
-
-
-def _angle(t0, t1):
-    return math.acos(max(-1.0, min(1.0, sum(p * q for p, q in zip(t0, t1)))))
-
-
-def _advance(position, t0, t1, length):
-    dogleg = _angle(t0, t1)
-    factor = 1.0 if dogleg < 1e-9 else math.tan(dogleg / 2) / (dogleg / 2)
-    return tuple(p + length / 2 * (a + b) * factor for p, a, b in zip(position, t0, t1))
-
-
-def _between(t0, t1, f):
-    """The tangent a fraction f along the arc from t0 to t1."""
-    dogleg = _angle(t0, t1)
-    if dogleg < 1e-9: return t1
-    s = math.sin(dogleg)
-    return tuple((math.sin((1 - f) * dogleg) * a + math.sin(f * dogleg) * b) / s for a, b in zip(t0, t1))
 
 
 def vertical_depth(stations, mds, origin_tvd=None, survey_unit='m', log_unit='m'):
@@ -54,19 +34,18 @@ def vertical_depth(stations, mds, origin_tvd=None, survey_unit='m', log_unit='m'
     else:
         raise Refused('The survey starts at %g %s and gives no vertical depth there, so its starting depth is not known.'
                       % (md[0], survey_unit))
-    tangents = [_tangent(s['inclination'], s['azimuth']) for s in stations]
-    positions = [(0.0, 0.0, start)]
-    for k in range(1, len(md)):
-        positions.append(_advance(positions[-1], tangents[k - 1], tangents[k], md[k] - md[k - 1]))
+    survey = [{'md': m, 'inclination': s['inclination'], 'azimuth': s['azimuth']} for m, s in zip(md, stations)]
+    mds = list(mds)
+    placed = geometry.interpolate(survey, mds, limit=False)  # offsets from the first station, on the arc
     notes = ['The survey\'s vertical depth decreases between measured depth %g and %g.' % (md[k - 1], md[k])
              for k in range(1, len(md)) if supplied[k] is not None and supplied[k - 1] is not None and supplied[k] < supplied[k - 1]]
     calculated, from_file, beyond = [], [], 0
-    for m in mds:
+    for m, p in zip(mds, placed):
         if m < md[0] or m > md[-1]:
             beyond += m > md[-1]; calculated.append(None); from_file.append(None); continue
         k = min(next(i for i in range(len(md) - 1, -1, -1) if md[i] <= m), len(md) - 2)
         f = (m - md[k]) / (md[k + 1] - md[k])
-        calculated.append(_advance(positions[k], tangents[k], _between(tangents[k], tangents[k + 1], f), m - md[k])[2])
+        calculated.append(start + p[2])
         a, b = supplied[k], supplied[k + 1]
         from_file.append(None if a is None or b is None else a + f * (b - a))
     return {'calculated': calculated, 'from_file': from_file, 'beyond': beyond, 'notes': notes}

@@ -1,0 +1,238 @@
+{
+ "schema": "ophiolite.resqml-kinds/1",
+ "id": "ophiolite.resqml-kinds/1",
+ "description": "E124: how the RESQML 2.0.1 package reader (resqml-epc/1, planned) treats each object of a package. An object is classified by the first variant, in this order, whose kinds include its kind and whose predicate holds on its XML (and on the package's other parts' XML); an object no variant takes falls to the first fallback that matches. Every part of a package is in exactly one of: an output (read), absorbed into an output, not read (with its code and sentence), or context (counted per kind). A read variant names the slice that brings it; the reader advertises only variants whose slice has merged. Nothing is resampled.",
+ "roles": [
+  {
+   "id": "well-path",
+   "lands_on": "well-path"
+  },
+  {
+   "id": "trajectory",
+   "lands_on": "trajectory"
+  },
+  {
+   "id": "well-log",
+   "lands_on": "well-log"
+  },
+  {
+   "id": "triangulated-surface",
+   "lands_on": "triangulated-surface"
+  },
+  {
+   "id": "polyline-set",
+   "lands_on": "polyline-set"
+  }
+ ],
+ "losses": [
+  {
+   "code": "angles-from-tangents",
+   "sentence": "Inclination and azimuth are computed from the package's tangent vectors, as the standard defines them; the package states no angles."
+  }
+ ],
+ "variants": [
+  {
+   "id": "V1",
+   "kinds": [
+    "WellboreTrajectoryRepresentation"
+   ],
+   "when": "parametric-md-points-tangents",
+   "outcome": "read",
+   "roles": [
+    "well-path",
+    "trajectory"
+   ],
+   "slice": "E124 s1",
+   "losses": {
+    "trajectory": [
+     "angles-from-tangents"
+    ]
+   }
+  },
+  {
+   "id": "V2",
+   "kinds": [
+    "WellboreTrajectoryRepresentation"
+   ],
+   "when": "parametric-md-points",
+   "outcome": "not-read",
+   "code": "no-real-object",
+   "sentence": "This kind of trajectory is not read yet."
+  },
+  {
+   "id": "V3",
+   "kinds": [
+    "WellboreTrajectoryRepresentation"
+   ],
+   "when": "always",
+   "outcome": "not-read",
+   "code": "not-read-yet",
+   "sentence": "This kind of trajectory is not read yet."
+  },
+  {
+   "id": "V4",
+   "kinds": [
+    "WellboreFrameRepresentation"
+   ],
+   "when": "frame-with-node-logs",
+   "outcome": "read",
+   "roles": [
+    "well-log"
+   ],
+   "slice": "E124 s1",
+   "losses": {}
+  },
+  {
+   "id": "V5",
+   "kinds": [
+    "WellboreFrameRepresentation"
+   ],
+   "when": "always",
+   "outcome": "not-read",
+   "code": "frame-without-values",
+   "sentence": "A wellbore frame without a log on its nodes holds nothing to read; its interval properties are listed on their own."
+  },
+  {
+   "id": "V6",
+   "kinds": [
+    "ContinuousProperty"
+   ],
+   "when": "log-on-frame-nodes",
+   "outcome": "absorbed",
+   "into": "well-log"
+  },
+  {
+   "id": "V7",
+   "kinds": [
+    "ContinuousProperty",
+    "CategoricalProperty",
+    "DiscreteProperty"
+   ],
+   "when": "always",
+   "outcome": "not-read",
+   "code": "property-not-on-frame-nodes",
+   "sentence": "A property that is not a log on a wellbore frame is not read yet."
+  },
+  {
+   "id": "V8",
+   "kinds": [
+    "WellboreMarkerFrameRepresentation"
+   ],
+   "when": "always",
+   "outcome": "not-read",
+   "code": "markers-not-read",
+   "sentence": "Well markers are not read yet."
+  },
+  {
+   "id": "V9",
+   "kinds": [
+    "Grid2dRepresentation"
+   ],
+   "when": "lattice-without-values",
+   "outcome": "not-read",
+   "code": "lattice-without-values",
+   "sentence": "A lattice without values holds no surface."
+  },
+  {
+   "id": "V10",
+   "kinds": [
+    "Grid2dRepresentation"
+   ],
+   "when": "lattice-rotated",
+   "outcome": "not-read",
+   "code": "rotated-lattice",
+   "sentence": "A rotated lattice is not representable as a grid and has more nodes than a point set holds; its triangulated version, where the package has one, is read."
+  },
+  {
+   "id": "V11",
+   "kinds": [
+    "Grid2dRepresentation"
+   ],
+   "when": "lattice-axis-aligned",
+   "outcome": "not-read",
+   "code": "no-real-object",
+   "sentence": "An axis-aligned lattice is not read yet: no rights-recorded package with one has been tested."
+  },
+  {
+   "id": "V12",
+   "kinds": [
+    "TriangulatedSetRepresentation"
+   ],
+   "when": "triangles-and-points",
+   "outcome": "read",
+   "roles": [
+    "triangulated-surface"
+   ],
+   "slice": "E124 s2",
+   "losses": {}
+  },
+  {
+   "id": "V13",
+   "kinds": [
+    "PolylineSetRepresentation"
+   ],
+   "when": "polylines-and-points",
+   "outcome": "read",
+   "roles": [
+    "polyline-set"
+   ],
+   "slice": "E124 s2",
+   "losses": {}
+  },
+  {
+   "id": "V14",
+   "kinds": [
+    "PointSetRepresentation"
+   ],
+   "when": "always",
+   "outcome": "not-read",
+   "code": "no-real-object",
+   "sentence": "A point set is not read yet: no rights-recorded package with one has been tested."
+  },
+  {
+   "id": "V15",
+   "kinds": [
+    "IjkGridRepresentation",
+    "SubRepresentation",
+    "GridConnectionSetRepresentation"
+   ],
+   "when": "always",
+   "outcome": "not-read",
+   "code": "reservoir-grid",
+   "sentence": "Reservoir grids are not read."
+  }
+ ],
+ "fallbacks": [
+  {
+   "id": "F-rep",
+   "match": "representation-or-property",
+   "outcome": "not-read",
+   "code": "not-read-yet",
+   "sentence": "This kind is not read yet."
+  },
+  {
+   "id": "F-ctx",
+   "match": "any",
+   "outcome": "context"
+  }
+ ],
+ "local_frame": {
+  "operation": "resqml-local-frame",
+  "record": "ophiolite.local-frame/1",
+  "formula": "rotate-then-offset",
+  "kinds": [
+   "LocalDepth3dCrs",
+   "LocalTime3dCrs"
+  ]
+ },
+ "codes": [
+  "frame-without-values",
+  "lattice-without-values",
+  "markers-not-read",
+  "no-real-object",
+  "not-read-yet",
+  "property-not-on-frame-nodes",
+  "reservoir-grid",
+  "rotated-lattice"
+ ]
+}

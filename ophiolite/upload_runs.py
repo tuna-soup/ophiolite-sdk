@@ -27,12 +27,14 @@ import base64
 import csv
 import hashlib
 import io
+import shlex
 import json
 import os
 import stat
 import time
 import uuid
 import zipfile
+from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 
 from .errors import IntegrityConflict, OphioliteError, Refused, ValidationFailed, VerificationFailed
@@ -45,14 +47,33 @@ ZIP_RATIO = 100  # an entry, or the whole zip, unpacked to more than this many t
 ZIP_TOTAL = 512 * 1024 * 1024
 LINKS = 50  # links per associate call
 RESULT = {'added': 'Added', 'already-here': 'Already here', 'needs-decision': 'Needs your decision', 'not-read': 'Not read',
-          'not-supported': 'Not supported', 'cancelled': 'Cancelled', 'waiting': 'Not sent yet', 'reading': 'Being added'}
+          'not-supported': 'Not supported', 'cancelled': 'Cancelled', 'waiting': 'Not sent yet', 'reading': 'Being added',
+          'needs-procedure': 'Can be read on your computer', 'converting': 'Being read on your computer',  # E107a
+          'converted': 'Read on your computer'}
+LISTED_RESULT = {'added': 'Added', 'already-here': 'Already here', 'planned': 'Not sent yet'}  # E127 s1a: a listed file; any other outcome is Not added
 OUTCOMES = ('added', 'already-here', 'needs-decision', 'not-read', 'not-supported')
+READ_STATES = ('needs-procedure', 'converting', 'converted')  # E107a: counted only when a run has them
+READS = ['procedures']  # E107a (R5-8): what this SDK reads; sent only to a deployment that lists it
 CLAIM_WAIT = 150  # seconds: the deployment's claim on a file being added lasts 120
 COLUMNS = ('path', 'result', 'kind', 'read', 'reason', 'asset')
 DEFAULT = 'project-default'  # E90: a declared value that keeps the project's default for that field
 NO_ATTRIBUTION = 'No attribution given and the project has none. Pass --attribution or ask an administrator to set one.'
 NOT_PROJECT = "This project's new files are not visible to everyone in it. Add the files for yourself or named people, then change who can see them (client.set_audience)."
 MOVED = "The project's defaults changed while this upload was being prepared. Nothing was added; run it again."
+# E123 S3b (D4): the basis items a folder upload asks once for files that share them, by their words
+BASIS_ITEMS = {'crs': 'coordinate system', 'vertical_domain': 'vertical values', 'vertical_datum': 'vertical datum', 'units.xy': 'map unit',
+               'units.depth': 'depth unit', 'units.time': 'time unit', 'units.z': 'vertical unit'}
+BASIS_ANSWERS = 50  # answers per request
+NAMED = 5  # E123 S6 (D3): the members a report line names before "and N more"
+
+
+def basis_item(name):
+    """A basis item by its words ('map unit', 'map-unit') or its id ('units.xy')."""
+    if name.strip() in BASIS_ITEMS: return name.strip()
+    words =' '.join(name.strip().lower().replace('_', ' ').replace('-', ' ').split())
+    for item, label in BASIS_ITEMS.items():
+        if words in (item, label): return item
+    raise Refused('%s is not asked once for a folder; say one of: %s.' % (name, ', '.join(BASIS_ITEMS.values())))
 
 
 def _checked(model, answer, what):
@@ -234,6 +255,31 @@ def open_zip(path, file_bytes):
 
 # --- the report --------------------------------------------------------------------------------------------------------
 
+@dataclass(frozen=True)
+class BasisBlock:
+    """E123 S6 (D1): one served block (`kind` 'block', `state` 'stated') or proposal (`kind` 'proposal', `state`
+    'proposed', 'confirmed' or 'declined') of a folder upload. `members` are its files in served order; `stated` what a
+    block's files share (a copy, keyed by item words; {} for a proposal); `open` every item still asked of the group or
+    of any of its files, first occurrence kept (an aggregate, not only what one answer to the group settles); `sentence`
+    the served sentence for it, or ''. A known item is in words; an item this SDK does not know stays as served."""
+    target: str
+    kind: str
+    state: str
+    members: tuple
+    stated: dict
+    open: tuple
+    sentence: str
+
+
+def _words(item): return BASIS_ITEMS.get(item, item)
+
+
+def _members(paths):
+    """E123 S6 (D3): 'a, b and c'; past five, the first five 'and N more'."""
+    if len(paths) > NAMED: return '%s and %d more' % (', '.join(paths[:NAMED]), len(paths) - NAMED)
+    return ' and '.join([', '.join(paths[:-1]), paths[-1]]) if len(paths) > 1 else ''.join(paths)
+
+
 class Report:
     """A folder upload as its report shows it. `counts` names the five outcomes (and `cancelled` when any file was
     stopped or skipped); `ok` is true when every file was added or is already here."""
@@ -241,22 +287,80 @@ class Report:
         self.view = view
         self.run_id, self.state, self.label, self.items = view['run_id'], view['state'], view['label'], view['items']
         self.left_out = []  # E59: [(key, sentence)] of a storage folder's objects the gateway did not read
+        self.names = {}  # E108 S1 (B6 rev 4): a source run's rows by output label; the path stays a technical detail
         counts = {k.replace('_', '-'): v for k, v in view['counts'].items()}
         self.counts = {k: counts[k] for k in OUTCOMES}
         if counts['cancelled']: self.counts['cancelled'] = counts['cancelled']
+        for state in READ_STATES:  # E107a
+            if counts.get(state): self.counts[state] = counts[state]
         if counts['waiting'] or counts['reading']: self.counts['not-sent'] = counts['waiting'] + counts['reading']
 
     @property
-    def ok(self): return self.state == 'closed' and all(i['state'] in ('added', 'already-here') for i in self.items)
+    def ok(self): return self.state == 'closed' and all(i['state'] in ('added', 'already-here', 'converted') for i in self.items)
+
+    @property
+    def proposals(self):
+        """E122 s3b: how many files of a named send are asked whether they are an earlier file renamed; 0 when not served."""
+        return (self.view.get('changes') or {}).get('proposals', 0)
+
+    @property
+    def basis(self):
+        """E123 S6 (D1, D2): the served blocks, then the served proposals, as `BasisBlock`s; () when nothing is served."""
+        basis = self.view.get('basis') or {}
+        grouping = basis.get('grouping') or {}
+        plan, resolved = grouping.get('plan') or {}, grouping.get('resolved') or {}
+        said, states, questions = {}, resolved.get('proposals') or {}, resolved.get('questions') or []
+        for s in basis.get('sentences') or []: said.setdefault(s['target'], s['sentence'])
+
+        def group(g, kind, state, stated):
+            members = tuple(g['members'])
+            asked = [_words(q['item']) for q in questions if q['target'] == g['id'] or q['target'] in members]
+            return BasisBlock(g['id'], kind, state, members, {_words(k): v for k, v in stated.items()}, tuple(dict.fromkeys(asked)), said.get(g['id'], ''))
+        return tuple([group(b, 'block', 'stated', b.get('stated') or {}) for b in plan.get('blocks') or []]
+                     + [group(p, 'proposal', states.get(p['id'], 'proposed'), {}) for p in plan.get('proposals') or []])
+
+    @property
+    def conflicts(self):
+        """E123 S6: (path, item in words, what the file states, what was answered) per served conflict; () when none."""
+        resolved = ((self.view.get('basis') or {}).get('grouping') or {}).get('resolved') or {}
+        return tuple((c['path'], _words(c['item']), c['stated'], c['answered']) for c in resolved.get('conflicts') or [])
 
     def rows(self):
-        return [{'path': i['path'], 'result': RESULT[i['state']], 'kind': i.get('kind') or '', 'read': i.get('read') or '',
-                 'reason': i.get('sentence') or '', 'asset': i.get('asset_id') or ''} for i in self.items]
+        """One row per file, each followed by the files its catalogue manifest lists (E127 s1a)."""
+        return [r for i in self.items for r in [self.row(i)] + self.listed(i)]
+
+    @staticmethod
+    def row(i):
+        return {'path': i['path'], 'result': RESULT[i['state']], 'kind': i.get('kind') or '', 'read': i.get('read') or '',
+                'reason': i.get('sentence') or '', 'asset': i.get('asset_id') or ''}
+
+    @staticmethod
+    def listed(i):
+        """E127 s1a (A12): the rows of the files a manifest row lists (outputs `listed-<n>`), as `<path>: <label>`; any
+        other output (a conversion's, a package's) is not a row. Whether the run is ok follows from the manifest's row."""
+        return [{'path': '%s: %s' % (i['path'], o['label']), 'result': LISTED_RESULT.get(o['outcome'], 'Not added'), 'kind': o.get('kind') or '',
+                 'read': o.get('line') or '', 'reason': o.get('sentence') or '', 'asset': o.get('asset_id') or ''}
+                for o in i.get('outputs') or [] if (o.get('output') or '').startswith('listed-')]
 
     def text(self):
         said = ', '.join('%d %s' % (n, RESULT.get(k, 'Not sent yet')) for k, n in self.counts.items())
         lines = ['%s - %d files - %s. %s' % (self.view['folder_name'], self.view['files'], self.label, said)]
-        lines += ['  %s: %s%s' % (r['path'], r['result'], ' - ' + r['reason'] if r['reason'] else '') for r in self.rows() if r['result'] not in ('Added', 'Already here')]
+        if self.view.get('changes'): lines.append(self.view['changes']['sentence'])  # E122 s1 (D5): the server's sentence, as served
+        if ((self.view.get('changes') or {}).get('elements') or {}).get('sentence'): lines.append(self.view['changes']['elements']['sentence'])  # E122 s3a (D3): the items, as served
+        if (self.view.get('scope') or {}).get('sentence'): lines.append(self.view['scope']['sentence'])  # E122 s2 (D7): what is gone, as served
+        groups = {g.target: g.members for g in self.basis}
+        for s in (self.view.get('basis') or {}).get('sentences') or []:  # E123 S3a (D4): the basis blocks and proposals, as served
+            lines.append(s['sentence'])
+            if s['target'] in groups: lines.append('    ' + _members(groups[s['target']]))  # E123 S6 (D3): which files it means
+        for item in self.items:  # each file with its own row (E127 s1a: a manifest's rows follow it)
+            r, name = self.row(item), self.names.get(item['path'], item['path'])
+            if r['result'] not in ('Added', 'Already here'):
+                lines.append('  %s: %s%s' % (name, r['result'], ' - ' + r['reason'] if r['reason'] else ''))
+                if item['state'] == 'needs-procedure' and item['role'] == 'primary':  # E107a: the exact command that reads it here
+                    lines.append('    To read it on this computer: ophiolite intake read %s %s' % (self.run_id, shlex.quote(PurePosixPath(item['path']).name)))
+            for listed in self.listed(item):
+                if listed['result'] in ('Added', 'Already here'): continue
+                lines.append('  %s%s: %s%s' % (name, listed['path'][len(item['path']):], listed['result'], ' - ' + listed['reason'] if listed['reason'] else ''))
         settings = self.view.get('settings') or {}
         if settings.get('defaults'):  # E90: what the run took from the project's settings, and at which revision
             took = {'attribution': 'attribution "%s"' % settings.get('attribution', ''), 'audience': who_sees(settings)}
@@ -289,9 +393,25 @@ class UploadRuns:
     def __init__(self, client):
         self.client = client
         self.sent_bytes = 0  # the file bytes this object sent (heads, bodies and parts), for a resumed upload's account
+        self._reads = None
+
+    def reads(self):
+        """E107a (R5-8): True when the deployment lists `upload_runs.reads: ['procedures']` in its capabilities; only then
+        does this SDK say it reads read procedures (start, reports and file steps). Read once."""
+        if self._reads is None:
+            described = getattr(self.client, 'upload_reads', None)
+            self._reads = bool(described()) if described is not None else False
+        return self._reads
+
+    def _declared(self, value):
+        return {**value, 'reads': list(READS)} if self.reads() else value
+
+    def _header(self, header):
+        header = self._declared(header)
+        return {'Content-Type': 'application/octet-stream', 'X-Ophiolite-Upload': base64.b64encode(json.dumps(header, separators=(',', ':')).encode()).decode()}
 
     def _call(self, operation, body, model, retry=True):
-        return _checked(model, self.client._post('upload-runs', operation, body, retry=retry), 'folder upload ' + operation)
+        return _checked(model, self.client._post('upload-runs', operation, self._declared(body), retry=retry), 'folder upload ' + operation)
 
     # one-call operations
 
@@ -313,11 +433,43 @@ class UploadRuns:
         return (Report(view) if view else self.status(run_id)), added
 
     def decide(self, run_id, ordinals, choice, declared=None, command_id=None):
-        """Answer files that need a decision: 'add-separately', 'add-new', 'declare' (with `declared`) or 'skip'. Files
-        to add go back to waiting; send them with `send(run_id, open(path))`."""
+        """Answer files that need a decision: 'add-separately', 'add-new', 'declare' (with `declared`), 'same-item'
+        (confirm a same-bytes question: the file is the earlier file renamed) or 'skip'. Files to add go back to waiting;
+        send them with `send(run_id, open(path))`."""
         body = {'run_id': run_id, 'ordinals': sorted(ordinals), 'choice': choice, **({'declared': dict(declared or {})} if choice == 'declare' else {})}
         body['command_id'] = command_id or _sha(['decide', body])
         return Report(self._call('decide', body, UploadRun))
+
+    def basis(self, run_id, decision=None, answers=(), command_id=None):
+        """E123 S3b: say whether the files a report proposes share one basis (`decision` (proposal id, 'confirm' or
+        'decline')) and answer the basis questions the report serves (`answers` [(target, item, value)], or dicts that
+        may say kept='project-default' for a suggestion kept as shown): a block or a confirmed proposal is answered once
+        for its files. A file whose declarations are then all given goes back to waiting; send it with `send`."""
+        body = {'run_id': run_id}
+        if decision is not None:
+            proposal, choice = (decision['proposal'], decision['choice']) if isinstance(decision, dict) else decision
+            body['decision'] = {'proposal': proposal, 'choice': choice}
+        body['answers'] = [dict(a) if isinstance(a, dict) else dict(zip(('target', 'item', 'value'), a)) for a in answers]
+        body['command_id'] = command_id or _sha(['basis', body])
+        return Report(self._call('basis', body, UploadRun))
+
+    def answer_basis(self, run_id, report, share=None, given=None):
+        """E123 S3b (D4): decide every undecided proposal of the report (`share` True confirms, False declines, None
+        leaves it), then answer each open basis question whose item `given` {item: value} names (an item by its words or
+        id). A question that names why its file could not take an answer is left to that file. True if anything was sent."""
+        given = {basis_item(k): v for k, v in (given or {}).items()}
+        grouping = (report.view.get('basis') or {}).get('grouping')
+        if grouping is None: return False
+        acted = False
+        if share is not None:
+            for p in grouping['plan']['proposals']:
+                if grouping['resolved']['proposals'].get(p['id']) != 'proposed': continue
+                report, acted = self.basis(run_id, decision=(p['id'], 'confirm' if share else 'decline')), True
+            grouping = (report.view.get('basis') or {}).get('grouping') or grouping
+        asked = [(q['target'], q['item']) for q in grouping['resolved']['questions'] if q['item'] in given and not q.get('reason')]
+        for i in range(0, len(asked), BASIS_ANSWERS):
+            self.basis(run_id, answers=[(t, item, given[item]) for t, item in asked[i:i + BASIS_ANSWERS]]); acted = True
+        return acted
 
     def share(self, run_id, readers):
         """Name the project members who may read this report (the whole list; empty revokes). Its files keep their own access."""
@@ -326,6 +478,17 @@ class UploadRuns:
     def report(self, run, path):
         """Save a report (a Report or a run id) as CSV, or as JSON for a .json path."""
         return (run if isinstance(run, Report) else self.status(run)).save(path)
+
+    def fidelity(self, report, source, destination):
+        """E127 s2: write the catalogue's fidelity document (`osd.fidelity/1`) for the one catalogue manifest REPORT (a
+        Report or run id) read from SOURCE (the local file or folder that was uploaded, read again here) to DESTINATION,
+        and return DESTINATION. Refused, with nothing written, when any file's outcome cannot be stated exactly
+        (ophiolite.fidelity)."""
+        from . import fidelity
+        if is_address(source): raise Refused(fidelity.ADDRESS)
+        fidelity.outside(source, destination)
+        report = report if isinstance(report, Report) else self.status(report)
+        return fidelity.write(fidelity.document(report, self.open(source), self.client), destination)
 
     # the whole journey
 
@@ -342,7 +505,7 @@ class UploadRuns:
         """E85b: what the gateway reads at an https address (its kind, what the file states and leaves open, and what was
         fetched); nothing is added. Its refusals carry the deployment's sentence."""
         header = {'project_id': self.client.project, 'mode': 'whole', 'address': address}
-        extra = {'Content-Type': 'application/octet-stream', 'X-Ophiolite-Upload': base64.b64encode(json.dumps(header, separators=(',', ':')).encode()).decode()}
+        extra = self._header(header)
         return _checked(UploadCheckAnswer, self.client._post_bytes('upload-runs', 'check', b'', extra_headers=extra, retry=True), 'file check')
 
     def fetched(self, address):
@@ -356,7 +519,7 @@ class UploadRuns:
         """E59: what the gateway reads of the object KEY of a storage connection (its kind, what it states and leaves
         open, and its size and digest); nothing is added. Its refusals carry the deployment's sentence."""
         header = {'project_id': self.client.project, 'mode': 'whole', 'bucket': {'connection_id': connection, 'key': key}}
-        extra = {'Content-Type': 'application/octet-stream', 'X-Ophiolite-Upload': base64.b64encode(json.dumps(header, separators=(',', ':')).encode()).decode()}
+        extra = self._header(header)
         return _checked(UploadCheckAnswer, self.client._post_bytes('upload-runs', 'check', b'', extra_headers=extra, retry=True), 'file check')
 
     def stored(self, connection, prefix=None):
@@ -419,27 +582,43 @@ class UploadRuns:
         return report
 
     def upload(self, path, *, attribution=None, rights_confirmed, audience=None, well_notes='', declare=None, skip_decisions=False,
-               associate_matches=False, new=False, progress=None, use_project_defaults=False):
-        """Upload a file, a folder, a .zip or an https address and return its Report. `declare` {kind: {field: value}} answers the files of that
+               associate_matches=False, new=False, progress=None, use_project_defaults=False, source_name=None, send=None, scope=None, started=None,
+               share_basis=None, basis=None):
+        """Upload a file, a folder, a .zip or an https address and return its Report. E122 s1: `source_name` names where
+        the files come from ("Petrel export"); a later send under the same name reports each file unchanged,
+        changed (its next version) or new, and `report.view['changes']['sentence']` says how many. E122 s2: `send='complete'`
+        says the folder is everything in that source (or in its folder `scope`): a file the source sent before and this send
+        does not list is marked gone (nothing is removed), and `report.view['scope']['sentence']` says which; a source
+        emptied completely is not marked gone. `send='incremental'` (or nothing) marks nothing. `declare` {kind: {field: value}} answers the files of that
         kind (profile, e.g. 'esri-ascii-grid/1') that need you to say what their values mean; `skip_decisions` skips
         every other file that needs a decision; `associate_matches` links each file to the one wellbore its header names.
         `progress(report)` is called after each file. E90: `attribution` None and `audience` None ('project' needs it to be
         the project's setting; 'me' is no one else) take the project's New data settings; a `declare` value 'project-default'
-        or `use_project_defaults` keeps the project's default for a field a file leaves open."""
+        or `use_project_defaults` keeps the project's default for a field a file leaves open. E129 Sa: `started(run_id)` is
+        called once the run is started or resumed, before any file content is sent. E123 S3b: `share_basis` True (or
+        False) says the files the report proposes do (or do not) share one basis, and `basis` {item: value} answers the
+        basis questions, an item by its words ('map unit') or id, before `declare` answers each file's own fields."""
         if rights_confirmed is not True:
             raise ValidationFailed(['Confirm that you may retain these files, derive results and share them within the audience.'])
         if not isinstance(path, (str, os.PathLike)):  # E56 (F1): a path is read and digested here; an open stream is not
             raise Refused('Pass the path of a file, a folder or a .zip, or an https address; an open file is not read. Nothing was sent.')
         checked_declarations(declare)
+        for item in basis or {}: basis_item(item)  # refused before anything is sent
         folder = self.fetched(path) if is_address(path) else self.open(path)
         checked_declarations(declare, folder)
-        run = None if new else self.unfinished(folder)
+        declared = (source_name, send or 'incremental', scope) if source_name is not None else None
+        run = None if new else self.unfinished(folder, declared)
         if run is None:
             body = {'command_id': uuid.uuid4().hex, 'folder_name': folder.name[:160], 'files': folder.listing(),
-                    'well_notes': well_notes, 'rights_confirmed': True, **({'address': folder.address} if folder.address else {})}
+                    'well_notes': well_notes, 'rights_confirmed': True, **({'address': folder.address} if folder.address else {}),
+                    **({'source_name': source_name} if source_name is not None else {}),
+                    **({'send': send} if send is not None else {}), **({'scope': scope} if scope is not None else {})}
             body.update(self.defaults(folder, attribution, audience, declare, use_project_defaults))
             run = self._call('start', body, UploadRun)['run_id']
+        if started is not None: started(run)
         report = self.send(run, folder, progress)
+        if (share_basis is not None or basis) and self.answer_basis(run, report, share_basis, basis):  # E123 S3b: before each file's own
+            report = self.send(run, folder, progress)
         for _ in range(SENDS - 1):  # E56 (N8): a file may ask again once it is read (a layer, corners); answered from `declare`
             if not self.answer(run, report, declare, folder): break
             report = self.send(run, folder, progress)
@@ -475,7 +654,7 @@ class UploadRuns:
         if folder.address: found = self.check(folder.address)  # the gateway reads the address again; nothing is sent from here
         else:
             header = {'project_id': self.client.project, 'name': file.path, 'bytes': file.size, 'mode': 'head', 'sha256': file.sha256}
-            extra = {'Content-Type': 'application/octet-stream', 'X-Ophiolite-Upload': base64.b64encode(json.dumps(header, separators=(',', ':')).encode()).decode()}
+            extra = self._header(header)
             found = _checked(UploadCheckAnswer, self.client._post_bytes('upload-runs', 'check', file.head(), extra_headers=extra, retry=True), 'file check')
         if not found.get('kind'): return {}
         if found.get('defaults_revision') != revision: raise Refused(MOVED)
@@ -501,14 +680,18 @@ class UploadRuns:
             self.decide(run, [item['ordinal']], 'declare', values); answered = True
         return answered
 
-    def unfinished(self, folder):
+    def unfinished(self, folder, declared=None):
         """The id of your unfinished upload of this folder (the same name, paths, sizes and digests), or None. An upload
-        whose files all ended but one still waits for a decision is unfinished too (E56, N8): `declare` may answer it now."""
+        whose files all ended but one still waits for a decision is unfinished too (E56, N8): `declare` may answer it now.
+        E122 s2 (D7): only the same send resumes: `declared` (source name, 'complete' or 'incremental', scope), or None
+        for an unnamed upload, equals the run's served `scope` block (none for an unnamed run)."""
         listing = folder.listing()
         for summary in self.list():
             if summary['state'] not in ('open', 'closed') or summary['folder_name'] != folder.name[:160]: continue
             view = self.status(summary['run_id']).view
             if summary['state'] == 'closed' and not any(i['state'] == 'needs-decision' and i['role'] == 'primary' for i in view['items']): continue
+            block = view.get('scope')
+            if (None if not block else (block['source_name'], block['send'], block['scope'])) != declared: continue
             if [{'path': i['path'], 'bytes': i['bytes'], 'sha256': i['sha256']} for i in view['items']] == listing: return summary['run_id']
         return None
 
@@ -538,7 +721,7 @@ class UploadRuns:
     def _post_file(self, run_id, ordinal, mode, raw, attempt=None, address=None, stored=False):
         header = {'project_id': self.client.project, 'run_id': run_id, 'ordinal': ordinal, 'mode': mode, **({'attempt': attempt} if attempt else {}),
                   **({'address': address} if address else {}), **({'bucket': True} if stored else {})}
-        extra = {'Content-Type': 'application/octet-stream', 'X-Ophiolite-Upload': base64.b64encode(json.dumps(header, separators=(',', ':')).encode()).decode()}
+        extra = self._header(header)
         self.sent_bytes += len(raw)
         return _checked(UploadRunStep, self.client._post_bytes('upload-runs', 'file', raw, extra_headers=extra, retry=mode == 'head'), 'folder upload file')
 

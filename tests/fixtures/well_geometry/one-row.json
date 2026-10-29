@@ -1,0 +1,27 @@
+{
+ "context": {
+  "type": "regular-grid-surface",
+  "crs": "EPSG:23031",
+  "xy_unit": "m",
+  "z_unit": "m",
+  "z_meaning": "depth",
+  "positive": "down",
+  "vertical_datum": "NAP",
+  "registration": "center",
+  "row_order": "north-to-south",
+  "ncols": 5,
+  "nrows": 1,
+  "cell_size": 100.0,
+  "x_first_center": 599800.0,
+  "y_first_center": 5900000.0,
+  "missing_count": 0
+ },
+ "values": [
+  1175.0022672948153,
+  1183.7511336474076,
+  1192.5,
+  1201.2488663525924,
+  1209.9977327051847
+ ],
+ "nodata_value": null
+}

@@ -6,6 +6,7 @@ from .errors import ValidationFailed
 from .las_header import curves as source_curves, null_marker as source_null_marker
 
 MAX_REQUEST_BYTES=2_100_000
+CHECK_REQUEST_BYTES=33_658_436  # D-38: the gateway's bound on checks publish and compare (three 8 MiB files in base64 + 104 000)
 
 
 def _number(value,marker):
@@ -84,10 +85,19 @@ def validate_changes(changes, *, values, null_marker):
     return changes
 
 
-def json_bytes(value):
+def receipt_matches(receipt, digest):
+    """E108 (N2, Q2): an upload receipt names the bytes sent: by `sha256` when it carries one (a declared-version's
+    revision is not the bytes' digest), else by its revision (a server from before E108). A receipt whose `sha256`
+    differs is refused even when its revision equals the digest."""
+    get = receipt.get if isinstance(receipt, dict) else lambda k: getattr(receipt, k, None)
+    named = get('sha256')
+    return named == digest if named is not None else get('revision') == digest
+
+
+def json_bytes(value,limit=MAX_REQUEST_BYTES):
     try:raw=json.dumps(value,allow_nan=False,separators=(',',':')).encode()
     except (ValueError,TypeError,OverflowError):raise ValidationFailed(['Request must be finite JSON data.']) from None
-    if len(raw)>MAX_REQUEST_BYTES:raise ValidationFailed(['Request exceeds 2,100,000 bytes.'])
+    if len(raw)>limit:raise ValidationFailed([f'Request exceeds {limit:,} bytes.'])
     return raw
 
 
@@ -109,22 +119,27 @@ from .models.generated import ApplicationCurve
 READ_OPERATIONS={'list','get','read','original','download','options','inspect','result-list','result-preview','result-download','result-history','info','members'}
 WRITE_OPERATIONS={'configure','start','publish','upload','share'}
 GROUP_OPERATIONS={'list','diff'}  # E8: result groups and diffs are read operations
-AI_OPERATIONS={'ai-use':{'get','grant','corpus'},'search':{'query'},'publications':{'derive','info','share','transform-preview','transform'}}  # E14; E30b publications; E64 changes
+AI_OPERATIONS={'ai-use':{'get','grant','corpus'},'search':{'query'},'publications':{'derive','info','share','transform-preview','transform'},  # E14; E30b publications; E64 changes
+               'rights':{'get','attach','renew'}}  # E35a: the rights to use data
 ENTITY_OPERATIONS={'entities':{'list','get','assets','associations','lineage','create','identify','share','associate','dissociate','extent'}}  # E20; E29 extent; H3 associations
-SOURCE_OPERATIONS={'sources':{'list','export','discover'}}  # E50a: the source reads (not READ_OPERATIONS, which would also allow applications/export); E59: a storage folder
+SOURCE_OPERATIONS={'sources':{'list','export','discover','export-file'}}  # E50a: the source reads (not READ_OPERATIONS, which would also allow applications/export); E59: a storage folder; E58b: export-file
 MAP_OPERATIONS={'maps':{'export'},'catalog':{'history'}}  # E70a C4: `get` of a scalar map and its version numbers (existing read routes)
 RESULT_OPERATIONS={'results':{'story','what-changed','dependents','remake-run','remake-save'}}  # E94: how a result was made, and making it again
 CHECK_OPERATIONS={'checks':{'publish','list','compare','publishers'}}  # E96: checks against a reference
 PROCEDURE_OPERATIONS={'procedures':{'register','list','get','bundle','enable','withdraw','trust'},  # E105b: the project catalogue
                       'procedure-runs':{'report','get','prepare-again'}}  # E106: a reported run and running a result again
-REPORT_OPERATIONS={'activity':{'report'}}  # E70b: a confirmed `get` reports which version this holder received
+OUTCOME_OPERATIONS={'outcomes':{'declare','revise','enable','disable','withdraw','list','get','states','evaluate','deliver-as','claims'}}  # E120: what a project accepts and where it delivers; s1: a result's states; s3: Deliver as and its claims
+REPORT_OPERATIONS={'activity':{'report','deliver','deliveries'}}  # E70b: a confirmed `get` reports which version this holder received; E109: a delivery's outcome and the deliveries page
 IMPORT_OPERATIONS={'well-imports':{'preview','start','step','status','list','cancel'},  # E42a: import a copy of an approved well table
-                   'upload-runs':{'start','file','check','file-parts','status','list','cancel','associate','decide','share','sample'},  # E55: a folder upload; E85: check; E91: the sample
+                   'upload-runs':{'start','file','check','file-parts','status','list','cancel','associate','decide','share','sample','convert','convert-original','convert-output','basis'},  # E55: a folder upload; E85: check; E91: the sample; E107a: read on your computer (C4: the original kept); E123 S3b: basis
                    'table-imports':{'read','preview','start','step','status','pause','resume','cancel','list'},  # E87: a table becomes typed data
                    'well-names':{'propose','accept','aliases','go-back'},  # E88: the wells a set of runs names
-                   'layouts':{'list','get','match','export','save','rename','retire','use-again','import','keep','update','reconnect'}}  # E89: layouts
+                   'layouts':{'list','get','match','export','save','rename','retire','use-again','import','keep','update','reconnect'},  # E89: layouts
+                   'public-repositories':{'catalogue','search','preview','import','check','collections','features-preview','features-import'}}  # E60: public repositories (NLOG; features services, C5c)
 RELEASE_OPERATIONS={'releases':{'list','get','download','download-snapshot'}}  # E50c: the kept copies Wells.with_source reads (read routes only)
 SESSION_OPERATIONS={'las-uploads':{'begin','part','state','finish','cancel'},'capabilities':{'describe'}}  # E54: a file sent in parts; the served limits
+KEPT_OPERATIONS={'las-uploads':{'provenance-stage',  # E107a C6b: an import stages a bundle's kept original before its upload
+                                'check-member'}}  # E111 s4a: a well set's member checked again before a run (stores nothing)
 NEW_DATA_OPERATIONS={'context':{'new-data','new-data-save'},'las-uploads':{'audience','audience-preview','audience-save'},
                      'templates':{'list','csv','xlsx'}}  # E90: New data settings; the one control on an original. E91: table templates
 
@@ -138,8 +153,8 @@ def operation_path(project,area,operation):
         if operation not in ORGANIZATION_OPERATIONS[area]:raise Refused('Unsupported application operation.')
         return '/api/v1/'+area+'/'+operation
     allowed=(GROUP_OPERATIONS if area=='result-groups' else READ_OPERATIONS|WRITE_OPERATIONS if area in ('applications','las-uploads')
-             else ENTITY_OPERATIONS.get(area) or SOURCE_OPERATIONS.get(area) or MAP_OPERATIONS.get(area) or REPORT_OPERATIONS.get(area) or RESULT_OPERATIONS.get(area) or CHECK_OPERATIONS.get(area) or PROCEDURE_OPERATIONS.get(area) or IMPORT_OPERATIONS.get(area) or RELEASE_OPERATIONS.get(area) or AI_OPERATIONS.get(area,set()))
-    allowed=allowed|SESSION_OPERATIONS.get(area,set())|NEW_DATA_OPERATIONS.get(area,set())
+             else ENTITY_OPERATIONS.get(area) or SOURCE_OPERATIONS.get(area) or MAP_OPERATIONS.get(area) or REPORT_OPERATIONS.get(area) or RESULT_OPERATIONS.get(area) or CHECK_OPERATIONS.get(area) or PROCEDURE_OPERATIONS.get(area) or OUTCOME_OPERATIONS.get(area) or IMPORT_OPERATIONS.get(area) or RELEASE_OPERATIONS.get(area) or AI_OPERATIONS.get(area,set()))
+    allowed=allowed|SESSION_OPERATIONS.get(area,set())|NEW_DATA_OPERATIONS.get(area,set())|KEPT_OPERATIONS.get(area,set())
     if operation not in allowed:
         raise Refused('Unsupported application operation.')
     return '/api/v1/projects/'+quote(project,safe='')+'/'+area+'/'+operation
@@ -434,10 +449,10 @@ class WorkFolder:
         else:
             owner=_stored(self.path/'owner.json')
             data=self.client._post_bytes(area,operation,raw,extra_headers=metadata['headers'] or None,headers=headers,retry=True,expected_context=(owner['url'],owner['project']))
-            if operation=='upload' and data.get('revision')!=metadata['sha256']:raise VerificationFailed('The uploaded original has a different checksum revision.')
+            if operation=='upload' and not receipt_matches(data,metadata['sha256']):raise VerificationFailed('The uploaded original has a different checksum revision.')
             self._typed(operation,data,metadata['request'])  # Refuse malformed responses before checkpointing.
             _checkpoint(response_path,data)
-        if operation=='upload' and data.get('revision')!=metadata['sha256']:raise VerificationFailed('The uploaded original has a different checksum revision.')
+        if operation=='upload' and not receipt_matches(data,metadata['sha256']):raise VerificationFailed('The uploaded original has a different checksum revision.')
         result=self._typed(operation,data,metadata['request'])
         self._finish(operation,data,state)
         return result
@@ -561,7 +576,7 @@ class WorkFolder:
                 response=self.path/'responses'/path.name.replace('.meta.json','.json')
                 if response.exists():
                     data=_stored(response)
-                    if metadata['operation']=='upload' and data.get('revision')!=metadata['sha256']:raise VerificationFailed('The uploaded original has a different checksum revision.')
+                    if metadata['operation']=='upload' and not receipt_matches(data,metadata['sha256']):raise VerificationFailed('The uploaded original has a different checksum revision.')
                     self._typed(metadata['operation'],data,metadata['request'])
                     self._finish(metadata['operation'],data,self._state());continue
                 operation=metadata['operation'];body={k:v for k,v in metadata['request'].items() if k!='project_id'}
@@ -612,7 +627,7 @@ def upload_bytes(source):
 
 
 def upload_metadata(project,command_id,*,filename,name,attribution,audience,rights_confirmed,well_notes='',profile=None,declared=None,well_log=None,origin=None,
-                    append_to=None,expected_parent=None):
+                    append_to=None,expected_parent=None,provenance=None,application_source=None):
     value={'project_id':project,'command_id':command_id,'filename':filename,'name':name,'attribution':attribution,
            'audience':audience,'rights_confirmed':rights_confirmed,'well_notes':well_notes}
     # Fields are sent only when used, so existing LAS uploads keep their exact request (and retry fingerprint).
@@ -622,6 +637,8 @@ def upload_metadata(project,command_id,*,filename,name,attribution,audience,righ
     if origin is not None:value['origin']=origin
     if (append_to is None)!=(expected_parent is None):raise ValidationFailed(['Name the result and the version it replaces.'])
     if append_to is not None:value.update(append_to=append_to,expected_parent=expected_parent)  # E53: a new version of your own upload
+    if provenance is not None:value['provenance']=provenance  # E107a C6b: the staged original kept beside this file
+    if application_source is not None:value['source']=source_block(application_source)  # E122 s6: where the file was sent from
     try:api.UploadRequest.model_validate(value)
     except ValidationError:raise ValidationFailed(['Confirm rights, project, name, attribution and bounded upload details.']) from None
     validate_recipients(audience,[])
@@ -657,8 +674,38 @@ def _parent(value):
     return parent
 
 
-def derive_request(project,written,*,name,from_,method,command_id,of_entity=None,new_version_of=None,expected_parent=None,procedure=None):
-    """The X-Ophiolite-Upload header of publications/derive, validated before anything is sent."""
+SOURCE_SYSTEM='A send names an application source: application:<client id>.'  # E122 s4a (D1), the server's words
+SOURCE_WITH_RUN="A procedure's output does not name an application source."
+_SOURCE_SUFFIX=re.compile(r'^[a-z0-9._-]{1,128}$')
+
+
+def source_block(source):
+    """E122 s4a: the application object a sent file came from, as the server takes it: {system: 'application:<client id>',
+    instance (the workspace) or None, container or None, id, as_new}."""
+    if not isinstance(source,dict) or set(source)-{'system','instance','container','id','as_new'}:raise ValidationFailed([SOURCE_SYSTEM])
+    system=source.get('system')
+    if not isinstance(system,str) or len(system)>140 or not system.startswith('application:') or not _SOURCE_SUFFIX.match(system[len('application:'):]):
+        raise ValidationFailed([SOURCE_SYSTEM])
+    for key,most,required in (('instance',160,False),('container',256,False),('id',256,True)):
+        value=source.get(key)
+        if (value is None and required) or (value is not None and not (isinstance(value,str) and 0<len(value)<=most)):
+            raise ValidationFailed(['Name the object you send by its id (1-256 characters), its workspace (up to 160) and its container (up to 256).'])
+    if not isinstance(source.get('as_new',False),bool):raise ValidationFailed(['as_new is true or false.'])
+    block={'system':system,'id':source['id']}
+    for key in ('instance','container'):
+        if source.get(key) is not None:block[key]=source[key]
+    if source.get('as_new'):block['as_new']=True
+    return block
+
+
+def compares(body):
+    """E122 s4a (D3): the server compares this send with what its application object sent before."""
+    return 'source' in body and not body['source'].get('as_new') and body.get('new_version_of') is None
+
+
+def derive_request(project,written,*,name,from_,method,command_id,of_entity=None,new_version_of=None,expected_parent=None,procedure=None,source=None):
+    """The X-Ophiolite-Upload header of publications/derive, validated before anything is sent. E122 s4a: `source` (see
+    `source_block`) is added only when given."""
     import hashlib
     from .writers import WrittenOriginal
     if not isinstance(written,WrittenOriginal):raise ValidationFailed(['Publish a file made by ophiolite.writers (a WrittenOriginal).'])
@@ -673,6 +720,12 @@ def derive_request(project,written,*,name,from_,method,command_id,of_entity=None
     if (new_version_of is None)!=(expected_parent is None):raise ValidationFailed(['A new version names both your earlier result and the version it replaces.'])
     if new_version_of is not None:body.update(new_version_of=new_version_of,expected_parent=expected_parent)
     if procedure is not None:body['run']={'id':procedure['id'],'role':procedure['role']}  # E106: an output of a reported run
+    if source is not None:
+        if procedure is not None:raise ValidationFailed([SOURCE_WITH_RUN])
+        body['source']=source_block(source)
+    if (procedure or {}).get('for_outcome') is not None:  # E120: "Publish for" an outcome, for an output of a run made again
+        if not isinstance(procedure['for_outcome'],str) or not 0<len(procedure['for_outcome'])<=64:raise ValidationFailed(['Name the outcome to publish for by its id.'])
+        body['for_outcome']=procedure['for_outcome']
     if not 1<=len(parents)<=32 or len({(p['asset_id'],p['revision']) for p in parents})!=len(parents):raise ValidationFailed(['Name 1-32 distinct parents.'])
     if not isinstance(name,str) or not name.strip() or len(name)>160:raise ValidationFailed(['Give the result a name (up to 160 characters).'])
     try:api.MethodRecord.model_validate(method)
@@ -686,9 +739,12 @@ def derive_request(project,written,*,name,from_,method,command_id,of_entity=None
 
 
 def verify_derived(body,receipt):
-    """The receipt names this file, these parents (in order) and this method."""
+    """The receipt names this file, these parents (in order) and this method. E122 s4a (D4, S6): only for a send the
+    server compared may it say `unchanged`, and then it names the stored version's parents, which are not compared."""
     if receipt.revision!=body['output_sha256'] or receipt.command_id!=body['command_id'] or receipt.profile!=body['profile']:
         raise VerificationFailed('The publication receipt names a different file or command.')
+    if receipt.source_change is not None and not compares(body):raise VerificationFailed('The publication receipt answers a comparison this send did not ask for.')
+    if receipt.source_change=='unchanged':return receipt
     # A parent kept from a connected source (a package copy) is recorded by that source's own reference, so its key is the
     # source's; the exact revision (the copy's sha256) still has to match. Ophiolite's own parents match by asset id too.
     named=[(r.authority.startswith('ophiolite:'),r.key,r.revision) for r in receipt.derived_from]

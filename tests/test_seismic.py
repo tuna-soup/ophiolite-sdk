@@ -112,6 +112,9 @@ def mock(v, slice_bytes, calls):
         if request.url.path == base + '/representations/data': return httpx.Response(200, content=v._wire_data_bytes)
         if request.url.path.startswith(base + '/slices/'):
             axis, label = request.url.path.rsplit('/', 2)[1:]; return httpx.Response(200, content=slice_bytes(axis, int(label)))
+        if request.url.path == base + '/provenance':  # E122 s5b: a current gateway, this version stored before records began
+            return httpx.Response(200, json={'schema': 'ophiolite.source-provenance/1', 'asset_id': descriptor['asset_id'], 'revision': descriptor['revision'],
+                                             'record': None, 'observation': None, 'words': 'Where this came from was not recorded.', 'gone': None})
         return httpx.Response(404, json={'error': {'code': 'unavailable'}})
     return httpx.MockTransport(handler), base
 

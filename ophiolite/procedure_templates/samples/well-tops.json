@@ -1,0 +1,24 @@
+{
+  "tops": [
+    {
+      "name": "NU",
+      "md": 1203.5,
+      "tvd": 1198.2,
+      "source": "picks 2024"
+    },
+    {
+      "name": "NM",
+      "md": 1421.0,
+      "tvd": null,
+      "source": ""
+    },
+    {
+      "name": "NL",
+      "md": 1650.25,
+      "tvd": 1601.0,
+      "source": "picks 2024"
+    }
+  ],
+  "depth_unit": "m",
+  "depth_basis": "same-as-log"
+}

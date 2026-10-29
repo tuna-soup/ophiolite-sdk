@@ -4,14 +4,15 @@
  "target": "table",
  "display_name": "Table",
  "description": "Any table kept as its columns, each with an optional description, unit, quantity and missing-value marker, and optionally a key and its x and y columns.",
- "lands_on": [],
+ "lands_on": [
+  "table-csv/1",
+  "table-excel/1",
+  "table-parquet/1"
+ ],
  "connected_profiles": [
   "table/1"
  ],
- "pending": {
-  "epic": "E58b",
-  "profiles": []
- },
+ "pending": null,
  "standards": {
   "none": "A table keeps its columns as given; no standard type applies"
  },

@@ -1,0 +1,33 @@
+"""Sends this procedure's sample to a folder on this computer and finds the delivery again: python -m pytest -q tests"""
+import importlib.util
+from pathlib import Path
+
+import ophiolite
+from ophiolite.procedures import DeliveryAttempt, LocalSystem, LocalVersion
+
+HERE = Path(__file__).resolve().parents[1]
+SAMPLE = HERE / 'data' / '$file'
+
+
+def procedure():
+    spec = importlib.util.spec_from_file_location('procedure_under_test', HERE / 'procedure.py')
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_it_delivers_the_sample_and_reconcile_finds_it(tmp_path):
+    system = LocalSystem({'folder': str(tmp_path)})
+    attempt = DeliveryAttempt('delivery-1', system)
+    sent = procedure().main({'data': [LocalVersion(str(SAMPLE), '$profile', $declared)], 'destination': system}, {}, attempt)
+    assert sent == ophiolite.delivered(items=1)
+    assert (tmp_path / 'delivery-1' / '0-$file').read_bytes() == SAMPLE.read_bytes()
+    assert procedure().reconcile(attempt) == ophiolite.delivered(items=1)
+
+
+def test_reconcile_withdraws_a_delivery_that_never_arrived(tmp_path):
+    system = LocalSystem({'folder': str(tmp_path)})
+    attempt = DeliveryAttempt('delivery-2', system)
+    assert procedure().reconcile(attempt) == ophiolite.not_delivered()
+    late = procedure().main({'data': [LocalVersion(str(SAMPLE), '$profile', $declared)], 'destination': system}, {}, attempt)
+    assert late == ophiolite.refused('This delivery was withdrawn at the destination.')

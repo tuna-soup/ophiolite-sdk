@@ -1,7 +1,8 @@
 import { adapt, type UploadMetadata } from "./api-types.js";
-import { CapacityExceeded, Refused, ShareOutcomeUnknown, VerificationFailed, httpError } from "./errors.js";
+import { CapacityExceeded, Refused, ShareOutcomeUnknown, VerificationFailed, refusalError, type OphioliteError } from "./errors.js";
 import { object, requireValue, validateDescriptor, verifyPair } from "./verify.js";
 import { postProjectsProjectResultsDependents, postProjectsProjectResultsRemakeRun, postProjectsProjectResultsRemakeSave, postProjectsProjectResultsStory, postProjectsProjectResultsWhatChanged } from "./generated/operations.js";
+import { postProjectsProjectRightsAttach, postProjectsProjectRightsGet, postProjectsProjectRightsRenew } from "./generated/operations.js";
 import type { postProjectsProjectResultsRemakeSaveInput } from "./generated/operations.js";
 export * from "./errors.js";
 export * from "./api-types.js";
@@ -16,6 +17,18 @@ export interface Transport {
   request<T>(method: string, path: string, params: Record<string, unknown>, query?: Record<string, unknown>, body?: unknown, options?: OperationOptions, adapter?: string | null, binary?: boolean): Promise<T>;
 }
 const MAX_BYTES = 32 * 1024 * 1024;
+const ENVELOPE_BYTES = 64 * 1024;
+
+/** E35a: a refusal's category, from its envelope's code when it names one (read with a bound), else from its status. */
+async function refusal(response: Response): Promise<OphioliteError> {
+  let body: unknown;
+  try {
+    if (Number(response.headers.get("Content-Length")) > ENVELOPE_BYTES) { await response.body?.cancel(); return refusalError(response.status, undefined); }
+    const text = await response.text();
+    if (text.length <= ENVELOPE_BYTES) body = JSON.parse(text);
+  } catch { body = undefined; }
+  return refusalError(response.status, body);
+}
 /** E94: the revision manifest profiles this package reads (/3 carries how a result was made). */
 export const PROFILES = "/1,/2,/3";
 function uploadHeader(value: UploadMetadata): string {
@@ -65,7 +78,7 @@ export class Client implements Transport {
     try { response = await this.fetcher(url, { method, headers, body: payload, redirect: "manual", credentials: this.auth.mode === "session" ? "include" : "omit", signal: options?.signal }); }
     catch (error) { if (share) throw new ShareOutcomeUnknown(); throw error; }
     if (response.type === "opaqueredirect" || (response.status >= 300 && response.status < 400)) throw new Refused(response.status);
-    if (!response.ok) throw httpError(response.status);
+    if (!response.ok) throw await refusal(response);
     if (Number(response.headers.get("Content-Length")) > MAX_BYTES) { await response.body?.cancel(); throw new CapacityExceeded(); }
     const reader = response.body?.getReader(); if (!reader) return new Uint8Array();
     const chunks: Uint8Array[] = []; let size = 0;
@@ -125,4 +138,23 @@ export function remake(transport: Transport, project: string, asset: string, rev
 export function remakeSave(transport: Transport, project: string, execution_id: string, outputs: postProjectsProjectResultsRemakeSaveInput["body"]["outputs"], options?: OperationOptions): ReturnType<typeof postProjectsProjectResultsRemakeSave> {
   requireValue(outputs.length > 0 && outputs.every(o => (o.target === "new-result" || o.target === "new-version") && !!o.command_id));
   return postProjectsProjectResultsRemakeSave(transport, { path: { project }, body: { project_id: project, execution_id, outputs }, options });
+}
+/** E35a: what a rights basis is attached to: an original kept in the project, a release, or a connection target (with its key). */
+export type RightsTarget = { target_kind: "upload" | "release"; target_ref: string } | { target_kind: "connection"; target_ref: string; key: string };
+export type RightsChange = { uses: Array<"read" | "derive" | "export" | "model-use">; last_day: string; delete_on_end?: boolean };
+function rightsTarget(target: RightsTarget): RightsTarget {
+  if (!["upload", "release", "connection"].includes(target.target_kind) || !target.target_ref || (target.target_kind === "connection") !== ("key" in target && !!target.key)) throw new Refused();
+  return target;
+}
+/** E35a: the rights to use the target: what they permit, their last day, and whether you may change them ({ basis: null } when none). */
+export function rights(transport: Transport, project: string, target: RightsTarget, options?: OperationOptions): ReturnType<typeof postProjectsProjectRightsGet> {
+  return postProjectsProjectRightsGet(transport, { path: { project }, body: { project_id: project, ...rightsTarget(target) }, options });
+}
+/** E35a: record the rights to use data (project administrators, or the person who added the original). */
+export function attachRights(transport: Transport, project: string, target: RightsTarget, change: RightsChange, options?: OperationOptions): ReturnType<typeof postProjectsProjectRightsAttach> {
+  return postProjectsProjectRightsAttach(transport, { path: { project }, body: { project_id: project, ...rightsTarget(target), ...change }, options });
+}
+/** E35a: a new version of recorded rights, against the generation you read; a changed generation rejects with RightsConflict. */
+export function renewRights(transport: Transport, project: string, target: RightsTarget, change: RightsChange & { expected_generation: number }, options?: OperationOptions): ReturnType<typeof postProjectsProjectRightsRenew> {
+  return postProjectsProjectRightsRenew(transport, { path: { project }, body: { project_id: project, ...rightsTarget(target), ...change }, options });
 }

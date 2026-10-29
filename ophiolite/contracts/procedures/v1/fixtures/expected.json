@@ -17,7 +17,19 @@
       "procedure.json",
       "procedure.py"
     ],
+    "send-to-system": [
+      "procedure.json",
+      "procedure.py"
+    ],
     "check": [
+      "procedure.json",
+      "procedure.py"
+    ],
+    "process-residual": [
+      "procedure.json",
+      "procedure.py"
+    ],
+    "send-residual": [
       "procedure.json",
       "procedure.py"
     ]
@@ -211,6 +223,20 @@
       "field": "/outputs",
       "structural": false,
       "sentence": "Not valid: this step makes a different number of outputs."
+    },
+    "send-two-systems": {
+      "base": "send",
+      "code": "wrong-input-count",
+      "field": "/inputs",
+      "structural": false,
+      "sentence": "Not valid: this step reads a different number of inputs."
+    },
+    "reconcile-bad-entry": {
+      "base": "send",
+      "code": "bad-reconcile",
+      "field": "/reconcile",
+      "structural": true,
+      "sentence": "Not valid: reconcile must name a Python file of this folder and a function in it, as module:function."
     },
     "delivery-with-kind": {
       "base": "send",
@@ -428,6 +454,67 @@
       "field": "",
       "structural": false,
       "sentence": "Not valid: procedure.json is not readable JSON."
+    },
+    "residual-slot-missing": {
+      "base": "process",
+      "code": "residual-slot-missing",
+      "field": "/inputs",
+      "structural": false,
+      "sentence": "Not valid: a procedure that makes residual results reads a well set, tops, one surface and trajectories; one of them is missing."
+    },
+    "residual-slot-extra": {
+      "base": "process",
+      "code": "residual-slot-extra",
+      "field": "/inputs/4",
+      "structural": false,
+      "sentence": "Not valid: a procedure that makes residual results reads only a well set, tops, one surface and trajectories."
+    },
+    "residual-slot-kind": {
+      "base": "process",
+      "code": "residual-slot-kind",
+      "field": "/inputs/2/kinds",
+      "structural": false,
+      "sentence": "Not valid: input 3 reads a type of data a procedure that makes residual results does not read there."
+    },
+    "residual-cardinality": {
+      "base": "process",
+      "code": "residual-cardinality",
+      "field": "/inputs/1/cardinality",
+      "structural": false,
+      "sentence": "Not valid: input 2 takes one item where a procedure that makes residual results takes many, or many where it takes one."
+    },
+    "residual-settings": {
+      "base": "process",
+      "code": "residual-settings",
+      "field": "/settings",
+      "structural": false,
+      "sentence": "Not valid: a procedure that makes residual results has exactly two settings: the formation (a text) and how depths are shown (m or ft)."
+    },
+    "residual-outputs": {
+      "base": "process",
+      "code": "residual-outputs",
+      "field": "/outputs",
+      "structural": false,
+      "sentence": "Not valid: a procedure that makes residual results makes exactly one result, the residuals."
+    }
+  },
+  "deliveries": {
+    "valid": {
+      "delivery_id": "3f2b8c1e-9a4d-4e6f-8b2a-7c5d1e0f9a3b",
+      "state": "confirmed",
+      "items": 3
+    },
+    "cases": {
+      "delivery-extra-field": {
+        "code": "delivery-unknown-field",
+        "field": "/reason",
+        "sentence": "Not valid: a delivery holds only its delivery id, its state and its item count."
+      },
+      "delivery-bad-count": {
+        "code": "delivery-bad-count",
+        "field": "/items",
+        "sentence": "Not valid: a delivery's item count is a whole number from 0 to 1000000."
+      }
     }
   }
 }

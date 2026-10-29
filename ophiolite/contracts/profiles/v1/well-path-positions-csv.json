@@ -1,0 +1,35 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "well-path-positions-csv/1",
+  "kind": "source",
+  "lifecycle": "preview",
+  "display_name": "Well path (positions, CSV)",
+  "description": "A well path given as positions: CSV with the columns md, x, y and tvdss, kept byte for byte. x is easting and y northing; TVDSS is positive downward below the declared datum. Detected from the header md,x,y,tvdss in that order; any order is read once the kind is chosen.",
+  "serves": [
+    "ophiolite.scientific-asset/1"
+  ],
+  "connector": {
+    "scientific_profile": "well-path-source/1",
+    "source_schema": "CSV/md,x,y,tvdss",
+    "mapping_version": "well-path/1",
+    "history": "retained-exact-read"
+  },
+  "role": "artifact",
+  "media_types": [
+    "text/csv"
+  ],
+  "normalized_profile": "ophiolite.well-path/1",
+  "context_schema": "ophiolite.typed-context/1",
+  "representation_rules": {
+    "artifact_kind_by_origin": {
+      "source-reference": "original",
+      "retained-capture": "original",
+      "managed-derived": "derived-artifact"
+    },
+    "normalized": 1,
+    "total": 2
+  },
+  "table_target": {
+    "none": "not-a-table"
+  }
+}

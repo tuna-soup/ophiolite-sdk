@@ -1,4 +1,5 @@
-"""ophiolite.procedure/1 (E105a): the one validator for a procedure, its bundle digest, and its archive.
+"""ophiolite.procedure/1 (E105a): the one validator for a procedure, its bundle digest, and its archive. E109 (rules
+1.1.0): a send may name one destination system and a `reconcile` function; its delivery payload is delivery.py's.
 
 The Platform and the SDK run this same file (the SDK's copy is byte-identical, contracts/ snapshot), loaded from its
 source text so no bytecode is read or written:
@@ -42,7 +43,7 @@ LIMITS = RULES['limits']
 labels = _source_module(HERE.parent.parent / 'vocabulary' / 'v1' / 'labels.py', 'ophiolite_label_rule')
 
 FIELDS = {
-    'procedure': {'schema', 'name', 'label', 'version', 'version_label', 'step', 'inputs', 'outputs', 'settings', 'entry', 'requires', 'licence'},
+    'procedure': {'schema', 'name', 'label', 'version', 'version_label', 'step', 'inputs', 'outputs', 'settings', 'entry', 'reconcile', 'requires', 'licence'},
     'input': {'slot', 'label', 'class', 'signature', 'config_keys', 'kinds', 'cardinality', 'from'},
     'output': {'role', 'label', 'class', 'kind'},
     'setting': {'key', 'label', 'type', 'unit', 'default', 'minimum', 'maximum', 'choices'},
@@ -152,7 +153,7 @@ def _input(item, i, step, slots):
     _identifier(item['slot'], field + '/slot', where, slots)
     _label(item['label'], field + '/label', where)
     cls = item['class']
-    allowed = {'read': ('file',), 'source': ('system',), 'process': ('version',), 'send': ('version',), 'check': ('version', 'reference')}[step]
+    allowed = {'read': ('file',), 'source': ('system',), 'process': ('version',), 'send': ('version', 'system'), 'check': ('version', 'reference')}[step]  # E109 D1: a send may name its destination system
     if cls not in allowed: raise Invalid('wrong-input-class', field + '/class', where=where)
     extra = {'file': {'signature'}, 'system': {'config_keys'}, 'version': {'kinds', 'cardinality'}, 'reference': {'from', 'kinds', 'cardinality'}}[cls]
     stray = sorted(set(item) - {'slot', 'label', 'class'} - extra)
@@ -194,7 +195,7 @@ def _output(item, i, step, roles):
         if 'kind' not in item: raise Invalid('missing-field', field + '/kind', where=where)
         if item['kind'] not in kinds: raise Invalid('kind-not-allowed', field + '/kind', where=where)
     elif 'kind' in item:
-        raise Invalid('unknown-field', field + '/kind', where=where)  # delivery and comparison payloads come with E109, E110
+        raise Invalid('unknown-field', field + '/kind', where=where)  # a delivery's payload is fixed (delivery.py, E109); comparison payloads come with E110
 
 
 def _setting(item, i, keys):
@@ -233,11 +234,43 @@ def _setting(item, i, keys):
             raise Invalid('bad-default', field + '/default', where=where)
 
 
-def _entry(value, members):
+def _entry(value, members, field='/entry', grammar='bad-entry', missing='missing-file'):
     match = ENTRY.match(value) if isinstance(value, str) else None
-    if not match: raise Invalid('bad-entry', '/entry')
+    if not match: raise Invalid(grammar, field)
     module = match.group(1).replace('.', '/')
-    if module + '.py' not in members and module + '/__init__.py' not in members: raise Invalid('missing-file', '/entry')
+    if module + '.py' not in members and module + '/__init__.py' not in members: raise Invalid(missing, field)
+
+
+RESIDUAL = RULES['residual_procedure']
+
+
+def is_residual(manifest):
+    """E119b D1: a process manifest with a `well-residual/1` output; registration holds it to the one shape."""
+    return manifest.get('step') == 'process' and any(o.get('kind') == RESIDUAL['output'] for o in manifest.get('outputs', []))
+
+
+def parent_slots(manifest):
+    """E119b D2: the slots whose versions are parents of a result: every slot, except a residual procedure's pinned
+    ones (`residual_procedure.pinned`, empty in this version). The SDK applies the same rule (`procedures.parent_slots`)."""
+    pinned = set(RESIDUAL['pinned']) if is_residual(manifest) else set()
+    return [i['slot'] for i in manifest['inputs'] if i['slot'] not in pinned]
+
+
+def _residual(manifest):
+    """The one shape of a residual procedure: its four slots (kind and cardinality), its two settings, one output."""
+    slots = {i['slot']: (n, i) for n, i in enumerate(manifest['inputs'])}
+    if set(RESIDUAL['slots']) - set(slots): raise Invalid('residual-slot-missing', '/inputs')
+    if set(slots) - set(RESIDUAL['slots']): raise Invalid('residual-slot-extra', '/inputs/%d' % min(n for k, (n, _) in slots.items() if k not in RESIDUAL['slots']))
+    for slot, rule in RESIDUAL['slots'].items():
+        n, item = slots[slot]
+        if item['kinds'] != [rule['kind']]: raise Invalid('residual-slot-kind', '/inputs/%d/kinds' % n, where=_where('input', n + 1))
+        if item['cardinality'] != rule['cardinality']: raise Invalid('residual-cardinality', '/inputs/%d/cardinality' % n, where=_where('input', n + 1))
+    settings = {s['key']: s for s in manifest.get('settings', [])}
+    wanted = RESIDUAL['settings']
+    if set(settings) != set(wanted) or any(settings[k]['type'] != rule['type'] for k, rule in wanted.items()) or \
+            sorted(c['value'] for c in settings['display_unit'].get('choices', [])) != sorted(wanted['display_unit']['choices']):
+        raise Invalid('residual-settings', '/settings')
+    if len(manifest['outputs']) != 1: raise Invalid('residual-outputs', '/outputs')
 
 
 def check_manifest(manifest, members):
@@ -256,13 +289,18 @@ def check_manifest(manifest, members):
     classes = [item['class'] for item in inputs]
     if step in ('read', 'source') and len(inputs) != 1: raise Invalid('wrong-input-count', '/inputs')
     if step == 'check' and sorted(classes) != ['reference', 'version']: raise Invalid('wrong-input-count', '/inputs')
+    if step == 'send' and (classes.count('system') > RULES['send_systems'] or 'version' not in classes): raise Invalid('wrong-input-count', '/inputs')  # E109 D1
     outputs = _list(manifest['outputs'], '/outputs', _where('procedure'), LIMITS['outputs'], 1)
     roles = set()
     for i, item in enumerate(outputs): _output(item, i, step, roles)
     if step in ('send', 'check') and len(outputs) != 1: raise Invalid('wrong-output-count', '/outputs')
     keys = set()
     for i, item in enumerate(_list(manifest.get('settings', []), '/settings', _where('procedure'), LIMITS['settings'])): _setting(item, i, keys)
+    if step == 'process' and any(o['kind'] == RESIDUAL['output'] for o in outputs): _residual(manifest)
     _entry(manifest['entry'], members)
+    if 'reconcile' in manifest:  # E109 D3: a send's optional `reconcile(delivery)`, checked as the entry is (never imported)
+        if step != 'send': raise Invalid('reconcile-not-send', '/reconcile')
+        _entry(manifest['reconcile'], members, '/reconcile', 'bad-reconcile', 'bad-reconcile')
     for i, item in enumerate(_list(manifest.get('requires', []), '/requires', _where('procedure'), LIMITS['requires'])):
         _text(item, f'/requires/{i}', _where('procedure'))
     if 'licence' in manifest: _text(manifest['licence'], '/licence', _where('procedure'))
