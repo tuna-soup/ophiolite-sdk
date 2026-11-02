@@ -91,6 +91,18 @@
       ]
     },
     {
+      "profile": "ophiolite.seismic-line/1",
+      "osdu": "work-product-component--SeismicTraceData (with a SeismicLineGeometry)",
+      "energistics": "RESQML 2.0.1 SeismicLineFeature with a PolylineRepresentation for the trace positions; samples stay in the SEG-Y original",
+      "segy": "SEG-Y rev 1 / rev 2.0: formats 1 and 5, big-endian, fixed-length traces, marked on textual header line C6 by Ophiolite's exporter",
+      "evo": "not declared",
+      "differences": [
+        "Only files carrying the exporter's marker are read as a line; any other SEG-Y is read as a volume.",
+        "Every trace keeps its position in file order; no grid, bin or shot-point interpolation is derived.",
+        "Samples are not published in this version; the full line is available only as the exact original."
+      ]
+    },
+    {
       "profile": "ophiolite.well-location-upload/1",
       "osdu": "master-data--Well (SpatialLocation.Wgs84Coordinates / AsIngestedCoordinates with its CRS)",
       "energistics": "WITSML 2.1 Well / WellLocation (Easting, Northing or Latitude, Longitude with a CRS)",
@@ -210,6 +222,12 @@
       "osdu": "none: a file format; its normalized profile is ophiolite.polyline-set/1",
       "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
       "normalized_profile": "ophiolite.polyline-set/1"
+    },
+    {
+      "profile": "petrel-well-tops/1",
+      "osdu": "none: a file format; its normalized profile is ophiolite.well-tops/1",
+      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "normalized_profile": "ophiolite.well-tops/1"
     },
     {
       "profile": "esri-shapefile/1",

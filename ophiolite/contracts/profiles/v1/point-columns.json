@@ -1,0 +1,21 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "ophiolite.point-columns/1",
+  "kind": "normalized",
+  "lifecycle": "preview",
+  "display_name": "Point set read in sections",
+  "description": "A point set of a points CSV above 100,000 nodes, stored as float64 columns (x, y, z when present, then each attribute) after a JSON header; missing values are NaN.",
+  "payload_schema": "ophiolite.point-columns/1",
+  "role": "normalized",
+  "media_types": [
+    "application/vnd.ophiolite.point-columns"
+  ],
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "parsing_policy": "typed-strict/1",
+    "mapping": "point-set/1"
+  },
+  "table_target": {
+    "none": "normalized-form"
+  }
+}

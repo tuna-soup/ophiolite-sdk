@@ -1,0 +1,25 @@
+{
+ "schema": "ophiolite.story/1",
+ "root": "n-sent-2",
+ "nodes": [
+  {"id": "n-sent-2", "kind": "declared", "asset_id": "a-sent", "revision": "r-sent-2", "version": 2, "name": "SAP-10 tops",
+   "made": {"at": "2026-10-28T10:00:00Z", "by": "bram", "by_kind": null, "by_name": null, "on_behalf_of": null, "through": null, "reported_by": "bram"},
+   "method": {"display": "Method declared by its publisher", "version_label": "Not recorded", "release": "Not recorded"}, "settings": [], "history": null,
+   "newer_input": false, "inputs": [{"id": "n-sent-1", "slot": null}],
+   "based_on": [{"asset_id": "a-sent", "revision": "r-sent-1", "kind": "version", "name": "SAP-10 tops", "version": 1, "file": null}],
+   "technical": {"asset_id": "a-sent", "revision": "r-sent-2", "declared_method": "tops-correction"}},
+  {"id": "n-sent-1", "kind": "declared", "asset_id": "a-sent", "revision": "r-sent-1", "version": 1, "name": "SAP-10 tops",
+   "made": {"at": "2026-10-27T10:00:00Z", "by": "bram", "by_kind": null, "by_name": null, "on_behalf_of": null, "through": null, "reported_by": "bram"},
+   "method": {"display": "Method declared by its publisher", "version_label": "Not recorded", "release": "Not recorded"}, "settings": [], "history": null,
+   "newer_input": false, "inputs": [{"id": "n-up", "slot": null}],
+   "based_on": [{"asset_id": "a-up", "revision": "r-up-1", "kind": "upload", "name": "SAP-10 tops", "version": 1, "file": "tops.csv"}],
+   "technical": {"asset_id": "a-sent", "revision": "r-sent-1", "declared_method": "tops-correction"}},
+  {"id": "n-up", "kind": "original", "asset_id": "a-up", "revision": "r-up-1", "version": 1, "name": "SAP-10 tops",
+   "made": {"at": "2026-10-26T08:30:00Z", "by": "sanne", "by_kind": "person", "by_name": null, "on_behalf_of": null, "through": "the browser", "reported_by": null},
+   "method": null, "settings": [], "history": null, "file": "tops.csv", "inputs": [], "technical": {"asset_id": "a-up", "revision": "r-up-1"}}
+ ],
+ "restricted": false,
+ "next_cursor": null,
+ "continue_from": null,
+ "display": {"member_names": {"sanne": "Sanne de Vries", "bram": "Bram Koster"}}
+}

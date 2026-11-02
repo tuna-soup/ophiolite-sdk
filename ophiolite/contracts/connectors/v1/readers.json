@@ -1880,7 +1880,7 @@
    "detect": "well_set_json",
    "limits": {
     "names": [],
-    "template": "One JSON document with schema ophiolite.well-set/1, a label and 1 to 29 members · each member names a well and a wellbore by id, with one trajectory revision and its frame, or neither · up to 256 KiB. Nothing is looked up, converted or filled in."
+    "template": "One JSON document with schema ophiolite.well-set/1, a label and 1 to 29 members · each member names a well and a wellbore by id, with one trajectory revision and its frame, a trajectory revision saved without a frame, or neither · up to 256 KiB. Nothing is looked up, converted or filled in."
    },
    "declared": [],
    "companions": [],
@@ -2273,6 +2273,151 @@
    "states": {
     "function": null,
     "items": []
+   },
+   "landing": "retained"
+  },
+  {
+   "profile": "petrel-well-tops/1",
+   "label": "Petrel well tops",
+   "extensions": [
+    ".txt",
+    ".dat"
+   ],
+   "detect": "petrel_well_tops_header",
+   "limits": {
+    "names": [],
+    "template": "Petrel well-tops export (VERSION 2, one column name per header line) · up to 10,000 tops of one well. Each top is its Surface at its MD, in file order with repeats kept; the file states the depth unit; other columns are listed as not read."
+   },
+   "declared": [
+    {
+     "key": "depth_unit",
+     "label": "Depth unit",
+     "kind": "unit",
+     "hint": "For example m or ft"
+    },
+    {
+     "key": "depth_basis",
+     "label": "Depth reference",
+     "kind": "choice",
+     "choices": {
+      "same-as-log": "Same depth reference as the associated well log",
+      "other": "A different depth reference",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "depth_datum",
+     "label": "Depth datum",
+     "kind": "text",
+     "hint": "For example rotary table"
+    }
+   ],
+   "companions": [],
+   "recipe": false,
+   "osdu": {
+    "kind": "work-product-component--WellboreMarkerSet",
+    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+   },
+   "route": {
+    "document": "typed-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "synthetic",
+    "path": "tests/fixtures/petrel_tops/well_tops.txt",
+    "sha256": "acb8031272960571027f0c3e396e27625d37ab1da67ca20ba52f4873415dcd93",
+    "bytes": 1581,
+    "exception": "D75"
+   },
+   "report": "{count:,} tops",
+   "type": "well-tops",
+   "mapping": "well-tops/1",
+   "states": {
+    "function": "petrel_tops",
+    "items": [
+     {
+      "key": "depth_unit",
+      "label": "Depth unit",
+      "from": "head"
+     }
+    ]
+   },
+   "landing": "retained"
+  },
+  {
+   "profile": "segy-line/1",
+   "label": "2D seismic line (SEG-Y)",
+   "extensions": [],
+   "detect": "segy_line_marker",
+   "limits": {
+    "names": [
+     "file_bytes"
+    ],
+    "template": "A 2D seismic line written by Ophiolite's exporter (textual header line C6 “OPHIOLITE 2D SEISMIC LINE”), SEG-Y rev 1 or 2, big-endian, IBM or IEEE 4-byte samples, one trace length, at most 200,000 traces · up to {file_bytes}. The file is kept byte for byte; every trace keeps its trace number, source point and position in file order."
+   },
+   "declared": [
+    {
+     "key": "z_domain",
+     "label": "Samples are",
+     "kind": "choice",
+     "choices": {
+      "time": "Time",
+      "depth": "Depth",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "crs",
+     "label": "Coordinate system",
+     "kind": "crs",
+     "hint": "EPSG code such as EPSG:23031"
+    },
+    {
+     "key": "datum",
+     "label": "Datum",
+     "kind": "text",
+     "hint": "For example mean sea level"
+    }
+   ],
+   "companions": [],
+   "recipe": false,
+   "osdu": {
+    "kind": "work-product-component--SeismicTraceData",
+    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+   },
+   "route": {
+    "document": "typed-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "synthetic",
+    "path": "tests/fixtures/readers/line.sgy",
+    "sha256": "24bf92bb07e29a62783e9d18c2dc9114dddce6d145a292a18bc87457bbcef679",
+    "bytes": 4880,
+    "exception": "D75"
+   },
+   "report": "{traces:,} traces, {samples:,} samples per trace",
+   "type": "seismic-line",
+   "mapping": "seismic-line/1",
+   "states": {
+    "function": "segy",
+    "items": [
+     {
+      "key": "sample_interval",
+      "label": "Sample interval",
+      "from": "head"
+     },
+     {
+      "key": "samples_per_trace",
+      "label": "Samples per trace",
+      "from": "head"
+     },
+     {
+      "key": "sample_format",
+      "label": "Sample format",
+      "from": "head"
+     }
+    ]
    },
    "landing": "retained"
   }

@@ -1,0 +1,20 @@
+{
+ "subject": "request bodies of consent/grant, consent/withdraw and consent/list, checked by the strict request models; a refused body is the structural 400 naming its field, never a consent sentence (R1-3)",
+ "valid": {
+  "grant": {"operation": "grant", "body": {"purpose": "training", "text_version": 0, "command_id": "c-1"}},
+  "grant-with-the-extra": {"operation": "grant", "body": {"purpose": "evaluation", "text_version": 1, "extras": ["instruction-text"], "command_id": "c_2-B"}},
+  "withdraw": {"operation": "withdraw", "body": {"purpose": "training", "command_id": "c-3"}},
+  "list": {"operation": "list", "body": {}}
+ },
+ "invalid": {
+  "list-names-a-person": {"operation": "list", "body": {"person": "u-bob"}, "field": "person"},
+  "grant-for-embedding": {"operation": "grant", "body": {"purpose": "embedding", "text_version": 0, "command_id": "c-1"}, "field": "purpose"},
+  "grant-an-unknown-extra": {"operation": "grant", "body": {"purpose": "training", "text_version": 0, "extras": ["values"], "command_id": "c-1"}, "field": "extras"},
+  "grant-a-duplicate-extra": {"operation": "grant", "body": {"purpose": "training", "text_version": 0, "extras": ["instruction-text", "instruction-text"], "command_id": "c-1"}, "field": "extras"},
+  "a-command-with-a-space": {"operation": "grant", "body": {"purpose": "training", "text_version": 0, "command_id": "c 1"}, "field": "command_id"},
+  "a-negative-text-version": {"operation": "grant", "body": {"purpose": "training", "text_version": -1, "command_id": "c-1"}, "field": "text_version"},
+  "a-text-version-as-a-string": {"operation": "grant", "body": {"purpose": "training", "text_version": "0", "command_id": "c-1"}, "field": "text_version"},
+  "withdraw-names-a-text-version": {"operation": "withdraw", "body": {"purpose": "training", "text_version": 0, "command_id": "c-1"}, "field": "text_version"},
+  "grant-sets-the-person": {"operation": "grant", "body": {"purpose": "training", "text_version": 0, "command_id": "c-1", "person": "u-bob"}, "field": "person"}
+ }
+}

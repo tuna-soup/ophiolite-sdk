@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools==84.0.0"]  # pinned: the released wheel is byte-identical to the one the release qualified
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -20,7 +20,11 @@ lasio = ["lasio>=0.32"]  # E126a: ophiolite.lasio (to_lasio, lasio_bytes, curves
 validation = ["jsonschema>=4.26"]
 telemetry = ["opentelemetry-api>=1.37"]  # E95: the reported model on the caller's span
 starter = ["pyproj>=3.6", "lasio>=0.32"]  # E129 Sa: ophiolite starter build (well heads, LAS heads)
-dev = ["pytest>=8", "build>=1", "jsonschema>=4.26", "lasio>=0.32", "pyproj>=3.6", "opentelemetry-sdk>=1.37"]
+zgy = ["pyzgy==0.1.1"]  # E123 SZ: ophiolite.zgy; pyzgy pulls segyio (LGPL-3.0), so this stays an extra, never in the server image
+pack = ["segyio==1.9.14", "lasio>=0.32", "numpy", "matplotlib"]  # E129 (e): the pack notebook; segyio is LGPL-3.0, only here, in zgy (through pyzgy) and in dev
+dev = ["pytest>=8", "build>=1", "jsonschema>=4.26", "lasio>=0.32", "pyproj>=3.6", "opentelemetry-sdk>=1.37", "segyio==1.9.14",
+       # E123 SZ (D7): the ZGY decoding tests (segyio, above, is their SEG-Y oracle); pyzgy is installed where segyio has a wheel
+       'pyzgy==0.1.1; sys_platform == "linux" and platform_machine == "x86_64"']
 
 [tool.setuptools.dynamic]
 version = {attr = "ophiolite._version.__version__"}

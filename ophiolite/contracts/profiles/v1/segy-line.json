@@ -1,0 +1,35 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "segy-line/1",
+  "kind": "source",
+  "lifecycle": "preview",
+  "display_name": "2D seismic line (SEG-Y)",
+  "description": "A 2D seismic line in SEG-Y (revision 1 or 2, IBM or IEEE floating-point samples, big-endian, fixed-length traces) marked by Ophiolite's exporter on its textual header line C6, kept byte for byte; every trace keeps its trace number, source point and x and y in file order.",
+  "serves": [
+    "ophiolite.scientific-asset/1"
+  ],
+  "connector": {
+    "scientific_profile": "seismic-line-source/1",
+    "source_schema": "SEG-Y/rev1-2,formats-1-5,big-endian,fixed,ophiolite-2d-line-marker",
+    "mapping_version": "seismic-line/1",
+    "history": "retained-exact-read"
+  },
+  "role": "artifact",
+  "media_types": [
+    "application/octet-stream"
+  ],
+  "normalized_profile": "ophiolite.seismic-line/1",
+  "context_schema": "ophiolite.typed-context/1",
+  "representation_rules": {
+    "artifact_kind_by_origin": {
+      "source-reference": "original",
+      "retained-capture": "original",
+      "managed-derived": "derived-artifact"
+    },
+    "normalized": 1,
+    "total": 2
+  },
+  "table_target": {
+    "none": "not-a-table"
+  }
+}

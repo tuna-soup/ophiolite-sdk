@@ -17,6 +17,7 @@ __all__ = ['read', 'KINDS', 'MATRIX', 'ReadRefused', 'Table', 'Grid', 'Mesh', 'S
            'ModelSection', 'SeismicSection', 'Las']
 
 RESIDUAL = 'A well-residual/1 version is read with ophiolite.residuals, not ophiolite.readers.'
+LIMIT = 'Give max_points as a whole number of nodes, at least 1.'
 ARGUMENTS = 'Give read() a version, or a path and its kind, not both.'
 
 
@@ -28,7 +29,12 @@ class ReadRefused(Refused):
         self.field, self.row = field, row
 
 
-def read(version=None, *, path=None, kind=None, declared=None):
+def read(version=None, *, path=None, kind=None, declared=None, max_points=None):
+    """`max_points` (E139 s2) is the horizon limit M a points-csv/1 file is read against, as a deployment serves it
+    (`served_limits()['horizon_nodes']`); None is the default deployment's 1,000,000."""
+    if max_points is None: max_points = tables.MAX_POINTS
+    elif isinstance(max_points, bool) or not isinstance(max_points, int) or max_points < 1:
+        raise ReadRefused(LIMIT, code='arguments', field='max_points')
     if version is not None:
         if path is not None or kind is not None or declared is not None or \
                 not all(hasattr(version, name) for name in ('path', 'kind', 'declared')):
@@ -45,6 +51,6 @@ def read(version=None, *, path=None, kind=None, declared=None):
     if not isinstance(kind, str) or kind not in MATRIX:
         raise ReadRefused('%s is not a kind ophiolite.readers reads; it reads the 12 process kinds in ophiolite.readers.KINDS.'
                           % (kind if isinstance(kind, str) else repr(kind)), code='not-a-process-kind', field='kind')
-    if kind in tables.READERS: return tables._parse(kind, Path(path).read_bytes(), declared)
+    if kind in tables.READERS: return tables._parse(kind, Path(path).read_bytes(), declared, max_points)
     if kind in text.READERS: return text._parse(kind, Path(path).read_bytes(), declared)
     return las._parse(Path(path).read_bytes(), declared)  # las2/1, the one kind left in MATRIX

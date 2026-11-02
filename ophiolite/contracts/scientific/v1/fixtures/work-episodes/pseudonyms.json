@@ -1,0 +1,96 @@
+{
+ "subject": "pseudonym, salt_id and episode_id (§2.3, §4), computed with hashlib alone",
+ "salts": {
+  "alpha": "653133342d746573742d73616c742d616c706861",
+  "beta": "653133342d746573742d73616c742d62657461"
+ },
+ "cases": [
+  {
+   "salt": "alpha",
+   "kind": "person",
+   "id": "u1",
+   "expect": "person-ac3fa930dbf6e3c31a9967e3e0f9781f"
+  },
+  {
+   "salt": "alpha",
+   "kind": "agent",
+   "id": "u1",
+   "expect": "agent-dae70065c99b307a2ae8e131c747d2f7"
+  },
+  {
+   "salt": "alpha",
+   "kind": "person",
+   "id": "u-anna",
+   "expect": "person-cd9dbe18bb9022661636719d82d2023e"
+  },
+  {
+   "salt": "alpha",
+   "kind": "project",
+   "id": "p-demo",
+   "expect": "project-4ef7215685ee9a7a6aacdd596368c113"
+  },
+  {
+   "salt": "alpha",
+   "kind": "ref",
+   "id": "vsh-out-1#r1",
+   "expect": "ref-58c19de3f1b68d5395a9220428bbf7c1"
+  },
+  {
+   "salt": "alpha",
+   "kind": "outcome",
+   "id": "o-depth",
+   "expect": "outcome-6854499b6ea63d56a01578cb1b9ef9ab"
+  },
+  {
+   "salt": "beta",
+   "kind": "person",
+   "id": "u1",
+   "expect": "person-c5c52f745d5b5bb3e939c9ef06884a91"
+  },
+  {
+   "salt": "beta",
+   "kind": "agent",
+   "id": "u1",
+   "expect": "agent-6b329fbbcc7419590bb3edf7d14116ff"
+  },
+  {
+   "salt": "beta",
+   "kind": "person",
+   "id": "u-anna",
+   "expect": "person-8e05382995ff9dd7ed66fea9557f9b73"
+  },
+  {
+   "salt": "beta",
+   "kind": "project",
+   "id": "p-demo",
+   "expect": "project-0bba046541ef26afdab6fa910c331672"
+  },
+  {
+   "salt": "beta",
+   "kind": "ref",
+   "id": "vsh-out-1#r1",
+   "expect": "ref-60b6bd6dcc6661db3f9c7556158e258c"
+  },
+  {
+   "salt": "beta",
+   "kind": "outcome",
+   "id": "o-depth",
+   "expect": "outcome-cc1bb59701e814db4b2c825e50a5a0b9"
+  }
+ ],
+ "salt_ids": {
+  "alpha": "salt-b22f6985db884bc1",
+  "beta": "salt-f27c1b2825dc1208"
+ },
+ "episode_id": {
+  "parts": [
+   "work-episode/1",
+   "salt-b22f6985db884bc1",
+   "project-00000000000000000000000000000000",
+   "person-11111111111111111111111111111111",
+   "act_360da744301c82ae583adba53eab5769"
+  ],
+  "canonical": "[\"work-episode/1\",\"salt-b22f6985db884bc1\",\"project-00000000000000000000000000000000\",\"person-11111111111111111111111111111111\",\"act_360da744301c82ae583adba53eab5769\"]",
+  "expect": "episode-fd712bc1a7c12eab8c91f8842dcde6eb"
+ }
+}

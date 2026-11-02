@@ -26,13 +26,13 @@ from .procedures import NotRun
 
 STATE = 'ophiolite.intake-read/1'
 SENTENCES = {
-    'not-served': 'This deployment does not read files on your computer with read procedures. Nothing ran and nothing was sent.',
+    'not-served': 'This deployment does not read files on your computer with read tools. Nothing ran and nothing was sent.',  # E131 s2
     'no-file': 'Not read: no file of this upload named {name} can be read on your computer.',
     'several-files': 'Not read: several files of this upload are named {name}: {paths}. Give the file\'s path in the upload.',
     'other-file': 'Not read: {name} on this computer is not the file chosen for this upload: its size or digest differs. Nothing ran and nothing was sent.',
     'keep-changed': 'Not read: this file was read here before {how} keeping the original, under the same command. Run it again {flag}, or remove {state} to read it again.',
-    'several-versions': 'Not run: several read procedure versions can read this file. Choose one with --version: {versions}.',
-    'not-listed': 'Not run: {digest} is not a read procedure version listed for this file. Choose one of: {versions}.',
+    'several-versions': 'Not run: several read tool versions can read this file. Choose one with --version: {versions}.',
+    'not-listed': 'Not run: {digest} is not a read tool version listed for this file. Choose one of: {versions}.',
     'no-file-slot': 'Not run: {label}, version {version}, does not take one file to read.',
     'saved-output-changed': 'Not sent: {file}, made earlier on this computer for this file, changed since it was made. Remove {state} to read the file again.',
 }

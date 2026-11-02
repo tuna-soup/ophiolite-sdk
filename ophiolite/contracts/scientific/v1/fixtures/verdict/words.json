@@ -1,0 +1,20 @@
+{
+ "subject": "verdicts.words: the line a reader sees, from a record and the labels the caller resolved; the date is UTC in the form E120's lines use. Each record is the records.json base with its patch",
+ "cases": {
+  "person-rejected": {"patch": {}, "actor_label": "Anna", "behalf_label": null,
+                      "line": "Rejected by Anna, 29 October 2026: tops differ from the published log"},
+  "person-accepted": {"patch": {"verdict": "accepted", "reason": "matches the published log"}, "actor_label": "Anna", "behalf_label": null,
+                      "line": "Accepted by Anna, 29 October 2026: matches the published log"},
+  "person-accepted-no-reason": {"patch": {"verdict": "accepted", "reason": null}, "actor_label": "Anna", "behalf_label": null,
+                                "line": "Accepted by Anna, 29 October 2026"},
+  "agent-for-person": {"patch": {"verdict": "accepted", "reason": "matches the published log",
+                                 "actor": {"kind": "agent", "id": "agent-7", "name_at_time": "the planning agent"},
+                                 "on_behalf_of": {"kind": "person", "id": "u-anna", "name_at_time": "Anna"}},
+                       "actor_label": "the planning agent", "behalf_label": "Anna",
+                       "line": "Accepted by the planning agent for Anna, 29 October 2026: matches the published log"},
+  "reason-kept-verbatim": {"patch": {"verdict": "accepted", "reason": "  matches\nthe log  "}, "actor_label": "Anna", "behalf_label": null,
+                           "line": "Accepted by Anna, 29 October 2026:   matches\nthe log  "},
+  "unresolved-person": {"patch": {}, "actor_label": "a project member", "behalf_label": null,
+                        "line": "Rejected by a project member, 29 October 2026: tops differ from the published log"}
+ }
+}

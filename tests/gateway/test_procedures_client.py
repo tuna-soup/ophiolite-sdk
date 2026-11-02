@@ -76,7 +76,7 @@ def test_the_registrant_runs_her_own_version_and_a_member_is_asked_once_per_vers
     assert (tmp_path / 'out-tina/shifted.csv').read_bytes() == SHIFTED and mine['run']['procedure']['digest'] == v1['digest']
     with pytest.raises(NotRun) as caught: run(bob, tmp_path, 'out-early', who='bob', prompt=never)
     assert caught.value.code == 'no-enabled-version' and str(caught.value) == ('Not run: depth-shift has no enabled version in this project. '  # E121 B5: the way
-                                                                                       'A project administrator enables one in Settings → Procedures or with ophiolite procedures enable.')
+                                                                                       'A project administrator enables one in Settings → Tools or with ophiolite tools enable.')
     alice.procedure_enable(v1['digest'])
     asked = Asked(tmp_path)
     run(bob, tmp_path, 'out-bob-1', who='bob', prompt=asked)
@@ -148,7 +148,7 @@ def test_the_command_line_registers_lists_enables_and_runs_with_yes_only(world, 
     argv = ['run', '--from-project', 'depth-shift', '--output', tmp_path / 'out', '--input', 'tops=%s' % (tmp_path / 'in/tops.csv'), '--kind', 'tops=well-tops-csv/1',
             '--declared', 'tops=%s' % (tmp_path / 'in/tops.declared.json'), '--setting', 'shift=2.5']
     code, text, err = command(bob, *argv)  # not a terminal and no --yes: refused at once
-    assert (code, text) == (1, '') and err.startswith('Not run: this procedure runs code someone else wrote') and not (tmp_path / 'out').exists()
+    assert (code, text) == (1, '') and err.startswith('Not run: this tool runs code someone else wrote') and not (tmp_path / 'out').exists()
     code, text, err = command(bob, *argv, '--yes')
     assert code == 0 and text.startswith('Ran Shift tops by a fixed depth, version 1, on this computer') and (tmp_path / 'out/shifted.csv').read_bytes() == SHIFTED
     assert rows(world, 'SELECT principal FROM procedure_trust') == [('bob',)]

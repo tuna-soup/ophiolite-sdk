@@ -1,7 +1,7 @@
 {
   "schema": "ophiolite.procedure-rules/1",
-  "rules_version": "1.3.0",
-  "description": "The literal lists, limits and sentences contracts/procedures/v1/procedure.py applies to a procedure (E105a), and contracts/procedures/v1/delivery.py to the delivery a send procedure returns (E109, 1.1.0); the one shape of a residual procedure (E119b, 1.2.0); a residual result may be sent (E120, 1.3.0). Any change to a list or a sentence changes rules_version; the same rules_version gives the same verdict wherever the validator runs.",
+  "rules_version": "1.4.0",
+  "description": "The literal lists, limits and sentences contracts/procedures/v1/procedure.py applies to a procedure (E105a), and contracts/procedures/v1/delivery.py to the delivery a send procedure returns (E109, 1.1.0); the one shape of a residual procedure (E119b, 1.2.0); a residual result may be sent (E120, 1.3.0); a read procedure may write a SEG-Y volume (E123 SZ, 1.4.0). Any change to a list or a sentence changes rules_version; the same rules_version gives the same verdict wherever the validator runs.",
   "steps": ["read", "source", "process", "send", "check"],
   "step_words": {
     "read": "reads a file",
@@ -11,7 +11,7 @@
     "check": "compares data with a reference"
   },
   "process_kinds": ["points-csv/1", "mesh-text/1", "esri-ascii-grid/1", "well-tops-csv/1", "deviation-csv/1", "opendtect-faultsticks/1", "las2/1", "well-location/1", "wavelet-text/1", "model-section-text/1", "seismic-section-text/1", "time-depth-csv/1", "well-residual/1"],
-  "read_source_kinds": ["points-csv/1", "mesh-text/1", "esri-ascii-grid/1", "well-tops-csv/1", "deviation-csv/1", "opendtect-faultsticks/1", "las2/1", "well-location/1", "wavelet-text/1", "model-section-text/1", "time-depth-csv/1"],
+  "read_source_kinds": ["points-csv/1", "mesh-text/1", "esri-ascii-grid/1", "well-tops-csv/1", "deviation-csv/1", "opendtect-faultsticks/1", "las2/1", "well-location/1", "wavelet-text/1", "model-section-text/1", "time-depth-csv/1", "segy/1"],
   "process_input_kinds": ["points-csv/1", "mesh-text/1", "esri-ascii-grid/1", "well-tops-csv/1", "deviation-csv/1", "opendtect-faultsticks/1", "las2/1", "well-location/1", "wavelet-text/1", "model-section-text/1", "seismic-section-text/1", "time-depth-csv/1", "well-set/1"],
   "send_kinds": ["points-csv/1", "mesh-text/1", "esri-ascii-grid/1", "well-tops-csv/1", "deviation-csv/1", "opendtect-faultsticks/1", "las2/1", "well-location/1", "wavelet-text/1", "model-section-text/1", "seismic-section-text/1", "time-depth-csv/1", "well-residual/1"],
   "kind_words": {
@@ -28,7 +28,8 @@
     "seismic-section-text/1": "Seismic section (text)",
     "time-depth-csv/1": "Time-depth table (CSV)",
     "well-set/1": "Well set (JSON)",
-    "well-residual/1": "Residual result (JSON)"
+    "well-residual/1": "Residual result (JSON)",
+    "segy/1": "Seismic volume (SEG-Y)"
   },
   "setting_types": ["number", "integer", "string", "choice", "boolean"],
   "send_systems": 1,

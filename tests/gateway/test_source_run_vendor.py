@@ -158,7 +158,7 @@ def test_a_rotated_grid_stops_the_run_before_anything_is_sent(world, journey, tm
     log = sent(world)
     with pytest.raises(NotRun) as stopped: run(irap_file='rotated.irap')
     assert stopped.value.code == 'raised' and stopped.value.details['message'] == REFUSED
-    assert str(stopped.value) == 'Not run: the procedure stopped with an error. Its details are under --json.'
+    assert str(stopped.value) == 'Not run: the tool stopped with an error. Its details are under --json.'
     assert MARKER not in str(stopped.value) and MARKER not in stopped.value.details['message']
     assert not [raw for raw in log if b'/upload' in raw.split(b'\n', 1)[0]]  # nothing was sent
     assert not (tmp_path / 'run-1').exists()

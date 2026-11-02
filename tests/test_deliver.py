@@ -396,7 +396,7 @@ def test_a_malformed_answer_an_error_or_a_stopped_writer_is_unknown(world, mode)
     w = world
     answer = deliver(w, settings=['mode=' + mode])
     assert answer['state'] == 'unknown' and answer['items'] == 0 and answer['reported'] and count(w) == 1
-    said = (f'The procedure stopped with an error: The connection was lost. {procedures.RAISED_NEXT.format(slot="dest")}' if mode == 'raise'
+    said = (f'The tool stopped with an error: The connection was lost. {procedures.RAISED_NEXT.format(slot="dest")}' if mode == 'raise'
             else procedures.UNSAID)  # adhoc-e121-claims (O6)
     assert answer['sentence'] == f'Outcome unknown for {DESTINATION} by Tops to team folder on this computer. {said} Recorded in the project.'
     assert w.posts[0]['delivery'] == {'delivery_id': answer['delivery_id'], 'state': 'unknown', 'items': 0}

@@ -1,0 +1,39 @@
+{
+ "subject": "ophiolite.verdict/1 records, checked by the Verdict model and, independently, by the published JSON Schema; each case is the base with its patch merged at the top level",
+ "base": {
+  "schema": "ophiolite.verdict/1",
+  "verdict_id": "verdict-0123456789abcdef0123456789abcdef",
+  "asset_id": "asset-residual-1",
+  "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "verdict": "rejected",
+  "reason": "tops differ from the published log",
+  "against": null,
+  "supersedes": null,
+  "actor": {"kind": "person", "id": "u-anna", "name_at_time": "Anna"},
+  "on_behalf_of": null,
+  "at": 1793275200.0
+ },
+ "valid": {
+  "person-rejected": {},
+  "person-accepted-no-reason": {"verdict": "accepted", "reason": null},
+  "reason-whitespace-and-newlines-kept": {"verdict": "accepted", "reason": "  matches\nthe published log  \n"},
+  "against-outcome": {"against": {"kind": "outcome", "outcome_id": "outcome-1", "version": 1}},
+  "against-check": {"against": {"kind": "check", "key": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}},
+  "superseding": {"supersedes": "verdict-00000000000000000000000000000001"},
+  "agent-on-behalf": {"actor": {"kind": "agent", "id": "agent-7", "name_at_time": "the planning agent"},
+                      "on_behalf_of": {"kind": "person", "id": "u-anna", "name_at_time": "Anna"}}
+ },
+ "invalid": {
+  "rejected-null-reason": {"patch": {"reason": null}, "field": "reason"},
+  "rejected-blank-reason": {"patch": {"reason": "  \n"}, "field": "reason"},
+  "reason-nul": {"patch": {"reason": "tops\u0000differ"}, "field": "reason"},
+  "agent-without-delegator": {"patch": {"actor": {"kind": "agent", "id": "agent-7", "name_at_time": null}}, "field": "on_behalf_of"},
+  "person-with-delegator": {"patch": {"on_behalf_of": {"kind": "person", "id": "u-bob", "name_at_time": "Bob"}}, "field": "on_behalf_of"},
+  "workload-actor": {"patch": {"actor": {"kind": "workload", "id": "svc-1", "name_at_time": null}}, "field": "actor"},
+  "against-rule": {"patch": {"against": {"kind": "rule", "key": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}}, "field": "against"},
+  "against-outcome-version-0": {"patch": {"against": {"kind": "outcome", "outcome_id": "outcome-1", "version": 0}}, "field": "against"},
+  "against-check-63-hex": {"patch": {"against": {"kind": "check", "key": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}}, "field": "against"},
+  "verdict-not-compared": {"patch": {"verdict": "not_compared"}, "field": "verdict"},
+  "unknown-key": {"patch": {"colour": "green"}, "field": "colour"}
+ }
+}

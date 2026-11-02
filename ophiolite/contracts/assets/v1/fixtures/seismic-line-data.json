@@ -1,0 +1,131 @@
+{
+  "schema": "ophiolite.seismic-line/1",
+  "representation": "normalized",
+  "source": {
+    "authority": "ophiolite:uploaded",
+    "key": "synthetic-seismic-line",
+    "revision": "24bf92bb07e29a62783e9d18c2dc9114dddce6d145a292a18bc87457bbcef679",
+    "profile": "segy-line/1"
+  },
+  "source_sha256": "24bf92bb07e29a62783e9d18c2dc9114dddce6d145a292a18bc87457bbcef679",
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "mapping": "seismic-line/1",
+    "parsing_policy": "typed-strict/1",
+    "null_policy": "empty cell or declared NODATA value is missing; never zero-filled"
+  },
+  "context": {
+    "type": "seismic-line",
+    "format": "IEEE 4-byte floating point",
+    "format_code": 5,
+    "segy_revision": "1.0",
+    "traces": 5,
+    "samples": 4,
+    "trace_bytes": 256,
+    "sample_interval": 4.0,
+    "sample_unit": "ms",
+    "first_sample": 0.0,
+    "z_domain": "time",
+    "crs": "EPSG:23031",
+    "datum": "unknown",
+    "dataset": "Syn2D",
+    "line": "L1",
+    "exceptions": [
+      [
+        3,
+        "sp-absent"
+      ],
+      [
+        4,
+        "sp-scalar-zero"
+      ]
+    ],
+    "fidelity": {
+      "status": "assessed",
+      "preserved": [
+        "every trace header and sample byte for byte (the exact original is the stored representation)",
+        "every trace in file order with its trace number, source point and x and y"
+      ],
+      "losses": [
+        "Nothing is resampled; samples are not copied into the description"
+      ],
+      "unknown_context": [
+        "datum"
+      ],
+      "decisions": [
+        "Textual header read as ASCII; card C6 carries the Ophiolite 2D seismic line marker.",
+        "Binary header bytes 3217\u20133218: sample interval 4000, read as microseconds, so 4 ms.",
+        "Binary header bytes 3221\u20133222: 4 samples per trace; every trace agrees.",
+        "Binary header bytes 3225\u20133226: data format 5 (IEEE 4-byte floating point), big-endian.",
+        "Trace header bytes 21\u201324: trace number, kept in file order for all 5 traces.",
+        "Trace header bytes 197\u2013200: source point, scaled by bytes 201\u2013202 (negative divides, positive multiplies).",
+        "Trace header bytes 181\u2013184 and 185\u2013188: x and y, scaled by the coordinate scalar -100 (bytes 71\u201372).",
+        "Trace header bytes 109\u2013110: delay recording time 0 on every trace; sample k is at delay + k \u00d7 interval.",
+        "Chunks are runs of at most 1024 whole traces by 0-based file ordinal.",
+        "Source point absent (value and scalar zero) on 1 trace, trace ordinals 3 to 3.",
+        "Source point scalar zero read as 1 on 1 trace, trace ordinals 4 to 4."
+      ]
+    }
+  },
+  "decisions": [
+    "Textual header read as ASCII; card C6 carries the Ophiolite 2D seismic line marker.",
+    "Binary header bytes 3217\u20133218: sample interval 4000, read as microseconds, so 4 ms.",
+    "Binary header bytes 3221\u20133222: 4 samples per trace; every trace agrees.",
+    "Binary header bytes 3225\u20133226: data format 5 (IEEE 4-byte floating point), big-endian.",
+    "Trace header bytes 21\u201324: trace number, kept in file order for all 5 traces.",
+    "Trace header bytes 197\u2013200: source point, scaled by bytes 201\u2013202 (negative divides, positive multiplies).",
+    "Trace header bytes 181\u2013184 and 185\u2013188: x and y, scaled by the coordinate scalar -100 (bytes 71\u201372).",
+    "Trace header bytes 109\u2013110: delay recording time 0 on every trace; sample k is at delay + k \u00d7 interval.",
+    "Chunks are runs of at most 1024 whole traces by 0-based file ordinal.",
+    "Source point absent (value and scalar zero) on 1 trace, trace ordinals 3 to 3.",
+    "Source point scalar zero read as 1 on 1 trace, trace ordinals 4 to 4."
+  ],
+  "positions": {
+    "trace_number_byte": 21,
+    "source_point_byte": 197,
+    "source_point_scalar_byte": 201,
+    "x_byte": 181,
+    "y_byte": 185,
+    "coordinate_scalar_byte": 71
+  },
+  "geometry": [
+    [
+      103,
+      1.5,
+      500000.25,
+      5800000.75
+    ],
+    [
+      101,
+      -2.0,
+      500012.75,
+      5800007.0
+    ],
+    [
+      102,
+      0.0,
+      500025.25,
+      5800013.25
+    ],
+    [
+      105,
+      null,
+      500037.75,
+      5800019.5
+    ],
+    [
+      104,
+      7.0,
+      500050.25,
+      5800025.75
+    ]
+  ],
+  "chunks": [
+    {
+      "first": 0,
+      "last": 4,
+      "sha256": "69c88ee53569e9b08595768657b0816a024da3e405f08c6c25dc1716c727de0c",
+      "bytes": 1280
+    }
+  ]
+}

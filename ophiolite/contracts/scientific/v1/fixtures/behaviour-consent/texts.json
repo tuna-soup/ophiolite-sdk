@@ -1,0 +1,6 @@
+{
+ "subject": "the consent text a person reads (owner item 115). Version 0 is the draft: served only when capture is by-consent, marked draft, and never agreed to (every grant against it is refused, D7). The owner's approval lands as version 1",
+ "current": {"version": 0, "state": "draft", "sha256": "484434bc491e4c77641801bb7d6bbe3ddbeb3add4b486ee65a9c64cf167eda32",
+             "words": "Ophiolite can learn from how people use it, to get better at helping with work like yours. If you allow it, the operator of this deployment may include a record of your own work in what is used to train the assistant (training) or to test how well it does (evaluation): the actions you take, the settings of your commands, the verdicts you give on results, the checks you publish, and fingerprints of the instructions you give agents. Your name is replaced by a code. Your data is never included: the values in files and results have their own permission, set by their owner. You can withdraw at any time; from then on nothing new is included. What was included before stays until your account is deleted. Allowing this lets no one see anything new.\n\nAlso include the text of my agent instructions, where my project keeps it."},
+ "test": {"version": 1, "state": "approved", "words": "Test text version 1", "label": "test text: never served by default"}
+}

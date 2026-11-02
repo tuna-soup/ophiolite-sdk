@@ -1,0 +1,364 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/assets/v1/point-columns-header-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.point-columns/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "Fidelity": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "const": "assessed",
+          "title": "Status",
+          "type": "string"
+        },
+        "preserved": {
+          "items": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Preserved",
+          "type": "array"
+        },
+        "losses": {
+          "items": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Losses",
+          "type": "array"
+        },
+        "unknown_context": {
+          "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Unknown Context",
+          "type": "array"
+        },
+        "decisions": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 512,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 64,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decisions"
+        }
+      },
+      "required": [
+        "status",
+        "preserved",
+        "losses",
+        "unknown_context"
+      ],
+      "title": "Fidelity",
+      "type": "object"
+    },
+    "PointColumnsContext": {
+      "additionalProperties": false,
+      "description": "E139 (typed-context 1.11.0): a point set's context wherever it is not inside a released `ophiolite.point-set/1`\ndocument, which keeps `PointContext` and its 100,000 bytes for bytes; above 100,000 nodes it is stored as columns.",
+      "properties": {
+        "crs": {
+          "pattern": "^(EPSG:[0-9]{4,6}|unknown)$",
+          "title": "Crs",
+          "type": "string"
+        },
+        "xy_unit": {
+          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+          "title": "Xy Unit",
+          "type": "string"
+        },
+        "z_unit": {
+          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+          "title": "Z Unit",
+          "type": "string"
+        },
+        "z_meaning": {
+          "enum": [
+            "depth",
+            "elevation",
+            "time",
+            "unknown"
+          ],
+          "title": "Z Meaning",
+          "type": "string"
+        },
+        "positive": {
+          "enum": [
+            "up",
+            "down",
+            "unknown"
+          ],
+          "title": "Positive",
+          "type": "string"
+        },
+        "vertical_datum": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Vertical Datum",
+          "type": "string"
+        },
+        "x_range": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "title": "X Range",
+          "type": "array"
+        },
+        "y_range": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "title": "Y Range",
+          "type": "array"
+        },
+        "z_range": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "number"
+              },
+              "maxItems": 2,
+              "minItems": 2,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Z Range"
+        },
+        "attributes": {
+          "items": {
+            "pattern": "^[A-Za-z][A-Za-z0-9_]{0,31}$",
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Attributes",
+          "type": "array"
+        },
+        "fidelity": {
+          "$ref": "#/$defs/Fidelity"
+        },
+        "type": {
+          "const": "point-set",
+          "title": "Type",
+          "type": "string"
+        },
+        "count": {
+          "maximum": 4000000,
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        },
+        "z_provided": {
+          "title": "Z Provided",
+          "type": "boolean"
+        },
+        "missing_z_count": {
+          "maximum": 4000000,
+          "minimum": 0,
+          "title": "Missing Z Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "crs",
+        "xy_unit",
+        "z_unit",
+        "z_meaning",
+        "positive",
+        "vertical_datum",
+        "x_range",
+        "y_range",
+        "z_range",
+        "attributes",
+        "fidelity",
+        "type",
+        "count",
+        "z_provided",
+        "missing_z_count"
+      ],
+      "title": "PointColumnsContext",
+      "type": "object"
+    },
+    "Reference": {
+      "additionalProperties": false,
+      "properties": {
+        "authority": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Authority",
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "profile": {
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+          "title": "Profile",
+          "type": "string"
+        }
+      },
+      "required": [
+        "authority",
+        "key",
+        "revision",
+        "profile"
+      ],
+      "title": "Reference",
+      "type": "object"
+    },
+    "TypedInterpretation": {
+      "additionalProperties": false,
+      "description": "The executable identity of the typed reader (Connectors typed_reader; E56: feature_files for feature sets).",
+      "properties": {
+        "reader": {
+          "enum": [
+            "asset_connectors.typed_reader/1",
+            "asset_connectors.feature_files/1"
+          ],
+          "title": "Reader",
+          "type": "string"
+        },
+        "mapping": {
+          "enum": [
+            "well-tops/1",
+            "trajectory/1",
+            "regular-grid-surface/1",
+            "triangulated-surface/1",
+            "point-set/1",
+            "polyline-set/1",
+            "seismic-volume/1",
+            "well-location/1",
+            "wavelet/1",
+            "model-section/1",
+            "seismic-section/1",
+            "time-depth/1",
+            "feature-set/1",
+            "well-path/1",
+            "well-set/1",
+            "well-residual/1",
+            "seismic-line/1"
+          ],
+          "title": "Mapping",
+          "type": "string"
+        },
+        "parsing_policy": {
+          "const": "typed-strict/1",
+          "title": "Parsing Policy",
+          "type": "string"
+        },
+        "null_policy": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Null Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reader",
+        "mapping",
+        "parsing_policy",
+        "null_policy"
+      ],
+      "title": "TypedInterpretation",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "E139: the header of the stored point-columns form, the fields of `ophiolite.point-set/1` without the points and\nattributes, which follow it as `count` little-endian float64 per name in `columns` (`point_columns.py`).",
+  "properties": {
+    "representation": {
+      "const": "normalized",
+      "title": "Representation",
+      "type": "string"
+    },
+    "source": {
+      "$ref": "#/$defs/Reference"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "interpretation": {
+      "$ref": "#/$defs/TypedInterpretation"
+    },
+    "schema": {
+      "const": "ophiolite.point-columns/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "context": {
+      "$ref": "#/$defs/PointColumnsContext"
+    },
+    "count": {
+      "maximum": 4000000,
+      "minimum": 1,
+      "title": "Count",
+      "type": "integer"
+    },
+    "columns": {
+      "items": {
+        "pattern": "^[A-Za-z][A-Za-z0-9_]{0,31}$",
+        "type": "string"
+      },
+      "maxItems": 19,
+      "minItems": 2,
+      "title": "Columns",
+      "type": "array"
+    },
+    "encoding": {
+      "const": "f64le",
+      "title": "Encoding",
+      "type": "string"
+    }
+  },
+  "required": [
+    "representation",
+    "source",
+    "source_sha256",
+    "interpretation",
+    "schema",
+    "context",
+    "count",
+    "columns",
+    "encoding"
+  ],
+  "title": "PointColumnsHeader",
+  "type": "object"
+}

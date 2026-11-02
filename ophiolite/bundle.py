@@ -31,15 +31,17 @@ TYPED_ORIGINALS = {'well-tops-csv/1': 'original.csv', 'deviation-csv/1': 'origin
                    'geojson/1': 'original.geojson', 'ogc-geopackage/1': 'original.gpkg',  # E56
                    'petrel-points-attributes/1': 'original.txt', 'opendtect-horizon-ascii/1': 'original.txt', 'esri-shapefile/1': 'original.shp',  # E23c: package primaries
                    'petrel-horizon-ilxl/1': 'original.txt',  # E123 s1b
-                   'petrel-scattered-data/1': 'original.txt'}  # E123 s1c: a grid or a point set, by its content
+                   'petrel-scattered-data/1': 'original.txt',  # E123 s1c: a grid or a point set, by its content
+                   'petrel-faultsticks/1': 'original.txt'}  # E123 S1f-c: a packaged polyline set (bundle 2.11)
 NEWER_TYPES = {'triangulated-surface': 2, 'point-set': 2, 'polyline-set': 3, 'seismic-slice': 3, 'wavelet': 5, 'model-section': 5, 'seismic-section': 5, 'time-depth': 6,
                'feature-set': 7}  # the 2.x minor that introduced them
 # E56: grids of the new formats are a known type with an original an older reader cannot send back; they need 2.7 too
-NEWER_PROFILES = {'zmap-plus-grid/1': 7, 'cps3-ascii-grid/1': 7, 'irap-ascii-grid/1': 7}
+NEWER_PROFILES = {'zmap-plus-grid/1': 7, 'cps3-ascii-grid/1': 7, 'irap-ascii-grid/1': 7,
+                  'petrel-faultsticks/1': 11}  # E123 S1f-c: a packaged polyline set needs 2.11; other polyline sets keep their minor
 TYPES_2 = ('well-log', 'well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-slice',
            'wavelet', 'model-section', 'seismic-section', 'time-depth', 'feature-set')  # 2.5 (E53); 2.6 (E57); 2.7 (E56)
 NOT_IMPORTED_PACKAGE = 'Importing a file that comes with companion files is not available yet.'
-PACKAGE_TYPES, PACKAGE_ROLES, PACKAGE_MINOR = ('point-set', 'feature-set'), ('package', 'companion', 'interpretation'), 8  # E23c (bundle 2.8)
+PACKAGE_TYPES, PACKAGE_ROLES, PACKAGE_MINOR = ('point-set', 'feature-set', 'polyline-set'), ('package', 'companion', 'interpretation'), 8  # E23c (bundle 2.8); polyline-set 2.11 (E123 S1f-c)
 PROVENANCE_MINOR = 9  # E107a C6b (bundle 2.9): the original a file read on a computer was read from, beside its recorded reading
 PROVENANCE_SHAPE = 'A file read on a computer carries its kept original once, beside the reading that names it, and on no curve.'
 PROVENANCE_OTHER = 'The original kept beside this file is not the one its reading names.'
@@ -494,13 +496,19 @@ def _typed_asset(entry, chosen, content, files, kind, raw_of):
     if chosen.get('curves') != [] or [r for r in roles_of(files) if r not in PACKAGE_ROLES + ('provenance',)] != ['descriptor', 'normalized', 'original'] \
             or any(item.get('curve') is not None for item in files if item.get('role') != 'provenance'):  # 2.9: the kept original is checked with its reading
         raise VerificationFailed('A typed asset carries exactly one original, one descriptor and one data file, and no curves.')
-    wire_descriptor = _finite_json(content['descriptor'][None], 'A descriptor'); body = content['normalized'][None]; _finite_json(body, 'Typed data')
+    from .typed import COLUMNS_FILE, data_file_of
+    wire_descriptor = _finite_json(content['descriptor'][None], 'A descriptor'); body = content['normalized'][None]
+    # E139 s2: the data file is named by its codec (a .json name only for JSON bytes); columns are checked by their reader
+    columns = data_file_of(wire_descriptor) == COLUMNS_FILE
+    if columns != next(f['path'] for f in files if f.get('role') == 'normalized').endswith('.ophpts'):
+        raise VerificationFailed('A data file is not named by its codec.')
+    if not columns: _finite_json(body, 'Typed data')
     if (wire_descriptor.get('asset_id'), wire_descriptor.get('revision')) != (entry.get('asset_id'), entry.get('revision')):
         raise VerificationFailed('A descriptor belongs to another exact revision.')
     if (wire_descriptor.get('scientific') or {}).get('type') != kind: raise VerificationFailed('The manifest disagrees with a descriptor (type).')
     for field in ('origin', 'profile', 'parents', 'parent_visibility', 'relationships'):
         if wire_descriptor.get(field, 'complete' if field == 'parent_visibility' else None) != entry.get(field): raise VerificationFailed('The manifest disagrees with a descriptor (' + field + ').')
-    package = bundle_package.check(entry, files, raw_of, wire_descriptor, json.loads(body))  # 2.8 (E23c): before the data is used
+    package = bundle_package.check(entry, files, raw_of, wire_descriptor, {} if columns else json.loads(body))  # 2.8 (E23c): before the data is used
     data = _core.typed_result(wire_descriptor, body, content['original'][None])
     loaded = BundleAsset(entry, content['original'][None], {}, data); loaded.package = package
     return loaded
@@ -547,6 +555,7 @@ def roles_of(files):
 
 def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=None, graph=None, entities_omitted=None, source_records_omitted=None):
     """Write verified exact reads [(selection, CurveSet-like)] atomically. Internal to export."""
+    from .typed import data_file_of
     destination = Path(destination)
     if destination.exists(): raise Refused('The destination already exists; choose a new folder.')
     if not 0 < len(items) <= MAX_ASSETS: raise Refused('Export between 1 and %d exact revisions.' % MAX_ASSETS)
@@ -596,7 +605,7 @@ def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=
                 first = read._wire_descriptor
                 files = [put(folder + TYPED_ORIGINALS[first['profile']], read.original, 'original'),
                          put(folder + 'descriptor.json', (json.dumps(first, indent=2, allow_nan=False) + '\n').encode(), 'descriptor'),
-                         put(folder + 'data.json', read._wire_data_bytes, 'normalized')]
+                         put(folder + data_file_of(first), read._wire_data_bytes, 'normalized')]  # E139 s2: named by its codec
                 block = None
                 if first.get('package') is not None:  # E23c (2.8): the package, its companions and the interpretation travel too
                     from .bundle_package import write_files

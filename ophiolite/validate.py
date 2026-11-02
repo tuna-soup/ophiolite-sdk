@@ -43,6 +43,7 @@ def typed_pair(descriptor, raw):
     rules.require('type' in data['scientific'], 'This descriptor is not typed data')
     rep=next(r for r in data['representations'] if r['kind']=='normalized')
     rules.require(rep['available'] and len(raw)==rep['bytes'] and hashlib.sha256(raw).hexdigest()==rep['sha256'], 'Normalized representation unavailable or integrity mismatch')
+    if rep['profile']=='ophiolite.point-columns/1':return asset,_columns_pair(asset,data,raw)
     try: value=json.loads(raw)
     except (ValueError,UnicodeError): raise VerificationFailed('Normalized data is not valid JSON.') from None
     # E23a: the payload model is the normalized profile the descriptor names (point-set/1 and /2 share a type).
@@ -53,17 +54,36 @@ def typed_pair(descriptor, raw):
                'ophiolite.well-location-upload/1':generated.WellLocationUpload,'ophiolite.time-depth/1':generated.TimeDepth,
                'ophiolite.feature-set/1':generated.FeatureSet,'ophiolite.table-file/1':generated.TableFile,
                'ophiolite.well-path/1':generated.WellPath,'ophiolite.well-set/1':generated.WellSet,
-               'ophiolite.well-residual/1':generated.WellResidual}  # E53; E74b; E57; E56; E58b; E125 s3a; E119a; E119b
+               'ophiolite.well-residual/1':generated.WellResidual,'ophiolite.seismic-line/1':generated.SeismicLine}  # E53; E74b; E57; E56; E58b; E125 s3a; E119a; E119b; E137 s1
     if rep['profile'] not in kinds:raise VerificationFailed('This kind of data is not supported by this SDK; update it.')
     rules.require(isinstance(value,dict) and value.get('schema')==rep['profile'], 'The normalized data is not the profile the descriptor names')
     payload=model(kinds[rep['profile']],value).model_dump(by_alias=True)
     rules.typed_payload(payload)
+    _agrees(asset,data,payload)
+    return asset, value
+
+
+def _agrees(asset, data, payload):
+    """The served data's source identity, context and interpretation are the descriptor's."""
     expected=data['source_reference'] or dict(authority=data['authority'],key=data['asset_id'],revision=data['revision'],profile=data['profile'])
     artifact=rules.artifact(data)
     rules.require(rules.known(payload['source'],rules.REFERENCE)==rules.known(expected,rules.REFERENCE) and payload['source_sha256']==artifact['sha256'], 'Typed data and artifact source identities disagree')
     rules.require(payload['context']==data['scientific'] and payload['interpretation']==data['interpretation'], 'Descriptor scientific context or interpretation disagrees with the data')
     rules.interpretation(asset.model_dump(by_alias=True,exclude_unset=True))
-    return asset, value
+
+
+def _columns_pair(asset, data, raw):
+    """E139 s2 (S2-6): a point set above 100,000 nodes, served as its stored columns: the codec's checks
+    (`point_columns.view`), the header's contract, the point-set rules on the columns (count, extents, missing z,
+    attributes) and the same identity, context and interpretation checks as a JSON payload. The value is the header with
+    the points and attributes beside it, its schema still the columns one: a view, never a point-set/1 document."""
+    from . import point_columns
+    from .models import generated
+    header,columns=point_columns.view(raw)
+    payload=model(generated.PointColumnsHeader,header).model_dump(by_alias=True)
+    rules.typed_payload({**payload,**columns})
+    _agrees(asset,data,payload)
+    return {**header,**columns}
 
 
 def schema(value, schema_id, *, strict=True):

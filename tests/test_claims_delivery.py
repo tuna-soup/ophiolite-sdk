@@ -39,7 +39,7 @@ def test_any_other_answer_has_no_raised_line():
 def test_the_sentence_names_the_line_and_the_system_to_check():
     attempt = {'destination': 'Team database', 'procedure': {'label': 'Residuals to the team database'}, 'reported': True,
                'result': {'state': 'unknown', 'items': 0, 'raised': {'line': 'fe_sendauth: no password supplied', 'slot': 'db'}}}
-    said = 'Outcome unknown for Team database by Residuals to the team database on this computer. The procedure stopped with an error: fe_sendauth: no password supplied.'
+    said = 'Outcome unknown for Team database by Residuals to the team database on this computer. The tool stopped with an error: fe_sendauth: no password supplied.'
     assert procedures.delivery_words(attempt) == said + ' Check the system configuration given with --system db, then run the same command to record what happened. Recorded in the project.'
     attempt['result']['raised']['slot'] = None
     assert procedures.delivery_words(attempt) == said + ' Run the same command to record what happened. Recorded in the project.'
@@ -51,7 +51,7 @@ def test_a_raising_procedure_keeps_its_line_here_and_reports_only_the_state(worl
     w.register(folder_of(tmp_path / 'raising', manifest(name='team/raising'), code=RAISES))
     answer = deliver(w, settings=['mode=raise'], name='team/raising')
     assert answer['state'] == 'unknown' and answer['reported'] and count(w) == 1
-    assert answer['sentence'] == (f'Outcome unknown for {DESTINATION} by Tops to team folder on this computer. The procedure stopped with an error: '
+    assert answer['sentence'] == (f'Outcome unknown for {DESTINATION} by Tops to team folder on this computer. The tool stopped with an error: '
                                   'cannot open …: permission denied. Check the system configuration given with --system dest, then run the same '
                                   'command to record what happened. Recorded in the project.')
     assert attempt_of(answer)['result']['raised'] == {'line': 'cannot open …: permission denied', 'slot': 'dest'}

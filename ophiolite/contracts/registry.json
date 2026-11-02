@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.78.0",
+  "version": "1.83.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -37,7 +37,7 @@
     },
     {
       "id": "ophiolite.scientific-asset/1",
-      "version": "1.32.0",
+      "version": "1.34.0",
       "lifecycle": "preview",
       "path": "assets/v1/schema.json",
       "title": "ScientificAsset",
@@ -76,6 +76,14 @@
       "description": "The JSON header of a curve stored as columns: the normalized curve's fields without its depths and values, which follow it as little-endian float64."
     },
     {
+      "id": "ophiolite.point-columns/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/point-columns-header-schema.json",
+      "title": "PointColumnsHeader",
+      "description": "The JSON header of a point set stored as columns above 100,000 nodes: the normalized point set's fields without its points and attributes, which follow it as little-endian float64, one column per name."
+    },
+    {
       "id": "ophiolite.asset-summary/1",
       "version": "1.4.0",
       "lifecycle": "preview",
@@ -85,11 +93,11 @@
     },
     {
       "id": "ophiolite.typed-context/1",
-      "version": "1.10.0",
+      "version": "1.12.0",
       "lifecycle": "preview",
       "path": "assets/v1/typed-context-schema.json",
       "title": "TypedContext",
-      "description": "Observed and declared context of a typed asset (tops, trajectory, grid, triangulated surface, point set, fault sticks, seismic volume, wavelet, rock model section, seismic section, time-depth table, feature set, well path given as positions, well set, residual result) with its fidelity report."
+      "description": "Observed and declared context of a typed asset (tops, trajectory, grid, triangulated surface, point set, fault sticks, seismic volume, wavelet, rock model section, seismic section, time-depth table, feature set, well path given as positions, well set, residual result, 2D seismic line) with its fidelity report."
     },
     {
       "id": "ophiolite.well-tops/1",
@@ -181,11 +189,11 @@
     },
     {
       "id": "ophiolite.portable-bundle/2",
-      "version": "2.10.0",
+      "version": "2.11.0",
       "lifecycle": "preview",
       "path": "bundles/v2/manifest-schema.json",
       "title": "PortableBundleManifestV2",
-      "description": "Portable bundle 2: exact selected revisions of well logs, well tops, trajectories, regular-grid surfaces, meshes, point sets, fault sticks, seismic slices, wavelets, rock model sections, seismic sections, time-depth tables and feature sets with files, digests, served context, permitted lineage and relationships; 2.8 (E23c) carries the source package, its companion members and the interpretation of a recipe-read point set or a Shapefile-read feature set; 2.9 (E107a) carries the original a file read on a computer was read from, beside the recorded reading; 1.10/2.10 (E122 s5b) carry each exported revision's source record as the gateway served it."
+      "description": "Portable bundle 2: exact selected revisions of well logs, well tops, trajectories, regular-grid surfaces, meshes, point sets, fault sticks, seismic slices, wavelets, rock model sections, seismic sections, time-depth tables and feature sets with files, digests, served context, permitted lineage and relationships; 2.8 (E23c) carries the source package, its companion members and the interpretation of a recipe-read point set or a Shapefile-read feature set; 2.9 (E107a) carries the original a file read on a computer was read from, beside the recorded reading; 1.10/2.10 (E122 s5b) carry each exported revision's source record as the gateway served it; 2.11 (E123 S1f-c) carries a packaged polyline set (Petrel fault sticks)."
     },
     {
       "id": "ophiolite.polyline-set/1",
@@ -269,11 +277,11 @@
     },
     {
       "id": "ophiolite.well-set/1",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "lifecycle": "preview",
       "path": "assets/v1/well-set-schema.json",
       "title": "WellSet",
-      "description": "A well set as uploaded: its label and 1 to 29 members in order, each a well and a wellbore by id with one exact trajectory revision and its frame (coordinate system, wellhead, depth reference, north and an optional tie-in), or neither (E119a). Nothing is looked up, converted or filled in."
+      "description": "A well set as uploaded: its label and 1 to 29 members in order, each a well and a wellbore by id with one exact trajectory revision and its frame (coordinate system, wellhead, depth reference, north and an optional tie-in), or neither (E119a); a trajectory may also be saved without a frame, and placement then refuses it with frame_missing (E119a s6). Nothing is looked up, converted or filled in."
     },
     {
       "id": "ophiolite.well-residual/1",
@@ -298,6 +306,14 @@
       "path": "assets/v1/seismic-volume-schema.json",
       "title": "SeismicVolume",
       "description": "A seismic volume description: grid, sample meaning, header decisions and per-inline chunk digests."
+    },
+    {
+      "id": "ophiolite.seismic-line/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/seismic-line-schema.json",
+      "title": "SeismicLine",
+      "description": "A 2D seismic line description: every trace's position in file order (trace number, source point or none, x and y), sample meaning, header decisions, up to 64 traces that needed a decision and the digests of runs of at most 1,024 whole traces (E137 s0). Samples stay in the exact original."
     },
     {
       "id": "ophiolite.seismic-slice/1",
@@ -378,6 +394,38 @@
       "path": "outcomes/v1/outcome-claim-schema.json",
       "title": "OutcomeClaim",
       "description": "A \"Deliver as\" claim: the outcome version, the exact result version, the acceptance record and the destination it was judged on, and its verdict; a claimed claim binds the delivery id the gate issued, a refused one keeps its reason and sentence and launched nothing; never changed (E120)."
+    },
+    {
+      "id": "ophiolite.verdict/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "scientific/v1/verdict.json",
+      "title": "Verdict",
+      "description": "A person's verdict on one exact result version: accepted or rejected, with a reason (required to reject, at most 2000 characters, kept as written), what it was judged against, the earlier verdict of theirs it supersedes, who gave it (a person, or an agent on a person's behalf) and when; never changed (E132)."
+    },
+    {
+      "id": "ophiolite.behaviour-consent/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "scientific/v1/behaviour-consent.json",
+      "title": "BehaviourConsent",
+      "description": "One step of a person's consent that a record of their own work may be used to train (training) or test (evaluation) the assistant: granted with the five items it covers and any extra, or withdrawn; ordered per person and purpose by sequence, with the text version they read; never changed (E133)."
+    },
+    {
+      "id": "ophiolite.work-episodes/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "scientific/v1/work-episodes.json",
+      "title": "WorkEpisodes",
+      "description": "The manifest of a folder of work episodes a model may learn from: whose work, for which purpose, what consent texts, rights bases and licences it relied on, the pseudonym salt's identity, the split rule and the counts of what was left out and why (E134)."
+    },
+    {
+      "id": "ophiolite.work-episode/1",
+      "version": "1.1.0",
+      "lifecycle": "preview",
+      "path": "scientific/v1/work-episode.json",
+      "title": "WorkEpisode",
+      "description": "One episode of one person's or agent's work in one project: consecutive actions less than the window apart, each with its inputs, outputs, checks, outcomes and verdicts; in shape mode only digests, pseudonyms and words of closed sets, in values mode also the values the rights allow (E134)."
     },
     {
       "id": "ophiolite.resqml-read/1",
@@ -468,6 +516,14 @@
       "description": "One curve of a LAS file above 100,000 samples, stored as its depths and values in float64 after a JSON header; read in windows, never whole.",
       "lifecycle": "preview",
       "path": "profiles/v1/curve-columns.json"
+    },
+    {
+      "id": "ophiolite.point-columns/1",
+      "kind": "normalized",
+      "display_name": "Point set read in sections",
+      "description": "A point set of a points CSV above 100,000 nodes, stored as float64 columns (x, y, z when present, then each attribute) after a JSON header; missing values are NaN.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/point-columns.json"
     },
     {
       "id": "ophiolite/well-curve/1",
@@ -662,6 +718,14 @@
       "path": "profiles/v1/petrel-faultsticks.json"
     },
     {
+      "id": "petrel-well-tops/1",
+      "kind": "source",
+      "display_name": "Petrel well tops",
+      "description": "A Petrel well-tops export (VERSION 2) of one well, kept byte for byte; each row is a top named by its Surface at its MD, in file order with repeats kept, and the file states its depth unit. Other columns are listed as not read.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/petrel-well-tops.json"
+    },
+    {
       "id": "opendtect-horizon-ascii/1",
       "kind": "source",
       "display_name": "OpendTect horizon (x y z)",
@@ -716,6 +780,22 @@
       "description": "The volume grid, sample meaning, every header decision and the digests of its per-inline chunks; samples are read as slices.",
       "lifecycle": "preview",
       "path": "profiles/v1/seismic-volume.json"
+    },
+    {
+      "id": "segy-line/1",
+      "kind": "source",
+      "display_name": "2D seismic line (SEG-Y)",
+      "description": "A 2D seismic line in SEG-Y (revision 1 or 2, IBM or IEEE floating-point samples, big-endian, fixed-length traces) marked by Ophiolite's exporter on its textual header line C6, kept byte for byte; every trace keeps its trace number, source point and x and y in file order.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/segy-line.json"
+    },
+    {
+      "id": "ophiolite.seismic-line/1",
+      "kind": "normalized",
+      "display_name": "2D seismic line description",
+      "description": "Every trace of the line in file order with its trace number, source point and x and y, the sample meaning, every header decision and the digests of its runs of at most 1,024 whole traces; samples stay in the exact original.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/seismic-line.json"
     },
     {
       "id": "well-location/1",

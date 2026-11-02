@@ -60,7 +60,7 @@ def test_a_process_run_writes_the_outputs_their_declarations_and_run_json(tmp_pa
     record = json.loads((out / 'run.json').read_text())
     assert record == {
         'schema': 'ophiolite.local-run/0', 'runner': 'this computer', 'systems': {},
-        'procedure': {'name': 'depth-shift', 'version': 1, 'digest': 'edf8668204255edd264cccb9f91d941c4c28d34312f9e264de10d4df31c5dda7', 'rules_version': '1.3.0'},  # E120 s3: rules 1.3.0
+        'procedure': {'name': 'depth-shift', 'version': 1, 'digest': 'edf8668204255edd264cccb9f91d941c4c28d34312f9e264de10d4df31c5dda7', 'rules_version': '1.4.0'},  # E123 SZ: rules 1.4.0
         'settings': {'shift': 2.5, 'mode': 'add', 'count': 1, 'note': '', 'keep': False},
         'inputs': {'tops': [{'file': str((tmp_path / 'in/tops.csv').resolve()), 'sha256': 'bccf61bf244a0fc06d3a489d23f581fef9e51eaa3bdd97830e36dd175f285a9f',
                              'kind': 'well-tops-csv/1', 'declared': DECLARED}]},
@@ -306,7 +306,7 @@ def test_send_procedures_validate_but_do_not_run_here_and_a_check_needs_its_inpu
         (folder / 'procedure.json').write_text((FIXTURES / f'valid/{step}.json').read_text()); (folder / 'procedure.py').write_text('')
         assert procedures.validate(folder)['valid']
         error = refused('later-release' if step == 'send' else 'missing-input', lambda: procedures.run(folder, tmp_path / f'{step}-out'))
-        assert str(error).startswith('Not run: running a send procedure comes with a later release.' if step == 'send' else 'Not run: ')
+        assert str(error).startswith('Not run: running a send tool comes with a later release.' if step == 'send' else 'Not run: ')
 
 
 # ---------------------------------------------------------------- what the person sees (V1, V3)
@@ -331,7 +331,7 @@ def test_identifiers_the_procedure_prints_or_raises_stay_out_of_the_default_line
     folder = depth_shift(tmp_path, NOISY); path, declared = tops(tmp_path)
     argv = ['procedures', 'run', str(folder), '--output', str(tmp_path / 'out'), '--input', f'tops={path}', '--kind', 'tops=well-tops-csv/1', '--declared', f'tops={declared}']
     code, out, err = cli_run(capsys, argv)
-    assert (code, out, err) == (1, '', 'Not run: the procedure stopped with an error. Its details are under --json.\n')
+    assert (code, out, err) == (1, '', 'Not run: the tool stopped with an error. Its details are under --json.\n')
     code, out, err = cli_run(capsys, argv + ['--json'])
     error = json.loads(out)['error']
     assert code == 1 and error['code'] == 'raised' and error['details']['message'] == 'depth_shift failed for alice-7f3a'
@@ -352,7 +352,7 @@ def test_validate_says_words_and_puts_identifiers_under_json(tmp_path, capsys):
     code, out, err = cli_run(capsys, ['procedures', 'validate', str(folder)])
     assert (code, out) == (1, 'Not valid: setting 1 needs a readable label, for example "Depth shift".\n')
     code, out, err = cli_run(capsys, ['procedures', 'validate', str(folder), '--json'])
-    assert json.loads(out) == {'valid': False, 'rules_version': '1.3.0', 'sentence': 'Not valid: setting 1 needs a readable label, for example "Depth shift".',
+    assert json.loads(out) == {'valid': False, 'rules_version': '1.4.0','sentence': 'Not valid: setting 1 needs a readable label, for example "Depth shift".',
                                'code': 'unreadable-label', 'field': '/settings/0/label'}
     assert cli.main(['procedures', 'validate', str(FIXTURES / 'bundles/depth-shift'), '--json'])['digest'] == 'edf8668204255edd264cccb9f91d941c4c28d34312f9e264de10d4df31c5dda7'
 
@@ -374,4 +374,4 @@ def test_every_earlier_subcommand_keeps_its_name_and_help():
     sub = next(a for a in cli.parser()._actions if isinstance(a, argparse._SubParsersAction))
     now = {choice.dest: choice.help for choice in sub._choices_actions}
     assert {name: now.get(name) for name in frozen} == frozen
-    assert set(now) - set(frozen) == {'procedures', 'new-data', 'audience', 'templates', 'template', 'sample', 'repositories', 'intake', 'source', 'access-history', 'teams', 'rights', 'deliver', 'outcomes', 'residuals', 'recipes', 'starter'}  # E129 Sa starter; E112 s2 recipes; E119b residuals; E120 s0 outcomes; E109 deliver; E35a rights; E67b: access-history and teams (read verbs); E108 source; E107a intake; E60 C6: repositories; E90 adds new-data and audience; E91 templates, template and sample
+    assert set(now) - set(frozen) == {'tools', 'new-data', 'audience', 'templates', 'template', 'sample', 'repositories', 'intake', 'source', 'access-history', 'teams', 'rights', 'deliver', 'outcomes', 'residuals', 'recipes', 'starter', 'verdicts', 'withdraw', 'trajectories', 'ai-use'}  # E134 s2 ai-use; E134 s1 trajectories; E132 s2 withdraw; E132 s0 verdicts; E129 Sa starter; E112 s2 recipes; E119b residuals; E120 s0 outcomes; E109 deliver; E35a rights; E67b: access-history and teams (read verbs); E108 source; E107a intake; E60 C6: repositories; E90 adds new-data and audience; E91 templates, template and sample

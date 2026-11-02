@@ -210,7 +210,7 @@ class PresentedRun(dict):
         from .procedures import contract
         procedure = self['run']['procedure']
         hidden = {procedure.get('name'), procedure.get('digest'), self.get('destination'), (self._call or {}).get('folder')}
-        label = _human(self._label, 'A procedure', {str(v) for v in hidden if v})  # the person's label; contract words may be in it
+        label = _human(self._label, 'A tool', {str(v) for v in hidden if v})  # the person's label; contract words may be in it
         if 'report' in self:
             did = {'passed': 'passed', 'differed': 'differed', 'not_compared': 'not compared'}.get(self['report'].get('outcome'), 'checked')
         else:

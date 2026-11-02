@@ -152,17 +152,20 @@ def rows(wellbore, tops_ref, tops, trajectory_ref, survey, found, formation):
 def compute(members, tops, trajectories, grid, surface, formation, display_unit='m', *, max_eval=None):
     """The `well-residual/1` document. MEMBERS: the well set's members in order; TOPS: {wellbore: ({asset_id, revision},
     [typed tops])}; TRAJECTORIES: {(asset_id, revision): {'context', 'stations'}}; GRID: the surface's {'context',
-    'values'}; SURFACE: its {asset_id, revision}. Raises Refused when a member's path cannot be placed."""
+    'values'}; SURFACE: its {asset_id, revision}. Raises Refused when a member's path that a row needs cannot be placed
+    (a member saved without a frame included: `frame_missing`), naming the member ("Member N: ...", `details` {'reason',
+    'field', 'member', 'wellbore'}); a member without a needed crossing makes its rows as before (E119a s6)."""
     module, out = geometry.contract(), []
-    for m in members:
+    for n, m in enumerate(members):
         ref, given = tops.get(m['wellbore'], (None, None))
         path = m.get('trajectory')
         survey = trajectories[(path['asset_id'], path['revision'])] if path is not None else None
         found = None
         if survey is not None and required(given or [], formation):
             found = module.crossings(survey, m['frame'], grid, **({} if max_eval is None else {'max_eval': max_eval}))
-            if found['refusal'] is not None:
-                raise Refused(module.REFUSALS[found['refusal']], details={'reason': 'geometry:' + found['refusal']})
+            if found['refusal'] is not None:  # E119a s6 (R1-4, R2-11, R2-12): this raise site names the member; the wellbore only in details
+                raise Refused('Member %d: %s' % (n + 1, module.REFUSALS[found['refusal']]),
+                              details={'reason': 'geometry:' + found['refusal'], 'field': 'members[%d]' % n, 'member': n, 'wellbore': m['wellbore']})
         trajectory_ref = {'asset_id': path['asset_id'], 'revision': path['revision']} if path is not None else None
         out.extend(rows(m['wellbore'], ref, given, trajectory_ref, survey, found, formation))
     return {'schema': SCHEMA, 'correspondence': {'formation': formation}, 'display_unit': display_unit,
@@ -295,7 +298,13 @@ def linked(client, wellbores):
 
 def prepare(client, selection, surface, formation, *, display_unit='m'):
     """Bind SELECTION (a saved well set version: '@ASSET:REVISION', {asset_id, revision} or a receipt) and SURFACE (the
-    same) for FORMATION before anything is computed; a `Prepared` with the four inputs, or Refused with one sentence."""
+    same) for FORMATION before anything is computed; a `Prepared` with the four inputs, or Refused with one sentence.
+
+    Every member with a trajectory is bound (`WellSets.bind`), whether or not it has a top of FORMATION: a prepared
+    selection is a set its author meant to place, and skipping a member would change the residual table without a
+    word. So a member saved without a frame (E119a s6) refuses `prepare` at that member with bind's sentence and
+    `details` {'reason': 'geometry:frame_missing', 'field': 'members[N]', 'member': N}; save a version of the set that
+    gives its frame, or one without that member. (`compute`, lower down, refuses only where a crossing is needed.)"""
     if not isinstance(formation, str) or not 1 <= len(formation) <= 64: raise _sentence('formation')
     if display_unit not in ('m', 'ft'): raise _sentence('display-unit')
     chosen, grid_ref = _version(selection, 'the selection'), _version(surface, 'the surface')

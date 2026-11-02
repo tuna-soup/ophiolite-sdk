@@ -1,0 +1,235 @@
+{
+ "subject": "The shape episodes of rows.json for the caller u-anna, purpose training, salt alpha, seed 0, the default fractions and the parameter table of joins.json (golden: written once by the C1 module and read by hand; each field traced in the test)",
+ "episodes": [
+  {
+   "schema": "ophiolite.work-episode/1",
+   "episode_id": "episode-8663b2a0d4bf49c37fdd2c377f156997",
+   "mode": "shape",
+   "project": "project-4ef7215685ee9a7a6aacdd596368c113",
+   "actor": {
+    "kind": "agent",
+    "id": "agent-9a22afeee857d2c5d69bc3f2836c3966"
+   },
+   "start": 1793276400.0,
+   "end": 1793276400.0,
+   "split": "train",
+   "rows": [
+    {
+     "action_id": "act_f83180f57081ecb982cfdcc9e9e234d2",
+     "at": 1793276400.0,
+     "operation": "derive/ShaleVolume",
+     "on_behalf_of": {
+      "kind": "person",
+      "id": "person-cd9dbe18bb9022661636719d82d2023e"
+     },
+     "through": {
+      "client": "ophiolite-python",
+      "version": "0.9.1"
+     },
+     "parameters": [],
+     "inputs": [
+      {
+       "ref": "ref-58c19de3f1b68d5395a9220428bbf7c1",
+       "sha256": "7de376c47c1bab32cf5b56c25bc9313d572590a60857a7939da21af06fbe7d56",
+       "kind": "well-curve"
+      }
+     ],
+     "outputs": [
+      {
+       "ref": "ref-68b592f688d0982d41b614e89fc502ee",
+       "sha256": "79ca27abd2af47c53742c6362e20fd24d7d937702e07493cb5fb8e012cf9f98f",
+       "kind": "well-curve"
+      }
+     ],
+     "plan": {
+      "plan_sha256": "e26d9cd1dae99fe1f83a87da2f873a25d4c51c62290b003465c57ff544a899fd",
+      "evidence_sha256": "5108deb71ee1d00d8e14ad48f2ddee3dca264528a5ae802ac5a682ee11ecc0d7"
+     },
+     "checks": [],
+     "outcomes": [
+      {
+       "ref": "ref-68b592f688d0982d41b614e89fc502ee",
+       "outcome_ref": "outcome-6854499b6ea63d56a01578cb1b9ef9ab",
+       "version": 1,
+       "state": "rejected",
+       "declaration_sha256": "c4d8bc26c2dc9d838f51a6420417d96a0d515c30bf8d075a1476e4aaa5373be1",
+       "evaluation_sha256": "900c0baa94835159347304a657842001bf0e1e28c0626b1c1a8a68810d515cc1"
+      }
+     ],
+     "verdicts": [],
+     "omitted": {
+      "parameters": 0,
+      "checks": 0,
+      "verdicts": 0,
+      "plan": 0
+     }
+    }
+   ],
+   "final": [
+    {
+     "ref": "ref-68b592f688d0982d41b614e89fc502ee",
+     "outcome_ref": "outcome-6854499b6ea63d56a01578cb1b9ef9ab",
+     "version": 1,
+     "state": "rejected",
+     "declaration_sha256": "c4d8bc26c2dc9d838f51a6420417d96a0d515c30bf8d075a1476e4aaa5373be1",
+     "evaluation_sha256": "900c0baa94835159347304a657842001bf0e1e28c0626b1c1a8a68810d515cc1"
+    }
+   ]
+  },
+  {
+   "schema": "ophiolite.work-episode/1",
+   "episode_id": "episode-bdafda2c048a8f4243248d3aa74009da",
+   "mode": "shape",
+   "project": "project-4ef7215685ee9a7a6aacdd596368c113",
+   "actor": {
+    "kind": "person",
+    "id": "person-cd9dbe18bb9022661636719d82d2023e"
+   },
+   "start": 1793275200.0,
+   "end": 1793275800.0,
+   "split": "test",
+   "rows": [
+    {
+     "action_id": "act_360da744301c82ae583adba53eab5769",
+     "at": 1793275200.0,
+     "operation": "derive/ShaleVolume",
+     "on_behalf_of": null,
+     "through": {
+      "client": "ophiolite-cli",
+      "version": "1.4.0"
+     },
+     "parameters": [
+      {
+       "key": "gr_max",
+       "value": 120.0,
+       "unit": "gAPI"
+      },
+      {
+       "key": "gr_min",
+       "value": 30.0,
+       "unit": "gAPI"
+      },
+      {
+       "key": "window.top",
+       "value": 1500.5,
+       "unit": "m"
+      }
+     ],
+     "inputs": [
+      {
+       "ref": "ref-4bfad1e97682f78c9aa9aec6b0a1eee3",
+       "sha256": "95da011f786f6313179740181dbf67674f958c108dc331ce84325e7d22221cce",
+       "kind": "well-curve"
+      }
+     ],
+     "outputs": [
+      {
+       "ref": "ref-58c19de3f1b68d5395a9220428bbf7c1",
+       "sha256": "7de376c47c1bab32cf5b56c25bc9313d572590a60857a7939da21af06fbe7d56",
+       "kind": "well-curve"
+      }
+     ],
+     "plan": null,
+     "checks": [
+      {
+       "ref": "ref-58c19de3f1b68d5395a9220428bbf7c1",
+       "key_sha256": "db7f3a6f21633ad2423ca6f106ac226b8fb46d29de7a17a1b999e8e102bbc013",
+       "record_sha256": "d11171bc28dacf471f82b9122bd447fc540b98216a01d58e0797491e92c8a687",
+       "outcome": "differed",
+       "witness": "server"
+      }
+     ],
+     "outcomes": [
+      {
+       "ref": "ref-58c19de3f1b68d5395a9220428bbf7c1",
+       "outcome_ref": "outcome-6854499b6ea63d56a01578cb1b9ef9ab",
+       "version": 1,
+       "state": "accepted",
+       "declaration_sha256": "c4d8bc26c2dc9d838f51a6420417d96a0d515c30bf8d075a1476e4aaa5373be1",
+       "evaluation_sha256": "900c0baa94835159347304a657842001bf0e1e28c0626b1c1a8a68810d515cc1"
+      },
+      {
+       "ref": "ref-58c19de3f1b68d5395a9220428bbf7c1",
+       "outcome_ref": "outcome-bb0ede5a658b6f896b09002c0d1f1c0d",
+       "version": 1,
+       "state": "not_checked",
+       "declaration_sha256": "a25971b2dabc4650c2b35aceae9cb323165e6d9243ddc456bcf7c016537842a4",
+       "evaluation_sha256": null
+      },
+      {
+       "ref": "ref-58c19de3f1b68d5395a9220428bbf7c1",
+       "outcome_ref": "outcome-93d0dc2684b46e40ba53067d1c37bb8a",
+       "version": 1,
+       "state": "withdrawn",
+       "declaration_sha256": "fba2a9d1d936ddfda3895b6ef714e4916b8e04de58dcb1b23622649c0faf57ad",
+       "evaluation_sha256": "d9956d95291e874c62417649610b8e54c41fb27d183975d8ae5f0d53f3c1ba3f"
+      }
+     ],
+     "verdicts": [
+      {
+       "ref": "ref-58c19de3f1b68d5395a9220428bbf7c1",
+       "verdict": "accepted",
+       "by": {
+        "kind": "person",
+        "id": "person-cd9dbe18bb9022661636719d82d2023e"
+       },
+       "at": 1793275300.0
+      }
+     ],
+     "omitted": {
+      "parameters": 6,
+      "checks": 2,
+      "verdicts": 0,
+      "plan": 0
+     }
+    },
+    {
+     "action_id": "act_cae343fde78891ee117546ee5232fe3c",
+     "at": 1793275800.0,
+     "operation": "read/GetReviewScene",
+     "on_behalf_of": null,
+     "through": null,
+     "parameters": [],
+     "inputs": [],
+     "outputs": [],
+     "plan": null,
+     "checks": [],
+     "outcomes": [],
+     "verdicts": [],
+     "omitted": {
+      "parameters": 0,
+      "checks": 0,
+      "verdicts": 0,
+      "plan": 0
+     }
+    }
+   ],
+   "final": [
+    {
+     "ref": "ref-58c19de3f1b68d5395a9220428bbf7c1",
+     "outcome_ref": "outcome-6854499b6ea63d56a01578cb1b9ef9ab",
+     "version": 1,
+     "state": "accepted",
+     "declaration_sha256": "c4d8bc26c2dc9d838f51a6420417d96a0d515c30bf8d075a1476e4aaa5373be1",
+     "evaluation_sha256": "900c0baa94835159347304a657842001bf0e1e28c0626b1c1a8a68810d515cc1"
+    },
+    {
+     "ref": "ref-58c19de3f1b68d5395a9220428bbf7c1",
+     "outcome_ref": "outcome-93d0dc2684b46e40ba53067d1c37bb8a",
+     "version": 1,
+     "state": "withdrawn",
+     "declaration_sha256": "fba2a9d1d936ddfda3895b6ef714e4916b8e04de58dcb1b23622649c0faf57ad",
+     "evaluation_sha256": "d9956d95291e874c62417649610b8e54c41fb27d183975d8ae5f0d53f3c1ba3f"
+    },
+    {
+     "ref": "ref-58c19de3f1b68d5395a9220428bbf7c1",
+     "outcome_ref": "outcome-bb0ede5a658b6f896b09002c0d1f1c0d",
+     "version": 1,
+     "state": "not_checked",
+     "declaration_sha256": "a25971b2dabc4650c2b35aceae9cb323165e6d9243ddc456bcf7c016537842a4",
+     "evaluation_sha256": null
+    }
+   ]
+  }
+ ]
+}

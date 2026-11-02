@@ -14,8 +14,12 @@ from ophiolite.errors import PermissionRefused, Refused
 URL = 'https://gateway.example'
 B = ['wellbore-' + c * 32 for c in 'abc']
 T = {'asset_id': 'traj-three', 'revision': '7' * 64}
+# E119a s6: a trajectory saved without a frame is refused before any request, so the checked member carries its frame.
+FRAME = {'crs': 'EPSG:28992', 'wellhead': {'x': 236512.4, 'y': 583104.75}, 'depth_reference': {'name': 'KB', 'elevation': 7.92, 'datum': 'NAP'},
+         'north': {'survey_basis': 'grid:EPSG:28992', 'rotation_deg': 0}, 'tie_in': None, 'source': 'NLOG wellbore header'}
 SET = {'schema': 'ophiolite.well-set/1', 'label': 'Zuidwolde wells', 'members': [
-    {'well': 'well-' + '1' * 32, 'wellbore': b, 'trajectory': T if i == 2 else None, 'frame': None} for i, b in enumerate(B)]}
+    {'well': 'well-' + '1' * 32, 'wellbore': b, 'trajectory': T if i == 2 else None, 'frame': FRAME if i == 2 else None}
+    for i, b in enumerate(B)]}
 
 
 class Refreshing(Credential):

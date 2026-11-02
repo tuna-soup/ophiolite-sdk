@@ -324,8 +324,10 @@ LIMITS = [  # kind, header, one row from its index, the last row read, the limit
     ('deviation-csv/1', b'md,inclination,azimuth\n', lambda i: b'%d,1,2\n' % i, (9999.0, 1.0, 2.0), 10000, 'The file has more than 10000 data rows.'),
     ('time-depth-csv/1', b'depth,time\n', lambda i: b'%d,%d\n' % (i, i), (99999.0, 99999.0), 100000,
      'The table has more than 100,000 pairs.'),
-    ('points-csv/1', b'x,y\n', lambda i: b'%d,%d\n' % (i, i), (99999.0, 99999.0), 100000, 'The file has more than 100000 points.'),
+    ('points-csv/1', b'x,y\n', lambda i: b'%d,%d\n' % (i, i), (99999.0, 99999.0), 100000,  # E139: by number, no repair suffix
+     'This horizon has 100001 nodes; this deployment accepts at most 100000. Nothing was added.'),
 ]
+REPAIR = {'points-csv/1': ''}  # the sentence's own ending; the other kinds keep NO_REPAIR
 
 
 def test_a_point_set_holds_sixteen_attributes_not_seventeen(tmp_path):
@@ -347,14 +349,44 @@ def test_a_point_set_holds_sixteen_attributes_not_seventeen(tmp_path):
 def test_the_row_limits_are_the_servers(tmp_path, kind, header, line, last, limit, sentence):
     typed_reader = pytest.importorskip('asset_connectors.typed_reader')
     raw = header + b''.join(line(i) for i in range(limit))
-    result = readers.read(path=written(tmp_path, raw), kind=kind)
+    at = {'max_points': limit} if kind == 'points-csv/1' else {}  # E139 s2: Connectors' offline M, stated to the SDK
+    result = readers.read(path=written(tmp_path, raw), kind=kind, **at)
     assert len(result.rows) == limit and result.rows[-1] == last
     assert typed_reader.read_typed(kind, raw)[0]['count'] == limit
     raw += line(limit)
-    with pytest.raises(ReadRefused) as caught: readers.read(path=written(tmp_path, raw), kind=kind)
-    assert (str(caught.value), caught.value.code) == (sentence + NO_REPAIR, 'too-many-rows')
+    with pytest.raises(ReadRefused) as caught: readers.read(path=written(tmp_path, raw), kind=kind, **at)
+    ending = REPAIR.get(kind, NO_REPAIR)
+    assert (str(caught.value), caught.value.code) == (sentence + ending, 'too-many-rows')
     with pytest.raises(typed_reader.TypedReadError) as server: typed_reader.read_typed(kind, raw)
-    assert (str(server.value), server.value.code) == (sentence + NO_REPAIR, 'too-many-rows')
+    assert (str(server.value), server.value.code) == (sentence + ending, 'too-many-rows')
+
+
+@pytest.mark.parametrize('m', [2999, 3000, 3001])
+def test_a_horizon_is_read_against_the_stated_m(tmp_path, m):
+    """E139 s2 (P7): `read(max_points=M)` at M = N - 1, N, N + 1 for a 3,000-node file: over M refused by number, the
+    whole file counted; at or under M read whole. Mutation: `>=` for `>` (M = N refuses), the override dropped (the
+    default reads all three), or the sentence naming the default instead of M."""
+    raw = b'x,y,z\n' + b''.join(b'%d,%d,%d\n' % (i, i // 60, i) for i in range(3000))
+    path = written(tmp_path, raw)
+    if m < 3000:
+        with pytest.raises(ReadRefused) as caught: readers.read(path=path, kind='points-csv/1', max_points=m)
+        assert (str(caught.value), caught.value.code) == ('This horizon has 3000 nodes; this deployment accepts at most 2999. Nothing was added.',
+                                                          'too-many-rows')
+    else:
+        result = readers.read(path=path, kind='points-csv/1', max_points=m)
+        assert len(result.rows) == 3000 and result.rows[-1] == (2999.0, 49.0, 2999.0)
+
+
+def test_a_horizon_above_the_old_limit_reads_at_the_default_m(tmp_path):
+    """E139 s2: with no M stated the SDK reads against 1,000,000 (the default deployment's), so 100,001 nodes read whole;
+    a stated M that is not a whole number of nodes is refused. Mutation: MAX_POINTS left at 100,000: red."""
+    raw = b'x,y\n' + b''.join(b'%d,%d\n' % (i, i) for i in range(100_001))
+    assert readers.tables.MAX_POINTS == 1_000_000
+    assert len(readers.read(path=written(tmp_path, raw), kind='points-csv/1').rows) == 100_001
+    for bad in (0, -1, 1.5, True, '1000'):
+        with pytest.raises(ReadRefused) as caught: readers.read(path=written(tmp_path, raw), kind='points-csv/1', max_points=bad)
+        assert (str(caught.value), caught.value.code, caught.value.field) == ('Give max_points as a whole number of nodes, at least 1.', 'arguments',
+                                                                              'max_points')
 
 
 def test_what_a_writer_writes_reads_back_as_given(tmp_path):

@@ -38,8 +38,7 @@ def test_the_snapshot_pair_reads_as_a_well_set():
 
 @pytest.mark.parametrize('broken,sentence', [
     (lambda p: p['members'][1].update(wellbore=p['members'][0]['wellbore']), 'A wellbore appears twice in the set'),
-    (lambda p: p['members'][0].update(trajectory=None), 'a frame without a trajectory'),
-    (lambda p: p['members'][2].update(trajectory={'asset_id': 'synthetic-trajectory-3', 'revision': '3' * 64}), 'a trajectory without a frame'),
+    (lambda p: p['members'][0].update(trajectory=None), '^A member has a frame without a trajectory No files were saved'),  # E119a s6: the literal, the old "or ..." gone
     (lambda p: p['context'].update(with_trajectory=3, without_trajectory=0), 'Members and their context disagree'),
     (lambda p: p['context'].update(count=4), 'Members and their context disagree'),
 ])
@@ -49,3 +48,38 @@ def test_inconsistent_payloads_with_valid_digests_are_refused(broken, sentence):
     generated.WellSet.model_validate(payload)  # the generated model (the schema) cannot state the cross-field rule
     descriptor, body = repinned(descriptor, payload)
     with pytest.raises(VerificationFailed, match=sentence): validate.typed_pair(descriptor, body)
+
+
+def frameless():
+    """The snapshot pair with member 0 saved without a frame (E119a s6), its digest made true."""
+    descriptor, body = load()
+    payload = json.loads(body); payload['members'][0]['frame'] = None
+    return (*repinned(descriptor, payload), payload)
+
+
+def test_a_trajectory_without_a_frame_reads_with_a_valid_digest():
+    """E119a s6 (D1, R1-5, A1): the invariant admits (trajectory, null); the counts still count it as with a trajectory."""
+    descriptor, body, payload = frameless()
+    asset, read = validate.typed_pair(descriptor, body)
+    assert read['members'] == payload['members'] and read['members'][0]['frame'] is None
+    assert (read['context']['count'], read['context']['with_trajectory'], read['context']['without_trajectory']) == (3, 2, 1)
+
+
+def test_client_well_sets_read_reads_a_frameless_set_back():
+    """R1-5: a stored frameless set read back through `client.well_sets.read`, as the server answers it."""
+    import httpx
+    from ophiolite import Client, Credential
+    descriptor, body, payload = frameless()
+    original = FIXTURES.joinpath('well-set.original').read_bytes()
+    asset, revision, project = descriptor['asset_id'], descriptor['revision'], descriptor['project_id']
+
+    def handle(request):
+        path = request.url.path
+        if path.endswith('/representations/data'): return httpx.Response(200, content=body)
+        if path.endswith('/representations/artifact'): return httpx.Response(200, content=original)
+        assert path.endswith('/revisions/' + revision), path
+        return httpx.Response(200, json=descriptor)
+    c = Client('https://gateway.example', project, Credential.bearer('t'), httpx.Client(transport=httpx.MockTransport(handle)))
+    well_set = c.well_sets.read(asset, revision)
+    assert well_set.members == payload['members'] and well_set.members[0]['frame'] is None
+    assert well_set.members[0]['trajectory'] == payload['members'][0]['trajectory']

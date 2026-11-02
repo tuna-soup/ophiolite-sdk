@@ -1,0 +1,48 @@
+{
+ "subject": "behaviour_consent.chain_refusal over rows given as u-anna's (null: one valid chain per purpose; 'chain-invalid' otherwise) and behaviour_consent.current (the highest sequence, never the latest at). Rows are short as in transitions.json; text_sha256 is the sha256 of 'Test text version <n>' unless a row names its own",
+ "refusal": {
+  "a-valid-chain-with-a-revision": {"rows": [
+    {"purpose": "training", "sequence": 1, "state": "granted", "text_version": 1, "at": 1793275200.0},
+    {"purpose": "training", "sequence": 2, "state": "granted", "text_version": 1, "at": 1793275260.0},
+    {"purpose": "training", "sequence": 3, "state": "withdrawn", "text_version": 1, "at": 1793275260.0},
+    {"purpose": "evaluation", "sequence": 1, "state": "granted", "text_version": 1, "at": 1793275200.0}], "expect": null},
+  "a-gap": {"rows": [
+    {"purpose": "training", "sequence": 1, "state": "granted", "text_version": 1, "at": 1793275200.0},
+    {"purpose": "training", "sequence": 3, "state": "withdrawn", "text_version": 1, "at": 1793275260.0}], "expect": "chain-invalid"},
+  "a-duplicate-sequence": {"rows": [
+    {"purpose": "training", "sequence": 1, "state": "granted", "text_version": 1, "at": 1793275200.0},
+    {"purpose": "training", "sequence": 1, "state": "granted", "text_version": 1, "at": 1793275260.0}], "expect": "chain-invalid"},
+  "a-first-row-withdrawal": {"rows": [
+    {"purpose": "training", "sequence": 1, "state": "withdrawn", "text_version": 1, "at": 1793275200.0}], "expect": "chain-invalid"},
+  "withdrawn-after-withdrawn": {"rows": [
+    {"purpose": "training", "sequence": 1, "state": "granted", "text_version": 1, "at": 1793275200.0},
+    {"purpose": "training", "sequence": 2, "state": "withdrawn", "text_version": 1, "at": 1793275260.0},
+    {"purpose": "training", "sequence": 3, "state": "withdrawn", "text_version": 1, "at": 1793275320.0}], "expect": "chain-invalid"},
+  "a-decreasing-at": {"rows": [
+    {"purpose": "training", "sequence": 1, "state": "granted", "text_version": 1, "at": 1793275260.0},
+    {"purpose": "training", "sequence": 2, "state": "withdrawn", "text_version": 1, "at": 1793275200.0}], "expect": "chain-invalid"},
+  "another-persons-row-among-them": {"rows": [
+    {"purpose": "training", "sequence": 1, "state": "granted", "text_version": 1, "at": 1793275200.0},
+    {"person": "u-bob", "purpose": "training", "sequence": 2, "state": "withdrawn", "text_version": 1, "at": 1793275260.0}], "expect": "chain-invalid"},
+  "a-withdrawal-names-another-text-version": {"rows": [
+    {"purpose": "training", "sequence": 1, "state": "granted", "text_version": 1, "at": 1793275200.0},
+    {"purpose": "training", "sequence": 2, "state": "withdrawn", "text_version": 2, "at": 1793275260.0}], "expect": "chain-invalid"},
+  "a-withdrawal-names-another-text-digest": {"rows": [
+    {"purpose": "training", "sequence": 1, "state": "granted", "text_version": 1, "at": 1793275200.0},
+    {"purpose": "training", "sequence": 2, "state": "withdrawn", "text_version": 1, "text_sha256": "0000000000000000000000000000000000000000000000000000000000000000", "at": 1793275260.0}], "expect": "chain-invalid"}
+ },
+ "current": {
+  "shuffled": {"rows": [
+    {"purpose": "training", "sequence": 3, "state": "granted", "text_version": 1, "at": 1793275320.0, "command_id": "c-3"},
+    {"purpose": "training", "sequence": 1, "state": "granted", "text_version": 1, "at": 1793275200.0, "command_id": "c-1"},
+    {"purpose": "training", "sequence": 2, "state": "withdrawn", "text_version": 1, "at": 1793275260.0, "command_id": "c-2"}], "purpose": "training", "expect": "c-3"},
+  "equal-at-with-the-ids-reversed": {"rows": [
+    {"purpose": "training", "sequence": 2, "state": "withdrawn", "text_version": 1, "at": 1793275200.0, "command_id": "a-2"},
+    {"purpose": "training", "sequence": 1, "state": "granted", "text_version": 1, "at": 1793275200.0, "command_id": "z-1"}], "purpose": "training", "expect": "a-2"},
+  "an-earlier-at-on-a-higher-sequence-is-never-written-but-sequence-still-decides": {"rows": [
+    {"purpose": "training", "sequence": 1, "state": "granted", "text_version": 1, "at": 1793275320.0, "command_id": "c-1"},
+    {"purpose": "training", "sequence": 2, "state": "withdrawn", "text_version": 1, "at": 1793275200.0, "command_id": "c-2"}], "purpose": "training", "expect": "c-2"},
+  "nothing-for-this-purpose": {"rows": [
+    {"purpose": "evaluation", "sequence": 1, "state": "granted", "text_version": 1, "at": 1793275200.0, "command_id": "c-1"}], "purpose": "training", "expect": null}
+ }
+}

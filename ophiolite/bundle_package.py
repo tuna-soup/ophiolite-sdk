@@ -13,7 +13,7 @@ import json
 from .errors import Refused, VerificationFailed
 
 MINOR = 8
-TYPES = ('point-set', 'feature-set')
+TYPES = ('point-set', 'feature-set', 'polyline-set')  # polyline-set: bundle 2.11 (E123 S1f-c, Petrel fault sticks)
 ROLES = ('package', 'companion', 'interpretation')
 SOURCE_PACKAGE = 'ophiolite.source-package/1'
 RECIPE_EXECUTION = 'ophiolite.recipe-execution/1'

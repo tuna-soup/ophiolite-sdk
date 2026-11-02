@@ -15,7 +15,7 @@ import re
 from .results import Location, Table
 
 MAX_ROWS = 10000
-MAX_POINTS, MAX_ATTRIBUTES = 100000, 16
+MAX_POINTS, MAX_ATTRIBUTES = 1_000_000, 16  # E139 s2: a deployment's default M; read(max_points=) states another
 MAX_PAIRS = 100_000
 TEXT_LIMIT = 128
 ATTRIBUTE = re.compile(r'^[A-Za-z][A-Za-z0-9_]{0,31}$')
@@ -234,9 +234,10 @@ def _spatial(declared):
             'vertical_datum': _free(declared.get('vertical_datum'), 'vertical datum')}
 
 
-def _points(text, declared):
+def _points(text, declared, max_points=MAX_POINTS):
     """The server's `_points`: the header stripped, not lowercased; rows numbered with blank records counted; every row
-    checked as it is read. A row is (x, y[, z], attribute values...) in header order."""
+    checked as it is read. A row is (x, y[, z], attribute values...) in header order; above `max_points` (M) refused by
+    number."""
     reader = csv.reader(io.StringIO(text, newline=''), strict=True)
     try: written = [h.strip() for h in next(reader)]
     except (StopIteration, csv.Error): _refuse('The file has no header row.', 'no-header')
@@ -257,7 +258,11 @@ def _points(text, declared):
             if has_z: values.append(None if cells[2] == '' else _number(cells[2], 'z', row))
             values += [None if c == '' else _number(c, 'An attribute', row) for c in cells[3 if has_z else 2:]]
             kept.append(values)
-            if len(kept) > MAX_POINTS: _refuse(f'The file has more than {MAX_POINTS} points.', 'too-many-rows')
+            if len(kept) > max_points:  # E139: by number, the whole file counted, as the server's reader says it
+                from . import ReadRefused
+                nodes = len(kept) + sum(1 for rest in reader if rest and any(c.strip() for c in rest))
+                raise ReadRefused('This horizon has %d nodes; this deployment accepts at most %d. Nothing was added.' % (nodes, max_points),
+                                  code='too-many-rows')
     except csv.Error: _refuse('The CSV structure is invalid (check quoting).', 'csv-structure')
     if not kept: _refuse('The file has no data rows.', 'no-rows')
     xs, ys = [p[0] for p in kept], [p[1] for p in kept]
@@ -294,8 +299,9 @@ READERS = {'well-tops-csv/1': _tops, 'deviation-csv/1': _trajectory, 'time-depth
            'well-location/1': _well_location}
 
 
-def _parse(kind, raw, declared):
-    """The result of `raw` (bytes) read whole as `kind`, with `declared` as supplied; ReadRefused when it cannot be."""
+def _parse(kind, raw, declared, max_points=MAX_POINTS):
+    """The result of `raw` (bytes) read whole as `kind`, with `declared` as supplied; ReadRefused when it cannot be.
+    `max_points` is the deployment's horizon limit M, read by points-csv/1 only."""
     declared = declared or {}  # as read_typed: a falsy declaration is none
     if not isinstance(declared, dict): _refuse('Declared context must be an object.')
     if kind == 'time-depth-csv/1':
@@ -303,5 +309,5 @@ def _parse(kind, raw, declared):
         if sentence: _refuse(sentence)
     text = _text(raw)
     if kind == 'well-location/1': return _well_location(text, declared)
-    columns, rows, context = READERS[kind](text, declared)
+    columns, rows, context = _points(text, declared, max_points) if kind == 'points-csv/1' else READERS[kind](text, declared)
     return Table(kind, dict(declared), context, columns, rows)

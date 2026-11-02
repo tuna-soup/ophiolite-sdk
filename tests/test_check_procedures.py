@@ -84,7 +84,7 @@ def test_list_words_a_report_beside_e96_records():
     ({'outcome': 'differed', 'counts': {'compared': 24, 'differed': 0}}, 'Not published: none differed exactly when the check passed.'),
     ({'outcome': 'not_compared', 'counts': {'compared': 0, 'differed': 0}}, 'Not published: nothing was compared, so no counts are reported.'),
     ({'outcome': 'checked'}, 'Not published: the outcome must be passed, differed or not compared.'),
-    ({'witness': 'server'}, 'Not published: the check folder does not hold a procedure report.'),
+    ({'witness': 'server'}, 'Not published: the check folder does not hold a tool report.'),
 ])
 def test_a_report_the_rules_refuse_is_refused_here_and_nothing_is_sent(tmp_path, changed, sentence):
     folder(tmp_path, **changed)
@@ -101,7 +101,7 @@ def test_counts_the_rules_allow(tmp_path):
 
 def test_a_server_refusal_keeps_the_servers_sentence_for_the_catalogue_and_the_settings(tmp_path):
     folder(tmp_path)
-    for field, words in (('kind', 'This check procedure is not in this project.'), ('schema', 'Allowed difference is outside its allowed range.')):
+    for field, words in (('kind', 'This check tool is not in this project.'), ('schema', 'Allowed difference is outside its allowed range.')):
         client = Recorded({'publish': refusal(400, field, words)})
         with pytest.raises(Exception) as refused: run(client, 'publish', str(tmp_path))
         assert str(refused.value) == words and refused.value.details['field'] == field
@@ -214,7 +214,7 @@ def test_the_run_folder_is_what_checks_publish_sends(project):
 @pytest.mark.parametrize('mode, sentence', [
     ('too_many', 'Not run: the check returned more differed than were compared.'),
     ('counted_nothing', 'Not run: the check returned nothing was compared, so no counts are reported.'),
-    ('dict', 'Not run: a check procedure must return ophiolite.compared(outcome, compared, differed).'),
+    ('dict', 'Not run: a check tool must return ophiolite.compared(outcome, compared, differed).'),
 ])
 def test_a_return_the_rules_refuse_is_refused_here_and_nothing_is_written(project, mode, sentence, capsys):
     w = project

@@ -139,7 +139,8 @@
             "feature-set/1",
             "well-path/1",
             "well-set/1",
-            "well-residual/1"
+            "well-residual/1",
+            "seismic-line/1"
           ],
           "title": "Mapping",
           "type": "string"

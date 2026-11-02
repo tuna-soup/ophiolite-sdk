@@ -34,7 +34,7 @@ def test_the_shared_invalid_fixtures_give_the_platform_sentences_through_the_sdk
     raw = (FIXTURES / 'invalid' / f'{name}.json').read_bytes()
     verdict = procedures.validate(folder_with(tmp_path, name, raw, EXPECTED['members'][case['base']]))
     assert (verdict['valid'], verdict['code'], verdict['field'], verdict['sentence'], verdict['rules_version']) == (
-        False, case['code'], case['field'], case['sentence'], '1.3.0')  # E120 s3: rules 1.3.0
+        False, case['code'], case['field'], case['sentence'], '1.4.0')  # E123 SZ: rules 1.4.0
 
 
 @pytest.mark.parametrize('step', sorted(EXPECTED['members']))

@@ -144,12 +144,18 @@ class WellSets:
         SURFACE (a surface read with `client.read_data`, or its context). Returns a `Bound`; refuses with one sentence naming
         the member and the defect, `details` {'reason', 'field'}: the server's "well-set:<key>" (withdrawn, rights, reuse,
         unreadable or removed well or wellbore, association ended), or "geometry:<key>" for what the geometry cannot place
-        (coordinate system, datum, north, units, time, tie-in). MEMBER is its position from 0 or its wellbore."""
+        (coordinate system, datum, north, units, time, tie-in). A member saved without a frame (E119a s6) is refused with
+        "geometry:frame_missing" before any request, `details` {'reason', 'field', 'member'}; a later version of the set
+        that gives its frame binds. MEMBER is its position from 0 or its wellbore."""
         label, members = _members(well_set)
         i = _index(members, member)
         chosen = members[i]
         if chosen['trajectory'] is None:
             raise _refused(i, 'It has no trajectory, so there is nothing to place.', 'no-trajectory')
+        if chosen['frame'] is None:  # E119a s6 (D3, R2-2): as no-trajectory, nothing asked of the server; `member` beside `field`
+            refused = _refused(i, geometry.refusals()['frame_missing'], 'geometry:frame_missing')
+            refused.details['member'] = i
+            raise refused
         try:  # D2 (run), E111 s4a D-A2: the same member checks as at saving (the server inspects a one-member document); nothing is stored; people and agents alike
             self.client._post('las-uploads', 'check-member', {'label': label, 'member': chosen})
         except Refused as error:

@@ -1,0 +1,20 @@
+{
+ "subject": "the words a person reads about consent and capture; slice 1 renders the action lines, deployment/capture answers the capture lines now",
+ "actions": [
+  {"state": "granted", "purpose": "training", "line": "Allowed learning from how you work: training"},
+  {"state": "withdrawn", "purpose": "evaluation", "line": "Withdrew learning from how you work: evaluation"}
+ ],
+ "deployment": {"detail": {"capture": "by-consent", "tier": "public-demonstration", "text_version": 0}, "line": "Capture by consent started (public demonstration, text version 0)"},
+ "capture": {
+  "off": "Capture is off on this deployment",
+  "by-consent-with-a-draft": "Learning from how you work is by consent here; the text is a draft and cannot be agreed to yet"
+ },
+ "reasons": {
+  "capture-off": [409, "FAILED_PRECONDITION", "Capture is off on this deployment"],
+  "text-draft": [409, "FAILED_PRECONDITION", "The consent text is not approved on this deployment"],
+  "text-stale": [409, "CONFLICT", "The text changed; read it again"],
+  "command-reused": [409, "CONFLICT", "This command was already used for a different request"],
+  "chain-invalid": [409, "CONFLICT", "Your consent changed; read it again"],
+  "unavailable": [503, "UNAVAILABLE", "Consent is not available on this deployment yet."]
+ }
+}

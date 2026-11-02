@@ -332,6 +332,46 @@
       }
     },
     {
+      "profile": "petrel-faultsticks/1",
+      "data": "Petrel fault sticks with their fault names and stick numbers",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "polling",
+      "losses": [
+        "Opened as one line per stick, its points in their stored order",
+        "A stick of one point opens without geometry",
+        "Display styling is QGIS-side and not returned",
+        "Opened as a GeoPackage copy on this computer; edits stay in that copy until you send them or keep them as a separate layer"
+      ],
+      "unsupported": [
+        "a set of sticks whose coordinate system is not stated",
+        "following the newest version automatically"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-10-29",
+        "evidence": "integration:docs/verification/E123-s1fb-qgis-petrel-sticks.json (QGIS 4.2.2 on Linux adds the sticks by the plug-in and by OGC API - Features)"
+      },
+      "reach": {
+        "route": "features",
+        "collections": [
+          "lines"
+        ],
+        "layer": "Lines",
+        "asset_kinds": [
+          "polyline-set"
+        ],
+        "transport": "ogc-api-features",
+        "slice": null,
+        "client_limits": [
+          "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
+        ]
+      }
+    },
+    {
       "profile": "geojson/1",
       "data": "Map features",
       "direction": "read",

@@ -140,7 +140,7 @@ def test_a_source_made_version_exported_verified_offline_and_imported_keeps_its_
     first = clients['bob'].export([(item['asset_id'], item['revision'], None)], tmp_path / 'first', groups=False, entities=False)
     opened = bundle.open_bundle(tmp_path / 'first')  # offline
     recorded = bundle.recorded_source(opened.assets[0].data._wire_descriptor)
-    assert recorded == {'digest': digest, 'label': 'Survey share', 'version_label': 'Release 2', 'version': 2, 'rules_version': '1.3.0',  # E120 s3: rules 1.3.0
+    assert recorded == {'digest': digest, 'label': 'Survey share', 'version_label': 'Release 2', 'version': 2, 'rules_version': '1.4.0',  # E123 SZ: rules 1.4.0
                         'runner': 'bob', 'system': 'Team survey share', 'role': 'tops'}
     assert first.manifest['bundle_version'] == opened.manifest['bundle_version'] and 'read_by' not in opened.manifest['assets'][0]
     [step] = clients['alice'].import_bundle(opened, audience=[], attribution='Synthetic test', rights_confirmed=True)
@@ -153,7 +153,7 @@ def test_a_source_made_version_exported_verified_offline_and_imported_keeps_its_
 
 
 SHARED = ('Someone in this project already added the same file from this system and shared it with you. Use that file; adding '
-          'your own copy from this procedure is not available on this deployment yet.')
+          'your own copy from this tool is not available on this deployment yet.')
 
 
 def test_case_6_refuses_keeps_the_outputs_and_the_printed_fallback_adds_them_once_bob_stops_sharing(world, tmp_path, capsys, monkeypatch):
@@ -182,7 +182,7 @@ def test_case_6_refuses_keeps_the_outputs_and_the_printed_fallback_adds_them_onc
     with pytest.raises(SystemExit) as stopped: cli._source(args, clients['alice'])
     printed = capsys.readouterr().out
     assert stopped.value.code == cli.EXIT['conflict'] and '  Well tops: Not supported - ' + SHARED in printed, printed
-    [line] = [l for l in printed.splitlines() if l.startswith('The files the procedure made are kept in ')]
+    [line] = [l for l in printed.splitlines() if l.startswith('The files the tool made are kept in ')]
     kept = Path(line.split(' To add them by hand: ophiolite upload ')[1])
     assert sorted(p.name for p in kept.iterdir()) == ['tops.csv'] and (tmp_path / 'share/runs.txt').read_text() == 'ran\n' * 2  # bob's run, alice's
     clients['bob'].share(target, read=[], expected_generation=clients['bob'].grants(target).generation)  # bob stops sharing

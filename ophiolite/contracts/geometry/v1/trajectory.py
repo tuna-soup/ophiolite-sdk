@@ -13,7 +13,8 @@ between the two station tangents), and `gate` is the frame and datum rule of `tr
 coordinate system, z the depth below the frame's datum in metres, positive down. Each azimuth gets the frame's
 `rotation_deg` added (survey north to the map grid), the start is the wellhead or the frame's tie-in, and a surface
 value times `surface_sign` is a depth below the same datum. A trajectory, frame or surface it cannot place is refused
-with one key of `REFUSALS`; the keys `gate` already names are `gate`'s. `offset_bound` is the largest distance between
+with one key of `REFUSALS`; the keys `gate` already names are `gate`'s. A member saved without a frame (frame None,
+E119a s6) is refused with `frame_missing` before any other key. `offset_bound` is the largest distance between
 a segment's arc and its chord.
 
 `crossings` (E119a D8, with 5-5 and 5-9) gives every crossing of a placed trajectory with a regular grid surface that it
@@ -121,6 +122,8 @@ TIE_IN_TVD_M = 0.01  # D7: a survey's own first vertical depth may differ from t
 # Each refusal of `place`, with the sentence a person reads. The keys `gate` names are `gate`'s (6-16); `place` adds the
 # coordinate-system, unit and surface keys and the tie-in keys of D7.
 REFUSALS = {  # in the order `refusal` checks them
+    'frame_missing': 'The wellbore\'s trajectory was saved without a frame (map system, wellhead, depth reference, datum and '
+                     'north), so it cannot be placed; save the well set again with its frame.',  # E119a s6 (D2): first of all
     'survey_unit': 'The survey is not in metres; positions are placed in metres only.',
     'surface_time': 'The surface is in time, not depth; a trajectory is placed against depth or elevation only.',
     'surface_unit': 'The surface is not in metres; its x, y and values must all be in metres.',
@@ -148,7 +151,8 @@ def _kind(basis):
 
 def refusal(trajectory, frame, surface):
     """The first key of REFUSALS that keeps TRAJECTORY ({'context', 'stations'}) from being placed by FRAME (a well set
-    member's frame) against SURFACE (a surface's context), or None."""
+    member's frame, or None for a member saved without one) against SURFACE (a surface's context), or None."""
+    if frame is None: return 'frame_missing'  # E119a s6 (D2): before every other key; a survey defect surfaces once a frame is given
     context, stations = trajectory['context'], trajectory['stations']
     if context.get('depth_unit') != 'm' or context.get('angle_unit', 'deg') != 'deg': return 'survey_unit'
     if surface.get('z_meaning') == 'time': return 'surface_time'

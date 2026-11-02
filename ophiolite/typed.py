@@ -16,9 +16,19 @@ from . import sources as _sources  # E58b: a kept table is read with the frame c
 TYPES = ('well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-volume',
          'wavelet', 'model-section', 'seismic-section', 'well-location', 'time-depth', 'feature-set', 'table', 'well-path',
          'well-residual',  # E119b
-         'well-set')  # E119a s1
+         'well-set',  # E119a s1
+         'seismic-line')  # E137 s1
 WAVELET_DT = (0.0005, 0.01)  # E53 D7: a bounded spectrum (at most 1001 bins of 1 Hz)
 WAVELET_SAMPLES = (3, 4095)
+
+
+COLUMNS_FILE = 'data.ophpts'  # E139 s2: a point set stored as columns (ophiolite.point-columns/1)
+
+
+def data_file_of(descriptor):
+    """The file name of a typed descriptor's normalized data, by the codec its normalized representation names."""
+    rep = next((r for r in (descriptor or {}).get('representations') or [] if r.get('kind') == 'normalized'), {})
+    return COLUMNS_FILE if rep.get('profile') == 'ophiolite.point-columns/1' else 'data.json'
 
 
 class TypedData:
@@ -32,6 +42,12 @@ class TypedData:
     @property
     def relationships(self):
         return (self._wire_descriptor or {}).get('relationships')
+
+    @property
+    def data_file(self):
+        """E139 s2: the name the served data is saved under, by its codec: `data.ophpts` for the point-columns form,
+        `data.json` for JSON bytes (every other profile)."""
+        return data_file_of(self._wire_descriptor)
 
     def _pandas(self):
         try: import pandas as pd
@@ -202,7 +218,10 @@ class PointSet(_Spatial):
     def points(self): return self.data['points']
 
     @property
-    def version(self): return 2 if self.data['schema'] == 'ophiolite.point-set/2' else 1
+    def version(self):
+        # E139 s2: above 100,000 nodes `data` is the checked view of the stored columns (schema ophiolite.point-columns/1,
+        # `point_columns.view`), shaped as point-set/1's points and attributes but never a point-set/1 document
+        return 2 if self.data['schema'] == 'ophiolite.point-set/2' else 1
 
     @property
     def attributes(self):
@@ -282,6 +301,22 @@ class SeismicVolume(TypedData):
     def __repr__(self):
         c = self.context
         return f'<SeismicVolume {c["inline"]["count"]}×{c["crossline"]["count"]}×{c["samples"]} {c["z_domain"]}>'
+
+
+class SeismicLine(TypedData):
+    """A 2D seismic line (E137 s1): every trace's number, source point and x and y in file order (`geometry`, an absent
+    source point is None), the header decisions, and the exact original (segy-line/1), whose samples are the line's."""
+    type = 'seismic-line'
+
+    @property
+    def geometry(self): return self.data['geometry']
+
+    @property
+    def decisions(self): return self.data['decisions']
+
+    def __repr__(self):
+        c = self.context
+        return f'<SeismicLine {c["dataset"]}/{c["line"]} {c["traces"]}×{c["samples"]} {c["z_domain"]}>'
 
 
 def _numpy():
@@ -496,8 +531,8 @@ class WellResidual(TypedData):
 
 class WellSet(TypedData):
     """A well set (E119a): its author's own list of wellbores under their wells, each with the exact trajectory version
-    and the frame that places it in the world, or neither. Read as it was saved; private to its author in this version
-    (`client.well_sets`)."""
+    and the frame that places it in the world, a trajectory version saved without a frame, or neither. Read as it was
+    saved; private to its author in this version (`client.well_sets`)."""
     type = 'well-set'
 
     @property
@@ -621,7 +656,8 @@ CLASSES = {'well-tops': WellTops, 'trajectory': Trajectory, 'regular-grid-surfac
            'wavelet': Wavelet, 'model-section': ModelSection, 'seismic-section': SeismicSection, 'well-location': WellLocation,
            'time-depth': TimeDepth, 'feature-set': FeatureSet, 'table': Table, 'well-path': WellPath,
            'well-residual': WellResidual,  # E119b
-           'well-set': WellSet}  # E119a s1
+           'well-set': WellSet,  # E119a s1
+           'seismic-line': SeismicLine}  # E137 s1
 
 
 def minimum_curvature(stations):

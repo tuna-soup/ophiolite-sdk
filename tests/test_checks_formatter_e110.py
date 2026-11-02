@@ -23,6 +23,23 @@ def test_a_survey_comparison_names_stations_and_those_beyond_the_reference():
     assert checks.compare_lines(only_missing)[:2] == ['Different at 2 of 2 stations.', '2 stations beyond the reference survey.']
 
 
+def test_e110s4_saved_datum_reasons_read_by_their_rule():
+    """E110 s4 (9.3): a listed tops record not compared for its datum reads the tops sentence (literals, never compared
+    with the Platform's); a survey keeps the survey words. Mutation: REASON whatever the rule -> red."""
+    rows = {('tops-compare/1', 'datum_unknown'): 'Tops measured on another depth basis are compared only when both say the same depth datum; one of them does not.',
+            ('tops-compare/1', 'datum_mismatch'): 'The two sets of tops are measured from different depth datums; nothing is converted.',
+            ('trajectory-compare/1', 'datum_unknown'): 'A survey does not say which depth datum it starts from.',
+            ('trajectory-compare/1', 'datum_mismatch'): 'The surveys start from different depth datums.'}
+    for (rules, reason), words in rows.items():
+        record = {**TOPS, 'outcome': 'not_compared', 'rules_id': rules, 'reason': reason, 'differences': None}
+        assert checks.outcome_lines(record) == [words], (rules, reason)
+        assert checks.record_lines(record) == ['Compared with a file on 13 October 2026: not compared.', words, 'Saved on this result only.']
+    assert checks.compare_lines({'outcome': 'not_compared', 'rules_id': 'tops-compare/1', 'reason': 'datum_mismatch'})[0] == \
+        'Not compared: the two sets of tops are measured from different depth datums; nothing is converted.'
+    assert checks.record_lines({**TOPS, 'outcome': 'not_compared', 'reason': 'depth_basis_unknown'})[1] == \
+        'Tops are compared when both are measured along the log\'s depths, or both on another depth basis from the same depth datum.'
+
+
 def test_gates_read_as_sentences_and_an_unknown_rule_counts_values():
     assert checks.compare_lines({'outcome': 'not_compared', 'rules_id': 'trajectory-compare/1', 'reason': 'grid_unknown'})[0] == \
         'Not compared: grid north is compared only on one known projected grid.'

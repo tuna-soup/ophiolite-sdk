@@ -1,7 +1,7 @@
 # %% [markdown]
 # # A recipe runs again
 # A recipe is a JSON file you write that names the steps you would otherwise type, in order: run the residual
-# procedure on your computer, publish the run, and read the result's outcome states. Ophiolite takes the steps one at
+# tool on your computer, publish the run, and read the result's outcome states. Ophiolite takes the steps one at
 # a time and records each in the work folder's journal, so a stop (a crash, a refusal, a lost answer) continues from
 # the first step not finished when you run it again, and nothing is published twice.
 #
@@ -17,7 +17,7 @@
 # folder and run `ophiolite login` here (or `ophiolite login --key-stdin` to paste a project access key); then set
 # `OPHIOLITE_URL` and `OPHIOLITE_PROJECT` to the address and project it names, and `OPHIOLITE_RECIPE_SELECTION` and
 # `OPHIOLITE_RECIPE_SURFACE` to the well set and the surface to use (a name, `NAME@N` or `@ASSET:REVISION`), before
-# you start Jupyter. Change the procedure, its version, the formation and the result name below to your project's.
+# you start Jupyter. Change the tool, its version, the formation and the result name below to your project's.
 # %%
 import json
 import os
@@ -54,7 +54,7 @@ for n, step in enumerate(recipe['steps'], 1):
 # ## Run it in your project
 # The work folder is `~/ophiolite-recipe-work/<recipe name>`, kept after the run: if anything stops, run this cell
 # again and it continues there. The card shows each step in words and, once every step is finished, a "Run again"
-# line: the same recipe file and inputs in a new work folder, asking again about any procedure version you have not
+# line: the same recipe file and inputs in a new work folder, asking again about any tool version you have not
 # trusted.
 # %%
 home = Path.home() / 'ophiolite-recipe-work'

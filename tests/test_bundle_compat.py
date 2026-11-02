@@ -87,6 +87,14 @@ def test_the_frozen_two_seven_reader_is_the_released_file():
     assert hashlib.sha256((FROZEN / 'bundle_2_7.py').read_bytes()).hexdigest() == '2c462c6bc8a8a83a410be03cd7ab9b49c706a50da7cf7eb74bac6ca7345c45bc'
 
 
+def test_the_frozen_two_ten_reader_is_the_released_file():  # E123 S1f-c (K3): the reader before 2.11
+    history = _history()
+    released = history.show(Path(__file__).parents[1], 'bfae694ed3fc3d7fa158bc0953fe55f04f71c904', 'ophiolite/bundle.py')  # nightly/2026.10.127
+    if released is not None: assert released == (FROZEN / 'bundle_2_10.py').read_bytes()
+    else: assert not history.FULL, history.missing('bfae694ed')
+    assert hashlib.sha256((FROZEN / 'bundle_2_10.py').read_bytes()).hexdigest() == '2917c352dca4dde1b0b747eea1196c6eb8bbdb89ced38c23591b4634c038e7a1'
+
+
 @pytest.mark.parametrize('kind', sorted(KINDS))
 def test_every_existing_kind_keeps_its_minor_and_the_released_reader_reads_it(tmp_path, kind):
     write, version = KINDS[kind]

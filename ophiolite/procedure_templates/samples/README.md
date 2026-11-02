@@ -1,6 +1,6 @@
-# Samples of the procedure starts
+# Samples of the tool starts
 
-Each file here holds the arguments of one Ophiolite writer (`ophiolite.writers`) for one kind. `ophiolite procedures
+Each file here holds the arguments of one Ophiolite writer (`ophiolite.writers`) for one kind. `ophiolite tools
 new --step STEP --kind KIND` copies the kind's sample into the start it makes (`data/`), so a new start runs, and
 passes its own tests, before you change it. `check-*.json` hold a version to check and two references, one that
 matches and one that differs.

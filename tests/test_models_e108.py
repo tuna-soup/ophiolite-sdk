@@ -34,5 +34,5 @@ def test_the_shared_descriptor_with_sourced_by_validates_in_the_sdk():
                                                           'version_label': '2', 'version': 2, 'rules_version': '1.0.0', 'runner': 'alice',
                                                           'system': 'Team survey share', 'role': 'well_headers'}
     schema = json.loads((CONTRACTS / 'assets/v1/schema.json').read_text())
-    assert schema['x-ophiolite']['version'] == '1.32.0'  # E123 S1f-a 1.32.0; S0 1.25.0; S1 1.26.0 (ImportOrigin.sourced_by); E125 s3a 1.27.0; E119a 1.28.0; E119b 1.29.0; E119b s1 1.30.0 (Asset.residual_validity); E127 s0 1.31.0 (Acquisition.listed_in)
+    assert schema['x-ophiolite']['version'] == '1.34.0'  # E139 s0 (a point set stored as columns); E137 s0 (a 2D seismic line) 1.33.0; E123 S1f-a 1.32.0; S0 1.25.0; S1 1.26.0 (ImportOrigin.sourced_by); E125 s3a 1.27.0; E119a 1.28.0; E119b 1.29.0; E119b s1 1.30.0 (Asset.residual_validity); E127 s0 1.31.0 (Acquisition.listed_in)
     jsonschema.Draft202012Validator(schema).validate(descriptor)

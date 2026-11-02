@@ -287,6 +287,64 @@ def test_an_e119a_geometry_refusal_names_the_member():
     assert refused(client, members) == 'Member 2: The survey is referenced to magnetic north; state it against true north or grid north.'
 
 
+# ---------------------------------------------------------------- E119a s6 (D3, A3, R1-6, R2-2, R2-11, R2-12)
+
+FRAME_MISSING = ("The wellbore's trajectory was saved without a frame (map system, wellhead, depth reference, datum and north), "
+                 'so it cannot be placed; save the well set again with its frame.')
+
+
+@pytest.mark.parametrize('top', [True, False], ids=['with-its-top', 'without-a-top'])
+def test_prepare_refuses_at_a_member_saved_without_a_frame_with_or_without_its_top(top):
+    """`prepare` binds every member with a trajectory (R1-6): a frameless second member refuses at member 1."""
+    client = FakeProject()
+    client.add_grid()
+    members = [member(1, client.add_survey(1)), dict(member(2, client.add_survey(2)), frame=None)]
+    client.link(bore(1), client.add_tops(1, [{'name': 'DCC', 'md': 1004.0}]))
+    if top: client.link(bore(2), client.add_tops(2, [{'name': 'DCC', 'md': 1005.0}]), name='Wellbore B')
+    selection = client.add_set(members)
+    with pytest.raises(Refused) as caught:
+        residuals.prepare(client, '@%s:%s' % (selection['asset_id'], selection['revision']), SURFACE, 'DCC')
+    assert str(caught.value) == 'Member 2: ' + FRAME_MISSING
+    assert caught.value.details == {'reason': 'geometry:frame_missing', 'field': 'members[1]', 'member': 1}
+    assert not any(c[0] == 'download' for c in client.calls)
+
+
+def two(second_tops, second_frame=None):
+    """`compute` over two members on the vertical case: member 0 placed with DCC at 1210 m; member 1 with the same
+    trajectory, SECOND_FRAME (None: saved without one) and SECOND_TOPS."""
+    c = CASES['vertical, 30 m east of a node']
+    path = {'asset_id': 'path-1', 'revision': rev(1001)}
+    members = [{'well': 'well-1', 'wellbore': bore(1), 'trajectory': path, 'frame': c['frame']},
+               {'well': 'well-1', 'wellbore': bore(2), 'trajectory': path, 'frame': second_frame}]
+    tops = {bore(1): ({'asset_id': 'tops-1', 'revision': rev(1)}, read_tops('tops-vertical.csv'))}
+    if second_tops is not None: tops[bore(2)] = ({'asset_id': 'tops-2', 'revision': rev(2)}, second_tops)
+    return residuals.compute(members, tops, {('path-1', rev(1001)): copy.deepcopy(c['trajectory'])}, grid(c['surface']),
+                             {'asset_id': 'grid-1', 'revision': rev(2000)}, 'DCC')
+
+
+def test_compute_refuses_a_frameless_member_that_needs_a_crossing_naming_the_member():
+    with pytest.raises(Refused) as caught: two([{'name': 'DCC', 'md': 1210.0}])
+    assert str(caught.value) == 'Member 2: ' + FRAME_MISSING
+    assert caught.value.details == {'reason': 'geometry:frame_missing', 'field': 'members[1]', 'member': 1, 'wellbore': bore(2)}
+    assert bore(2) not in str(caught.value)  # R2-12: the wellbore in details only
+
+
+def test_compute_makes_the_rows_of_a_frameless_member_that_needs_no_crossing_as_before():
+    framed = one('vertical, 30 m east of a node', 'tops-vertical.csv')['rows']
+    rows = two(None)['rows']
+    assert rows[:-1] == framed
+    assert rows[-1] == {'wellbore': bore(2), 'occurrence': 0, 'top': None, 'trajectory': {'asset_id': 'path-1', 'revision': rev(1001)},
+                        'crossings': [], 'used': None, 'residual': None, 'unit': 'm', 'reason': 'no-top', 'between': None}
+    assert two([{'name': 'NSB', 'md': 1100.0}])['rows'][-1]['reason'] == 'no-top'  # a top of another formation needs no crossing
+
+
+def test_an_existing_placement_refusal_in_compute_names_its_member_too():
+    c = CASES['vertical, 30 m east of a node']
+    with pytest.raises(Refused) as caught: two([{'name': 'DCC', 'md': 1210.0}], dict(c['frame'], crs='EPSG:28992'))
+    assert str(caught.value) == "Member 2: The surface's coordinate system is not the frame's."
+    assert caught.value.details == {'reason': 'geometry:crs_mismatch', 'field': 'members[1]', 'member': 1, 'wellbore': bore(2)}
+
+
 def accepted(client, members):
     selection = client.add_set(members)
     prepared = residuals.prepare(client, selection, SURFACE, 'DCC')

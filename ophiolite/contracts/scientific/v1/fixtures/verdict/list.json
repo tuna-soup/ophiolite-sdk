@@ -1,0 +1,14 @@
+{
+ "verdicts": [
+  {"record": {"schema": "ophiolite.verdict/1", "verdict_id": "verdict-000000000000000000000000000000f0", "asset_id": "asset-residual-1",
+              "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "verdict": "accepted", "reason": null,
+              "against": null, "supersedes": null, "actor": {"kind": "person", "id": "u-anna", "name_at_time": "Anna"},
+              "on_behalf_of": null, "at": 1793275200.0},
+   "current": false, "line": "Accepted by Anna, 29 October 2026"},
+  {"record": {"schema": "ophiolite.verdict/1", "verdict_id": "verdict-000000000000000000000000000000a0", "asset_id": "asset-residual-1",
+              "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "verdict": "rejected",
+              "reason": "tops differ from the published log", "against": null, "supersedes": "verdict-000000000000000000000000000000f0",
+              "actor": {"kind": "person", "id": "u-anna", "name_at_time": "Anna"}, "on_behalf_of": null, "at": 1793278800.0},
+   "current": true, "line": "Rejected by Anna, 29 October 2026: tops differ from the published log"}
+ ]
+}

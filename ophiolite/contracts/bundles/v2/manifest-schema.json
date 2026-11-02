@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/bundles/v2/manifest-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.portable-bundle/2",
-    "version": "2.10.0",
+    "version": "2.11.0",
     "lifecycle": "preview"
   },
   "title": "PortableBundleManifestV2",
@@ -630,7 +630,7 @@
         "type": "object"
       },
       "then": {
-        "description": "2.8 (E23c) value rules: a package block only on a point set or feature set; package, companion and interpretation files only with a package block; the package file and the interpretation file at most once, companions at most 8; no member listed twice. 2.9 (E107a): a provenance file only with read_by, at most once.",
+        "description": "2.8 (E23c) value rules: a package block only on a point set or feature set; package, companion and interpretation files only with a package block; the package file and the interpretation file at most once, companions at most 8; no member listed twice. 2.9 (E107a): a provenance file only with read_by, at most once. 2.11 (E123 S1f-c): a package block also on a polyline set (Petrel fault sticks).",
         "allOf": [
           {
             "if": {
@@ -643,7 +643,8 @@
                 "type": {
                   "enum": [
                     "point-set",
-                    "feature-set"
+                    "feature-set",
+                    "polyline-set"
                   ]
                 }
               },

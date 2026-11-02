@@ -122,3 +122,30 @@ def test_a_member_without_a_trajectory_or_outside_the_set_is_refused_before_any_
     assert refused(lambda: c.well_sets.bind(SET, 'wellbore-' + 'c' * 32, SURFACE))[0] == 'That wellbore is not a member of this set.'
     assert refused(lambda: c.well_sets.bind(SET, 2, SURFACE))[0].startswith('The set has 2 members')
     assert seen['inspected'] == [] and seen['read'] == []
+
+
+# --- E119a s6 (D3, A3, R2-2, R2-5): a member saved without a frame ----------------------------------------------------
+
+FRAME_MISSING = ("Member 2: The wellbore's trajectory was saved without a frame (map system, wellhead, depth reference, datum "
+                 'and north), so it cannot be placed; save the well set again with its frame.')
+FRAMELESS = {**SET, 'members': [SET['members'][0], {**SET['members'][1], 'frame': None}]}
+
+
+@pytest.mark.parametrize('surface', [SURFACE, dict(SURFACE, z_meaning='time', z_unit='ms', positive='down')], ids=['depth', 'time'])
+def test_a_member_saved_without_a_frame_is_refused_frame_missing_before_any_request(surface):
+    c, seen = client(survey=dict(SURVEY, depth_unit='ft'))  # survey and surface defects wait until a frame is given
+    text, details = refused(lambda: c.well_sets.bind(FRAMELESS, B2, Surface(surface)))
+    assert text == FRAME_MISSING
+    assert details == {'reason': 'geometry:frame_missing', 'field': 'members[1]', 'member': 1}
+    assert B2 not in text and 'frame_missing' not in text  # R2-12: the wellbore id is not in the sentence
+    assert seen == {'inspected': [], 'read': []}
+
+
+def test_a_later_version_with_the_frame_binds_while_the_frameless_version_still_refuses():
+    """R2-5: the earlier version (frame null) refuses; the next version, the same member with its frame, binds."""
+    c, seen = client()
+    assert refused(lambda: c.well_sets.bind(FRAMELESS, 1, SURFACE))[1]['reason'] == 'geometry:frame_missing'
+    bound = c.well_sets.bind(SET, 1, SURFACE)
+    assert bound.index == 1 and bound.frame == FRAME and len(bound.stations) == 2
+    assert refused(lambda: c.well_sets.bind(FRAMELESS, 1, SURFACE))[1] == {'reason': 'geometry:frame_missing', 'field': 'members[1]', 'member': 1}
+    assert len(seen['inspected']) == 1  # only the framed version was checked by the server

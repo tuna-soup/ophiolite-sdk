@@ -5,7 +5,7 @@
     "version": "1.0.0-pilot",
     "description": "One public API for every project operation. Three credential kinds reach it: the browser session (opaque HttpOnly cookie plus the X-CSRF-Token proof and, on non-GET requests, the exact Origin), a project-scoped delegate lasting at most five minutes (Bearer oph_api_..., parent session and current native permissions remain mandatory), and a browser-approved provider grant (Bearer provider token plus X-Ophiolite-Application-Grant; capability 1: the scientific read resources and the applications route within its read/write scopes; capability 3 adds reading wells, wellbores and lineage and the LAS upload routes). A request that carries an Authorization header is a machine request and is refused with MACHINE_AUTH_REQUIRED when a cookie or Origin travels with it. Scope and capability are ceilings; every operation runs the same native permission checks whoever calls it. Not a stable SDK or unattended service-account contract.",
     "x-ophiolite-contracts": {
-      "registry_version": "1.78.0",
+      "registry_version": "1.83.0",
       "index": "/api/v1/contracts",
       "served_profiles": [
         "las2/1",
@@ -19,9 +19,11 @@
         "petrel-horizon-ilxl/1",
         "petrel-scattered-data/1",
         "petrel-faultsticks/1",
+        "petrel-well-tops/1",
         "opendtect-horizon-ascii/1",
         "opendtect-faultsticks/1",
         "segy/1",
+        "segy-line/1",
         "well-location/1",
         "wavelet-text/1",
         "model-section-text/1",
@@ -1492,6 +1494,141 @@
                   "id"
                 ],
                 "title": "AccessKeyById",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/account/actions": {
+      "post": {
+        "summary": "E133 s2: the actions on your record, oldest first, in the projects you still belong to that this credential reaches",
+        "description": "Scope read; accepted principals: session, delegate; project extractor none.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "E93: a page of organisation or account record rows.",
+                  "properties": {
+                    "schema": {
+                      "const": "ophiolite.record-page/1",
+                      "title": "Schema",
+                      "type": "string"
+                    },
+                    "stream_id": {
+                      "title": "Stream Id",
+                      "type": "string"
+                    },
+                    "events": {
+                      "items": {
+                        "$ref": "#/components/schemas/ActivityEvent"
+                      },
+                      "title": "Events",
+                      "type": "array"
+                    },
+                    "next_cursor": {
+                      "title": "Next Cursor",
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "schema",
+                    "stream_id",
+                    "events",
+                    "next_cursor"
+                  ],
+                  "title": "RecordPage",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "description": "E133 s2: one page of the actions on the caller's record across the projects this credential reaches (the caller\nis the only subject: no account, project or request filter).",
+                "properties": {
+                  "after": {
+                    "default": 0,
+                    "description": "The `next_cursor` of the previous page.",
+                    "minimum": 0,
+                    "title": "After",
+                    "type": "integer"
+                  },
+                  "limit": {
+                    "default": 100,
+                    "maximum": 200,
+                    "minimum": 1,
+                    "title": "Limit",
+                    "type": "integer"
+                  }
+                },
+                "title": "OwnActionsRequest",
                 "type": "object"
               }
             }
@@ -3696,6 +3833,242 @@
                   "mode"
                 ],
                 "title": "ExchangeObservation",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/activity/trajectories": {
+      "post": {
+        "summary": "E134: your own work in this project as episodes a model may learn from, under your consent and the data rights (ophiolite.work-episodes/1; follow `next` with the same `until`)",
+        "description": "Scope read; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "schema": {
+                      "const": "ophiolite.work-episodes-page/1",
+                      "title": "Schema",
+                      "type": "string"
+                    },
+                    "manifest": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/WorkEpisodes"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "On the last page only"
+                    },
+                    "episodes": {
+                      "items": {
+                        "$ref": "#/components/schemas/WorkEpisode"
+                      },
+                      "title": "Episodes",
+                      "type": "array"
+                    },
+                    "next": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Next"
+                    },
+                    "until": {
+                      "title": "Until",
+                      "type": "integer"
+                    },
+                    "reconstruction": {
+                      "description": "The same on every page of one export; a different value means the record changed: export again",
+                      "pattern": "^[0-9a-f]{64}$",
+                      "title": "Reconstruction",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "schema",
+                    "manifest",
+                    "episodes",
+                    "next",
+                    "until",
+                    "reconstruction"
+                  ],
+                  "title": "TrajectoryPage",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "description": "One page of your own work in this project as episodes (slice 0: the route answers in its sentences).",
+                "properties": {
+                  "project_id": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "purpose": {
+                    "enum": [
+                      "training",
+                      "evaluation"
+                    ],
+                    "title": "Purpose",
+                    "type": "string"
+                  },
+                  "mode": {
+                    "default": "auto",
+                    "description": "auto: values where the rights allow; shape lowers every episode to its shape",
+                    "enum": [
+                      "auto",
+                      "shape"
+                    ],
+                    "title": "Mode",
+                    "type": "string"
+                  },
+                  "window_seconds": {
+                    "default": 14400,
+                    "maximum": 86400,
+                    "minimum": 60,
+                    "title": "Window Seconds",
+                    "type": "integer"
+                  },
+                  "seed": {
+                    "default": 0,
+                    "minimum": 0,
+                    "title": "Seed",
+                    "type": "integer"
+                  },
+                  "fractions": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/EpisodeFractions"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null
+                  },
+                  "after": {
+                    "default": 0,
+                    "description": "Continue after this row (the `next` of the previous page)",
+                    "minimum": 0,
+                    "title": "After",
+                    "type": "integer"
+                  },
+                  "until": {
+                    "anyOf": [
+                      {
+                        "description": "The upper boundary the first page answered; send it with every continuation",
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Until"
+                  },
+                  "limit": {
+                    "default": 100,
+                    "maximum": 1000,
+                    "minimum": 1,
+                    "title": "Limit",
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "purpose"
+                ],
+                "title": "TrajectoriesRequest",
                 "type": "object"
               }
             }
@@ -6871,6 +7244,190 @@
                   "expected_generation"
                 ],
                 "title": "AIUseGrant",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/ai-use/self-grant": {
+      "post": {
+        "summary": "E134 s2: record that your own work in an item you uploaded or made may be used for training or evaluation, or no longer (forward only)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Your own AI use of the item for the purpose: the latest row (`withdrawn` and sequence 0 when there is none).",
+                  "properties": {
+                    "asset_id": {
+                      "title": "Asset Id",
+                      "type": "string"
+                    },
+                    "purpose": {
+                      "enum": [
+                        "training",
+                        "evaluation"
+                      ],
+                      "title": "Purpose",
+                      "type": "string"
+                    },
+                    "state": {
+                      "enum": [
+                        "granted",
+                        "withdrawn"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "sequence": {
+                      "title": "Sequence",
+                      "type": "integer"
+                    },
+                    "at": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "At"
+                    }
+                  },
+                  "required": [
+                    "asset_id",
+                    "purpose",
+                    "state",
+                    "sequence",
+                    "at"
+                  ],
+                  "title": "AIUseSelfGrant",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "description": "E134 s2 (D1): the owner of an item records that their own work in it may be used for one purpose (`granted`), or\nno longer (`withdrawn`, forward only). A request id is used once per person.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "title": "Asset Id",
+                    "type": "string"
+                  },
+                  "purpose": {
+                    "enum": [
+                      "training",
+                      "evaluation"
+                    ],
+                    "title": "Purpose",
+                    "type": "string"
+                  },
+                  "state": {
+                    "enum": [
+                      "granted",
+                      "withdrawn"
+                    ],
+                    "title": "State",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "Your request id: the same request again answers its row; another request under it is refused.",
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "asset_id",
+                  "purpose",
+                  "state",
+                  "command_id"
+                ],
+                "title": "AIUseSelfGrantRequest",
                 "type": "object"
               }
             }
@@ -16970,7 +17527,7 @@
                       }
                     ],
                     "default": null,
-                    "description": "A grid result: your file's confirmed interpretation envelope (required; refused schema without it). A tops or survey result (E110): your file's declarations (depth_unit, depth_basis; or depth_unit, azimuth_reference, depth_datum, grid_crs) and wellbore_confirmed: true (required; refused interpretation without it)",
+                    "description": "A grid result: your file's confirmed interpretation envelope (required; refused schema without it). A tops or survey result (E110): your file's declarations (depth_unit, depth_basis, and depth_datum when depth_basis is other; or depth_unit, azimuth_reference, depth_datum, grid_crs) and wellbore_confirmed: true (required; refused interpretation without it)",
                     "title": "Interpretation"
                   }
                 },
@@ -20032,6 +20589,381 @@
         }
       }
     },
+    "/api/v1/consent/grant": {
+      "post": {
+        "summary": "Allow this deployment to include a record of your own work for one purpose (training or evaluation), under the text version you read",
+        "description": "Scope write; accepted principals: session; project extractor none.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "record": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/BehaviourConsent"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "current": {
+                      "title": "Current",
+                      "type": "boolean"
+                    },
+                    "line": {
+                      "title": "Line",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "record",
+                    "current",
+                    "line"
+                  ],
+                  "title": "ConsentEntry",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "purpose": {
+                    "enum": [
+                      "training",
+                      "evaluation"
+                    ],
+                    "title": "Purpose",
+                    "type": "string"
+                  },
+                  "text_version": {
+                    "description": "The version of the text you read",
+                    "minimum": 0,
+                    "title": "Text Version",
+                    "type": "integer"
+                  },
+                  "extras": {
+                    "items": {
+                      "const": "instruction-text",
+                      "type": "string"
+                    },
+                    "title": "Extras",
+                    "type": "array",
+                    "uniqueItems": true
+                  },
+                  "command_id": {
+                    "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+                    "title": "Command Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "purpose",
+                  "text_version",
+                  "command_id"
+                ],
+                "title": "GrantRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/consent/list": {
+      "post": {
+        "summary": "Your own consent, every step, per purpose in order",
+        "description": "Scope read; accepted principals: session; project extractor none.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "consents": {
+                      "description": "Ordered by (purpose, sequence)",
+                      "items": {
+                        "$ref": "#/components/schemas/ConsentEntry"
+                      },
+                      "title": "Consents",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "consents"
+                  ],
+                  "title": "ConsentList",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "description": "Your own consent only: there is no `person` (D5).",
+                "properties": {},
+                "title": "ListRequest",
+                "type": "object",
+                "x-ophiolite-no-fields": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/consent/withdraw": {
+      "post": {
+        "summary": "Withdraw your consent for one purpose; from then on nothing new is included",
+        "description": "Scope write; accepted principals: session; project extractor none.",
+        "security": [
+          {
+            "session": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "record": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/BehaviourConsent"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "current": {
+                      "title": "Current",
+                      "type": "boolean"
+                    },
+                    "line": {
+                      "title": "Line",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "record",
+                    "current",
+                    "line"
+                  ],
+                  "title": "ConsentEntry",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "purpose": {
+                    "enum": [
+                      "training",
+                      "evaluation"
+                    ],
+                    "title": "Purpose",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+                    "title": "Command Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "purpose",
+                  "command_id"
+                ],
+                "title": "WithdrawRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/context/native-report": {
       "post": {
         "summary": "Record client-reported native calculation evidence",
@@ -21251,6 +22183,146 @@
                 ],
                 "title": "PolicyWrite",
                 "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/deployment/capture": {
+      "post": {
+        "summary": "Whether this deployment may learn from how people work (capture off or by consent), its tier, and the consent text when capture is by consent",
+        "description": "Scope read; accepted principals: session, delegate; project extractor none.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "capture": {
+                      "enum": [
+                        "off",
+                        "by-consent"
+                      ],
+                      "title": "Capture",
+                      "type": "string"
+                    },
+                    "tier": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "public-demonstration",
+                            "local-evaluation",
+                            "self-managed",
+                            "managed-dedicated",
+                            "shared-cloud"
+                          ],
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Tier"
+                    },
+                    "consent_text": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/components/schemas/ConsentText"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "The current text when capture is by-consent; null when off"
+                    },
+                    "line": {
+                      "title": "Line",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "capture",
+                    "tier",
+                    "consent_text",
+                    "line"
+                  ],
+                  "title": "CaptureAnswer",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {},
+                "title": "CaptureRequest",
+                "type": "object",
+                "x-ophiolite-no-fields": true
               }
             }
           }
@@ -26824,7 +27896,9 @@
                       "resqml-epc/1",
                       "petrel-horizon-ilxl/1",
                       "petrel-scattered-data/1",
-                      "petrel-faultsticks/1"
+                      "petrel-faultsticks/1",
+                      "petrel-well-tops/1",
+                      "segy-line/1"
                     ],
                     "title": "Profile",
                     "type": "string"
@@ -29932,7 +31006,9 @@
                       "resqml-epc/1",
                       "petrel-horizon-ilxl/1",
                       "petrel-scattered-data/1",
-                      "petrel-faultsticks/1"
+                      "petrel-faultsticks/1",
+                      "petrel-well-tops/1",
+                      "segy-line/1"
                     ],
                     "title": "Profile",
                     "type": "string"
@@ -53138,7 +54214,8 @@
                         "ogc-geopackage/1",
                         "geojson/1",
                         "esri-shapefile/1",
-                        "well-residual/1"
+                        "well-residual/1",
+                        "petrel-well-tops/1"
                       ],
                       "title": "Profile",
                       "type": "string"
@@ -53301,6 +54378,7 @@
                       "model-section-text/1",
                       "seismic-section-text/1",
                       "time-depth-csv/1",
+                      "petrel-well-tops/1",
                       "ogc-geopackage/1",
                       "well-residual/1"
                     ],
@@ -54324,7 +55402,8 @@
                         "ogc-geopackage/1",
                         "geojson/1",
                         "esri-shapefile/1",
-                        "well-residual/1"
+                        "well-residual/1",
+                        "petrel-well-tops/1"
                       ],
                       "title": "Profile",
                       "type": "string"
@@ -93351,6 +94430,359 @@
         }
       }
     },
+    "/api/v1/projects/{project}/verdicts/list": {
+      "post": {
+        "summary": "Every verdict on one exact result version you may read, oldest first, each with whether it is its author's current one",
+        "description": "Scope read; accepted principals: session, delegate, agent; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "verdicts": {
+                      "description": "Ordered by (at, verdict_id); history has current false",
+                      "items": {
+                        "$ref": "#/components/schemas/VerdictEntry"
+                      },
+                      "title": "Verdicts",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "verdicts"
+                  ],
+                  "title": "VerdictList",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "maxLength": 200,
+                    "minLength": 1,
+                    "title": "Asset Id",
+                    "type": "string"
+                  },
+                  "revision": {
+                    "maxLength": 200,
+                    "minLength": 1,
+                    "title": "Revision",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "asset_id",
+                  "revision"
+                ],
+                "title": "VerdictListRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/verdicts/record": {
+      "post": {
+        "summary": "Record that you accept or reject one exact result version, with your reason (required to reject); it supersedes your earlier verdict on that version",
+        "description": "Scope write; accepted principals: session, delegate, agent; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "session"
+        ],
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "record": {
+                      "$ref": "#/components/schemas/Verdict"
+                    },
+                    "current": {
+                      "description": "The terminal link of its author's chain on this version",
+                      "title": "Current",
+                      "type": "boolean"
+                    },
+                    "line": {
+                      "description": "\"Accepted by Anna, 29 October 2026: matches the published log\"",
+                      "title": "Line",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "record",
+                    "current",
+                    "line"
+                  ],
+                  "title": "VerdictEntry",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "asset_id": {
+                    "maxLength": 200,
+                    "minLength": 1,
+                    "title": "Asset Id",
+                    "type": "string"
+                  },
+                  "revision": {
+                    "maxLength": 200,
+                    "minLength": 1,
+                    "title": "Revision",
+                    "type": "string"
+                  },
+                  "verdict": {
+                    "enum": [
+                      "accepted",
+                      "rejected"
+                    ],
+                    "title": "Verdict",
+                    "type": "string"
+                  },
+                  "reason": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Required when rejected; at most 2000 characters",
+                    "title": "Reason"
+                  },
+                  "against": {
+                    "anyOf": [
+                      {
+                        "discriminator": {
+                          "mapping": {
+                            "check": "#/components/schemas/AgainstCheck",
+                            "outcome": "#/components/schemas/AgainstOutcome"
+                          },
+                          "propertyName": "kind"
+                        },
+                        "oneOf": [
+                          {
+                            "$ref": "#/components/schemas/AgainstOutcome"
+                          },
+                          {
+                            "$ref": "#/components/schemas/AgainstCheck"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Against"
+                  },
+                  "supersedes": {
+                    "anyOf": [
+                      {
+                        "pattern": "^verdict-[0-9a-f]{32}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Omitted: supersede your current verdict on this version. null: you expect none. An id: it must be your current one",
+                    "title": "Supersedes"
+                  },
+                  "command_id": {
+                    "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+                    "title": "Command Id",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "asset_id",
+                  "revision",
+                  "verdict",
+                  "command_id"
+                ],
+                "title": "VerdictRecordRequest",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/webhooks/create": {
       "post": {
         "summary": "Notify an HTTPS address when this project changes; the signing secret is shown once (command_id)",
@@ -99144,7 +100576,7 @@
                 "schema": {
                   "x-ophiolite": {
                     "id": "ophiolite.scientific-asset/1",
-                    "version": "1.32.0",
+                    "version": "1.34.0",
                     "lifecycle": "preview"
                   },
                   "additionalProperties": false,
@@ -99356,7 +100788,7 @@
                                         "type": "string"
                                       },
                                       "bytes": {
-                                        "maximum": 33554432,
+                                        "maximum": 609048576,
                                         "minimum": 0,
                                         "title": "Bytes",
                                         "type": "integer"
@@ -99540,7 +100972,7 @@
                                         "type": "string"
                                       },
                                       "bytes": {
-                                        "maximum": 33554432,
+                                        "maximum": 609048576,
                                         "minimum": 0,
                                         "title": "Bytes",
                                         "type": "integer"
@@ -99782,7 +101214,7 @@
                                         "type": "string"
                                       },
                                       "bytes": {
-                                        "maximum": 33554432,
+                                        "maximum": 609048576,
                                         "minimum": 0,
                                         "title": "Bytes",
                                         "type": "integer"
@@ -100661,7 +102093,7 @@
                                         "type": "string"
                                       },
                                       "bytes": {
-                                        "maximum": 33554432,
+                                        "maximum": 609048576,
                                         "minimum": 0,
                                         "title": "Bytes",
                                         "type": "integer"
@@ -104174,6 +105606,7 @@
                         },
                         {
                           "additionalProperties": false,
+                          "description": "E139 (typed-context 1.11.0): a point set's context wherever it is not inside a released `ophiolite.point-set/1`\ndocument, which keeps `PointContext` and its 100,000 bytes for bytes; above 100,000 nodes it is stored as columns.",
                           "properties": {
                             "crs": {
                               "pattern": "^(EPSG:[0-9]{4,6}|unknown)$",
@@ -104330,7 +105763,7 @@
                               "type": "string"
                             },
                             "count": {
-                              "maximum": 100000,
+                              "maximum": 4000000,
                               "minimum": 1,
                               "title": "Count",
                               "type": "integer"
@@ -104340,7 +105773,7 @@
                               "type": "boolean"
                             },
                             "missing_z_count": {
-                              "maximum": 100000,
+                              "maximum": 4000000,
                               "minimum": 0,
                               "title": "Missing Z Count",
                               "type": "integer"
@@ -104363,7 +105796,7 @@
                             "z_provided",
                             "missing_z_count"
                           ],
-                          "title": "PointContext",
+                          "title": "PointColumnsContext",
                           "type": "object"
                         },
                         {
@@ -107284,6 +108717,219 @@
                           ],
                           "title": "WellResidualContext",
                           "type": "object"
+                        },
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "type": {
+                              "const": "seismic-line",
+                              "title": "Type",
+                              "type": "string"
+                            },
+                            "format": {
+                              "enum": [
+                                "IBM 4-byte floating point",
+                                "IEEE 4-byte floating point"
+                              ],
+                              "title": "Format",
+                              "type": "string"
+                            },
+                            "format_code": {
+                              "enum": [
+                                1,
+                                5
+                              ],
+                              "title": "Format Code",
+                              "type": "integer"
+                            },
+                            "segy_revision": {
+                              "pattern": "^[0-9]{1,3}\\.[0-9]{1,3}$",
+                              "title": "Segy Revision",
+                              "type": "string"
+                            },
+                            "traces": {
+                              "maximum": 200000,
+                              "minimum": 1,
+                              "title": "Traces",
+                              "type": "integer"
+                            },
+                            "samples": {
+                              "maximum": 20000,
+                              "minimum": 1,
+                              "title": "Samples",
+                              "type": "integer"
+                            },
+                            "trace_bytes": {
+                              "minimum": 244,
+                              "title": "Trace Bytes",
+                              "type": "integer"
+                            },
+                            "sample_interval": {
+                              "exclusiveMinimum": 0,
+                              "title": "Sample Interval",
+                              "type": "number"
+                            },
+                            "sample_unit": {
+                              "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+                              "title": "Sample Unit",
+                              "type": "string"
+                            },
+                            "first_sample": {
+                              "title": "First Sample",
+                              "type": "number"
+                            },
+                            "z_domain": {
+                              "enum": [
+                                "time",
+                                "depth",
+                                "unknown"
+                              ],
+                              "title": "Z Domain",
+                              "type": "string"
+                            },
+                            "crs": {
+                              "pattern": "^(EPSG:[0-9]{4,6}|unknown)$",
+                              "title": "Crs",
+                              "type": "string"
+                            },
+                            "datum": {
+                              "maxLength": 128,
+                              "minLength": 1,
+                              "title": "Datum",
+                              "type": "string"
+                            },
+                            "dataset": {
+                              "anyOf": [
+                                {
+                                  "maxLength": 128,
+                                  "minLength": 1,
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "title": "Dataset"
+                            },
+                            "line": {
+                              "anyOf": [
+                                {
+                                  "maxLength": 128,
+                                  "minLength": 1,
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "title": "Line"
+                            },
+                            "exceptions": {
+                              "items": {
+                                "items": {
+                                  "anyOf": [
+                                    {
+                                      "type": "integer"
+                                    },
+                                    {
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "type": "array"
+                              },
+                              "maxItems": 64,
+                              "title": "Exceptions",
+                              "type": "array"
+                            },
+                            "fidelity": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "status": {
+                                  "const": "assessed",
+                                  "title": "Status",
+                                  "type": "string"
+                                },
+                                "preserved": {
+                                  "items": {
+                                    "maxLength": 512,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Preserved",
+                                  "type": "array"
+                                },
+                                "losses": {
+                                  "items": {
+                                    "maxLength": 512,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Losses",
+                                  "type": "array"
+                                },
+                                "unknown_context": {
+                                  "items": {
+                                    "maxLength": 128,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Unknown Context",
+                                  "type": "array"
+                                },
+                                "decisions": {
+                                  "anyOf": [
+                                    {
+                                      "items": {
+                                        "maxLength": 512,
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      "maxItems": 64,
+                                      "type": "array"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "default": null,
+                                  "title": "Decisions"
+                                }
+                              },
+                              "required": [
+                                "status",
+                                "preserved",
+                                "losses",
+                                "unknown_context"
+                              ],
+                              "title": "Fidelity",
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "format",
+                            "format_code",
+                            "segy_revision",
+                            "traces",
+                            "samples",
+                            "trace_bytes",
+                            "sample_interval",
+                            "sample_unit",
+                            "first_sample",
+                            "z_domain",
+                            "crs",
+                            "datum",
+                            "dataset",
+                            "line",
+                            "exceptions",
+                            "fidelity"
+                          ],
+                          "title": "SeismicLineContext",
+                          "type": "object"
                         }
                       ],
                       "title": "Scientific"
@@ -107361,7 +109007,8 @@
                                 "feature-set/1",
                                 "well-path/1",
                                 "well-set/1",
-                                "well-residual/1"
+                                "well-residual/1",
+                                "seismic-line/1"
                               ],
                               "title": "Mapping",
                               "type": "string"
@@ -107662,7 +109309,8 @@
                               "application/x-esri-shapefile",
                               "application/geopackage+sqlite3",
                               "application/geo+json",
-                              "application/vnd.ophiolite.curve-columns"
+                              "application/vnd.ophiolite.curve-columns",
+                              "application/vnd.ophiolite.point-columns"
                             ],
                             "title": "Media Type",
                             "type": "string"
@@ -107714,20 +109362,36 @@
                             "properties": {
                               "profile": {
                                 "not": {
-                                  "const": "ophiolite.curve-columns/1"
+                                  "const": "ophiolite.point-columns/1"
                                 }
                               }
                             }
                           },
                           "properties": {
                             "bytes": {
-                              "maximum": 65048576
+                              "maximum": 609048576
                             }
                           },
                           "then": {
+                            "if": {
+                              "properties": {
+                                "profile": {
+                                  "not": {
+                                    "const": "ophiolite.curve-columns/1"
+                                  }
+                                }
+                              }
+                            },
                             "properties": {
                               "bytes": {
-                                "maximum": 33554432
+                                "maximum": 65048576
+                              }
+                            },
+                            "then": {
+                              "properties": {
+                                "bytes": {
+                                  "maximum": 33554432
+                                }
                               }
                             }
                           }
@@ -108437,7 +110101,8 @@
                             "feature-set/1",
                             "well-path/1",
                             "well-set/1",
-                            "well-residual/1"
+                            "well-residual/1",
+                            "seismic-line/1"
                           ],
                           "title": "Mapping",
                           "type": "string"
@@ -112574,7 +114239,7 @@
                             }
                           },
                           "properties": {
-                            "description": "Per collection (Technical details): wells: The well name first; source revision and row, elevation reference, ambiguity and the transformation performed; for a well whose stored CRS cannot be converted, stored_x, stored_y, stored_crs and transformation \"unavailable\" with a null geometry. tops: The top name, its measured depth and (when the file gives it) vertical depth in the stated unit, the wellbore and the exact source revision; a top whose wellbore has no location you may read has a null geometry and the reason in placement. wellbore-paths: The wellbore name, the survey's measured-depth range and station count, its azimuth reference and the exact source revision; placement states the rule that drew the line or why it is not drawn. point-sets: The point set name, the point's index in its file, its height when given, the exact source revision and each attribute of the set by name (an attribute whose name is reserved here is served as attribute_<name>). lines: The polyline set name, the stick number in its file and the exact source revision. feature-points: The layer name, the feature's index in its file, the exact source revision and each declared attribute by name (an attribute whose name is reserved here is served as attribute_<name>). feature-lines: The layer name, the feature's index in its file, the exact source revision and each declared attribute by name (an attribute whose name is reserved here is served as attribute_<name>). feature-polygons: The layer name, the feature's index in its file, the exact source revision and each declared attribute by name (an attribute whose name is reserved here is served as attribute_<name>).",
+                            "description": "Per collection (Technical details): wells: The well name first; source revision and row, elevation reference, ambiguity and the transformation performed; for a well whose stored CRS cannot be converted, stored_x, stored_y, stored_crs and transformation \"unavailable\" with a null geometry. tops: The top name, its measured depth and (when the file gives it) vertical depth in the stated unit, the wellbore and the exact source revision; a top whose wellbore has no location you may read has a null geometry and the reason in placement. wellbore-paths: The wellbore name, the survey's measured-depth range and station count, its azimuth reference and the exact source revision; placement states the rule that drew the line or why it is not drawn. point-sets: The point set name, the point's index in its file, its height when given, the exact source revision and each attribute of the set by name (an attribute whose name is reserved here is served as attribute_<name>). lines: The polyline set name, the stick's position in its file, the fault name and stick number as the file states them (absent when it states none) and the exact source revision; a stick of one point has no line, and placement says so. feature-points: The layer name, the feature's index in its file, the exact source revision and each declared attribute by name (an attribute whose name is reserved here is served as attribute_<name>). feature-lines: The layer name, the feature's index in its file, the exact source revision and each declared attribute by name (an attribute whose name is reserved here is served as attribute_<name>). feature-polygons: The layer name, the feature's index in its file, the exact source revision and each declared attribute by name (an attribute whose name is reserved here is served as attribute_<name>).",
                             "anyOf": [
                               {
                                 "type": "object",
@@ -112762,12 +114427,18 @@
                                   "source_revision",
                                   "source_profile"
                                 ],
-                                "description": "The polyline set name, the stick number in its file and the exact source revision.",
+                                "description": "The polyline set name, the stick's position in its file, the fault name and stick number as the file states them (absent when it states none) and the exact source revision; a stick of one point has no line, and placement says so.",
                                 "properties": {
                                   "name": {
                                     "type": "string"
                                   },
                                   "stick": {
+                                    "type": "integer"
+                                  },
+                                  "fault": {
+                                    "type": "string"
+                                  },
+                                  "fault_stick": {
                                     "type": "integer"
                                   },
                                   "source_asset_id": {
@@ -113268,7 +114939,7 @@
                       }
                     },
                     "properties": {
-                      "description": "Per collection (Technical details): wells: The well name first; source revision and row, elevation reference, ambiguity and the transformation performed; for a well whose stored CRS cannot be converted, stored_x, stored_y, stored_crs and transformation \"unavailable\" with a null geometry. tops: The top name, its measured depth and (when the file gives it) vertical depth in the stated unit, the wellbore and the exact source revision; a top whose wellbore has no location you may read has a null geometry and the reason in placement. wellbore-paths: The wellbore name, the survey's measured-depth range and station count, its azimuth reference and the exact source revision; placement states the rule that drew the line or why it is not drawn. point-sets: The point set name, the point's index in its file, its height when given, the exact source revision and each attribute of the set by name (an attribute whose name is reserved here is served as attribute_<name>). lines: The polyline set name, the stick number in its file and the exact source revision. feature-points: The layer name, the feature's index in its file, the exact source revision and each declared attribute by name (an attribute whose name is reserved here is served as attribute_<name>). feature-lines: The layer name, the feature's index in its file, the exact source revision and each declared attribute by name (an attribute whose name is reserved here is served as attribute_<name>). feature-polygons: The layer name, the feature's index in its file, the exact source revision and each declared attribute by name (an attribute whose name is reserved here is served as attribute_<name>).",
+                      "description": "Per collection (Technical details): wells: The well name first; source revision and row, elevation reference, ambiguity and the transformation performed; for a well whose stored CRS cannot be converted, stored_x, stored_y, stored_crs and transformation \"unavailable\" with a null geometry. tops: The top name, its measured depth and (when the file gives it) vertical depth in the stated unit, the wellbore and the exact source revision; a top whose wellbore has no location you may read has a null geometry and the reason in placement. wellbore-paths: The wellbore name, the survey's measured-depth range and station count, its azimuth reference and the exact source revision; placement states the rule that drew the line or why it is not drawn. point-sets: The point set name, the point's index in its file, its height when given, the exact source revision and each attribute of the set by name (an attribute whose name is reserved here is served as attribute_<name>). lines: The polyline set name, the stick's position in its file, the fault name and stick number as the file states them (absent when it states none) and the exact source revision; a stick of one point has no line, and placement says so. feature-points: The layer name, the feature's index in its file, the exact source revision and each declared attribute by name (an attribute whose name is reserved here is served as attribute_<name>). feature-lines: The layer name, the feature's index in its file, the exact source revision and each declared attribute by name (an attribute whose name is reserved here is served as attribute_<name>). feature-polygons: The layer name, the feature's index in its file, the exact source revision and each declared attribute by name (an attribute whose name is reserved here is served as attribute_<name>).",
                       "anyOf": [
                         {
                           "type": "object",
@@ -113456,12 +115127,18 @@
                             "source_revision",
                             "source_profile"
                           ],
-                          "description": "The polyline set name, the stick number in its file and the exact source revision.",
+                          "description": "The polyline set name, the stick's position in its file, the fault name and stick number as the file states them (absent when it states none) and the exact source revision; a stick of one point has no line, and placement says so.",
                           "properties": {
                             "name": {
                               "type": "string"
                             },
                             "stick": {
+                              "type": "integer"
+                            },
+                            "fault": {
+                              "type": "string"
+                            },
+                            "fault_stick": {
                               "type": "integer"
                             },
                             "source_asset_id": {
@@ -115450,6 +117127,44 @@
         "title": "ActivityEvent",
         "type": "object"
       },
+      "Actor": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "person",
+              "agent"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "id": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "name_at_time": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name At Time"
+          }
+        },
+        "required": [
+          "kind",
+          "id",
+          "name_at_time"
+        ],
+        "title": "Actor",
+        "type": "object"
+      },
       "AdministrationBlocker": {
         "additionalProperties": false,
         "description": "What stops adding a connection; listed in this order.",
@@ -115710,6 +117425,56 @@
           "earlier"
         ],
         "title": "AgainOutput",
+        "type": "object"
+      },
+      "AgainstCheck": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "check",
+            "title": "Kind",
+            "type": "string"
+          },
+          "key": {
+            "description": "An E96 check key (ophiolite.check/1) over this result version",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "key"
+        ],
+        "title": "AgainstCheck",
+        "type": "object"
+      },
+      "AgainstOutcome": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "outcome",
+            "title": "Kind",
+            "type": "string"
+          },
+          "outcome_id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Outcome Id",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "kind",
+          "outcome_id",
+          "version"
+        ],
+        "title": "AgainstOutcome",
         "type": "object"
       },
       "AgentConversion": {
@@ -117357,6 +119122,176 @@
           "source"
         ],
         "title": "BasisValue",
+        "type": "object"
+      },
+      "Behalf": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "person",
+            "title": "Kind",
+            "type": "string"
+          },
+          "id": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "name_at_time": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name At Time"
+          }
+        },
+        "required": [
+          "kind",
+          "id",
+          "name_at_time"
+        ],
+        "title": "Behalf",
+        "type": "object"
+      },
+      "BehaviourConsent": {
+        "additionalProperties": false,
+        "description": "One step of one person's consent chain for one purpose; never changed, never pruned.",
+        "else": {
+          "properties": {
+            "covers": {
+              "maxItems": 0
+            },
+            "extras": {
+              "maxItems": 0
+            }
+          }
+        },
+        "if": {
+          "properties": {
+            "state": {
+              "const": "granted"
+            }
+          },
+          "required": [
+            "state"
+          ]
+        },
+        "properties": {
+          "schema": {
+            "const": "ophiolite.behaviour-consent/1",
+            "title": "Schema",
+            "type": "string"
+          },
+          "consent_id": {
+            "pattern": "^consent-[0-9a-f]{32}$",
+            "title": "Consent Id",
+            "type": "string"
+          },
+          "person": {
+            "description": "The account id, never a name",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Person",
+            "type": "string"
+          },
+          "purpose": {
+            "enum": [
+              "training",
+              "evaluation"
+            ],
+            "title": "Purpose",
+            "type": "string"
+          },
+          "sequence": {
+            "description": "1, 2, 3, ... per person and purpose; the highest is current",
+            "minimum": 1,
+            "title": "Sequence",
+            "type": "integer"
+          },
+          "state": {
+            "enum": [
+              "granted",
+              "withdrawn"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "covers": {
+            "description": "All five when granted; none when withdrawn",
+            "items": {
+              "enum": [
+                "own-actions",
+                "command-parameters",
+                "verdicts",
+                "published-checks",
+                "agent-plan-digests"
+              ],
+              "type": "string"
+            },
+            "title": "Covers",
+            "type": "array",
+            "uniqueItems": true
+          },
+          "extras": {
+            "description": "None when withdrawn",
+            "items": {
+              "const": "instruction-text",
+              "type": "string"
+            },
+            "title": "Extras",
+            "type": "array",
+            "uniqueItems": true
+          },
+          "text_version": {
+            "description": "The text read; on a withdrawal, the version of the grant it closes",
+            "minimum": 0,
+            "title": "Text Version",
+            "type": "integer"
+          },
+          "text_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Text Sha256",
+            "type": "string"
+          },
+          "at": {
+            "title": "At",
+            "type": "number"
+          },
+          "command_id": {
+            "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+            "title": "Command Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema",
+          "consent_id",
+          "person",
+          "purpose",
+          "sequence",
+          "state",
+          "covers",
+          "extras",
+          "text_version",
+          "text_sha256",
+          "at",
+          "command_id"
+        ],
+        "then": {
+          "properties": {
+            "covers": {
+              "maxItems": 5,
+              "minItems": 5
+            }
+          }
+        },
+        "title": "BehaviourConsent",
         "type": "object"
       },
       "Binding": {
@@ -119328,6 +121263,71 @@
         "title": "ConnectionReadiness",
         "type": "object"
       },
+      "ConsentEntry": {
+        "additionalProperties": false,
+        "properties": {
+          "record": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BehaviourConsent"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "current": {
+            "title": "Current",
+            "type": "boolean"
+          },
+          "line": {
+            "title": "Line",
+            "type": "string"
+          }
+        },
+        "required": [
+          "record",
+          "current",
+          "line"
+        ],
+        "title": "ConsentEntry",
+        "type": "object"
+      },
+      "ConsentText": {
+        "additionalProperties": false,
+        "properties": {
+          "version": {
+            "minimum": 0,
+            "title": "Version",
+            "type": "integer"
+          },
+          "state": {
+            "enum": [
+              "draft",
+              "approved"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Sha256",
+            "type": "string"
+          },
+          "words": {
+            "title": "Words",
+            "type": "string"
+          }
+        },
+        "required": [
+          "version",
+          "state",
+          "sha256",
+          "words"
+        ],
+        "title": "ConsentText",
+        "type": "object"
+      },
       "ContractsRegistry": {
         "x-ophiolite": {
           "id": "ophiolite.contracts-registry/1",
@@ -120952,6 +122952,459 @@
         "title": "EntityRef",
         "type": "object"
       },
+      "EpisodeActor": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "person",
+              "agent"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "id": {
+            "description": "A pseudonym; its prefix is the kind",
+            "pattern": "^(person|agent)-[0-9a-f]{32}$",
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "title": "EpisodeActor",
+        "type": "object"
+      },
+      "EpisodeBehalf": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "person",
+            "title": "Kind",
+            "type": "string"
+          },
+          "id": {
+            "pattern": "^person-[0-9a-f]{32}$",
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "title": "EpisodeBehalf",
+        "type": "object"
+      },
+      "EpisodeCheck": {
+        "additionalProperties": false,
+        "properties": {
+          "ref": {
+            "pattern": "^ref-[0-9a-f]{32}$",
+            "title": "Ref",
+            "type": "string"
+          },
+          "key_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Key Sha256",
+            "type": "string"
+          },
+          "record_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Record Sha256",
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "passed",
+              "differed",
+              "not_compared"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "witness": {
+            "enum": [
+              "server",
+              "claimed",
+              "personal"
+            ],
+            "title": "Witness",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ref",
+          "key_sha256",
+          "record_sha256",
+          "outcome",
+          "witness"
+        ],
+        "title": "EpisodeCheck",
+        "type": "object"
+      },
+      "EpisodeCounts": {
+        "additionalProperties": false,
+        "properties": {
+          "episodes": {
+            "minimum": 0,
+            "title": "Episodes",
+            "type": "integer"
+          },
+          "values": {
+            "minimum": 0,
+            "title": "Values",
+            "type": "integer"
+          },
+          "shape": {
+            "minimum": 0,
+            "title": "Shape",
+            "type": "integer"
+          },
+          "rights_refused": {
+            "minimum": 0,
+            "title": "Rights Refused",
+            "type": "integer"
+          },
+          "no_consent": {
+            "minimum": 0,
+            "title": "No Consent",
+            "type": "integer"
+          },
+          "unreadable": {
+            "minimum": 0,
+            "title": "Unreadable",
+            "type": "integer"
+          },
+          "skipped": {
+            "description": "Rows without a record (before E93), never part of an episode",
+            "minimum": 0,
+            "title": "Skipped",
+            "type": "integer"
+          },
+          "scrubbed_fields": {
+            "minimum": 0,
+            "title": "Scrubbed Fields",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "episodes",
+          "values",
+          "shape",
+          "rights_refused",
+          "no_consent",
+          "unreadable",
+          "skipped",
+          "scrubbed_fields"
+        ],
+        "title": "EpisodeCounts",
+        "type": "object"
+      },
+      "EpisodeFractions": {
+        "additionalProperties": false,
+        "properties": {
+          "train": {
+            "maximum": 1000,
+            "minimum": 0,
+            "title": "Train",
+            "type": "integer"
+          },
+          "validation": {
+            "maximum": 1000,
+            "minimum": 0,
+            "title": "Validation",
+            "type": "integer"
+          },
+          "test": {
+            "maximum": 1000,
+            "minimum": 0,
+            "title": "Test",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "train",
+          "validation",
+          "test"
+        ],
+        "title": "EpisodeFractions",
+        "type": "object"
+      },
+      "EpisodeOmitted": {
+        "additionalProperties": false,
+        "properties": {
+          "parameters": {
+            "minimum": 0,
+            "title": "Parameters",
+            "type": "integer"
+          },
+          "checks": {
+            "minimum": 0,
+            "title": "Checks",
+            "type": "integer"
+          },
+          "verdicts": {
+            "minimum": 0,
+            "title": "Verdicts",
+            "type": "integer"
+          },
+          "plan": {
+            "minimum": 0,
+            "title": "Plan",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "parameters",
+          "checks",
+          "verdicts",
+          "plan"
+        ],
+        "title": "EpisodeOmitted",
+        "type": "object"
+      },
+      "EpisodeOutcome": {
+        "additionalProperties": false,
+        "properties": {
+          "ref": {
+            "pattern": "^ref-[0-9a-f]{32}$",
+            "title": "Ref",
+            "type": "string"
+          },
+          "outcome_ref": {
+            "pattern": "^outcome-[0-9a-f]{32}$",
+            "title": "Outcome Ref",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          },
+          "state": {
+            "enum": [
+              "accepted",
+              "rejected",
+              "not_checked",
+              "withdrawn"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "declaration_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Declaration Sha256",
+            "type": "string"
+          },
+          "evaluation_sha256": {
+            "anyOf": [
+              {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evaluation Sha256"
+          }
+        },
+        "required": [
+          "ref",
+          "outcome_ref",
+          "version",
+          "state",
+          "declaration_sha256",
+          "evaluation_sha256"
+        ],
+        "title": "EpisodeOutcome",
+        "type": "object"
+      },
+      "EpisodeParameter": {
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "description": "The path of a listed numeric parameter",
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Key",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "number"
+          },
+          "unit": {
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Unit",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "value",
+          "unit"
+        ],
+        "title": "EpisodeParameter",
+        "type": "object"
+      },
+      "EpisodePlan": {
+        "additionalProperties": false,
+        "properties": {
+          "plan_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Plan Sha256",
+            "type": "string"
+          },
+          "evidence_sha256": {
+            "anyOf": [
+              {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The digest of the evidence the command executed under; null when approved without evidence or left out by consent",
+            "title": "Evidence Sha256"
+          }
+        },
+        "required": [
+          "plan_sha256",
+          "evidence_sha256"
+        ],
+        "title": "EpisodePlan",
+        "type": "object"
+      },
+      "EpisodeRevision": {
+        "additionalProperties": false,
+        "properties": {
+          "ref": {
+            "description": "The pseudonym of asset#revision",
+            "pattern": "^ref-[0-9a-f]{32}$",
+            "title": "Ref",
+            "type": "string"
+          },
+          "sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Sha256",
+            "type": "string"
+          },
+          "kind": {
+            "pattern": "^[a-z0-9][a-z0-9./-]{0,63}$",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ref",
+          "sha256",
+          "kind"
+        ],
+        "title": "EpisodeRevision",
+        "type": "object"
+      },
+      "EpisodeScope": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "own",
+            "title": "Kind",
+            "type": "string"
+          },
+          "person": {
+            "pattern": "^person-[0-9a-f]{32}$",
+            "title": "Person",
+            "type": "string"
+          },
+          "project": {
+            "pattern": "^project-[0-9a-f]{32}$",
+            "title": "Project",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "person",
+          "project"
+        ],
+        "title": "EpisodeScope",
+        "type": "object"
+      },
+      "EpisodeThrough": {
+        "additionalProperties": false,
+        "properties": {
+          "client": {
+            "description": "A product of the closed list; any other report is left out",
+            "enum": [
+              "qgis-plugin",
+              "ophiolite-python",
+              "ophiolite-cli",
+              "ophiolite-typescript",
+              "workspace",
+              "claude-desktop"
+            ],
+            "title": "Client",
+            "type": "string"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "pattern": "^[0-9]{1,4}(?:\\.[0-9]{1,6}){0,3}(?:-(?:alpha|beta|rc)(?:\\.?[0-9]{1,3})?)?$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          }
+        },
+        "required": [
+          "client",
+          "version"
+        ],
+        "title": "EpisodeThrough",
+        "type": "object"
+      },
+      "EpisodeVerdict": {
+        "additionalProperties": false,
+        "properties": {
+          "ref": {
+            "pattern": "^ref-[0-9a-f]{32}$",
+            "title": "Ref",
+            "type": "string"
+          },
+          "verdict": {
+            "enum": [
+              "accepted",
+              "rejected"
+            ],
+            "title": "Verdict",
+            "type": "string"
+          },
+          "by": {
+            "$ref": "#/components/schemas/EpisodeActor"
+          },
+          "at": {
+            "title": "At",
+            "type": "number"
+          }
+        },
+        "required": [
+          "ref",
+          "verdict",
+          "by",
+          "at"
+        ],
+        "title": "EpisodeVerdict",
+        "type": "object"
+      },
       "Error": {
         "type": "object",
         "required": [
@@ -121548,6 +124001,64 @@
           "role"
         ],
         "title": "FileSource",
+        "type": "object"
+      },
+      "FinalEntry": {
+        "additionalProperties": false,
+        "description": "One (output, outcome) at the end of the episode, never merged across outcomes (R1-9).",
+        "properties": {
+          "ref": {
+            "pattern": "^ref-[0-9a-f]{32}$",
+            "title": "Ref",
+            "type": "string"
+          },
+          "outcome_ref": {
+            "pattern": "^outcome-[0-9a-f]{32}$",
+            "title": "Outcome Ref",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          },
+          "state": {
+            "enum": [
+              "accepted",
+              "rejected",
+              "not_checked",
+              "withdrawn"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "declaration_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Declaration Sha256",
+            "type": "string"
+          },
+          "evaluation_sha256": {
+            "anyOf": [
+              {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evaluation Sha256"
+          }
+        },
+        "required": [
+          "ref",
+          "outcome_ref",
+          "version",
+          "state",
+          "declaration_sha256",
+          "evaluation_sha256"
+        ],
+        "title": "FinalEntry",
         "type": "object"
       },
       "FoundInvitation": {
@@ -123211,6 +125722,11 @@
             "description": "E100b: the depth samples of one LAS file; a curve above 100,000 is read in windows",
             "title": "Las Rows",
             "type": "integer"
+          },
+          "horizon_nodes": {
+            "description": "E139: the nodes of one points file; a larger one is refused by number, never thinned",
+            "title": "Horizon Nodes",
+            "type": "integer"
           }
         },
         "required": [
@@ -123229,7 +125745,8 @@
           "max_samples",
           "max_inline_bytes",
           "package_companion_bytes",
-          "las_rows"
+          "las_rows",
+          "horizon_nodes"
         ],
         "title": "Limits",
         "type": "object"
@@ -130433,7 +132950,8 @@
               "ogc-geopackage/1",
               "geojson/1",
               "esri-shapefile/1",
-              "well-residual/1"
+              "well-residual/1",
+              "petrel-well-tops/1"
             ],
             "title": "Profile",
             "type": "string"
@@ -130981,6 +133499,81 @@
           "read_only"
         ],
         "title": "ReleaseOnBoard",
+        "type": "object"
+      },
+      "ReliedBasis": {
+        "additionalProperties": false,
+        "properties": {
+          "basis": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Basis",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          },
+          "sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "basis",
+          "version",
+          "sha256"
+        ],
+        "title": "ReliedBasis",
+        "type": "object"
+      },
+      "ReliedLicence": {
+        "additionalProperties": false,
+        "properties": {
+          "spdx": {
+            "enum": [
+              "CC0-1.0",
+              "CC-BY-4.0",
+              "PDDL-1.0",
+              "ODC-By-1.0"
+            ],
+            "title": "Spdx",
+            "type": "string"
+          },
+          "sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "spdx",
+          "sha256"
+        ],
+        "title": "ReliedLicence",
+        "type": "object"
+      },
+      "ReliedText": {
+        "additionalProperties": false,
+        "properties": {
+          "version": {
+            "minimum": 0,
+            "title": "Version",
+            "type": "integer"
+          },
+          "sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "version",
+          "sha256"
+        ],
+        "title": "ReliedText",
         "type": "object"
       },
       "RemakeAudience": {
@@ -134123,6 +136716,193 @@
         "title": "ShaleVolumePreview",
         "type": "object"
       },
+      "ShapeEpisode": {
+        "additionalProperties": false,
+        "properties": {
+          "schema": {
+            "const": "ophiolite.work-episode/1",
+            "title": "Schema",
+            "type": "string"
+          },
+          "episode_id": {
+            "pattern": "^episode-[0-9a-f]{32}$",
+            "title": "Episode Id",
+            "type": "string"
+          },
+          "project": {
+            "pattern": "^project-[0-9a-f]{32}$",
+            "title": "Project",
+            "type": "string"
+          },
+          "actor": {
+            "$ref": "#/components/schemas/EpisodeActor"
+          },
+          "start": {
+            "title": "Start",
+            "type": "number"
+          },
+          "end": {
+            "title": "End",
+            "type": "number"
+          },
+          "split": {
+            "enum": [
+              "train",
+              "validation",
+              "test"
+            ],
+            "title": "Split",
+            "type": "string"
+          },
+          "mode": {
+            "const": "shape",
+            "title": "Mode",
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/ShapeRow"
+            },
+            "minItems": 1,
+            "title": "Rows",
+            "type": "array"
+          },
+          "final": {
+            "items": {
+              "$ref": "#/components/schemas/FinalEntry"
+            },
+            "title": "Final",
+            "type": "array"
+          }
+        },
+        "required": [
+          "schema",
+          "episode_id",
+          "project",
+          "actor",
+          "start",
+          "end",
+          "split",
+          "mode",
+          "rows",
+          "final"
+        ],
+        "title": "ShapeEpisode",
+        "type": "object"
+      },
+      "ShapeRow": {
+        "additionalProperties": false,
+        "description": "One action of the episode in shape mode: the allowlist (no request, label, reason, name or chosen id).",
+        "properties": {
+          "action_id": {
+            "description": "The E93 action id: an opaque record identifier, linkable to the record",
+            "pattern": "^act_[0-9a-f]{32}$",
+            "title": "Action Id",
+            "type": "string"
+          },
+          "at": {
+            "title": "At",
+            "type": "number"
+          },
+          "operation": {
+            "pattern": "^[a-z][a-z0-9-]*/[A-Za-z][A-Za-z0-9-]*$",
+            "title": "Operation",
+            "type": "string"
+          },
+          "on_behalf_of": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EpisodeBehalf"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "through": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EpisodeThrough"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "parameters": {
+            "items": {
+              "$ref": "#/components/schemas/EpisodeParameter"
+            },
+            "title": "Parameters",
+            "type": "array"
+          },
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/EpisodeRevision"
+            },
+            "title": "Inputs",
+            "type": "array"
+          },
+          "outputs": {
+            "items": {
+              "$ref": "#/components/schemas/EpisodeRevision"
+            },
+            "title": "Outputs",
+            "type": "array"
+          },
+          "plan": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EpisodePlan"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/EpisodeCheck"
+            },
+            "title": "Checks",
+            "type": "array"
+          },
+          "outcomes": {
+            "items": {
+              "$ref": "#/components/schemas/EpisodeOutcome"
+            },
+            "title": "Outcomes",
+            "type": "array"
+          },
+          "verdicts": {
+            "items": {
+              "$ref": "#/components/schemas/EpisodeVerdict"
+            },
+            "title": "Verdicts",
+            "type": "array"
+          },
+          "omitted": {
+            "$ref": "#/components/schemas/EpisodeOmitted"
+          }
+        },
+        "required": [
+          "action_id",
+          "at",
+          "operation",
+          "on_behalf_of",
+          "through",
+          "parameters",
+          "inputs",
+          "outputs",
+          "plan",
+          "checks",
+          "outcomes",
+          "verdicts",
+          "omitted"
+        ],
+        "title": "ShapeRow",
+        "type": "object"
+      },
       "Signal": {
         "additionalProperties": false,
         "properties": {
@@ -135499,6 +138279,90 @@
         "title": "StoryAgain",
         "type": "object"
       },
+      "StoryBasis": {
+        "additionalProperties": false,
+        "description": "E109 s4 (D1): one version a declared (sent) version is based on, read at its own revision. `upload`: an upload\nwith a file; `map`, `reference`: by their current label; `version`: any other version. `name` and `file` are\nreadable labels or null (never an identifier, hash or path).",
+        "properties": {
+          "asset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null for a reference",
+            "title": "Asset Id"
+          },
+          "revision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null for a reference",
+            "title": "Revision"
+          },
+          "kind": {
+            "enum": [
+              "upload",
+              "map",
+              "reference",
+              "version"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          },
+          "file": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "An upload's own file name at that version; null otherwise or when it does not read as a name",
+            "title": "File"
+          }
+        },
+        "required": [
+          "asset_id",
+          "revision",
+          "kind",
+          "name",
+          "version",
+          "file"
+        ],
+        "title": "StoryBasis",
+        "type": "object"
+      },
       "StoryCheck": {
         "additionalProperties": false,
         "description": "E96: whether this calculation was checked against a reference, for its implementation, script and release.",
@@ -136389,6 +139253,35 @@
             "default": null,
             "description": "E94: for a saved made-again output, the version it was made again from (\"Made again from\")"
           },
+          "based_on": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/StoryBasis"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E109: on a declared (sent) version on the story route, the versions it is based on that the reader may open, in the recorded order (\"Based on ...\"); absent when none",
+            "title": "Based On"
+          },
+          "based_on_hidden": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E109: true when the version is based on something the reader cannot open; never a count; absent otherwise",
+            "title": "Based On Hidden"
+          },
           "read": {
             "anyOf": [
               {
@@ -136448,6 +139341,22 @@
             "default": null,
             "description": "E120: the \"Deliver as <outcome>\" claims of this exact version and their deliveries; absent until one is claimed",
             "title": "Outcomes"
+          },
+          "verdicts": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/StoryVerdict"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E132: each person's current verdict on this exact version, accepted or rejected with a reason; absent until one is recorded",
+            "title": "Verdicts"
           },
           "technical": {
             "$ref": "#/components/schemas/StoryTechnical"
@@ -137200,6 +140109,61 @@
           }
         },
         "title": "StoryTechnical",
+        "type": "object"
+      },
+      "StoryVerdict": {
+        "additionalProperties": false,
+        "description": "E132 s1: one author's current verdict on this exact version, as a person reads it.",
+        "properties": {
+          "verdict": {
+            "enum": [
+              "accepted",
+              "rejected"
+            ],
+            "title": "Verdict",
+            "type": "string"
+          },
+          "line": {
+            "description": "\"Rejected by Anna, 29 October 2026: tops differ from the published log\"; an unresolved author reads \"a project member\"",
+            "title": "Line",
+            "type": "string"
+          },
+          "at": {
+            "title": "At",
+            "type": "number"
+          },
+          "person": {
+            "description": "Whose verdict, or for whom an agent gave it (labelled in display.member_names)",
+            "title": "Person",
+            "type": "string"
+          },
+          "agent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The agent that gave it, if one did",
+            "title": "Agent"
+          },
+          "current": {
+            "description": "Always true here: the story shows each author's current verdict; verdicts/list reads the history",
+            "title": "Current",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "verdict",
+          "line",
+          "at",
+          "person",
+          "agent",
+          "current"
+        ],
+        "title": "StoryVerdict",
         "type": "object"
       },
       "StreamHead": {
@@ -142056,6 +145020,782 @@
         "title": "UsedEvidence",
         "type": "object"
       },
+      "ValuesCheck": {
+        "additionalProperties": false,
+        "properties": {
+          "ref": {
+            "pattern": "^ref-[0-9a-f]{32}$",
+            "title": "Ref",
+            "type": "string"
+          },
+          "key_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Key Sha256",
+            "type": "string"
+          },
+          "record_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Record Sha256",
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "passed",
+              "differed",
+              "not_compared"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "witness": {
+            "enum": [
+              "server",
+              "claimed",
+              "personal"
+            ],
+            "title": "Witness",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          }
+        },
+        "required": [
+          "ref",
+          "key_sha256",
+          "record_sha256",
+          "outcome",
+          "witness",
+          "name"
+        ],
+        "title": "ValuesCheck",
+        "type": "object"
+      },
+      "ValuesEpisode": {
+        "additionalProperties": false,
+        "properties": {
+          "schema": {
+            "const": "ophiolite.work-episode/1",
+            "title": "Schema",
+            "type": "string"
+          },
+          "episode_id": {
+            "pattern": "^episode-[0-9a-f]{32}$",
+            "title": "Episode Id",
+            "type": "string"
+          },
+          "project": {
+            "pattern": "^project-[0-9a-f]{32}$",
+            "title": "Project",
+            "type": "string"
+          },
+          "actor": {
+            "$ref": "#/components/schemas/EpisodeActor"
+          },
+          "start": {
+            "title": "Start",
+            "type": "number"
+          },
+          "end": {
+            "title": "End",
+            "type": "number"
+          },
+          "split": {
+            "enum": [
+              "train",
+              "validation",
+              "test"
+            ],
+            "title": "Split",
+            "type": "string"
+          },
+          "mode": {
+            "const": "values",
+            "title": "Mode",
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/ValuesRow"
+            },
+            "minItems": 1,
+            "title": "Rows",
+            "type": "array"
+          },
+          "final": {
+            "items": {
+              "$ref": "#/components/schemas/ValuesFinal"
+            },
+            "title": "Final",
+            "type": "array"
+          }
+        },
+        "required": [
+          "schema",
+          "episode_id",
+          "project",
+          "actor",
+          "start",
+          "end",
+          "split",
+          "mode",
+          "rows",
+          "final"
+        ],
+        "title": "ValuesEpisode",
+        "type": "object"
+      },
+      "ValuesFinal": {
+        "additionalProperties": false,
+        "properties": {
+          "ref": {
+            "pattern": "^ref-[0-9a-f]{32}$",
+            "title": "Ref",
+            "type": "string"
+          },
+          "outcome_ref": {
+            "pattern": "^outcome-[0-9a-f]{32}$",
+            "title": "Outcome Ref",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          },
+          "state": {
+            "enum": [
+              "accepted",
+              "rejected",
+              "not_checked",
+              "withdrawn"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "declaration_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Declaration Sha256",
+            "type": "string"
+          },
+          "evaluation_sha256": {
+            "anyOf": [
+              {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evaluation Sha256"
+          },
+          "asset_id": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "revision": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Revision",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ref",
+          "outcome_ref",
+          "version",
+          "state",
+          "declaration_sha256",
+          "evaluation_sha256",
+          "asset_id",
+          "revision"
+        ],
+        "title": "ValuesFinal",
+        "type": "object"
+      },
+      "ValuesOutcome": {
+        "additionalProperties": false,
+        "properties": {
+          "ref": {
+            "pattern": "^ref-[0-9a-f]{32}$",
+            "title": "Ref",
+            "type": "string"
+          },
+          "outcome_ref": {
+            "pattern": "^outcome-[0-9a-f]{32}$",
+            "title": "Outcome Ref",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          },
+          "state": {
+            "enum": [
+              "accepted",
+              "rejected",
+              "not_checked",
+              "withdrawn"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "declaration_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Declaration Sha256",
+            "type": "string"
+          },
+          "evaluation_sha256": {
+            "anyOf": [
+              {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evaluation Sha256"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          }
+        },
+        "required": [
+          "ref",
+          "outcome_ref",
+          "version",
+          "state",
+          "declaration_sha256",
+          "evaluation_sha256",
+          "label"
+        ],
+        "title": "ValuesOutcome",
+        "type": "object"
+      },
+      "ValuesParameter": {
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "description": "The path of a listed numeric parameter",
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Key",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "number"
+          },
+          "unit": {
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Unit",
+            "type": "string"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          }
+        },
+        "required": [
+          "key",
+          "value",
+          "unit",
+          "label"
+        ],
+        "title": "ValuesParameter",
+        "type": "object"
+      },
+      "ValuesRevision": {
+        "additionalProperties": false,
+        "properties": {
+          "ref": {
+            "description": "The pseudonym of asset#revision",
+            "pattern": "^ref-[0-9a-f]{32}$",
+            "title": "Ref",
+            "type": "string"
+          },
+          "sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Sha256",
+            "type": "string"
+          },
+          "kind": {
+            "pattern": "^[a-z0-9][a-z0-9./-]{0,63}$",
+            "title": "Kind",
+            "type": "string"
+          },
+          "asset_id": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "revision": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Revision",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ref",
+          "sha256",
+          "kind",
+          "asset_id",
+          "revision"
+        ],
+        "title": "ValuesRevision",
+        "type": "object"
+      },
+      "ValuesRow": {
+        "additionalProperties": false,
+        "description": "One action in values mode (slice 2 writes it, after the secrets and name scans).",
+        "properties": {
+          "action_id": {
+            "description": "The E93 action id: an opaque record identifier, linkable to the record",
+            "pattern": "^act_[0-9a-f]{32}$",
+            "title": "Action Id",
+            "type": "string"
+          },
+          "at": {
+            "title": "At",
+            "type": "number"
+          },
+          "operation": {
+            "pattern": "^[a-z][a-z0-9-]*/[A-Za-z][A-Za-z0-9-]*$",
+            "title": "Operation",
+            "type": "string"
+          },
+          "on_behalf_of": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EpisodeBehalf"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "through": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EpisodeThrough"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "parameters": {
+            "items": {
+              "$ref": "#/components/schemas/ValuesParameter"
+            },
+            "title": "Parameters",
+            "type": "array"
+          },
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/ValuesRevision"
+            },
+            "title": "Inputs",
+            "type": "array"
+          },
+          "outputs": {
+            "items": {
+              "$ref": "#/components/schemas/ValuesRevision"
+            },
+            "title": "Outputs",
+            "type": "array"
+          },
+          "plan": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EpisodePlan"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/ValuesCheck"
+            },
+            "title": "Checks",
+            "type": "array"
+          },
+          "outcomes": {
+            "items": {
+              "$ref": "#/components/schemas/ValuesOutcome"
+            },
+            "title": "Outcomes",
+            "type": "array"
+          },
+          "verdicts": {
+            "items": {
+              "$ref": "#/components/schemas/ValuesVerdict"
+            },
+            "title": "Verdicts",
+            "type": "array"
+          },
+          "omitted": {
+            "$ref": "#/components/schemas/EpisodeOmitted"
+          },
+          "request": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The canonical request minus credentials",
+            "title": "Request"
+          },
+          "instruction": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instruction"
+          }
+        },
+        "required": [
+          "action_id",
+          "at",
+          "operation",
+          "on_behalf_of",
+          "through",
+          "parameters",
+          "inputs",
+          "outputs",
+          "plan",
+          "checks",
+          "outcomes",
+          "verdicts",
+          "omitted",
+          "request",
+          "instruction"
+        ],
+        "title": "ValuesRow",
+        "type": "object"
+      },
+      "ValuesVerdict": {
+        "additionalProperties": false,
+        "properties": {
+          "ref": {
+            "pattern": "^ref-[0-9a-f]{32}$",
+            "title": "Ref",
+            "type": "string"
+          },
+          "verdict": {
+            "enum": [
+              "accepted",
+              "rejected"
+            ],
+            "title": "Verdict",
+            "type": "string"
+          },
+          "by": {
+            "$ref": "#/components/schemas/EpisodeActor"
+          },
+          "at": {
+            "title": "At",
+            "type": "number"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "required": [
+          "ref",
+          "verdict",
+          "by",
+          "at",
+          "reason"
+        ],
+        "title": "ValuesVerdict",
+        "type": "object"
+      },
+      "Verdict": {
+        "additionalProperties": false,
+        "description": "One person's accepted or rejected on one exact result version, with a reason; never changed, never pruned.",
+        "else": {
+          "else": {
+            "properties": {
+              "on_behalf_of": {
+                "type": "null"
+              }
+            }
+          },
+          "if": {
+            "properties": {
+              "actor": {
+                "properties": {
+                  "kind": {
+                    "const": "agent"
+                  }
+                },
+                "required": [
+                  "kind"
+                ]
+              }
+            },
+            "required": [
+              "actor"
+            ]
+          },
+          "then": {
+            "properties": {
+              "on_behalf_of": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "if": {
+          "properties": {
+            "verdict": {
+              "const": "rejected"
+            }
+          },
+          "required": [
+            "verdict"
+          ]
+        },
+        "properties": {
+          "schema": {
+            "const": "ophiolite.verdict/1",
+            "title": "Schema",
+            "type": "string"
+          },
+          "verdict_id": {
+            "pattern": "^verdict-[0-9a-f]{32}$",
+            "title": "Verdict Id",
+            "type": "string"
+          },
+          "asset_id": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "revision": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Revision",
+            "type": "string"
+          },
+          "verdict": {
+            "enum": [
+              "accepted",
+              "rejected"
+            ],
+            "title": "Verdict",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "pattern": "^[^\\x00]*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Required and not blank when rejected; kept verbatim",
+            "title": "Reason"
+          },
+          "against": {
+            "anyOf": [
+              {
+                "discriminator": {
+                  "mapping": {
+                    "check": "#/components/schemas/AgainstCheck",
+                    "outcome": "#/components/schemas/AgainstOutcome"
+                  },
+                  "propertyName": "kind"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/AgainstOutcome"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AgainstCheck"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Against"
+          },
+          "supersedes": {
+            "anyOf": [
+              {
+                "pattern": "^verdict-[0-9a-f]{32}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The author's previous verdict on this version; null for the first",
+            "title": "Supersedes"
+          },
+          "actor": {
+            "$ref": "#/components/schemas/Actor"
+          },
+          "on_behalf_of": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Behalf"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The delegator, exactly when the actor is an agent"
+          },
+          "at": {
+            "title": "At",
+            "type": "number"
+          }
+        },
+        "required": [
+          "schema",
+          "verdict_id",
+          "asset_id",
+          "revision",
+          "verdict",
+          "reason",
+          "against",
+          "supersedes",
+          "actor",
+          "on_behalf_of",
+          "at"
+        ],
+        "then": {
+          "else": {
+            "properties": {
+              "on_behalf_of": {
+                "type": "null"
+              }
+            }
+          },
+          "if": {
+            "properties": {
+              "actor": {
+                "properties": {
+                  "kind": {
+                    "const": "agent"
+                  }
+                },
+                "required": [
+                  "kind"
+                ]
+              }
+            },
+            "required": [
+              "actor"
+            ]
+          },
+          "properties": {
+            "reason": {
+              "pattern": "\\S",
+              "type": "string"
+            }
+          },
+          "required": [
+            "reason"
+          ],
+          "then": {
+            "properties": {
+              "on_behalf_of": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "title": "Verdict",
+        "type": "object"
+      },
+      "VerdictEntry": {
+        "additionalProperties": false,
+        "properties": {
+          "record": {
+            "$ref": "#/components/schemas/Verdict"
+          },
+          "current": {
+            "description": "The terminal link of its author's chain on this version",
+            "title": "Current",
+            "type": "boolean"
+          },
+          "line": {
+            "description": "\"Accepted by Anna, 29 October 2026: matches the published log\"",
+            "title": "Line",
+            "type": "string"
+          }
+        },
+        "required": [
+          "record",
+          "current",
+          "line"
+        ],
+        "title": "VerdictEntry",
+        "type": "object"
+      },
       "Via": {
         "additionalProperties": false,
         "description": "B1(a): the project access key a change was made through, as it was named then (the person stays the author;\nthis is the route, not a verified application identity). `key_id` belongs under Technical details.",
@@ -143309,6 +147049,171 @@
           "label_readable"
         ],
         "title": "WordedModel",
+        "type": "object"
+      },
+      "WorkEpisode": {
+        "description": "One episode: shape or values, chosen by the rights gate (R2-3: the union publishes as oneOf + discriminator).",
+        "discriminator": {
+          "mapping": {
+            "shape": "#/components/schemas/ShapeEpisode",
+            "values": "#/components/schemas/ValuesEpisode"
+          },
+          "propertyName": "mode"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/ShapeEpisode"
+          },
+          {
+            "$ref": "#/components/schemas/ValuesEpisode"
+          }
+        ],
+        "title": "WorkEpisode"
+      },
+      "WorkEpisodes": {
+        "additionalProperties": false,
+        "description": "The folder's manifest (`trajectories.json`).",
+        "properties": {
+          "schema": {
+            "const": "ophiolite.work-episodes/1",
+            "title": "Schema",
+            "type": "string"
+          },
+          "deployment_id": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Deployment Id",
+            "type": "string"
+          },
+          "release": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Release",
+            "type": "string"
+          },
+          "sdk_version": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sdk Version"
+          },
+          "capture": {
+            "const": "by-consent",
+            "title": "Capture",
+            "type": "string"
+          },
+          "purpose": {
+            "enum": [
+              "training",
+              "evaluation"
+            ],
+            "title": "Purpose",
+            "type": "string"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/EpisodeScope"
+          },
+          "mode": {
+            "enum": [
+              "auto",
+              "shape"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "window_seconds": {
+            "maximum": 86400,
+            "minimum": 60,
+            "title": "Window Seconds",
+            "type": "integer"
+          },
+          "until": {
+            "minimum": 0,
+            "title": "Until",
+            "type": "integer"
+          },
+          "consent_texts": {
+            "items": {
+              "$ref": "#/components/schemas/ReliedText"
+            },
+            "title": "Consent Texts",
+            "type": "array"
+          },
+          "rights_bases": {
+            "items": {
+              "$ref": "#/components/schemas/ReliedBasis"
+            },
+            "title": "Rights Bases",
+            "type": "array"
+          },
+          "licences": {
+            "items": {
+              "$ref": "#/components/schemas/ReliedLicence"
+            },
+            "title": "Licences",
+            "type": "array"
+          },
+          "salt_id": {
+            "pattern": "^salt-[0-9a-f]{16}$",
+            "title": "Salt Id",
+            "type": "string"
+          },
+          "linkage": {
+            "const": "Pseudonyms in this folder can be linked to the named record by anyone who can read the deployment.",
+            "title": "Linkage",
+            "type": "string"
+          },
+          "seed": {
+            "minimum": 0,
+            "title": "Seed",
+            "type": "integer"
+          },
+          "fractions": {
+            "$ref": "#/components/schemas/EpisodeFractions"
+          },
+          "split_rule": {
+            "const": "split/1",
+            "title": "Split Rule",
+            "type": "string"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/EpisodeCounts"
+          },
+          "exported_at": {
+            "title": "Exported At",
+            "type": "number"
+          }
+        },
+        "required": [
+          "schema",
+          "deployment_id",
+          "release",
+          "sdk_version",
+          "capture",
+          "purpose",
+          "scope",
+          "mode",
+          "window_seconds",
+          "until",
+          "consent_texts",
+          "rights_bases",
+          "licences",
+          "salt_id",
+          "linkage",
+          "seed",
+          "fractions",
+          "split_rule",
+          "counts",
+          "exported_at"
+        ],
+        "title": "WorkEpisodes",
         "type": "object"
       }
     }

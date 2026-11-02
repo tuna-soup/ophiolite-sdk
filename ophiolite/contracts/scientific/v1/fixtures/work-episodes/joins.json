@@ -1,0 +1,277 @@
+{
+ "subject": "The records joined to each action of rows.json (E94 method, E11 revisions, E96 checks, E132 verdicts, E120 outcome states, E95 evidence), synthetic",
+ "joins": {
+  "act_360da744301c82ae583adba53eab5769": {
+   "method": {
+    "implementation": {
+     "id": "ophiolite.shale-volume",
+     "version": "1.0.0"
+    },
+    "parameters": {
+     "request": {
+      "type": "object",
+      "entries": [
+       {
+        "key": "gr_min",
+        "value": {
+         "type": "number",
+         "value": "30"
+        }
+       },
+       {
+        "key": "gr_max",
+        "value": {
+         "type": "integer",
+         "value": "120"
+        }
+       },
+       {
+        "key": "label",
+        "value": {
+         "type": "string",
+         "value": "Maren Testperson"
+        }
+       },
+       {
+        "key": "cutoff",
+        "value": {
+         "type": "string",
+         "value": "12"
+        }
+       },
+       {
+        "key": "window",
+        "value": {
+         "type": "object",
+         "entries": [
+          {
+           "key": "top",
+           "value": {
+            "type": "number",
+            "value": "1500.5"
+           }
+          }
+         ]
+        }
+       },
+       {
+        "key": "vps-reserve-TEST",
+        "value": {
+         "type": "number",
+         "value": "1"
+        }
+       },
+       {
+        "key": "weights",
+        "value": {
+         "type": "array",
+         "items": [
+          {
+           "type": "number",
+           "value": "1"
+          }
+         ]
+        }
+       },
+       {
+        "key": "bad",
+        "value": {
+         "type": "number",
+         "value": "NaN"
+        }
+       },
+       {
+        "key": "gr_min_unit",
+        "value": {
+         "type": "string",
+         "value": "vps-reserve-TEST"
+        }
+       }
+      ]
+     }
+    }
+   },
+   "inputs": [
+    {
+     "asset_id": "gr-in-7",
+     "revision": "r3",
+     "sha256": "95da011f786f6313179740181dbf67674f958c108dc331ce84325e7d22221cce",
+     "kind": "well-curve",
+     "name_at_time": "Maren Testperson GR"
+    }
+   ],
+   "outputs": [
+    {
+     "asset_id": "vsh-out-1",
+     "revision": "r1",
+     "sha256": "7de376c47c1bab32cf5b56c25bc9313d572590a60857a7939da21af06fbe7d56",
+     "kind": "well-curve",
+     "name_at_time": "Maren Testperson Vsh"
+    }
+   ],
+   "checks": [
+    {
+     "asset_id": "vsh-out-1",
+     "revision": "r1",
+     "key": "k-carla",
+     "body_sha256": "d24c136e8c2b10066bc6a1bb7e29c40ab79964eb13698c71cca72f25523b1fc0",
+     "outcome": "passed",
+     "witness": "server",
+     "recorded_by": "u-carla",
+     "principal_kind": "person",
+     "at": 1793275230.0,
+     "name": "Maren Testperson check"
+    },
+    {
+     "asset_id": "vsh-out-1",
+     "revision": "r1",
+     "key": "k-anna",
+     "body_sha256": "d11171bc28dacf471f82b9122bd447fc540b98216a01d58e0797491e92c8a687",
+     "outcome": "differed",
+     "witness": "server",
+     "recorded_by": "u-anna",
+     "principal_kind": "person",
+     "at": 1793275240.0,
+     "name": "Maren Testperson check"
+    },
+    {
+     "asset_id": "vsh-out-1",
+     "revision": "r1",
+     "key": "k-wl",
+     "body_sha256": "75386efca39f6f0eb09426b3ddca062eea514107b6cde3ef0651b9db040f1a54",
+     "outcome": "passed",
+     "witness": "server",
+     "recorded_by": "wl-ingest",
+     "principal_kind": "workload",
+     "at": 1793275250.0,
+     "name": "Maren Testperson check"
+    }
+   ],
+   "verdicts": [
+    {
+     "asset_id": "vsh-out-1",
+     "revision": "r1",
+     "verdict": "accepted",
+     "actor": {
+      "kind": "person",
+      "id": "u-anna"
+     },
+     "on_behalf_of": null,
+     "at": 1793275300.0,
+     "reason": "vps-reserve-TEST"
+    }
+   ],
+   "outcomes": [
+    {
+     "asset_id": "vsh-out-1",
+     "revision": "r1",
+     "outcome_id": "o-depth",
+     "version": 1,
+     "state": "accepted",
+     "declaration_sha256": "c4d8bc26c2dc9d838f51a6420417d96a0d515c30bf8d075a1476e4aaa5373be1",
+     "evaluation_sha256": "900c0baa94835159347304a657842001bf0e1e28c0626b1c1a8a68810d515cc1",
+     "label": "vps-reserve-TEST"
+    },
+    {
+     "asset_id": "vsh-out-1",
+     "revision": "r1",
+     "outcome_id": "o-range",
+     "version": 1,
+     "state": "not_checked",
+     "declaration_sha256": "a25971b2dabc4650c2b35aceae9cb323165e6d9243ddc456bcf7c016537842a4",
+     "evaluation_sha256": null,
+     "label": "vps-reserve-TEST"
+    },
+    {
+     "asset_id": "vsh-out-1",
+     "revision": "r1",
+     "outcome_id": "o-old",
+     "version": 1,
+     "state": "withdrawn",
+     "declaration_sha256": "fba2a9d1d936ddfda3895b6ef714e4916b8e04de58dcb1b23622649c0faf57ad",
+     "evaluation_sha256": "d9956d95291e874c62417649610b8e54c41fb27d183975d8ae5f0d53f3c1ba3f",
+     "label": "vps-reserve-TEST"
+    }
+   ]
+  },
+  "act_f83180f57081ecb982cfdcc9e9e234d2": {
+   "inputs": [
+    {
+     "asset_id": "vsh-out-1",
+     "revision": "r1",
+     "sha256": "7de376c47c1bab32cf5b56c25bc9313d572590a60857a7939da21af06fbe7d56",
+     "kind": "well-curve",
+     "name_at_time": "Maren Testperson Vsh"
+    }
+   ],
+   "outputs": [
+    {
+     "asset_id": "vsh-out-2",
+     "revision": "r1",
+     "sha256": "79ca27abd2af47c53742c6362e20fd24d7d937702e07493cb5fb8e012cf9f98f",
+     "kind": "well-curve",
+     "name_at_time": null
+    }
+   ],
+   "plan": {
+    "plan_sha256": "e26d9cd1dae99fe1f83a87da2f873a25d4c51c62290b003465c57ff544a899fd",
+    "delegator": "u-anna",
+    "executed": "ev-1",
+    "evidence": [
+     {
+      "id": "ev-1",
+      "digest": "5108deb71ee1d00d8e14ad48f2ddee3dca264528a5ae802ac5a682ee11ecc0d7",
+      "created_at": 1793276300.0,
+      "kept": true,
+      "instruction_removed": false,
+      "instruction": "Maren Testperson asked for Vsh"
+     }
+    ]
+   },
+   "outcomes": [
+    {
+     "asset_id": "vsh-out-2",
+     "revision": "r1",
+     "outcome_id": "o-depth",
+     "version": 1,
+     "state": "rejected",
+     "declaration_sha256": "c4d8bc26c2dc9d838f51a6420417d96a0d515c30bf8d075a1476e4aaa5373be1",
+     "evaluation_sha256": "900c0baa94835159347304a657842001bf0e1e28c0626b1c1a8a68810d515cc1",
+     "label": "vps-reserve-TEST"
+    }
+   ]
+  }
+ },
+ "parameters": [
+  [
+   "ophiolite.shale-volume",
+   "1.0.0",
+   "gr_min",
+   "gAPI"
+  ],
+  [
+   "ophiolite.shale-volume",
+   "1.0.0",
+   "gr_max",
+   "gAPI"
+  ],
+  [
+   "ophiolite.shale-volume",
+   "1.0.0",
+   "cutoff",
+   "v/v"
+  ],
+  [
+   "ophiolite.shale-volume",
+   "1.0.0",
+   "window.top",
+   "m"
+  ],
+  [
+   "ophiolite.shale-volume",
+   "1.0.0",
+   "bad",
+   "m"
+  ]
+ ]
+}

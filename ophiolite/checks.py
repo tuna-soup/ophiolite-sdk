@@ -69,7 +69,7 @@ REASON = {  # a check's reference, as the story says it
     'no_such_curve': 'The reference has no such curve.',
     # E110: the tops and trajectory gates
     'unit_unknown': 'A depth unit is not known; nothing is converted.',
-    'depth_basis_unknown': 'Only tops declared same-as-log, measured along the log\'s depths, are compared today.',  # adhoc-e121-words: the Platform's (E121 B8, O9)
+    'depth_basis_unknown': 'Tops are compared when both are measured along the log\'s depths, or both on another depth basis from the same depth datum.',  # E110 s4: the Platform's
     'depth_basis_mismatch': 'The picks are measured on different depths.',
     'wellbore_mismatch': 'The file names another well.',
     'magnetic_north': 'A survey refers to magnetic north; nothing is corrected.',
@@ -84,6 +84,10 @@ REASON = {  # a check's reference, as the story says it
     'ambiguous_rows': 'A wellbore and top occurrence appear more than once in one of the results.',
     'correspondence_mismatch': 'The results are for different formations.',
     'inputs_differ': 'The results were computed from different surface, tops or trajectory versions.',
+}
+TOPS_REASON = {  # E110 s4: a tops record's datum reasons read as tops, not surveys (trajectory records keep REASON's words)
+    'datum_unknown': 'Tops measured on another depth basis are compared only when both say the same depth datum; one of them does not.',
+    'datum_mismatch': 'The two sets of tops are measured from different depth datums; nothing is converted.',
 }
 FILE_REASON = {  # your file, as `checks compare` says it
     'axis_mismatch': 'Not compared: the depth samples differ; nothing is resampled.',
@@ -154,7 +158,7 @@ def one_file(folder, stem):
 def report_refusal(report):
     """E110 (D4, M5, 2-M5): why a procedure report would be refused, as a sentence, or None. The server refuses the same."""
     if not isinstance(report, dict) or set(report) - set(REPORT_FIELDS) or report.get('kind') != 'procedure-report':
-        return 'The check folder does not hold a procedure report.'
+        return 'The check folder does not hold a tool report.'  # E131 s2: tool
     outcome, counts = report.get('outcome'), report.get('counts')
     if outcome not in OUTCOME: return 'The outcome must be passed, differed or not compared.'
     if counts is None: return None
@@ -334,11 +338,17 @@ def unpaired(d):
             + (['%s beyond the reference survey.' % count(d['outside'], 'station')] if d.get('outside') else []))
 
 
+def reason_words(record):
+    """E110 s4: a not-compared reason in the rule's own words first (tops datum reasons), else the story's."""
+    rule_words = TOPS_REASON if record.get('rules_id') == 'tops-compare/1' else {}
+    return rule_words.get(record.get('reason')) or REASON.get(record.get('reason'))
+
+
 def outcome_lines(record):
     """The sentences after a record's first: the bound, the largest difference, or the reason it was not compared."""
     limit = record.get('tolerance')
     if record['outcome'] == 'passed': return [bound(limit) + '.']
-    if record['outcome'] == 'not_compared': return [REASON.get(record.get('reason'), 'The values could not be compared.')]
+    if record['outcome'] == 'not_compared': return [reason_words(record) or 'The values could not be compared.']
     d = record.get('differences') or {}
     if d.get('largest') is None and places(record) in ('depths', 'cells'): first = 'Values are missing at %d of %d %s.' % (d.get('count', 0), d.get('total', 0), places(record))
     elif d.get('largest') is None: first = 'Different at %d of %d %s.' % (d.get('count', 0), d.get('total', 0), places(record))
@@ -422,6 +432,8 @@ def compare_lines(found, curve=None, method=None, unit=None):
         if found.get('sentence'): first = [found['sentence']]
         elif reason == 'unreadable': first = ['Not compared: the file could not be read as %s.' % READ_AS.get(places(found), 'a well log')]
         elif reason == 'no_such_curve': first = ['Not compared: the file has no curve called %s.' % (curve or 'that name')]
+        elif found.get('rules_id') == 'tops-compare/1' and reason in TOPS_REASON:  # E110 s4: tops, not surveys
+            first = ['Not compared: ' + TOPS_REASON[reason][0].lower() + TOPS_REASON[reason][1:]]
         else: first = [FILE_REASON.get(reason, 'Not compared: the values could not be compared.')]
         if found.get('fields'): first.append('Declarations concerned: %s.' % ', '.join(found['fields']))
     return first + [SAVED_HERE, 'This is not a check of %s.' % (method or 'the method that made this result')]

@@ -1,0 +1,81 @@
+{
+  "schema": "ophiolite.procedure/1",
+  "name": "read-zgy",
+  "label": "Read a ZGY cube on your computer",
+  "version": 1,
+  "version_label": "First release",
+  "step": "read",
+  "inputs": [
+    {
+      "slot": "file",
+      "label": "ZGY cube",
+      "class": "file",
+      "signature": {
+        "extensions": [
+          ".zgy"
+        ],
+        "head_patterns": [
+          "^VBS"
+        ],
+        "max_head_bytes": 4
+      }
+    }
+  ],
+  "outputs": [
+    {
+      "role": "volume",
+      "label": "Seismic volume",
+      "class": "version",
+      "kind": "segy/1"
+    }
+  ],
+  "settings": [
+    {
+      "key": "crs",
+      "label": "Coordinate system (EPSG code such as EPSG:23031)",
+      "type": "string",
+      "default": ""
+    },
+    {
+      "key": "z_domain",
+      "label": "The samples represent",
+      "type": "choice",
+      "default": "not_confirmed",
+      "choices": [
+        {
+          "value": "not_confirmed",
+          "label": "Not confirmed yet"
+        },
+        {
+          "value": "time",
+          "label": "Time, the file's values in milliseconds"
+        },
+        {
+          "value": "depth",
+          "label": "Depth, the file's values in metres"
+        }
+      ]
+    },
+    {
+      "key": "horizontal_unit",
+      "label": "Horizontal coordinates, when the file does not state their unit",
+      "type": "choice",
+      "default": "not_confirmed",
+      "choices": [
+        {
+          "value": "not_confirmed",
+          "label": "Not confirmed yet"
+        },
+        {
+          "value": "m",
+          "label": "Metres"
+        }
+      ]
+    }
+  ],
+  "entry": "procedure:read_zgy",
+  "requires": [
+    "pyzgy>=0.1.1"
+  ],
+  "licence": "Apache-2.0"
+}

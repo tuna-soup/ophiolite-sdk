@@ -149,48 +149,51 @@ def parser():
             whole.add_argument('--project',dest='project',action='store_const',const=True,help='Also share with everyone in this project, including people who join later (derived publications)')
             whole.add_argument('--no-project',dest='project',action='store_const',const=False,help='Stop sharing with everyone in this project; the people named still see it')
             p.add_argument('--dry-run',action='store_true',help='Print the change without sending it or writing anything')
-    procs=sub.add_parser('procedures',help='Write, check and run your own procedures on this computer (offline; nothing is published)')  # E105a
-    steps=procs.add_subparsers(dest='procedure_action',required=True)
-    made=steps.add_parser('new',parents=[common],help='Write a starting procedure folder')
-    made.add_argument('folder',type=Path);made.add_argument('--step',required=True,choices=['read','source','process','send','check'])
-    made.add_argument('--kind',default=None,help='What the procedure reads, makes or sends: a word such as well-tops or las')
-    made.add_argument('--label',help='What the procedure does, in words a person reads (default: from --step and --kind)')
-    checked=steps.add_parser('validate',parents=[common],help='Say whether Ophiolite would accept a procedure folder, and why not')
-    checked.add_argument('folder',type=Path)
-    ran=steps.add_parser('run',parents=[common],help='Run a procedure on local files; writes its outputs and run.json into a new folder')
-    ran.add_argument('folder',type=Path,nargs='?',help='The procedure folder (or --from-project NAME)')
-    ran.add_argument('--from-project',metavar='NAME',help='Run a version from the project\'s catalogue instead of a folder (E105b): the highest enabled one, or --version')
-    ran.add_argument('--version',type=int,help='With --from-project: this version number (your own private ones included)')
-    ran.add_argument('--yes',action='store_true',help='With --from-project: trust the version without asking (recorded as your trust)')
-    ran.add_argument('--output',type=Path,required=True,help='A new folder for the outputs')
-    ran.add_argument('--input',action='append',default=[],help='SLOT=PATH; repeat for each file')
-    ran.add_argument('--kind',action='append',default=[],help='SLOT=KIND: the type of data of a file that is not an earlier run\'s output')
-    ran.add_argument('--declared',action='append',default=[],help='SLOT=PATH: a JSON file of that data\'s declarations')
-    ran.add_argument('--system',action='append',default=[],help='SLOT=PATH: a local JSON file with a source\'s connection settings (never recorded)')
-    ran.add_argument('--setting',action='append',default=[],help='NAME=VALUE; once per setting')
-    ran.add_argument('--item',action='append',default=[],metavar='SLOT=ITEM[@N]|SLOT=@ASSET:REVISION',help='With --from-project: a project version to run on, by name and version number (default: its latest), or exactly as @ASSET:REVISION')  # E110 (D9)
-    ran.add_argument('--reference',metavar='FILE|ITEM@N',help='With --from-project, for a check procedure: the reference, a file on this computer or a project version')
-    for p in (ran,):p.add_argument('--configuration',type=Path,default=Path('configuration.json'));p.add_argument('--credentials',type=Path)
-    catalogue=lambda name,help:steps.add_parser(name,parents=[common],help=help)  # E105b: the project's catalogue (needs the project's configuration)
-    reg=catalogue('register','Register a procedure folder as a private version of this project')
-    reg.add_argument('folder',type=Path)
-    shown=catalogue('list','The procedures of this project you can see');shown.add_argument('--name')
-    one=catalogue('show','One procedure: what it reads and makes, its settings and who registered it');one.add_argument('name');one.add_argument('--version',type=int)
-    for name,help in (('enable','Enable a version for everyone in this project (administrators)'),('withdraw','Withdraw a version: it is never fetched or run again'),
-                      ('trust','Trust a version, so running it asks nothing')):
-        c=catalogue(name,help);c.add_argument('name');c.add_argument('--version',type=int,required=True)
-    published=catalogue('publish','Publish a run made with run --from-project on project versions (--input SLOT=@RESULT:REVISION): each output once, under the run')  # E106
-    published.add_argument('folder',type=Path,help='The run\'s output folder');published.add_argument('--name',help='The name of the published result')
-    again=catalogue('again','Run a procedure-made result again on this computer; the project says whether it is the same result')  # E106
-    again.add_argument('result',help='The result to run again');again.add_argument('--revision',required=True,help='Its exact version')
-    other=again.add_mutually_exclusive_group()
-    other.add_argument('--version',type=int,help='Run this version of the procedure instead of the one that made it')
-    other.add_argument('--folder',type=Path,help='Run a local procedure folder (it must be a version in the project)')
-    again.add_argument('--output',type=Path,required=True,help='A new folder for the outputs');again.add_argument('--name')
-    again.add_argument('--for',dest='for_',metavar='OUTCOME',help='Publish the same result again for this outcome, so its current version checks it')  # E120
-    again.add_argument('--yes',action='store_true',help='Trust the version without asking (recorded as your trust)')
-    for p in (reg,shown,one,published,again)+tuple(steps.choices[n] for n in ('enable','withdraw','trust')):
-        p.add_argument('--configuration',type=Path,default=Path('configuration.json'));p.add_argument('--credentials',type=Path)
+    def tool_group(name,**shown):  # E131 s1 (D3): `tools`, and `procedures` built the same way with no help line
+        procs=sub.add_parser(name,**shown);procs.set_defaults(command='procedures',spelling=name)  # both run as the one group (R2-8: `new` names the spelling typed)
+        steps=procs.add_subparsers(dest='procedure_action',required=True)
+        made=steps.add_parser('new',parents=[common],help='Write a starting tool folder')
+        made.add_argument('folder',type=Path);made.add_argument('--step',required=True,choices=['read','source','process','send','check'])
+        made.add_argument('--kind',default=None,help='What the tool reads, makes or sends: a word such as well-tops or las')
+        made.add_argument('--label',help='What the tool does, in words a person reads (default: from --step and --kind)')
+        checked=steps.add_parser('validate',parents=[common],help='Say whether Ophiolite would accept a tool folder, and why not')
+        checked.add_argument('folder',type=Path)
+        ran=steps.add_parser('run',parents=[common],help='Run a tool on local files; writes its outputs and run.json into a new folder')
+        ran.add_argument('folder',type=Path,nargs='?',help='The tool folder (or --from-project NAME)')
+        ran.add_argument('--from-project',metavar='NAME',help='Run a version from the project\'s catalogue instead of a folder: the highest enabled one, or --version')
+        ran.add_argument('--version',type=int,help='With --from-project: this version number (your own private ones included)')
+        ran.add_argument('--yes',action='store_true',help='With --from-project: trust the version without asking (recorded as your trust)')
+        ran.add_argument('--output',type=Path,required=True,help='A new folder for the outputs')
+        ran.add_argument('--input',action='append',default=[],help='SLOT=PATH; repeat for each file')
+        ran.add_argument('--kind',action='append',default=[],help='SLOT=KIND: the type of data of a file that is not an earlier run\'s output')
+        ran.add_argument('--declared',action='append',default=[],help='SLOT=PATH: a JSON file of that data\'s declarations')
+        ran.add_argument('--system',action='append',default=[],help='SLOT=PATH: a local JSON file with a source\'s connection settings (never recorded)')
+        ran.add_argument('--setting',action='append',default=[],help='NAME=VALUE; once per setting')
+        ran.add_argument('--item',action='append',default=[],metavar='SLOT=ITEM[@N]|SLOT=@ASSET:REVISION',help='With --from-project: a project version to run on, by name and version number (default: its latest), or exactly as @ASSET:REVISION')  # E110 (D9)
+        ran.add_argument('--reference',metavar='FILE|ITEM@N',help='With --from-project, for a check tool: the reference, a file on this computer or a project version')
+        for p in (ran,):p.add_argument('--configuration',type=Path,default=Path('configuration.json'));p.add_argument('--credentials',type=Path)
+        catalogue=lambda name,help:steps.add_parser(name,parents=[common],help=help)  # E105b: the project's catalogue (needs the project's configuration)
+        reg=catalogue('register','Register a tool folder as a private version of this project')
+        reg.add_argument('folder',type=Path)
+        shown=catalogue('list','The tools of this project you can see');shown.add_argument('--name')
+        one=catalogue('show','One tool: what it reads and makes, its settings and who registered it');one.add_argument('name');one.add_argument('--version',type=int)
+        for name,help in (('enable','Enable a version for everyone in this project (administrators)'),('withdraw','Withdraw a version: it is never fetched or run again'),
+                          ('trust','Trust a version, so running it asks nothing')):
+            c=catalogue(name,help);c.add_argument('name');c.add_argument('--version',type=int,required=True)
+        published=catalogue('publish','Publish a run made with run --from-project on project versions (--input SLOT=@RESULT:REVISION): each output once, under the run')  # E106
+        published.add_argument('folder',type=Path,help='The run\'s output folder');published.add_argument('--name',help='The name of the published result')
+        again=catalogue('again','Run a tool-made result again on this computer; the project says whether it is the same result')  # E106
+        again.add_argument('result',help='The result to run again');again.add_argument('--revision',required=True,help='Its exact version')
+        other=again.add_mutually_exclusive_group()
+        other.add_argument('--version',type=int,help='Run this version of the tool instead of the one that made it')
+        other.add_argument('--folder',type=Path,help='Run a local tool folder (it must be a version in the project)')
+        again.add_argument('--output',type=Path,required=True,help='A new folder for the outputs');again.add_argument('--name')
+        again.add_argument('--for',dest='for_',metavar='OUTCOME',help='Publish the same result again for this outcome, so its current version checks it')  # E120
+        again.add_argument('--yes',action='store_true',help='Trust the version without asking (recorded as your trust)')
+        for p in (reg,shown,one,published,again)+tuple(steps.choices[n] for n in ('enable','withdraw','trust')):
+            p.add_argument('--configuration',type=Path,default=Path('configuration.json'));p.add_argument('--credentials',type=Path)
+    tool_group('tools',help='Write, check and run your own tools on this computer (offline; nothing is published)')  # E105a; E131 s1: tools is the word
+    tool_group('procedures',prog=sub._prog_prefix+' tools')  # the old spelling; main prints the notice before parsing
     tables=sub.add_parser('targets',help='What each type of table needs: its fields, which are required and the choices that describe it (offline)')  # E86
     tables.add_argument('name',nargs='?',help='One type, for example well-tops')
     bundle=sub.add_parser('bundle',help='Check or summarize a portable bundle offline (no server or account needed)')
@@ -471,7 +474,7 @@ def parser():
     cc.add_argument('--tolerance',type=float,help='The allowed difference in the compared unit (default: exactly equal)')
     cc.add_argument('--relative',action='store_true',help='--tolerance is a fraction of each value instead')
     cc.add_argument('--unit',help='The unit of --tolerance, when the file does not say it')
-    cc.add_argument('--interpretation',type=Path,help='A .json of confirmed declarations. A grid: crs, horizontal_unit, value_unit, value_meaning, direction and vertical_datum. Tops: depth_unit, depth_basis (only same-as-log compares today) and wellbore_confirmed: true; no depth_datum. A survey: depth_unit, azimuth_reference, depth_datum, grid_crs for grid north, and wellbore_confirmed: true')
+    cc.add_argument('--interpretation',type=Path,help='A .json of confirmed declarations. A grid: crs, horizontal_unit, value_unit, value_meaning, direction and vertical_datum. Tops: depth_unit, depth_basis, and depth_datum when the basis is other, and wellbore_confirmed: true. A survey: depth_unit, azimuth_reference, depth_datum, grid_crs for grid north, and wellbore_confirmed: true')
     cc.add_argument('--command-id',help='The same id answers the same comparison')
     pub=verbs.add_parser('publishers',help='Who may publish checks besides the project administrators (administrators only)')
     pv=pub.add_subparsers(dest='change',required=True)
@@ -502,6 +505,43 @@ def parser():
     for name,help in (('states','The outcome states of one result version: accepted, rejected or not checked, in words'),
                       ('evaluate','Evaluate the outcomes over one result version where no record exists yet, then its states')):
         overb(name,help).add_argument('item',metavar='ITEM[@N]|@ASSET:REVISION',help='The result by its name, and its version number (default: its latest); or exactly, as @ASSET:REVISION')
+    # E134: your own consented work in a project, exported as a folder of work episodes (s2: values where the rights allow)
+    traj=sub.add_parser('trajectories',help='Your own work in a project as episodes a model may learn from')
+    tverbs=traj.add_subparsers(dest='action',required=True)
+    texp=project(tverbs.add_parser('export',help='Export your own consented work in a project to a new folder',parents=[common]))
+    texp.add_argument('--scope',dest='trajectory_scope',metavar='project:ID',required=True,help='Whose work: project:ID, your own work in that project')
+    texp.add_argument('--purpose',choices=['training','evaluation'],required=True)
+    texp.add_argument('--mode',choices=['auto','shape'],default='auto',help='auto (default): values where the rights allow, else the shape; shape: the shape of the work, never values')
+    texp.add_argument('--destination',type=Path,required=True,help='A new folder; nothing is written when the export is refused')
+    texp.add_argument('--window-seconds',dest='window_seconds',type=int,help='A gap at or above this starts a new episode (default four hours)')
+    texp.add_argument('--seed',type=int,default=0,help='The split seed (default 0)')
+    texp.add_argument('--until',type=int,help='Repeat an earlier export: the until of its trajectories.json (default: the latest work now)')
+    # E134 s2: a person's own AI use of an item they uploaded or made, per purpose, granted or withdrawn (forward only)
+    aiu=sub.add_parser('ai-use',help='Whether your own work may be used for AI')
+    averbs=aiu.add_subparsers(dest='action',required=True)
+    asg=project(averbs.add_parser('self-grant',help='Record that your own work in an item you uploaded or made may be used for training or evaluation, or no longer',parents=[common]))
+    asg.add_argument('asset',metavar='ASSET',help='The item, by its asset id')
+    asg.add_argument('--purpose',choices=['training','evaluation'],required=True)
+    asg.add_argument('--withdraw',action='store_true',help='No longer (from now on; earlier exports keep what they hold)')
+    # E132: a person's verdict on one exact result version, accepted or rejected, with a reason
+    verd=sub.add_parser('verdicts',help='Verdicts: whether you accept or reject one result version, and why')
+    vverbs=verd.add_subparsers(dest='action',required=True)
+    vrec=project(vverbs.add_parser('record',help='Record that you accept or reject this result version (a reason is required to reject)',parents=[common]))
+    vrec.add_argument('item',metavar='ITEM[@N]|@ASSET:REVISION',help='The result by its name, and its version number (default: its latest); or exactly, as @ASSET:REVISION')
+    vrec.add_argument('verdict',choices=['accepted','rejected'])
+    vrec.add_argument('--reason',help='Why, in words (at most 2000 characters; kept as written)')
+    against=vrec.add_mutually_exclusive_group()
+    against.add_argument('--against-outcome',dest='against_outcome',metavar='NAME@V',help='Judged against this outcome version, by its name and version number')
+    against.add_argument('--against-check',dest='against_check',metavar='KEY',help='Judged against this check, by its key')
+    chain=vrec.add_mutually_exclusive_group()
+    chain.add_argument('--supersedes',metavar='ID',help='The verdict of yours on this version it replaces; refused if yours has changed since')
+    chain.add_argument('--expect-first',dest='expect_first',action='store_true',help='Refused if you already gave a verdict on this version')
+    project(vverbs.add_parser('list',help='Every verdict on this result version you may read, oldest first',parents=[common])).add_argument(
+        'item',metavar='ITEM[@N]|@ASSET:REVISION',help='The result by its name, and its version number (default: its latest); or exactly, as @ASSET:REVISION')
+    # E132 s2: withdrawing a result version also records your rejection of it, with the same reason
+    wd=project(sub.add_parser('withdraw',help='Withdraw one result version, with your reason (this also records that you reject it)'))
+    wd.add_argument('item',metavar='ITEM[@N]|@ASSET:REVISION',help='The result by its name, and its version number (default: its latest); or exactly, as @ASSET:REVISION')
+    wd.add_argument('--reason',required=True,help='Why, in words (at most 500 characters; kept as written)')
     # E119b: residuals at wells, run on this computer from the project's catalogue (nothing is published)
     resid=sub.add_parser('residuals',help='Residuals at wells: run a residual procedure on a well selection and a surface, on this computer')
     rr=project(resid.add_subparsers(dest='action',required=True).add_parser('run',parents=[common],
@@ -535,11 +575,41 @@ def parser():
     sbuild.add_argument('--catalogue',type=Path,required=True,help="The catalogue's built records.json")
     sbuild.add_argument('--verification',type=Path,required=True,help='The folder of verification results (<record id with / as __>.json)')
     sbuild.add_argument('--custody',type=Path,required=True,help='The folder of custody documents (<sha256>.json)')
+    sbuild.add_argument('--export',type=Path,help='For a definition with an archive input: the folder ophiolite starter export wrote; its derived files are landed and the pack gets the OpendTect target')
+    # E129 sc C3: the OpendTect target's qualification (maintainer only)
+    sopen=project(sverbs.add_parser('opendtect',parents=[common],help="Run the pack's import.py into an existing OpendTect survey, read each placed object back and compare it with the landed item at its pinned version; writes files/targets/opendtect/result.json, then starter.json's oracle"))
+    sopen.add_argument('out',type=Path,help='The pack folder starter build wrote (an archive pack)')
+    sopen.add_argument('--survey',type=Path,required=True,help='The existing OpendTect survey folder (data root / survey name)')
+    sopen.add_argument('--opendtect-python',help='The Python the OpendTect connector is installed in (default: OPHIOLITE_OPENDTECT_PYTHON)')
+    sopen.add_argument('--timeout',type=int,default=7200,help='Seconds the import and the comparison may each run (default 7200)')
+    # E129 (e) D5: the Python target's qualification (offline)
+    spython=sverbs.add_parser('python',parents=[common],help="Run the pack notebook on the pack folder with the network blocked; writes files/targets/python/result.json, then starter.json's oracle; reads this computer only")
+    spython.add_argument('out',type=Path,help='The pack folder starter build wrote (an archive pack with the python target)')
+    spython.add_argument('--keep',type=Path,help='Run the notebook in this folder and keep its plot and JSON there (default: a temporary folder)')
+    spython.add_argument('--timeout',type=int,default=600,help='Seconds the notebook may run (default 600)')
+    # E129 (d) D6: the ResInsight target's import and comparison (offline; the Connectors interpreter talks to ResInsight)
+    sri=sverbs.add_parser('resinsight',parents=[common],help="Run the pack's ResInsight import.py into a new project, read every well path and log back through rips (again after reopening) and compare it with the pack; writes files/targets/resinsight/result.json, then starter.json's oracle")
+    sri.add_argument('out',type=Path,help='The pack folder starter build wrote (an archive pack with the resinsight target)')
+    sriserver=sri.add_mutually_exclusive_group()
+    sriserver.add_argument('--port',type=int,help='A ResInsight you started with its Python server on this port and an empty project (default: the launcher starts its own)')
+    sriserver.add_argument('--resinsight',help='The ResInsight executable the launcher starts (default: RESINSIGHT_EXECUTABLE)')
+    sri.add_argument('--resinsight-python',help='The Python with the Connectors package and its resinsight extra (default: OPHIOLITE_RESINSIGHT_PYTHON)')
+    sri.add_argument('--timeout',type=int,default=1800,help='Seconds the import and the comparison may each run (default 1800)')
     sfinal=sverbs.add_parser('finalise',parents=[common],help="Write each artefact's key from its held custody document; reads this computer only")
     sfinal.add_argument('out',type=Path,help='The pack folder starter build wrote')
     sfinal.add_argument('--custody',type=Path,required=True,help='The folder of custody documents, with the derived ones the upload of files/ wrote')
+    # E129 sb: the derived files of a survey archive, through the OpendTect connector in its own interpreter
+    sexport=sverbs.add_parser('export',parents=[common],help="Export a survey archive's cubes, horizons and wells with the OpendTect connector, read them back and write derived.json; reads this computer only")
+    sexport.add_argument('definition',type=Path,help='The export definition (ophiolite.starter-definition/1 with one archive input)')
+    sexport.add_argument('--out',type=Path,required=True,help='The export folder: each run adds exports/<stamp>/ and moves derived.json to it')
+    sexport.add_argument('--catalogue',type=Path,required=True,help="The catalogue's built records.json")
+    sexport.add_argument('--verification',type=Path,required=True,help='The folder of verification results (<record id with / as __>.json)')
+    sexport.add_argument('--custody',type=Path,required=True,help='The folder of custody documents (<sha256>.json)')
+    sexport.add_argument('--opendtect-python',help='The Python the OpendTect connector is installed in (default: OPHIOLITE_OPENDTECT_PYTHON)')
+    sexport.add_argument('--timeout',type=int,default=7200,help='Seconds the export may run (default 7200)')
     skills=sub.add_parser('skills',help='Locate packaged SDK guidance')
     skills.add_subparsers(dest='action',required=True).add_parser('path')
+    sub.metavar='{%s}' % ','.join(name for name in sub.choices if name!='procedures')  # E131 s1: the old spelling is not listed
     return parser
 
 
@@ -749,10 +819,37 @@ def _starter(args,client=None):
     """E129 Sa: starter build DEFINITION --out --catalogue --verification --custody, and starter finalise OUT --custody
     (offline). Refusals are the pack's sentences; exit 1 refused, 3 access, 4 a newer version in the project."""
     from . import starter
+    def paths(doc):return len({a['path'] for t in doc['targets'] for a in t['artefacts']})  # E129 (e): a file two targets share is one artefact
     if args.action=='finalise':
         doc=starter.finalise(args.out,args.custody)
-        return done(args,'Finalised %s: %d artefact keys written; it stays unpublished.' % (doc['id'],len(doc['targets'][0]['artefacts'])),{'finalised':True,'id':doc['id'],'starter':str(args.out/'starter.json')})
-    doc=starter.build(client,args.definition,args.out,catalogue=args.catalogue,verification=args.verification,custody=args.custody)
+        return done(args,'Finalised %s: %d artefact keys written; it stays unpublished.' % (doc['id'],paths(doc)),{'finalised':True,'id':doc['id'],'starter':str(args.out/'starter.json')})
+    if args.action=='opendtect':  # E129 sc C3
+        doc,result=starter.opendtect(client,args.out,args.survey,python=args.opendtect_python,timeout=args.timeout)
+        oracle=starter.target_of(doc,'opendtect')['oracle']
+        return done(args,'Compared %s in OpendTect survey %s: %d objects placed, %d not placed, %d values, %d differences; result.json and starter.json written.'
+                    % (doc['id'],result['survey'],len(result['placed']),len(result['not_placed']),oracle['values'],oracle['differences']),
+                    {'compared':True,'id':doc['id'],'result':str(args.out/'files'/starter.RESULT),'oracle':oracle})
+    if args.action=='python':  # E129 (e) D5
+        doc,result=starter.python(args.out,keep=args.keep,timeout=args.timeout)
+        oracle=starter.target_of(doc,'python')['oracle']
+        return done(args,'Ran the pack notebook on %s: inline %d, %d wells, %d values compared, %d differences; result.json and starter.json written.'
+                    % (doc['id'],result['inline'],len(result['wells']),oracle['values'],oracle['differences']),
+                    {'ran':True,'id':doc['id'],'result':str(args.out/'files'/starter.PY_RESULT),'oracle':oracle})
+    if args.action=='resinsight':  # E129 (d) D6
+        doc,result=starter.resinsight(args.out,port=args.port,executable=args.resinsight,python=args.resinsight_python,timeout=args.timeout)
+        oracle=starter.target_of(doc,'resinsight')['oracle']
+        return done(args,'Compared %s in ResInsight %s: %d well paths, %d values, %d differences, the same after reopening; result.json and starter.json written.'
+                    % (doc['id'],starter.RI_RELEASE,len(result['wells']),oracle['values'],oracle['differences']),
+                    {'compared':True,'id':doc['id'],'result':str(args.out/'files'/starter.RI_RESULT),'oracle':oracle})
+    if args.action=='export':  # E129 sb
+        from . import starter_archive
+        report,folder=starter_archive.export(args.definition,args.out,catalogue=args.catalogue,verification=args.verification,custody=args.custody,python=args.opendtect_python,timeout=args.timeout)
+        return done(args,'Exported %s in %s: %d derived files, %d objects not read; derived.json points to it.' % (report['record_id'],folder,len(report['derived']),len(report['not_read'])),
+                    {'exported':True,'record_id':report['record_id'],'derived':str(folder/'derived.json')})
+    doc=starter.build(client,args.definition,args.out,catalogue=args.catalogue,verification=args.verification,custody=args.custody,export=args.export)
+    if args.export is not None:  # E129 sc: an archive pack, from its export's derived files
+        return done(args,'Built %s in %s from the export: %d derived files, %d artefacts in files/ (unpublished, no keys yet).' % (doc['id'],args.out,len(doc['derived']),paths(doc)),
+                    {'built':True,'id':doc['id'],'starter':str(args.out/'starter.json')})
     return done(args,'Built %s in %s: %d inputs landed, %d artefacts in files/ (unpublished, no keys yet).' % (doc['id'],args.out,len(doc['inputs']),len(doc['targets'][0]['artefacts'])),
                 {'built':True,'id':doc['id'],'starter':str(args.out/'starter.json')})
 
@@ -812,6 +909,49 @@ def _outcomes(args,client):
     o=getattr(client,'outcome_'+args.action)(named['outcome_id'])
     text={'enable':'"%s" is enabled.','disable':'"%s" is disabled; it is kept and can be enabled again.','withdraw':'"%s" is withdrawn; its name is free again.'}[args.action]
     return done(args,text % o['label'],o)
+
+
+def _verdicts(args,client):
+    """E132: verdicts record | list on one result version, resolved as `outcomes states` resolves it (its refusals kept;
+    nothing is sent when it is refused). Words by default; the entry or the list under --json. A deployment that does not
+    record verdicts answers 503 in its own sentence, which is printed instead of the generic busy one (exit code 5)."""
+    from .errors import Busy
+    asset_id,revision=client.result_version(args.item)
+    try:return _verdict_call(args,client,asset_id,revision)
+    except Busy as error:
+        if error.status!=503 or not error.server_message:raise
+        raise Busy(error.server_message,error.remedy or '',status=error.status,code=error.code,request_id=error.request_id,docs=error.docs) from None
+
+
+def _verdict_call(args,client,asset_id,revision):
+    if args.action=='list':
+        found=client.verdicts(asset_id,revision)
+        return done(args,'\n'.join(e['line'] for e in found['verdicts']) or 'No verdicts on this version yet.',found)
+    from .verdicts import UNSET,against_check,against_outcome
+    against=None
+    if args.against_outcome:
+        name,_,number=args.against_outcome.rpartition('@')
+        if not name or not number.isdigit():raise Refused('Name the outcome version as NAME@V, such as "Tops within 5 m@1".')
+        against=against_outcome(client.outcome_named(name)['outcome_id'],int(number))
+    elif args.against_check:against=against_check(args.against_check)
+    supersedes=None if args.expect_first else args.supersedes if args.supersedes else UNSET
+    entry=client.record_verdict(asset_id,revision,args.verdict,args.reason,against,supersedes)
+    return done(args,entry['line'],entry)
+
+
+def _withdraw(args,client):
+    """E132 s2 (D8): withdraw ITEM[@N], resolved as `verdicts` resolves it; prints only the server's confirmation, "<name>
+    is now <stage name>: <reason>", the name through the readable-label rule ("This result" otherwise), never a version
+    number or revision; nothing is read after the transition. The rejection it records shows in `verdicts list`. A stage
+    refusal prints the server's sentence (exit code 1); a permission refusal keeps its own (exit code 3)."""
+    from .procedures import contract
+    asset_id,revision=client.result_version(args.item)
+    try:answer=client.withdraw(asset_id,revision,args.reason)
+    except Refused as error:
+        if type(error) is not Refused or not error.server_message:raise
+        raise Refused(error.server_message,error.remedy or '',status=error.status,code=error.code,request_id=error.request_id,docs=error.docs) from None
+    name=answer.get('name');name=(contract().labels.readable_label(name) if isinstance(name,str) else None) or 'This result'
+    return done(args,'%s is now %s: %s'%(name,answer['stage']['name'],answer.get('reason') or args.reason),answer)
 
 
 def _curves(args,client):
@@ -882,7 +1022,11 @@ def _journey(args,client):
     if args.command in ('story','dependents'):
         from . import story as told
         page=(client.story if args.command=='story' else client.dependents)(args.asset,args.revision,cursor=args.cursor)
-        return done(args,'\n'.join(told.lines(page)),page)
+        states=None
+        if args.command=='story':  # E120 s7: the root version's outcome lines, from outcomes/states; a refused read adds none
+            try:states=client.outcome_states(args.asset,args.revision)
+            except Refused:pass
+        return done(args,'\n'.join(told.lines(page,states)),page)
     if args.command=='what-changed':
         answer=client.what_changed((args.since_asset or args.asset,args.since),(args.asset,args.revision))
         return done(args,'\n'.join(changed_lines(answer)),answer)
@@ -1604,7 +1748,7 @@ def _catalogue(args,client):
         if args.procedure_action=='list':
             versions=client.procedure_list(args.name)
             lines=['%s, version %d (%s): %s' % (v['label'],v['version'],v['name'],_state_words(v)) for v in versions]
-            return done(args,'\n'.join(lines) or 'This project has no procedures you can see yet.',{'versions':versions})
+            return done(args,'\n'.join(lines) or 'This project has no tools you can see yet.',{'versions':versions})
         if args.procedure_action=='run':
             def ask(question):
                 print(question['text']+' [y/N] ',end='',flush=True)
@@ -1660,11 +1804,11 @@ def _procedures(args):
         payload={**verdict,**({'name':manifest['name'],'version':manifest['version']} if manifest else {})}
         text=verdict['sentence']
         if args.procedure_action=='new' and verdict['valid']:
-            text='Created %s with procedure.json and procedure.py. Edit them, then run: ophiolite procedures validate %s' % (args.folder.name,args.folder)
+            text='Created %s with procedure.json and procedure.py. Edit them, then run: ophiolite %s validate %s' % (args.folder.name,args.spelling,args.folder)
         done(args,text,payload)
         if not verdict['valid']:raise SystemExit(EXIT['refused'])
         return payload
-    if args.folder is None:raise SystemExit('Name the procedure folder, or run one from the project with --from-project NAME.')
+    if args.folder is None:raise SystemExit('Name the tool folder, or run one from the project with --from-project NAME.')
     _output_parent(args.output)
     try:
         result=procedures.run(args.folder,args.output,_slots(args.input,'--input',many=True),kinds=_slots(args.kind,'--kind'),
@@ -1700,8 +1844,14 @@ def _deliver(args,client=None):
     return result
 
 
+NOTICE='`ophiolite procedures` now runs as `ophiolite tools`; the old spelling is removed in a later release, announced one release ahead in the CHANGELOG.'  # E131 s1 (R2-1)
+
+
 def main(argv=None):
     from . import _client_header
+    words=sys.argv[1:] if argv is None else argv
+    if next((word for word in words if not word.startswith('-')),None)=='procedures' and sys.stderr.isatty():  # R2-8: a person at a terminal; scripts see nothing new
+        print(NOTICE,file=sys.stderr)  # before parsing: --help and usage errors too
     token=_client_header._NAME.set('ophiolite-cli')  # E93: the command line names itself on every gateway request
     try:return _main(argv)
     finally:_client_header._NAME.reset(token)
@@ -1716,7 +1866,7 @@ def _main(argv=None):
         return done(args,str(files('ophiolite').joinpath('skills')),{'path':str(files('ophiolite').joinpath('skills'))})
     if args.command=='targets':return _targets(args)  # E86: offline; reads the packaged contracts only
     if args.command=='recipes' and args.action=='show':return _recipes(args)  # E112 s2: offline; reads the journal only
-    if args.command=='starter' and args.action=='finalise':return _starter(args)  # E129 Sa: offline; reads local files only
+    if args.command=='starter' and args.action in ('finalise','export','python','resinsight'):return _starter(args)  # E129 Sa, sb, (e), (d): offline; reads local files only
     if args.command=='procedures' and not _catalogue_verb(args):return _procedures(args)  # E105a: offline; reads and runs local files only
     if args.command=='bundle':
         # Offline: no configuration, credentials or network are read.
@@ -1738,6 +1888,9 @@ def _main(argv=None):
     if args.command=='doctor':return _doctor(args)
     config=configuration(args.configuration)
     if getattr(args,'upload_project',None):config={**config,'project':args.upload_project}  # E55: ophiolite upload --project
+    if getattr(args,'trajectory_scope',None):  # E134: --scope project:ID
+        if not args.trajectory_scope.startswith('project:') or len(args.trajectory_scope)==len('project:'):raise Refused('--scope takes project:ID.')
+        config={**config,'project':args.trajectory_scope.removeprefix('project:')}
     path=args.credentials or credentials_path(config)
     if args.command=='run':return _local_run(config,args.work.resolve())
     if getattr(args,'dry_run',False) and args.command not in ('well-imports','import','wells'):return _dry_run(args,config)  # E88: wells from-run --dry-run is its server list, which keeps nothing; E31: before any credential, network or file write (E42a: an import's dry run is its server preview, which keeps nothing)
@@ -1779,6 +1932,14 @@ def _main(argv=None):
         if args.command in ('entities','wells','changes','sources','org-connections','well-imports','story','what-changed','dependents','remake','import'):return _journey(args,client)
         if args.command=='checks':return _checks(args,client)
         if args.command=='outcomes':return _outcomes(args,client)  # E120
+        if args.command=='verdicts':return _verdicts(args,client)  # E132
+        if args.command=='withdraw':return _withdraw(args,client)  # E132 s2
+        if args.command=='trajectories':  # E134
+            found=client.export_trajectories(args.destination,purpose=args.purpose,mode=args.mode,window_seconds=args.window_seconds,seed=args.seed,until=args.until)
+            return done(args,'Exported %d episodes of your own work to %s (%d with values).' % (found['episodes'],found['destination'],found['values']),found)
+        if args.command=='ai-use':  # E134 s2
+            found=client.grant_own_ai_use(args.asset,args.purpose,granted=not args.withdraw)
+            return done(args,'Your own AI use of %s for %s is %s (number %d).' % (found['asset_id'],found['purpose'],found['state'],found['sequence']),found)
         if args.command=='residuals':return _residuals(args,client)  # E119b
         if args.command=='recipes':return _recipes(args,client)  # E112 s2
         if args.command=='starter':return _starter(args,client)  # E129 Sa
@@ -1819,10 +1980,12 @@ def _main(argv=None):
             data=client.read_data(args.asset,args.revision)
             if args.output.exists():raise Refused('The output folder already exists; choose a new folder.')
             args.output.mkdir(parents=True)
-            (args.output/'original').write_bytes(data.original);(args.output/'data.json').write_bytes(data._wire_data_bytes)
+            from .typed import data_file_of
+            named=data_file_of(data._wire_descriptor)  # E139 s2: named by its codec
+            (args.output/'original').write_bytes(data.original);(args.output/named).write_bytes(data._wire_data_bytes)
             (args.output/'descriptor.json').write_text(json.dumps(data._wire_descriptor,indent=2)+'\n')
-            return done(args,'Saved the exact original, data.json and descriptor.json for %s - units and references are as declared; unknown stays unknown.' % data.type,
-                        {'saved':str(args.output),'type':data.type,'files':['original','data.json','descriptor.json']})
+            return done(args,'Saved the exact original, %s and descriptor.json for %s - units and references are as declared; unknown stays unknown.' % (named,data.type),
+                        {'saved':str(args.output),'type':data.type,'files':['original',named,'descriptor.json']})
         if args.command=='export':
             if len(args.asset)!=len(args.revision):raise Refused('Give one --revision for each --asset, in the same order.')
             opened=client.export([(a,r,args.curve or None) for a,r in zip(args.asset,args.revision)],args.output,groups=not args.no_groups)

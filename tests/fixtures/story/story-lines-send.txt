@@ -1,0 +1,10 @@
+SAP-10 tops, version 2
+  Reported by Bram Koster; Ophiolite did not run this calculation.
+  Method declared by its publisher.
+  Based on SAP-10 tops, version 1.
+  SAP-10 tops, version 1
+    Reported by Bram Koster; Ophiolite did not run this calculation.
+    Method declared by its publisher.
+    Based on the upload tops.csv (SAP-10 tops, version 1).
+    SAP-10 tops, version 1
+      A file added by Sanne de Vries on 2026-10-26: tops.csv.

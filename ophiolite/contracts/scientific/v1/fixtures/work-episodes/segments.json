@@ -1,0 +1,396 @@
+{
+ "subject": "segment (§2, R2-7): short rows as in consent.json, project p-demo unless given; window 14400; the episodes as lists of short ids in output order (by project, actor kind and id, then time)",
+ "cases": {
+  "a-gap-of-14340": {
+   "rows": [
+    {
+     "id": "a",
+     "at": 1793275200.0,
+     "actor": [
+      "person",
+      "u-anna"
+     ],
+     "behalf": null
+    },
+    {
+     "id": "b",
+     "at": 1793289540.0,
+     "actor": [
+      "person",
+      "u-anna"
+     ],
+     "behalf": null
+    }
+   ],
+   "expect": [
+    [
+     "a",
+     "b"
+    ]
+   ]
+  },
+  "a-gap-of-14400": {
+   "rows": [
+    {
+     "id": "a",
+     "at": 1793275200.0,
+     "actor": [
+      "person",
+      "u-anna"
+     ],
+     "behalf": null
+    },
+    {
+     "id": "b",
+     "at": 1793289600.0,
+     "actor": [
+      "person",
+      "u-anna"
+     ],
+     "behalf": null
+    }
+   ],
+   "expect": [
+    [
+     "a"
+    ],
+    [
+     "b"
+    ]
+   ]
+  },
+  "a-gap-of-14460": {
+   "rows": [
+    {
+     "id": "a",
+     "at": 1793275200.0,
+     "actor": [
+      "person",
+      "u-anna"
+     ],
+     "behalf": null
+    },
+    {
+     "id": "b",
+     "at": 1793289660.0,
+     "actor": [
+      "person",
+      "u-anna"
+     ],
+     "behalf": null
+    }
+   ],
+   "expect": [
+    [
+     "a"
+    ],
+    [
+     "b"
+    ]
+   ]
+  },
+  "consecutive-gaps-not-from-the-start": {
+   "rows": [
+    {
+     "id": "a",
+     "at": 1793275200.0,
+     "actor": [
+      "person",
+      "u-anna"
+     ],
+     "behalf": null
+    },
+    {
+     "id": "b",
+     "at": 1793289540.0,
+     "actor": [
+      "person",
+      "u-anna"
+     ],
+     "behalf": null
+    },
+    {
+     "id": "c",
+     "at": 1793289600.0,
+     "actor": [
+      "person",
+      "u-anna"
+     ],
+     "behalf": null
+    },
+    {
+     "id": "d",
+     "at": 1793289660.0,
+     "actor": [
+      "person",
+      "u-anna"
+     ],
+     "behalf": null
+    }
+   ],
+   "expect": [
+    [
+     "a",
+     "b",
+     "c",
+     "d"
+    ]
+   ]
+  },
+  "the-agent-is-its-own-episode": {
+   "rows": [
+    {
+     "id": "a",
+     "at": 1793275200.0,
+     "actor": [
+      "person",
+      "u-anna"
+     ],
+     "behalf": null
+    },
+    {
+     "id": "g",
+     "at": 1793275210.0,
+     "actor": [
+      "agent",
+      "ag-anna-1"
+     ],
+     "behalf": "u-anna"
+    },
+    {
+     "id": "b",
+     "at": 1793275220.0,
+     "actor": [
+      "person",
+      "u-anna"
+     ],
+     "behalf": null
+    }
+   ],
+   "expect": [
+    [
+     "g"
+    ],
+    [
+     "a",
+     "b"
+    ]
+   ]
+  },
+  "equal-instants-order-by-action-id": {
+   "rows": [
+    {
+     "id": "a",
+     "at": 1793275200.0,
+     "actor": [
+      "person",
+      "u-anna"
+     ],
+     "behalf": null
+    },
+    {
+     "id": "b",
+     "at": 1793275200.0,
+     "actor": [
+      "person",
+      "u-anna"
+     ],
+     "behalf": null
+    },
+    {
+     "id": "c",
+     "at": 1793275200.0,
+     "actor": [
+      "person",
+      "u-anna"
+     ],
+     "behalf": null
+    }
+   ],
+   "expect": [
+    [
+     "c",
+     "b",
+     "a"
+    ]
+   ]
+  },
+  "two-projects": {
+   "rows": [
+    {
+     "id": "a",
+     "at": 1793275200.0,
+     "actor": [
+      "person",
+      "u-anna"
+     ],
+     "behalf": null
+    },
+    {
+     "id": "b",
+     "at": 1793275210.0,
+     "actor": [
+      "person",
+      "u-anna"
+     ],
+     "behalf": null,
+     "project": "p-other"
+    }
+   ],
+   "expect": [
+    [
+     "a"
+    ],
+    [
+     "b"
+    ]
+   ]
+  }
+ },
+ "pipeline": {
+  "rows": [
+   {
+    "id": "a",
+    "at": 1793275200.0,
+    "actor": [
+     "person",
+     "u-anna"
+    ],
+    "behalf": null
+   },
+   {
+    "id": "b",
+    "at": 1793285200.0,
+    "actor": [
+     "person",
+     "u-anna"
+    ],
+    "behalf": null
+   },
+   {
+    "id": "c",
+    "at": 1793295200.0,
+    "actor": [
+     "person",
+     "u-anna"
+    ],
+    "behalf": null
+   }
+  ],
+  "cases": {
+   "all-in": {
+    "consents": [
+     {
+      "person": "u-anna",
+      "purpose": "training",
+      "sequence": 1,
+      "state": "granted",
+      "covers": [
+       "own-actions",
+       "command-parameters",
+       "verdicts",
+       "published-checks",
+       "agent-plan-digests"
+      ],
+      "extras": [
+       "instruction-text"
+      ],
+      "at": 1793275140.0
+     }
+    ],
+    "expect": [
+     [
+      "a",
+      "b",
+      "c"
+     ]
+    ],
+    "no_consent": 0
+   },
+   "the-first-row-removed": {
+    "consents": [
+     {
+      "person": "u-anna",
+      "purpose": "training",
+      "sequence": 1,
+      "state": "granted",
+      "covers": [
+       "own-actions",
+       "command-parameters",
+       "verdicts",
+       "published-checks",
+       "agent-plan-digests"
+      ],
+      "extras": [
+       "instruction-text"
+      ],
+      "at": 1793275205.0
+     }
+    ],
+    "expect": [
+     [
+      "b",
+      "c"
+     ]
+    ],
+    "no_consent": 1
+   },
+   "the-bridging-row-removed": {
+    "consents": [
+     {
+      "person": "u-anna",
+      "purpose": "training",
+      "sequence": 1,
+      "state": "granted",
+      "covers": [
+       "own-actions",
+       "command-parameters",
+       "verdicts",
+       "published-checks",
+       "agent-plan-digests"
+      ],
+      "extras": [
+       "instruction-text"
+      ],
+      "at": 1793275140.0
+     },
+     {
+      "person": "u-anna",
+      "purpose": "training",
+      "sequence": 2,
+      "state": "withdrawn",
+      "covers": [],
+      "extras": [],
+      "at": 1793280200.0
+     },
+     {
+      "person": "u-anna",
+      "purpose": "training",
+      "sequence": 3,
+      "state": "granted",
+      "covers": [
+       "own-actions",
+       "command-parameters",
+       "verdicts",
+       "published-checks",
+       "agent-plan-digests"
+      ],
+      "extras": [
+       "instruction-text"
+      ],
+      "at": 1793290200.0
+     }
+    ],
+    "expect": [
+     [
+      "a"
+     ],
+     [
+      "c"
+     ]
+    ],
+    "no_consent": 1
+   }
+  }
+ }
+}

@@ -1,0 +1,30 @@
+{
+  "subject": "E134 s3 D5 (R2-1, R2-2, R2-5): the constructed inputs of the conformance folder beside this file. First-party synthetic: two derive/ShaleVolume actions of u-anna five hours apart (two episodes), each with a method whose request is literal; revision S is an input to both, A the first's output, B the second's. Rights are keyed by revision: S and B permit use with models, A does not, so episode 1 is shape and episode 2 values. test_work_episodes_contract.py composes the folder from these with w.export (salt alpha, purpose training, mode auto) and compares it byte for byte.",
+  "caller": "u-anna",
+  "events": [
+    {"schema": "ophiolite.activity/1", "event_id": "act_5e3f0c0a1d2b4c6e8f00112233445566", "project_id": "p-demo", "actor_id": "u-anna", "kind": "action", "run_id": null, "trace_id": null, "evidence": "server-recorded", "coverage_profile": "ophiolite-record/1", "data": {"operation": "derive/ShaleVolume", "record": {"class": "action", "action_id": "act_5e3f0c0a1d2b4c6e8f00112233445566", "linked_to": null, "actor": {"kind": "person", "id": "u-anna", "name_at_time": null}, "on_behalf_of": null, "credential": {"kind": "browser", "key_id": null, "approval": null}, "through": {"client": "ophiolite-cli", "version": "1.4.0", "host": null, "transport": "http", "raw": "ophiolite-cli/1.4.0"}, "request_id": null, "trace_context": null}}, "recorded_at": "2026-10-29T12:00:00+00:00", "cursor": 10},
+    {"schema": "ophiolite.activity/1", "event_id": "act_7a8b9c0d1e2f3a4b5c6d7e8f90a1b2c3", "project_id": "p-demo", "actor_id": "u-anna", "kind": "action", "run_id": null, "trace_id": null, "evidence": "server-recorded", "coverage_profile": "ophiolite-record/1", "data": {"operation": "derive/ShaleVolume", "record": {"class": "action", "action_id": "act_7a8b9c0d1e2f3a4b5c6d7e8f90a1b2c3", "linked_to": null, "actor": {"kind": "person", "id": "u-anna", "name_at_time": null}, "on_behalf_of": null, "credential": {"kind": "browser", "key_id": null, "approval": null}, "through": {"client": "ophiolite-cli", "version": "1.4.0", "host": null, "transport": "http", "raw": "ophiolite-cli/1.4.0"}, "request_id": null, "trace_context": null}}, "recorded_at": "2026-10-29T17:00:00+00:00", "cursor": 20}
+  ],
+  "joins": {
+    "act_5e3f0c0a1d2b4c6e8f00112233445566": {
+      "method": {"implementation": {"id": "ophiolite.shale-volume", "version": "1.0.0"}, "parameters": {"request": {"type": "object", "entries": [{"key": "gr_min", "value": {"type": "number", "value": "30"}}, {"key": "gr_max", "value": {"type": "integer", "value": "120"}}]}}},
+      "inputs": [{"asset_id": "s3-gr-in", "revision": "rS", "sha256": "1f0e2d3c4b5a69788796a5b4c3d2e1f00f1e2d3c4b5a69788796a5b4c3d2e1f0", "kind": "well-curve", "name_at_time": null}],
+      "outputs": [{"asset_id": "s3-vsh-a", "revision": "rA", "sha256": "2a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f70819", "kind": "well-curve", "name_at_time": null}],
+      "checks": [], "verdicts": [], "outcomes": []
+    },
+    "act_7a8b9c0d1e2f3a4b5c6d7e8f90a1b2c3": {
+      "method": {"implementation": {"id": "ophiolite.shale-volume", "version": "1.0.0"}, "parameters": {"request": {"type": "object", "entries": [{"key": "gr_min", "value": {"type": "number", "value": "35"}}, {"key": "gr_max", "value": {"type": "integer", "value": "150"}}]}}},
+      "inputs": [{"asset_id": "s3-gr-in", "revision": "rS", "sha256": "1f0e2d3c4b5a69788796a5b4c3d2e1f00f1e2d3c4b5a69788796a5b4c3d2e1f0", "kind": "well-curve", "name_at_time": null}],
+      "outputs": [{"asset_id": "s3-vsh-b", "revision": "rB", "sha256": "3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8091a2b", "kind": "well-curve", "name_at_time": null}],
+      "checks": [], "verdicts": [], "outcomes": []
+    }
+  },
+  "consents": [
+    {"person": "u-anna", "purpose": "training", "sequence": 1, "state": "granted", "covers": ["own-actions", "command-parameters", "verdicts", "published-checks", "agent-plan-digests"], "extras": [], "at": 1793271600.0, "text_version": 1, "text_sha256": "0cfa7fb17507c15c1120df3a3f21c6409d51a88c4e76cad8f6d762d0f5906aa5"}
+  ],
+  "rights": [
+    {"asset_id": "s3-gr-in", "revision": "rS", "facts": {"checked": true, "merged": {"uses": ["read", "export", "model-use"], "ended": []}, "grants": [], "listed_licence": null, "bases": []}},
+    {"asset_id": "s3-vsh-a", "revision": "rA", "facts": {"checked": true, "merged": {"uses": ["read", "export"], "ended": []}, "grants": [], "listed_licence": null, "bases": []}},
+    {"asset_id": "s3-vsh-b", "revision": "rB", "facts": {"checked": true, "merged": {"uses": ["read", "export", "model-use"], "ended": []}, "grants": [], "listed_licence": null, "bases": []}}
+  ]
+}

@@ -47,7 +47,7 @@ def test_procedures_validate_names_the_destination_and_the_delivery(tmp_path, ca
     folder = send_folder(tmp_path)
     answer = cli.main(['procedures', 'validate', str(folder)])
     assert capsys.readouterr().out == 'Valid: Tops to team DB, version 1. It reads Well tops (CSV) and Team tops database and makes a delivery.\n'
-    assert (answer['valid'], answer['rules_version'], answer['name'], answer['version']) == (True, '1.3.0', 'tops-to-team-db', 1)
+    assert (answer['valid'], answer['rules_version'], answer['name'], answer['version']) == (True, '1.4.0', 'tops-to-team-db', 1)  # E123 SZ: rules 1.4.0
 
 
 @pytest.mark.parametrize('name', ['send-two-systems', 'reconcile-bad-entry'])
@@ -61,7 +61,7 @@ def test_a_send_with_two_systems_or_a_bad_reconcile_is_refused_in_words(tmp_path
 def test_running_a_send_procedure_locally_is_still_a_later_release(tmp_path):
     folder = send_folder(tmp_path)
     with pytest.raises(procedures.NotRun) as error: procedures.run(folder, tmp_path / 'out')
-    assert (error.value.code, str(error.value)) == ('later-release', 'Not run: running a send procedure comes with a later release.')
+    assert (error.value.code, str(error.value)) == ('later-release', 'Not run: running a send tool comes with a later release.')
     assert not (tmp_path / 'out').exists()
 
 
@@ -71,7 +71,7 @@ def test_the_delivery_payload_is_the_contract_s_and_closed():
     assert delivery.CONTRACT == PACKAGE / 'contracts/procedures/v1/delivery.py'
     assert (delivery.contract().SCHEMA, delivery.contract().STATES, delivery.PROFILE, delivery.KIND) == (
         'ophiolite.delivery/1', ('confirmed', 'not-sent', 'unknown'), 'procedure-delivery/1', 'delivery.reported')
-    assert delivery.verdict(VALID) == {'valid': True, 'rules_version': '1.3.0'}
+    assert delivery.verdict(VALID) == {'valid': True, 'rules_version': '1.4.0'}
     assert delivery.Delivery.model_validate(VALID).model_dump() == VALID
     for name, case in EXPECTED['deliveries']['cases'].items():
         raw = json.loads((FIXTURES / 'invalid' / f'{name}.json').read_text())

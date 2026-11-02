@@ -658,6 +658,74 @@ class MemoryDeliveries:
         return [e['delivery']['state'] for _, e in self.events if e['delivery']['delivery_id'] == delivery_id]
 
 
+PACK_INLINES, PACK_CROSSLINES, PACK_Z = [100, 104, 2], [200, 206, 2], [100, 4000, 6]  # E129 (e): synthetic_pack's cube
+
+
+def pack_position(i, c):
+    """synthetic_pack's rotated grid: 25 m per line number along (0.6, 0.8) for crosslines and (-0.8, 0.6) for inlines."""
+    return 431000.0 + 15.0 * (c - 200) - 20.0 * (i - 100), 6500000.0 + 20.0 * (c - 200) + 15.0 * (i - 100)
+
+
+def pack_sample(i, c, k):
+    """synthetic_pack's sample k of trace (i, c): small dyadic values, exact in float32, so every sum is exact."""
+    return (i - 100) + (c - 200) / 4 + k / 16
+
+
+def pack_segy(path, inlines=PACK_INLINES, crosslines=PACK_CROSSLINES, z=PACK_Z, position=pack_position, sample=pack_sample):
+    """A SEG-Y in the form `ophiolite starter export` writes (rev 1, IEEE format 5, big-endian, scalar -100, inline at
+    byte 189, crossline 193, CDP X and Y 181 and 185 in hundredths), inline-major."""
+    import struct
+    delay, interval, count = z
+    text = ''.join(('C%2d SYNTHETIC STARTER PACK CUBE' % n if n == 1 else 'C%2d' % n).ljust(80) for n in range(1, 41)).encode('ascii')
+    binary = bytearray(400)
+    struct.pack_into('>H', binary, 16, interval); struct.pack_into('>H', binary, 20, count); struct.pack_into('>h', binary, 24, 5)
+    struct.pack_into('>H', binary, 300, 0x0100); struct.pack_into('>h', binary, 302, 1)
+    out, n = [text, bytes(binary)], 0
+    for i in range(inlines[0], inlines[1] + 1, inlines[2]):
+        for c in range(crosslines[0], crosslines[1] + 1, crosslines[2]):
+            n += 1
+            x, y = position(i, c)
+            th = bytearray(240)
+            struct.pack_into('>i', th, 0, n); struct.pack_into('>h', th, 70, -100)
+            struct.pack_into('>i', th, 180, round(x * 100)); struct.pack_into('>i', th, 184, round(y * 100))
+            struct.pack_into('>i', th, 188, i); struct.pack_into('>i', th, 192, c)
+            struct.pack_into('>h', th, 108, delay); struct.pack_into('>H', th, 114, count); struct.pack_into('>H', th, 116, interval)
+            out += [bytes(th), struct.pack('>%df' % count, *(sample(i, c, k) for k in range(count)))]
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+    Path(path).write_bytes(b''.join(out))
+
+
+PACK_WELLS = {'SYN-A': [(0.0, 431020.0, 6500050.0, -10.0), (50.0, 431020.0, 6500050.0, 40.0), (100.0, 431021.5, 6500051.0, 89.5)],
+              'SYN-B': [(0.0, 431060.0, 6500100.0, -12.0), (80.0, 431061.0, 6500101.5, 67.75)]}
+PACK_LAS = ('~Version\n VERS.   2.0 : CWLS LOG ASCII STANDARD - VERSION 2.0\n WRAP.   NO : ONE LINE PER DEPTH STEP\n'
+            '~Well\n STRT.M 10.0 : first depth\n STOP.M 10.6 : last depth\n STEP.M 0.15 : depth step\n NULL. -999.25 : null value\n'
+            ' WELL. SYN-A : well\n~Curve\n DEPT.M : measured depth\n DT.us/ft : DT\n GR.API : GR\n~ASCII\n'
+            '10.0 -999.25 50.5\n10.15 120.25 51.0\n10.3 121.5 52.0\n10.45 122.0 -999.25\n10.6 123.75 54.5\n')
+
+
+def synthetic_pack(folder):
+    """E129 (e): a small starter pack folder for the pack notebook (`open-a-starter-pack`), nothing real: a rotated cube
+    of 3 inlines by 4 crosslines (`files/seismic/Syn.sgy`, in the export's SEG-Y form), well SYN-A with its positions
+    and a LAS, well SYN-B with positions only, and `files/targets/python/expected.json` computed by the build's own
+    code (`ophiolite.starter.expected`). Returns the folder."""
+    from . import starter
+    folder = Path(folder)
+    files = folder / 'files'
+    pack_segy(files / 'seismic/Syn.sgy')
+    derived = [{'path': 'seismic/Syn.sgy', 'kind': 'seismic-3d', 'object': 'Syn'}]
+    (files / 'wells').mkdir(parents=True, exist_ok=True)
+    for well, rows in PACK_WELLS.items():
+        path = 'wells/%s-positions.csv' % well
+        (files / path).write_text('md,x,y,tvdss\n' + ''.join('%r,%r,%r,%r\n' % row for row in rows), encoding='ascii')
+        derived.append({'path': path, 'kind': 'wellbore-paths', 'object': well})
+    (files / 'wells/SYN-A.las').write_text(PACK_LAS, encoding='ascii')
+    derived.append({'path': 'wells/SYN-A.las', 'kind': 'wellbore-logs', 'object': 'SYN-A'})
+    for d in derived: d['local'] = files / d['path']
+    (files / starter.PY_EXPECTED).parent.mkdir(parents=True, exist_ok=True)
+    (files / starter.PY_EXPECTED).write_bytes(starter.dumped(starter.expected(derived)))
+    return folder
+
+
 if __name__=='__main__':
     import argparse,threading
     parser=argparse.ArgumentParser(description='Synthetic SDK application fixture, loopback only')

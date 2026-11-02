@@ -94,10 +94,10 @@
     },
     {
       "slug": "share-a-procedure",
-      "title": "Share a procedure with your project",
-      "sentence": "Check a procedure and run it on your computer, add it to your project privately, enable it, and run it as a colleague who is asked once to trust it.",
+      "title": "Share a tool with your project",
+      "sentence": "Check a tool and run it on your computer, add it to your project privately, enable it, and run it as a colleague who is asked once to trust it.",
       "modes": ["synthetic", "live"],
-      "data": "Two synthetic formation tops and the SDK's sample depth-shift procedure; in your project it adds a private procedure only you and the administrators see until one enables it."
+      "data": "Two synthetic formation tops and the SDK's sample depth-shift tool; in your project it adds a private tool only you and the administrators see until one enables it."
     },
     {
       "slug": "who-has-access-until-when",
@@ -200,8 +200,8 @@
     },
     {
       "slug": "start-a-procedure-from-a-template",
-      "title": "Start a procedure from a template",
-      "sentence": "Make a working procedure for a step and a kind of data, valid as it is made, and see which pairs have a start.",
+      "title": "Start a tool from a template",
+      "sentence": "Make a working tool for a step and a kind of data, valid as it is made, and see which pairs have a start.",
       "modes": [
         "synthetic",
         "live"
@@ -216,17 +216,26 @@
         "synthetic",
         "live"
       ],
-      "data": "A recipe written in the notebook; in your project the well set and the surface you name, and the residual procedure your project holds."
+      "data": "A recipe written in the notebook; in your project the well set and the surface you name, and the residual tool your project holds."
     },
     {
       "slug": "run-it-again",
       "title": "Run it again",
-      "sentence": "Run a procedure on your computer, then run its card's \"Run again\" line: the same tops again, and a refusal once the procedure changed.",
+      "sentence": "Run a tool on your computer, then run its card's \"Run again\" line: the same tops again, and a refusal once the tool changed.",
       "modes": [
         "synthetic",
         "live"
       ],
-      "data": "Two synthetic formation tops and a procedure made from the well-tops template; nothing is added to a project in either mode."
+      "data": "Two synthetic formation tops and a tool made from the well-tops template; nothing is added to a project in either mode."
+    },
+    {
+      "slug": "open-a-starter-pack",
+      "title": "Open a starter pack",
+      "sentence": "Read the seismic and well files of a starter pack you downloaded, draw one inline with the wells on it, and check what you read against the values the pack was built with.",
+      "modes": [
+        "pack"
+      ],
+      "data": "The starter pack folder you downloaded; the notebook reads nothing else and sends nothing."
     }
   ]
 }

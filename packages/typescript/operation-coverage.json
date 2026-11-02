@@ -18,6 +18,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/account/actions",
+    "function": "postAccountActions",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/account/activity",
     "function": "postAccountActivity",
     "request": "schema",
@@ -132,6 +138,24 @@
     "response": "explicitly-untyped"
   },
   {
+    "operation": "POST /api/v1/consent/grant",
+    "function": "postConsentGrant",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/consent/list",
+    "function": "postConsentList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/consent/withdraw",
+    "function": "postConsentWithdraw",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "GET /api/v1/contracts",
     "function": "getContracts",
     "request": "explicitly-untyped",
@@ -142,6 +166,12 @@
     "function": "getContractsPath",
     "request": "explicitly-untyped",
     "response": "explicitly-untyped"
+  },
+  {
+    "operation": "POST /api/v1/deployment/capture",
+    "function": "postDeploymentCapture",
+    "request": "schema",
+    "response": "schema"
   },
   {
     "operation": "GET /api/v1/openapi.json",
@@ -558,6 +588,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/activity/trajectories",
+    "function": "postProjectsProjectActivityTrajectories",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/agents/approve",
     "function": "postProjectsProjectAgentsApprove",
     "request": "schema",
@@ -668,6 +704,12 @@
   {
     "operation": "POST /api/v1/projects/{project}/ai-use/grant",
     "function": "postProjectsProjectAiUseGrant",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/ai-use/self-grant",
+    "function": "postProjectsProjectAiUseSelfGrant",
     "request": "schema",
     "response": "schema"
   },
@@ -2618,6 +2660,18 @@
   {
     "operation": "POST /api/v1/projects/{project}/upload-runs/status",
     "function": "postProjectsProjectUploadRunsStatus",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/verdicts/list",
+    "function": "postProjectsProjectVerdictsList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/verdicts/record",
+    "function": "postProjectsProjectVerdictsRecord",
     "request": "schema",
     "response": "schema"
   },

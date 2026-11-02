@@ -40,6 +40,29 @@ def test_unsupported_request_schema_keyword_refuses_with_route():
         generator.outputs(document)
 
 
+def test_if_then_else_is_a_value_rule_the_typescript_type_does_not_carry():
+    """E132: the verdict record's conditional (an agent names its delegator, a person none; a rejection needs a reason)
+    generates, and the TypeScript type is exactly the schema's without it: the server checks the rule, the type stays
+    the looser union (`on_behalf_of` object or null, `reason` string or null)."""
+    document=json.loads((generator.CONTRACTS/'openapi/v1/openapi.json').read_text())
+    verdict=document['components']['schemas']['Verdict']
+    assert {'if','then','else'}<=set(verdict)
+    plain={k:v for k,v in verdict.items() if k not in ('if','then','else')}
+    generator.scan(verdict,'#/components/schemas/Verdict')
+    assert generator.expression(verdict)==generator.expression(plain)
+    assert '"verdict": "accepted" | "rejected"' in generator.expression(verdict)
+    with pytest.raises(ValueError,match='unsupported keyword not'):generator.scan({**verdict,'not':{}},'#/components/schemas/Verdict')
+
+
+def test_unique_items_is_a_value_rule_the_typescript_type_does_not_carry():
+    """E133: a consent's covers name each entry once; the server checks it, the TypeScript type is the plain array."""
+    document=json.loads((generator.CONTRACTS/'openapi/v1/openapi.json').read_text())
+    covers=document['components']['schemas']['BehaviourConsent']['properties']['covers']
+    assert covers['uniqueItems'] is True
+    generator.scan(covers,'#/components/schemas/BehaviourConsent/properties/covers')
+    assert generator.expression(covers)==generator.expression({k:v for k,v in covers.items() if k!='uniqueItems'})
+
+
 def test_override_requires_real_route_source_adapter_and_recorded_response():
     coverage=json.loads(generator.outputs()['operation-coverage.json'])
     for row in coverage:

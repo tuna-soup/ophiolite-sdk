@@ -434,7 +434,7 @@ FIDELITY_CASES = {
     'not JSON': ('text', 'fidelity %s: not JSON.' % FIDELITY),
     'another record': (lambda d: d.update(record='ophiolite-synthetic/other'), 'fidelity %s: record ophiolite-synthetic/other, the pack is of %s.' % (FIDELITY, RID)),
     'an input with no result': (lambda d: d['inputs'].pop(2), 'fidelity %s: no result for input syn-1-tops.csv.' % FIDELITY),
-    'a result for a non-input': (lambda d: d['inputs'].append(EXTRA), 'fidelity %s: input extra.las is not a pack input.' % FIDELITY),
+    'a result for a non-input': (lambda d: d['inputs'].append(EXTRA), 'fidelity %s: input extra.las is not a pack input or derived file.' % FIDELITY),
     'an output kind not in contents': (lambda d: d['inputs'][3]['output'].update(kind='seismic-3d'), 'fidelity %s: input syn-1-deviation.csv became seismic-3d, not a contents kind.' % FIDELITY),
 }
 
@@ -445,6 +445,37 @@ def test_finalise_checks_the_fidelity_document(built, case):
     change, sentence = FIDELITY_CASES[case]
     fidelity_edit(change)(folder)
     assert unchanged(folder, starter.finalise, folder / 'out', folder / 'custody') == (sentence + starter.UNCHANGED, 1)
+
+
+# E129 sb A9: rule (h) of OSD db80352, on literal documents. An archive input with derived entries `from` it is covered by
+# a result for it or for each of its derived files; a result names a pack input or a derived file.
+ARCHIVE, CUBE, LAS = 'a' * 64, 'c' * 64, 'd' * 64
+CATALOG = {'source_commit': None, 'verification_commit': None, 'built_at': '2026-10-29T00:00:00Z', 'records_digest': 'e' * 64}
+
+
+def result(sha, name, kind):
+    return {'sha256': sha, 'name': name, 'result': 'converted', 'output': {'kind': kind, 'id': 'item-' + name, 'converter': 'reader', 'version': '1'}}
+
+
+def rule_h(tmp_path, results):
+    doc = {'record_id': RID, 'fidelity': 'fidelity/x.json', 'inputs': [{'name': 'survey.zip', 'sha256': ARCHIVE}],
+           'contents': [{'kind': 'seismic-3d'}, {'kind': 'wellbore-logs'}],
+           'derived': [{'path': 'seismic/Syn.sgy', 'sha256': CUBE, 'from': ARCHIVE}, {'path': 'wells/SYN-A.las', 'sha256': LAS, 'from': ARCHIVE}]}
+    (tmp_path / 'fidelity').mkdir(exist_ok=True)
+    (tmp_path / 'fidelity/x.json').write_text(json.dumps(fidelity.written(CATALOG, RID, results)))
+    try: starter.fidelity_of(doc, tmp_path)
+    except Refused as e: return str(e)
+
+
+@pytest.mark.parametrize('results, sentence', [
+    ([result(CUBE, 'Syn.sgy', 'seismic-3d'), result(LAS, 'SYN-A.las', 'wellbore-logs')], None),
+    ([result(ARCHIVE, 'survey.zip', 'seismic-3d')], None),
+    ([result(CUBE, 'Syn.sgy', 'seismic-3d')], 'fidelity fidelity/x.json: no result for input survey.zip nor for its derived wells/SYN-A.las.'),
+    ([result(CUBE, 'Syn.sgy', 'seismic-3d'), result(LAS, 'SYN-A.las', 'wellbore-logs'), result('f' * 64, 'other.las', 'wellbore-logs')],
+     'fidelity fidelity/x.json: input other.las is not a pack input or derived file.'),
+], ids=['each-derived-file', 'the-archive-itself', 'a-derived-file-missing', 'a-result-naming-neither'])
+def test_rule_h_an_archive_is_covered_by_its_derived_files(tmp_path, results, sentence):
+    assert rule_h(tmp_path, results) == (None if sentence is None else sentence + starter.UNCHANGED)
 
 
 def test_finalise_reconciles_each_deposit_with_the_custody_documents_now(built, tmp_path):
@@ -466,3 +497,18 @@ def test_finalise_runs_offline_from_the_command_line(built, monkeypatch, capsys)
     cli.main(['starter', 'finalise', str(folder / 'out'), '--custody', str(folder / 'custody')])
     assert capsys.readouterr().out == 'Finalised %s: 4 artefact keys written; it stays unpublished.\n' % PACK
     assert [a['key'] for a in json.loads((folder / 'out/starter.json').read_text())['targets'][0]['artefacts']] == [keys[p] for p in ARTEFACTS]
+
+
+def test_a_pack_document_takes_three_targets_one_per_application(built):
+    """E129 (d) D3: `shaped` takes up to three targets, one per application; a ResInsight target whose oracle is the
+    built one (D2's cube line, then "nothing yet") is not imported, so finalise would refuse it (A6)."""
+    folder, doc, keys = built
+    python = doc['targets'][0]
+    def target(application, oracle): return {**python, 'application': application, 'oracle': oracle}
+    doc['targets'] = [target('opendtect', starter.ORACLE_OPENDTECT), python, target('resinsight', starter.ORACLE_RESINSIGHT)]
+    starter.shaped(doc)
+    assert starter.not_imported(doc) and starter.ORACLE_RESINSIGHT['compared'][0] == 'cube: false; wells and logs only (rips 2026.9.0.2 has no SEG-Y import)'
+    doc['targets'][2] = target('resinsight', {**starter.ORACLE_RESINSIGHT, 'compared': [starter.CUBE_LINE, 'well paths: 2 read back']})
+    assert not starter.not_imported(doc)
+    for targets in (doc['targets'] + [target('petrel', starter.ORACLE)], [python, python], doc['targets'][:2] + [target('python', starter.ORACLE)]):
+        assert refused(Refused, starter.shaped, {**doc, 'targets': targets}) == ('starter.json is not a pack document ophiolite starter build wrote.' + starter.UNCHANGED, 1)

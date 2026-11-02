@@ -352,6 +352,75 @@ def write_location(x, y, *, crs=None, elevation_reference=None, filename='locati
     return WrittenOriginal(text.encode(), 'well-location/1', {}, filename)
 
 
+SEGY_SCALARS = (-1, -10, -100, -1000)  # E123 SZ: a coordinate is the header integer divided by -scalar
+FLOAT32_MAX = 3.4028234663852886e38
+
+
+def _whole(value, what, low, high):
+    if isinstance(value, bool) or not isinstance(value, int) or not low <= value <= high:
+        raise ValidationFailed([f'{what} must be a whole number from {low} to {high}; it is {value!r}.'])
+    return value
+
+
+def write_volume(samples, *, inlines, crosslines, sample_interval, cdp_xy, scalar, first_sample=0, text_lines=(), declared=None,
+                 filename='volume.sgy'):
+    """E123 SZ: a seismic volume as SEG-Y rev 1 (`segy/1`), IEEE 4-byte samples (format 5), big-endian, one trace per
+    (inline, crossline) in inline-major order. `samples[i][j]` is the trace of inlines[i], crosslines[j].
+    `sample_interval` and `first_sample` are the header integers (bytes 3217 and 109: microseconds and milliseconds
+    for time, the server's depth convention for depth); `cdp_xy[i * len(crosslines) + j]` is the trace's (x, y) as whole
+    numbers that `scalar` (one of -1, -10, -100, -1000) divides. The caller maps every value exactly; nothing here
+    rounds. `text_lines` (at most 40, each at most 76 ASCII characters) fill the textual header. `declared` holds the
+    segy/1 declarations (z_domain, crs, datum)."""
+    import struct
+    n_in, n_x = len(inlines), len(crosslines)
+    if n_in == 0 or n_x == 0: raise ValidationFailed(['A volume needs at least one inline and one crossline.'])
+    for what, numbers in (('An inline number', inlines), ('A crossline number', crosslines)):
+        for number in numbers: _whole(number, what, -2**31, 2**31 - 1)
+        if len(set(numbers)) != len(numbers): raise ValidationFailed([f'{what} is repeated.'])
+    _whole(sample_interval, 'The sample interval', 1, 65535)
+    _whole(first_sample, 'The first sample (delay)', -32768, 32767)
+    if scalar not in SEGY_SCALARS: raise ValidationFailed([f'The coordinate scalar must be one of -1, -10, -100, -1000; it is {scalar!r}.'])
+    if len(cdp_xy) != n_in * n_x: raise ValidationFailed(['Give one (x, y) for every trace.'])
+    for x, y in cdp_xy:
+        _whole(x, 'A coordinate (CDP X)', -2**31, 2**31 - 1); _whole(y, 'A coordinate (CDP Y)', -2**31, 2**31 - 1)
+    lines = list(text_lines)
+    if len(lines) > 40 or any(len(t) > 76 or not t.isascii() or not t.isprintable() for t in lines):
+        raise ValidationFailed(['The textual header holds at most 40 lines of at most 76 printable ASCII characters.'])
+    if len(samples) != n_in or any(len(row) != n_x for row in samples): raise ValidationFailed(['Give one trace for every inline and crossline.'])
+    count = len(samples[0][0])
+    if count == 0: raise ValidationFailed(['A trace needs at least one sample.'])
+    _whole(count, 'The number of samples per trace', 1, 65535)
+    for i, row in enumerate(samples):
+        for j, trace in enumerate(row):
+            if len(trace) != count: raise ValidationFailed([f'The trace of inline {inlines[i]}, crossline {crosslines[j]} has {len(trace)} samples; the first has {count}.'])
+    text = ''.join(('C%2d %s' % (n + 1, lines[n] if n < len(lines) else '')).ljust(80) for n in range(40)).encode('ascii')
+    binary = bytearray(400)
+    struct.pack_into('>HH', binary, 16, sample_interval, sample_interval)
+    struct.pack_into('>H', binary, 20, count); struct.pack_into('>h', binary, 24, 5); struct.pack_into('>h', binary, 54, 1)  # metres
+    struct.pack_into('>H', binary, 300, 0x0100); struct.pack_into('>h', binary, 302, 1)
+    out = bytearray(text + bytes(binary))
+    array = samples if hasattr(samples, 'dtype') and getattr(samples, 'ndim', 0) == 3 else None  # numpy: one conversion per trace
+    for i, row in enumerate(samples):
+        for j, trace in enumerate(row):
+            n = i * n_x + j
+            if array is not None:
+                words = array[i, j].astype('>f4')  # a value beyond float32 becomes infinite here and is refused below
+                bad = next((int(k) for k in ((words != words) | (abs(words) == float('inf'))).nonzero()[0][:1]), None)
+                payload = words.tobytes()
+            else:
+                values = [float(v) for v in trace]
+                bad = next((k for k, v in enumerate(values) if not (math.isfinite(v) and abs(v) <= FLOAT32_MAX)), None)
+                payload = struct.pack('>%df' % count, *values) if bad is None else b''
+            if bad is not None: raise ValidationFailed([f'Inline {inlines[i]}, crossline {crosslines[j]}, sample {bad} is not a finite number.'])
+            header = bytearray(240)
+            struct.pack_into('>ii', header, 0, n + 1, n + 1); struct.pack_into('>i', header, 20, n + 1); struct.pack_into('>h', header, 28, 1)
+            struct.pack_into('>hh', header, 70, scalar, scalar); struct.pack_into('>h', header, 88, 1)
+            struct.pack_into('>h', header, 108, first_sample); struct.pack_into('>HH', header, 114, count, sample_interval)
+            struct.pack_into('>iiii', header, 180, cdp_xy[n][0], cdp_xy[n][1], inlines[i], crosslines[j])
+            out += header + payload
+    return WrittenOriginal(bytes(out), 'segy/1', dict(declared or {}), filename)
+
+
 def well_residual(document, *, filename='residuals.json'):
     """A residual result (E119b, `well-residual/1`): the document `ophiolite.residuals.compute` makes, as UTF-8 JSON of
     at most 8 MiB (D-36 (a)). It is published only by a procedure run; nothing is declared beside it. Every number must be finite."""

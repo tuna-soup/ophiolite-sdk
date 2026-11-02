@@ -1,0 +1,100 @@
+{
+  "format": "ophiolite.opendtect-starter-result/1",
+  "pack": "ophiolite-synthetic/survey/starter",
+  "survey": "Syn_Survey",
+  "placed": [
+    {
+      "kind": "seismic-3d",
+      "file": "seismic/Syn.sgy",
+      "item": "item-Syn-sgy",
+      "version": "r1",
+      "object": "Syn · Ophiolite v1",
+      "digest": "dfcb80d938a12c89ccbb3b89f7b9bbd655d29f7c19a03a5993ec514bafd8de5a",
+      "values": 80,
+      "differences": 0,
+      "moves": []
+    },
+    {
+      "kind": "horizons",
+      "file": "horizons/Top.csv",
+      "item": "item-Top-csv",
+      "version": "r1",
+      "object": "Top · Ophiolite v1",
+      "digest": "3a4a29e571aa01262680da654e475cc7dafb3ce1a1bc76a8f5459d081c74540f",
+      "values": 16,
+      "differences": 0,
+      "moves": [
+        {
+          "crossline": 22,
+          "given": 105.5,
+          "inline": 10,
+          "stored": 105.50000762939453
+        },
+        {
+          "crossline": 24,
+          "given": 106.0,
+          "inline": 10,
+          "stored": 105.99999237060547
+        },
+        {
+          "crossline": 22,
+          "given": 113.5,
+          "inline": 12,
+          "stored": 113.50000762939453
+        },
+        {
+          "crossline": 22,
+          "given": 121.5,
+          "inline": 14,
+          "stored": 121.50000762939453
+        },
+        {
+          "crossline": 24,
+          "given": 122.0,
+          "inline": 14,
+          "stored": 121.99999237060547
+        },
+        {
+          "crossline": 22,
+          "given": 129.5,
+          "inline": 16,
+          "stored": 129.50001525878906
+        },
+        {
+          "crossline": 24,
+          "given": 130.0,
+          "inline": 16,
+          "stored": 129.99998474121094
+        }
+      ]
+    }
+  ],
+  "not_placed": [
+    {
+      "kind": "seismic-3d",
+      "object": "Syn2",
+      "reason": "This seismic volume is not on the OpendTect survey's sampling yet."
+    },
+    {
+      "kind": "wellbore-paths",
+      "object": "SYN-A",
+      "reason": "Logs and well paths are not imported by this version."
+    },
+    {
+      "kind": "wellbore-logs",
+      "object": "SYN-A",
+      "reason": "Logs and well paths are not imported by this version."
+    },
+    {
+      "kind": "wellbore-paths",
+      "object": "SYN-B",
+      "reason": "Logs and well paths are not imported by this version."
+    },
+    {
+      "kind": "wellbore-logs",
+      "object": "SYN-B",
+      "reason": "the well has no logs"
+    }
+  ],
+  "ticket": "E129 (f)"
+}

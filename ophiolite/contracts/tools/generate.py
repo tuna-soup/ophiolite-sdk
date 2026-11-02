@@ -44,20 +44,26 @@ def schemas():
     from project_gateway.scientific_assets import WellPath  # E125 s3a
     from project_gateway.scientific_assets import WellSet  # E119a
     from project_gateway.scientific_assets import WellResidual  # E119b
+    from project_gateway.scientific_assets import SeismicLine  # E137 s0
     from project_gateway.domain import RelationshipRegistry, Entity, EntityAssets, Lineage
     from project_gateway.scientific_assets import DerivationRecord, Parameters  # E94
     from project_gateway.scientific_assets import DerivationRecordV2  # E106
     from project_gateway.scientific_assets import CheckRecord  # E96
     from project_gateway.scientific_assets import CurveColumnsHeader  # E100b
+    from project_gateway.scientific_assets import PointColumnsHeader  # E139
     from project_gateway.scientific_assets import TableFile  # E58b
     from project_gateway.source_provenance import SourceProvenance  # E122
     from project_gateway.basis_groups import BasisGrouping  # E123
     from project_gateway.outcomes import OutcomeCheck, OutcomeClaim, OutcomeDeclaration  # E120
     from project_gateway.resqml_read import LocalFrame, ResqmlObject, ResqmlRead  # E124
+    from project_gateway.verdicts import Verdict  # E132
+    from project_gateway.behaviour_consent import BehaviourConsent  # E133
+    from project_gateway.work_episodes import WorkEpisode, WorkEpisodes  # E134
     for model in (CheckRecord, DerivationRecord, DerivationRecordV2, Parameters, Asset, Curve, ScientificContext, AssetSummary, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface, PointSet, PolylineSet, SeismicVolume, SeismicSlice,
                   RelationshipRegistry, Entity, EntityAssets, Lineage, ImportRecipe, PointSet2, WellLocationUpload, WellLocation,
                   Wavelet, ModelSection, SeismicSection, TimeDepth, FeatureSet, ImportRecipe2, CurveColumnsHeader, TableFile, SourceProvenance, WellPath, BasisGrouping, WellSet,
-                  WellResidual, OutcomeDeclaration, OutcomeCheck, OutcomeClaim, ResqmlRead, LocalFrame, ResqmlObject):  # E53; E57; E56; E23b; E100b; E58b; E122; E125 s3a; E123; E119a; E119b; E120 (s3: the claim); E124 (s1: the object)
+                  WellResidual, SeismicLine, OutcomeDeclaration, OutcomeCheck, OutcomeClaim, ResqmlRead, LocalFrame, ResqmlObject, Verdict, BehaviourConsent, WorkEpisodes, WorkEpisode,
+                  PointColumnsHeader):  # E53; E57; E56; E23b; E100b; E58b; E122; E125 s3a; E123; E119a; E119b; E120 (s3: the claim); E124 (s1: the object); E132; E133; E134; E137 s0; E139
         write(CONTRACTS / model.CONTRACT['path'], model.model_json_schema())
 
 
@@ -164,6 +170,7 @@ TYPED = {
     'faults': ('opendtect-faultsticks/1', 'text/plain', b'# synthetic FaultStickSet\n500100.5 5800200.25 1200 3 0\n500110 5800210 1350 3 1\n500300 5800400 1100 1 0\n500310 5800410 1250.125 1 1\n',
                {'crs': 'EPSG:23031', 'xy_unit': 'm', 'z_unit': 'm', 'z_meaning': 'depth', 'positive': 'down'}),
     'seismic': ('segy/1', 'application/octet-stream', None, {'crs': 'EPSG:23031', 'z_domain': 'time'}),
+    'seismic-line': ('segy-line/1', 'application/octet-stream', None, {'crs': 'EPSG:23031', 'z_domain': 'time'}),  # E137 s0
     # E53: each file states its own context, so nothing is declared beside it.
     'wavelet': ('wavelet-text/1', 'text/plain', b'# ophiolite-wavelet 1\nkind ricker\nfrequency_hz 30\ndt 0.002\nt0 -0.004\npolarity impedance-increase-positive\n'
                 b'samples\n-0.25\n0.5\n1.0\n0.5\n-0.25\n', {}),
@@ -209,13 +216,20 @@ def seismic_original():
     return write(None, cube, inlines=[10, 12], crosslines=[100, 101, 102], interval=4000)
 
 
+def line_original():
+    """E137 s0: a tiny synthetic marked 2D line, the Connectors fixture's literals (tests/fixtures/readers/line.sgy)."""
+    from asset_connectors.segy_line import write
+    return write(None, [[n + 0.5, -float(n), 2.25, 10.0 * n] for n in range(5)], numbers=[103, 101, 102, 105, 104],
+                 points=[(15, -10), (-2, 1), (0, 1), (0, 0), (7, 0)], xy=[(500000.25 + 12.5 * n, 5800000.75 + 6.25 * n) for n in range(5)])
+
+
 def typed(FIX):
     """Synthetic typed fixtures (E11): exact original, normalized data and a retained descriptor."""
     from asset_connectors.typed_reader import read_typed, interpretation
     from project_gateway.scientific_assets import Asset, TYPED_PAYLOADS
     from project_gateway.contracts_registry import registry
     for name, (profile, media, raw, declared) in TYPED.items():
-        raw = raw if raw is not None else seismic_original()
+        raw = raw if raw is not None else line_original() if name == 'seismic-line' else seismic_original()
         context, data, fidelity = read_typed(profile, raw, declared)
         kind = context['type']; ref = {'authority': 'ophiolite:uploaded', 'key': 'synthetic-' + name, 'revision': digest(raw), 'profile': profile}
         normalized = registry().normalized_profile(profile)

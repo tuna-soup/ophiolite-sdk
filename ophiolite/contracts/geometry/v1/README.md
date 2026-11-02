@@ -34,7 +34,8 @@ member's frame from its well set, and the surface's context. Metres only.
 - A surface value times `surface_sign` is a depth below the same datum: (`depth`, `down`) gives 1, (`elevation`,
   `up`) gives -1.
 
-`REFUSALS` holds one sentence per key; `refusal` names the first that applies, in this order: `survey_unit` (survey
+`REFUSALS` holds one sentence per key; `refusal` names the first that applies, in this order: `frame_missing` (the
+member's trajectory was saved without a frame, E119a s6), `survey_unit` (survey
 not in metres and degrees), `surface_time`, `surface_unit` (surface x, y or z not in metres), `surface_vertical`
 (neither depth positive down nor elevation positive up), `crs_mismatch` (surface CRS not the frame's),
 `magnetic_north`, `azimuth_reference_unknown`, `azimuth_reference_mismatch` (the survey's north is not the frame's

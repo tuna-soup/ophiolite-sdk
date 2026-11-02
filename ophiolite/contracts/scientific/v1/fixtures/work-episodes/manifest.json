@@ -1,0 +1,47 @@
+{
+ "subject": "A valid manifest for the episodes of shape-episode.json",
+ "manifest": {
+  "schema": "ophiolite.work-episodes/1",
+  "deployment_id": "dep-e134-test",
+  "release": "2026.10.130",
+  "sdk_version": null,
+  "capture": "by-consent",
+  "purpose": "training",
+  "scope": {
+   "kind": "own",
+   "person": "person-cd9dbe18bb9022661636719d82d2023e",
+   "project": "project-4ef7215685ee9a7a6aacdd596368c113"
+  },
+  "mode": "auto",
+  "window_seconds": 14400,
+  "until": 42,
+  "consent_texts": [
+   {
+    "version": 1,
+    "sha256": "0cfa7fb17507c15c1120df3a3f21c6409d51a88c4e76cad8f6d762d0f5906aa5"
+   }
+  ],
+  "rights_bases": [],
+  "licences": [],
+  "salt_id": "salt-b22f6985db884bc1",
+  "linkage": "Pseudonyms in this folder can be linked to the named record by anyone who can read the deployment.",
+  "seed": 0,
+  "fractions": {
+   "train": 800,
+   "validation": 100,
+   "test": 100
+  },
+  "split_rule": "split/1",
+  "counts": {
+   "episodes": 2,
+   "values": 0,
+   "shape": 2,
+   "rights_refused": 0,
+   "no_consent": 0,
+   "unreadable": 0,
+   "skipped": 1,
+   "scrubbed_fields": 0
+  },
+  "exported_at": 1793280000.0
+ }
+}

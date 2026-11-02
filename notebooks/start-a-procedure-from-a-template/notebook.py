@@ -1,6 +1,6 @@
 # %% [markdown]
-# # Start a procedure from a template
-# A procedure starts from a working template for a step and a kind of data: `procedure.json` says what it reads,
+# # Start a tool from a template
+# A tool starts from a working template for a step and a kind of data: `procedure.json` says what it reads,
 # makes and lets you set, `procedure.py` holds the code, and its own tests and sample data come with it. Each start
 # is valid as it is made. A pair this version has no start for is refused with a sentence that says what there is.
 #
@@ -13,7 +13,7 @@
 #
 # Open the notebook with the `ophiolite-gallery` kernel. Everything here runs on your computer in both modes: nothing
 # is added to a project, so `OPHIOLITE_URL` changes nothing. To share a start once it does what you need, see the
-# notebook "Share a procedure with your project".
+# notebook "Share a tool with your project".
 # %%
 import tempfile
 from pathlib import Path

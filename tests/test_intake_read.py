@@ -153,7 +153,7 @@ def test_several_versions_without_version_are_listed_and_an_unlisted_one_is_refu
     server = Server(advertised=True, items=[row(procedures=[version(1, 'e' * 64), version(2, 'f' * 64)])])
     error = refused(server, tmp_path / 'end of well report.pdf', tmp_path)
     assert error.code == 'several-versions' and str(error) == (
-        'Not run: several read procedure versions can read this file. Choose one with --version: Groningen report reader, version 1 (%s); '
+        'Not run: several read tool versions can read this file. Choose one with --version: Groningen report reader, version 1 (%s); '
         'Groningen report reader, version 2 (%s).' % ('e' * 64, 'f' * 64))
     error = refused(server, tmp_path / 'end of well report.pdf', tmp_path, version='a' * 64)
     assert error.code == 'not-listed'
@@ -201,6 +201,9 @@ def test_older_commands_help_is_unchanged_and_intake_read_has_its_own(monkeypatc
         with contextlib.redirect_stdout(out), pytest.raises(SystemExit): cli.parser().parse_args([*argv, '--help'])
         return out.getvalue()
     sub = next(a for a in cli.parser()._actions if isinstance(a, argparse._SubParsersAction))
-    assert {name: helped(name) for name in frozen['help']} == frozen['help'] and set(sub.choices) - set(frozen['help']) == {'intake', 'source', 'access-history', 'teams', 'rights', 'deliver', 'outcomes', 'residuals', 'recipes', 'starter'}  # E129 Sa: starter; E112 s2: recipes; E119b: residuals; E108: source; E67b: the two read verbs; E35a: rights; E109: deliver; E120: outcomes
+    from test_tools_cli import reworded, unwrap  # E131 s1 (D4.3): the group says tools; both spellings print the same help
+    procedures = frozen['help'].pop('procedures')
+    assert unwrap(helped('tools')) == reworded(procedures) and helped('procedures') == helped('tools')
+    assert {name: helped(name) for name in frozen['help']} == frozen['help'] and set(sub.choices) - set(frozen['help']) == {'procedures', 'tools', 'intake', 'source', 'access-history', 'teams', 'rights', 'deliver', 'outcomes', 'residuals', 'recipes', 'starter', 'verdicts', 'withdraw', 'trajectories', 'ai-use'}  # E134 s2: ai-use; E134 s1: trajectories; E131 s1: tools (procedures is checked above); E132 s0: verdicts; E132 s2: withdraw; E129 Sa: starter; E112 s2: recipes; E119b: residuals; E108: source; E67b: the two read verbs; E35a: rights; E109: deliver; E120: outcomes
     text = helped('intake', 'read')
     for flag in ('RUN', 'FILE', '--keep-original', '--version DIGEST', '--folder FOLDER', '--setting NAME=VALUE', '--yes'): assert flag in text

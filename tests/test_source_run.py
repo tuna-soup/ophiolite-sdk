@@ -149,12 +149,12 @@ def test_without_a_folder_the_run_leaves_nothing_behind_and_names_the_given_syst
     assert [m for m in made if 'ophiolite-source-' in m and Path(m).exists()] == []
 
 
-ENABLE = ' A project administrator enables one in Settings → Procedures or with ophiolite procedures enable.'  # E121 B5
+ENABLE = ' A project administrator enables one in Settings → Tools or with ophiolite tools enable.'  # E121 B5
 CASES = {
     'not-enabled': (dict(), dict(state='private'), 'Not run: Survey share has no enabled version in this project.' + ENABLE),  # B6 rev 5 (R4-8): its label
     'wrong-step': (dict(step='process'), dict(), None),
-    'missing-role': (dict(made=('well_a', 'well_b')), dict(), 'Not run: the procedure did not make Well C location.'),
-    'extra-role': (dict(roles=('well_a', 'well_b')), dict(), 'Not run: the procedure made an output it does not declare.'),
+    'missing-role': (dict(made=('well_a', 'well_b')), dict(), 'Not run: the tool did not make Well C location.'),
+    'extra-role': (dict(roles=('well_a', 'well_b')), dict(), 'Not run: the tool made an output it does not declare.'),
     'system-address': (dict(), dict(system_label='https://share.example'), "Not run: name the team's system in words; its address and passwords stay in the configuration on this computer."),
     'system-password': (dict(), dict(system_label='Share Password'), "Not run: name the team's system in words; its address and passwords stay in the configuration on this computer."),
 }
@@ -172,7 +172,7 @@ def test_disabled_procedure_wrong_step_or_role_is_refused(tmp_path, case):
         m.update(step='process', inputs=[{'slot': 'share', 'label': 'Locations', 'class': 'version', 'kinds': ['well-location/1'], 'cardinality': 'one'}])
         (root / 'procedure.json').write_text(json.dumps(m)); (root / 'procedure.py').write_text(CODE % (WELLS, TOKEN, made))
         assert procedures.validate(root)['valid'], procedures.validate(root)
-        sentence = "Not run: Survey share does not read from a team's system; only a source procedure adds its results this way."
+        sentence = "Not run: Survey share does not read from a team's system; only a source tool adds its results this way."
     else:
         root = folder(tmp_path / 'procedure', made=made, **shape)
     server = Server(root, state=given.pop('state', 'enabled'))
@@ -211,7 +211,7 @@ def test_the_command_line_runs_it_and_prints_what_became_of_each_file(tmp_path, 
 # --- B6 rev 4: what a refused run keeps, and the words it prints -------------------------------------------------------
 
 SHARED = ('Someone in this project already added the same file from this system and shared it with you. Use that file; adding '
-          'your own copy from this procedure is not available on this deployment yet.')
+          'your own copy from this tool is not available on this deployment yet.')
 SETTINGS = 'This file is already in the project with other settings.'
 PLANTED = CODE.replace("    with open(config['counter']", "    print('log line', config['token'], 'planted-log-7c2e')\n    with open(config['counter']")
 
@@ -272,9 +272,9 @@ def test_a_refused_run_keeps_only_the_outputs_and_the_fallback_sends_no_log_or_r
     with client(server) as c, pytest.raises(SystemExit) as stopped: cli._source(args, c)
     assert stopped.value.code == cli.EXIT['conflict']
     printed = capsys.readouterr().out
-    [line] = [l for l in printed.splitlines() if l.startswith('The files the procedure made are kept in ')]
+    [line] = [l for l in printed.splitlines() if l.startswith('The files the tool made are kept in')]
     kept = Path(line.split(' To add them by hand: ophiolite upload ')[1])
-    assert line == 'The files the procedure made are kept in %s. To add them by hand: ophiolite upload %s' % (kept, kept)
+    assert line == 'The files the tool made are kept in %s. To add them by hand: ophiolite upload %s' % (kept, kept)
     assert sorted(p.name for p in kept.iterdir()) == ['well_a.json', 'well_b.json', 'well_c.json'] and runs(tmp_path) == 1
     server.hand, server.raw = True, []
     upload = cli.parser().parse_args(['upload', str(kept), '--attribution', 'Team survey share', '--audience', 'me', '--rights-confirmed'])
@@ -298,7 +298,7 @@ def test_the_source_report_names_outputs_by_label_on_failed_and_decision_rows(tm
                                                  label='share_v2')
     with client(server) as c, pytest.raises(SystemExit): cli._source(args, c)
     printed = capsys.readouterr().out.splitlines()
-    kept = [l for l in printed if l.startswith('The files the procedure made are kept in ')]
+    kept = [l for l in printed if l.startswith('The files the tool made are kept in')]
     words = '\n'.join(l for l in printed if l not in kept)
     assert printed[0] == "Ran Survey share, version 2, on this computer, reading from a team's system."
     assert '  Well A location: Not supported - ' + SHARED in words and '  Well B location: Needs your decision - ' + SETTINGS in words
@@ -320,7 +320,7 @@ def test_an_upload_that_fails_after_the_run_keeps_the_outputs_and_says_where(tmp
     server.fail = where
     with client(server) as c, pytest.raises(Exception) as failed: cli._source(args, c)
     kept = Path(failed.value.kept)
-    assert capsys.readouterr().err.splitlines()[-1] == 'The files the procedure made are kept in %s. To add them by hand: ophiolite upload %s' % (kept, kept)
+    assert capsys.readouterr().err.splitlines()[-1] == 'The files the tool made are kept in %s. To add them by hand: ophiolite upload %s' % (kept, kept)
     assert sorted(p.name for p in kept.iterdir()) == ['well_a.json', 'well_b.json', 'well_c.json'] and runs(tmp_path) == 1
     [start] = [json.loads(body) for url, _, body in server.raw if url.endswith('/upload-runs/start')]
     assert {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in kept.iterdir()} == {f['path'].rsplit('/', 1)[1]: f['sha256'] for f in start['files']}
@@ -336,7 +336,7 @@ def test_an_unavailable_version_is_named_by_its_label_or_this_procedure_on_stder
     monkeypatch.setenv('OPHIOLITE_PROCEDURE_CACHE', str(tmp_path / 'cache'))
     root = folder(tmp_path / 'procedure')
     args = lambda *more: cli.parser().parse_args(['source', 'run', 'team/survey-share', '--system', 'share=' + config(tmp_path)['share'], *more])
-    for label, said in (('Survey share', 'Survey share'), ('survey_share_v2', 'this procedure'), (None, 'this procedure')):
+    for label, said in (('Survey share', 'Survey share'), ('survey_share_v2', 'this tool'), (None, 'this tool')):
         server = Server(root, state='private')
         if label is None: server.version = lambda: {**Server.version(server), 'name': 'team/other'}
         else: server.version = lambda label=label: {**Server.version(server), 'label': label}

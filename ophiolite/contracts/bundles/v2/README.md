@@ -120,3 +120,11 @@ keeps the major at 2), and `observations.source_records_omitted` when the server
 names a source system, its instance and a path or native id, which may contain names; it carries no words, reader or
 person. Readers before 2.10 open such a bundle exactly as the same export without records
 ([fixture](fixtures/manifest-source-records.json)).
+
+## 2.11 — a packaged polyline set (E123 S1f-c)
+
+A package block, its package file, companions and interpretation file are allowed on a `polyline-set` asset as on a
+point set or feature set (2.8): Petrel fault sticks travel with their `.crsmeta.xml` companion and their
+`ophiolite.package-read/1` interpretation. Exporters write 2.11 only when such a set travels; every other export keeps
+its minor. Readers before 2.11 refuse the bundle on its file roles ("Bundle 1.0 carries exactly one original per asset
+and only known file roles."); they never read it without the package.

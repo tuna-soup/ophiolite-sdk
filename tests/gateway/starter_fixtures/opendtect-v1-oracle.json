@@ -1,0 +1,14 @@
+{
+ "compared": [
+  "seismic-3d seismic/Syn.sgy (item item-Syn-sgy at r1) into OpendTect as “Syn · Ophiolite v1”: 80 values, 0 differences, 0 moved",
+  "horizons horizons/Top.csv (item item-Top-csv at r1) into OpendTect as “Top · Ophiolite v1”: 16 values, 0 differences, 7 moved",
+  "not placed: seismic-3d Syn2: This seismic volume is not on the OpendTect survey's sampling yet.",
+  "not placed: wellbore-paths SYN-A: Logs and well paths are not imported by this version.",
+  "not placed: wellbore-logs SYN-A: Logs and well paths are not imported by this version.",
+  "not placed: wellbore-paths SYN-B: Logs and well paths are not imported by this version.",
+  "not placed: wellbore-logs SYN-B: the well has no logs"
+ ],
+ "values": 96,
+ "differences": 0,
+ "seed": 0
+}

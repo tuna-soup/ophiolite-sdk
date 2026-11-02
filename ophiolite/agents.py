@@ -30,7 +30,8 @@ CHANGES = ('applications/configure', 'applications/start', 'applications/publish
            'results/remake-run',  # E94: run an approved calculation again; a person saves
            'procedures/register', 'procedure-runs/report',  # E111: a private version of exact bytes; a run whose outputs publish under its approval
            'upload-runs/start',  # E111 s2 (P-10): one file read with a procedure; its file, convert and output steps run under this approval
-           'outcomes/deliver-as', 'procedures/trust')  # E111 s4b (R4-10): a delivery as an outcome; trust in exactly one procedure version
+           'outcomes/deliver-as', 'procedures/trust',  # E111 s4b (R4-10): a delivery as an outcome; trust in exactly one procedure version
+           'verdicts/record')  # E132 s3: a verdict on exactly one result version, for the agent's person
 
 
 class PlanDeclined(OphioliteError): code = 'plan-declined'
@@ -134,7 +135,7 @@ class AgentClient:
         """Propose the exact request. `evidence` (E95), when given: `instruction` (what the person asked, as you received
         it), `model` ({provider, id, label?}), `conversation` ({kind, reference, label?}) and `client` (product/version).
         The answer's `evidence` is the record's id; pass it to `wait` and `execute`."""
-        if operation not in CHANGES: raise Refused('Agents change application configurations, runs, publications, recipients, runner jobs, recalculations, procedure runs, deliveries as an outcome and trust in a procedure version only.')
+        if operation not in CHANGES: raise Refused('Agents change application configurations, runs, publications, recipients, runner jobs, recalculations, procedure runs, deliveries as an outcome, trust in a procedure version and verdicts on a result only.')
         body = {'operation': operation, 'request': {'project_id': self.project, **request}, 'summary': summary}
         if evidence is not None:
             body['evidence'] = evidence

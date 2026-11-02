@@ -24,6 +24,12 @@ def __getattr__(name):
     if name == 'procedure':  # E105a: the decorator that marks a procedure's entry function
         from .procedures import procedure
         return procedure
+    if name == 'tool':  # E131 s1 (D78): the decorator that marks a tool's entry (the same mark as `procedure`)
+        from .tools import tool
+        return tool
+    if name == 'tools':  # E131 s1: the module, also reachable as `import ophiolite.tools`
+        import importlib
+        return importlib.import_module('.tools', __name__)
     if name == 'compared':  # E110 (D9): what a check's entry returns
         from .procedures import compared
         return compared

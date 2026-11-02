@@ -47,3 +47,8 @@ every slot in this version, the selection included.
 
 **A residual result may be sent (E120, rules 1.3.0).** `send_kinds` includes `well-residual/1`, so a send procedure
 can deliver a residual result, for example as an outcome's destination (`fixtures/valid/send-residual.json`).
+
+**A read procedure may write a SEG-Y volume (E123 SZ, rules 1.4.0).** `read_source_kinds` and `kind_words` include
+`segy/1`, so a procedure that reads a file on the person's computer (the SDK's "Read a ZGY cube on your computer")
+can land what it converted as a seismic volume. A volume is still never made by a process procedure, sent or checked:
+`process_kinds`, `process_input_kinds` and `send_kinds` are unchanged.

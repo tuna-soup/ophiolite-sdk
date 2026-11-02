@@ -1,0 +1,35 @@
+{
+ "subject": "verdicts/record request bodies, checked by VerdictRecordRequest (strict: server-set and unknown fields refused) and then by verdicts.refusal (the request's own sentences); each case is the base with its patch merged",
+ "base": {
+  "project_id": "e132-fixture",
+  "asset_id": "asset-residual-1",
+  "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "verdict": "accepted",
+  "command_id": "cmd-1"
+ },
+ "valid": {
+  "supersedes-omitted": {"patch": {}, "dumped_supersedes": "absent"},
+  "supersedes-null": {"patch": {"supersedes": null}, "dumped_supersedes": null},
+  "supersedes-id": {"patch": {"supersedes": "verdict-00000000000000000000000000000001"}, "dumped_supersedes": "verdict-00000000000000000000000000000001"},
+  "against-check": {"patch": {"against": {"kind": "check", "key": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}}, "dumped_supersedes": "absent"}
+ },
+ "invalid": {
+  "client-actor": {"patch": {"actor": {"kind": "person", "id": "u-anna", "name_at_time": "Anna"}}, "field": "actor"},
+  "client-at": {"patch": {"at": 1793275200.0}, "field": "at"},
+  "client-verdict-id": {"patch": {"verdict_id": "verdict-0123456789abcdef0123456789abcdef"}, "field": "verdict_id"},
+  "client-on-behalf-of": {"patch": {"on_behalf_of": null}, "field": "on_behalf_of"},
+  "unknown-key": {"patch": {"colour": "green"}, "field": "colour"},
+  "against-without-kind": {"patch": {"against": {"outcome_id": "outcome-1", "version": 1}}, "field": "against"},
+  "against-check-with-outcome-id": {"patch": {"against": {"kind": "check", "outcome_id": "outcome-1"}}, "field": "against"},
+  "against-version-as-text": {"patch": {"against": {"kind": "outcome", "outcome_id": "outcome-1", "version": "1"}}, "field": "against"},
+  "against-extra-key": {"patch": {"against": {"kind": "outcome", "outcome_id": "outcome-1", "version": 1, "label": "x"}}, "field": "against"},
+  "supersedes-not-an-id": {"patch": {"supersedes": "latest"}, "field": "supersedes"}
+ },
+ "refusals": {
+  "rejected-no-reason": {"patch": {"verdict": "rejected"}, "reason": "say-why", "sentence": "Say why"},
+  "rejected-null-reason": {"patch": {"verdict": "rejected", "reason": null}, "reason": "say-why", "sentence": "Say why"},
+  "rejected-blank-reason": {"patch": {"verdict": "rejected", "reason": " \n\t "}, "reason": "say-why", "sentence": "Say why"},
+  "reason-nul": {"patch": {"reason": "tops\u0000differ"}, "reason": "reason-nul", "sentence": "A reason cannot contain a NUL character"},
+  "accepted-no-reason": {"patch": {}, "reason": null, "sentence": null}
+ }
+}

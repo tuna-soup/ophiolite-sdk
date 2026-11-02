@@ -1,0 +1,24 @@
+{
+ "subject": "behaviour_consent.capture_setting: the deployment's capture and tier from OPHIOLITE_CAPTURE, OPHIOLITE_DEPLOYMENT_TIER and OPHIOLITE_DEMONSTRATION, or the sentence startup refuses with (D2, §3). The package configuration refuses the same shapes before the gateway, with its own JSON Schema diagnostics (R2-4)",
+ "cases": {
+  "nothing-set": {"environ": {}, "expect": {"capture": "off", "tier": null}},
+  "off-explicitly": {"environ": {"OPHIOLITE_CAPTURE": "off", "OPHIOLITE_DEPLOYMENT_TIER": "self-managed"}, "expect": {"capture": "off", "tier": "self-managed"}},
+  "by-consent-on-a-public-demonstration": {"environ": {"OPHIOLITE_CAPTURE": "by-consent", "OPHIOLITE_DEPLOYMENT_TIER": "public-demonstration", "OPHIOLITE_DEMONSTRATION": "1"},
+                                           "expect": {"capture": "by-consent", "tier": "public-demonstration"}},
+  "a-demonstration-with-capture-off": {"environ": {"OPHIOLITE_DEPLOYMENT_TIER": "public-demonstration", "OPHIOLITE_DEMONSTRATION": "1"}, "expect": {"capture": "off", "tier": "public-demonstration"}},
+  "an-unknown-capture": {"environ": {"OPHIOLITE_CAPTURE": "on"}, "refused": "OPHIOLITE_CAPTURE is off or by-consent"},
+  "an-unknown-tier": {"environ": {"OPHIOLITE_DEPLOYMENT_TIER": "tier-1"},
+                      "refused": "OPHIOLITE_DEPLOYMENT_TIER is one of public-demonstration, local-evaluation, self-managed, managed-dedicated, shared-cloud"},
+  "by-consent-on-a-self-managed-deployment": {"environ": {"OPHIOLITE_CAPTURE": "by-consent", "OPHIOLITE_DEPLOYMENT_TIER": "self-managed"},
+                      "refused": "Capture is allowed only on a public demonstration or shared cloud deployment, contract self-managed"},
+  "by-consent-with-no-tier": {"environ": {"OPHIOLITE_CAPTURE": "by-consent", "OPHIOLITE_DEMONSTRATION": "1"},
+                      "refused": "Capture is allowed only on a public demonstration or shared cloud deployment, contract undeclared"},
+  "a-public-demonstration-tier-without-a-demonstration": {"environ": {"OPHIOLITE_CAPTURE": "by-consent", "OPHIOLITE_DEPLOYMENT_TIER": "public-demonstration"},
+                      "refused": "A public demonstration deployment sets OPHIOLITE_DEMONSTRATION"},
+  "the-demonstration-tier-without-a-demonstration-and-capture-off": {"environ": {"OPHIOLITE_DEPLOYMENT_TIER": "public-demonstration"},
+                      "refused": "A public demonstration deployment sets OPHIOLITE_DEMONSTRATION"},
+  "shared-cloud": {"environ": {"OPHIOLITE_DEPLOYMENT_TIER": "shared-cloud"}, "refused": "Shared cloud is not available yet (E36)"},
+  "shared-cloud-by-consent": {"environ": {"OPHIOLITE_CAPTURE": "by-consent", "OPHIOLITE_DEPLOYMENT_TIER": "shared-cloud", "OPHIOLITE_DEMONSTRATION": "1"},
+                      "refused": "Shared cloud is not available yet (E36)"}
+ }
+}

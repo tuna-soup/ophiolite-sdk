@@ -1,0 +1,7 @@
+{
+ "subject": "digest and id of the records.json base record, computed independently with hashlib over json.dumps(sort_keys, compact separators, ensure_ascii false) of the record without verdict_id; the id adds the project and a newline before the body (check_store's rule)",
+ "project": "e132-fixture",
+ "canonical_body": "{\"actor\":{\"id\":\"u-anna\",\"kind\":\"person\",\"name_at_time\":\"Anna\"},\"against\":null,\"asset_id\":\"asset-residual-1\",\"at\":1793275200.0,\"on_behalf_of\":null,\"reason\":\"tops differ from the published log\",\"revision\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"schema\":\"ophiolite.verdict/1\",\"supersedes\":null,\"verdict\":\"rejected\"}",
+ "body_digest": "441ed9d650da64a7d3036fd1266c1c392099c675c5184a3d5d148de978c7bc71",
+ "verdict_id": "verdict-49d878ed73f94bcac7414d09cbf4abdb"
+}

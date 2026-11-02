@@ -179,45 +179,57 @@ def procedure(function):
     return function
 
 
-SENTENCES = {
-    'later-release': 'Not run: running a {step} procedure comes with a later release.',
+class Stopped(Exception):
+    """E123 SZ: raised by a procedure body to stop on purpose with a sentence for the person (at most 1000 characters).
+    `run` reports it as NotRun 'asked' (asks=True: the procedure needs an answer, given as settings) or
+    'procedure-stopped', with that sentence, instead of the generic 'raised'."""
+
+    def __init__(self, sentence, *, asks=False):
+        self.sentence, self.asks = str(sentence)[:1000], bool(asks)
+        super().__init__(self.sentence)
+
+
+SENTENCES = {  # E131 s2: person-read sentences say tool; `withdrawn` is kept (the conformance kit asserts it)
+    'later-release': 'Not run: running a {step} tool comes with a later release.',
     'requires-missing': 'Not run: {label} needs {names}; {installed}install {it_them} with: {command}',  # E112 s4 (S4-D5)
     'requires-malformed': 'Not run: {label} lists "{text}" under requires; {remedy}',
     'destination-exists': 'Not run: the output folder already exists; name a new one.',
-    'overlap': 'Not run: the output folder must be outside the procedure folder and its inputs.',
-    'unknown-input': 'Not run: an input was given that this procedure does not read.',
+    'overlap': 'Not run: the output folder must be outside the tool folder and its inputs.',
+    'unknown-input': 'Not run: an input was given that this tool does not read.',
     'missing-input': 'Not run: {label} needs a file.',
     'too-many-inputs': 'Not run: {label} takes one file.',
     'not-a-file': 'Not run: the file for {label} cannot be read.',
-    'signature': 'Not run: the file for {label} does not look like the files this procedure reads.',
+    'signature': 'Not run: the file for {label} does not look like the files this tool reads.',
     'no-kind': 'Not run: say what type of data {label} is (--kind), or give an output of an earlier run.',
     'wrong-kind': 'Not run: {label} cannot read that type of data.',
     'bad-declared': 'Not run: the declarations for {label} must be a JSON object.',
     'system-config': 'Not run: {label} needs its configuration file, holding exactly its settings as text{not_text}.',  # E121 O5
     'setting-format': 'Not run: give each setting as --setting name=value.',
-    'setting-unknown': 'Not run: a setting was given that this procedure does not have.',
+    'setting-unknown': 'Not run: a setting was given that this tool does not have.',
     'setting-twice': 'Not run: {label} was given more than once.',
     'setting-missing': 'Not run: {label} needs a value.',
     'setting-type': 'Not run: {label} needs {what}.',
     'setting-bounds': 'Not run: {label} is outside its allowed range.',
-    'changed': "Not run: the procedure's files changed while it was being prepared; run it again.",
+    'changed': "Not run: the tool's files changed while it was being prepared; run it again.",
     'not-marked': 'Not run: the entry function is not marked with @procedure.',
-    'raised': 'Not run: the procedure stopped with an error. Its details are under --json.',
-    'stopped': 'Not run: the procedure stopped before it finished.',
-    'returned-wrong': 'Not run: the procedure must return its outputs by name, each made with an ophiolite writer.',
-    'missing-output': 'Not run: the procedure did not make {label}.',
-    'extra-output': 'Not run: the procedure made an output it does not declare.',
+    'raised': 'Not run: the tool stopped with an error. Its details are under --json.',
+    'stopped': 'Not run: the tool stopped before it finished.',
+    'asked': 'Not run yet: {sentence}',  # E123 SZ: procedures.Stopped(asks=True)
+    'procedure-stopped': 'Not run: {sentence}',  # E123 SZ: procedures.Stopped
+    'returned-wrong': 'Not run: the tool must return its outputs by name, each made with an ophiolite writer.',
+    'missing-output': 'Not run: the tool did not make {label}.',
+    'extra-output': 'Not run: the tool made an output it does not declare.',
     'wrong-profile': 'Not run: {label} was made as a different type of data than declared.',
     # E105b: the project catalogue
-    'changed-before-run': "Not run: the procedure's files changed after they were checked; nothing ran. Run it again.",
-    'cache-changed': 'Not run: the copy of this procedure on this computer was changed, so it was removed. Run it again to fetch it from the project.',
+    'changed-before-run': "Not run: the tool's files changed after they were checked; nothing ran. Run it again.",
+    'cache-changed': 'Not run: the copy of this tool on this computer was changed, so it was removed. Run it again to fetch it from the project.',
     'no-enabled-version': ('Not run: {name} has no enabled version in this project. A project administrator enables one in '  # E121 B5: the way
-                           'Settings → Procedures or with ophiolite procedures enable.'),
+                           'Settings → Tools or with ophiolite tools enable.'),
     'no-such-version': 'Not run: there is no version {version} of {name} in this project that you can see.',
     'withdrawn': 'Not run: this procedure was withdrawn on {date}.',
-    'trust-needed': 'Not run: this procedure runs code someone else wrote on this computer. Answer the question in a terminal, or add --yes to trust it.',
-    'declined': 'Not run: you did not trust this procedure. Nothing ran and nothing was recorded.',
-    'bundle-differs': 'Not run: the procedure the project sent does not match its digest; nothing was kept.',
+    'trust-needed': 'Not run: this tool runs code someone else wrote on this computer. Answer the question in a terminal, or add --yes to trust it.',
+    'declined': 'Not run: you did not trust this tool. Nothing ran and nothing was recorded.',
+    'bundle-differs': 'Not run: the tool the project sent does not match its digest; nothing was kept.',
     # E106: project versions as inputs; publishing a run; running a result again
     'project-input-format': 'Not run: give a project version as --input SLOT=@RESULT:REVISION.',
     'project-input-class': 'Not run: {label} reads a file, not a project version.',
@@ -226,29 +238,29 @@ SENTENCES = {
     'local-inputs': 'Not published: this run read files from this computer; run it on project versions (--input SLOT=@RESULT:REVISION) to publish it.',
     'output-changed': 'Not published: {file} changed after the run; run it again.',
     # E111 s2 (P-10): an agent's read of one file with a procedure, refused before anything is sent
-    'read-version': 'Not read: name the read procedure version to use (its digest).',
+    'read-version': 'Not read: name the read tool version to use (its digest).',
     'read-attribution': 'Not read: name who the file is attributed to (attribution); an agent\'s upload does not take the project\'s default.',
     'read-audience': 'Not read: name the members who may read the file (audience), or none for only the person.',
     'read-file-changed': 'Not sent: {file} changed after the person approved it; nothing was sent. Propose it again.',
     'inputs-differ': 'Not published: the project describes {label} differently from what the run used ({which}); run it again.',  # E121 B9
     'refused': '{sentence}',
     # E108: a source procedure's results added to the project
-    'not-a-source': "Not run: {name} does not read from a team's system; only a source procedure adds its results this way.",
+    'not-a-source': "Not run: {name} does not read from a team's system; only a source tool adds its results this way.",
     'system-words': "Not run: name the team's system in words; its address and passwords stay in the configuration on this computer.",
     'setting-secret': 'A setting looks like an address or a password; put it in the system configuration on this computer.',  # D9 (ii)
     # E109: `ophiolite deliver` (slice 0's `not-available-yet` stays a reason code a host may still meet)
     'not-available-yet': "Delivering to a team's system is not available on this deployment yet.",
-    'not-a-send': "Not sent: {name} does not deliver to a team's system; only a send procedure delivers.",
+    'not-a-send': "Not sent: {name} does not deliver to a team's system; only a send tool delivers.",
     'windows': 'Delivering from this computer is not supported on Windows yet.',  # R5-1: before anything is launched
     'item-format': 'Not sent: give each item as --item SLOT=NAME, --item SLOT=NAME@N (N its version number) or --item SLOT=@ASSET:REVISION.',
-    'item-slot': 'Not sent: this procedure reads more than one kind of version; say which input each item is for (--item SLOT=NAME@N).',
+    'item-slot': 'Not sent: this tool reads more than one kind of version; say which input each item is for (--item SLOT=NAME@N).',
     'item-missing': 'Not sent: there is no item named {name} in this project that you can see.',
     'item-ambiguous': 'Not sent: more than one item you can see is named {name}: {candidates}. Name one as @ASSET:REVISION.',
     'item-version': 'Not sent: {name} has no version {number} that you can see.',
     'item-unreadable': 'Not sent: {name} cannot be read here, so nothing was sent.',
     'delivery-busy': 'Another delivery from this folder is still running on this computer; try again when it has finished.',
     'delivery-pending': "This delivery's outcome is not known yet; it cannot be sent again.",  # R5-1: never relaunched
-    'delivery-changed': 'Not sent: the system configuration, the settings or the procedure differ from the delivery waiting in this folder.',
+    'delivery-changed': 'Not sent: the system configuration, the settings or the tool differ from the delivery waiting in this folder.',
     'delivery-other-person': 'Not sent: the delivery waiting in this folder was started with another access key.',
     'delivery-running': 'This delivery is still running on this computer; try again when it has finished.',  # D8
     'nothing-to-set-aside': 'There is no delivery of {name} waiting in this folder to set aside.',
@@ -261,7 +273,7 @@ SENTENCES = {
     'check-project': 'Not run: a check reports on a project version; give {label} with --item SLOT=ITEM[@N].',
     'check-reference': 'Not run: give the reference as --reference FILE or --reference ITEM@N, as {label} reads.',
     'check-returned': 'Not run: the check returned {reason}',
-    'check-wrong': 'Not run: a check procedure must return ophiolite.compared(outcome, compared, differed).',
+    'check-wrong': 'Not run: a check tool must return ophiolite.compared(outcome, compared, differed).',
 }
 WHAT = {'number': 'a finite number', 'integer': 'a whole number', 'boolean': 'true or false', 'choice': 'one of its choices', 'string': 'a short text'}
 INTEGER = re.compile(r'^[-+]?[0-9]+$')
@@ -302,7 +314,10 @@ def _requirements(manifest):
 
 
 def _sha256(path):
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    digest = hashlib.sha256()  # E123 SZ (A1): in 1 MiB blocks, as intake._sha256; a large input is never held whole to hash it
+    with open(path, 'rb') as handle:
+        for block in iter(lambda: handle.read(1 << 20), b''): digest.update(block)
+    return digest.hexdigest()
 
 
 def _setting_values(manifest, given):
@@ -347,8 +362,8 @@ def _setting_values(manifest, given):
 
 NEUTRAL_SYSTEM = "a team's system"  # B6 rev 4 (6): a system label that does not read as a name
 NEUTRAL_FOLDER = 'Team system'
-THIS_PROCEDURE = 'this procedure'
-KEPT = 'The files the procedure made are kept in {path}. To add them by hand: ophiolite upload {path}'
+THIS_PROCEDURE = 'this tool'  # E131 s2: tool
+KEPT = 'The files the tool made are kept in {path}. To add them by hand: ophiolite upload {path}'
 
 
 def _binding(name, system, role):
@@ -529,6 +544,8 @@ def _child(request_path):
     if 'check' in request: return _child_check(function, inputs, request, exchange)
     try:
         returned = function(inputs, request['settings'])
+    except Stopped as stopped:  # E123 SZ: a stop on purpose, with the procedure's own sentence
+        return fail('asked' if stopped.asks else 'procedure-stopped', sentence=stopped.sentence)
     except Exception as error:
         return fail('raised', type=type(error).__name__, message=str(error)[:2000])
     if not isinstance(returned, dict): return fail('returned-wrong')
@@ -677,7 +694,8 @@ def run(folder, destination, inputs=None, *, kinds=None, declared=None, systems=
         technical = {'exit_status': child.returncode, 'log': log.decode('utf-8', 'replace')[-4000:]}
         if (exchange / 'error.json').exists():
             error = json.loads((exchange / 'error.json').read_text())
-            raise NotRun(error.pop('code'), '/entry', {**technical, **error})
+            code = error.pop('code')
+            raise NotRun(code, '/entry', {**technical, **error}, **({'sentence': error['sentence']} if code in ('asked', 'procedure-stopped') else {}))
         if check:
             if child.returncode != 0 or not (exchange / 'comparison.json').exists(): raise NotRun('stopped', '', technical)
             report = _report_of(manifest, verdict['digest'], values, bound, input_record, json.loads((exchange / 'comparison.json').read_text()))
@@ -749,7 +767,8 @@ def _process_start(folder, label):
     manifest = {'schema': 'ophiolite.procedure/1', 'name': name, 'label': label, 'version': 1, 'step': 'process',
                 'inputs': [{'slot': 'tops', 'label': 'Tops to use', 'class': 'version', 'kinds': ['well-tops-csv/1'], 'cardinality': 'one'}],
                 'outputs': [{'role': 'tops', 'label': 'Tops', 'class': 'version', 'kind': 'well-tops-csv/1'}], 'settings': [], 'entry': 'procedure:main'}
-    code = ('"""%s."""\nfrom ophiolite import procedure\n\n\n@procedure\ndef main(inputs, settings):\n'
+    code = ('"""%s."""\n# A tool. Ophiolite reads it as procedure.json and procedure.py, and its code imports procedure, the name every '
+            'release runs.\nfrom ophiolite import procedure\n\n\n@procedure\ndef main(inputs, settings):\n'
             '    """Return each output by its role, made with an ophiolite writer (ophiolite.writers)."""\n'
             '    raise NotImplementedError("Write what this procedure does.")\n') % label
     folder.mkdir(parents=True)
@@ -878,7 +897,7 @@ def _before_run(folder):
 
 INTENT = 'ophiolite.delivery-intent/0'  # local and provisional: a "Deliver as" gate command before its claim is used (E120 5-20)
 ATTEMPT = 'ophiolite.delivery-attempt/0'  # local and provisional, as run.json: one delivery's pending record (D2, D8, R5-1)
-UNSAID = 'The procedure did not say whether it delivered.'  # M6
+UNSAID = 'The tool did not say whether it delivered.'  # M6
 RAISED_NEXT = 'Check the system configuration given with --system {slot}, then run the same command to record what happened.'
 
 
@@ -1058,7 +1077,7 @@ def delivery_words(attempt, again=False):
     elif again: sentence = f'Outcome unknown for {said} on this computer. It was not sent again.'
     elif result.get('raised'):  # adhoc-e121-claims (O6): what the procedure's error said first, and what to check
         raised = result['raised']
-        sentence = f"Outcome unknown for {said} on this computer. The procedure stopped with an error: {raised['line']}. " + (
+        sentence = f"Outcome unknown for {said} on this computer. The tool stopped with an error: {raised['line']}. " + (
             RAISED_NEXT.format(slot=raised['slot']) if raised.get('slot') else 'Run the same command to record what happened.')
     else: sentence = f'Outcome unknown for {said} on this computer. {UNSAID}'
     if attempt.get('reported'): return sentence + ' Recorded in the project.'

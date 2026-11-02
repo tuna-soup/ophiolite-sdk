@@ -2,6 +2,12 @@
 
 Python dependencies are installed separately, not copied into this source tree:
 HTTPX, Pydantic and their dependencies; optional NumPy, pandas and jsonschema.
+The optional `zgy` extra installs pyzgy 0.1.1 (Apache-2.0), which installs segyio (LGPL-3.0-or-later);
+`ophiolite.zgy` imports only pyzgy's bundled `openzgy`, and neither package is copied into this tree or bundled.
+The test cubes in `tests/fixtures/zgy/` (`small-*.zgy` and their `small-*.sgy` twins) are OpenZGY test data from
+equinor/pyzgy (Equinor ASA) at 03b9f7bd7b, Apache-2.0, copied unmodified with that licence as `LICENSE-pyzgy.txt`
+(Integration `docs/release/rights/e123sz-pyzgy-test-cubes-2026-10.json`); they are test fixtures only and are not in
+the wheel.
 An installed dependency inventory and licence review is required before release.
 No assertion about that complete transitive inventory is made here.
 

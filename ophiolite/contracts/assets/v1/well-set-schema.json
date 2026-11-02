@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/well-set-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.well-set/1",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -139,7 +139,8 @@
             "feature-set/1",
             "well-path/1",
             "well-set/1",
-            "well-residual/1"
+            "well-residual/1",
+            "seismic-line/1"
           ],
           "title": "Mapping",
           "type": "string"
@@ -284,7 +285,7 @@
     },
     "WellSetMember": {
       "additionalProperties": false,
-      "description": "A wellbore under its well, with one exact trajectory revision and its frame, or neither.",
+      "description": "A wellbore under its well, with one exact trajectory revision and its frame, a trajectory revision saved without a frame, or neither.",
       "properties": {
         "well": {
           "pattern": "^well-[0-9a-f]{32}$",

@@ -57,10 +57,6 @@
           "sentence": "has a frame but no trajectory; a frame places a trajectory."
         },
         {
-          "key": "trajectory-without-frame",
-          "sentence": "has a trajectory but no frame; the frame says where it starts and how it is oriented."
-        },
-        {
           "key": "crs",
           "sentence": "states its coordinate system other than as EPSG:<code>."
         },

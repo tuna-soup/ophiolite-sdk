@@ -21,7 +21,7 @@ WORDS = {'points-csv/1': 'points', 'mesh-text/1': 'mesh', 'esri-ascii-grid/1': '
          'deviation-csv/1': 'deviation', 'opendtect-faultsticks/1': 'fault-sticks', 'las2/1': 'las',
          'well-location/1': 'well-location', 'wavelet-text/1': 'wavelet', 'model-section-text/1': 'model-section',
          'seismic-section-text/1': 'seismic-section', 'time-depth-csv/1': 'time-depth', 'well-set/1': 'well-set',
-         'well-residual/1': 'residual'}
+         'well-residual/1': 'residual', 'segy/1': 'seismic-volume'}  # E123 SZ: rules 1.4.0, no segy/1 template
 STEPS = ('read', 'source', 'process', 'send', 'check')
 
 
@@ -36,7 +36,7 @@ def test_the_listed_pairs_are_these_49():
 def test_every_step_and_kind_is_listed_or_refused_with_a_sentence():
     doc = templates.pairs()
     refused = {(row['step'], templates.word(row['kind'])) for row in doc['refused']}
-    assert len(refused) == 21 and refused | LISTED == {(s, w) for s in STEPS for w in WORDS.values()} and not refused & LISTED
+    assert len(refused) == 26 and refused | LISTED == {(s, w) for s in STEPS for w in WORDS.values()} and not refused & LISTED
     for row in doc['refused']:
         said = row['sentence']
         assert said and said.endswith('.') and len(said) <= 200 and '/' not in said and said == templates.refusal(row['step'], row['kind'])
@@ -57,6 +57,8 @@ def test_the_words_and_rules_agree_with_the_packaged_procedure_rules():
     ('process', 'residual', 'Residual results have one fixed procedure shape; start from the reference procedure for residuals at wells instead.'),
     ('send', 'well-set', 'Well sets are chosen in Ophiolite; a procedure can use one as an input but cannot read, make or send one.'),
     ('check', 'mesh', 'There is no check template for mesh yet; check templates compare well tops and deviation surveys.'),
+    ('read', 'seismic-volume', 'There is no template for reading a seismic volume yet; start from the reference procedure Read a ZGY cube on your computer instead.'),
+    ('process', 'seismic-volume', 'Seismic volumes are not made by a procedure that processes versions; only a procedure that reads a file may write one.'),
 ])
 def test_the_refusal_sentences(step, word, sentence):
     assert templates.refusal(step, word) == sentence

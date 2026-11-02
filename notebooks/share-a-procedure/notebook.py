@@ -1,8 +1,8 @@
 # %% [markdown]
-# # Share a procedure with your project
-# Check a procedure and run it on your own computer, add it to your project privately, have a project administrator
+# # Share a tool with your project
+# Check a tool and run it on your own computer, add it to your project privately, have a project administrator
 # enable it for everyone, and run it as a colleague: they are asked once whether they trust code you wrote, and their
-# answer is recorded as theirs. Ophiolite never runs a procedure on its server; every run is on someone's computer.
+# answer is recorded as theirs. Ophiolite never runs a tool on its server; every run is on someone's computer.
 #
 # **Install once.** Put this notebook and the `requirements.txt` published beside it in an empty folder, then run:
 #
@@ -11,7 +11,7 @@
 #     pip install -r requirements.txt
 #     python -m ipykernel install --user --name ophiolite-gallery
 #
-# Open the notebook with the `ophiolite-gallery` kernel. Without `OPHIOLITE_URL` the procedure is checked and run on
+# Open the notebook with the `ophiolite-gallery` kernel. Without `OPHIOLITE_URL` the tool is checked and run on
 # your own computer and nothing is added anywhere. To work in your project, put the `configuration.json` from Connect →
 # Use Python in this folder and run `ophiolite login` here (or `ophiolite login --key-stdin` to paste a project access
 # key); then set `OPHIOLITE_URL` and `OPHIOLITE_PROJECT` to the address and project it names before you start Jupyter.
@@ -36,10 +36,10 @@ client = connect()
 other = colleague()
 work = Path(tempfile.mkdtemp(prefix='share-a-procedure-'))  # the procedure, its inputs and runs live outside this folder
 # %% [markdown]
-# ## The procedure
-# The SDK's sample procedure shifts formation tops by a fixed depth: a `procedure.json` that says what it reads, makes
+# ## The tool
+# The SDK's sample tool shifts formation tops by a fixed depth: a `procedure.json` that says what it reads, makes
 # and lets you set, and a `procedure.py` with the code. Each run of this notebook gives it a new name, so it is a new
-# procedure in your project.
+# tool in your project.
 # %%
 folder = work / 'procedure'
 shutil.copytree(Path(ophiolite.__file__).parent / 'contracts/procedures/v1/fixtures/bundles/depth-shift', folder,
@@ -91,14 +91,14 @@ else:
           'until an administrator enables it for everyone.')
 # %% [markdown]
 # ## Enable it for everyone
-# Only a project administrator enables a version. If you are not one, ask one to enable it in Settings → Procedures.
+# Only a project administrator enables a version. If you are not one, ask one to enable it in Settings → Tools.
 # %%
 if added:
     try:
         client.procedure_enable(added['digest'])
         print('Enabled for everyone in this project.')
     except OphioliteError as refused:
-        print(refused, '- ask a project administrator to enable it in Settings → Procedures.')
+        print(refused, '- ask a project administrator to enable it in Settings → Tools.')
 # %% [markdown]
 # ## Your colleague trusts it, once
 # Your colleague would run code you wrote on their own computer, so Ophiolite asks them first: who added it, when, and

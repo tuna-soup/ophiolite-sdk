@@ -1,7 +1,7 @@
 """E128 s4 (acceptance 7): from an installed wheel, outside this checkout, `ophiolite procedures run` runs a process
 procedure whose entry reads its input with ophiolite.readers, and its output is a literal written here
-(E128-readers-S4-COMMIT-STRATEGY.md S4-D8). `ENTRY` is the example of the user page "Read your procedure's inputs"
-(web/docs/src/content/docs/guides/read-your-procedures-inputs.md); tools/test_readers_page.py holds the two equal."""
+(E128-readers-S4-COMMIT-STRATEGY.md S4-D8). `ENTRY` is the example of the user page "Read your tool's inputs"
+(web/docs/src/content/docs/guides/read-your-tools-inputs.md); tools/test_readers_page.py holds the two equal."""
 import json
 import os
 from pathlib import Path

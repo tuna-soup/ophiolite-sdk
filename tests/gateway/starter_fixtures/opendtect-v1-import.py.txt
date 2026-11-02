@@ -1,0 +1,19 @@
+"""Starter pack ophiolite-synthetic/survey/starter: the OpendTect import.
+
+Places the pack's cubes and horizons in an existing OpendTect survey through odbind; logs and well paths are not
+imported by this version. Run it with the Python the OpendTect connector (ophiolite-opendtect) is installed in:
+
+    python import.py PACK --survey ROOT/NAME
+
+PACK is the folder holding starter.json and files/, with the pack's files at their paths."""
+import sys
+
+PACK = 'ophiolite-synthetic/survey/starter'
+FILES = {'seismic/Syn.sgy': {'kind': 'seismic-3d', 'object': 'Syn', 'declared': {'crs': 'EPSG:32631', 'z_domain': 'time'}}, 'seismic/Syn2.sgy': {'kind': 'seismic-3d', 'object': 'Syn2', 'declared': {'crs': 'EPSG:32631', 'z_domain': 'time'}}, 'horizons/Top.csv': {'kind': 'horizons', 'object': 'Top', 'declared': {'crs': 'EPSG:32631', 'xy_unit': 'm', 'z_meaning': 'time', 'z_unit': 'ms', 'positive': 'down'}}, 'wells/SYN-A-positions.csv': {'kind': 'wellbore-paths', 'object': 'SYN-A', 'declared': {'crs': 'EPSG:32631', 'xy_unit': 'm', 'depth_unit': 'm', 'tvdss_datum': 'MSL', 'md_reference': 'unknown'}}, 'wells/SYN-A.las': {'kind': 'wellbore-logs', 'object': 'SYN-A', 'declared': {}}, 'wells/SYN-B-positions.csv': {'kind': 'wellbore-paths', 'object': 'SYN-B', 'declared': {'crs': 'EPSG:32631', 'xy_unit': 'm', 'depth_unit': 'm', 'tvdss_datum': 'MSL', 'md_reference': 'unknown'}}}
+NOT_READ = [{'kind': 'wellbore-logs', 'name': 'SYN-B', 'reason': 'the well has no logs'}]
+
+
+if __name__ == '__main__':
+    try: from ophiolite_opendtect import starter_import
+    except ImportError: sys.exit('Run this import with the Python the OpendTect connector (ophiolite-opendtect) is installed in; nothing was placed.')
+    sys.exit(starter_import.main(sys.argv[1:], pack=PACK, files=FILES, not_read=NOT_READ))

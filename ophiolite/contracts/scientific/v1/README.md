@@ -92,3 +92,43 @@ OSDU schema. A future OSDU adapter must separately prove mappings, exact version
 permissions and recovery against the same fixtures and domain payload APIs.
 Breaking meaning/encoding changes require a new profile version and migration
 instructions. Independent implementers can run these tests without our server.
+
+## `ophiolite.verdict/1` (preview)
+
+`verdict.json`: a person's accepted or rejected on one exact result version, with a reason (required to reject, at
+most 2000 code points, kept as written, no NUL), what it was judged against (an outcome version or a check key), the
+earlier verdict of the same author on the same version it supersedes, and who gave it; the current verdict is the
+last link of each author's chain, never the latest timestamp. Fixtures for the record, the requests, the chains, the
+words and the id are in `fixtures/verdict/`; a deployment that does not record verdicts yet answers "Recording
+verdicts is not available on this deployment yet."
+
+## `ophiolite.behaviour-consent/1` (preview)
+
+`behaviour-consent.json`: one step of a person's consent that a record of their own work may be used for training or
+evaluation. Per person and purpose the steps form one chain ordered by `sequence`: a grant opens an interval and the
+next step closes it (a grant after a grant is a revision, a withdrawal closes without opening, so a later grant never
+covers the gap). A grant covers all five items (`own-actions`, `command-parameters`, `verdicts`, `published-checks`,
+`agent-plan-digests`), never data values; `instruction-text` is the one extra. The consent id is
+`consent-` + the first 32 hex digits of sha256(person, a newline, the canonical body without the id). Eligibility
+also needs the deployment's capture to be `by-consent`. Fixtures for the records, requests, transitions, intervals,
+settings, texts and words are in `fixtures/behaviour-consent/`.
+
+## `ophiolite.work-episodes/1` and `ophiolite.work-episode/1` (preview)
+
+`work-episodes.json` is the manifest of a folder of work episodes a model may learn from; `work-episode.json` is one
+episode, one line of the folder's `episodes.jsonl`. An episode is one person's or one agent's consecutive actions in one
+project, consecutive rows less than `window_seconds` apart (default 14400), each with its inputs, outputs, checks,
+outcomes and verdicts. `mode` chooses the branch: `shape` holds only digests, pseudonyms (`kind-` + 32 hex digits of
+sha256(salt, the kind, a newline, the id)) and words of closed sets; `values` also holds the values the data rights
+allow. The episode id is `episode-` + 32 hex digits of sha256 of the canonical JSON array
+`["work-episode/1", salt_id, project, actor id, first action id]`; the split (`split/1`) buckets sha256 of
+`["split/1", seed, episode_id]` (its first 8 hex digits modulo 1000) against the fractions per thousand. Digests and
+action ids link to the named record for anyone who can read the deployment: this is pseudonymisation, not anonymity.
+
+Rules JSON Schema does not express here, which a consumer checks: the fractions sum to 1000; `counts.episodes` is
+`values + shape`; an episode's `start` and `end` are its first and last row's `at`, its rows are ordered by
+(`at`, `action_id`) and consecutive rows are less than the manifest's `window_seconds` apart; every `final` entry names an
+output of the episode, once per outcome; every split follows `split/1`; a `shape` export holds shape episodes only.
+Fixtures for the source rows, joins, consent, segmentation, rights, pseudonyms, splits, the shape episodes and a
+manifest are in `fixtures/work-episodes/` (synthetic). A deployment that does not export yet answers "Exporting the
+trajectory of work is not available on this deployment yet."

@@ -1,4 +1,4 @@
-"""E112 s0: which step x kind pairs `ophiolite procedures new` can start (`ophiolite.procedure-template-pairs/1`).
+"""E112 s0: which step x kind pairs `ophiolite tools new` can start (`ophiolite.procedure-template-pairs/1`).
 
 The list lives beside the starts it describes (D1), independent of what the server accepts; `pairs()` checks it
 against the packaged procedure rules when it loads: every step x every kind in exactly one of listed and refused,
@@ -16,6 +16,8 @@ NAME = 'ophiolite.procedure-template-pairs/1'
 WORD = re.compile(r'^[a-z][a-z0-9-]{1,30}$')
 PROFILE = re.compile(r'[a-z0-9][a-z0-9.-]*/[0-9]+')
 DEFAULT = 'well-tops-csv/1'
+TOOL_COMMENT = ('# A tool. Ophiolite reads it as procedure.json and procedure.py, and its code imports procedure, the name every '
+                'release runs.')
 LISTS = {'read': 'read_source_kinds', 'source': 'read_source_kinds', 'process': 'process_kinds', 'send': 'send_kinds'}
 VERBS = {'read': 'Read {}', 'source': 'Read {} from a system', 'process': 'Make {}', 'send': 'Send {}', 'check': 'Check {}'}
 UNKNOWN = 'There is no kind called "{text}". Kinds: {words}.'
@@ -148,7 +150,8 @@ def _parts(step, profile, label, name):
         fill.update(extension=Path(written.filename).suffix, declared=repr(written.declared))
     if step in ('read', 'source'): fill['declared'] = repr(_written(profile, _sample(word)).declared)
     body = CHECKS[profile] if step == 'check' else f'process-{word}' if step == 'process' else step
-    files['procedure.py'] = Template((SKELETONS / f'{body}.py.tmpl').read_text(encoding='utf-8')).substitute(fill).encode()
+    docstring, rest = Template((SKELETONS / f'{body}.py.tmpl').read_text(encoding='utf-8')).substitute(fill).split('\n', 1)
+    files['procedure.py'] = f'{docstring}\n{TOOL_COMMENT}\n{rest}'.encode()  # E131 s1 (D5): the first comment names tools
     files['tests/test_procedure.py'] = Template((SKELETONS / f'test-{step}.py.tmpl').read_text(encoding='utf-8')).substitute(fill).encode()
     from .._version import __version__
     files['template.json'] = (json.dumps({'step': step, 'kind': profile, 'pairs_rules_version': pairs()['rules_version'], 'sdk_version': __version__},

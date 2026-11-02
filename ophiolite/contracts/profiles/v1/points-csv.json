@@ -19,6 +19,10 @@
     "text/csv"
   ],
   "normalized_profile": "ophiolite.point-set/1",
+  "normalized_profiles": [
+    "ophiolite.point-set/1",
+    "ophiolite.point-columns/1"
+  ],
   "context_schema": "ophiolite.typed-context/1",
   "representation_rules": {
     "artifact_kind_by_origin": {

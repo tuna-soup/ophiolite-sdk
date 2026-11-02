@@ -1,0 +1,345 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/scientific/v1/work-episodes.json",
+  "x-ophiolite": {
+    "id": "ophiolite.work-episodes/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "EpisodeCounts": {
+      "additionalProperties": false,
+      "properties": {
+        "episodes": {
+          "minimum": 0,
+          "title": "Episodes",
+          "type": "integer"
+        },
+        "values": {
+          "minimum": 0,
+          "title": "Values",
+          "type": "integer"
+        },
+        "shape": {
+          "minimum": 0,
+          "title": "Shape",
+          "type": "integer"
+        },
+        "rights_refused": {
+          "minimum": 0,
+          "title": "Rights Refused",
+          "type": "integer"
+        },
+        "no_consent": {
+          "minimum": 0,
+          "title": "No Consent",
+          "type": "integer"
+        },
+        "unreadable": {
+          "minimum": 0,
+          "title": "Unreadable",
+          "type": "integer"
+        },
+        "skipped": {
+          "description": "Rows without a record (before E93), never part of an episode",
+          "minimum": 0,
+          "title": "Skipped",
+          "type": "integer"
+        },
+        "scrubbed_fields": {
+          "minimum": 0,
+          "title": "Scrubbed Fields",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "episodes",
+        "values",
+        "shape",
+        "rights_refused",
+        "no_consent",
+        "unreadable",
+        "skipped",
+        "scrubbed_fields"
+      ],
+      "title": "EpisodeCounts",
+      "type": "object"
+    },
+    "EpisodeFractions": {
+      "additionalProperties": false,
+      "properties": {
+        "train": {
+          "maximum": 1000,
+          "minimum": 0,
+          "title": "Train",
+          "type": "integer"
+        },
+        "validation": {
+          "maximum": 1000,
+          "minimum": 0,
+          "title": "Validation",
+          "type": "integer"
+        },
+        "test": {
+          "maximum": 1000,
+          "minimum": 0,
+          "title": "Test",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "train",
+        "validation",
+        "test"
+      ],
+      "title": "EpisodeFractions",
+      "type": "object"
+    },
+    "EpisodeScope": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "own",
+          "title": "Kind",
+          "type": "string"
+        },
+        "person": {
+          "pattern": "^person-[0-9a-f]{32}$",
+          "title": "Person",
+          "type": "string"
+        },
+        "project": {
+          "pattern": "^project-[0-9a-f]{32}$",
+          "title": "Project",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "person",
+        "project"
+      ],
+      "title": "EpisodeScope",
+      "type": "object"
+    },
+    "ReliedBasis": {
+      "additionalProperties": false,
+      "properties": {
+        "basis": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Basis",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "basis",
+        "version",
+        "sha256"
+      ],
+      "title": "ReliedBasis",
+      "type": "object"
+    },
+    "ReliedLicence": {
+      "additionalProperties": false,
+      "properties": {
+        "spdx": {
+          "enum": [
+            "CC0-1.0",
+            "CC-BY-4.0",
+            "PDDL-1.0",
+            "ODC-By-1.0"
+          ],
+          "title": "Spdx",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "spdx",
+        "sha256"
+      ],
+      "title": "ReliedLicence",
+      "type": "object"
+    },
+    "ReliedText": {
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "minimum": 0,
+          "title": "Version",
+          "type": "integer"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "sha256"
+      ],
+      "title": "ReliedText",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "The folder's manifest (`trajectories.json`).",
+  "properties": {
+    "schema": {
+      "const": "ophiolite.work-episodes/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "deployment_id": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Deployment Id",
+      "type": "string"
+    },
+    "release": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Release",
+      "type": "string"
+    },
+    "sdk_version": {
+      "anyOf": [
+        {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Sdk Version"
+    },
+    "capture": {
+      "const": "by-consent",
+      "title": "Capture",
+      "type": "string"
+    },
+    "purpose": {
+      "enum": [
+        "training",
+        "evaluation"
+      ],
+      "title": "Purpose",
+      "type": "string"
+    },
+    "scope": {
+      "$ref": "#/$defs/EpisodeScope"
+    },
+    "mode": {
+      "enum": [
+        "auto",
+        "shape"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "window_seconds": {
+      "maximum": 86400,
+      "minimum": 60,
+      "title": "Window Seconds",
+      "type": "integer"
+    },
+    "until": {
+      "minimum": 0,
+      "title": "Until",
+      "type": "integer"
+    },
+    "consent_texts": {
+      "items": {
+        "$ref": "#/$defs/ReliedText"
+      },
+      "title": "Consent Texts",
+      "type": "array"
+    },
+    "rights_bases": {
+      "items": {
+        "$ref": "#/$defs/ReliedBasis"
+      },
+      "title": "Rights Bases",
+      "type": "array"
+    },
+    "licences": {
+      "items": {
+        "$ref": "#/$defs/ReliedLicence"
+      },
+      "title": "Licences",
+      "type": "array"
+    },
+    "salt_id": {
+      "pattern": "^salt-[0-9a-f]{16}$",
+      "title": "Salt Id",
+      "type": "string"
+    },
+    "linkage": {
+      "const": "Pseudonyms in this folder can be linked to the named record by anyone who can read the deployment.",
+      "title": "Linkage",
+      "type": "string"
+    },
+    "seed": {
+      "minimum": 0,
+      "title": "Seed",
+      "type": "integer"
+    },
+    "fractions": {
+      "$ref": "#/$defs/EpisodeFractions"
+    },
+    "split_rule": {
+      "const": "split/1",
+      "title": "Split Rule",
+      "type": "string"
+    },
+    "counts": {
+      "$ref": "#/$defs/EpisodeCounts"
+    },
+    "exported_at": {
+      "title": "Exported At",
+      "type": "number"
+    }
+  },
+  "required": [
+    "schema",
+    "deployment_id",
+    "release",
+    "sdk_version",
+    "capture",
+    "purpose",
+    "scope",
+    "mode",
+    "window_seconds",
+    "until",
+    "consent_texts",
+    "rights_bases",
+    "licences",
+    "salt_id",
+    "linkage",
+    "seed",
+    "fractions",
+    "split_rule",
+    "counts",
+    "exported_at"
+  ],
+  "title": "WorkEpisodes",
+  "type": "object"
+}

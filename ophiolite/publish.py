@@ -119,7 +119,7 @@ from .models.generated import ApplicationCurve
 READ_OPERATIONS={'list','get','read','original','download','options','inspect','result-list','result-preview','result-download','result-history','info','members'}
 WRITE_OPERATIONS={'configure','start','publish','upload','share'}
 GROUP_OPERATIONS={'list','diff'}  # E8: result groups and diffs are read operations
-AI_OPERATIONS={'ai-use':{'get','grant','corpus'},'search':{'query'},'publications':{'derive','info','share','transform-preview','transform'},  # E14; E30b publications; E64 changes
+AI_OPERATIONS={'ai-use':{'get','grant','corpus','self-grant'},'search':{'query'},'publications':{'derive','info','share','transform-preview','transform'},  # E14; E30b publications; E64 changes
                'rights':{'get','attach','renew'}}  # E35a: the rights to use data
 ENTITY_OPERATIONS={'entities':{'list','get','assets','associations','lineage','create','identify','share','associate','dissociate','extent'}}  # E20; E29 extent; H3 associations
 SOURCE_OPERATIONS={'sources':{'list','export','discover','export-file'}}  # E50a: the source reads (not READ_OPERATIONS, which would also allow applications/export); E59: a storage folder; E58b: export-file
@@ -128,8 +128,10 @@ RESULT_OPERATIONS={'results':{'story','what-changed','dependents','remake-run','
 CHECK_OPERATIONS={'checks':{'publish','list','compare','publishers'}}  # E96: checks against a reference
 PROCEDURE_OPERATIONS={'procedures':{'register','list','get','bundle','enable','withdraw','trust'},  # E105b: the project catalogue
                       'procedure-runs':{'report','get','prepare-again'}}  # E106: a reported run and running a result again
-OUTCOME_OPERATIONS={'outcomes':{'declare','revise','enable','disable','withdraw','list','get','states','evaluate','deliver-as','claims'}}  # E120: what a project accepts and where it delivers; s1: a result's states; s3: Deliver as and its claims
-REPORT_OPERATIONS={'activity':{'report','deliver','deliveries'}}  # E70b: a confirmed `get` reports which version this holder received; E109: a delivery's outcome and the deliveries page
+OUTCOME_OPERATIONS={'outcomes':{'declare','revise','enable','disable','withdraw','list','get','states','evaluate','deliver-as','claims'},  # E120: what a project accepts and where it delivers; s1: a result's states; s3: Deliver as and its claims
+                    'verdicts':{'record','list'},  # E132: a person's accepted or rejected on one result version, with a reason
+                    'stages':{'get','transition'}}  # E132 s2: withdrawing a result version (which records the withdrawer's rejection)
+REPORT_OPERATIONS={'activity':{'report','deliver','deliveries','trajectories'}}  # E70b: a confirmed `get` reports which version this holder received; E109: a delivery's outcome and the deliveries page; E134: your own work as episodes
 IMPORT_OPERATIONS={'well-imports':{'preview','start','step','status','list','cancel'},  # E42a: import a copy of an approved well table
                    'upload-runs':{'start','file','check','file-parts','status','list','cancel','associate','decide','share','sample','convert','convert-original','convert-output','basis'},  # E55: a folder upload; E85: check; E91: the sample; E107a: read on your computer (C4: the original kept); E123 S3b: basis
                    'table-imports':{'read','preview','start','step','status','pause','resume','cancel','list'},  # E87: a table becomes typed data
@@ -675,7 +677,7 @@ def _parent(value):
 
 
 SOURCE_SYSTEM='A send names an application source: application:<client id>.'  # E122 s4a (D1), the server's words
-SOURCE_WITH_RUN="A procedure's output does not name an application source."
+SOURCE_WITH_RUN="A tool's output does not name an application source."
 _SOURCE_SUFFIX=re.compile(r'^[a-z0-9._-]{1,128}$')
 
 

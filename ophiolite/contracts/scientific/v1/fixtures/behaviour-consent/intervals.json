@@ -1,0 +1,49 @@
+{
+ "subject": "behaviour_consent.includable (acceptance 4, D4): whether an item of a person's work at an instant may be included for a purpose. Rows are short as in transitions.json; t1 = 1793275200.0, t2 = t1+60, t3 = t1+120, t4 = t1+180. Intervals are half-open [at, the next row's at); a zero-length interval covers nothing",
+ "chains": {
+  "withdrawn-then-regranted": [
+   {"person": "u-anna", "purpose": "training", "sequence": 1, "state": "granted", "extras": [], "at": 1793275200.0},
+   {"person": "u-anna", "purpose": "training", "sequence": 2, "state": "withdrawn", "extras": [], "at": 1793275320.0},
+   {"person": "u-anna", "purpose": "training", "sequence": 3, "state": "granted", "extras": [], "at": 1793275380.0}],
+  "a-revision-removes-the-extra": [
+   {"person": "u-anna", "purpose": "training", "sequence": 1, "state": "granted", "extras": ["instruction-text"], "at": 1793275200.0},
+   {"person": "u-anna", "purpose": "training", "sequence": 2, "state": "granted", "extras": [], "at": 1793275260.0}],
+  "all-at-one-instant": [
+   {"person": "u-anna", "purpose": "training", "sequence": 1, "state": "granted", "extras": [], "at": 1793275200.0},
+   {"person": "u-anna", "purpose": "training", "sequence": 2, "state": "withdrawn", "extras": [], "at": 1793275200.0},
+   {"person": "u-anna", "purpose": "training", "sequence": 3, "state": "granted", "extras": [], "at": 1793275200.0}],
+  "granted-then-withdrawn-at-one-instant": [
+   {"person": "u-anna", "purpose": "training", "sequence": 1, "state": "granted", "extras": [], "at": 1793275200.0},
+   {"person": "u-anna", "purpose": "training", "sequence": 2, "state": "withdrawn", "extras": [], "at": 1793275200.0}],
+  "two-people-overlapping": [
+   {"person": "u-anna", "purpose": "training", "sequence": 1, "state": "granted", "extras": [], "at": 1793275200.0},
+   {"person": "u-anna", "purpose": "training", "sequence": 2, "state": "withdrawn", "extras": [], "at": 1793275320.0},
+   {"person": "u-bob", "purpose": "training", "sequence": 1, "state": "granted", "extras": [], "at": 1793275260.0},
+   {"person": "u-bob", "purpose": "training", "sequence": 2, "state": "withdrawn", "extras": [], "at": 1793275380.0}]
+ },
+ "cases": [
+  {"chain": "withdrawn-then-regranted", "person": "u-anna", "purpose": "training", "capture": "by-consent", "item": "own-actions", "instant": 1793275200.0, "expect": true},
+  {"chain": "withdrawn-then-regranted", "person": "u-anna", "purpose": "training", "capture": "by-consent", "item": "own-actions", "instant": 1793275260.0, "expect": true},
+  {"chain": "withdrawn-then-regranted", "person": "u-anna", "purpose": "training", "capture": "by-consent", "item": "own-actions", "instant": 1793275320.0, "expect": false},
+  {"chain": "withdrawn-then-regranted", "person": "u-anna", "purpose": "training", "capture": "by-consent", "item": "own-actions", "instant": 1793275350.0, "expect": false},
+  {"chain": "withdrawn-then-regranted", "person": "u-anna", "purpose": "training", "capture": "by-consent", "item": "own-actions", "instant": 1793275380.0, "expect": true},
+  {"chain": "withdrawn-then-regranted", "person": "u-anna", "purpose": "training", "capture": "by-consent", "item": "own-actions", "instant": 1793275199.0, "expect": false},
+  {"chain": "withdrawn-then-regranted", "person": "u-anna", "purpose": "training", "capture": "by-consent", "item": "instruction-text", "instant": 1793275260.0, "expect": false},
+  {"chain": "withdrawn-then-regranted", "person": "u-anna", "purpose": "training", "capture": "by-consent", "item": "data-values", "instant": 1793275260.0, "expect": false},
+  {"chain": "withdrawn-then-regranted", "person": "u-anna", "purpose": "training", "capture": "off", "item": "own-actions", "instant": 1793275260.0, "expect": false},
+  {"chain": "withdrawn-then-regranted", "person": "u-anna", "purpose": "training", "capture": "off", "item": "own-actions", "instant": 1793275380.0, "expect": false},
+  {"chain": "withdrawn-then-regranted", "person": "u-anna", "purpose": "evaluation", "capture": "by-consent", "item": "own-actions", "instant": 1793275260.0, "expect": false},
+  {"chain": "a-revision-removes-the-extra", "person": "u-anna", "purpose": "training", "capture": "by-consent", "item": "instruction-text", "instant": 1793275230.0, "expect": true},
+  {"chain": "a-revision-removes-the-extra", "person": "u-anna", "purpose": "training", "capture": "by-consent", "item": "instruction-text", "instant": 1793275260.0, "expect": false},
+  {"chain": "a-revision-removes-the-extra", "person": "u-anna", "purpose": "training", "capture": "by-consent", "item": "instruction-text", "instant": 1793275300.0, "expect": false},
+  {"chain": "a-revision-removes-the-extra", "person": "u-anna", "purpose": "training", "capture": "by-consent", "item": "own-actions", "instant": 1793275259.0, "expect": true},
+  {"chain": "a-revision-removes-the-extra", "person": "u-anna", "purpose": "training", "capture": "by-consent", "item": "own-actions", "instant": 1793275260.0, "expect": true},
+  {"chain": "all-at-one-instant", "person": "u-anna", "purpose": "training", "capture": "by-consent", "item": "own-actions", "instant": 1793275200.0, "expect": true},
+  {"chain": "granted-then-withdrawn-at-one-instant", "person": "u-anna", "purpose": "training", "capture": "by-consent", "item": "own-actions", "instant": 1793275200.0, "expect": false},
+  {"chain": "two-people-overlapping", "person": "u-anna", "purpose": "training", "capture": "by-consent", "item": "own-actions", "instant": 1793275230.0, "expect": true},
+  {"chain": "two-people-overlapping", "person": "u-anna", "purpose": "training", "capture": "by-consent", "item": "own-actions", "instant": 1793275350.0, "expect": false},
+  {"chain": "two-people-overlapping", "person": "u-bob", "purpose": "training", "capture": "by-consent", "item": "own-actions", "instant": 1793275230.0, "expect": false},
+  {"chain": "two-people-overlapping", "person": "u-bob", "purpose": "training", "capture": "by-consent", "item": "own-actions", "instant": 1793275350.0, "expect": true},
+  {"chain": "two-people-overlapping", "person": "u-carl", "purpose": "training", "capture": "by-consent", "item": "own-actions", "instant": 1793275300.0, "expect": false}
+ ]
+}

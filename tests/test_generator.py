@@ -41,8 +41,10 @@ def test_declared_keyword_constraints(schema,good,bad):
 def test_server_checked_value_rules_are_accepted_and_left_to_the_server():
     model=generated({'type':'object','maxProperties':3,'if':{'required':['kind']},'then':{'required':['size']}})  # E54: the server checks these
     assert model.model_validate({'value':{'kind':'x'}}).value.kind=='x'  # not required here: the then-rule is the server's
+    listed=generated({'type':'array','items':{'type':'string'},'uniqueItems':True})  # E133: the server refuses a repeated entry
+    assert listed.model_validate({'value':['a','a']}).value==['a','a']
 
-@pytest.mark.parametrize('key,value',[(k,{}) for k in ('allOf','not','patternProperties','dependentSchemas','format')]+[('uniqueItems',True)])
+@pytest.mark.parametrize('key,value',[(k,{}) for k in ('allOf','not','patternProperties','dependentSchemas','format')])
 def test_unsupported_keywords_refuse(key,value):
     with pytest.raises(ValueError,match='unsupported|Unsupported'):
         generated({'type':'object',key:value})
@@ -64,6 +66,23 @@ def test_default_ref_and_discriminated_union():
     exec(generator.Generator().generate(docs),module.__dict__)
     assert module.Probe.model_validate({'choice':{'kind':'a'}}).count==2
     with pytest.raises(ValidationError):module.Probe.model_validate({'choice':{'kind':'c'}})
+
+def test_root_discriminated_union_is_an_alias():  # E134: work-episode/1 is one published union of two objects
+    docs={'p.json':{'title':'Probe','oneOf':[{'$ref':'#/$defs/A'},{'$ref':'#/$defs/B'}],'discriminator':{'propertyName':'kind'},
+        '$defs':{'A':{'type':'object','required':['kind','a'],'properties':{'kind':{'const':'a'},'a':{'type':'integer'}}},
+                 'B':{'type':'object','required':['kind'],'properties':{'kind':{'const':'b'}}}}}}
+    import types
+    source=generator.Generator().generate(docs)
+    assert "Probe = Annotated[A | B, Field(discriminator='kind')]" in source and 'class Probe' not in source
+    module=types.ModuleType('generated_root_union');sys.modules[module.__name__]=module
+    exec(source,module.__dict__)
+    from pydantic import TypeAdapter
+    adapter=TypeAdapter(module.Probe)
+    assert type(adapter.validate_python({'kind':'a','a':1})).__name__=='A' and type(adapter.validate_python({'kind':'b'})).__name__=='B'
+    for bad in ({'kind':'c'},{'kind':'a'},{'a':1}):
+        with pytest.raises(ValidationError):adapter.validate_python(bad)
+    with pytest.raises(ValueError,match='Non-object named model'):  # a typed non-object root still refuses
+        generator.Generator().generate({'p':{'title':'Probe','oneOf':[{'type':'string'}],'type':'string'}})
 
 @pytest.mark.parametrize('name',['123',''])
 def test_invalid_model_name(name):

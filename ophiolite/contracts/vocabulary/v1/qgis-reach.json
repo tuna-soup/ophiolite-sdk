@@ -137,6 +137,22 @@
           ]
         },
         {
+          "profile": "petrel-well-tops/1",
+          "noun": "Petrel well tops",
+          "asset_kind": "well-tops",
+          "routes": [
+            {
+              "route": "features",
+              "state": "not-yet",
+              "transport": null,
+              "asset_kinds": [
+                "well-tops"
+              ],
+              "slice": null
+            }
+          ]
+        },
+        {
           "profile": "deviation-csv/1",
           "noun": "deviation surveys",
           "asset_kind": "trajectory",
@@ -263,12 +279,29 @@
           "routes": [
             {
               "route": "features",
-              "state": "not-yet",
-              "transport": null,
+              "state": "open",
+              "transport": "ogc-api-features",
               "asset_kinds": [
                 "polyline-set"
               ],
-              "slice": null
+              "collections": [
+                "lines"
+              ],
+              "layer": "Lines",
+              "slice": null,
+              "evidence": "integration:docs/verification/E123-s1fb-qgis-petrel-sticks.json (QGIS 4.2.2 on Linux adds the sticks by the plug-in and by OGC API - Features)",
+              "client": {
+                "name": "QGIS",
+                "versions": [
+                  "4.2.2"
+                ],
+                "platforms": [
+                  "linux"
+                ],
+                "limits": [
+                  "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
+                ]
+              }
             }
           ]
         },
@@ -668,6 +701,22 @@
               "slice": null
             }
           ]
+        },
+        {
+          "profile": "segy-line/1",
+          "noun": "2D seismic lines",
+          "asset_kind": "seismic-line",
+          "routes": [
+            {
+              "route": "features",
+              "state": "not-yet",
+              "transport": null,
+              "asset_kinds": [
+                "seismic-line"
+              ],
+              "slice": null
+            }
+          ]
         }
       ]
     },
@@ -748,6 +797,11 @@
     },
     {
       "asset_kind": "regular-grid-surface",
+      "mode": "get",
+      "curves_required": false
+    },
+    {
+      "asset_kind": "seismic-line",
       "mode": "get",
       "curves_required": false
     },

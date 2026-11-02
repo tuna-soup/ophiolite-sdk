@@ -9,7 +9,7 @@
       "status": "deferred",
       "opens_with": "E123 SZ",
       "evidence": {
-        "reason": "Deferred on 22 Oct 2026 for three reasons. The real-data fixture planned for Petrel exports publishes its seismic as SEG-Y, not ZGY. The closure of pyzgy 0.1.1 includes segyio, which is LGPL-3.0, so the library can only be an optional extra outside the image (gate Z0). How a ZGY cube lands on seismic-volume is not decided (K5, gate Z2). A rights-recorded test cube is gate Z1."
+        "reason": "Read on your computer with Read a ZGY cube on your computer (Technical details: SDK procedure ophiolite/reference/read-zgy, extra ophiolite[zgy]); the server keeps the SEG-Y it writes. The server never reads ZGY: the closure of pyzgy 0.1.1 includes segyio, which is LGPL-3.0, so the library stays an optional extra outside the image."
       }
     }
   ]

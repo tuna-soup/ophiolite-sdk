@@ -48,13 +48,14 @@ def test_an_agent_proposes_an_upload_start_but_never_one_of_its_covered_steps():
 
 
 ONLY = ('Agents change application configurations, runs, publications, recipients, runner jobs, recalculations, procedure runs, '
-        'deliveries as an outcome and trust in a procedure version only.')
+        'deliveries as an outcome, trust in a procedure version and verdicts on a result only.')  # E132 s3
 
 
 @pytest.mark.parametrize('operation, request_', [
     ('outcomes/deliver-as', {'outcome_id': 'o-1', 'asset_id': 'a', 'revision': 'r', 'send': {'procedure_digest': 'd' * 64, 'label': 'Team database'},
                              'command_id': 'c-1'}),
-    ('procedures/trust', {'command_id': 'trust-1', 'digest': 'd' * 64})])
+    ('procedures/trust', {'command_id': 'trust-1', 'digest': 'd' * 64}),
+    ('verdicts/record', {'asset_id': 'a', 'revision': 'r', 'verdict': 'rejected', 'reason': 'tops differ', 'command_id': 'v-1'})])  # E132 s3
 def test_an_agent_proposes_a_delivery_as_an_outcome_and_trust_in_a_version(operation, request_):
     """E111 s4b t1 (R4-10). Mutation: drop the operation from CHANGES → refused before sending."""
     seen = []
@@ -64,6 +65,18 @@ def test_an_agent_proposes_a_delivery_as_an_outcome_and_trust_in_a_version(opera
     agent = AgentClient('https://x.example', 'p', 'oph_agent_test', http=httpx.Client(transport=httpx.MockTransport(handler)))
     assert agent.propose(operation, request_, 'Deliver or trust') == {'hash': 'h' * 64, 'state': 'pending'}
     assert seen == [('/api/v1/projects/p/agents/propose', {'project_id': 'p', 'operation': operation, 'request': {'project_id': 'p', **request_}, 'summary': 'Deliver or trust'})]
+
+
+def test_an_agent_executes_a_verdict_with_its_plan_and_evidence_and_the_body_unchanged():
+    """E132 s3 (F3): execute sends the plan and the evidence it was approved with. Mutation: no evidence header → red."""
+    seen = []
+    def handler(request):
+        seen.append((request.url.path, request.headers.get('X-Ophiolite-Plan'), request.headers.get('X-Ophiolite-Evidence'), json.loads(request.content)))
+        return httpx.Response(200, json={'record': {'verdict_id': 'v'}})
+    agent = AgentClient('https://x.example', 'p', 'oph_agent_test', http=httpx.Client(transport=httpx.MockTransport(handler)))
+    request_ = {'asset_id': 'a', 'revision': 'r', 'verdict': 'accepted', 'command_id': 'v-1'}
+    assert agent.execute('verdicts/record', request_, 'h' * 64, 'ev_1') == {'record': {'verdict_id': 'v'}}
+    assert seen == [('/api/v1/projects/p/verdicts/record', 'h' * 64, 'ev_1', {'project_id': 'p', **request_})]
 
 
 def test_an_operation_agents_do_not_change_is_refused_before_sending_in_the_listed_words():

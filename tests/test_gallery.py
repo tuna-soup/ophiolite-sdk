@@ -215,7 +215,7 @@ def test_run_it_again_makes_the_same_shifted_tops_and_refuses_a_changed_procedur
     text = run('run-it-again', tmp_path, monkeypatch, check="assert first.again == line and again['result']['run']['outputs'] == first['run']['outputs']")
     assert 'First run: [1003.0, 1202.5]' in text and 'Run again: [1003.0, 1202.5]' in text
     assert "procedures.run('…/shift-tops', new_output, inputs={'data': ['…/tops.csv']}" in text and "settings=['shift=2.5'], expected_digest='" in text
-    assert "Refused: Not run: the procedure's files changed after they were checked; nothing ran." in text  # mutation: no expected_digest
+    assert "Refused: Not run: the tool's files changed after they were checked; nothing ran." in text  # mutation: no expected_digest; E131 s2: tool
 
 
 def test_who_has_access_until_when_reads_the_last_days_and_who_has_access_synthetic(tmp_path, monkeypatch):
@@ -242,6 +242,7 @@ def test_a_spreadsheet_and_a_database_joined_joins_on_the_well_name_and_sends_no
     assert 'Hydreco: mean porosity 25.00 %' in text and 'Wintershall Noordzee: mean porosity 19.75 %' in text  # -888 left out of the mean
 
 
+PACKED = {'open-a-starter-pack'}  # E129 (e): its canonical script is ophiolite/templates/starter-pack/<slug>.py
 ADAPTED = {'petrophysical-calculations': '05 - Petrophysical Calculations', 'working-with-lasio': '07 - Working With LASIO',  # E126b: slug -> upstream title
            'csv-file-to-las-file': '22 - CSV File to LAS File', 'well-paths-with-wellpathpy': '31 - Creating Well Paths with wellpathpy'}
 SOURCE = {'author': 'Andy McDonald', 'licence': 'MIT', 'url': 'https://github.com/andymcdgeo/Petrophysics-Python-Series',
@@ -314,17 +315,21 @@ def test_the_volve_fetch_refuses_a_changed_file_and_an_unreachable_upstream_befo
 
 
 def test_every_entry_is_listed_built_and_described():
-    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'grids-and-gis-files', 'how-was-this-made', 'open-it-here', 'a-spreadsheet-becomes-wells-and-tops', 'layers-for-a-gis', 'well-logs-in-a-bucket', 'share-a-procedure', 'who-has-access-until-when', 'where-are-my-wells', 'a-spreadsheet-and-a-database-joined', 'wells-from-sql-server-and-oracle', 'public-repository-to-map', 'petrophysical-calculations', 'working-with-lasio', 'csv-file-to-las-file', 'well-paths-with-wellpathpy', 'start-a-procedure-from-a-template', 'a-recipe-runs-again', 'run-it-again']
+    assert GALLERY['schema'] == 'ophiolite.notebook-gallery/1' and SLUGS == ['read-a-well-log', 'shale-volume-from-gamma-ray', 'make-a-wavelet', 'make-a-wedge-model', 'large-files', 'a-well-folder-in-one-report', 'time-depth-table', 'grids-and-gis-files', 'how-was-this-made', 'open-it-here', 'a-spreadsheet-becomes-wells-and-tops', 'layers-for-a-gis', 'well-logs-in-a-bucket', 'share-a-procedure', 'who-has-access-until-when', 'where-are-my-wells', 'a-spreadsheet-and-a-database-joined', 'wells-from-sql-server-and-oracle', 'public-repository-to-map', 'petrophysical-calculations', 'working-with-lasio', 'csv-file-to-las-file', 'well-paths-with-wellpathpy', 'start-a-procedure-from-a-template', 'a-recipe-runs-again', 'run-it-again', 'open-a-starter-pack']
     for entry in GALLERY['notebooks']:
         adapted = {'attribution', 'data_terms', 'minimum_sdk'} if entry['slug'] in ADAPTED else set()  # E126b (D3)
-        assert set(entry) == {'slug', 'title', 'sentence', 'modes', 'data'} | adapted and entry['modes'] == ['synthetic', 'live']
+        packed = entry['slug'] in PACKED  # E129 (e) D6: a pack notebook reads a downloaded starter pack, never a project
+        assert set(entry) == {'slug', 'title', 'sentence', 'modes', 'data'} | adapted and entry['modes'] == (['pack'] if packed else ['synthetic', 'live'])
         if adapted:
             assert entry['attribution'] == dict(SOURCE, title=ADAPTED[entry['slug']]) and 'Equinor and the Volve licence partners' in entry['data_terms']
             assert entry['minimum_sdk'] == 'The first Ophiolite SDK release after 2026.10.96 (it adds the lasio and DataFrame adapters); requirements.txt installs it.'
         script = (ROOT / 'notebooks' / entry['slug'] / 'notebook.py').read_text()
         assert script.startswith('# %% [markdown]\n# # ' + entry['title'] + '\n')
         assert 'pip install -r requirements.txt' in script and 'python -m ipykernel install --user' in script  # install first
-        assert 'from ophiolite.gallery import connect' in script and 'sys.path' not in script and 'support' not in script
+        assert 'from ophiolite.gallery import ' + ('pack' if packed else 'connect') in script and 'sys.path' not in script and 'support' not in script
+        if packed:  # D2: the packaged script is canonical, the gallery's a byte copy; segyio comes from the pack extra
+            assert script == (ROOT / 'ophiolite/templates/starter-pack' / (entry['slug'] + '.py')).read_text() and 'from ophiolite.gallery import connect' not in script
+            assert '#     pip install "ophiolite[pack]"\n' in script and 'segyio (LGPL-3.0)' in script
     subprocess.run([sys.executable, str(ROOT / 'tools/build_notebook.py'), '--check'], check=True, capture_output=True, text=True)
 
 
@@ -357,6 +362,11 @@ def test_a_hand_edit_an_unbuilt_entry_and_an_unlisted_folder_are_refused(tmp_pat
     listing['notebooks'][0] = dict(listing['notebooks'][0], attribution={'title': '05'}, data_terms='T', minimum_sdk='E126a')
     (copy / 'notebooks/gallery.json').write_text(json.dumps(listing))
     assert 'The gallery entry read-a-well-log needs attribution with author, commit, licence, title, url' in check(copy).stderr
+    shutil.copy(ROOT / 'notebooks/gallery.json', copy / 'notebooks/gallery.json')
+    assert check(copy).returncode == 0
+    gallery_copy = copy / 'notebooks/open-a-starter-pack/notebook.py'  # E129 (e) D2: a copy differing from the packaged script
+    gallery_copy.write_text(gallery_copy.read_text().replace('Open a starter pack', 'Open a pack'))
+    assert 'notebooks/open-a-starter-pack/notebook.py differs from ophiolite/templates/starter-pack/open-a-starter-pack.py' in check(copy).stderr
 
 
 def test_notebooks_ship_in_neither_artifact_and_the_gallery_module_ships_in_the_wheel():

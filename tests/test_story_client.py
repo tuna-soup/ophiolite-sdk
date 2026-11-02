@@ -12,6 +12,7 @@ import pytest
 from ophiolite import cli, story
 from ophiolite.entities import EntityClient
 from ophiolite.errors import Refused
+from ophiolite.outcomes import OutcomeClient
 from ophiolite.publish import operation_path
 
 FIX = Path(__file__).parent / 'fixtures/story'
@@ -20,7 +21,7 @@ LINES = (FIX / 'story-lines.txt').read_text().splitlines()
 R = 'a' * 64
 
 
-class Recorded(EntityClient):
+class Recorded(EntityClient, OutcomeClient):
     """The hand-written methods over a fake `_post`: every call is recorded, every answer is the one given."""
     def __init__(self, answers):
         self.answers, self.calls = answers, []
@@ -84,6 +85,54 @@ def test_a_long_story_names_where_to_continue_and_the_next_page():
     assert story.lines(page)[-3:] == [story.LONG, '  Porosity HON-GT-01, version 3', 'More on the next page.']
 
 
+SEND = json.loads((FIX / 'story-page-send.json').read_text())
+SEND_LINES = (FIX / 'story-lines-send.txt').read_text().splitlines()
+UUID = '3f2b9c1e-7d4a-4f0e-9b1c-2a5d8e6f7a90'
+UP = {'asset_id': 'a-up', 'revision': R, 'kind': 'upload', 'name': 'FRB-07 tops', 'version': 1, 'file': 'tops.csv'}
+SENT = {'asset_id': 'a-sent', 'revision': R, 'kind': 'version', 'name': 'SAP-10 tops', 'version': 1, 'file': None}
+MAP = {'asset_id': 'a-map', 'revision': R, 'kind': 'map', 'name': 'Top Chalk', 'version': 2, 'file': None}
+REF = {'asset_id': None, 'revision': None, 'kind': 'reference', 'name': 'LAS', 'version': None, 'file': None}
+BASES = [  # (based_on, based_on_hidden, the sentence): one, two, three-plus, hidden, each kind, null fields (strategy D2)
+    ([UP], None, 'Based on the upload tops.csv (FRB-07 tops, version 1).'),
+    ([SENT], None, 'Based on SAP-10 tops, version 1.'),
+    ([UP, SENT], None, 'Based on the upload tops.csv (FRB-07 tops, version 1) and SAP-10 tops, version 1.'),
+    ([MAP, REF, UP], None, 'Based on the map Top Chalk, version 2, the reference LAS and 1 more.'),
+    ([SENT, MAP, REF, UP], None, 'Based on SAP-10 tops, version 1, the map Top Chalk, version 2 and 2 more.'),
+    ([SENT], True, 'Based on SAP-10 tops, version 1 and other inputs you cannot open.'),
+    ([SENT, MAP, REF], True, 'Based on SAP-10 tops, version 1, the map Top Chalk, version 2, 1 more and other inputs you cannot open.'),
+    (None, True, 'Based on inputs you cannot open.'),
+    ([{**SENT, 'name': None, 'version': None}], None, 'Based on an unnamed item.'),
+    ([{**UP, 'file': None}], None, 'Based on the upload FRB-07 tops, version 1.'),
+    ([{**SENT, 'name': 'Zeta sentinel tops'}], None, 'Based on Zeta sentinel tops, version 1.'),
+    ([{**UP, 'name': UUID, 'file': UUID + '.csv'}], None, 'Based on the upload an unnamed item, version 1.'),
+    ([{**UP, 'name': '9e' * 32, 'file': '9e' * 32 + '.csv'}], None, 'Based on the upload an unnamed item, version 1.'),
+    ([{**UP, 'name': '/data/wells/FRB-07 tops', 'file': '/data/wells/FRB-07/tops.csv'}], None, 'Based on the upload an unnamed item, version 1.'),
+]
+
+
+@pytest.mark.parametrize('bases,hidden,sentence', BASES)
+def test_a_declared_version_says_what_it_is_based_on(bases, hidden, sentence):
+    """E109 s4 (A4). Mutation M5: the basis sentence removed from `details` (every row is red)."""
+    node = {**copy.deepcopy(SEND['nodes'][0]), 'based_on': bases, 'based_on_hidden': hidden}
+    if bases is None: del node['based_on']
+    out = story.details(node, {'bram': 'Bram Koster'})
+    assert out == ['Reported by Bram Koster; Ophiolite did not run this calculation.', 'Method declared by its publisher.', sentence]
+    assert R not in sentence and 'a-up' not in sentence and UUID not in sentence and '9e9e' not in sentence and '/' not in sentence
+
+
+def test_without_a_basis_there_is_no_sentence_and_the_old_lines_are_unchanged():
+    node = {k: v for k, v in SEND['nodes'][0].items() if k not in ('based_on', 'based_on_hidden')}
+    assert not any(line.startswith('Based on') for line in story.details(node, {}))
+    assert story.lines(PAGE) == LINES and not any('Based on' in line for line in LINES)
+
+
+def test_a_send_story_reads_what_each_version_is_based_on():
+    assert story.lines(SEND) == SEND_LINES
+    text = '\n'.join(SEND_LINES)
+    for node in SEND['nodes']:
+        assert all(v not in text for v in (node.get('revision'), node.get('asset_id')) if v)
+
+
 def test_identifiers_stay_out_of_the_lines():
     text = '\n'.join(LINES)
     for node in PAGE['nodes']:
@@ -124,9 +173,10 @@ def test_remake_refuses_a_step_it_cannot_take_before_any_call():
 # --- the command line --------------------------------------------------------------------------------------------------
 
 def test_the_story_verb_prints_the_lines_and_json_prints_the_page(capsys):
-    c = Recorded({'story': PAGE})
+    c = Recorded({'story': PAGE, 'states': {'asset_id': 'a-shale', 'revision': R, 'outcomes': []}})
     _, out = run(['story', 'a-shale', R], c, capsys)
     assert out.splitlines() == LINES
+    assert c.calls[1][:3] == ('outcomes', 'states', {'asset_id': 'a-shale', 'revision': R})  # E120 s7: no outcome, no line
     payload, out = run(['story', 'a-shale', R, '--json'], c, capsys)
     assert json.loads(out) == PAGE == payload
 

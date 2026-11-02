@@ -13,7 +13,9 @@ KEYWORDS = {'$defs', '$id', '$ref', '$schema', 'additionalProperties', 'anyOf',
             'minimum', 'exclusiveMinimum', 'exclusiveMaximum', 'oneOf', 'pattern', 'properties',  # E56: exclusiveMaximum
             'required', 'title', 'type', 'x-ophiolite',
             'propertyNames', 'x-ophiolite-no-fields', 'x-ophiolite-body-of',  # E31: typed map keys, bodies with no fields, the connector proxy
-            'if', 'then', 'maxProperties'}  # E54: value rules and map sizes the server checks; TypeScript types do not carry them
+            'if', 'then', 'maxProperties',  # E54: value rules and map sizes the server checks; TypeScript types do not carry them
+            'else',  # E132: the verdict record's conditional (an agent names its delegator, a person none), a value rule too
+            'uniqueItems'}  # E133: a consent's covers and extras name each entry once; a value rule the server checks
 METHODS = {'get', 'post', 'put', 'patch', 'delete', 'head', 'options'}
 
 

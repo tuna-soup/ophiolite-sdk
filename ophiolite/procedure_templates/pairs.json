@@ -1,6 +1,6 @@
 {
  "schema": "ophiolite.procedure-template-pairs/1",
- "rules_version": "1.3.0",
+ "rules_version": "1.4.0",
  "kinds": {
   "points-csv/1": {
    "word": "points"
@@ -43,6 +43,9 @@
   },
   "well-residual/1": {
    "word": "residual"
+  },
+  "segy/1": {
+   "word": "seismic-volume"
   }
  },
  "listed": [
@@ -348,6 +351,31 @@
    "step": "check",
    "kind": "well-residual/1",
    "sentence": "There is no check template for residual yet; check templates compare well tops and deviation surveys."
+  },
+  {
+   "step": "read",
+   "kind": "segy/1",
+   "sentence": "There is no template for reading a seismic volume yet; start from the reference procedure Read a ZGY cube on your computer instead."
+  },
+  {
+   "step": "source",
+   "kind": "segy/1",
+   "sentence": "There is no template for reading a seismic volume yet; start from the reference procedure Read a ZGY cube on your computer instead."
+  },
+  {
+   "step": "process",
+   "kind": "segy/1",
+   "sentence": "Seismic volumes are not made by a procedure that processes versions; only a procedure that reads a file may write one."
+  },
+  {
+   "step": "send",
+   "kind": "segy/1",
+   "sentence": "Seismic volumes cannot be sent by a procedure yet."
+  },
+  {
+   "step": "check",
+   "kind": "segy/1",
+   "sentence": "There is no check template for seismic-volume yet; check templates compare well tops and deviation surveys."
   }
  ]
 }

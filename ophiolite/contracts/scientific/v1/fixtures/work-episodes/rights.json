@@ -1,0 +1,451 @@
+{
+ "subject": "rights_mode (§5, R1-14, R2-9): facts per revision, the purpose, the request, the answer",
+ "cases": {
+  "no-basis-no-grant": {
+   "facts": [
+    {
+     "checked": true,
+     "merged": null,
+     "grants": [],
+     "listed_licence": null
+    }
+   ],
+   "purpose": "training",
+   "requested": "auto",
+   "expect": "shape"
+  },
+  "a-model-use-basis": {
+   "facts": [
+    {
+     "checked": true,
+     "merged": {
+      "uses": [
+       "read",
+       "export",
+       "model-use"
+      ],
+      "ended": []
+     },
+     "grants": [],
+     "listed_licence": null
+    }
+   ],
+   "purpose": "training",
+   "requested": "auto",
+   "expect": "values"
+  },
+  "the-same-asked-for-shape": {
+   "facts": [
+    {
+     "checked": true,
+     "merged": {
+      "uses": [
+       "read",
+       "export",
+       "model-use"
+      ],
+      "ended": []
+     },
+     "grants": [],
+     "listed_licence": null
+    }
+   ],
+   "purpose": "training",
+   "requested": "shape",
+   "expect": "shape"
+  },
+  "an-ended-basis-with-model-use-and-a-grant": {
+   "facts": [
+    {
+     "checked": true,
+     "merged": {
+      "uses": [
+       "read",
+       "export",
+       "model-use"
+      ],
+      "ended": [
+       "b-1@2"
+      ]
+     },
+     "grants": [
+      "training"
+     ],
+     "listed_licence": null
+    }
+   ],
+   "purpose": "training",
+   "requested": "auto",
+   "expect": "refused"
+  },
+  "a-revoked-basis": {
+   "facts": [
+    {
+     "checked": true,
+     "merged": {
+      "uses": [
+       "read",
+       "export",
+       "model-use"
+      ],
+      "ended": [
+       "b-1@1"
+      ]
+     },
+     "grants": [],
+     "listed_licence": null
+    }
+   ],
+   "purpose": "training",
+   "requested": "auto",
+   "expect": "refused"
+  },
+  "a-not-yet-effective-basis": {
+   "facts": [
+    {
+     "checked": true,
+     "merged": {
+      "uses": [
+       "read",
+       "export",
+       "model-use"
+      ],
+      "ended": [
+       "b-2@1"
+      ]
+     },
+     "grants": [],
+     "listed_licence": null
+    }
+   ],
+   "purpose": "training",
+   "requested": "auto",
+   "expect": "refused"
+  },
+  "unchecked": {
+   "facts": [
+    {
+     "checked": false,
+     "merged": null,
+     "grants": [],
+     "listed_licence": null
+    }
+   ],
+   "purpose": "training",
+   "requested": "auto",
+   "expect": "refused"
+  },
+  "without-export": {
+   "facts": [
+    {
+     "checked": true,
+     "merged": {
+      "uses": [
+       "read",
+       "model-use"
+      ],
+      "ended": []
+     },
+     "grants": [],
+     "listed_licence": null
+    }
+   ],
+   "purpose": "training",
+   "requested": "auto",
+   "expect": "refused"
+  },
+  "without-read": {
+   "facts": [
+    {
+     "checked": true,
+     "merged": {
+      "uses": [
+       "export",
+       "model-use"
+      ],
+      "ended": []
+     },
+     "grants": [],
+     "listed_licence": null
+    }
+   ],
+   "purpose": "training",
+   "requested": "auto",
+   "expect": "refused"
+  },
+  "read-only": {
+   "facts": [
+    {
+     "checked": true,
+     "merged": {
+      "uses": [
+       "read"
+      ],
+      "ended": []
+     },
+     "grants": [],
+     "listed_licence": null
+    }
+   ],
+   "purpose": "training",
+   "requested": "auto",
+   "expect": "refused"
+  },
+  "mixed": {
+   "facts": [
+    {
+     "checked": true,
+     "merged": {
+      "uses": [
+       "read",
+       "export",
+       "model-use"
+      ],
+      "ended": []
+     },
+     "grants": [],
+     "listed_licence": null
+    },
+    {
+     "checked": true,
+     "merged": {
+      "uses": [
+       "read",
+       "export"
+      ],
+      "ended": []
+     },
+     "grants": [],
+     "listed_licence": null
+    }
+   ],
+   "purpose": "training",
+   "requested": "auto",
+   "expect": "shape"
+  },
+  "governed-without-model-use-with-a-grant": {
+   "facts": [
+    {
+     "checked": true,
+     "merged": {
+      "uses": [
+       "read",
+       "export"
+      ],
+      "ended": []
+     },
+     "grants": [
+      "training"
+     ],
+     "listed_licence": null
+    }
+   ],
+   "purpose": "training",
+   "requested": "auto",
+   "expect": "shape"
+  },
+  "unconfigured-with-a-training-grant": {
+   "facts": [
+    {
+     "checked": true,
+     "merged": null,
+     "grants": [
+      "training"
+     ],
+     "listed_licence": null
+    }
+   ],
+   "purpose": "training",
+   "requested": "auto",
+   "expect": "values"
+  },
+  "the-training-grant-for-evaluation": {
+   "facts": [
+    {
+     "checked": true,
+     "merged": null,
+     "grants": [
+      "training"
+     ],
+     "listed_licence": null
+    }
+   ],
+   "purpose": "evaluation",
+   "requested": "auto",
+   "expect": "shape"
+  },
+  "listed-cc-by-allowed-with-model-use": {
+   "facts": [
+    {
+     "checked": true,
+     "merged": {
+      "uses": [
+       "read",
+       "export",
+       "model-use"
+      ],
+      "ended": []
+     },
+     "grants": [],
+     "listed_licence": {
+      "spdx": "CC-BY-4.0",
+      "redistribution": "allowed"
+     }
+    }
+   ],
+   "purpose": "training",
+   "requested": "auto",
+   "expect": "values"
+  },
+  "listed-cc-by-nc": {
+   "facts": [
+    {
+     "checked": true,
+     "merged": {
+      "uses": [
+       "read",
+       "export",
+       "model-use"
+      ],
+      "ended": []
+     },
+     "grants": [],
+     "listed_licence": {
+      "spdx": "CC-BY-NC-4.0",
+      "redistribution": "allowed"
+     }
+    }
+   ],
+   "purpose": "training",
+   "requested": "auto",
+   "expect": "shape"
+  },
+  "listed-restricted": {
+   "facts": [
+    {
+     "checked": true,
+     "merged": {
+      "uses": [
+       "read",
+       "export",
+       "model-use"
+      ],
+      "ended": []
+     },
+     "grants": [],
+     "listed_licence": {
+      "spdx": "CC0-1.0",
+      "redistribution": "restricted"
+     }
+    }
+   ],
+   "purpose": "training",
+   "requested": "auto",
+   "expect": "shape"
+  },
+  "listed-without-spdx": {
+   "facts": [
+    {
+     "checked": true,
+     "merged": {
+      "uses": [
+       "read",
+       "export",
+       "model-use"
+      ],
+      "ended": []
+     },
+     "grants": [],
+     "listed_licence": {
+      "spdx": null,
+      "redistribution": "allowed"
+     }
+    }
+   ],
+   "purpose": "training",
+   "requested": "auto",
+   "expect": "shape"
+  },
+  "listed-no-basis-no-grant": {
+   "facts": [
+    {
+     "checked": true,
+     "merged": null,
+     "grants": [],
+     "listed_licence": {
+      "spdx": "CC0-1.0",
+      "redistribution": "allowed"
+     }
+    }
+   ],
+   "purpose": "training",
+   "requested": "auto",
+   "expect": "shape"
+  },
+  "refused-asked-for-shape": {
+   "facts": [
+    {
+     "checked": false,
+     "merged": null,
+     "grants": [],
+     "listed_licence": null
+    }
+   ],
+   "purpose": "training",
+   "requested": "shape",
+   "expect": "refused"
+  },
+  "no-revisions": {
+   "facts": [],
+   "purpose": "training",
+   "requested": "auto",
+   "expect": "shape"
+  },
+  "ended-without-model-use-or-grants": {
+   "facts": [
+    {
+     "checked": true,
+     "merged": {
+      "uses": [
+       "read",
+       "export"
+      ],
+      "ended": [
+       "b-1@2"
+      ]
+     },
+     "grants": [],
+     "listed_licence": null
+    }
+   ],
+   "purpose": "training",
+   "requested": "auto",
+   "expect": "refused"
+  },
+  "unchecked-without-model-use-or-grants": {
+   "facts": [
+    {
+     "checked": false,
+     "merged": null,
+     "grants": [],
+     "listed_licence": null
+    },
+    {
+     "checked": true,
+     "merged": {
+      "uses": [
+       "read",
+       "export"
+      ],
+      "ended": []
+     },
+     "grants": [],
+     "listed_licence": null
+    }
+   ],
+   "purpose": "training",
+   "requested": "auto",
+   "expect": "refused"
+  }
+ }
+}

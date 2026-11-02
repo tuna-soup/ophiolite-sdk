@@ -1,6 +1,8 @@
 """Build deterministic, output-free notebooks from their tested percent scripts: the notebook template and every entry
 of the notebook gallery (`notebooks/gallery.json`). `--check` fails on a notebook that differs from its script, an entry
-without a notebook, or a gallery folder the listing does not name."""
+without a notebook, or a gallery folder the listing does not name. The starter pack's packaged notebook
+(`ophiolite/templates/starter-pack/`) is the canonical script of its gallery entry: the gallery's `notebook.py` is
+written as its byte copy, and `--check` refuses a copy that differs."""
 import argparse
 import json
 from pathlib import Path
@@ -53,10 +55,22 @@ def gallery():
         yield script,directory/slug/'notebook.ipynb',{'gallery':slug}
 
 
+PACKED='open-a-starter-pack'  # E129 (e) D2: the starter pack's notebook, packaged; its gallery script is a byte copy
+
+
+def copies(check):
+    """The gallery copy of each packaged notebook script: written, or with --check refused when it differs."""
+    source=ROOT/'ophiolite/templates/starter-pack'/(PACKED+'.py');copy=ROOT/'notebooks'/PACKED/'notebook.py'
+    if check:
+        if not copy.is_file() or copy.read_bytes()!=source.read_bytes():raise ValueError(f'{copy.relative_to(ROOT)} differs from {source.relative_to(ROOT)}; run tools/build_notebook.py')
+    else:copy.parent.mkdir(exist_ok=True);copy.write_bytes(source.read_bytes())
+
+
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--check',action='store_true');args=parser.parse_args()
-    template=ROOT/'ophiolite/templates/notebook'
-    pairs=[(template/'read-and-plot.py',template/'read-and-plot.ipynb',None),*gallery()]
+    template=ROOT/'ophiolite/templates/notebook';packed=ROOT/'ophiolite/templates/starter-pack'
+    copies(args.check)
+    pairs=[(template/'read-and-plot.py',template/'read-and-plot.ipynb',None),(packed/(PACKED+'.py'),packed/(PACKED+'.ipynb'),{'gallery':PACKED}),*gallery()]
     for script,target,metadata in pairs:
         output=build(script.read_text(),metadata)
         if args.check:

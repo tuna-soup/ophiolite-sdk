@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/scientific/v1/behaviour-consent.json",
+  "x-ophiolite": {
+    "id": "ophiolite.behaviour-consent/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "additionalProperties": false,
+  "description": "One step of one person's consent chain for one purpose; never changed, never pruned.",
+  "else": {
+    "properties": {
+      "covers": {
+        "maxItems": 0
+      },
+      "extras": {
+        "maxItems": 0
+      }
+    }
+  },
+  "if": {
+    "properties": {
+      "state": {
+        "const": "granted"
+      }
+    },
+    "required": [
+      "state"
+    ]
+  },
+  "properties": {
+    "schema": {
+      "const": "ophiolite.behaviour-consent/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "consent_id": {
+      "pattern": "^consent-[0-9a-f]{32}$",
+      "title": "Consent Id",
+      "type": "string"
+    },
+    "person": {
+      "description": "The account id, never a name",
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Person",
+      "type": "string"
+    },
+    "purpose": {
+      "enum": [
+        "training",
+        "evaluation"
+      ],
+      "title": "Purpose",
+      "type": "string"
+    },
+    "sequence": {
+      "description": "1, 2, 3, ... per person and purpose; the highest is current",
+      "minimum": 1,
+      "title": "Sequence",
+      "type": "integer"
+    },
+    "state": {
+      "enum": [
+        "granted",
+        "withdrawn"
+      ],
+      "title": "State",
+      "type": "string"
+    },
+    "covers": {
+      "description": "All five when granted; none when withdrawn",
+      "items": {
+        "enum": [
+          "own-actions",
+          "command-parameters",
+          "verdicts",
+          "published-checks",
+          "agent-plan-digests"
+        ],
+        "type": "string"
+      },
+      "title": "Covers",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "extras": {
+      "description": "None when withdrawn",
+      "items": {
+        "const": "instruction-text",
+        "type": "string"
+      },
+      "title": "Extras",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "text_version": {
+      "description": "The text read; on a withdrawal, the version of the grant it closes",
+      "minimum": 0,
+      "title": "Text Version",
+      "type": "integer"
+    },
+    "text_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Text Sha256",
+      "type": "string"
+    },
+    "at": {
+      "title": "At",
+      "type": "number"
+    },
+    "command_id": {
+      "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+      "title": "Command Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema",
+    "consent_id",
+    "person",
+    "purpose",
+    "sequence",
+    "state",
+    "covers",
+    "extras",
+    "text_version",
+    "text_sha256",
+    "at",
+    "command_id"
+  ],
+  "then": {
+    "properties": {
+      "covers": {
+        "maxItems": 5,
+        "minItems": 5
+      }
+    }
+  },
+  "title": "BehaviourConsent",
+  "type": "object"
+}

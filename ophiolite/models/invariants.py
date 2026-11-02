@@ -107,7 +107,7 @@ def asset(value):
                    'wavelet': 'wavelet/1', 'model-section': 'model-section/1', 'seismic-section': 'seismic-section/1',
                    'well-location': 'well-location/1', 'time-depth': 'time-depth/1', 'feature-set': 'feature-set/1',
                    'well-path': 'well-path/1', 'well-set': 'well-set/1',
-                   'well-residual': 'well-residual/1'}  # E53; E74b: a position file or a corrected position; E56; E125 s3a; E119a; E119b
+                   'well-residual': 'well-residual/1', 'seismic-line': 'seismic-line/1'}  # E53; E74b: a position file or a corrected position; E56; E125 s3a; E119a; E119b; E137 s1
         require(value['interpretation'].get('mapping') == mapping.get(value['scientific']['type']), 'Scientific context and interpretation disagree')
     else:
         context(value['scientific'])
@@ -320,10 +320,10 @@ def typed_payload(value):
         require(all(math.isfinite(s[k]) for s in stations for k in ('md', 'x', 'y', 'tvdss')), 'Every station needs finite numbers')
         require(len(stations) == c['count'] >= 1 and c['md_range'] == [md[0], md[-1]] and c['tvdss_range'] == [min(tvdss), max(tvdss)], 'Stations and their context disagree')
         require(all(a < b for a, b in zip(md, md[1:])), 'Measured depth must strictly increase')
-    elif kind == 'well-set':  # E119a (4-10): each wellbore once, a frame exactly with a trajectory, counts as the context says
+    elif kind == 'well-set':  # E119a (4-10): each wellbore once, a frame only with a trajectory (s6: a trajectory may be saved without one), counts as the context says
         members = value['members']; placed = [m['trajectory'] is not None for m in members]
         require(len({m['wellbore'] for m in members}) == len(members), 'A wellbore appears twice in the set')
-        require(all((m['frame'] is not None) == p for m, p in zip(members, placed)), 'A member has a frame without a trajectory, or a trajectory without a frame')
+        require(all(p or m['frame'] is None for m, p in zip(members, placed)), 'A member has a frame without a trajectory')
         require(c['count'] == len(members) and c['with_trajectory'] == sum(placed) and c['without_trajectory'] == len(members) - sum(placed), 'Members and their context disagree')
     elif kind == 'well-residual':  # E119b (5-9): each row a residual or a reason; the residual is top.md - md of the used crossing
         well_residual(value, c)

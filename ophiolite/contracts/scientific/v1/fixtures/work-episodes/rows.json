@@ -1,0 +1,382 @@
+{
+ "subject": "E93-shaped source rows (synthetic) of project p-demo; the caller is u-anna. t0 = 1793275200.0. Planted literals: 'vps-reserve-TEST' and 'Maren Testperson'",
+ "events": [
+  {
+   "schema": "ophiolite.activity/1",
+   "event_id": "act_360da744301c82ae583adba53eab5769",
+   "project_id": "p-demo",
+   "actor_id": "u-anna",
+   "kind": "action",
+   "run_id": null,
+   "trace_id": null,
+   "evidence": "server-recorded",
+   "coverage_profile": "ophiolite-record/1",
+   "data": {
+    "operation": "derive/ShaleVolume",
+    "record": {
+     "class": "action",
+     "action_id": "act_360da744301c82ae583adba53eab5769",
+     "linked_to": null,
+     "actor": {
+      "kind": "person",
+      "id": "u-anna",
+      "name_at_time": "Maren Testperson"
+     },
+     "on_behalf_of": null,
+     "credential": {
+      "kind": "browser",
+      "key_id": null,
+      "approval": null
+     },
+     "through": {
+      "client": "ophiolite-cli",
+      "version": "1.4.0",
+      "host": null,
+      "transport": "http",
+      "raw": "ophiolite-cli/1.4.0"
+     },
+     "request_id": null,
+     "trace_context": null
+    }
+   },
+   "recorded_at": "2026-10-29T12:00:00+00:00"
+  },
+  {
+   "schema": "ophiolite.activity/1",
+   "event_id": "act_cae343fde78891ee117546ee5232fe3c",
+   "project_id": "p-demo",
+   "actor_id": "u-anna",
+   "kind": "action",
+   "run_id": null,
+   "trace_id": null,
+   "evidence": "server-recorded",
+   "coverage_profile": "ophiolite-record/1",
+   "data": {
+    "operation": "read/GetReviewScene",
+    "record": {
+     "class": "action",
+     "action_id": "act_cae343fde78891ee117546ee5232fe3c",
+     "linked_to": null,
+     "actor": {
+      "kind": "person",
+      "id": "u-anna",
+      "name_at_time": "Maren Testperson"
+     },
+     "on_behalf_of": null,
+     "credential": {
+      "kind": "browser",
+      "key_id": null,
+      "approval": null
+     },
+     "through": {
+      "client": "Maren Testperson",
+      "version": "vps-reserve-TEST",
+      "host": null,
+      "transport": "http",
+      "raw": "vps-reserve-TEST"
+     },
+     "request_id": null,
+     "trace_context": null
+    }
+   },
+   "recorded_at": "2026-10-29T12:10:00+00:00"
+  },
+  {
+   "schema": "ophiolite.activity/1",
+   "event_id": "act_f83180f57081ecb982cfdcc9e9e234d2",
+   "project_id": "p-demo",
+   "actor_id": "u-anna",
+   "kind": "action",
+   "run_id": null,
+   "trace_id": null,
+   "evidence": "server-recorded",
+   "coverage_profile": "ophiolite-record/1",
+   "data": {
+    "operation": "derive/ShaleVolume",
+    "record": {
+     "class": "action",
+     "action_id": "act_f83180f57081ecb982cfdcc9e9e234d2",
+     "linked_to": null,
+     "actor": {
+      "kind": "agent",
+      "id": "ag-anna-1",
+      "name_at_time": "Anna helper"
+     },
+     "on_behalf_of": {
+      "kind": "person",
+      "id": "u-anna",
+      "name_at_time": "Maren Testperson"
+     },
+     "credential": {
+      "kind": "browser",
+      "key_id": null,
+      "approval": null
+     },
+     "through": {
+      "client": "ophiolite-python",
+      "version": "0.9.1",
+      "host": null,
+      "transport": "http",
+      "raw": "ophiolite-python/0.9.1"
+     },
+     "request_id": null,
+     "trace_context": null
+    }
+   },
+   "recorded_at": "2026-10-29T12:20:00+00:00"
+  },
+  {
+   "schema": "ophiolite.activity/1",
+   "event_id": "act_259c66c07658be144e975d00eb1e5d42",
+   "project_id": "p-demo",
+   "actor_id": "u-ben",
+   "kind": "action",
+   "run_id": null,
+   "trace_id": null,
+   "evidence": "server-recorded",
+   "coverage_profile": "ophiolite-record/1",
+   "data": {
+    "operation": "derive/ShaleVolume",
+    "record": {
+     "class": "action",
+     "action_id": "act_259c66c07658be144e975d00eb1e5d42",
+     "linked_to": null,
+     "actor": {
+      "kind": "person",
+      "id": "u-ben",
+      "name_at_time": "Ben Test"
+     },
+     "on_behalf_of": null,
+     "credential": {
+      "kind": "browser",
+      "key_id": null,
+      "approval": null
+     },
+     "through": null,
+     "request_id": null,
+     "trace_context": null
+    }
+   },
+   "recorded_at": "2026-10-29T12:05:00+00:00"
+  },
+  {
+   "schema": "ophiolite.activity/1",
+   "event_id": "act_0bcfbef58d8453e5109401d856ee464a",
+   "project_id": "p-demo",
+   "actor_id": "u-ben",
+   "kind": "action",
+   "run_id": null,
+   "trace_id": null,
+   "evidence": "server-recorded",
+   "coverage_profile": "ophiolite-record/1",
+   "data": {
+    "operation": "derive/ShaleVolume",
+    "record": {
+     "class": "action",
+     "action_id": "act_0bcfbef58d8453e5109401d856ee464a",
+     "linked_to": null,
+     "actor": {
+      "kind": "agent",
+      "id": "ag-ben-1",
+      "name_at_time": null
+     },
+     "on_behalf_of": {
+      "kind": "person",
+      "id": "u-ben",
+      "name_at_time": null
+     },
+     "credential": {
+      "kind": "browser",
+      "key_id": null,
+      "approval": null
+     },
+     "through": null,
+     "request_id": null,
+     "trace_context": null
+    }
+   },
+   "recorded_at": "2026-10-29T12:15:00+00:00"
+  },
+  {
+   "schema": "ophiolite.activity/1",
+   "event_id": "act_c6ccf254309a2a64c7e5d97bd8b700ad",
+   "project_id": "p-demo",
+   "actor_id": "wl-ingest",
+   "kind": "action",
+   "run_id": null,
+   "trace_id": null,
+   "evidence": "server-recorded",
+   "coverage_profile": "ophiolite-record/1",
+   "data": {
+    "operation": "derive/ShaleVolume",
+    "record": {
+     "class": "action",
+     "action_id": "act_c6ccf254309a2a64c7e5d97bd8b700ad",
+     "linked_to": null,
+     "actor": {
+      "kind": "workload",
+      "id": "wl-ingest",
+      "name_at_time": null
+     },
+     "on_behalf_of": null,
+     "credential": {
+      "kind": "browser",
+      "key_id": null,
+      "approval": null
+     },
+     "through": null,
+     "request_id": null,
+     "trace_context": null
+    }
+   },
+   "recorded_at": "2026-10-29T12:01:00+00:00"
+  },
+  {
+   "schema": "ophiolite.activity/1",
+   "event_id": "ev_a29d84f0185eac917b8cb0a675f3b0b1",
+   "project_id": "p-demo",
+   "actor_id": "u-anna",
+   "kind": "asset.revision",
+   "run_id": null,
+   "trace_id": null,
+   "evidence": "server-recorded",
+   "coverage_profile": "ophiolite-record/1",
+   "data": {
+    "operation": "derive/ShaleVolume",
+    "record": {
+     "class": "effect",
+     "action_id": null,
+     "linked_to": "act_360da744301c82ae583adba53eab5769",
+     "actor": {
+      "kind": "person",
+      "id": "u-anna",
+      "name_at_time": "Maren Testperson"
+     },
+     "on_behalf_of": null,
+     "credential": {
+      "kind": "browser",
+      "key_id": null,
+      "approval": null
+     },
+     "through": null,
+     "request_id": null,
+     "trace_context": null
+    }
+   },
+   "recorded_at": "2026-10-29T12:00:01+00:00"
+  },
+  {
+   "schema": "ophiolite.activity/1",
+   "event_id": "ev_a8d0a1117e28efe9d9bcd29833dd103c",
+   "project_id": "p-demo",
+   "actor_id": "u-anna",
+   "kind": "operation.finished",
+   "run_id": null,
+   "trace_id": null,
+   "evidence": "server-recorded",
+   "coverage_profile": "ophiolite-record/1",
+   "data": {
+    "operation": "derive/ShaleVolume",
+    "record": {
+     "class": "lifecycle",
+     "action_id": null,
+     "linked_to": "act_360da744301c82ae583adba53eab5769",
+     "actor": {
+      "kind": "person",
+      "id": "u-anna",
+      "name_at_time": "Maren Testperson"
+     },
+     "on_behalf_of": null,
+     "credential": {
+      "kind": "browser",
+      "key_id": null,
+      "approval": null
+     },
+     "through": null,
+     "request_id": null,
+     "trace_context": null
+    }
+   },
+   "recorded_at": "2026-10-29T12:00:02+00:00"
+  },
+  {
+   "schema": "ophiolite.activity/1",
+   "event_id": "act_6fa447f76dffd5789a0a224f5db45003",
+   "project_id": "p-demo",
+   "actor_id": "u-anna",
+   "kind": "action",
+   "run_id": null,
+   "trace_id": null,
+   "evidence": "server-recorded",
+   "coverage_profile": "ophiolite-record/1",
+   "data": {
+    "operation": "derive/ShaleVolume"
+   },
+   "recorded_at": "2026-10-29T12:00:03+00:00"
+  },
+  {
+   "schema": "ophiolite.activity/1",
+   "event_id": "act_8e103dccd5c76b4768feac6d8ac4348e",
+   "project_id": "p-demo",
+   "actor_id": "p-demo",
+   "kind": "action",
+   "run_id": null,
+   "trace_id": null,
+   "evidence": "server-recorded",
+   "coverage_profile": "ophiolite-record/1",
+   "data": {
+    "operation": "derive/ShaleVolume",
+    "record": {
+     "class": "action",
+     "action_id": "act_8e103dccd5c76b4768feac6d8ac4348e",
+     "linked_to": null,
+     "actor": {
+      "kind": "service-account",
+      "id": "sa-1",
+      "name_at_time": null
+     },
+     "on_behalf_of": {
+      "kind": "project",
+      "id": "p-demo"
+     },
+     "credential": {
+      "kind": "browser",
+      "key_id": null,
+      "approval": null
+     },
+     "through": null,
+     "request_id": null,
+     "trace_context": null
+    }
+   },
+   "recorded_at": "2026-10-29T12:00:04+00:00"
+  }
+ ],
+ "actions": {
+  "expect": [
+   "act_360da744301c82ae583adba53eab5769",
+   "act_cae343fde78891ee117546ee5232fe3c",
+   "act_f83180f57081ecb982cfdcc9e9e234d2",
+   "act_259c66c07658be144e975d00eb1e5d42",
+   "act_0bcfbef58d8453e5109401d856ee464a",
+   "act_c6ccf254309a2a64c7e5d97bd8b700ad",
+   "act_8e103dccd5c76b4768feac6d8ac4348e"
+  ],
+  "skipped": 1
+ },
+ "own": {
+  "caller": "u-anna",
+  "expect": [
+   "act_360da744301c82ae583adba53eab5769",
+   "act_cae343fde78891ee117546ee5232fe3c",
+   "act_f83180f57081ecb982cfdcc9e9e234d2"
+  ]
+ },
+ "own-ben": {
+  "caller": "u-ben",
+  "expect": [
+   "act_259c66c07658be144e975d00eb1e5d42",
+   "act_0bcfbef58d8453e5109401d856ee464a"
+  ]
+ }
+}

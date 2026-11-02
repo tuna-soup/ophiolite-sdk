@@ -1,0 +1,31 @@
+{
+ "subject": "supersession chains over stored rows (verdicts.current, previous, chain_refusal). Current is the terminal link of an author's chain; timestamps never decide it (R2-3). The person and the agent share the textual id u-1 (two authors). A case without `stated` means the field was omitted (UNSET)",
+ "rows": [
+  {"verdict_id": "verdict-000000000000000000000000000000f0", "asset_id": "asset-a", "revision": "r1", "actor": {"kind": "person", "id": "u-1"}, "supersedes": null, "at": 100.0},
+  {"verdict_id": "verdict-000000000000000000000000000000a0", "asset_id": "asset-a", "revision": "r1", "actor": {"kind": "person", "id": "u-1"}, "supersedes": "verdict-000000000000000000000000000000f0", "at": 100.0},
+  {"verdict_id": "verdict-000000000000000000000000000000b1", "asset_id": "asset-a", "revision": "r1", "actor": {"kind": "agent", "id": "u-1"}, "supersedes": null, "at": 50.0},
+  {"verdict_id": "verdict-000000000000000000000000000000b2", "asset_id": "asset-a", "revision": "r1", "actor": {"kind": "agent", "id": "u-1"}, "supersedes": "verdict-000000000000000000000000000000b1", "at": 40.0},
+  {"verdict_id": "verdict-000000000000000000000000000000c1", "asset_id": "asset-a", "revision": "r2", "actor": {"kind": "person", "id": "u-1"}, "supersedes": null, "at": 10.0},
+  {"verdict_id": "verdict-000000000000000000000000000000d1", "asset_id": "asset-a", "revision": "r1", "actor": {"kind": "person", "id": "u-2"}, "supersedes": null, "at": 5.0}
+ ],
+ "current": ["verdict-000000000000000000000000000000d1", "verdict-000000000000000000000000000000c1",
+             "verdict-000000000000000000000000000000b2", "verdict-000000000000000000000000000000a0"],
+ "previous": [
+  {"author": ["person", "u-1"], "revision": "r1", "expected": "verdict-000000000000000000000000000000a0"},
+  {"author": ["agent", "u-1"], "revision": "r1", "expected": "verdict-000000000000000000000000000000b2"},
+  {"author": ["person", "u-1"], "revision": "r2", "expected": "verdict-000000000000000000000000000000c1"},
+  {"author": ["person", "u-3"], "revision": "r1", "expected": null}
+ ],
+ "cases": {
+  "omitted-supersedes-current": {"author": ["person", "u-1"], "revision": "r1", "expected": null},
+  "null-but-one-exists": {"author": ["person", "u-1"], "revision": "r1", "stated": null, "expected": "supersedes-stale"},
+  "null-first-verdict": {"author": ["person", "u-3"], "revision": "r1", "stated": null, "expected": null},
+  "current-id": {"author": ["person", "u-1"], "revision": "r1", "stated": "verdict-000000000000000000000000000000a0", "expected": null},
+  "own-earlier-id": {"author": ["person", "u-1"], "revision": "r1", "stated": "verdict-000000000000000000000000000000f0", "expected": "supersedes-stale"},
+  "another-authors": {"author": ["person", "u-1"], "revision": "r1", "stated": "verdict-000000000000000000000000000000d1", "expected": "supersedes-other"},
+  "own-on-another-version": {"author": ["person", "u-1"], "revision": "r1", "stated": "verdict-000000000000000000000000000000c1", "expected": "supersedes-other"},
+  "agent-with-the-same-id": {"author": ["person", "u-1"], "revision": "r1", "stated": "verdict-000000000000000000000000000000b2", "expected": "supersedes-other"},
+  "agent-own-current": {"author": ["agent", "u-1"], "revision": "r1", "stated": "verdict-000000000000000000000000000000b2", "expected": null},
+  "unknown-id": {"author": ["person", "u-1"], "revision": "r1", "stated": "verdict-ffffffffffffffffffffffffffffffff", "expected": "supersedes-unknown"}
+ }
+}

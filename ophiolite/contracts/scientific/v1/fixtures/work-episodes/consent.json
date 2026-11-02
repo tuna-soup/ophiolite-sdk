@@ -1,0 +1,1116 @@
+{
+ "subject": "consent_view (§3, R1-7, R2-11): short rows (id, at, [kind, id], delegator) the test expands to E93 rows with action id act_ + sha256(id)[:32]; purpose training and capture by-consent unless a case says otherwise; verdicts are listed by their at, checks by key. t0 = 1793275200.0",
+ "cases": {
+  "the-non-consenting-checker-is-left-out": {
+   "consents": [
+    {
+     "person": "u-anna",
+     "purpose": "training",
+     "sequence": 1,
+     "state": "granted",
+     "covers": [
+      "own-actions",
+      "command-parameters",
+      "verdicts",
+      "published-checks",
+      "agent-plan-digests"
+     ],
+     "extras": [
+      "instruction-text"
+     ],
+     "at": 1793271600.0
+    }
+   ],
+   "rows": [
+    {
+     "id": "a1",
+     "at": 1793275210.0,
+     "actor": [
+      "person",
+      "u-anna"
+     ],
+     "behalf": null
+    }
+   ],
+   "joins": {
+    "a1": {
+     "checks": [
+      {
+       "asset_id": "vsh-out-1",
+       "revision": "r1",
+       "key": "k-carla",
+       "body_sha256": "d24c136e8c2b10066bc6a1bb7e29c40ab79964eb13698c71cca72f25523b1fc0",
+       "outcome": "passed",
+       "witness": "server",
+       "recorded_by": "u-carla",
+       "principal_kind": "person",
+       "at": 1793275230.0,
+       "name": "Maren Testperson check"
+      },
+      {
+       "asset_id": "vsh-out-1",
+       "revision": "r1",
+       "key": "k-anna",
+       "body_sha256": "d11171bc28dacf471f82b9122bd447fc540b98216a01d58e0797491e92c8a687",
+       "outcome": "passed",
+       "witness": "server",
+       "recorded_by": "u-anna",
+       "principal_kind": "person",
+       "at": 1793275240.0,
+       "name": "Maren Testperson check"
+      },
+      {
+       "asset_id": "vsh-out-1",
+       "revision": "r1",
+       "key": "k-wl",
+       "body_sha256": "75386efca39f6f0eb09426b3ddca062eea514107b6cde3ef0651b9db040f1a54",
+       "outcome": "passed",
+       "witness": "server",
+       "recorded_by": "wl-ingest",
+       "principal_kind": "workload",
+       "at": 1793275250.0,
+       "name": "Maren Testperson check"
+      }
+     ]
+    }
+   },
+   "expect": {
+    "kept": {
+     "a1": {
+      "parameters": true,
+      "plan": null,
+      "instruction": null,
+      "checks": [
+       "k-anna"
+      ],
+      "verdicts": [],
+      "omitted": {
+       "parameters": 0,
+       "checks": 2,
+       "verdicts": 0,
+       "plan": 0
+      }
+     }
+    },
+    "no_consent": 0
+   }
+  },
+  "the-agent-is-in-under-the-callers-grant": {
+   "consents": [
+    {
+     "person": "u-anna",
+     "purpose": "training",
+     "sequence": 1,
+     "state": "granted",
+     "covers": [
+      "own-actions",
+      "command-parameters",
+      "verdicts",
+      "published-checks",
+      "agent-plan-digests"
+     ],
+     "extras": [
+      "instruction-text"
+     ],
+     "at": 1793271600.0
+    }
+   ],
+   "rows": [
+    {
+     "id": "g1",
+     "at": 1793275290.0,
+     "actor": [
+      "agent",
+      "ag-anna-1"
+     ],
+     "behalf": "u-anna"
+    }
+   ],
+   "joins": {},
+   "expect": {
+    "kept": {
+     "g1": {
+      "parameters": true,
+      "plan": null,
+      "instruction": null,
+      "checks": [],
+      "verdicts": [],
+      "omitted": {
+       "parameters": 0,
+       "checks": 0,
+       "verdicts": 0,
+       "plan": 0
+      }
+     }
+    },
+    "no_consent": 0
+   }
+  },
+  "the-agent-is-out-without-it": {
+   "consents": [
+    {
+     "person": "u-ben",
+     "purpose": "training",
+     "sequence": 1,
+     "state": "granted",
+     "covers": [
+      "own-actions",
+      "command-parameters",
+      "verdicts",
+      "published-checks",
+      "agent-plan-digests"
+     ],
+     "extras": [
+      "instruction-text"
+     ],
+     "at": 1793271600.0
+    }
+   ],
+   "rows": [
+    {
+     "id": "g1",
+     "at": 1793275290.0,
+     "actor": [
+      "agent",
+      "ag-anna-1"
+     ],
+     "behalf": "u-anna"
+    }
+   ],
+   "joins": {},
+   "expect": {
+    "kept": {},
+    "no_consent": 1
+   }
+  },
+  "an-agent-without-a-delegator": {
+   "consents": [
+    {
+     "person": "u-anna",
+     "purpose": "training",
+     "sequence": 1,
+     "state": "granted",
+     "covers": [
+      "own-actions",
+      "command-parameters",
+      "verdicts",
+      "published-checks",
+      "agent-plan-digests"
+     ],
+     "extras": [
+      "instruction-text"
+     ],
+     "at": 1793271600.0
+    }
+   ],
+   "rows": [
+    {
+     "id": "g2",
+     "at": 1793275290.0,
+     "actor": [
+      "agent",
+      "ag-anna-1"
+     ],
+     "behalf": null
+    }
+   ],
+   "joins": {},
+   "expect": {
+    "kept": {},
+    "no_consent": 1
+   }
+  },
+  "a-grant-after-the-last-action": {
+   "consents": [
+    {
+     "person": "u-anna",
+     "purpose": "training",
+     "sequence": 1,
+     "state": "granted",
+     "covers": [
+      "own-actions",
+      "command-parameters",
+      "verdicts",
+      "published-checks",
+      "agent-plan-digests"
+     ],
+     "extras": [
+      "instruction-text"
+     ],
+     "at": 1793282400.0
+    }
+   ],
+   "rows": [
+    {
+     "id": "a1",
+     "at": 1793275210.0,
+     "actor": [
+      "person",
+      "u-anna"
+     ],
+     "behalf": null
+    },
+    {
+     "id": "g1",
+     "at": 1793275290.0,
+     "actor": [
+      "agent",
+      "ag-anna-1"
+     ],
+     "behalf": "u-anna"
+    }
+   ],
+   "joins": {},
+   "expect": {
+    "kept": {},
+    "no_consent": 2
+   }
+  },
+  "without-command-parameters": {
+   "consents": [
+    {
+     "person": "u-anna",
+     "purpose": "training",
+     "sequence": 1,
+     "state": "granted",
+     "covers": [
+      "own-actions",
+      "verdicts",
+      "published-checks",
+      "agent-plan-digests"
+     ],
+     "extras": [
+      "instruction-text"
+     ],
+     "at": 1793271600.0
+    }
+   ],
+   "rows": [
+    {
+     "id": "a1",
+     "at": 1793275210.0,
+     "actor": [
+      "person",
+      "u-anna"
+     ],
+     "behalf": null
+    }
+   ],
+   "joins": {},
+   "expect": {
+    "kept": {
+     "a1": {
+      "parameters": false,
+      "plan": null,
+      "instruction": null,
+      "checks": [],
+      "verdicts": [],
+      "omitted": {
+       "parameters": 0,
+       "checks": 0,
+       "verdicts": 0,
+       "plan": 0
+      }
+     }
+    },
+    "no_consent": 0
+   }
+  },
+  "evidence-created-before-the-grant": {
+   "consents": [
+    {
+     "person": "u-anna",
+     "purpose": "training",
+     "sequence": 1,
+     "state": "granted",
+     "covers": [
+      "own-actions",
+      "command-parameters",
+      "verdicts",
+      "published-checks",
+      "agent-plan-digests"
+     ],
+     "extras": [
+      "instruction-text"
+     ],
+     "at": 1793275200.0
+    }
+   ],
+   "rows": [
+    {
+     "id": "g1",
+     "at": 1793275290.0,
+     "actor": [
+      "agent",
+      "ag-anna-1"
+     ],
+     "behalf": "u-anna"
+    }
+   ],
+   "joins": {
+    "g1": {
+     "plan": {
+      "plan_sha256": "c6d8b30b8cc1ba87c5fc31196a625208f095f385e5181275f374f3028719cae2",
+      "delegator": "u-anna",
+      "executed": "e1",
+      "evidence": [
+       {
+        "id": "e1",
+        "digest": "cabd76800c4ab93764055013bb1b1c8522978410b7055c44fcae216776543585",
+        "created_at": 1793275140.0,
+        "kept": true,
+        "instruction_removed": false,
+        "instruction": "Do the thing e1"
+       }
+      ]
+     }
+    }
+   },
+   "expect": {
+    "kept": {
+     "g1": {
+      "parameters": true,
+      "plan": null,
+      "instruction": null,
+      "checks": [],
+      "verdicts": [],
+      "omitted": {
+       "parameters": 0,
+       "checks": 0,
+       "verdicts": 0,
+       "plan": 1
+      }
+     }
+    },
+    "no_consent": 0
+   }
+  },
+  "the-executed-snapshot-wins-over-the-newest": {
+   "consents": [
+    {
+     "person": "u-anna",
+     "purpose": "training",
+     "sequence": 1,
+     "state": "granted",
+     "covers": [
+      "own-actions",
+      "command-parameters",
+      "verdicts",
+      "published-checks",
+      "agent-plan-digests"
+     ],
+     "extras": [
+      "instruction-text"
+     ],
+     "at": 1793275200.0
+    },
+    {
+     "person": "u-anna",
+     "purpose": "training",
+     "sequence": 2,
+     "state": "withdrawn",
+     "covers": [],
+     "extras": [],
+     "at": 1793275300.0
+    }
+   ],
+   "rows": [
+    {
+     "id": "g1",
+     "at": 1793275290.0,
+     "actor": [
+      "agent",
+      "ag-anna-1"
+     ],
+     "behalf": "u-anna"
+    }
+   ],
+   "joins": {
+    "g1": {
+     "plan": {
+      "plan_sha256": "c6d8b30b8cc1ba87c5fc31196a625208f095f385e5181275f374f3028719cae2",
+      "delegator": "u-anna",
+      "executed": "e-old",
+      "evidence": [
+       {
+        "id": "e-old",
+        "digest": "684bc63472a75eb82bcb808ed929e265aa17a52f2a2f94255dc29acbe23f2c8d",
+        "created_at": 1793275260.0,
+        "kept": true,
+        "instruction_removed": false,
+        "instruction": "Do the thing e-old"
+       },
+       {
+        "id": "e-new",
+        "digest": "f75f067794e42e4f593653753bb9f4535d0d23239a4ec179b93667a767e72f9d",
+        "created_at": 1793275320.0,
+        "kept": true,
+        "instruction_removed": false,
+        "instruction": "Do the thing e-new"
+       }
+      ]
+     }
+    }
+   },
+   "expect": {
+    "kept": {
+     "g1": {
+      "parameters": true,
+      "plan": {
+       "plan_sha256": "c6d8b30b8cc1ba87c5fc31196a625208f095f385e5181275f374f3028719cae2",
+       "evidence_sha256": "684bc63472a75eb82bcb808ed929e265aa17a52f2a2f94255dc29acbe23f2c8d"
+      },
+      "instruction": "Do the thing e-old",
+      "checks": [],
+      "verdicts": [],
+      "omitted": {
+       "parameters": 0,
+       "checks": 0,
+       "verdicts": 0,
+       "plan": 0
+      }
+     }
+    },
+    "no_consent": 0
+   }
+  },
+  "the-executed-snapshot-loses-when-it-is-outside": {
+   "consents": [
+    {
+     "person": "u-anna",
+     "purpose": "training",
+     "sequence": 1,
+     "state": "granted",
+     "covers": [
+      "own-actions",
+      "command-parameters",
+      "verdicts",
+      "published-checks",
+      "agent-plan-digests"
+     ],
+     "extras": [
+      "instruction-text"
+     ],
+     "at": 1793275200.0
+    },
+    {
+     "person": "u-anna",
+     "purpose": "training",
+     "sequence": 2,
+     "state": "withdrawn",
+     "covers": [],
+     "extras": [],
+     "at": 1793275300.0
+    }
+   ],
+   "rows": [
+    {
+     "id": "g1",
+     "at": 1793275290.0,
+     "actor": [
+      "agent",
+      "ag-anna-1"
+     ],
+     "behalf": "u-anna"
+    }
+   ],
+   "joins": {
+    "g1": {
+     "plan": {
+      "plan_sha256": "c6d8b30b8cc1ba87c5fc31196a625208f095f385e5181275f374f3028719cae2",
+      "delegator": "u-anna",
+      "executed": "e-new",
+      "evidence": [
+       {
+        "id": "e-old",
+        "digest": "684bc63472a75eb82bcb808ed929e265aa17a52f2a2f94255dc29acbe23f2c8d",
+        "created_at": 1793275260.0,
+        "kept": true,
+        "instruction_removed": false,
+        "instruction": "Do the thing e-old"
+       },
+       {
+        "id": "e-new",
+        "digest": "f75f067794e42e4f593653753bb9f4535d0d23239a4ec179b93667a767e72f9d",
+        "created_at": 1793275320.0,
+        "kept": true,
+        "instruction_removed": false,
+        "instruction": "Do the thing e-new"
+       }
+      ]
+     }
+    }
+   },
+   "expect": {
+    "kept": {
+     "g1": {
+      "parameters": true,
+      "plan": null,
+      "instruction": null,
+      "checks": [],
+      "verdicts": [],
+      "omitted": {
+       "parameters": 0,
+       "checks": 0,
+       "verdicts": 0,
+       "plan": 1
+      }
+     }
+    },
+    "no_consent": 0
+   }
+  },
+  "approved-without-evidence": {
+   "consents": [
+    {
+     "person": "u-anna",
+     "purpose": "training",
+     "sequence": 1,
+     "state": "granted",
+     "covers": [
+      "own-actions",
+      "command-parameters",
+      "verdicts",
+      "published-checks",
+      "agent-plan-digests"
+     ],
+     "extras": [
+      "instruction-text"
+     ],
+     "at": 1793271600.0
+    }
+   ],
+   "rows": [
+    {
+     "id": "g1",
+     "at": 1793275290.0,
+     "actor": [
+      "agent",
+      "ag-anna-1"
+     ],
+     "behalf": "u-anna"
+    }
+   ],
+   "joins": {
+    "g1": {
+     "plan": {
+      "plan_sha256": "c6d8b30b8cc1ba87c5fc31196a625208f095f385e5181275f374f3028719cae2",
+      "delegator": "u-anna",
+      "executed": null,
+      "evidence": []
+     }
+    }
+   },
+   "expect": {
+    "kept": {
+     "g1": {
+      "parameters": true,
+      "plan": {
+       "plan_sha256": "c6d8b30b8cc1ba87c5fc31196a625208f095f385e5181275f374f3028719cae2",
+       "evidence_sha256": null
+      },
+      "instruction": null,
+      "checks": [],
+      "verdicts": [],
+      "omitted": {
+       "parameters": 0,
+       "checks": 0,
+       "verdicts": 0,
+       "plan": 0
+      }
+     }
+    },
+    "no_consent": 0
+   }
+  },
+  "verdicts-either-side-of-a-boundary": {
+   "consents": [
+    {
+     "person": "u-anna",
+     "purpose": "training",
+     "sequence": 1,
+     "state": "granted",
+     "covers": [
+      "own-actions",
+      "command-parameters",
+      "verdicts",
+      "published-checks",
+      "agent-plan-digests"
+     ],
+     "extras": [
+      "instruction-text"
+     ],
+     "at": 1793271600.0
+    },
+    {
+     "person": "u-ben",
+     "purpose": "training",
+     "sequence": 1,
+     "state": "granted",
+     "covers": [
+      "own-actions",
+      "command-parameters",
+      "verdicts",
+      "published-checks",
+      "agent-plan-digests"
+     ],
+     "extras": [
+      "instruction-text"
+     ],
+     "at": 1793275200.0
+    }
+   ],
+   "rows": [
+    {
+     "id": "a1",
+     "at": 1793275210.0,
+     "actor": [
+      "person",
+      "u-anna"
+     ],
+     "behalf": null
+    }
+   ],
+   "joins": {
+    "a1": {
+     "verdicts": [
+      {
+       "asset_id": "x",
+       "revision": "r1",
+       "verdict": "accepted",
+       "actor": {
+        "kind": "person",
+        "id": "u-ben"
+       },
+       "on_behalf_of": null,
+       "at": 1793275199.0,
+       "reason": null
+      },
+      {
+       "asset_id": "x",
+       "revision": "r1",
+       "verdict": "accepted",
+       "actor": {
+        "kind": "person",
+        "id": "u-ben"
+       },
+       "on_behalf_of": null,
+       "at": 1793275200.0,
+       "reason": null
+      },
+      {
+       "asset_id": "x",
+       "revision": "r1",
+       "verdict": "accepted",
+       "actor": {
+        "kind": "agent",
+        "id": "ag-ben-1"
+       },
+       "on_behalf_of": {
+        "kind": "person",
+        "id": "u-ben"
+       },
+       "at": 1793275205.0,
+       "reason": null
+      },
+      {
+       "asset_id": "x",
+       "revision": "r1",
+       "verdict": "accepted",
+       "actor": {
+        "kind": "agent",
+        "id": "ag-x"
+       },
+       "on_behalf_of": null,
+       "at": 1793275205.0,
+       "reason": null
+      }
+     ]
+    }
+   },
+   "expect": {
+    "kept": {
+     "a1": {
+      "parameters": true,
+      "plan": null,
+      "instruction": null,
+      "checks": [],
+      "verdicts": [
+       1793275200.0,
+       1793275205.0
+      ],
+      "omitted": {
+       "parameters": 0,
+       "checks": 0,
+       "verdicts": 2,
+       "plan": 0
+      }
+     }
+    },
+    "no_consent": 0
+   }
+  },
+  "capture-off": {
+   "capture": "off",
+   "consents": [
+    {
+     "person": "u-anna",
+     "purpose": "training",
+     "sequence": 1,
+     "state": "granted",
+     "covers": [
+      "own-actions",
+      "command-parameters",
+      "verdicts",
+      "published-checks",
+      "agent-plan-digests"
+     ],
+     "extras": [
+      "instruction-text"
+     ],
+     "at": 1793271600.0
+    }
+   ],
+   "rows": [
+    {
+     "id": "a1",
+     "at": 1793275210.0,
+     "actor": [
+      "person",
+      "u-anna"
+     ],
+     "behalf": null
+    }
+   ],
+   "joins": {},
+   "expect": {
+    "kept": {},
+    "no_consent": 1
+   }
+  },
+  "evaluation-never-answers-for-training": {
+   "purpose": "evaluation",
+   "consents": [
+    {
+     "person": "u-anna",
+     "purpose": "training",
+     "sequence": 1,
+     "state": "granted",
+     "covers": [
+      "own-actions",
+      "command-parameters",
+      "verdicts",
+      "published-checks",
+      "agent-plan-digests"
+     ],
+     "extras": [
+      "instruction-text"
+     ],
+     "at": 1793271600.0
+    }
+   ],
+   "rows": [
+    {
+     "id": "a1",
+     "at": 1793275210.0,
+     "actor": [
+      "person",
+      "u-anna"
+     ],
+     "behalf": null
+    }
+   ],
+   "joins": {},
+   "expect": {
+    "kept": {},
+    "no_consent": 1
+   }
+  },
+  "instruction-with-the-extra-kept": {
+   "consents": [
+    {
+     "person": "u-anna",
+     "purpose": "training",
+     "sequence": 1,
+     "state": "granted",
+     "covers": [
+      "own-actions",
+      "command-parameters",
+      "verdicts",
+      "published-checks",
+      "agent-plan-digests"
+     ],
+     "extras": [
+      "instruction-text"
+     ],
+     "at": 1793271600.0
+    }
+   ],
+   "rows": [
+    {
+     "id": "g1",
+     "at": 1793275290.0,
+     "actor": [
+      "agent",
+      "ag-anna-1"
+     ],
+     "behalf": "u-anna"
+    }
+   ],
+   "joins": {
+    "g1": {
+     "plan": {
+      "plan_sha256": "c6d8b30b8cc1ba87c5fc31196a625208f095f385e5181275f374f3028719cae2",
+      "delegator": "u-anna",
+      "executed": "e1",
+      "evidence": [
+       {
+        "id": "e1",
+        "digest": "cabd76800c4ab93764055013bb1b1c8522978410b7055c44fcae216776543585",
+        "created_at": 1793275260.0,
+        "kept": true,
+        "instruction_removed": false,
+        "instruction": "Do the thing e1"
+       }
+      ]
+     }
+    }
+   },
+   "expect": {
+    "kept": {
+     "g1": {
+      "parameters": true,
+      "plan": {
+       "plan_sha256": "c6d8b30b8cc1ba87c5fc31196a625208f095f385e5181275f374f3028719cae2",
+       "evidence_sha256": "cabd76800c4ab93764055013bb1b1c8522978410b7055c44fcae216776543585"
+      },
+      "instruction": "Do the thing e1",
+      "checks": [],
+      "verdicts": [],
+      "omitted": {
+       "parameters": 0,
+       "checks": 0,
+       "verdicts": 0,
+       "plan": 0
+      }
+     }
+    },
+    "no_consent": 0
+   }
+  },
+  "instruction-without-the-extra": {
+   "consents": [
+    {
+     "person": "u-anna",
+     "purpose": "training",
+     "sequence": 1,
+     "state": "granted",
+     "covers": [
+      "own-actions",
+      "command-parameters",
+      "verdicts",
+      "published-checks",
+      "agent-plan-digests"
+     ],
+     "extras": [],
+     "at": 1793271600.0
+    }
+   ],
+   "rows": [
+    {
+     "id": "g1",
+     "at": 1793275290.0,
+     "actor": [
+      "agent",
+      "ag-anna-1"
+     ],
+     "behalf": "u-anna"
+    }
+   ],
+   "joins": {
+    "g1": {
+     "plan": {
+      "plan_sha256": "c6d8b30b8cc1ba87c5fc31196a625208f095f385e5181275f374f3028719cae2",
+      "delegator": "u-anna",
+      "executed": "e1",
+      "evidence": [
+       {
+        "id": "e1",
+        "digest": "cabd76800c4ab93764055013bb1b1c8522978410b7055c44fcae216776543585",
+        "created_at": 1793275260.0,
+        "kept": true,
+        "instruction_removed": false,
+        "instruction": "Do the thing e1"
+       }
+      ]
+     }
+    }
+   },
+   "expect": {
+    "kept": {
+     "g1": {
+      "parameters": true,
+      "plan": {
+       "plan_sha256": "c6d8b30b8cc1ba87c5fc31196a625208f095f385e5181275f374f3028719cae2",
+       "evidence_sha256": "cabd76800c4ab93764055013bb1b1c8522978410b7055c44fcae216776543585"
+      },
+      "instruction": null,
+      "checks": [],
+      "verdicts": [],
+      "omitted": {
+       "parameters": 0,
+       "checks": 0,
+       "verdicts": 0,
+       "plan": 0
+      }
+     }
+    },
+    "no_consent": 0
+   }
+  },
+  "instruction-not-kept": {
+   "consents": [
+    {
+     "person": "u-anna",
+     "purpose": "training",
+     "sequence": 1,
+     "state": "granted",
+     "covers": [
+      "own-actions",
+      "command-parameters",
+      "verdicts",
+      "published-checks",
+      "agent-plan-digests"
+     ],
+     "extras": [
+      "instruction-text"
+     ],
+     "at": 1793271600.0
+    }
+   ],
+   "rows": [
+    {
+     "id": "g1",
+     "at": 1793275290.0,
+     "actor": [
+      "agent",
+      "ag-anna-1"
+     ],
+     "behalf": "u-anna"
+    }
+   ],
+   "joins": {
+    "g1": {
+     "plan": {
+      "plan_sha256": "c6d8b30b8cc1ba87c5fc31196a625208f095f385e5181275f374f3028719cae2",
+      "delegator": "u-anna",
+      "executed": "e1",
+      "evidence": [
+       {
+        "id": "e1",
+        "digest": "cabd76800c4ab93764055013bb1b1c8522978410b7055c44fcae216776543585",
+        "created_at": 1793275260.0,
+        "kept": false,
+        "instruction_removed": false,
+        "instruction": "Do the thing e1"
+       }
+      ]
+     }
+    }
+   },
+   "expect": {
+    "kept": {
+     "g1": {
+      "parameters": true,
+      "plan": {
+       "plan_sha256": "c6d8b30b8cc1ba87c5fc31196a625208f095f385e5181275f374f3028719cae2",
+       "evidence_sha256": "cabd76800c4ab93764055013bb1b1c8522978410b7055c44fcae216776543585"
+      },
+      "instruction": null,
+      "checks": [],
+      "verdicts": [],
+      "omitted": {
+       "parameters": 0,
+       "checks": 0,
+       "verdicts": 0,
+       "plan": 0
+      }
+     }
+    },
+    "no_consent": 0
+   }
+  },
+  "instruction-removed": {
+   "consents": [
+    {
+     "person": "u-anna",
+     "purpose": "training",
+     "sequence": 1,
+     "state": "granted",
+     "covers": [
+      "own-actions",
+      "command-parameters",
+      "verdicts",
+      "published-checks",
+      "agent-plan-digests"
+     ],
+     "extras": [
+      "instruction-text"
+     ],
+     "at": 1793271600.0
+    }
+   ],
+   "rows": [
+    {
+     "id": "g1",
+     "at": 1793275290.0,
+     "actor": [
+      "agent",
+      "ag-anna-1"
+     ],
+     "behalf": "u-anna"
+    }
+   ],
+   "joins": {
+    "g1": {
+     "plan": {
+      "plan_sha256": "c6d8b30b8cc1ba87c5fc31196a625208f095f385e5181275f374f3028719cae2",
+      "delegator": "u-anna",
+      "executed": "e1",
+      "evidence": [
+       {
+        "id": "e1",
+        "digest": "cabd76800c4ab93764055013bb1b1c8522978410b7055c44fcae216776543585",
+        "created_at": 1793275260.0,
+        "kept": true,
+        "instruction_removed": true,
+        "instruction": "Do the thing e1"
+       }
+      ]
+     }
+    }
+   },
+   "expect": {
+    "kept": {
+     "g1": {
+      "parameters": true,
+      "plan": {
+       "plan_sha256": "c6d8b30b8cc1ba87c5fc31196a625208f095f385e5181275f374f3028719cae2",
+       "evidence_sha256": "cabd76800c4ab93764055013bb1b1c8522978410b7055c44fcae216776543585"
+      },
+      "instruction": null,
+      "checks": [],
+      "verdicts": [],
+      "omitted": {
+       "parameters": 0,
+       "checks": 0,
+       "verdicts": 0,
+       "plan": 0
+      }
+     }
+    },
+    "no_consent": 0
+   }
+  }
+ }
+}

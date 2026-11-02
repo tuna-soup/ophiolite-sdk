@@ -1,0 +1,338 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/scientific/v1/verdict.json",
+  "x-ophiolite": {
+    "id": "ophiolite.verdict/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "Actor": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "person",
+            "agent"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "name_at_time": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name At Time"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "name_at_time"
+      ],
+      "title": "Actor",
+      "type": "object"
+    },
+    "AgainstCheck": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "check",
+          "title": "Kind",
+          "type": "string"
+        },
+        "key": {
+          "description": "An E96 check key (ophiolite.check/1) over this result version",
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "key"
+      ],
+      "title": "AgainstCheck",
+      "type": "object"
+    },
+    "AgainstOutcome": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "outcome",
+          "title": "Kind",
+          "type": "string"
+        },
+        "outcome_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Outcome Id",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "outcome_id",
+        "version"
+      ],
+      "title": "AgainstOutcome",
+      "type": "object"
+    },
+    "Behalf": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "person",
+          "title": "Kind",
+          "type": "string"
+        },
+        "id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "name_at_time": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name At Time"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "name_at_time"
+      ],
+      "title": "Behalf",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "One person's accepted or rejected on one exact result version, with a reason; never changed, never pruned.",
+  "else": {
+    "else": {
+      "properties": {
+        "on_behalf_of": {
+          "type": "null"
+        }
+      }
+    },
+    "if": {
+      "properties": {
+        "actor": {
+          "properties": {
+            "kind": {
+              "const": "agent"
+            }
+          },
+          "required": [
+            "kind"
+          ]
+        }
+      },
+      "required": [
+        "actor"
+      ]
+    },
+    "then": {
+      "properties": {
+        "on_behalf_of": {
+          "type": "object"
+        }
+      }
+    }
+  },
+  "if": {
+    "properties": {
+      "verdict": {
+        "const": "rejected"
+      }
+    },
+    "required": [
+      "verdict"
+    ]
+  },
+  "properties": {
+    "schema": {
+      "const": "ophiolite.verdict/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "verdict_id": {
+      "pattern": "^verdict-[0-9a-f]{32}$",
+      "title": "Verdict Id",
+      "type": "string"
+    },
+    "asset_id": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "revision": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Revision",
+      "type": "string"
+    },
+    "verdict": {
+      "enum": [
+        "accepted",
+        "rejected"
+      ],
+      "title": "Verdict",
+      "type": "string"
+    },
+    "reason": {
+      "anyOf": [
+        {
+          "maxLength": 2000,
+          "pattern": "^[^\\x00]*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Required and not blank when rejected; kept verbatim",
+      "title": "Reason"
+    },
+    "against": {
+      "anyOf": [
+        {
+          "discriminator": {
+            "mapping": {
+              "check": "#/$defs/AgainstCheck",
+              "outcome": "#/$defs/AgainstOutcome"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/AgainstOutcome"
+            },
+            {
+              "$ref": "#/$defs/AgainstCheck"
+            }
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Against"
+    },
+    "supersedes": {
+      "anyOf": [
+        {
+          "pattern": "^verdict-[0-9a-f]{32}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The author's previous verdict on this version; null for the first",
+      "title": "Supersedes"
+    },
+    "actor": {
+      "$ref": "#/$defs/Actor"
+    },
+    "on_behalf_of": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Behalf"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The delegator, exactly when the actor is an agent"
+    },
+    "at": {
+      "title": "At",
+      "type": "number"
+    }
+  },
+  "required": [
+    "schema",
+    "verdict_id",
+    "asset_id",
+    "revision",
+    "verdict",
+    "reason",
+    "against",
+    "supersedes",
+    "actor",
+    "on_behalf_of",
+    "at"
+  ],
+  "then": {
+    "else": {
+      "properties": {
+        "on_behalf_of": {
+          "type": "null"
+        }
+      }
+    },
+    "if": {
+      "properties": {
+        "actor": {
+          "properties": {
+            "kind": {
+              "const": "agent"
+            }
+          },
+          "required": [
+            "kind"
+          ]
+        }
+      },
+      "required": [
+        "actor"
+      ]
+    },
+    "properties": {
+      "reason": {
+        "pattern": "\\S",
+        "type": "string"
+      }
+    },
+    "required": [
+      "reason"
+    ],
+    "then": {
+      "properties": {
+        "on_behalf_of": {
+          "type": "object"
+        }
+      }
+    }
+  },
+  "title": "Verdict",
+  "type": "object"
+}

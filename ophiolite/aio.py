@@ -162,8 +162,8 @@ class AsyncClient(Client):
         _core.verify_typed_descriptor(data,self.project,asset,revision)
         raw=_core.rules.artifact(data)
         normalized=next(r for r in data['representations'] if r['kind']=='normalized')
-        artifact=None if data['scientific'].get('type')=='seismic-volume' else await self._get(path+'/representations/'+quote(raw['id'],safe=''),raw['bytes'])
-        body=await self._get(path+'/representations/'+quote(normalized['id'],safe=''),normalized['bytes'])
+        artifact=None if data['scientific'].get('type')=='seismic-volume' else await self._artifact(path+'/representations/'+quote(raw['id'],safe=''),raw['bytes'])
+        body=await self._artifact(path+'/representations/'+quote(normalized['id'],safe=''),normalized['bytes'])  # E139 s2: by ranges above the bound
         return _core.typed_result(data,body,artifact)
 
     async def read_slice(self,asset,revision,axis,label,*,volume=None):

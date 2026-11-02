@@ -164,6 +164,29 @@
       }
     },
     {
+      "profile": "segy-line/1",
+      "data": "2D seismic line",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "Samples are not copied into the description; header interpretations are recorded as decisions"
+      ],
+      "unsupported": [
+        "a 2D SEG-Y file without the exporter's marker (it is read as a seismic volume)",
+        "SEG-Y formats other than IBM and IEEE float",
+        "little-endian or variable-length traces",
+        "lines of more than 200,000 traces",
+        "line export"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    },
+    {
       "profile": "petrel-points-attributes/1",
       "data": "Petrel points with attributes (horizon points)",
       "direction": "read",
@@ -244,6 +267,29 @@
         "time-to-depth",
         "a coordinate system stated without an EPSG code",
         "joining sticks of one fault that the file writes apart"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    },
+    {
+      "profile": "petrel-well-tops/1",
+      "data": "Petrel well tops (each Surface at its MD, one well per file)",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "Columns other than Surface, MD and Well are kept only in the exact original",
+        "Text formatting is kept only in the exact original"
+      ],
+      "unsupported": [
+        "unit conversion",
+        "several wells in one file",
+        "reading Z or other vertical coordinates",
+        "residuals at wells"
       ],
       "qualification": {
         "status": "unverified",

@@ -5,6 +5,97 @@
 Supported 0.x client over preview contracts, installable from reviewed source.
 No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
 
+- An agent records a verdict through an approved plan (E132 s3): `AgentClient` proposes and executes
+  `verdicts/record` like any other change (`agent.run('verdicts/record', {...}, evidence=...)`); without an approved
+  plan the server refuses it (`plan-required`). The verdict reads "by <agent> for <person>" in `verdicts` and the
+  story, and replaying the executed plan answers the stored verdict only while its person can read that version.
+- Repeatable work-episode exports (E134 s3): `export_trajectories(..., until=N)` and `ophiolite trajectories export
+  --until N` repeat an export at the boundary of its manifest: the same `episodes.jsonl` and a manifest that differs
+  only in `exported_at` while readership, rights, consent, member names, release and SDK version are unchanged. A
+  `until` above the project's latest work is answered as that work. With pyarrow installed the folder also holds
+  `episodes.parquet` (episode id, mode, split, start, end, rows and the line; zstd), and `load` checks it as rule 9;
+  without pyarrow it is neither written nor read. The result gains `parquet`. The package carries a two-episode
+  conformance folder under `contracts/scientific/v1/fixtures/work-episodes/folder/`.
+- Values in exported work episodes (E134 s2): `export_trajectories` and `ophiolite trajectories export` take
+  `--mode auto|shape` (default `auto`; it was `shape` only and required). `auto` gives values episodes where the
+  rights allow (a grant, your own self-grant on every item the episode touches, or a catalogue basis under an open
+  licence): the request, parameters with their labels, item ids and revisions, check names, verdict reasons and the
+  instruction you consented to share, after scans that drop a secret or a member's name; otherwise the episode stays
+  shape. The result is `{episodes, values, destination}` and the line says how many have values.
+  `client.grant_own_ai_use(asset, purpose, granted=True)` and `ophiolite ai-use self-grant ASSET --purpose
+  training|evaluation [--withdraw]` record that your own work in an item you uploaded or made may be used, or no
+  longer (forward only; people only, never an agent or a service account). `ai-use/self-grant` is now an operation
+  the client sends.
+- The story's rejected outcome line says what a version is (E121 P10): 'Fails the outcome "<outcome>", declared at
+  version N (a change to its rule makes a new version): ...', as the Workspace result page says it; it read
+  "(version N of its rule)" before.
+- Exporting your own work as episodes (E134 s1): `client.export_trajectories(destination, purpose=...)` and
+  `ophiolite trajectories export --scope project:ID --purpose training|evaluation --mode shape --destination DIR` write
+  your own consented work in one project to a new folder (`trajectories.json` and `episodes.jsonl`), shape mode only:
+  pseudonyms, digests and listed parameters, never values. The export pages under one boundary and refuses when the
+  record changes while exporting (exit code 4); nothing is left at the destination on any refusal.
+  `ophiolite.trajectories.load(folder)` reads a folder and checks its eight rules. `activity/trajectories` is now an
+  operation the client sends.
+- Withdrawing a result version (E132 s2): `client.withdraw(asset_id, revision, reason, command_id=None)` reads the
+  version's stage (`stages/get`) and sends one `stages/transition` withdrawal with your reason; a lost answer is sent
+  again with the same command id. The server also records your rejection of that version with the same reason, which
+  `verdicts` and the story show. `ophiolite withdraw ITEM[@N] --reason TEXT` prints only the server's confirmation,
+  "<name> is now <stage name>: <reason>" ("This result" when the name does not read as a name), with no version number;
+  a refusal prints the server's sentence (exit code 1). `stages/get` and `stages/transition` are now operations the
+  client sends.
+- The story prints the outcome lines (E120 s7): `ophiolite story ASSET REVISION` also reads `outcomes/states` for the
+  asked version and prints, after that version's own lines, one line per current outcome in the Workspace result
+  page's words: the server's state line (a line that does not name its outcome gets "<outcome>: " in front), a
+  rejection as 'Fails the outcome "<outcome>" (version N of its rule): ...', the earlier publications and versions,
+  and each "Deliver as" claim as "Delivered as <outcome> version N: ..." ("allowed to be delivered; no delivery
+  reported yet" until one is reported). A refused states read adds no line; `--json` and `story.lines(page)` without
+  states are unchanged, and `ophiolite dependents` prints none.
+- The story says what a sent version is based on (E109 s4): a declared (sent) node of `results/story` carries
+  `based_on`, the versions it was sent based on that you can open, in the recorded order, each
+  `{asset_id, revision, kind, name, version, file}` with `kind` one of `upload`, `map`, `reference` or `version`, and
+  `based_on_hidden: true` when it is also based on something you cannot open (never a count). Both are absent
+  otherwise, and on dependents pages. `ophiolite story` prints the sentence after the method line, for example "Based
+  on the upload tops.csv (FRB-07 tops, version 1)." or "Based on SAP-10 tops, version 1."; a name that does not read
+  as a name reads "an unnamed item", and such a file is left out. Version numbers do not change.
+- A well set saved without a frame (E119a slice 6): a member of `well-set/1` may hold a trajectory with `frame: null`,
+  and `client.well_sets.read` reads such a set back (a frame without a trajectory is still refused: "A member has a
+  frame without a trajectory"). Placing it refuses until a later version of the set gives its frame:
+  `well_sets.bind` refuses before any request with "Member N: The wellbore's trajectory was saved without a frame (map
+  system, wellhead, depth reference, datum and north), so it cannot be placed; save the well set again with its
+  frame." and `details` `{'reason': 'geometry:frame_missing', 'field': 'members[N-1]', 'member': N-1}`.
+  `residuals.prepare` binds every member with a trajectory, so it refuses at that member whether or not it has a top;
+  `residuals.compute` refuses only where a member needs a crossing, and its placement refusals now start "Member N: "
+  with `field`, `member` and `wellbore` in `details`. `WellSets.from_list` still refuses a chosen trajectory without
+  a frame (it is the scripted path, where the frame can be given); to save without a frame, upload the document or
+  use the Workspace.
+- The sentences say tool (E131 s2): the SDK's `Not run: …` sentences and the CLI's output say tool where they said
+  procedure, for example "This project has no tools you can see yet." and "Settings → Tools or with ophiolite tools
+  enable.". Scripts that match a sentence's text see the new words; a refusal's `reason` code is unchanged. Kept as
+  they were: the "withdrawn" sentence (the conformance kit asserts it), `OUTCOME_WORDS` (they mirror the stored
+  comparison), and every command, method and file name.
+
+- Tools is the word (E131 s1): a team's own code is a tool. `ophiolite tools new|validate|run|register|list|show|enable|
+  withdraw|trust|publish|again` are the commands, e.g. `ophiolite tools register ophiolite/reference/read-zgy`;
+  `@ophiolite.tool` marks a tool's entry, `ophiolite.tools` holds the helpers (the same objects as
+  `ophiolite.procedures`), and `Client.tool_*` calls the matching `procedure_*` method. `ophiolite procedures …` still
+  runs; at a terminal it first prints one line on stderr: "`ophiolite procedures` now runs as `ophiolite tools`; the old
+  spelling is removed in a later release, announced one release ahead in the CHANGELOG." Scripts that call it with
+  stderr piped see exactly the output they saw before, `new`'s next command included; this entry is their notice. `procedure`, `ophiolite.procedures`,
+  `Client.procedure_*` and the folder's procedure.json and procedure.py stay as they are: they are the names a
+  registered tool's code imports, so a tool written now runs on 2026.10.128 and a version registered before runs now.
+  Every start `tools new` writes says so in its first comment, so the digest of E105a's no-kind start moves once.
+
+- A ZGY cube read on your computer (E123 SZ): `ophiolite.zgy.read(path, crs=, z_domain=, horizontal_unit=)` converts it
+  to SEG-Y rev 1 with IEEE samples (`WrittenOriginal`, profile `segy/1`), and the packaged read procedure "Read a ZGY
+  cube on your computer" (`ophiolite.zgy.PROCEDURE`, `requires: ["pyzgy>=0.1.1"]`) lands it as a seismic volume. The
+  first read asks once, before any sample is decoded: "Choose the coordinate system and confirm whether the samples
+  represent time or depth. …" (`NotRun('asked')`). The vertical axis is time in milliseconds or depth in metres from 0,
+  exact or refused; horizontal coordinates are metres, written with the coarsest exact SEG-Y scalar or refused naming
+  the coordinate; int8 and int16 cubes are scaled by their stated datarange; at most 32 MiB of ZGY and 128 MiB of
+  SEG-Y. Needs `pip install 'ophiolite[zgy]'` (pyzgy, which installs segyio, LGPL-3.0; no Linux aarch64 wheel).
+  `writers.write_volume` writes a cube as SEG-Y rev 1; a procedure stops on purpose with `procedures.Stopped(sentence,
+  asks=False)`, shown as "Not run yet: …" (`asked`) or "Not run: …" (`procedure-stopped`) with its sentence.
+  A Petrel-written cube is not yet proven.
 - What is gone from a source (E122 slice 2): `ophiolite upload PATH --source NAME --complete` says the folder is
   everything in that source (`--scope DIR` for one folder of it); a file the source sent before and this send does not
   list is marked gone (nothing is removed), and the report prints the server's sentence as served, e.g. "Not in this

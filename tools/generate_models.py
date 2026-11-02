@@ -11,7 +11,9 @@ KEYWORDS = {'$defs','$id','$ref','$schema','additionalProperties','anyOf','const
             'default','description','discriminator','enum','exclusiveMinimum','exclusiveMaximum','items',
             'maxItems','maxLength','maximum','minItems','minLength','minimum','oneOf',
             'pattern','properties','required','title','type','x-ophiolite',
-            'if','then','maxProperties'}  # E54: value rules beside a type (an original may exceed 32 MiB) are the server's to check
+            'if','then','maxProperties',  # E54: value rules beside a type (an original may exceed 32 MiB) are the server's to check
+            'else',  # E132: the verdict's conditional (delegator, reason) is a value rule too
+            'uniqueItems'}  # E133: a consent's covers and extras name each entry once; the server checks it, the model stays a list
 RENAMES = {'Asset':'ScientificAsset','Curve':'ApplicationCurve','ScientificContext':'ScientificContext'}
 
 def name(value):
@@ -26,7 +28,7 @@ def python_field(field):
 
 class Generator:
     def __init__(self):
-        self.classes = {}; self.documents = {}; self.origins = {}
+        self.classes = {}; self.documents = {}; self.origins = {}; self.aliases = {}
 
     def scan(self, schema, path):
         if not isinstance(schema, dict): raise ValueError(path+': schema must be an object')
@@ -93,7 +95,11 @@ class Generator:
         self.documents = documents
         for path, schema in documents.items():
             self.scan(schema,path)
-            self.model(schema['title'],schema,path)
+            if schema.get('type') is None and 'oneOf' in schema and 'discriminator' in schema:  # E134: a document whose root is a discriminated union is an alias
+                alias = name(schema['title'])
+                if alias in self.aliases: raise ValueError('Conflicting model '+alias)
+                self.aliases[alias] = self.expression({k:v for k,v in schema.items() if k in ('oneOf','discriminator')},alias,path)
+            else: self.model(schema['title'],schema,path)
             for key, definition in schema.get('$defs',{}).items():
                 if definition.get('type') == 'object': self.model(key,definition,path)
         emitted = {}; pending = list(self.classes)
@@ -124,7 +130,8 @@ class Contract(BaseModel):
     model_config = ConfigDict(extra='allow', strict=True, allow_inf_nan=False)
     __strict_extras__: ClassVar[bool] = False
 '''
-        body = '\n\n'.join(emitted.values())
+        if self.aliases.keys() & emitted.keys(): raise ValueError('Conflicting model '+sorted(self.aliases.keys() & emitted.keys())[0])
+        body = '\n\n'.join([*emitted.values(), *(f'{alias} = {expression}' for alias, expression in self.aliases.items())])
         rebuild = '\n'.join(f'{model_name}.model_rebuild()' for model_name in emitted)
         return header+'\n\n'+body+'\n\n'+rebuild+'\n'
 

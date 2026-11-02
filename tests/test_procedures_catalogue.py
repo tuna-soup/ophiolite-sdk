@@ -16,7 +16,7 @@ def test_an_expected_digest_runs_exactly_that_version_and_nothing_else(tmp_path)
     run_shift(tmp_path, folder, expected_digest=DEPTH_SHIFT)
     assert (tmp_path / 'out/shifted.csv').read_bytes() == SHIFTED
     error = refused('changed-before-run', lambda: run_shift(tmp_path, folder, output='other', expected_digest='0' * 64))
-    assert str(error) == "Not run: the procedure's files changed after they were checked; nothing ran. Run it again."
+    assert str(error) == "Not run: the tool's files changed after they were checked; nothing ran. Run it again."
     assert error.details == {'expected': '0' * 64, 'found': DEPTH_SHIFT} and not (tmp_path / 'other').exists()
 
 

@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/schema.json",
   "x-ophiolite": {
     "id": "ophiolite.scientific-asset/1",
-    "version": "1.32.0",
+    "version": "1.34.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -2276,7 +2276,7 @@
           "type": "string"
         },
         "bytes": {
-          "maximum": 33554432,
+          "maximum": 609048576,
           "minimum": 0,
           "title": "Bytes",
           "type": "integer"
@@ -3264,8 +3264,9 @@
       "title": "PetrelPackageInterpretation",
       "type": "object"
     },
-    "PointContext": {
+    "PointColumnsContext": {
       "additionalProperties": false,
+      "description": "E139 (typed-context 1.11.0): a point set's context wherever it is not inside a released `ophiolite.point-set/1`\ndocument, which keeps `PointContext` and its 100,000 bytes for bytes; above 100,000 nodes it is stored as columns.",
       "properties": {
         "crs": {
           "pattern": "^(EPSG:[0-9]{4,6}|unknown)$",
@@ -3359,7 +3360,7 @@
           "type": "string"
         },
         "count": {
-          "maximum": 100000,
+          "maximum": 4000000,
           "minimum": 1,
           "title": "Count",
           "type": "integer"
@@ -3369,7 +3370,7 @@
           "type": "boolean"
         },
         "missing_z_count": {
-          "maximum": 100000,
+          "maximum": 4000000,
           "minimum": 0,
           "title": "Missing Z Count",
           "type": "integer"
@@ -3392,7 +3393,7 @@
         "z_provided",
         "missing_z_count"
       ],
-      "title": "PointContext",
+      "title": "PointColumnsContext",
       "type": "object"
     },
     "PolylineContext": {
@@ -4434,7 +4435,8 @@
             "application/x-esri-shapefile",
             "application/geopackage+sqlite3",
             "application/geo+json",
-            "application/vnd.ophiolite.curve-columns"
+            "application/vnd.ophiolite.curve-columns",
+            "application/vnd.ophiolite.point-columns"
           ],
           "title": "Media Type",
           "type": "string"
@@ -4486,20 +4488,36 @@
           "properties": {
             "profile": {
               "not": {
-                "const": "ophiolite.curve-columns/1"
+                "const": "ophiolite.point-columns/1"
               }
             }
           }
         },
         "properties": {
           "bytes": {
-            "maximum": 65048576
+            "maximum": 609048576
           }
         },
         "then": {
+          "if": {
+            "properties": {
+              "profile": {
+                "not": {
+                  "const": "ophiolite.curve-columns/1"
+                }
+              }
+            }
+          },
           "properties": {
             "bytes": {
-              "maximum": 33554432
+              "maximum": 65048576
+            }
+          },
+          "then": {
+            "properties": {
+              "bytes": {
+                "maximum": 33554432
+              }
             }
           }
         }
@@ -5066,6 +5084,156 @@
         "fidelity"
       ],
       "title": "SeismicContext",
+      "type": "object"
+    },
+    "SeismicLineContext": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "seismic-line",
+          "title": "Type",
+          "type": "string"
+        },
+        "format": {
+          "enum": [
+            "IBM 4-byte floating point",
+            "IEEE 4-byte floating point"
+          ],
+          "title": "Format",
+          "type": "string"
+        },
+        "format_code": {
+          "enum": [
+            1,
+            5
+          ],
+          "title": "Format Code",
+          "type": "integer"
+        },
+        "segy_revision": {
+          "pattern": "^[0-9]{1,3}\\.[0-9]{1,3}$",
+          "title": "Segy Revision",
+          "type": "string"
+        },
+        "traces": {
+          "maximum": 200000,
+          "minimum": 1,
+          "title": "Traces",
+          "type": "integer"
+        },
+        "samples": {
+          "maximum": 20000,
+          "minimum": 1,
+          "title": "Samples",
+          "type": "integer"
+        },
+        "trace_bytes": {
+          "minimum": 244,
+          "title": "Trace Bytes",
+          "type": "integer"
+        },
+        "sample_interval": {
+          "exclusiveMinimum": 0,
+          "title": "Sample Interval",
+          "type": "number"
+        },
+        "sample_unit": {
+          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+          "title": "Sample Unit",
+          "type": "string"
+        },
+        "first_sample": {
+          "title": "First Sample",
+          "type": "number"
+        },
+        "z_domain": {
+          "enum": [
+            "time",
+            "depth",
+            "unknown"
+          ],
+          "title": "Z Domain",
+          "type": "string"
+        },
+        "crs": {
+          "pattern": "^(EPSG:[0-9]{4,6}|unknown)$",
+          "title": "Crs",
+          "type": "string"
+        },
+        "datum": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Datum",
+          "type": "string"
+        },
+        "dataset": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dataset"
+        },
+        "line": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Line"
+        },
+        "exceptions": {
+          "items": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "maxItems": 64,
+          "title": "Exceptions",
+          "type": "array"
+        },
+        "fidelity": {
+          "$ref": "#/$defs/Fidelity"
+        }
+      },
+      "required": [
+        "type",
+        "format",
+        "format_code",
+        "segy_revision",
+        "traces",
+        "samples",
+        "trace_bytes",
+        "sample_interval",
+        "sample_unit",
+        "first_sample",
+        "z_domain",
+        "crs",
+        "datum",
+        "dataset",
+        "line",
+        "exceptions",
+        "fidelity"
+      ],
+      "title": "SeismicLineContext",
       "type": "object"
     },
     "SeismicSectionContext": {
@@ -6021,7 +6189,8 @@
             "feature-set/1",
             "well-path/1",
             "well-set/1",
-            "well-residual/1"
+            "well-residual/1",
+            "seismic-line/1"
           ],
           "title": "Mapping",
           "type": "string"
@@ -6758,7 +6927,7 @@
           "$ref": "#/$defs/MeshContext"
         },
         {
-          "$ref": "#/$defs/PointContext"
+          "$ref": "#/$defs/PointColumnsContext"
         },
         {
           "$ref": "#/$defs/PolylineContext"
@@ -6798,6 +6967,9 @@
         },
         {
           "$ref": "#/$defs/WellResidualContext"
+        },
+        {
+          "$ref": "#/$defs/SeismicLineContext"
         }
       ],
       "title": "Scientific"

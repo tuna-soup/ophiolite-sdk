@@ -128,11 +128,14 @@ from .locations import LocationClient  # noqa: E402
 from .sources import SourceClient  # noqa: E402
 from .checks import CheckClient  # noqa: E402
 from .procedures import ProcedureClient  # noqa: E402
+from .tools import ToolClient  # noqa: E402  (E131 s1: the tool_* twins)
 from .access_history import AccessHistoryClient  # noqa: E402  (E67b)
 from .outcomes import OutcomeClient  # noqa: E402  (E120)
+from .verdicts import VerdictClient  # noqa: E402  (E132)
+from .trajectories import TrajectoryClient  # noqa: E402  (E134)
 
 
-class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient, ProcedureClient, AccessHistoryClient, OutcomeClient):  # E29: wells() and extent(); E50a: sources(); E96: checks; E105b: procedures; E67b: access history and teams; E120: outcomes
+class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient, ProcedureClient, ToolClient, AccessHistoryClient, OutcomeClient, VerdictClient, TrajectoryClient):  # E29: wells() and extent(); E50a: sources(); E96: checks; E105b: procedures; E131 s1: tools; E67b: access history and teams; E120: outcomes; E132: verdicts; E134: export_trajectories
     def __init__(self,url,project,credential=None,http=None):
         self.url=origin(url)
         if not isinstance(project,str) or not project:raise Refused('Choose a project.')
@@ -437,8 +440,9 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         raw=_core.rules.artifact(data)
         normalized=next(r for r in data['representations'] if r['kind']=='normalized')
         # E16: a seismic volume is described, never downloaded here; read_slice reads its samples.
-        artifact=None if data['scientific'].get('type')=='seismic-volume' else self._get(path+'/representations/'+quote(raw['id'],safe=''),raw['bytes'])
-        body=self._get(path+'/representations/'+quote(normalized['id'],safe=''),normalized['bytes'])
+        # E139 s2: above the whole-answer bound (a point set's columns or its original) both are read by ranges
+        artifact=None if data['scientific'].get('type')=='seismic-volume' else self._artifact(path+'/representations/'+quote(raw['id'],safe=''),raw['bytes'])
+        body=self._artifact(path+'/representations/'+quote(normalized['id'],safe=''),normalized['bytes'])
         result=_core.typed_result(data,body,artifact)
         result._client=self  # E58b: a kept table downloads itself as a file
         return result
@@ -732,6 +736,12 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         """Owner only: {person: ['embedding'|'training'|'evaluation', ...]} for people who can read the item."""
         import uuid
         return self._post('ai-use','grant',{'asset_id':asset,'grants':grants,'expected_generation':expected_generation,'command_id':command_id or uuid.uuid4().hex})
+
+    def grant_own_ai_use(self,asset,purpose,granted=True,*,command_id=None):
+        """E134 s2: your own work in an item you uploaded or made may be used for purpose ('training' or 'evaluation'),
+        or with granted=False no longer (forward only). Returns {asset_id, purpose, state, sequence, at}."""
+        import uuid
+        return self._post('ai-use','self-grant',{'asset_id':asset,'purpose':purpose,'state':'granted' if granted else 'withdrawn','command_id':command_id or uuid.uuid4().hex})
 
     def search(self,text,*,method=None,limit=20):
         """Rank what you may read by its description ('words', or 'embedding' with the deployment's local model)."""

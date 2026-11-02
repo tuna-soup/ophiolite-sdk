@@ -1,0 +1,104 @@
+{
+ "subject": "split/1 (§2.3, R1-15): buckets and words under the default fractions 800/100/100",
+ "cases": [
+  {
+   "seed": 0,
+   "id": "episode-889ebb3e1844e1d1e96dc8b83ba8d60f",
+   "bucket": 832,
+   "split": "validation"
+  },
+  {
+   "seed": 0,
+   "id": "episode-f65e4fa7bdd603feb6104d3583935150",
+   "bucket": 165,
+   "split": "train"
+  },
+  {
+   "seed": 0,
+   "id": "episode-e52b4b9c563b278e2df7afae88ac46e2",
+   "bucket": 313,
+   "split": "train"
+  },
+  {
+   "seed": 0,
+   "id": "episode-67543f93e3e5fe6966e6e0ccd2b08bd3",
+   "bucket": 961,
+   "split": "test"
+  },
+  {
+   "seed": 0,
+   "id": "episode-1cdd147de9143723471d199a241334c3",
+   "bucket": 966,
+   "split": "test"
+  },
+  {
+   "seed": 0,
+   "id": "episode-cf818d14d0beec4074bd58eb70ece3e1",
+   "bucket": 416,
+   "split": "train"
+  },
+  {
+   "seed": 1,
+   "id": "episode-889ebb3e1844e1d1e96dc8b83ba8d60f",
+   "bucket": 845,
+   "split": "validation"
+  },
+  {
+   "seed": 1,
+   "id": "episode-f65e4fa7bdd603feb6104d3583935150",
+   "bucket": 556,
+   "split": "train"
+  },
+  {
+   "seed": 1,
+   "id": "episode-e52b4b9c563b278e2df7afae88ac46e2",
+   "bucket": 390,
+   "split": "train"
+  },
+  {
+   "seed": 1,
+   "id": "episode-67543f93e3e5fe6966e6e0ccd2b08bd3",
+   "bucket": 406,
+   "split": "train"
+  },
+  {
+   "seed": 1,
+   "id": "episode-1cdd147de9143723471d199a241334c3",
+   "bucket": 929,
+   "split": "test"
+  },
+  {
+   "seed": 1,
+   "id": "episode-cf818d14d0beec4074bd58eb70ece3e1",
+   "bucket": 550,
+   "split": "train"
+  }
+ ],
+ "boundaries": [
+  {
+   "n": 799,
+   "split": "train"
+  },
+  {
+   "n": 800,
+   "split": "validation"
+  },
+  {
+   "n": 899,
+   "split": "validation"
+  },
+  {
+   "n": 900,
+   "split": "test"
+  }
+ ],
+ "uneven": {
+  "fractions": {
+   "train": 0,
+   "validation": 0,
+   "test": 1000
+  },
+  "n": 0,
+  "split": "test"
+ }
+}

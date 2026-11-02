@@ -1,0 +1,39 @@
+{
+ "subject": "E133-shaped consent rows for rows.json: u-anna and u-ben granted training an hour before t0 with every item and the extra; u-carla never",
+ "rows": [
+  {
+   "person": "u-anna",
+   "purpose": "training",
+   "sequence": 1,
+   "state": "granted",
+   "covers": [
+    "own-actions",
+    "command-parameters",
+    "verdicts",
+    "published-checks",
+    "agent-plan-digests"
+   ],
+   "extras": [
+    "instruction-text"
+   ],
+   "at": 1793271600.0
+  },
+  {
+   "person": "u-ben",
+   "purpose": "training",
+   "sequence": 1,
+   "state": "granted",
+   "covers": [
+    "own-actions",
+    "command-parameters",
+    "verdicts",
+    "published-checks",
+    "agent-plan-digests"
+   ],
+   "extras": [
+    "instruction-text"
+   ],
+   "at": 1793271600.0
+  }
+ ]
+}

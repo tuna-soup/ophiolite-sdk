@@ -1,0 +1,40 @@
+{
+ "subject": "ophiolite.behaviour-consent/1 records, checked by the BehaviourConsent model and, independently, by the published JSON Schema; each case is the base with its patch merged at the top level. Invalid inputs are fixed; the mutations act on the model or the schema (R1-11, R2-11)",
+ "base": {
+  "schema": "ophiolite.behaviour-consent/1",
+  "consent_id": "consent-b3a1628686075a97977a5ef52e4631e6",
+  "person": "u-anna",
+  "purpose": "training",
+  "sequence": 1,
+  "state": "granted",
+  "covers": ["own-actions", "command-parameters", "verdicts", "published-checks", "agent-plan-digests"],
+  "extras": [],
+  "text_version": 0,
+  "text_sha256": "484434bc491e4c77641801bb7d6bbe3ddbeb3add4b486ee65a9c64cf167eda32",
+  "at": 1793275200.0,
+  "command_id": "c-1"
+ },
+ "id_rule": {
+  "subject": "the base record's consent_id, computed independently with hashlib: sha256(person, a newline, json.dumps(sort_keys, compact separators, ensure_ascii false) of the record without consent_id)[:32] (R1-4)",
+  "canonical_body": "{\"at\":1793275200.0,\"command_id\":\"c-1\",\"covers\":[\"own-actions\",\"command-parameters\",\"verdicts\",\"published-checks\",\"agent-plan-digests\"],\"extras\":[],\"person\":\"u-anna\",\"purpose\":\"training\",\"schema\":\"ophiolite.behaviour-consent/1\",\"sequence\":1,\"state\":\"granted\",\"text_sha256\":\"484434bc491e4c77641801bb7d6bbe3ddbeb3add4b486ee65a9c64cf167eda32\",\"text_version\":0}",
+  "consent_id": "consent-b3a1628686075a97977a5ef52e4631e6"
+ },
+ "valid": {
+  "granted": {},
+  "granted-with-the-extra": {"extras": ["instruction-text"]},
+  "granted-for-evaluation": {"purpose": "evaluation"},
+  "withdrawn": {"sequence": 2, "state": "withdrawn", "covers": [], "extras": []}
+ },
+ "invalid": {
+  "purpose-embedding": {"patch": {"purpose": "embedding"}, "field": "purpose"},
+  "covers-on-a-withdrawal": {"patch": {"state": "withdrawn", "sequence": 2, "extras": []}, "field": "covers"},
+  "four-covers-on-a-grant": {"patch": {"covers": ["own-actions", "command-parameters", "verdicts", "published-checks"]}, "field": "covers"},
+  "a-duplicate-cover-in-five": {"patch": {"covers": ["own-actions", "own-actions", "verdicts", "published-checks", "agent-plan-digests"]}, "field": "covers"},
+  "data-values-in-place-of-a-cover": {"patch": {"covers": ["own-actions", "command-parameters", "verdicts", "published-checks", "data-values"]}, "field": "covers"},
+  "a-duplicate-extra": {"patch": {"extras": ["instruction-text", "instruction-text"]}, "field": "extras"},
+  "extras-on-a-withdrawal": {"patch": {"state": "withdrawn", "sequence": 2, "covers": [], "extras": ["instruction-text"]}, "field": "extras"},
+  "a-name": {"patch": {"person_name": "Anna"}, "field": "person_name"},
+  "sequence-zero": {"patch": {"sequence": 0}, "field": "sequence"},
+  "an-unknown-extra": {"patch": {"extras": ["values"]}, "field": "extras"}
+ }
+}

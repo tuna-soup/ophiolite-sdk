@@ -23,8 +23,10 @@ def test_a_refused_tolerance_says_the_servers_reason_with_both_units():
 
 def test_a_record_not_compared_for_its_depth_basis_reads_the_platform_sentence():
     record = {'outcome': 'not_compared', 'reason': 'depth_basis_unknown', 'tolerance': None}
-    assert checks.outcome_lines(record) == ["Only tops declared same-as-log, measured along the log's depths, are compared today."]
-    assert checks.FILE_REASON['depth_basis_unknown'] == "Not compared: only tops declared same-as-log, measured along the log's depths, are compared today."
+    assert checks.outcome_lines(record) == ["Tops are compared when both are measured along the log's depths, or both on another depth basis from "
+                                            "the same depth datum."]  # E110 s4
+    assert checks.FILE_REASON['depth_basis_unknown'] == ("Not compared: tops are compared when both are measured along the log's depths, or both on "
+                                                         "another depth basis from the same depth datum.")
 
 
 class Untouched:

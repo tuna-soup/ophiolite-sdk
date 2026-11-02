@@ -38,11 +38,9 @@ def verify_typed_descriptor(value, project, asset, revision):
 
 def typed_result(descriptor, body, artifact):
     """Verify a typed read and build its object; exact served bytes are kept for export."""
-    import json
     from .typed import CLASSES
-    asset,_=validate.typed_pair(descriptor,body)
+    asset,value=validate.typed_pair(descriptor,body)  # E139 s2: a point set's columns come back as their checked view
     data=asset.model_dump(by_alias=True)
-    value=json.loads(body)
     if value['context']['type']=='seismic-volume' and artifact is None:pass  # E16: a volume is read as slices; its original stays on the server
     else:verify_bytes(rules.artifact(data),artifact)
     return CLASSES[value['context']['type']](asset,value,artifact,wire_descriptor=descriptor,wire_data_bytes=body)

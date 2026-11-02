@@ -89,8 +89,9 @@ def find(client, asset):
     return next((a for a in client.assets() if a.get('asset_id') == asset), None)
 
 
-def landed(client, name, asset, revision, digest):
-    """The output and representative values of one added item, and its own bytes' SHA-256 (from its provenance)."""
+def landed(client, name, asset, revision, digest, *, compare=None):
+    """The output and representative values of one added item, and its own bytes' SHA-256 (from its provenance). E139 s2:
+    COMPARE, given for typed data, checks the read against its file and returns its representative values."""
     try: content = ((client.provenance(asset, revision).record or {}).get('content') or {}).get('content_sha256')
     except Exception: raise Refused(UNREAD % name) from None  # a version stored before records began has none
     if not isinstance(content, str) or not SHA256.fullmatch(content): raise Refused(UNREAD % name)
@@ -109,7 +110,7 @@ def landed(client, name, asset, revision, digest):
             values.append({'field': 'samples', 'value': described.scientific.sample_count, 'unit': None})
         else:
             read = client.read_data(asset, revision)
-            reader, kind, values = read.descriptor.interpretation.reader, read.type, None
+            reader, kind, values = read.descriptor.interpretation.reader, read.type, compare(read) if compare else None
     except Refused: raise
     except Exception: raise Refused(UNREAD % name) from None
     if not isinstance(reader, str) or '/' not in reader or not kind: raise Refused(UNREAD % name)

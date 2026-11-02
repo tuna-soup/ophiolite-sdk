@@ -1,8 +1,8 @@
 # %% [markdown]
 # # Run it again
-# A procedure made from a template shifts formation tops on your own computer. The result shows itself as a card: what
+# A tool made from a template shifts formation tops on your own computer. The result shows itself as a card: what
 # ran, what it made, and a "Run again" line, the same call with the same inputs and settings, pinned to the exact
-# procedure version that ran. Running that line makes the same tops again in a new folder; once the procedure is
+# tool version that ran. Running that line makes the same tops again in a new folder; once the tool is
 # changed, the line refuses instead of running something else.
 #
 # **Install once.** Put this notebook and the `requirements.txt` published beside it in an empty folder, then run:
@@ -28,7 +28,7 @@ from ophiolite.gallery import connect
 client = connect()  # not used: every run here is on this computer
 work = Path(tempfile.mkdtemp(prefix='run-it-again-'))  # the procedure and its runs live outside this folder
 # %% [markdown]
-# ## A procedure from a template
+# ## A tool from a template
 # The well-tops start reads tops with Ophiolite's reader and writes them again with its writer. Its calculation goes
 # where the start marks it: here, every measured depth moves by a setting, `shift`, in metres.
 # %%
@@ -45,7 +45,7 @@ print(procedures.validate(folder)['sentence'])
 # %% [markdown]
 # ## Run it, and see the card
 # Two synthetic tops, declared in metres on the same depth basis as the log, shifted down by 2.5 m. Open "Run again" on the card to see
-# the line; "Technical details" holds the folders and the procedure's digest.
+# the line; "Technical details" holds the folders and the tool's digest.
 # %%
 (work / 'tops.csv').write_text('name,md\nTop Chalk,1000.5\nBase Chalk,1200\n')
 (work / 'tops.declared.json').write_text(json.dumps({'depth_unit': 'm', 'depth_basis': 'same-as-log'}))
@@ -60,7 +60,7 @@ def depths(path):
 print('First run:', depths(work / 'first/data.csv'))
 # %% [markdown]
 # ## Run again
-# The line names the procedure folder, the inputs and settings as they were when the run began, and the digest of the
+# The line names the tool folder, the inputs and settings as they were when the run began, and the digest of the
 # version that ran. `new_output` is a new folder for its outputs. Changing `inputs` afterwards does not change it.
 # %%
 inputs['data'] = [work / 'somewhere-else.csv']  # the line keeps the inputs the run started with
@@ -81,8 +81,8 @@ fig.savefig('run-it-again.png', bbox_inches='tight')
 plt.close(fig)
 print('Wrote run-it-again.png')
 # %% [markdown]
-# ## A changed procedure is not run by the old line
-# Edit the procedure and the same line refuses: it runs only the version that made the first result.
+# ## A changed tool is not run by the old line
+# Edit the tool and the same line refuses: it runs only the version that made the first result.
 # %%
 (folder / 'procedure.py').write_text(code.replace("settings['shift']", "2 * settings['shift']"))
 try:

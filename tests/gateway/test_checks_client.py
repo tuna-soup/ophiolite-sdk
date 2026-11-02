@@ -110,6 +110,31 @@ def test_compare_says_how_far_a_file_differs_and_that_it_is_kept_on_this_result_
     assert found['witness'] == 'personal' and found['differences']['count'] == 1
 
 
+FRB07 = b'name,md\nNL,1210.0\nCK,2405.0\nDCC,2865.0\nDCD,2880.0\n'  # the Platform's tests/fixtures/e110/frb07-copy.csv (B5)
+FRB07_EDITED = b'name,md\nNL,1210.0\nCK,2405.0\nDCC,2865.5\nDCD,2880.0\nDCG,2895.0\n'  # frb07-edited.csv (B6)
+DATUM = 'Rotary Table, 6.7 m above NAP'
+
+
+def test_e110s4_compare_sends_a_tops_files_datum_and_says_how_the_edit_differs(world, tmp_path):
+    """E110 s4: a real `checks compare --interpretation` with tops on another depth basis from one datum, against the
+    in-process gateway. Mutation: drop depth_datum on the way (the CLI or the client) -> not compared -> red."""
+    header = {'project_id': 'p', 'command_id': 'u-frb07', 'filename': 'frb07-edited.csv', 'name': 'FRB-07 tops', 'attribution': 'Synthetic',
+              'audience': ['alice'], 'rights_confirmed': True, 'profile': 'well-tops-csv/1',
+              'declared': {'depth_unit': 'm', 'depth_basis': 'other', 'depth_datum': DATUM}}
+    result = world.ok('alice', 'las-uploads', 'upload', raw=FRB07_EDITED, header=header)
+    (tmp_path / 'copy.csv').write_bytes(FRB07)
+    declared = {'depth_unit': 'm', 'depth_basis': 'other', 'depth_datum': DATUM, 'wellbore_confirmed': True}
+    (tmp_path / 'declared.json').write_text(json.dumps(declared))
+    text, found = run(sdk(world, 'alice'), 'compare', '--asset', result['asset_id'], '--revision', result['revision'], '--file', str(tmp_path / 'copy.csv'),
+                      '--interpretation', str(tmp_path / 'declared.json'), '--tolerance', '0', '--unit', 'm')
+    assert (found['outcome'], found['interpretation']) == ('differed', declared), found
+    assert text.splitlines() == ['Differs by at most 0.5 metres, at 2 of 5 picks.', '1 pick only in the result.', 'Saved on this result only.',
+                                 'This is not a check of the method that made this result.']
+    checks_parser = next(a for a in cli.parser()._actions if a.dest == 'command').choices['checks']
+    compare = next(a for a in checks_parser._actions if a.dest == 'action').choices['compare']
+    assert 'depth_datum when the basis is other' in next(a.help for a in compare._actions if '--interpretation' in a.option_strings)
+
+
 def test_an_unknown_key_gets_the_sign_in_sentence_not_a_check_sentence(world, tmp_path):
     with pytest.raises(PermissionRefused) as refused:
         sdk(world, 'alice', key='oph_key_' + 'x' * 40).check_publish(shale(tmp_path))

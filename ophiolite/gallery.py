@@ -16,6 +16,9 @@ When none applies it raises `Refused` with the sentence that says what to set. I
 `colleague()` (E105b) is a second project member's client for a notebook that shows both sides of sharing: the one a
 harness bound with `use(client, colleague=...)`, else, outside synthetic mode, `OPHIOLITE_COLLEAGUE_ACCESS_KEY` for
 the same address and project; otherwise None and the notebook says what it would show.
+
+`pack()` (E129 e) is the one start of a pack notebook, which reads a downloaded starter pack and no project: it
+returns the folder `OPHIOLITE_PACK` names, after blocking the process's network.
 """
 import atexit
 import os
@@ -72,6 +75,39 @@ def connect():
     raise Refused(f'No saved sign-in for {project} at {url}.',
                   'Put the configuration.json from Connect → Use Python in this folder and run: ophiolite login (or ophiolite login --key-stdin), '
                   'or set OPHIOLITE_ACCESS_KEY; unset OPHIOLITE_URL to use the synthetic server.')
+
+
+PACK_WITH_URL = 'This notebook reads the starter pack folder only; unset OPHIOLITE_URL.'
+PACK_UNSET = 'Set OPHIOLITE_PACK to the folder of a starter pack you downloaded.'
+BLOCKED = 'network blocked: this notebook reads the pack folder only'
+
+
+def pack():
+    """E129 (e) D3: the folder of the starter pack a pack notebook reads (`OPHIOLITE_PACK`), after this process's
+    network is blocked: from then on `socket.socket` (but for local Unix sockets), `socket.create_connection` and
+    `socket.getaddrinfo` refuse. `OPHIOLITE_URL` set as well is refused, as is no `OPHIOLITE_PACK`."""
+    from pathlib import Path
+    if os.environ.get('OPHIOLITE_URL'): raise Refused(PACK_WITH_URL)
+    folder = os.environ.get('OPHIOLITE_PACK')
+    if not folder: raise Refused(PACK_UNSET)
+    _block()
+    return Path(folder)
+
+
+def _block():
+    import socket
+    if getattr(socket.socket, '_ophiolite_blocked', False): return
+    real = socket.socket
+
+    class Blocked(real):
+        _ophiolite_blocked = True
+
+        def __init__(self, family=-1, type=-1, proto=-1, fileno=None):
+            if fileno is None and family != getattr(socket, 'AF_UNIX', None): raise Refused(BLOCKED)  # the default (-1) is AF_INET
+            super().__init__(family, type, proto, fileno)
+
+    def refused(*args, **kwargs): raise Refused(BLOCKED)
+    socket.socket, socket.create_connection, socket.getaddrinfo = Blocked, refused, refused
 
 
 def _stop():

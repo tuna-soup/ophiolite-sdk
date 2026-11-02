@@ -110,9 +110,9 @@ def test_e121_o3_compare_interpretation_help_names_tops_and_their_declarations()
     compare = next(a for a in checks_parser._actions if a.dest == 'action').choices['compare']
     [option] = [a for a in compare._actions if '--interpretation' in a.option_strings]
     assert option.help == ('A .json of confirmed declarations. A grid: crs, horizontal_unit, value_unit, value_meaning, direction and '
-                           'vertical_datum. Tops: depth_unit, depth_basis (only same-as-log compares today) and wellbore_confirmed: true; '
-                           'no depth_datum. A survey: depth_unit, azimuth_reference, depth_datum, grid_crs for grid north, and '
-                           'wellbore_confirmed: true')
+                           'vertical_datum. Tops: depth_unit, depth_basis, and depth_datum when the basis is other, and wellbore_confirmed: '
+                           'true. A survey: depth_unit, azimuth_reference, depth_datum, grid_crs for grid north, and '
+                           'wellbore_confirmed: true')  # E110 s4: the help names depth_datum for tops
 
 
 def test_the_four_routes_are_allowed_and_no_other():
