@@ -2,7 +2,7 @@
 # # Read an exact curve and keep its scientific context
 # This example uses synthetic gamma-ray data. Missing samples remain missing;
 # zero remains zero. No alignment, conversion or resampling is performed.
-# Start with `make dev`. For real data, sign in with `ophiolite login` first.
+# Start with `make dev`. For real data, sign in with `ophiolite account login` first.
 # %%
 import copy
 import os

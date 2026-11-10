@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/agents/v1/declarations-schema.json",
+  "title": "Agent declarations 1",
+  "description": "What an agent may do with every operation (ophiolite.agent-declarations/1, E149 s0): one declaration per route row, keyed by area/name. Structure only: the rules that need the route row itself (its scope, credential kinds and answer type, and whether a parent is a row) are project_gateway/agent_declarations.py's (validate). The guide's word, whether a change needs a plan and whether a row is an MCP tool are derived from a declaration, never stored. See agents/v1/README.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "rows"],
+  "properties": {
+    "schema": {"const": "ophiolite.agent-declarations/1"},
+    "rows": {"type": "array", "minItems": 1, "maxItems": 4096, "items": {"$ref": "#/$defs/row"}}
+  },
+  "$defs": {
+    "operation": {"type": "string", "pattern": "^[a-z][a-z0-9-]{0,63}/[A-Za-z][A-Za-z0-9-]{0,63}$"},
+    "row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operation", "agent"],
+      "properties": {"operation": {"$ref": "#/$defs/operation"}, "agent": {"$ref": "#/$defs/declaration"}}
+    },
+    "declaration": {
+      "description": "One operation's declaration. reach: tool (an agent's request is answered and the operation is an MCP tool), call (answered over HTTP, no MCP tool) or person (every agent request is refused). admitted: how a change enters (its own plan, only as a step of an approved parent, either, or not at all; every read is never). policy: an agent's policy may approve it at proposal.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reach", "admitted", "policy"],
+      "properties": {
+        "reach": {"enum": ["tool", "call", "person"]},
+        "reason": {"enum": ["file-body", "unbounded-answer", "handwritten-route", "person-area", "person-setting", "covered-only", "frozen-out",
+                            "refused-by-gate", "person-only", "credential-kinds", "write-not-admitted"]},
+        "admitted": {"enum": ["proposable", "covered", "both", "never"]},
+        "parent": {"$ref": "#/$defs/operation"},
+        "policy": {"type": "boolean"},
+        "destructive": {"const": true, "description": "E149 s1: the change can remove or narrow what exists (an MCP client asks before it); absent means it only adds. Only on a tool that changes something."},
+        "note": {"type": "string", "minLength": 1, "maxLength": 400}
+      },
+      "allOf": [
+        {"if": {"properties": {"reach": {"const": "tool"}}}, "then": {"not": {"required": ["reason"]}}},
+        {"if": {"properties": {"reach": {"const": "call"}}},
+         "then": {"required": ["reason"], "properties": {"reason": {"enum": ["file-body", "unbounded-answer", "handwritten-route", "person-area", "person-setting", "covered-only", "frozen-out"]}}}},
+        {"if": {"properties": {"reach": {"const": "person"}}},
+         "then": {"required": ["reason"], "properties": {"reason": {"enum": ["refused-by-gate", "person-only", "credential-kinds", "write-not-admitted"]},
+                                                         "admitted": {"const": "never"}}}},
+        {"if": {"properties": {"admitted": {"enum": ["covered", "both"]}}}, "then": {"required": ["parent"]}, "else": {"not": {"required": ["parent"]}}},
+        {"if": {"required": ["policy"], "properties": {"policy": {"const": true}}}, "then": {"properties": {"admitted": {"const": "proposable"}}}},
+        {"if": {"required": ["destructive"]}, "then": {"properties": {"reach": {"const": "tool"}}}}
+      ]
+    }
+  }
+}

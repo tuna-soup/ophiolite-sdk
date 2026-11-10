@@ -3,10 +3,12 @@
 Keep this file when copying a template. It is educational support, never a gateway
 or authentication substitute. Real credentials are loaded only in explicit live mode.
 """
+import importlib.util
 import json
 import os
 from pathlib import Path
 import re
+import sys
 import tempfile
 
 from ophiolite import Client, Credential
@@ -18,8 +20,9 @@ from ophiolite.testing import WELLS, synthetic_server  # noqa: F401 (E52: moved 
 TEMPLATE_VERSION = '0.1.0'
 
 
-def client_for(url, project='p', *, fixture=False):
+def client_for(url, project='p', *, fixture=False, credentials=None):
     if fixture: credential = Credential.bearer('oph_api_alice')
+    elif credentials is not None: credential = Credential.from_file(credentials)  # E162 s1: the file named on the command line wins
     else:
         # The SDK owns discovery, private storage, locking and refresh.
         from ophiolite.auth import default_path
@@ -43,7 +46,10 @@ def stage(client, folder, *, mnemonic='CALC', factor=2, asset=None, curve='GR'):
     # Explicit local model validation preserves the scientific fields; the SDK read
     # has already verified the original normalized bytes and their exact digest.
     view = selected.curves[0]
-    validate.schema(view.model_dump(by_alias=True),'ophiolite.application-curve/1')
+    # E162 s1: with the `validation` extra (the template's requirements); a base install (`ophiolite demo`'s third line)
+    # keeps the verification above and says the skip on stderr
+    if importlib.util.find_spec('jsonschema'): validate.schema(view.model_dump(by_alias=True),'ophiolite.application-curve/1')
+    else: print('schema check skipped: install ophiolite[validation]', file=sys.stderr)
     values = derive(view.values,factor)
     method = {'name':'multiply','library':'ophiolite-template','version':TEMPLATE_VERSION,'parameters':{'factor':factor,'curve':curve}}
     state = {'selected':selected,'asset':asset,'work':client.work_folder(folder),'view':view,'values':values,'method':method}
@@ -106,6 +112,8 @@ def command(argv=None):
     import argparse
     parser=argparse.ArgumentParser(description='Read an exact permitted curve and publish a bounded local calculation.')
     parser.add_argument('--fixture',action='store_true');parser.add_argument('--work');parser.add_argument('--share',action='append')
+    # E162 s1: the files the ophiolite command takes; given, they win over OPHIOLITE_URL, OPHIOLITE_PROJECT and the credential order
+    parser.add_argument('--configuration',help='configuration.json naming the service and project');parser.add_argument('--credentials',help='a private credential file')
     args=parser.parse_args(argv)
     folder=args.work or str(Path(tempfile.mkdtemp(prefix='ophiolite-template-'))/'work')
     from ophiolite.errors import OphioliteError
@@ -114,7 +122,11 @@ def command(argv=None):
             with synthetic_server() as server, client_for(server.url,fixture=True) as client:
                 answer=workflow(client,folder,share=args.share)
         else:
-            with client_for(os.environ['OPHIOLITE_URL'],os.environ['OPHIOLITE_PROJECT']) as client:
+            if args.configuration:
+                from ophiolite.cli import configuration
+                config=configuration(args.configuration);url,project=config['url'],config['project']
+            else:url,project=os.environ['OPHIOLITE_URL'],os.environ['OPHIOLITE_PROJECT']
+            with client_for(url,project,credentials=args.credentials) as client:
                 answer=workflow(client,folder,share=args.share)
     except OphioliteError as error:
         import sys
@@ -136,7 +148,7 @@ def interval_offset(client, folder, *, offset=1):
 
 def guidance(error):
     from ophiolite.errors import AuthenticationRequired,PermissionRefused,CapacityExceeded,Busy,IntegrityConflict,VerificationFailed
-    if isinstance(error,AuthenticationRequired):return 'Run ophiolite login for this project, then retry the requested action.'
+    if isinstance(error,AuthenticationRequired):return 'Run ophiolite account login for this project, then retry the requested action.'
     if isinstance(error,PermissionRefused):return 'Access was refused. Ask the data owner to check your permission.'
     if isinstance(error,CapacityExceeded):return 'This input exceeds the supported size. Select a smaller input.'
     if isinstance(error,Busy):return 'The service is busy. Wait, then choose Retry.'

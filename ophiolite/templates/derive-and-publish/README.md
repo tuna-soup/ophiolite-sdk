@@ -27,12 +27,17 @@ recipient change after reading current grants.
 
 ## Live mode and recovery
 
-Set `OPHIOLITE_URL` and `OPHIOLITE_PROJECT`, sign in with `ophiolite login` and
+Set `OPHIOLITE_URL` and `OPHIOLITE_PROJECT`, sign in with `ophiolite account login` and
 use `make live`. Optional `OPHIOLITE_CREDENTIAL` selects an explicit private SDK
 credential file. Do not put credentials in the configuration example. The example
 expects a permitted gamma-ray curve; adapt the selection explicitly for your data.
 
-Expired credential: run `ophiolite login`. Revoked access: ask the owner to check
+You can instead give the files the `ophiolite` command takes: `python app --configuration
+configuration.json --credentials credential.json`. When given, they win over
+`OPHIOLITE_URL`, `OPHIOLITE_PROJECT` and the credential order above; `ophiolite demo`
+prints the command this way.
+
+Expired credential: run `ophiolite account login`. Revoked access: ask the owner to check
 permissions. Different axes/units: read separately or align explicitly. Capacity
 refusal: select a smaller input. Changed input: read and verify the exact version
 again. Invalid names, source-curve collisions and the LAS missing marker refuse

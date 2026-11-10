@@ -31,6 +31,15 @@ def test_the_residual_declaration_is_the_shared_valid_fixture():
         (CONTRACT / 'fixtures/valid/tops-within-1m.json').read_text())
 
 
+def test_the_residual_declaration_names_data_rules_only_when_asked():
+    """E144 s4: `data_rules` gives the contract's on-path fixture; omitted, the rule has no `data_rules` key (mutation:
+    always send the key -> `None` in the five metre declaration -> red)."""
+    made = outcomes.residual_declaration('Tops within 5 m', 5, 'm', 'tops-to-team-database', 'Team database',
+                                         data_rules=['top-on-path/1', 'tops-unique-name/1'])
+    assert made == json.loads((CONTRACT / 'fixtures/valid/tops-within-5m-on-path.json').read_text())
+    assert list(outcomes.residual_declaration('Tops within 5 m', 5, 'm', 'tops-to-team-database', 'Team database')['rule']) == ['name', 'settings']
+
+
 @pytest.mark.parametrize('operation', ['declare', 'revise', 'enable', 'disable', 'withdraw', 'list', 'get', 'states', 'evaluate', 'deliver-as', 'claims'])
 def test_the_eleven_outcome_operations_have_their_paths(operation):  # E120 s1: states and evaluate; s3: deliver-as and claims
     assert operation_path('p one', 'outcomes', operation) == '/api/v1/projects/p%20one/outcomes/' + operation

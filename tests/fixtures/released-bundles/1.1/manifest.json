@@ -1,0 +1,87 @@
+{
+  "schema": "ophiolite.portable-bundle/1",
+  "bundle_version": "1.1.0",
+  "created_at": "2026-11-02T18:16:32+00:00",
+  "exporter": {
+    "name": "ophiolite-sdk",
+    "version": "2026.11.4"
+  },
+  "scope": "selection",
+  "selection": [
+    {
+      "asset_id": "curve-a",
+      "revision": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
+      "curves": [
+        "GR"
+      ]
+    }
+  ],
+  "assets": [
+    {
+      "asset_id": "curve-a",
+      "revision": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
+      "origin": "source-reference",
+      "profile": "las2/1",
+      "name": null,
+      "files": [
+        {
+          "path": "assets/0/original.las",
+          "role": "original",
+          "sha256": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
+          "bytes": 311
+        },
+        {
+          "path": "assets/0/descriptor-GR.json",
+          "role": "descriptor",
+          "sha256": "7bb6af90ffb90a754b3985f1679eaa16f2a32efa384aef028c6b5d0d0719145d",
+          "bytes": 2479,
+          "curve": "GR"
+        },
+        {
+          "path": "assets/0/curve-GR.json",
+          "role": "normalized",
+          "sha256": "81992992a1a15daac792bebf5979c51e0f8c3c1869a75a125999e6466e38bfba",
+          "bytes": 1076,
+          "curve": "GR"
+        }
+      ],
+      "history": null,
+      "parents": [],
+      "parent_visibility": "complete",
+      "omissions": [
+        "Synthetic offline fixture, not a server publication",
+        "No independently verified execution environment"
+      ],
+      "losses": [
+        "Selected curve only; other LAS headers and curves remain in artifact"
+      ]
+    }
+  ],
+  "groups": null,
+  "recommendations": null,
+  "observations": {
+    "groups": [
+      {
+        "name": "Synthetic group",
+        "observed_at": "2026-11-02T10:00:00Z",
+        "meaning": "observation-at-export",
+        "members": [
+          0
+        ],
+        "recommended": {
+          "asset_position": 0,
+          "revision": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
+          "by": "bob",
+          "at": 1790000000.0,
+          "reason": "Synthetic"
+        }
+      }
+    ]
+  },
+  "limits": {
+    "max_assets": 128,
+    "max_file_bytes": 33554432,
+    "max_total_bytes": 536870912
+  },
+  "notice": "Checksums show the integrity of this copy, not authorship or scientific correctness. Exported copies cannot be recalled; holding one grants no new upstream, sharing or AI-training rights."
+}

@@ -1,0 +1,35 @@
+{
+  "note": "E165 s0: the rules that need stored rows, as vectors written by hand. `check` is the part of an ophiolite.check/1 body the rule reads (null: no such id in this project); `derivation` the part of the subject revision's ophiolite.derivation/2 record it reads (null: none). D = depth-shift, the version being verified; O = team-las, another version.",
+  "digests": {"D": "edf8668204255edd264cccb9f91d941c4c28d34312f9e264de10d4df31c5dda7",
+              "O": "81cb03b2aa046fd8eb5e8176b859059fb027061d42ad5a35c1c70e2848a18f17"},
+  "checks": [
+    {"name": "a passed check on a result D reported", "check": {"outcome": "passed", "subject": {"kind": "result"}},
+     "derivation": {"kind": "reported", "procedure": {"digest": "D"}}, "expect": null},
+    {"name": "a check that differed", "check": {"outcome": "differed", "subject": {"kind": "result"}},
+     "derivation": {"kind": "reported", "procedure": {"digest": "D"}}, "expect": "check-differed"},
+    {"name": "a check that was not compared", "check": {"outcome": "not_compared", "subject": {"kind": "result"}},
+     "derivation": {"kind": "reported", "procedure": {"digest": "D"}}, "expect": "check-not-compared"},
+    {"name": "a passed check on a result O reported", "check": {"outcome": "passed", "subject": {"kind": "result"}},
+     "derivation": {"kind": "reported", "procedure": {"digest": "O"}}, "expect": "check-other-version"},
+    {"name": "R7: a check that differed on a result O reported", "check": {"outcome": "differed", "subject": {"kind": "result"}},
+     "derivation": {"kind": "reported", "procedure": {"digest": "O"}}, "expect": "check-differed"},
+    {"name": "R7: a check not compared on a result O reported", "check": {"outcome": "not_compared", "subject": {"kind": "result"}},
+     "derivation": {"kind": "reported", "procedure": {"digest": "O"}}, "expect": "check-not-compared"},
+    {"name": "a passed check on a person's upload (no derivation)", "check": {"outcome": "passed", "subject": {"kind": "result"}},
+     "derivation": null, "expect": "check-other-version"},
+    {"name": "a passed check on an executed result whose script is D", "check": {"outcome": "passed", "subject": {"kind": "result"}},
+     "derivation": {"kind": "executed", "script_sha256": "D", "procedure": null}, "expect": "check-other-version"},
+    {"name": "a passed check of an implementation", "check": {"outcome": "passed", "subject": {"kind": "implementation"}},
+     "derivation": null, "expect": "check-other-version"},
+    {"name": "no check with this id in this project", "check": null, "derivation": null, "expect": "check-unknown"}
+  ],
+  "withdrawals": [
+    {"name": "the author withdraws their own", "target": "verification-000000000000000000000000000000b1", "person": "u-ben", "admin": false, "expect": null},
+    {"name": "an administrator withdraws another's", "target": "verification-000000000000000000000000000000b1", "person": "u-dora", "admin": true, "expect": null},
+    {"name": "a third member", "target": "verification-000000000000000000000000000000b1", "person": "u-dora", "admin": false, "expect": "withdraw-not-yours"},
+    {"name": "an id no record has", "target": "verification-0000000000000000000000000000ffff", "person": "u-ben", "admin": false, "expect": "withdraw-unknown"},
+    {"name": "a withdrawal named as the target", "target": "verification-000000000000000000000000000000a2", "person": "u-anna", "admin": false, "expect": "withdraw-unknown"},
+    {"name": "an already withdrawn verification", "target": "verification-000000000000000000000000000000a1", "person": "u-anna", "admin": false, "expect": "already-withdrawn"},
+    {"name": "already withdrawn, asked by an administrator", "target": "verification-000000000000000000000000000000a1", "person": "u-dora", "admin": true, "expect": "already-withdrawn"}
+  ]
+}

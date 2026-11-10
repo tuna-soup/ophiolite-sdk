@@ -132,3 +132,53 @@ output of the episode, once per outcome; every split follows `split/1`; a `shape
 Fixtures for the source rows, joins, consent, segmentation, rights, pseudonyms, splits, the shape episodes and a
 manifest are in `fixtures/work-episodes/` (synthetic). A deployment that does not export yet answers "Exporting the
 trajectory of work is not available on this deployment yet."
+
+Version 1.2.0 (E160) adds two optional properties, never null: `tier`, the deployment tier of the capture setting the
+export ran under, and `files`, the payload files with their size and SHA-256. A 1.1.0 manifest stays valid. Who
+enforces what (`fixtures/work-episodes/invalid-manifests.json` holds one case per row):
+
+| Rule | JSON Schema | The model (`WorkEpisodes`) |
+|---|---|---|
+| `tier` is one of the five deployment tiers | yes | yes |
+| a file name is `episodes.jsonl`, `episodes.parquet` or `turns.jsonl` (never the manifest or a descriptor) | yes | yes |
+| `bytes` is not negative; `sha256` is 64 lower-case hex digits | yes | yes |
+| at most three files | yes | yes |
+| `episodes.jsonl` is listed | no | yes |
+| each name once, in the order `episodes.jsonl`, `episodes.parquet`, `turns.jsonl` | no | yes |
+| `bytes` and `sha256` match the file in the folder | no | no: the SDK's `load` will (E160 slice 1) |
+
+## `ophiolite.work-turn/1` (preview): turns
+
+`work-turn.json` is one line of a folder's `turns.jsonl`: one row of an episode as what was in front of the person or
+agent (`observation`), what they did (`action`) and how it was judged (`judgement`), with the episode's id, mode and
+split and the row's 1-based position `n`. The line re-arranges the row and converts back byte for byte; nothing is
+summarised and no reward is invented. `work-turn-mapping.json` is the one table, and `work_turns.py` (standard library
+only; the Platform and the SDK load it from its source text) runs it both ways: `turn(episode, n)`, `turns(episode)`
+and `row(line)`.
+
+| Row (or episode) | Line |
+|---|---|
+| `episode.episode_id`, `episode.mode`, `episode.split` | `episode`, `mode`, `split` |
+| `attempt.chain`, `.n`, `.from`, `.continued` | `attempt.chain`, `.n`, `.from`, `.continued` |
+| `attempt.ended` | `judgement.attempt_ended` |
+| `offered`, `inputs` | `observation.offered`, `observation.inputs` |
+| `action_id`, `at`, `operation`, `parameters`, `through`, `on_behalf_of`, `plan`, `outputs` | `action.` the same name |
+| `request`, `instruction` (values only) | `action.request`, `action.instruction` |
+| `checks`, `outcomes`, `verdicts` | `judgement.` the same name |
+| `omitted` | `omitted` |
+
+A row without `attempt` has `attempt` and `judgement.attempt_ended` null; a row without `offered` has
+`observation.offered` null (present, never omitted). A line with one of `attempt` and `judgement.attempt_ended` null
+and the other set is refused by the model and by `row`. A shape line carries the shape row's parts only (no request,
+instruction, reason, name, label or row key). Fixtures: `fixtures/work-turns/` (`shape`, `auto` mixing a shape and a
+values episode, `empty`, and `invalid-cases.json`).
+
+## `ophiolite.profile-migration/1` (preview)
+
+`profile-migration.json`: a stored item moved to a released profile version. A move never edits a stored revision: it
+writes a new revision of the same item and one record naming the revision moved from (the item's head when the move
+started) and the new one, the profile and the stored SHA-256 of each revision's `data` form, the release that ran the
+move (`null` when the deployment names none), the system actor `system:profile-migration` and the time (ISO-8601 UTC).
+The two profiles are of the same kind and never equal. One record per item, from revision and to profile; a revision is
+the `to` of at most one record. Fixtures are in `fixtures/profile-migration/` (`valid.json`; `same-profile.json`, which
+a consumer refuses).

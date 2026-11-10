@@ -1,0 +1,15 @@
+{
+ "schema": "ophiolite.data-rule/1",
+ "id": "station-step/1",
+ "title": "Survey stations close enough",
+ "description": "No station is farther than maximum_step in measured depth after the station before it (included). The step is the MD minus the previous MD, times 0.3048 when the depth unit is ft; a survey whose declared depth unit is neither m nor ft is not applicable (no-column). The example depth is the station's measured depth as written and its value the step in m.",
+ "class": "file-local",
+ "kinds": ["deviation-csv/1"],
+ "context_kinds": null,
+ "severity": "warn",
+ "parameters": [
+  {"name": "maximum_step", "type": "quantity", "unit": "m", "default": 152.4, "minimum": 1, "maximum": 1000, "compare": "inclusive", "choices": null, "source": "30 CFR 250.461(b): surveys of a directional well give inclination and azimuth at intervals not to exceed 500 feet (152.4 m) during the normal course of drilling."}
+ ],
+ "words": {"template": "{count} stations are more than {maximum_step} after the station before, the first at {first}.", "examples": "depths"},
+ "since": "1.1.0"
+}

@@ -1,0 +1,414 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/procedures/v1/tool-verification.json",
+  "x-ophiolite": {
+    "id": "ophiolite.tool-verification/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "title": "ToolVerification",
+  "$defs": {
+    "CheckVerification": {
+      "additionalProperties": false,
+      "properties": {
+        "schema": {
+          "const": "ophiolite.tool-verification/1",
+          "title": "Schema",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^verification-[0-9a-f]{32}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "project": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Project",
+          "type": "string"
+        },
+        "digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        },
+        "by": {
+          "$ref": "#/$defs/VerifierPerson"
+        },
+        "at": {
+          "title": "At",
+          "type": "number"
+        },
+        "statement": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "pattern": "^[^\\x00]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Statement"
+        },
+        "command_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Command Id",
+          "type": "string"
+        },
+        "request_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Request Sha256",
+          "type": "string"
+        },
+        "kind": {
+          "const": "check",
+          "title": "Kind",
+          "type": "string"
+        },
+        "reference": {
+          "$ref": "#/$defs/VerifiedCheckReference"
+        }
+      },
+      "required": [
+        "schema",
+        "id",
+        "project",
+        "digest",
+        "by",
+        "at",
+        "statement",
+        "command_id",
+        "request_sha256",
+        "kind",
+        "reference"
+      ],
+      "title": "CheckVerification",
+      "type": "object"
+    },
+    "Link": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "doi",
+            "url"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "value": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "pattern": "^[^\\x00\\s]+$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "value"
+      ],
+      "title": "Link",
+      "type": "object"
+    },
+    "PublicationReference": {
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "maxLength": 400,
+          "minLength": 1,
+          "pattern": "^[^\\x00]*$",
+          "title": "Title",
+          "type": "string"
+        },
+        "authors": {
+          "items": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "title": "Authors",
+          "type": "array"
+        },
+        "year": {
+          "maximum": 2200,
+          "minimum": 1600,
+          "title": "Year",
+          "type": "integer"
+        },
+        "link": {
+          "$ref": "#/$defs/Link"
+        }
+      },
+      "required": [
+        "title",
+        "authors",
+        "year",
+        "link"
+      ],
+      "title": "PublicationReference",
+      "type": "object"
+    },
+    "PublicationVerification": {
+      "additionalProperties": false,
+      "properties": {
+        "schema": {
+          "const": "ophiolite.tool-verification/1",
+          "title": "Schema",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^verification-[0-9a-f]{32}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "project": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Project",
+          "type": "string"
+        },
+        "digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        },
+        "by": {
+          "$ref": "#/$defs/VerifierPerson"
+        },
+        "at": {
+          "title": "At",
+          "type": "number"
+        },
+        "statement": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "pattern": "^[^\\x00]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Statement"
+        },
+        "command_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Command Id",
+          "type": "string"
+        },
+        "request_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Request Sha256",
+          "type": "string"
+        },
+        "kind": {
+          "const": "publication",
+          "title": "Kind",
+          "type": "string"
+        },
+        "reference": {
+          "$ref": "#/$defs/PublicationReference"
+        }
+      },
+      "required": [
+        "schema",
+        "id",
+        "project",
+        "digest",
+        "by",
+        "at",
+        "statement",
+        "command_id",
+        "request_sha256",
+        "kind",
+        "reference"
+      ],
+      "title": "PublicationVerification",
+      "type": "object"
+    },
+    "VerifiedCheckReference": {
+      "additionalProperties": false,
+      "description": "Named apart from the check contract's `CheckReference` (one SDK model per name).",
+      "properties": {
+        "check_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Check Id",
+          "type": "string"
+        },
+        "label": {
+          "description": "The check's reference label as the server read it at verification",
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "check_id",
+        "label"
+      ],
+      "title": "VerifiedCheckReference",
+      "type": "object"
+    },
+    "VerifierPerson": {
+      "additionalProperties": false,
+      "description": "E93's actor shape, persons only: an assistant never authors a verification (slice 1's `reach: person` is the\nfirst layer, this is the second). Named apart from the assets contract's `Person`: the SDK generates one model per\nname across every contract.",
+      "properties": {
+        "kind": {
+          "const": "person",
+          "title": "Kind",
+          "type": "string"
+        },
+        "id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "name_at_time": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name At Time"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "name_at_time"
+      ],
+      "title": "VerifierPerson",
+      "type": "object"
+    },
+    "Withdrawal": {
+      "additionalProperties": false,
+      "properties": {
+        "schema": {
+          "const": "ophiolite.tool-verification/1",
+          "title": "Schema",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^verification-[0-9a-f]{32}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "project": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Project",
+          "type": "string"
+        },
+        "digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        },
+        "by": {
+          "$ref": "#/$defs/VerifierPerson"
+        },
+        "at": {
+          "title": "At",
+          "type": "number"
+        },
+        "statement": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "pattern": "^[^\\x00]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Statement"
+        },
+        "command_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Command Id",
+          "type": "string"
+        },
+        "request_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Request Sha256",
+          "type": "string"
+        },
+        "kind": {
+          "const": "withdrawn",
+          "title": "Kind",
+          "type": "string"
+        },
+        "reference": {
+          "$ref": "#/$defs/WithdrawnReference"
+        }
+      },
+      "required": [
+        "schema",
+        "id",
+        "project",
+        "digest",
+        "by",
+        "at",
+        "statement",
+        "command_id",
+        "request_sha256",
+        "kind",
+        "reference"
+      ],
+      "title": "Withdrawal",
+      "type": "object"
+    },
+    "WithdrawnReference": {
+      "additionalProperties": false,
+      "properties": {
+        "withdraws": {
+          "pattern": "^verification-[0-9a-f]{32}$",
+          "title": "Withdraws",
+          "type": "string"
+        }
+      },
+      "required": [
+        "withdraws"
+      ],
+      "title": "WithdrawnReference",
+      "type": "object"
+    }
+  },
+  "description": "One verification record (or a withdrawal of one); never changed, never deleted.",
+  "discriminator": {
+    "mapping": {
+      "check": "#/$defs/CheckVerification",
+      "publication": "#/$defs/PublicationVerification",
+      "withdrawn": "#/$defs/Withdrawal"
+    },
+    "propertyName": "kind"
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/CheckVerification"
+    },
+    {
+      "$ref": "#/$defs/PublicationVerification"
+    },
+    {
+      "$ref": "#/$defs/Withdrawal"
+    }
+  ]
+}

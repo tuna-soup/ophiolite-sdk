@@ -1,0 +1,11 @@
+{
+ "schema": "ophiolite.rule-results/1",
+ "kind": "las2/1",
+ "registry_version": "1.1.0",
+ "results": [
+  {"rule": "depth-increasing/1", "state": "passed", "count": 0, "examples": [], "parameters": {}, "reason": null, "context": null},
+  {"rule": "gr-range/1", "state": "passed", "count": 0, "examples": [], "parameters": {"minimum": 0, "maximum": 4000}, "reason": null, "context": null},
+  {"rule": "null-sentinel/1", "state": "failed", "count": 1, "examples": [{"row": 5, "depth": 1098.0, "value": -999.0}], "parameters": {}, "reason": null, "context": null},
+  {"rule": "unit-known/1", "state": "passed", "count": 0, "examples": [], "parameters": {}, "reason": null, "context": null}
+ ]
+}

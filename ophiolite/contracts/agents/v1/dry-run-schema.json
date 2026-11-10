@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ophiolite.agent-dry-run/1",
+  "title": "The answer to a dry run: what the same request would do, kept nowhere (E150)",
+  "description": "A request sent with \"dry_run\": true (in the JSON body, or inside the X-Ophiolite-Upload object of an octet-stream operation) is answered with this document and changes nothing. `would` says whether the real call would proceed and, if so, the effects it would have; `digest` is the SHA-256 of the canonical JSON of `$defs/digest_input` (sorted keys, no spaces), so a person who approves a proposal can name exactly the dry run they saw. The real answer's shape is not repeated here: it stays the operation's own.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "dry_run", "operation", "project_id", "would", "digest"],
+  "properties": {
+    "schema": {"const": "ophiolite.agent-dry-run/1"},
+    "dry_run": {"const": true},
+    "operation": {"type": "string", "pattern": "^[a-z0-9-]+/[a-z0-9-]+$", "maxLength": 128},
+    "project_id": {"type": "string", "minLength": 1, "maxLength": 200},
+    "would": {"$ref": "#/$defs/would"},
+    "digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  },
+  "$defs": {
+    "would": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outcome", "effects"],
+      "properties": {
+        "outcome": {"enum": ["proceeds", "refused"]},
+        "effects": {"type": "array", "maxItems": 64, "items": {"$ref": "#/$defs/effect"}},
+        "refusal": {"$ref": "#/$defs/refusal"}
+      },
+      "if": {"properties": {"outcome": {"const": "refused"}}},
+      "then": {"required": ["refusal"], "properties": {"effects": {"maxItems": 0}}},
+      "else": {"properties": {"refusal": false}}
+    },
+    "effect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["action", "kind", "count"],
+      "properties": {
+        "action": {"enum": ["create", "change", "remove"]},
+        "kind": {"enum": ["plan", "record", "asset-version", "payload", "grant", "signal", "run", "job", "claim", "verdict", "procedure-version", "trust"]},
+        "count": {"type": "integer", "minimum": 1, "maximum": 100000},
+        "label": {"type": "string", "minLength": 1, "maxLength": 200}
+      }
+    },
+    "refusal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": {
+        "code": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"},
+        "message": {"type": "string", "minLength": 1, "maxLength": 500},
+        "reason": {"type": "string", "pattern": "^[a-z][a-z0-9-]{0,63}$"}
+      }
+    },
+    "digest_input": {
+      "description": "What `digest` hashes. A JSON operation: the request without `dry_run`. An octet-stream operation: the X-Ophiolite-Upload object without `dry_run` and the SHA-256 of the bytes the gateway received (never a digest the caller claims).",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["operation", "project_id", "body", "would"],
+          "properties": {
+            "operation": {"type": "string"},
+            "project_id": {"type": "string"},
+            "body": {"type": "object"},
+            "would": {"$ref": "#/$defs/would"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["operation", "project_id", "header", "content_sha256", "would"],
+          "properties": {
+            "operation": {"type": "string"},
+            "project_id": {"type": "string"},
+            "header": {"type": "object"},
+            "content_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "would": {"$ref": "#/$defs/would"}
+          }
+        }
+      ]
+    }
+  }
+}

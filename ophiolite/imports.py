@@ -210,7 +210,8 @@ class Imports:
 
     def read(self, source, *, name=None, reading=None):
         """Keep the file as your private input and say how it was read (`context.decisions`), its columns and the
-        standard layouts its header is. `reading` asks again: sheet, header_row, delimiter, decimal_mark, encoding."""
+        standard layouts its header is. `reading` asks again: sheet, header_row (0 for a file without column names: columns are named "1", "2", ...
+        by position), delimiter, decimal_mark, encoding."""
         from .models.api import TableImportRead
         raw = Path(source).read_bytes() if isinstance(source, (str, Path)) else bytes(source)
         name = name or (Path(source).name if isinstance(source, (str, Path)) else None)

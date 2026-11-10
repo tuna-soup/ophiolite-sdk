@@ -1,0 +1,42 @@
+{
+  "schema": "ophiolite.mapper-recipe/1",
+  "created": {"tool": "ophiolite-mapper 0.1.0", "rules_version": "1.5.0", "at": "2026-11-02T12:00:00Z"},
+  "source": {
+    "kind": "file",
+    "locator": {"path": "wells.csv"},
+    "reader": "well-location/1",
+    "digest": {"algorithm": "sha256", "over": "bytes", "value": "1111111111111111111111111111111111111111111111111111111111111111"},
+    "bytes": 214
+  },
+  "target": {"kind": "table-target", "id": "wells"},
+  "layout": null,
+  "identity": {"basis": "external", "column": "WELL", "decision": {"by": "A. Reviewer", "at": "2026-11-02T12:05:00+01:00", "action": "accept"}},
+  "fields": [
+    {"field": "id", "required": true, "multiple": false, "column": "WELL", "evidence": "inferred", "decision": {"by": "A. Reviewer", "at": "2026-11-02T12:05:00+01:00", "action": "accept"}},
+    {"field": "name", "required": true, "multiple": false, "column": "WELL", "evidence": "previously-reviewed", "reuse": "same-table", "apply": "prefilled", "decision": null},
+    {"field": "x", "required": true, "multiple": false, "column": "EASTING", "evidence": "declared", "decision": null},
+    {"field": "y", "required": true, "multiple": false, "column": "NORTHING", "evidence": "declared", "decision": null},
+    {"field": "depth", "required": false, "multiple": false, "column": "TD", "evidence": "inferred", "decision": {"by": "A. Reviewer", "at": "2026-11-02T12:05:00+01:00", "action": "choose", "column": "TD_M"}},
+    {"field": "operator", "required": false, "multiple": false, "column": null, "evidence": "none", "decision": null}
+  ],
+  "columns": {
+    "TD_M": {"unit": "m", "quantity": "length", "missing": ["-999.25"]}
+  },
+  "declarations": [
+    {"name": "crs", "value": "EPSG:28992", "evidence": "declared", "decision": null},
+    {"name": "depth_unit", "value": "m", "evidence": "inferred", "decision": {"by": "A. Reviewer", "at": "2026-11-02T12:05:00+01:00", "action": "accept"}}
+  ],
+  "missing": ["NA"],
+  "wells": [
+    {"spelling": "SYN-A1", "match": "exact", "canonical": "SYN-A1", "entity": null, "decision": null},
+    {"spelling": "SYN A-2", "match": "alias", "canonical": "SYN-A2", "entity": null, "decision": null},
+    {"spelling": "syn-a03", "match": "normalised", "canonical": "SYN-A3", "entity": null, "decision": {"by": "A. Reviewer", "at": "2026-11-02T12:06:00Z", "action": "accept-alias"}},
+    {"spelling": "SYN-A4", "match": "none", "canonical": null, "entity": {"kind": "well", "key": "SYN-A4", "basis": "provisional"}, "decision": {"by": "A. Reviewer", "at": "2026-11-02T12:06:00Z", "action": "new-entity"}},
+    {"spelling": "SYN-A5X", "match": "none", "canonical": null, "entity": null, "decision": null}
+  ],
+  "findings": [
+    {"field": "x", "code": "not-numeric", "rows": 1, "examples": ["n/a"], "acknowledged": {"by": "A. Reviewer", "at": "2026-11-02T12:07:00Z", "note": "One row has no easting; it is left out."}},
+    {"field": "depth", "code": "out-of-range", "rows": 2, "examples": [], "acknowledged": null}
+  ],
+  "osdu": {"namespace": "{{NAMESPACE}}", "legal_tag": "{{LEGAL_TAG}}", "owners": ["data.default.owners@{{DATA_PARTITION}}"], "viewers": ["data.default.viewers@{{DATA_PARTITION}}"]}
+}

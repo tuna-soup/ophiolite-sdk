@@ -1,6 +1,9 @@
 # The `ophiolite` command line: exit codes, `--json` and `--dry-run`
 
-Run it as `ophiolite <verb>` (the installed script) or `python -m ophiolite <verb>`.
+Run it as `ophiolite <group> <verb>` (the installed script) or `python -m ophiolite <group> <verb>`. The groups are
+`account`, `data`, `exchange`, `results` and `tools`; `ophiolite` alone lists them, and `ophiolite <group> --help` lists
+a group's verbs. A verb without its group (`ophiolite login`) still works in this release and stops working in the
+next. The sections below name each verb as it is written after its group.
 
 ## Exit codes
 
@@ -45,6 +48,7 @@ Every verb accepts `--json`. The result is one JSON object on standard output:
 | `access-history` | `{"entries": [entry]}`; with `--export`: `{"out": path}` (see below) |
 | `teams` | `{"teams": [team]}`; with `--team`: `{"team": team}` |
 | `list` | `{"assets": [asset]}` |
+| `kinds` | `{"kinds": [row]}`: every row of the export matrix this release carries (`profile`, `kind` or `none`, and the rest), in its order |
 | `doctor` | `{"configuration", "python", "local_contracts", "server_contracts"?}` |
 | `check`, `get`, `send` | `{"outcome", "sentence", "facts", "technical"}` (see below) |
 | `checks publish` | `{"published": [stored check]}` (each an `ophiolite.check/1` record with its `id`, `witness`, `recorded_by`, `command_id`, `at`) |
@@ -65,9 +69,9 @@ The same three actions as `Client.exchange()` in Python (guide: Exchange data be
 `--work` (default `.ophiolite-held`), remembers what you hold; keep one per application or script.
 
 ```sh
-ophiolite check
-ophiolite get --item ID --output surface            # a well log: add --curve GR (repeat)
-ophiolite send porosity.csv --profile points-csv/1 --name "Porosity points" --how kriging --based-on ID [--declare crs=EPSG:28992] [--of ID]
+ophiolite data check
+ophiolite data get --item ID --output surface       # a well log: add --curve GR (repeat)
+ophiolite exchange send porosity.csv --profile points-csv/1 --name "Porosity points" --how kriging --based-on ID [--declare crs=EPSG:28992] [--of ID]
 ```
 
 `send` builds only on items you hold (`--based-on`, and `--of` for the next version of an item you wrote); the version it
@@ -89,12 +93,12 @@ after an interrupted one never publishes twice.
 Checks against a reference (E96). `check` above is a different command and is unchanged.
 
 ```sh
-ophiolite checks publish checks/20261007/            # a check folder, or a folder of them (python -m conformance.checks produce DIR)
-ophiolite checks list --asset A --revision R [--earlier]
-ophiolite checks list --implementation ophiolite.shale-volume --version 1
-ophiolite checks compare --asset A --revision R --file ref.las [--curve VSH] [--tolerance 0.001]
-ophiolite checks publishers add|remove PRINCIPAL [--workload]
-ophiolite checks publishers list
+ophiolite tools checks publish checks/20261007/      # a check folder, or a folder of them (python -m conformance.checks produce DIR)
+ophiolite tools checks list --asset A --revision R [--earlier]
+ophiolite tools checks list --implementation ophiolite.shale-volume --version 1
+ophiolite tools checks compare --asset A --revision R --file ref.las [--curve VSH] [--tolerance 0.001]
+ophiolite tools checks publishers add|remove PRINCIPAL [--workload]
+ophiolite tools checks publishers list
 ```
 
 `publish` sends each folder's `check.json`, `fixture.*`, `reference.*`, `output.json` and `request.json` (and a grid's
@@ -192,7 +196,7 @@ ignored. A credential is never refused for its prefix. Saved credentials are rea
 
 ## `doctor --online`
 
-`ophiolite doctor --online` (with `configuration.json`, or `--url U --project P` and a key from `--key-file`,
+`ophiolite account doctor --online` (with `configuration.json`, or `--url U --project P` and a key from `--key-file`,
 `--key-stdin`, `--key` or `OPHIOLITE_ACCESS_KEY`) checks, in order, and stops at the first failure: **address** (the
 name resolves), **tls** (the server answers its contracts index; https with a trusted certificate), **credential-arrived**
 (the server received a bearer credential), **credential-accepted** (it was accepted), **project-readable** (it reaches the
@@ -207,14 +211,14 @@ report. Exit codes: 5 address or tls, 3 a credential or project stage, 4 feature
 
 Two read verbs show who had access to what, and when, and the teams that give it. They change nothing.
 
-- `ophiolite access-history --project` lists the configuration's project's history, newest first (project
-  administrators); `ophiolite access-history --person USER_ID --organization ORG` lists one person's history in the
+- `ophiolite account access-history --project` lists the configuration's project's history, newest first (project
+  administrators); `ophiolite account access-history --person USER_ID --organization ORG` lists one person's history in the
   organisation (its owners; projects you do not administer are left out). Filters: `--kind KIND` (repeat), `--since`
   and `--until` (an instant or a day, UTC; `--since` inclusive). `--export csv|jsonl --out FILE` writes the whole
   history as one file (at most 10,000 entries) and prints only where it went. `--json` prints `{"entries": [entry]}`
   (or `{"out": path}`); an entry has `id`, `at`, `kind`, `parts`, `actor`, `on_behalf_of`, `credential_kind`,
   `through`, `subject`, `project`, `from`, `to`, `role` and `details`.
-- `ophiolite teams` lists the project's teams and their grants (administrators); `ophiolite teams --organization ORG`
+- `ophiolite account teams` lists the project's teams and their grants (administrators); `ophiolite account teams --organization ORG`
   lists the organisation's teams (owners), and `--team TEAM` one team's people. `--json` prints `{"teams": [team]}`
   (`{"team": team}` with `--team`).
 
@@ -223,7 +227,7 @@ In Python: `Client.access_history(kinds=, person=, actor=, since=, until=)`, `Cl
 `Account.team(organization_id, team_id)`, `Account.person_history(organization_id, user_id, ...)` and
 `Account.export_person_history(organization_id, user_id, format, dest)` read an organisation. Every page is followed.
 
-Authenticate with an access key (`ophiolite login --key`, `OPHIOLITE_ACCESS_KEY`, or `Credential.bearer(key)`);
+Authenticate with an access key (`ophiolite account login --key`, `OPHIOLITE_ACCESS_KEY`, or `Credential.bearer(key)`);
 a saved sign-in is refused: the SDK does not send it (`access-key-required`, exit 1). The deployment refuses an
 application you signed in to with `HISTORY_GRANT_REFUSED` and an agent, whoever it acts for, with
 `HISTORY_AGENT_REFUSED` (exit 3); anyone who is not an administrator of the project, or an owner of the organisation
@@ -234,6 +238,14 @@ for a person's history, gets `PERMISSION_DENIED` with the deployment's sentence.
 `publish-derived` and `share` accept `--dry-run` (`well-imports start --dry-run` is the server's preview, above): the command prints what it would send (`publications/derive` with its
 upload header, size and digest; or the recipients a share would set) and exits 0. It reads no credential, sends
 nothing and writes nothing — no work folder, no credential file.
+
+## `kinds`
+
+`ophiolite data kinds` prints one line per profile of the export matrix this release carries: the profile and its OSDU
+kind, or `none:` and the matrix's reason. It reads no configuration or credential and contacts no server. In Python,
+`ophiolite.kinds()` returns the same rows and `ophiolite.profiles_for(kind)` every profile of one kind (an empty list
+for a kind no row names); a read says what the server served, as `osdu_kind` and `osdu_kind_reason` on the curve
+frame's descriptor and on a typed read, and both are `None` from a server that does not send them yet.
 
 ## `recipes`
 

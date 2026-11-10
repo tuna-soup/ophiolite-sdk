@@ -1,0 +1,144 @@
+{
+ "kind": "osdu:wks:Manifest:1.0.0",
+ "MasterData": [
+  {
+   "id": "synthetic:master-data--Well:well-2071eeea22a8523596a7bceb357b09a6",
+   "kind": "osdu:wks:master-data--Well:1.5.0",
+   "acl": {
+    "owners": [
+     "data.default.owners@{{DATA_PARTITION}}"
+    ],
+    "viewers": [
+     "data.default.viewers@{{DATA_PARTITION}}"
+    ]
+   },
+   "legal": {
+    "legaltags": [
+     "{{LEGAL_TAG}}"
+    ],
+    "otherRelevantDataCountries": []
+   },
+   "data": {
+    "FacilityName": "SYN-A1",
+    "NameAliases": [
+     {
+      "AliasName": "SYN-A1"
+     }
+    ]
+   }
+  },
+  {
+   "id": "synthetic:master-data--Well:well-92272ae888020942bc8a51613109b96d",
+   "kind": "osdu:wks:master-data--Well:1.5.0",
+   "acl": {
+    "owners": [
+     "data.default.owners@{{DATA_PARTITION}}"
+    ],
+    "viewers": [
+     "data.default.viewers@{{DATA_PARTITION}}"
+    ]
+   },
+   "legal": {
+    "legaltags": [
+     "{{LEGAL_TAG}}"
+    ],
+    "otherRelevantDataCountries": []
+   },
+   "data": {
+    "FacilityName": "SYN-A2",
+    "NameAliases": [
+     {
+      "AliasName": "SYN-A2"
+     }
+    ]
+   }
+  },
+  {
+   "id": "synthetic:master-data--Well:well-3ae5e5d797530cc4dd774463957039bf",
+   "kind": "osdu:wks:master-data--Well:1.5.0",
+   "acl": {
+    "owners": [
+     "data.default.owners@{{DATA_PARTITION}}"
+    ],
+    "viewers": [
+     "data.default.viewers@{{DATA_PARTITION}}"
+    ]
+   },
+   "legal": {
+    "legaltags": [
+     "{{LEGAL_TAG}}"
+    ],
+    "otherRelevantDataCountries": []
+   },
+   "data": {
+    "FacilityName": "SYN-A3",
+    "NameAliases": [
+     {
+      "AliasName": "SYN-A3"
+     }
+    ]
+   }
+  },
+  {
+   "id": "synthetic:master-data--Well:well-494cdd6ca7cc697c2ef0570e5228c0dc",
+   "kind": "osdu:wks:master-data--Well:1.5.0",
+   "acl": {
+    "owners": [
+     "data.default.owners@{{DATA_PARTITION}}"
+    ],
+    "viewers": [
+     "data.default.viewers@{{DATA_PARTITION}}"
+    ]
+   },
+   "legal": {
+    "legaltags": [
+     "{{LEGAL_TAG}}"
+    ],
+    "otherRelevantDataCountries": []
+   },
+   "data": {
+    "FacilityName": "SYN-A4",
+    "NameAliases": [
+     {
+      "AliasName": "SYN-A4"
+     }
+    ]
+   }
+  }
+ ],
+ "Data": {
+  "WorkProductComponents": [],
+  "Datasets": [
+   {
+    "id": "synthetic:dataset--File.Generic:file-6346c191abc74b6a5d1eccc0de47c9ff",
+    "kind": "osdu:wks:dataset--File.Generic:1.1.0",
+    "acl": {
+     "owners": [
+      "data.default.owners@{{DATA_PARTITION}}"
+     ],
+     "viewers": [
+      "data.default.viewers@{{DATA_PARTITION}}"
+     ]
+    },
+    "legal": {
+     "legaltags": [
+      "{{LEGAL_TAG}}"
+     ],
+     "otherRelevantDataCountries": []
+    },
+    "data": {
+     "Name": "wells.csv",
+     "DatasetProperties": {
+      "FileSourceInfo": {
+       "FileSource": "originals/wells.csv",
+       "Name": "wells.csv",
+       "FileSize": "172",
+       "Checksum": "a4755b91553e5a0387fc1c5c1389691ed5851548b53836ed25b0bb06618c1f83",
+       "ChecksumAlgorithm": "SHA-256"
+      }
+     }
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/mapper/v1/reviewed-schema.json",
+  "title": "Reviewed column choices",
+  "description": "The structure of ophiolite-reviewed.json (ophiolite.mapper-reviewed/1, E116 s4): the column picks and the accepted well-name aliases a person made in finished writes, kept in one local file per project so the same table starts from them again, as the Workspace's second import does. A pick is keyed by the target, the table (its source kind, locator and sheet) and the digest of the table's column names and types; the newest pick of a key replaces the older one. Structure only: unique keys, timestamps and the locator of each source kind are mapper/v1/mapper.py's (check_reviewed). No credentials: a bucket is named by its endpoint, region, bucket and prefix, never by a key, secret or signature.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "picks", "aliases"],
+  "properties": {
+    "schema": {"const": "ophiolite.mapper-reviewed/1"},
+    "picks": {"type": "array", "maxItems": 1000, "items": {"$ref": "#/$defs/pick"}},
+    "aliases": {"type": "array", "maxItems": 1000, "items": {"$ref": "#/$defs/alias"}}
+  },
+  "$defs": {
+    "at": {"type": "string", "minLength": 1, "maxLength": 40, "format": "date-time"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "label": {"type": "string", "minLength": 1, "maxLength": 256},
+    "target": {"type": "string", "minLength": 1, "maxLength": 120},
+    "table": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "locator", "sheet"],
+      "properties": {
+        "kind": {"enum": ["file", "bucket-prefix", "folder"]},
+        "locator": {"type": "object"},
+        "sheet": {"anyOf": [{"type": "null"}, {"type": "string", "minLength": 1, "maxLength": 31}]}
+      }
+    },
+    "pick": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target", "table", "schema_digest", "fields", "recipe_digest", "at"],
+      "properties": {
+        "target": {"$ref": "#/$defs/target"},
+        "table": {"$ref": "#/$defs/table"},
+        "schema_digest": {"$ref": "#/$defs/sha256"},
+        "fields": {
+          "type": "object",
+          "maxProperties": 64,
+          "additionalProperties": {
+            "anyOf": [
+              {"type": "null"},
+              {"$ref": "#/$defs/label"},
+              {"type": "array", "minItems": 1, "maxItems": 16, "items": {"$ref": "#/$defs/label"}}
+            ]
+          }
+        },
+        "recipe_digest": {"$ref": "#/$defs/sha256"},
+        "at": {"$ref": "#/$defs/at"}
+      }
+    },
+    "alias": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target", "spelling", "canonical", "recipe_digest", "at"],
+      "properties": {
+        "target": {"$ref": "#/$defs/target"},
+        "spelling": {"type": "string", "minLength": 1, "maxLength": 160},
+        "canonical": {"type": "string", "minLength": 1, "maxLength": 160},
+        "recipe_digest": {"$ref": "#/$defs/sha256"},
+        "at": {"$ref": "#/$defs/at"}
+      }
+    }
+  }
+}

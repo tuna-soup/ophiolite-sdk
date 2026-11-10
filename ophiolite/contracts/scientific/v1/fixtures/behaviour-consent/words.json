@@ -4,10 +4,15 @@
   {"state": "granted", "purpose": "training", "line": "Allowed learning from how you work: training"},
   {"state": "withdrawn", "purpose": "evaluation", "line": "Withdrew learning from how you work: evaluation"}
  ],
- "deployment": {"detail": {"capture": "by-consent", "tier": "public-demonstration", "text_version": 0}, "line": "Capture by consent started (public demonstration, text version 0)"},
+ "deployment": [
+  {"detail": {"capture": "by-consent", "tier": "self-managed", "text_version": 1}, "line": "Capture by consent switched on (self-managed, text version 1)"},
+  {"detail": {"capture": "off", "tier": "managed-dedicated", "text_version": 1}, "line": "Capture switched off (managed dedicated)"},
+  {"detail": {"capture": "off", "tier": null, "text_version": 1}, "line": "Capture switched off"}
+ ],
  "capture": {
-  "off": "Capture is off on this deployment",
-  "by-consent-with-a-draft": "Learning from how you work is by consent here; the text is a draft and cannot be agreed to yet"
+  "sentences": ["Learning from how people work is off by default.", "It is on only when the operator of this deployment sets it and the person agrees.", "An export is a deliberate download by someone authorised, never an automatic upload."],
+  "off": "Capture is off on this deployment. Learning from how people work is off by default. It is on only when the operator of this deployment sets it and the person agrees. An export is a deliberate download by someone authorised, never an automatic upload.",
+  "by-consent": "Learning from how you work is by consent here. Learning from how people work is off by default. It is on only when the operator of this deployment sets it and the person agrees. An export is a deliberate download by someone authorised, never an automatic upload."
  },
  "reasons": {
   "capture-off": [409, "FAILED_PRECONDITION", "Capture is off on this deployment"],

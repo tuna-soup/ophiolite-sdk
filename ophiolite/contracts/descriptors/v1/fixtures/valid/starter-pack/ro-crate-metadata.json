@@ -1,0 +1,119 @@
+{
+  "@context": [
+    "https://w3id.org/ro/crate/1.1/context",
+    {
+      "sha256": "https://schema.org/sha256"
+    }
+  ],
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      },
+      "about": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": "Dataset",
+      "name": "Synthetic starter pack: two wells",
+      "description": "Two made-up wells with a log each and a small cube, packed for Python and ResInsight. Synthetic values only.",
+      "datePublished": "2026-11-05",
+      "license": {
+        "@id": "https://spdx.org/licenses/CC-BY-4.0"
+      },
+      "author": [
+        {
+          "@id": "#creator-1"
+        }
+      ],
+      "publisher": {
+        "@id": "#publisher"
+      },
+      "hasPart": [
+        {
+          "@id": "files/targets/python/open_pack.py"
+        },
+        {
+          "@id": "files/targets/python/heads/SYN-W1.geojson"
+        },
+        {
+          "@id": "files/ATTRIBUTION.md"
+        },
+        {
+          "@id": "files/targets/resinsight/import.py"
+        },
+        {
+          "@id": "files/seismic-3d/SYN-CUBE.sgy"
+        },
+        {
+          "@id": "starter.json"
+        }
+      ]
+    },
+    {
+      "@id": "#creator-1",
+      "@type": "Organization",
+      "name": "Synthetic Survey Organisation"
+    },
+    {
+      "@id": "#publisher",
+      "@type": "Organization",
+      "name": "Open Subsurface Data"
+    },
+    {
+      "@id": "https://spdx.org/licenses/CC-BY-4.0",
+      "@type": "CreativeWork",
+      "name": "Creative Commons Attribution 4.0 International"
+    },
+    {
+      "@id": "starter.json",
+      "@type": "File",
+      "name": "The starter pack document",
+      "encodingFormat": "application/json"
+    },
+    {
+      "@id": "files/targets/python/open_pack.py",
+      "@type": "File",
+      "name": "open_pack.py",
+      "sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "contentSize": "1200",
+      "encodingFormat": "text/x-python"
+    },
+    {
+      "@id": "files/targets/python/heads/SYN-W1.geojson",
+      "@type": "File",
+      "name": "SYN-W1.geojson",
+      "sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+      "contentSize": "310",
+      "encodingFormat": "application/geo+json"
+    },
+    {
+      "@id": "files/ATTRIBUTION.md",
+      "@type": "File",
+      "name": "ATTRIBUTION.md",
+      "sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+      "contentSize": "420",
+      "encodingFormat": "text/markdown"
+    },
+    {
+      "@id": "files/targets/resinsight/import.py",
+      "@type": "File",
+      "name": "import.py",
+      "sha256": "5555555555555555555555555555555555555555555555555555555555555555",
+      "contentSize": "900",
+      "encodingFormat": "text/x-python"
+    },
+    {
+      "@id": "files/seismic-3d/SYN-CUBE.sgy",
+      "@type": "File",
+      "name": "SYN-CUBE.sgy",
+      "sha256": "6666666666666666666666666666666666666666666666666666666666666666",
+      "contentSize": "16",
+      "encodingFormat": "application/octet-stream"
+    }
+  ]
+}

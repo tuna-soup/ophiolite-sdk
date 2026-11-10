@@ -1,0 +1,36 @@
+{
+ "id": "ophiolite.work-turn-mapping/1",
+ "subject": "E160 s0 (D2): where each property of a work-episode row, and the three episode properties a line repeats, goes in one ophiolite.work-turn/1 line, and back. `from` is `row.<property>` or `episode.<property>`, one level deeper only for a row object that is split (`attempt`); `to` is the dotted place in the line; `modes` the episode modes the entry applies to; `group` the optional row object the entry belongs to (absent in the row: every place in that group's `null` list is null in the line; all of them null: absent in the row; some null and some not: refused). `n` is the row's 1-based position and has no source. Lists are copied whole, in order; no reward is invented. work_turns.py reads this table and nothing else.",
+ "line": "ophiolite.work-turn/1",
+ "positional": {"n": "the row's 1-based position in the episode's rows"},
+ "groups": {
+  "attempt": {"null": ["attempt", "judgement.attempt_ended"]},
+  "offered": {"null": ["observation.offered"]}
+ },
+ "entries": [
+  {"from": "episode.episode_id", "to": "episode", "modes": ["shape", "values"], "group": null, "absent": "never"},
+  {"from": "episode.mode", "to": "mode", "modes": ["shape", "values"], "group": null, "absent": "never"},
+  {"from": "episode.split", "to": "split", "modes": ["shape", "values"], "group": null, "absent": "never"},
+  {"from": "row.attempt.chain", "to": "attempt.chain", "modes": ["shape", "values"], "group": "attempt", "absent": "null"},
+  {"from": "row.attempt.n", "to": "attempt.n", "modes": ["shape", "values"], "group": "attempt", "absent": "null"},
+  {"from": "row.attempt.from", "to": "attempt.from", "modes": ["shape", "values"], "group": "attempt", "absent": "null"},
+  {"from": "row.attempt.continued", "to": "attempt.continued", "modes": ["shape", "values"], "group": "attempt", "absent": "null"},
+  {"from": "row.offered", "to": "observation.offered", "modes": ["shape", "values"], "group": "offered", "absent": "null"},
+  {"from": "row.inputs", "to": "observation.inputs", "modes": ["shape", "values"], "group": null, "absent": "never"},
+  {"from": "row.action_id", "to": "action.action_id", "modes": ["shape", "values"], "group": null, "absent": "never"},
+  {"from": "row.at", "to": "action.at", "modes": ["shape", "values"], "group": null, "absent": "never"},
+  {"from": "row.operation", "to": "action.operation", "modes": ["shape", "values"], "group": null, "absent": "never"},
+  {"from": "row.parameters", "to": "action.parameters", "modes": ["shape", "values"], "group": null, "absent": "never"},
+  {"from": "row.through", "to": "action.through", "modes": ["shape", "values"], "group": null, "absent": "never"},
+  {"from": "row.on_behalf_of", "to": "action.on_behalf_of", "modes": ["shape", "values"], "group": null, "absent": "never"},
+  {"from": "row.plan", "to": "action.plan", "modes": ["shape", "values"], "group": null, "absent": "never"},
+  {"from": "row.outputs", "to": "action.outputs", "modes": ["shape", "values"], "group": null, "absent": "never"},
+  {"from": "row.request", "to": "action.request", "modes": ["values"], "group": null, "absent": "never"},
+  {"from": "row.instruction", "to": "action.instruction", "modes": ["values"], "group": null, "absent": "never"},
+  {"from": "row.checks", "to": "judgement.checks", "modes": ["shape", "values"], "group": null, "absent": "never"},
+  {"from": "row.outcomes", "to": "judgement.outcomes", "modes": ["shape", "values"], "group": null, "absent": "never"},
+  {"from": "row.verdicts", "to": "judgement.verdicts", "modes": ["shape", "values"], "group": null, "absent": "never"},
+  {"from": "row.attempt.ended", "to": "judgement.attempt_ended", "modes": ["shape", "values"], "group": "attempt", "absent": "null"},
+  {"from": "row.omitted", "to": "omitted", "modes": ["shape", "values"], "group": null, "absent": "never"}
+ ]
+}

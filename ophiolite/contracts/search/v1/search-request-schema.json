@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/search/v1/search-request-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.search-request/2",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "Box": {
+      "additionalProperties": false,
+      "description": "A place: x (easting or longitude) from `minx` to `maxx` and y (northing or latitude) from `miny` to `maxy` in the\nnamed coordinate system, whatever its axis order; bounds are inclusive.",
+      "properties": {
+        "minx": {
+          "title": "Minx",
+          "type": "number"
+        },
+        "miny": {
+          "title": "Miny",
+          "type": "number"
+        },
+        "maxx": {
+          "title": "Maxx",
+          "type": "number"
+        },
+        "maxy": {
+          "title": "Maxy",
+          "type": "number"
+        },
+        "crs": {
+          "default": "OGC:CRS84",
+          "title": "Crs",
+          "type": "string"
+        }
+      },
+      "required": [
+        "minx",
+        "miny",
+        "maxx",
+        "maxy"
+      ],
+      "title": "Box",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "A question to every project of one organisation the caller may read: words, filters, or both (E145).",
+  "properties": {
+    "organization_id": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Organization Id",
+      "type": "string"
+    },
+    "text": {
+      "maxLength": 200,
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Text",
+      "type": "string"
+    },
+    "method": {
+      "enum": [
+        "words",
+        "embedding"
+      ],
+      "title": "Method",
+      "type": "string"
+    },
+    "kinds": {
+      "items": {
+        "maxLength": 128,
+        "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+        "type": "string"
+      },
+      "maxItems": 12,
+      "minItems": 1,
+      "title": "Kinds",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "well": {
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Well",
+      "type": "string"
+    },
+    "bbox": {
+      "$ref": "#/$defs/Box"
+    },
+    "since": {
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+      "title": "Since",
+      "type": "string"
+    },
+    "until": {
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+      "title": "Until",
+      "type": "string"
+    },
+    "published_by": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Published By",
+      "type": "string"
+    },
+    "projects": {
+      "items": {
+        "maxLength": 80,
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "title": "Projects",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "include_archived": {
+      "default": false,
+      "title": "Include Archived",
+      "type": "boolean"
+    },
+    "cursor": {
+      "maxLength": 2000,
+      "minLength": 1,
+      "title": "Cursor",
+      "type": "string"
+    },
+    "limit": {
+      "default": 20,
+      "maximum": 50,
+      "minimum": 1,
+      "title": "Limit",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "organization_id"
+  ],
+  "title": "SearchRequest",
+  "type": "object"
+}

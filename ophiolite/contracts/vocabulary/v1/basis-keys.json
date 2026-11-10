@@ -82,7 +82,8 @@
     "corners",
     "column_start",
     "encoding",
-    "layer"
+    "layer",
+    "undefined_code"
   ],
   "compare": {
     "exact": "equal only when the stated texts are identical",

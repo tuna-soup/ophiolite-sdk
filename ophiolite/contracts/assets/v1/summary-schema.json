@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/summary-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.asset-summary/1",
-    "version": "1.4.0",
+    "version": "1.5.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -358,6 +358,16 @@
     }
   },
   "additionalProperties": false,
+  "if": {
+    "properties": {
+      "osdu_kind_reason": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "osdu_kind_reason"
+    ]
+  },
   "properties": {
     "asset_id": {
       "maxLength": 512,
@@ -457,6 +467,34 @@
         }
       ],
       "default": null
+    },
+    "osdu_kind": {
+      "anyOf": [
+        {
+          "maxLength": 128,
+          "pattern": "^osdu:wks:[a-z-]+--[A-Za-z]+:\\d+\\.\\d+\\.\\d+$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Osdu Kind"
+    },
+    "osdu_kind_reason": {
+      "anyOf": [
+        {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Osdu Kind Reason"
     }
   },
   "required": [
@@ -471,6 +509,16 @@
     "sample_count",
     "allowed_operations"
   ],
+  "then": {
+    "properties": {
+      "osdu_kind": {
+        "type": "null"
+      }
+    },
+    "required": [
+      "osdu_kind"
+    ]
+  },
   "title": "AssetSummary",
   "type": "object"
 }

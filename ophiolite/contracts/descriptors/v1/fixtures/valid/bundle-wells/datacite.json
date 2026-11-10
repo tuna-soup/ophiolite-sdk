@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "http://datacite.org/schema/kernel-4",
+  "types": {
+    "resourceTypeGeneral": "Dataset",
+    "resourceType": "Well log bundle"
+  },
+  "titles": [
+    {"title": "Synthetic gamma ray log of well SYNTHETIC-M1"}
+  ],
+  "creators": [
+    {
+      "name": "Josiah Carberry",
+      "nameType": "Personal",
+      "nameIdentifiers": [
+        {"nameIdentifier": "https://orcid.org/0000-0002-1825-0097", "nameIdentifierScheme": "ORCID", "schemeUri": "https://orcid.org"}
+      ]
+    },
+    {
+      "name": "Ada Synthetic",
+      "nameType": "Personal"
+    }
+  ],
+  "publisher": "Synthetic Survey Organisation",
+  "publicationYear": "2026",
+  "dates": [
+    {"date": "2026-11-05", "dateType": "Issued"}
+  ],
+  "version": "1.0.0",
+  "rightsList": [
+    {
+      "rights": "Creative Commons Attribution 4.0 International",
+      "rightsUri": "https://spdx.org/licenses/CC-BY-4.0",
+      "rightsIdentifier": "CC-BY-4.0",
+      "rightsIdentifierScheme": "SPDX",
+      "schemeUri": "https://spdx.org/licenses/"
+    }
+  ],
+  "descriptions": [
+    {
+      "description": "One gamma ray curve (GR, five samples) of a made-up well, with the LAS file it was read from. Synthetic data for the descriptor contract; no observed well.",
+      "descriptionType": "Abstract"
+    }
+  ],
+  "sizes": ["3866 bytes"],
+  "formats": ["application/json", "text/plain"]
+}

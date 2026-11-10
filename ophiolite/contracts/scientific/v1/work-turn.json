@@ -1,0 +1,1630 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/scientific/v1/work-turn.json",
+  "x-ophiolite": {
+    "id": "ophiolite.work-turn/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "title": "WorkTurn",
+  "$defs": {
+    "EpisodeActor": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "person",
+            "agent"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "id": {
+          "description": "A pseudonym; its prefix is the kind",
+          "pattern": "^(person|agent)-[0-9a-f]{32}$",
+          "title": "Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "title": "EpisodeActor",
+      "type": "object"
+    },
+    "EpisodeBehalf": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "person",
+          "title": "Kind",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^person-[0-9a-f]{32}$",
+          "title": "Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "title": "EpisodeBehalf",
+      "type": "object"
+    },
+    "EpisodeCheck": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "pattern": "^ref-[0-9a-f]{32}$",
+          "title": "Ref",
+          "type": "string"
+        },
+        "key_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Key Sha256",
+          "type": "string"
+        },
+        "record_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Record Sha256",
+          "type": "string"
+        },
+        "outcome": {
+          "enum": [
+            "passed",
+            "differed",
+            "not_compared"
+          ],
+          "title": "Outcome",
+          "type": "string"
+        },
+        "witness": {
+          "enum": [
+            "server",
+            "claimed",
+            "personal"
+          ],
+          "title": "Witness",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref",
+        "key_sha256",
+        "record_sha256",
+        "outcome",
+        "witness"
+      ],
+      "title": "EpisodeCheck",
+      "type": "object"
+    },
+    "EpisodeOmitted": {
+      "additionalProperties": false,
+      "properties": {
+        "parameters": {
+          "minimum": 0,
+          "title": "Parameters",
+          "type": "integer"
+        },
+        "checks": {
+          "minimum": 0,
+          "title": "Checks",
+          "type": "integer"
+        },
+        "verdicts": {
+          "minimum": 0,
+          "title": "Verdicts",
+          "type": "integer"
+        },
+        "plan": {
+          "minimum": 0,
+          "title": "Plan",
+          "type": "integer"
+        },
+        "offered": {
+          "description": "1.2.0 (E159): offered candidates and checks removed by the readership or the consent gate",
+          "minimum": 0,
+          "title": "Offered",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "parameters",
+        "checks",
+        "verdicts",
+        "plan"
+      ],
+      "title": "EpisodeOmitted",
+      "type": "object"
+    },
+    "EpisodeOutcome": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "pattern": "^ref-[0-9a-f]{32}$",
+          "title": "Ref",
+          "type": "string"
+        },
+        "outcome_ref": {
+          "pattern": "^outcome-[0-9a-f]{32}$",
+          "title": "Outcome Ref",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        },
+        "state": {
+          "enum": [
+            "accepted",
+            "rejected",
+            "not_checked",
+            "withdrawn"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "declaration_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Declaration Sha256",
+          "type": "string"
+        },
+        "evaluation_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Evaluation Sha256"
+        }
+      },
+      "required": [
+        "ref",
+        "outcome_ref",
+        "version",
+        "state",
+        "declaration_sha256",
+        "evaluation_sha256"
+      ],
+      "title": "EpisodeOutcome",
+      "type": "object"
+    },
+    "EpisodeParameter": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "description": "The path of a listed numeric parameter",
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "unit": {
+          "maxLength": 32,
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "value",
+        "unit"
+      ],
+      "title": "EpisodeParameter",
+      "type": "object"
+    },
+    "EpisodePlan": {
+      "additionalProperties": false,
+      "properties": {
+        "plan_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Plan Sha256",
+          "type": "string"
+        },
+        "evidence_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The digest of the evidence the command executed under; null when approved without evidence or left out by consent",
+          "title": "Evidence Sha256"
+        }
+      },
+      "required": [
+        "plan_sha256",
+        "evidence_sha256"
+      ],
+      "title": "EpisodePlan",
+      "type": "object"
+    },
+    "EpisodeRevision": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "description": "The pseudonym of asset#revision",
+          "pattern": "^ref-[0-9a-f]{32}$",
+          "title": "Ref",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "kind": {
+          "pattern": "^[a-z0-9][a-z0-9./-]{0,63}$",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref",
+        "sha256",
+        "kind"
+      ],
+      "title": "EpisodeRevision",
+      "type": "object"
+    },
+    "EpisodeThrough": {
+      "additionalProperties": false,
+      "properties": {
+        "client": {
+          "description": "A product of the closed list; any other report is left out",
+          "enum": [
+            "qgis-plugin",
+            "ophiolite-python",
+            "ophiolite-cli",
+            "ophiolite-typescript",
+            "workspace",
+            "claude-desktop"
+          ],
+          "title": "Client",
+          "type": "string"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9]{1,4}(?:\\.[0-9]{1,6}){0,3}(?:-(?:alpha|beta|rc)(?:\\.?[0-9]{1,3})?)?$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Version"
+        }
+      },
+      "required": [
+        "client",
+        "version"
+      ],
+      "title": "EpisodeThrough",
+      "type": "object"
+    },
+    "EpisodeVerdict": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "pattern": "^ref-[0-9a-f]{32}$",
+          "title": "Ref",
+          "type": "string"
+        },
+        "verdict": {
+          "enum": [
+            "accepted",
+            "rejected"
+          ],
+          "title": "Verdict",
+          "type": "string"
+        },
+        "by": {
+          "$ref": "#/$defs/EpisodeActor"
+        },
+        "at": {
+          "title": "At",
+          "type": "number"
+        },
+        "because": {
+          "description": "1.2.0 (E159): the verdict's reason category (ophiolite.verdict/1 1.1.0); the reason itself is values only",
+          "enum": [
+            "wrong-input",
+            "wrong-method",
+            "wrong-setting",
+            "wrong-unit",
+            "data-quality",
+            "reference-mismatch",
+            "matches",
+            "other"
+          ],
+          "title": "Because",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref",
+        "verdict",
+        "by",
+        "at"
+      ],
+      "title": "EpisodeVerdict",
+      "type": "object"
+    },
+    "OfferedRevision": {
+      "additionalProperties": false,
+      "description": "A revision the preview offered: `EpisodeRevision`'s fields; `as` names the candidate (`kind` is the revision's).",
+      "properties": {
+        "ref": {
+          "description": "The pseudonym of asset#revision",
+          "pattern": "^ref-[0-9a-f]{32}$",
+          "title": "Ref",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "kind": {
+          "pattern": "^[a-z0-9][a-z0-9./-]{0,63}$",
+          "title": "Kind",
+          "type": "string"
+        },
+        "as": {
+          "const": "revision",
+          "title": "As",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref",
+        "sha256",
+        "kind",
+        "as"
+      ],
+      "title": "OfferedRevision",
+      "type": "object"
+    },
+    "OfferedUnit": {
+      "additionalProperties": false,
+      "description": "A unit a landing preview offered, by its ordinal in the answer; the wellbore entity, if any.",
+      "properties": {
+        "as": {
+          "const": "unit",
+          "title": "As",
+          "type": "string"
+        },
+        "ordinal": {
+          "minimum": 1,
+          "title": "Ordinal",
+          "type": "integer"
+        },
+        "action": {
+          "enum": [
+            "land",
+            "reuse",
+            "skip"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "entity": {
+          "anyOf": [
+            {
+              "description": "The pseudonym of an entity",
+              "pattern": "^entity-[0-9a-f]{32}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Entity"
+        }
+      },
+      "required": [
+        "as",
+        "ordinal",
+        "action",
+        "entity"
+      ],
+      "title": "OfferedUnit",
+      "type": "object"
+    },
+    "OfferedWell": {
+      "additionalProperties": false,
+      "description": "A well an import preview offered, by its ordinal in the answer; the entity when it is already here.",
+      "properties": {
+        "as": {
+          "const": "well",
+          "title": "As",
+          "type": "string"
+        },
+        "ordinal": {
+          "minimum": 1,
+          "title": "Ordinal",
+          "type": "integer"
+        },
+        "action": {
+          "enum": [
+            "create",
+            "already-here",
+            "possible-duplicate",
+            "skip"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "entity": {
+          "anyOf": [
+            {
+              "description": "The pseudonym of an entity",
+              "pattern": "^entity-[0-9a-f]{32}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Entity"
+        }
+      },
+      "required": [
+        "as",
+        "ordinal",
+        "action",
+        "entity"
+      ],
+      "title": "OfferedWell",
+      "type": "object"
+    },
+    "ShapeAction": {
+      "additionalProperties": false,
+      "properties": {
+        "action_id": {
+          "pattern": "^act_[0-9a-f]{32}$",
+          "title": "Action Id",
+          "type": "string"
+        },
+        "at": {
+          "title": "At",
+          "type": "number"
+        },
+        "operation": {
+          "pattern": "^[a-z][a-z0-9-]*/[A-Za-z][A-Za-z0-9-]*$",
+          "title": "Operation",
+          "type": "string"
+        },
+        "parameters": {
+          "items": {
+            "$ref": "#/$defs/EpisodeParameter"
+          },
+          "title": "Parameters",
+          "type": "array"
+        },
+        "through": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EpisodeThrough"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "on_behalf_of": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EpisodeBehalf"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "plan": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EpisodePlan"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outputs": {
+          "items": {
+            "$ref": "#/$defs/EpisodeRevision"
+          },
+          "title": "Outputs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "action_id",
+        "at",
+        "operation",
+        "parameters",
+        "through",
+        "on_behalf_of",
+        "plan",
+        "outputs"
+      ],
+      "title": "ShapeAction",
+      "type": "object"
+    },
+    "ShapeJudgement": {
+      "additionalProperties": false,
+      "properties": {
+        "checks": {
+          "items": {
+            "$ref": "#/$defs/EpisodeCheck"
+          },
+          "title": "Checks",
+          "type": "array"
+        },
+        "outcomes": {
+          "items": {
+            "$ref": "#/$defs/EpisodeOutcome"
+          },
+          "title": "Outcomes",
+          "type": "array"
+        },
+        "verdicts": {
+          "items": {
+            "$ref": "#/$defs/EpisodeVerdict"
+          },
+          "title": "Verdicts",
+          "type": "array"
+        },
+        "attempt_ended": {
+          "anyOf": [
+            {
+              "enum": [
+                "accepted",
+                "withdrawn",
+                "superseded",
+                "discarded",
+                "open"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How the row's attempt ended; null outside a chain",
+          "title": "Attempt Ended"
+        }
+      },
+      "required": [
+        "checks",
+        "outcomes",
+        "verdicts",
+        "attempt_ended"
+      ],
+      "title": "ShapeJudgement",
+      "type": "object"
+    },
+    "ShapeObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "offered": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ShapeOffered"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "What the preview this row consumed offered; null without one"
+        },
+        "inputs": {
+          "items": {
+            "$ref": "#/$defs/EpisodeRevision"
+          },
+          "title": "Inputs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "offered",
+        "inputs"
+      ],
+      "title": "ShapeObservation",
+      "type": "object"
+    },
+    "ShapeOffered": {
+      "additionalProperties": false,
+      "description": "What one preview offered before this row acted on it: candidates, checks and outcomes as the preview showed them.",
+      "properties": {
+        "preview": {
+          "description": "The pseudonym of the preview",
+          "pattern": "^preview-[0-9a-f]{32}$",
+          "title": "Preview",
+          "type": "string"
+        },
+        "at": {
+          "title": "At",
+          "type": "number"
+        },
+        "candidates": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "revision": "#/$defs/OfferedRevision",
+                "unit": "#/$defs/OfferedUnit",
+                "well": "#/$defs/OfferedWell"
+              },
+              "propertyName": "as"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/OfferedRevision"
+              },
+              {
+                "$ref": "#/$defs/OfferedWell"
+              },
+              {
+                "$ref": "#/$defs/OfferedUnit"
+              }
+            ]
+          },
+          "title": "Candidates",
+          "type": "array"
+        },
+        "checks": {
+          "items": {
+            "$ref": "#/$defs/EpisodeCheck"
+          },
+          "title": "Checks",
+          "type": "array"
+        },
+        "outcomes": {
+          "items": {
+            "$ref": "#/$defs/EpisodeOutcome"
+          },
+          "title": "Outcomes",
+          "type": "array"
+        },
+        "answer_sha256": {
+          "description": "The sha256 of the canonical bytes of the whole answer as returned (history, not a binding)",
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Answer Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "preview",
+        "at",
+        "candidates",
+        "checks",
+        "outcomes",
+        "answer_sha256"
+      ],
+      "title": "ShapeOffered",
+      "type": "object"
+    },
+    "ShapeTurn": {
+      "additionalProperties": false,
+      "properties": {
+        "episode": {
+          "pattern": "^episode-[0-9a-f]{32}$",
+          "title": "Episode",
+          "type": "string"
+        },
+        "n": {
+          "description": "The row's 1-based position in the episode",
+          "minimum": 1,
+          "title": "N",
+          "type": "integer"
+        },
+        "split": {
+          "enum": [
+            "train",
+            "validation",
+            "test"
+          ],
+          "title": "Split",
+          "type": "string"
+        },
+        "attempt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TurnAttempt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "omitted": {
+          "$ref": "#/$defs/EpisodeOmitted"
+        },
+        "mode": {
+          "const": "shape",
+          "title": "Mode",
+          "type": "string"
+        },
+        "observation": {
+          "$ref": "#/$defs/ShapeObservation"
+        },
+        "action": {
+          "$ref": "#/$defs/ShapeAction"
+        },
+        "judgement": {
+          "$ref": "#/$defs/ShapeJudgement"
+        }
+      },
+      "required": [
+        "episode",
+        "n",
+        "split",
+        "attempt",
+        "omitted",
+        "mode",
+        "observation",
+        "action",
+        "judgement"
+      ],
+      "title": "ShapeTurn",
+      "type": "object"
+    },
+    "TurnAttempt": {
+      "additionalProperties": false,
+      "description": "The row's attempt without how it ended (that is judged: `judgement.attempt_ended`).",
+      "properties": {
+        "chain": {
+          "pattern": "^ref-[0-9a-f]{32}$",
+          "title": "Chain",
+          "type": "string"
+        },
+        "n": {
+          "minimum": 1,
+          "title": "N",
+          "type": "integer"
+        },
+        "from": {
+          "anyOf": [
+            {
+              "pattern": "^ref-[0-9a-f]{32}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "From"
+        },
+        "continued": {
+          "title": "Continued",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "chain",
+        "n",
+        "from",
+        "continued"
+      ],
+      "title": "TurnAttempt",
+      "type": "object"
+    },
+    "ValuesAction": {
+      "additionalProperties": false,
+      "properties": {
+        "action_id": {
+          "pattern": "^act_[0-9a-f]{32}$",
+          "title": "Action Id",
+          "type": "string"
+        },
+        "at": {
+          "title": "At",
+          "type": "number"
+        },
+        "operation": {
+          "pattern": "^[a-z][a-z0-9-]*/[A-Za-z][A-Za-z0-9-]*$",
+          "title": "Operation",
+          "type": "string"
+        },
+        "parameters": {
+          "items": {
+            "$ref": "#/$defs/ValuesParameter"
+          },
+          "title": "Parameters",
+          "type": "array"
+        },
+        "through": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EpisodeThrough"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "on_behalf_of": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EpisodeBehalf"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "plan": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EpisodePlan"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outputs": {
+          "items": {
+            "$ref": "#/$defs/ValuesRevision"
+          },
+          "title": "Outputs",
+          "type": "array"
+        },
+        "request": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The canonical request minus credentials",
+          "title": "Request"
+        },
+        "instruction": {
+          "anyOf": [
+            {
+              "maxLength": 4000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Instruction"
+        }
+      },
+      "required": [
+        "action_id",
+        "at",
+        "operation",
+        "parameters",
+        "through",
+        "on_behalf_of",
+        "plan",
+        "outputs",
+        "request",
+        "instruction"
+      ],
+      "title": "ValuesAction",
+      "type": "object"
+    },
+    "ValuesCheck": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "pattern": "^ref-[0-9a-f]{32}$",
+          "title": "Ref",
+          "type": "string"
+        },
+        "key_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Key Sha256",
+          "type": "string"
+        },
+        "record_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Record Sha256",
+          "type": "string"
+        },
+        "outcome": {
+          "enum": [
+            "passed",
+            "differed",
+            "not_compared"
+          ],
+          "title": "Outcome",
+          "type": "string"
+        },
+        "witness": {
+          "enum": [
+            "server",
+            "claimed",
+            "personal"
+          ],
+          "title": "Witness",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        }
+      },
+      "required": [
+        "ref",
+        "key_sha256",
+        "record_sha256",
+        "outcome",
+        "witness",
+        "name"
+      ],
+      "title": "ValuesCheck",
+      "type": "object"
+    },
+    "ValuesJudgement": {
+      "additionalProperties": false,
+      "properties": {
+        "checks": {
+          "items": {
+            "$ref": "#/$defs/ValuesCheck"
+          },
+          "title": "Checks",
+          "type": "array"
+        },
+        "outcomes": {
+          "items": {
+            "$ref": "#/$defs/ValuesOutcome"
+          },
+          "title": "Outcomes",
+          "type": "array"
+        },
+        "verdicts": {
+          "items": {
+            "$ref": "#/$defs/ValuesVerdict"
+          },
+          "title": "Verdicts",
+          "type": "array"
+        },
+        "attempt_ended": {
+          "anyOf": [
+            {
+              "enum": [
+                "accepted",
+                "withdrawn",
+                "superseded",
+                "discarded",
+                "open"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "How the row's attempt ended; null outside a chain",
+          "title": "Attempt Ended"
+        }
+      },
+      "required": [
+        "checks",
+        "outcomes",
+        "verdicts",
+        "attempt_ended"
+      ],
+      "title": "ValuesJudgement",
+      "type": "object"
+    },
+    "ValuesObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "offered": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ValuesOffered"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "What the preview this row consumed offered, with its values; null without one"
+        },
+        "inputs": {
+          "items": {
+            "$ref": "#/$defs/ValuesRevision"
+          },
+          "title": "Inputs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "offered",
+        "inputs"
+      ],
+      "title": "ValuesObservation",
+      "type": "object"
+    },
+    "ValuesOffered": {
+      "additionalProperties": false,
+      "description": "`ShapeOffered` plus the preview's own command id and the names, labels and row keys of its candidates.",
+      "properties": {
+        "preview": {
+          "description": "The pseudonym of the preview",
+          "pattern": "^preview-[0-9a-f]{32}$",
+          "title": "Preview",
+          "type": "string"
+        },
+        "at": {
+          "title": "At",
+          "type": "number"
+        },
+        "candidates": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "revision": "#/$defs/ValuesOfferedRevision",
+                "unit": "#/$defs/ValuesOfferedUnit",
+                "well": "#/$defs/ValuesOfferedWell"
+              },
+              "propertyName": "as"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ValuesOfferedRevision"
+              },
+              {
+                "$ref": "#/$defs/ValuesOfferedWell"
+              },
+              {
+                "$ref": "#/$defs/ValuesOfferedUnit"
+              }
+            ]
+          },
+          "title": "Candidates",
+          "type": "array"
+        },
+        "checks": {
+          "items": {
+            "$ref": "#/$defs/ValuesCheck"
+          },
+          "title": "Checks",
+          "type": "array"
+        },
+        "outcomes": {
+          "items": {
+            "$ref": "#/$defs/ValuesOutcome"
+          },
+          "title": "Outcomes",
+          "type": "array"
+        },
+        "answer_sha256": {
+          "description": "The sha256 of the canonical bytes of the whole answer as returned (history, not a binding)",
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Answer Sha256",
+          "type": "string"
+        },
+        "preview_command_id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "title": "Preview Command Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "preview",
+        "at",
+        "candidates",
+        "checks",
+        "outcomes",
+        "answer_sha256",
+        "preview_command_id"
+      ],
+      "title": "ValuesOffered",
+      "type": "object"
+    },
+    "ValuesOfferedRevision": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "description": "The pseudonym of asset#revision",
+          "pattern": "^ref-[0-9a-f]{32}$",
+          "title": "Ref",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "kind": {
+          "pattern": "^[a-z0-9][a-z0-9./-]{0,63}$",
+          "title": "Kind",
+          "type": "string"
+        },
+        "asset_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "as": {
+          "const": "revision",
+          "title": "As",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref",
+        "sha256",
+        "kind",
+        "asset_id",
+        "revision",
+        "as"
+      ],
+      "title": "ValuesOfferedRevision",
+      "type": "object"
+    },
+    "ValuesOfferedUnit": {
+      "additionalProperties": false,
+      "properties": {
+        "as": {
+          "const": "unit",
+          "title": "As",
+          "type": "string"
+        },
+        "ordinal": {
+          "minimum": 1,
+          "title": "Ordinal",
+          "type": "integer"
+        },
+        "action": {
+          "enum": [
+            "land",
+            "reuse",
+            "skip"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "entity": {
+          "anyOf": [
+            {
+              "description": "The pseudonym of an entity",
+              "pattern": "^entity-[0-9a-f]{32}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Entity"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The unit label as the preview answered it",
+          "title": "Label"
+        }
+      },
+      "required": [
+        "as",
+        "ordinal",
+        "action",
+        "entity",
+        "label"
+      ],
+      "title": "ValuesOfferedUnit",
+      "type": "object"
+    },
+    "ValuesOfferedWell": {
+      "additionalProperties": false,
+      "properties": {
+        "as": {
+          "const": "well",
+          "title": "As",
+          "type": "string"
+        },
+        "ordinal": {
+          "minimum": 1,
+          "title": "Ordinal",
+          "type": "integer"
+        },
+        "action": {
+          "enum": [
+            "create",
+            "already-here",
+            "possible-duplicate",
+            "skip"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "entity": {
+          "anyOf": [
+            {
+              "description": "The pseudonym of an entity",
+              "pattern": "^entity-[0-9a-f]{32}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Entity"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The well name as the preview answered it",
+          "title": "Name"
+        },
+        "row_key": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The source row key as the preview answered it",
+          "title": "Row Key"
+        }
+      },
+      "required": [
+        "as",
+        "ordinal",
+        "action",
+        "entity",
+        "name",
+        "row_key"
+      ],
+      "title": "ValuesOfferedWell",
+      "type": "object"
+    },
+    "ValuesOutcome": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "pattern": "^ref-[0-9a-f]{32}$",
+          "title": "Ref",
+          "type": "string"
+        },
+        "outcome_ref": {
+          "pattern": "^outcome-[0-9a-f]{32}$",
+          "title": "Outcome Ref",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        },
+        "state": {
+          "enum": [
+            "accepted",
+            "rejected",
+            "not_checked",
+            "withdrawn"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "declaration_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Declaration Sha256",
+          "type": "string"
+        },
+        "evaluation_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Evaluation Sha256"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Label"
+        }
+      },
+      "required": [
+        "ref",
+        "outcome_ref",
+        "version",
+        "state",
+        "declaration_sha256",
+        "evaluation_sha256",
+        "label"
+      ],
+      "title": "ValuesOutcome",
+      "type": "object"
+    },
+    "ValuesParameter": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "description": "The path of a listed numeric parameter",
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "unit": {
+          "maxLength": 32,
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Label"
+        }
+      },
+      "required": [
+        "key",
+        "value",
+        "unit",
+        "label"
+      ],
+      "title": "ValuesParameter",
+      "type": "object"
+    },
+    "ValuesRevision": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "description": "The pseudonym of asset#revision",
+          "pattern": "^ref-[0-9a-f]{32}$",
+          "title": "Ref",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "kind": {
+          "pattern": "^[a-z0-9][a-z0-9./-]{0,63}$",
+          "title": "Kind",
+          "type": "string"
+        },
+        "asset_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref",
+        "sha256",
+        "kind",
+        "asset_id",
+        "revision"
+      ],
+      "title": "ValuesRevision",
+      "type": "object"
+    },
+    "ValuesTurn": {
+      "additionalProperties": false,
+      "properties": {
+        "episode": {
+          "pattern": "^episode-[0-9a-f]{32}$",
+          "title": "Episode",
+          "type": "string"
+        },
+        "n": {
+          "description": "The row's 1-based position in the episode",
+          "minimum": 1,
+          "title": "N",
+          "type": "integer"
+        },
+        "split": {
+          "enum": [
+            "train",
+            "validation",
+            "test"
+          ],
+          "title": "Split",
+          "type": "string"
+        },
+        "attempt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TurnAttempt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "omitted": {
+          "$ref": "#/$defs/EpisodeOmitted"
+        },
+        "mode": {
+          "const": "values",
+          "title": "Mode",
+          "type": "string"
+        },
+        "observation": {
+          "$ref": "#/$defs/ValuesObservation"
+        },
+        "action": {
+          "$ref": "#/$defs/ValuesAction"
+        },
+        "judgement": {
+          "$ref": "#/$defs/ValuesJudgement"
+        }
+      },
+      "required": [
+        "episode",
+        "n",
+        "split",
+        "attempt",
+        "omitted",
+        "mode",
+        "observation",
+        "action",
+        "judgement"
+      ],
+      "title": "ValuesTurn",
+      "type": "object"
+    },
+    "ValuesVerdict": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "pattern": "^ref-[0-9a-f]{32}$",
+          "title": "Ref",
+          "type": "string"
+        },
+        "verdict": {
+          "enum": [
+            "accepted",
+            "rejected"
+          ],
+          "title": "Verdict",
+          "type": "string"
+        },
+        "by": {
+          "$ref": "#/$defs/EpisodeActor"
+        },
+        "at": {
+          "title": "At",
+          "type": "number"
+        },
+        "because": {
+          "description": "1.2.0 (E159): the verdict's reason category (ophiolite.verdict/1 1.1.0); the reason itself is values only",
+          "enum": [
+            "wrong-input",
+            "wrong-method",
+            "wrong-setting",
+            "wrong-unit",
+            "data-quality",
+            "reference-mismatch",
+            "matches",
+            "other"
+          ],
+          "title": "Because",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reason"
+        }
+      },
+      "required": [
+        "ref",
+        "verdict",
+        "by",
+        "at",
+        "reason"
+      ],
+      "title": "ValuesVerdict",
+      "type": "object"
+    }
+  },
+  "description": "One line of turns.jsonl: shape or values, as the episode it comes from.",
+  "discriminator": {
+    "mapping": {
+      "shape": "#/$defs/ShapeTurn",
+      "values": "#/$defs/ValuesTurn"
+    },
+    "propertyName": "mode"
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/ShapeTurn"
+    },
+    {
+      "$ref": "#/$defs/ValuesTurn"
+    }
+  ]
+}

@@ -1,0 +1,245 @@
+{
+  "schema": "ophiolite.portable-bundle/2",
+  "bundle_version": "2.16.0",
+  "created_at": "2026-11-06T12:00:00Z",
+  "exporter": {
+    "name": "ophiolite-sdk",
+    "version": "2026.11.6"
+  },
+  "scope": "selection",
+  "selection": [
+    {
+      "asset_id": "synthetic-tops",
+      "revision": "7bca6c523913b58113d3fa23aa97424ce907af3b27915c18ada91b845b71a594",
+      "curves": []
+    },
+    {
+      "asset_id": "synthetic-tops-b",
+      "revision": "c46110d68b37bb4d7a4f1d4ae3b462d3396b9f108a2fd3a62844c1a976953df8",
+      "curves": []
+    },
+    {
+      "asset_id": "synthetic-time-depth",
+      "revision": "462055b9f278d99c849b9f5a5b50db9e18ea81ce672ab7f05d4a22a4183be472",
+      "curves": []
+    },
+    {
+      "asset_id": "synthetic-points",
+      "revision": "9f0095c2dfdc7fd26ad36f47c5c924bd6ea091848557168c9e6a31d0b50f753b",
+      "curves": []
+    }
+  ],
+  "assets": [
+    {
+      "asset_id": "synthetic-tops",
+      "revision": "7bca6c523913b58113d3fa23aa97424ce907af3b27915c18ada91b845b71a594",
+      "origin": "retained-capture",
+      "profile": "well-tops-csv/1",
+      "type": "well-tops",
+      "name": null,
+      "files": [
+        {
+          "path": "assets/0/original.csv",
+          "role": "original",
+          "media_type": "text/csv",
+          "sha256": "7bca6c523913b58113d3fa23aa97424ce907af3b27915c18ada91b845b71a594",
+          "bytes": 65
+        },
+        {
+          "path": "assets/0/descriptor.json",
+          "role": "descriptor",
+          "media_type": "application/json",
+          "sha256": "2dd7494de3d35cba7f7194759daefea7ad5692e618d0d93e4173f56b5e0917c1",
+          "bytes": 2736
+        },
+        {
+          "path": "assets/0/data.json",
+          "role": "normalized",
+          "media_type": "application/json",
+          "sha256": "eae5778eca7ced6e1010cbe7ef342efb23298da1de5a634e9a4c9f3bb70e305b",
+          "bytes": 1419
+        }
+      ],
+      "history": null,
+      "parents": [],
+      "parent_visibility": "complete",
+      "relationships": {
+        "well_log": null
+      },
+      "omissions": [
+        "Synthetic offline fixture, not a server publication"
+      ],
+      "losses": [
+        "Text formatting (whitespace, quoting, line endings, number spelling) is kept only in the exact original"
+      ]
+    },
+    {
+      "asset_id": "synthetic-tops-b",
+      "revision": "c46110d68b37bb4d7a4f1d4ae3b462d3396b9f108a2fd3a62844c1a976953df8",
+      "origin": "retained-capture",
+      "profile": "well-tops-csv/1",
+      "type": "well-tops",
+      "name": null,
+      "files": [
+        {
+          "path": "assets/1/original.csv",
+          "role": "original",
+          "media_type": "text/csv",
+          "sha256": "c46110d68b37bb4d7a4f1d4ae3b462d3396b9f108a2fd3a62844c1a976953df8",
+          "bytes": 71
+        },
+        {
+          "path": "assets/1/descriptor.json",
+          "role": "descriptor",
+          "media_type": "application/json",
+          "sha256": "e057c22b2085c69a078b06cc0c61f89af2e0d9c6d8e18f08f7f6d89bd6263efa",
+          "bytes": 2741
+        },
+        {
+          "path": "assets/1/data.json",
+          "role": "normalized",
+          "media_type": "application/json",
+          "sha256": "bac6250c06c695b9bfc3d68ff192453b3c6fe273dc8888214f70f46bcfc67556",
+          "bytes": 1426
+        }
+      ],
+      "history": null,
+      "parents": [],
+      "parent_visibility": "complete",
+      "relationships": {
+        "well_log": null
+      },
+      "omissions": [
+        "Synthetic offline fixture, not a server publication"
+      ],
+      "losses": [
+        "Text formatting (whitespace, quoting, line endings, number spelling) is kept only in the exact original"
+      ]
+    },
+    {
+      "asset_id": "synthetic-time-depth",
+      "revision": "462055b9f278d99c849b9f5a5b50db9e18ea81ce672ab7f05d4a22a4183be472",
+      "origin": "retained-capture",
+      "profile": "time-depth-csv/1",
+      "type": "time-depth",
+      "name": null,
+      "files": [
+        {
+          "path": "assets/2/original.csv",
+          "role": "original",
+          "media_type": "text/csv",
+          "sha256": "462055b9f278d99c849b9f5a5b50db9e18ea81ce672ab7f05d4a22a4183be472",
+          "bytes": 56
+        },
+        {
+          "path": "assets/2/descriptor.json",
+          "role": "descriptor",
+          "media_type": "application/json",
+          "sha256": "438832f0496d8db2c142887ab008c606f55c5190a90bf1bb20b61b7bbdaa6c44",
+          "bytes": 2883
+        },
+        {
+          "path": "assets/2/data.json",
+          "role": "normalized",
+          "media_type": "application/json",
+          "sha256": "8904989233b10af3698f02a794caaa456ac1cbe8f58f0752ecbee8d396b26b37",
+          "bytes": 1482
+        }
+      ],
+      "history": null,
+      "parents": [],
+      "parent_visibility": "complete",
+      "relationships": {
+        "well_log": null
+      },
+      "omissions": [
+        "Synthetic offline fixture, not a server publication"
+      ],
+      "losses": [
+        "Text formatting (whitespace, quoting, line endings, number spelling) is kept only in the exact original"
+      ]
+    },
+    {
+      "asset_id": "synthetic-points",
+      "revision": "9f0095c2dfdc7fd26ad36f47c5c924bd6ea091848557168c9e6a31d0b50f753b",
+      "origin": "retained-capture",
+      "profile": "points-csv/1",
+      "type": "point-set",
+      "name": null,
+      "files": [
+        {
+          "path": "assets/3/original.csv",
+          "role": "original",
+          "media_type": "text/csv",
+          "sha256": "9f0095c2dfdc7fd26ad36f47c5c924bd6ea091848557168c9e6a31d0b50f753b",
+          "bytes": 33
+        },
+        {
+          "path": "assets/3/descriptor.json",
+          "role": "descriptor",
+          "media_type": "application/json",
+          "sha256": "5c4d540d62d4216dfa351e5db991a574ff9c0672887b9a23b5aff096e7a02c5f",
+          "bytes": 3045
+        },
+        {
+          "path": "assets/3/data.json",
+          "role": "normalized",
+          "media_type": "application/json",
+          "sha256": "90acd93fb33b361e86d6d35a00fe54656f5e7efafe2f4c9acdff547f340b04ee",
+          "bytes": 1734
+        }
+      ],
+      "history": null,
+      "parents": [],
+      "parent_visibility": "complete",
+      "relationships": {
+        "well_log": null
+      },
+      "omissions": [
+        "Synthetic offline fixture, not a server publication"
+      ],
+      "losses": [
+        "Text formatting (whitespace, quoting, line endings, number spelling) is kept only in the exact original"
+      ]
+    }
+  ],
+  "groups": null,
+  "recommendations": null,
+  "limits": {
+    "max_assets": 128,
+    "max_file_bytes": 33554432,
+    "max_total_bytes": 536870912
+  },
+  "notice": "Checksums show the integrity of this copy, not authorship or scientific correctness. Exported copies cannot be recalled; holding one grants no new upstream, sharing or AI-training rights.",
+  "citation": {
+    "schema": "ophiolite.citation/1",
+    "title": "Synthetic well tops, time-depth table and points",
+    "description": "Two well tops tables, one time-depth table and one point set of made-up wells, each with the CSV it was read from. Synthetic data for the descriptor contract; no observed well.",
+    "published": "2026-11-06",
+    "version": "1.0.0",
+    "creators": [
+      {
+        "name": "Josiah Carberry",
+        "kind": "person",
+        "identifier": "https://orcid.org/0000-0002-1825-0097"
+      },
+      {
+        "name": "Ada Synthetic",
+        "kind": "person"
+      }
+    ],
+    "publisher": {
+      "name": "Synthetic Survey Organisation",
+      "identifier": "https://ror.org/0abcdef12"
+    },
+    "licence": {
+      "spdx": "CC-BY-4.0"
+    },
+    "doi": null,
+    "descriptors": [
+      "ro-crate-metadata.json",
+      "croissant.json",
+      "datacite.json"
+    ]
+  }
+}

@@ -129,5 +129,7 @@
   ],
   "authorization": {
     "status": "not-evaluated"
-  }
+  },
+  "osdu_kind": null,
+  "osdu_kind_reason": "no OSDU kind models a general feature collection"
 }

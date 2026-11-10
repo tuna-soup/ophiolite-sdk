@@ -1,0 +1,15 @@
+{
+  "schema": "ophiolite.profile-migration/1",
+  "asset_id": "synthetic-points",
+  "from_revision": "1d5c4e6b2f0a9e8d7c6b5a4938271605f4e3d2c1b0a99887766554433221100f",
+  "from_storage": "synthetic-points",
+  "from_profile": "ophiolite.point-set/1",
+  "from_sha256": "8a7b6c5d4e3f20112233445566778899aabbccddeeff00112233445566778899",
+  "to_profile": "ophiolite.point-set/2",
+  "to_revision": "f0e1d2c3b4a5968778695a4b3c2d1e0ff0e1d2c3b4a5968778695a4b3c2d1e0f",
+  "to_storage": "migrated-0123456789abcdef0123456789abcdef",
+  "to_sha256": "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+  "release": {"number": "2026.11.3", "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+  "actor": "system:profile-migration",
+  "at": "2026-11-03T09:00:00Z"
+}

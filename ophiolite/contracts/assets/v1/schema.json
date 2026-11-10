@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/schema.json",
   "x-ophiolite": {
     "id": "ophiolite.scientific-asset/1",
-    "version": "1.34.0",
+    "version": "1.36.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -454,6 +454,48 @@
       "title": "DerivationInput",
       "type": "object"
     },
+    "DerivationNotVerified": {
+      "additionalProperties": false,
+      "description": "E165 s2: nobody had verified the tool version when this result was published.",
+      "properties": {
+        "state": {
+          "const": "none",
+          "title": "State",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "null"
+        },
+        "by": {
+          "title": "By",
+          "type": "null"
+        },
+        "at": {
+          "title": "At",
+          "type": "null"
+        },
+        "reference_label": {
+          "title": "Reference Label",
+          "type": "null"
+        },
+        "line": {
+          "const": "Not verified",
+          "title": "Line",
+          "type": "string"
+        }
+      },
+      "required": [
+        "state",
+        "id",
+        "by",
+        "at",
+        "reference_label",
+        "line"
+      ],
+      "title": "DerivationNotVerified",
+      "type": "object"
+    },
     "DerivationOutput": {
       "additionalProperties": false,
       "properties": {
@@ -543,6 +585,28 @@
               "type": "null"
             }
           ]
+        },
+        "verification": {
+          "discriminator": {
+            "mapping": {
+              "none": "#/$defs/DerivationNotVerified",
+              "verified": "#/$defs/DerivationVerified",
+              "withdrawn": "#/$defs/DerivationWithdrawn"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/DerivationVerified"
+            },
+            {
+              "$ref": "#/$defs/DerivationWithdrawn"
+            },
+            {
+              "$ref": "#/$defs/DerivationNotVerified"
+            }
+          ],
+          "title": "Verification"
         }
       },
       "required": [
@@ -799,6 +863,94 @@
         "derivation_digest"
       ],
       "title": "DerivationRecordV2",
+      "type": "object"
+    },
+    "DerivationVerified": {
+      "additionalProperties": false,
+      "description": "E165 s2: the tool version was verified when this result was published (`tool_verifications.state` then), with\n`line`, the sentence the catalogue showed at that moment, stored verbatim and never re-rendered.",
+      "properties": {
+        "state": {
+          "const": "verified",
+          "title": "State",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^verification-[0-9a-f]{32}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "by": {
+          "$ref": "#/$defs/VerifierPerson"
+        },
+        "at": {
+          "title": "At",
+          "type": "number"
+        },
+        "reference_label": {
+          "maxLength": 400,
+          "minLength": 1,
+          "title": "Reference Label",
+          "type": "string"
+        },
+        "line": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Line",
+          "type": "string"
+        }
+      },
+      "required": [
+        "state",
+        "id",
+        "by",
+        "at",
+        "reference_label",
+        "line"
+      ],
+      "title": "DerivationVerified",
+      "type": "object"
+    },
+    "DerivationWithdrawn": {
+      "additionalProperties": false,
+      "description": "E165 s2: every verification of the tool version was withdrawn when this result was published; `id`, `by` and\n`at` are the newest withdrawal's.",
+      "properties": {
+        "state": {
+          "const": "withdrawn",
+          "title": "State",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^verification-[0-9a-f]{32}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "by": {
+          "$ref": "#/$defs/VerifierPerson"
+        },
+        "at": {
+          "title": "At",
+          "type": "number"
+        },
+        "reference_label": {
+          "title": "Reference Label",
+          "type": "null"
+        },
+        "line": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Line",
+          "type": "string"
+        }
+      },
+      "required": [
+        "state",
+        "id",
+        "by",
+        "at",
+        "reference_label",
+        "line"
+      ],
+      "title": "DerivationWithdrawn",
       "type": "object"
     },
     "Display": {
@@ -2587,6 +2739,133 @@
         "density_unit"
       ],
       "title": "ModelSectionContext",
+      "type": "object"
+    },
+    "NativeSeismicContext": {
+      "additionalProperties": false,
+      "description": "E140 s0 (D101): a cube kept in its native 8-bit form, SEG-Y data format 8. The value of a code is the code;\nwhen `undefined_code` is -128, code -128 means no value (the quiet NaN 0x7fc00000), and when null every code is a\nvalue. Reached only through profile segy/2 and mapping seismic-volume/2.",
+      "properties": {
+        "type": {
+          "const": "seismic-volume",
+          "title": "Type",
+          "type": "string"
+        },
+        "format": {
+          "const": "1-byte two's complement integer",
+          "title": "Format",
+          "type": "string"
+        },
+        "format_code": {
+          "const": 8,
+          "title": "Format Code",
+          "type": "integer"
+        },
+        "undefined_code": {
+          "anyOf": [
+            {
+              "const": -128,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Undefined Code"
+        },
+        "segy_revision": {
+          "pattern": "^[0-9]{1,3}\\.[0-9]{1,3}$",
+          "title": "Segy Revision",
+          "type": "string"
+        },
+        "traces": {
+          "maximum": 50000000,
+          "minimum": 1,
+          "title": "Traces",
+          "type": "integer"
+        },
+        "samples": {
+          "maximum": 20000,
+          "minimum": 1,
+          "title": "Samples",
+          "type": "integer"
+        },
+        "trace_bytes": {
+          "minimum": 241,
+          "title": "Trace Bytes",
+          "type": "integer"
+        },
+        "inline": {
+          "$ref": "#/$defs/LineRange"
+        },
+        "crossline": {
+          "$ref": "#/$defs/LineRange"
+        },
+        "sample_interval": {
+          "exclusiveMinimum": 0,
+          "title": "Sample Interval",
+          "type": "number"
+        },
+        "sample_unit": {
+          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+          "title": "Sample Unit",
+          "type": "string"
+        },
+        "first_sample": {
+          "title": "First Sample",
+          "type": "number"
+        },
+        "z_domain": {
+          "enum": [
+            "time",
+            "depth",
+            "unknown"
+          ],
+          "title": "Z Domain",
+          "type": "string"
+        },
+        "crs": {
+          "pattern": "^(EPSG:[0-9]{4,6}|unknown)$",
+          "title": "Crs",
+          "type": "string"
+        },
+        "datum": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Datum",
+          "type": "string"
+        },
+        "first_cdp": {
+          "$ref": "#/$defs/XY"
+        },
+        "last_cdp": {
+          "$ref": "#/$defs/XY"
+        },
+        "fidelity": {
+          "$ref": "#/$defs/Fidelity"
+        }
+      },
+      "required": [
+        "type",
+        "format",
+        "format_code",
+        "undefined_code",
+        "segy_revision",
+        "traces",
+        "samples",
+        "trace_bytes",
+        "inline",
+        "crossline",
+        "sample_interval",
+        "sample_unit",
+        "first_sample",
+        "z_domain",
+        "crs",
+        "datum",
+        "first_cdp",
+        "last_cdp",
+        "fidelity"
+      ],
+      "title": "NativeSeismicContext",
       "type": "object"
     },
     "NotEvaluated": {
@@ -6190,7 +6469,8 @@
             "well-path/1",
             "well-set/1",
             "well-residual/1",
-            "seismic-line/1"
+            "seismic-line/1",
+            "seismic-volume/2"
           ],
           "title": "Mapping",
           "type": "string"
@@ -6214,6 +6494,42 @@
         "null_policy"
       ],
       "title": "TypedInterpretation",
+      "type": "object"
+    },
+    "VerifierPerson": {
+      "additionalProperties": false,
+      "description": "E93's actor shape, persons only: an assistant never authors a verification (slice 1's `reach: person` is the\nfirst layer, this is the second). Named apart from the assets contract's `Person`: the SDK generates one model per\nname across every contract.",
+      "properties": {
+        "kind": {
+          "const": "person",
+          "title": "Kind",
+          "type": "string"
+        },
+        "id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "name_at_time": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name At Time"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "name_at_time"
+      ],
+      "title": "VerifierPerson",
       "type": "object"
     },
     "Version": {
@@ -6719,6 +7035,16 @@
     }
   },
   "additionalProperties": false,
+  "if": {
+    "properties": {
+      "osdu_kind_reason": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "osdu_kind_reason"
+    ]
+  },
   "properties": {
     "package": {
       "anyOf": [
@@ -6970,6 +7296,9 @@
         },
         {
           "$ref": "#/$defs/SeismicLineContext"
+        },
+        {
+          "$ref": "#/$defs/NativeSeismicContext"
         }
       ],
       "title": "Scientific"
@@ -7081,6 +7410,34 @@
         }
       ],
       "title": "Authorization"
+    },
+    "osdu_kind": {
+      "anyOf": [
+        {
+          "maxLength": 128,
+          "pattern": "^osdu:wks:[a-z-]+--[A-Za-z]+:\\d+\\.\\d+\\.\\d+$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Osdu Kind"
+    },
+    "osdu_kind_reason": {
+      "anyOf": [
+        {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Osdu Kind Reason"
     }
   },
   "required": [
@@ -7102,6 +7459,16 @@
     "supported_operations",
     "authorization"
   ],
+  "then": {
+    "properties": {
+      "osdu_kind": {
+        "type": "null"
+      }
+    },
+    "required": [
+      "osdu_kind"
+    ]
+  },
   "title": "Asset",
   "type": "object"
 }

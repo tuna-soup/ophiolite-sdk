@@ -280,7 +280,8 @@ def test_a_seismic_volume_is_described_not_received(keyed, tmp_path):
                                audience=[], rights_confirmed=True, declared={'z_domain': 'time'})
     ex = alice.exchange(tmp_path / 'w')
     cannot = refused('cannot-read-here', lambda: ex.get(volume.asset_id, output=tmp_path / 'o'))
-    assert cannot.sentence == 'This kind of item cannot be received by this script yet: a seismic volume is described here, not received; read its slices in Python.'
+    assert cannot.sentence == 'Give a window, for example --window inline=100:104,by=label, or call Client.download_original for the whole file.'  # E141 s2 (D-S)
+    assert cannot.technical['reason'] == 'volume-needs-window'
     assert ex.held() == {} and not (tmp_path / 'o').exists()
 
 

@@ -183,6 +183,33 @@ when every point agrees within 0.5 mm in x and y and 0.5 µs in Z. A fault whose
 domain is not the survey's is refused before anything is compared, and so is a stick set holding an undefined value. ResInsight does not import fault sticks in this version, and the pack notebook does not read them; each says
 so in its oracle.
 
+### 2D horizons
+
+The contents may also name 2D horizons under `horizons`, by their OpendTect name, with the same decisions as a
+horizon. The connector writes one file per line of the horizon that holds a pick, `horizons2d/HORIZON/LINE.csv`: the
+header `x,y,z,trace`, then one row per defined pick in trace order, every number exactly as OpendTect holds it, Z in
+two-way time in milliseconds. A line without a pick has no file; the export lists it. A line's name is kept in
+export.json, and its file name keeps the name's ASCII letters and digits, every other character as `_`.
+
+The export refuses a 2D horizon by name, before it writes anything, when: the name is both a horizon and a 2D horizon
+in the survey; it is not in two-way time in milliseconds; a line gives fewer or more values than it has traces; a
+position is not finite; a line holds a trace number twice; or two names would be written to one file. The SDK reads
+every line again and refuses unless it is in the export's own form, its traces are in order and its rows are the ones
+export.json states. In the project each line is added as points with its trace number, and the horizon's
+declarations.
+
+OpendTect cannot create a 2D horizon from Python, and its lines must be in the survey first: the OpendTect import
+names the first missing line and stops there for that horizon. When the lines are there, it writes one file per 2D
+horizon, `opendtect-import/HORIZON.txt` in the pack folder (the header `line,trace,x,y,z`, one row per pick), and tells
+you the one step: import it in OpendTect (Survey > Import > Horizons > ASCII 2D > Single 2D Horizon; Horizon is in
+Time; File header Fixed size, 1 line; Define: Field separator Comma, Line name column 1, X and Y columns 3 and 4, Trace
+Nr column 2, TWT column 5 in ms; Undefined values Skip) under the name it gives, and answer Yes when OpendTect says the
+horizon has gaps. The next run of the import (and of `ophiolite starter opendtect`) reads the horizon back and records
+each line as placed by you when it holds the same traces, x and y agree within 0.5 mm, and Z within half of the step
+OpendTect stores that line's times in (its time range over 65,534) plus the rounding of a single-precision number. A
+difference is refused with the line and the trace. ResInsight does not import 2D horizons in this version, and the pack
+notebook does not read them; each says so in its oracle.
+
 ### Time-depth models
 
 The contents may also name time-depth models, `time-depth`, one per well, from checkshot tables in the archive. Each
@@ -207,6 +234,24 @@ verify the imported model." When the survey has no such well yet, it tells you t
 the import again, and then import the model. The pack notebook reads every model and compares every pair with
 `expected.json`. ResInsight does not import time-depth models from a starter pack; its oracle says "Time-depth
 models: not placed".
+
+**Well tops.** A survey archive pack may also name `tops`, one entry per well, each also under `wellbore-paths`. The
+SDK has OpendTect's odbind read each well's markers (their names and depths along hole, in OpendTect's order; marker
+colours are not carried) and writes them as `wells/WELL-tops.csv`, the header `name,md` and one top per row. A well
+without markers is said not read ("the well has no markers"). A marker whose name a tops file cannot hold (empty,
+over 128 characters, spaces around it, a comma, a quote or a control character), a depth OpendTect leaves undefined,
+more than 10,000 markers, or markers OpendTect cannot read refuse the export by name before its first file is written.
+The decisions of each such well must agree with OpendTect's markers: `depth-kind` MD, `units` m and
+`depth-reference` KB; in the project each file is added as `well-tops-csv/1` with depth basis `same-as-log` and datum
+KB. OpendTect's Python cannot write a marker, so the import tells you the step (Survey > Manage > Wells, select the
+well, Edit Markers, Import ...; File header Fixed size, 1 line; Define ...: Field separator Comma, Depth col:2 MD,
+Unit m (Meter), Marker name col:1; Existing markers Replace) and, on the next run, reads the
+well's markers back: the tops are placed by you when the well holds exactly the pack's tops (each name with its depth
+as OpendTect stores it, in any order, none missing and none extra); otherwise the step says how many differ. The well
+must first pass the checks a log's well passes (the pack's path, the survey's well, its head, the depth reference and
+metres). The pack notebook compares every name and depth with `expected.json` (it still needs a cube or a 2D line:
+a pack of tops and well paths only is refused with "The Python target reads a cube or a 2D line; this export has
+neither."). ResInsight does not import well tops from a starter pack; its oracle says "Well tops: not placed".
 
 ## The OpendTect target
 
@@ -248,7 +293,8 @@ source points, positions (to the centimetre) and Z that differ.
 **Logs.** Each curve of each LAS file is placed or refused on its own, as a new log on the survey's well of the same
 name (the pack's well, not its file name, pairs them). OpendTect 7.0.10 cannot create a well from Python, so the well
 must already be in the survey: import its well path in OpendTect first (Survey > Import > Wells, from
-`files/wells/WELL-positions.csv`); every well path is listed as not placed with that step. A curve is written only when:
+`files/wells/WELL-positions.csv`, with Field separator Comma, File header fixed, 1 line, and "Depth to Time model"
+unticked; the dialog's defaults are Tab/Space, no header and the model ticked); every well path is listed as not placed with that step. A curve is written only when:
 
 - the pack has the well's path, and its head matches the survey's well within 1 cm on each axis, in the survey's
   coordinate system;
@@ -361,7 +407,8 @@ well paths and logs and saves a new ResInsight project in PROJECT_OUT. The seism
 Python API cannot import SEG-Y in this version. Nor are 2D lines: ResInsight cannot import seismic lines in this
 version, and the oracle of a pack with lines says "lines: not placed". Nor are faults: this version of ResInsight
 cannot import fault sticks, and the oracle of a pack with faults says "faults: not placed". Nor are time-depth
-models, and the oracle of a pack with them says "Time-depth models: not placed".
+models, and the oracle of a pack with them says "Time-depth models: not placed". Nor are well tops, and the oracle of a
+pack with them says "Well tops: not placed".
 
 ```sh
 pip install "arraybridge-connectors[resinsight]"
@@ -425,3 +472,12 @@ with the import's sentence ("The import refused: …") and leaves `starter.json`
   places it in OpendTect from the pack's file, and the comparison names it as not in Ophiolite.
 - It does not make the OpendTect survey: the survey must exist before the import (the GUI step above).
 - It does not upload `files/` to the mirror; that is the catalogue's own step, between build and finalise.
+- It does not carry picksets or polygons. OpendTect's Python lists a survey's picksets but cannot read their points,
+  so a definition or an export that names `picksets` or `polygons` is refused with that sentence. Random lines,
+  wavelets, earth models, horizon cubes and bodies are refused the same way, because OpendTect's Python cannot read them.
+
+Technical: measured on odbind 7.0.10 (OpendTect 7.0.10), which lists picksets as `PickSet Group` objects but has no
+class that reads them. `ophiolite.starter_kinds.ARCHIVE` names every kind of file an OpendTect survey archive holds and
+its status (`written`, `refused`, `waits` or `not data`); `starter_kinds.archive_kind` maps an archive member to one,
+or to `unresolved` when its path does not say. The row states the route only; whether this installation can run it is
+still `starter_archive.READERS`, `starter.EXPORT_PROFILE` and the connector's `export.WRITERS`.

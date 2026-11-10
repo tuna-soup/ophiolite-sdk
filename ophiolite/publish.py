@@ -126,11 +126,12 @@ SOURCE_OPERATIONS={'sources':{'list','export','discover','export-file'}}  # E50a
 MAP_OPERATIONS={'maps':{'export'},'catalog':{'history'}}  # E70a C4: `get` of a scalar map and its version numbers (existing read routes)
 RESULT_OPERATIONS={'results':{'story','what-changed','dependents','remake-run','remake-save'}}  # E94: how a result was made, and making it again
 CHECK_OPERATIONS={'checks':{'publish','list','compare','publishers'}}  # E96: checks against a reference
-PROCEDURE_OPERATIONS={'procedures':{'register','list','get','bundle','enable','withdraw','trust'},  # E105b: the project catalogue
+PROCEDURE_OPERATIONS={'procedures':{'register','list','get','bundle','enable','withdraw','trust','verify','verifications'},  # E105b: the project catalogue; E165 s1: verifications
                       'procedure-runs':{'report','get','prepare-again'}}  # E106: a reported run and running a result again
 OUTCOME_OPERATIONS={'outcomes':{'declare','revise','enable','disable','withdraw','list','get','states','evaluate','deliver-as','claims'},  # E120: what a project accepts and where it delivers; s1: a result's states; s3: Deliver as and its claims
                     'verdicts':{'record','list'},  # E132: a person's accepted or rejected on one result version, with a reason
-                    'stages':{'get','transition'}}  # E132 s2: withdrawing a result version (which records the withdrawer's rejection)
+                    'stages':{'get','transition'},  # E132 s2: withdrawing a result version (which records the withdrawer's rejection)
+                    'rule-results':{'get'}}  # E144 s3: the data rules' results stored with one version, and their lines
 REPORT_OPERATIONS={'activity':{'report','deliver','deliveries','trajectories'}}  # E70b: a confirmed `get` reports which version this holder received; E109: a delivery's outcome and the deliveries page; E134: your own work as episodes
 IMPORT_OPERATIONS={'well-imports':{'preview','start','step','status','list','cancel'},  # E42a: import a copy of an approved well table
                    'upload-runs':{'start','file','check','file-parts','status','list','cancel','associate','decide','share','sample','convert','convert-original','convert-output','basis'},  # E55: a folder upload; E85: check; E91: the sample; E107a: read on your computer (C4: the original kept); E123 S3b: basis
@@ -144,6 +145,8 @@ KEPT_OPERATIONS={'las-uploads':{'provenance-stage',  # E107a C6b: an import stag
                                 'check-member'}}  # E111 s4a: a well set's member checked again before a run (stores nothing)
 NEW_DATA_OPERATIONS={'context':{'new-data','new-data-save'},'las-uploads':{'audience','audience-preview','audience-save'},
                      'templates':{'list','csv','xlsx'}}  # E90: New data settings; the one control on an original. E91: table templates
+JOB_OPERATIONS={'agents':{'proposals'},'jobs':{'answer'}}  # E151 s2: the person's side of an agent's job (what waits for them; their answer)
+SURVEY_OPERATIONS={'surveys':{'get','list','history','create','add','remove','replace','relate','unrelate','rename','identify','withdraw'}}  # E142 s1
 
 
 # E39: an organisation's connections are not a project's; their routes carry no project (/api/v1/<area>/<op>).
@@ -155,11 +158,68 @@ def operation_path(project,area,operation):
         if operation not in ORGANIZATION_OPERATIONS[area]:raise Refused('Unsupported application operation.')
         return '/api/v1/'+area+'/'+operation
     allowed=(GROUP_OPERATIONS if area=='result-groups' else READ_OPERATIONS|WRITE_OPERATIONS if area in ('applications','las-uploads')
-             else ENTITY_OPERATIONS.get(area) or SOURCE_OPERATIONS.get(area) or MAP_OPERATIONS.get(area) or REPORT_OPERATIONS.get(area) or RESULT_OPERATIONS.get(area) or CHECK_OPERATIONS.get(area) or PROCEDURE_OPERATIONS.get(area) or OUTCOME_OPERATIONS.get(area) or IMPORT_OPERATIONS.get(area) or RELEASE_OPERATIONS.get(area) or AI_OPERATIONS.get(area,set()))
-    allowed=allowed|SESSION_OPERATIONS.get(area,set())|NEW_DATA_OPERATIONS.get(area,set())|KEPT_OPERATIONS.get(area,set())
+             else ENTITY_OPERATIONS.get(area) or SOURCE_OPERATIONS.get(area) or MAP_OPERATIONS.get(area) or REPORT_OPERATIONS.get(area) or RESULT_OPERATIONS.get(area) or CHECK_OPERATIONS.get(area) or PROCEDURE_OPERATIONS.get(area) or OUTCOME_OPERATIONS.get(area) or IMPORT_OPERATIONS.get(area) or RELEASE_OPERATIONS.get(area) or JOB_OPERATIONS.get(area) or AI_OPERATIONS.get(area,set()))
+    allowed=allowed|SESSION_OPERATIONS.get(area,set())|NEW_DATA_OPERATIONS.get(area,set())|KEPT_OPERATIONS.get(area,set())|SURVEY_OPERATIONS.get(area,set())
     if operation not in allowed:
         raise Refused('Unsupported application operation.')
     return '/api/v1/projects/'+quote(project,safe='')+'/'+area+'/'+operation
+
+
+# E151 s2: the answer of agents/proposals, mirroring the synced ophiolite.agent-proposals/1 (contracts/agents/v1/
+# proposals-schema.json) without the optional `validation` extra, as agents.JobStatus mirrors job-schema.json. The
+# optional fields may be absent, never null; `evidence` is required and may be null.
+from typing import Annotated,Dict,List,Optional,Union
+from pydantic import BaseModel,ConfigDict,Field
+
+
+class _StrictAnswer(BaseModel):
+    model_config=ConfigDict(extra='forbid',strict=True)
+
+
+class ProposalChoice(_StrictAnswer):
+    """One offered choice of a waiting job (proposals-schema.json $defs/choice)."""
+    id:Annotated[str,Field(pattern=r'^c[1-8]$')]
+    fragment:Annotated[dict,Field(max_length=16)]
+
+
+class ProposalEvidence(_StrictAnswer):
+    """The newest evidence record of a plan, as agents/approve names it."""
+    id:Annotated[str,Field(min_length=1,max_length=128)]
+    generation:Annotated[int,Field(ge=1)]
+    digest:Annotated[str,Field(pattern=r'^[0-9a-f]{64}$')]
+
+
+class ProposalDryRun(_StrictAnswer):
+    """E150 s1b: the dry run the newest evidence record names, as the gateway ran it again (its digest and `would`)."""
+    digest:Annotated[str,Field(pattern=r'^[0-9a-f]{64}$')]
+    would:dict
+
+
+class Proposal(_StrictAnswer):
+    """One plan or waiting job the person's agents wait on (proposals-schema.json $defs/proposal)."""
+    plan:Annotated[str,Field(pattern=r'^[0-9a-f]{64}$')]
+    operation:Annotated[str,Field(pattern=r'^[a-z][a-z0-9-]*/[a-z][a-z0-9-]*$')]
+    summary:Annotated[str,Field(max_length=2000)]
+    evidence:Optional[ProposalEvidence]
+    dry_run:ProposalDryRun=None
+    budget:Dict[str,Annotated[int,Field(ge=0)]]
+    expires_at:Union[int,float]
+    review_url:Annotated[str,Field(min_length=1,max_length=2048)]
+    question:Annotated[str,Field(min_length=1,max_length=300)]=None
+    choices:Annotated[List[ProposalChoice],Field(min_length=2,max_length=8)]=None
+    choice_token:Annotated[str,Field(pattern=r'^ct1\.[A-Za-z0-9_-]{43}$')]=None
+
+
+class Proposals(_StrictAnswer):
+    """The envelope of agents/proposals: {"proposals": [...]}, at most 200, newest first."""
+    proposals:Annotated[List[Proposal],Field(max_length=200)]
+
+
+def parse_proposals(data):
+    """The proposals of a validated ophiolite.agent-proposals/1 envelope; anything else is VerificationFailed."""
+    try:Proposals.model_validate(data)
+    except (ValidationError,ValueError,TypeError):raise VerificationFailed('The proposals do not satisfy ophiolite.agent-proposals/1.') from None
+    return data['proposals']
 
 
 def parse(model,data):

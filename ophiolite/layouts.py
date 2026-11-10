@@ -2,7 +2,7 @@
 
 A layout remembers how the columns of one kind of table were mapped. `client.layouts().match(columns)` lists the active
 layouts a header is, exact or in another order; several are all listed and none is chosen: a layout is only used when
-you name it (`imports.from_table(..., layout='Tubbergen tops')` or `ophiolite import table --layout`). Layouts are named
+you name it (`imports.from_table(..., layout='Tubbergen tops')` or `ophiolite exchange import table --layout`). Layouts are named
 by their name here; ids, digests and the stored document stay in the answers (`--json` puts them under `technical`).
 
 A refusal keeps the server's sentence (the browser's words): what happened, who can change it and what to do next.
@@ -21,7 +21,7 @@ CODES = ('capacity', 'changed', 'command-reused', 'connection-outside', 'does-no
          'not-a-layouts-file', 'not-a-table-layout', 'not-downloadable', 'not-found', 'not-valid', 'retired', 'schema-differs',
          'target-changed', 'too-many-layouts')
 HOLDS = {'well-tops': 'Well tops', 'wells': 'Wells', 'deviation-survey': 'Deviation survey', 'time-depth': 'Time-depth', 'point-set': 'Points'}
-LIST_THEM = 'List them with: ophiolite layouts list.'
+LIST_THEM = 'List them with: ophiolite exchange layouts list.'
 NO_SUCH = 'This project has no layout called "%s". ' + LIST_THEM  # J7-11 in the SDK and CLI
 RESULT = {'added': 'Added', 'already-here': 'Already here'}
 

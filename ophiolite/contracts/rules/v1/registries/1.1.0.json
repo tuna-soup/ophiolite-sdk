@@ -1,0 +1,12 @@
+{
+ "schema": "ophiolite.data-rules-snapshot/1",
+ "registry_version": "1.1.0",
+ "rules": [
+  {"id": "depth-increasing/1", "path": "rules/depth-increasing-1.json", "sha256": "5a419d9be28d1c89c93fdd677a6cc0cb113cd4cab8589a9e4de47b31962757a9"},
+  {"id": "gr-range/1", "path": "rules/gr-range-1.json", "sha256": "33bb0af7593d09d4eff8be7bcfb34a80c40e98be4ad15dec8f51132fdefa72cc"},
+  {"id": "null-sentinel/1", "path": "rules/null-sentinel-1.json", "sha256": "d386bf33ac78e44b97323468039003040f2b51dc937ef87a50d62d6390e2da21"},
+  {"id": "station-step/1", "path": "rules/station-step-1.json", "sha256": "666e6740b3e38c771c1c438ee1277fd7e249e5fa353a351af0da173d6c305e83"},
+  {"id": "tops-unique-name/1", "path": "rules/tops-unique-name-1.json", "sha256": "435c9e6cd3c07b6c9a2a167d5326bc58b0038698341f8391a778786db18eb50a"},
+  {"id": "unit-known/1", "path": "rules/unit-known-1.json", "sha256": "1177b273005a608634298551da1c2ccbbc9e1a11bf2a31bd1acad764342155ef"}
+ ]
+}

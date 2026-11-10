@@ -1,14 +1,14 @@
 # A worker that keeps a project's copy current
 
 Preview template version **0.1.0**. Compare `template_version` with the SDK CHANGELOG before upgrading. Keep
-`../support.py` alongside this directory (`ophiolite init sync-worker` copies both).
+`../support.py` alongside this directory (`ophiolite tools init sync-worker` copies both).
 
 ```sh
 python3 -m venv .venv && . .venv/bin/activate
 python -m pip install -r requirements.lock
 python -m pytest -q tests          # against a synthetic event log; no service needed
 export OPHIOLITE_URL=https://ophiolite.example OPHIOLITE_PROJECT=my-project
-ophiolite login                    # or set OPHIOLITE_ACCESS_KEY
+ophiolite account login            # or set OPHIOLITE_ACCESS_KEY
 python worker.py --checkpoint state/checkpoint.json
 ```
 

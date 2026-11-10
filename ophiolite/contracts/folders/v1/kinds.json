@@ -1,0 +1,14 @@
+{
+  "schema": "ophiolite.project-folder-kinds/1",
+  "description": "The closed table of what a project folder /2 item may be (E117 s0): per profile its kind word, the suffix of its path under items/ and its file row's media type. A table target's declarations are the ones its target document declares (targets/v1/<target>.json); a reader profile lists its own. The OSDU kind of every profile is the export matrix's (mapper/v1/export-matrix.json), never this table's.",
+  "profiles": {
+    "ophiolite.table-target/wells/1": {"kind": "wells", "suffix": ".parquet", "media_type": "application/vnd.apache.parquet", "target": "wells"},
+    "ophiolite.table-target/well-tops/1": {"kind": "well-tops", "suffix": ".parquet", "media_type": "application/vnd.apache.parquet", "target": "well-tops"},
+    "ophiolite.table-target/deviation-survey/1": {"kind": "deviation-survey", "suffix": ".parquet", "media_type": "application/vnd.apache.parquet", "target": "deviation-survey"},
+    "ophiolite.table-target/time-depth/1": {"kind": "time-depth", "suffix": ".parquet", "media_type": "application/vnd.apache.parquet", "target": "time-depth"},
+    "ophiolite.table-target/point-set/1": {"kind": "point-set", "suffix": ".parquet", "media_type": "application/vnd.apache.parquet", "target": "point-set"},
+    "ophiolite.table-target/table/1": {"kind": "table", "suffix": ".parquet", "media_type": "application/vnd.apache.parquet", "target": "table"},
+    "las2/1": {"kind": "well-log", "suffix": ".parquet", "media_type": "application/vnd.apache.parquet", "declarations": {}},
+    "geotiff/1": {"kind": "grid", "suffix": ".tif", "media_type": "image/tiff", "declarations": {"crs": "crs"}}
+  }
+}

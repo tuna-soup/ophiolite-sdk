@@ -1,0 +1,16 @@
+{
+  "schema": "ophiolite.agent-declarations/1",
+  "rows": [
+    {"operation": "members/list", "agent": {"reach": "tool", "admitted": "never", "policy": false}},
+    {"operation": "applications/configure", "agent": {"reach": "tool", "admitted": "proposable", "policy": true, "destructive": true}},
+    {"operation": "applications/publish", "agent": {"reach": "tool", "admitted": "proposable", "policy": false}},
+    {"operation": "publications/derive", "agent": {"reach": "call", "reason": "file-body", "admitted": "both", "parent": "procedure-runs/report", "policy": false}},
+    {"operation": "upload-runs/file", "agent": {"reach": "call", "reason": "file-body", "admitted": "covered", "parent": "upload-runs/start", "policy": false}},
+    {"operation": "upload-runs/convert", "agent": {"reach": "call", "reason": "covered-only", "admitted": "covered", "parent": "upload-runs/start", "policy": false}},
+    {"operation": "read/GetOriginalChunk", "agent": {"reach": "call", "reason": "unbounded-answer", "admitted": "never", "policy": false, "note": "E58b: an original's bytes, not a bounded JSON answer"}},
+    {"operation": "access/history", "agent": {"reach": "person", "reason": "refused-by-gate", "admitted": "never", "policy": false}},
+    {"operation": "activity/report", "agent": {"reach": "person", "reason": "person-only", "admitted": "never", "policy": false}},
+    {"operation": "account/sessions", "agent": {"reach": "person", "reason": "credential-kinds", "admitted": "never", "policy": false}},
+    {"operation": "upload-runs/decide", "agent": {"reach": "person", "reason": "write-not-admitted", "admitted": "never", "policy": false}}
+  ]
+}

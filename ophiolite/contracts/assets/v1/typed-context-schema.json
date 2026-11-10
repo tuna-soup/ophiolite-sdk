@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/typed-context-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.typed-context/1",
-    "version": "1.12.0",
+    "version": "1.13.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -734,6 +734,133 @@
         "density_unit"
       ],
       "title": "ModelSectionContext",
+      "type": "object"
+    },
+    "NativeSeismicContext": {
+      "additionalProperties": false,
+      "description": "E140 s0 (D101): a cube kept in its native 8-bit form, SEG-Y data format 8. The value of a code is the code;\nwhen `undefined_code` is -128, code -128 means no value (the quiet NaN 0x7fc00000), and when null every code is a\nvalue. Reached only through profile segy/2 and mapping seismic-volume/2.",
+      "properties": {
+        "type": {
+          "const": "seismic-volume",
+          "title": "Type",
+          "type": "string"
+        },
+        "format": {
+          "const": "1-byte two's complement integer",
+          "title": "Format",
+          "type": "string"
+        },
+        "format_code": {
+          "const": 8,
+          "title": "Format Code",
+          "type": "integer"
+        },
+        "undefined_code": {
+          "anyOf": [
+            {
+              "const": -128,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Undefined Code"
+        },
+        "segy_revision": {
+          "pattern": "^[0-9]{1,3}\\.[0-9]{1,3}$",
+          "title": "Segy Revision",
+          "type": "string"
+        },
+        "traces": {
+          "maximum": 50000000,
+          "minimum": 1,
+          "title": "Traces",
+          "type": "integer"
+        },
+        "samples": {
+          "maximum": 20000,
+          "minimum": 1,
+          "title": "Samples",
+          "type": "integer"
+        },
+        "trace_bytes": {
+          "minimum": 241,
+          "title": "Trace Bytes",
+          "type": "integer"
+        },
+        "inline": {
+          "$ref": "#/$defs/LineRange"
+        },
+        "crossline": {
+          "$ref": "#/$defs/LineRange"
+        },
+        "sample_interval": {
+          "exclusiveMinimum": 0,
+          "title": "Sample Interval",
+          "type": "number"
+        },
+        "sample_unit": {
+          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+          "title": "Sample Unit",
+          "type": "string"
+        },
+        "first_sample": {
+          "title": "First Sample",
+          "type": "number"
+        },
+        "z_domain": {
+          "enum": [
+            "time",
+            "depth",
+            "unknown"
+          ],
+          "title": "Z Domain",
+          "type": "string"
+        },
+        "crs": {
+          "pattern": "^(EPSG:[0-9]{4,6}|unknown)$",
+          "title": "Crs",
+          "type": "string"
+        },
+        "datum": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Datum",
+          "type": "string"
+        },
+        "first_cdp": {
+          "$ref": "#/$defs/XY"
+        },
+        "last_cdp": {
+          "$ref": "#/$defs/XY"
+        },
+        "fidelity": {
+          "$ref": "#/$defs/Fidelity"
+        }
+      },
+      "required": [
+        "type",
+        "format",
+        "format_code",
+        "undefined_code",
+        "segy_revision",
+        "traces",
+        "samples",
+        "trace_bytes",
+        "inline",
+        "crossline",
+        "sample_interval",
+        "sample_unit",
+        "first_sample",
+        "z_domain",
+        "crs",
+        "datum",
+        "first_cdp",
+        "last_cdp",
+        "fidelity"
+      ],
+      "title": "NativeSeismicContext",
       "type": "object"
     },
     "PointColumnsContext": {
@@ -2022,7 +2149,24 @@
           "regular-grid-surface": "#/$defs/GridContext",
           "seismic-line": "#/$defs/SeismicLineContext",
           "seismic-section": "#/$defs/SeismicSectionContext",
-          "seismic-volume": "#/$defs/SeismicContext",
+          "seismic-volume": {
+            "discriminator": {
+              "mapping": {
+                "1": "#/$defs/SeismicContext",
+                "5": "#/$defs/SeismicContext",
+                "8": "#/$defs/NativeSeismicContext"
+              },
+              "propertyName": "format_code"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/SeismicContext"
+              },
+              {
+                "$ref": "#/$defs/NativeSeismicContext"
+              }
+            ]
+          },
           "time-depth": "#/$defs/TimeDepthContext",
           "trajectory": "#/$defs/TrajectoryContext",
           "triangulated-surface": "#/$defs/MeshContext",
@@ -2055,7 +2199,22 @@
           "$ref": "#/$defs/PolylineContext"
         },
         {
-          "$ref": "#/$defs/SeismicContext"
+          "discriminator": {
+            "mapping": {
+              "1": "#/$defs/SeismicContext",
+              "5": "#/$defs/SeismicContext",
+              "8": "#/$defs/NativeSeismicContext"
+            },
+            "propertyName": "format_code"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/SeismicContext"
+            },
+            {
+              "$ref": "#/$defs/NativeSeismicContext"
+            }
+          ]
         },
         {
           "$ref": "#/$defs/WellLocationContext"

@@ -44,6 +44,27 @@ class TypedData:
         return (self._wire_descriptor or {}).get('relationships')
 
     @property
+    def osdu_kind(self):
+        """E168 s1 (D1, D3): the OSDU kind the gateway served for this element; None when it named none, or from a
+        gateway before E168 s0 (never filled in here)."""
+        return self._served('osdu_kind')
+
+    @property
+    def osdu_kind_reason(self):
+        """E168 s1: why the gateway named no OSDU kind, in the export matrix's words; None when it named one."""
+        return self._served('osdu_kind_reason')
+
+    def attach(self, frame):
+        """E168 s1 (D3): this read's identity and OSDU kind in `frame.attrs['ophiolite']`, as `Descriptor.attach` does
+        for a curve frame; the frame's columns and its other attrs (`source_names`) are kept."""
+        frame.attrs['ophiolite'] = {key: self._served(key) for key in ('asset_id', 'revision', 'profile', 'osdu_kind', 'osdu_kind_reason')}
+        return frame
+
+    def _served(self, key):
+        found = self.descriptor
+        return found.get(key) if isinstance(found, dict) else getattr(found, key, None)
+
+    @property
     def data_file(self):
         """E139 s2: the name the served data is saved under, by its codec: `data.ophpts` for the point-columns form,
         `data.json` for JSON bytes (every other profile)."""

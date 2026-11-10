@@ -1,0 +1,59 @@
+{
+  "note": "E165 s0: valid ophiolite.tool-verification/1 records, written by hand. The digest is the depth-shift bundle (procedures/v1/fixtures/bundles/depth-shift); people, projects and labels are synthetic.",
+  "records": [
+    {
+      "schema": "ophiolite.tool-verification/1",
+      "id": "verification-000000000000000000000000000000a1",
+      "project": "p-synthetic",
+      "digest": "edf8668204255edd264cccb9f91d941c4c28d34312f9e264de10d4df31c5dda7",
+      "by": {"kind": "person", "id": "u-anna", "name_at_time": "Anna"},
+      "at": 1762300800.0,
+      "statement": "Shifted depths agree with the hand-picked tops of the reference well.",
+      "command_id": "verify-1",
+      "request_sha256": "bae5a173239f3be8f6517f3ea5473ae5cfd7e5f0f33bc8005f008774a9c7636d",
+      "kind": "check",
+      "reference": {"check_id": "check-0001", "label": "Depth shift against hand-picked tops"}
+    },
+    {
+      "schema": "ophiolite.tool-verification/1",
+      "id": "verification-000000000000000000000000000000b1",
+      "project": "p-synthetic",
+      "digest": "edf8668204255edd264cccb9f91d941c4c28d34312f9e264de10d4df31c5dda7",
+      "by": {"kind": "person", "id": "u-ben", "name_at_time": null},
+      "at": 1762387200.0,
+      "statement": null,
+      "command_id": "verify-2",
+      "request_sha256": "bae5a173239f3be8f6517f3ea5473ae5cfd7e5f0f33bc8005f008774a9c7636d",
+      "kind": "publication",
+      "reference": {"title": "Shift corrections in deviated wells", "authors": ["A. Example", "B. Example"], "year": 2019,
+                    "link": {"kind": "doi", "value": "10.0000/synthetic.example"}}
+    },
+    {
+      "schema": "ophiolite.tool-verification/1",
+      "id": "verification-000000000000000000000000000000b2",
+      "project": "p-synthetic",
+      "digest": "edf8668204255edd264cccb9f91d941c4c28d34312f9e264de10d4df31c5dda7",
+      "by": {"kind": "person", "id": "u-cleo", "name_at_time": "Cleo"},
+      "at": 1762390800.5,
+      "statement": null,
+      "command_id": "verify-3",
+      "request_sha256": "bae5a173239f3be8f6517f3ea5473ae5cfd7e5f0f33bc8005f008774a9c7636d",
+      "kind": "publication",
+      "reference": {"title": "A method note", "authors": ["C. Example"], "year": 2024,
+                    "link": {"kind": "url", "value": "https://example.org/method-note"}}
+    },
+    {
+      "schema": "ophiolite.tool-verification/1",
+      "id": "verification-000000000000000000000000000000a2",
+      "project": "p-synthetic",
+      "digest": "edf8668204255edd264cccb9f91d941c4c28d34312f9e264de10d4df31c5dda7",
+      "by": {"kind": "person", "id": "u-anna", "name_at_time": "Anna"},
+      "at": 1762473600.0,
+      "statement": "The reference well was re-interpreted.",
+      "command_id": "withdraw-1",
+      "request_sha256": "bae5a173239f3be8f6517f3ea5473ae5cfd7e5f0f33bc8005f008774a9c7636d",
+      "kind": "withdrawn",
+      "reference": {"withdraws": "verification-000000000000000000000000000000a1"}
+    }
+  ]
+}

@@ -378,5 +378,136 @@
    "act_259c66c07658be144e975d00eb1e5d42",
    "act_0bcfbef58d8453e5109401d856ee464a"
   ]
+ },
+ "e159": {
+  "subject": "E159 s0 (work-episode 1.2.0): one shape and one values row each for an offered revision, well and unit candidate, mapped by hand from the preview answers; one attempt; pseudonyms are pseudonym(alpha, kind, id) of the listed ids. Written by no exporter until s2 and s3",
+  "mapped_from": {
+   "offered-revision": "results/remake-run step preview (remake.py preview answer): each explicit input (asset_id, revision) -> as revision, ref = pseudonym of asset#revision, sha256 and kind of the stored revision",
+   "offered-wells": "table-imports/preview, file wells (table_imports.py preview): plan actions create -> create (entity null); already_here[] {ordinal, row_key, well} -> already-here (name null, the answer has none); possible_duplicates[] {ordinal, row_key, name, well} -> possible-duplicate; skipped[] {ordinal, row_key} -> skip; well -> entity pseudonym",
+   "offered-units": "table-imports/preview, landing units (table_landings.py preview): units[] in order -> ordinal; action land|reuse|skip as answered; wellbore -> entity pseudonym or null; label -> label (values only)"
+  },
+  "pseudonyms": {
+   "preview": ["remake-preview-01", "wells-file-preview-01", "units-preview-01"],
+   "entity": ["well-grn-02", "well-grn-03", "wellbore-grn-01"],
+   "ref": ["gr-in-7#r1", "vsh-out-7#r1", "chain-vsh-7"],
+   "outcome": ["clay-below-0.4"],
+   "person": ["u-anna"]
+  },
+  "shape": {
+   "offered-revision": {
+    "action_id": "act_ed96303918a149569353f76c343d920c",
+    "at": 1793275260.0,
+    "operation": "results/remake-run",
+    "on_behalf_of": null,
+    "through": null,
+    "parameters": [],
+    "inputs": [{"ref": "ref-f9a93fa4ebd98e77b1c9e3413c8b1b9c", "sha256": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1", "kind": "las2/1"}],
+    "outputs": [{"ref": "ref-01651f18401e3159f90d8addf999bff3", "sha256": "b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1", "kind": "well-curve"}],
+    "plan": null,
+    "checks": [{"ref": "ref-f9a93fa4ebd98e77b1c9e3413c8b1b9c", "key_sha256": "c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1", "record_sha256": "c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2", "outcome": "passed", "witness": "server"}],
+    "outcomes": [{"ref": "ref-01651f18401e3159f90d8addf999bff3", "outcome_ref": "outcome-0c6514378eb7c0981f7853155fafd1ec", "version": 1, "state": "accepted", "declaration_sha256": "d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1", "evaluation_sha256": null}],
+    "verdicts": [{"ref": "ref-01651f18401e3159f90d8addf999bff3", "verdict": "rejected", "by": {"kind": "person", "id": "person-cd9dbe18bb9022661636719d82d2023e"}, "at": 1793275320.0, "because": "wrong-unit"}],
+    "omitted": {"parameters": 0, "checks": 0, "verdicts": 0, "plan": 0},
+    "offered": {"preview": "preview-9341903c3c3e8f5b474e0789e95a23e0", "at": 1793275200.0, "candidates": [{"as": "revision", "ref": "ref-f9a93fa4ebd98e77b1c9e3413c8b1b9c", "sha256": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1", "kind": "las2/1"}], "checks": [{"ref": "ref-f9a93fa4ebd98e77b1c9e3413c8b1b9c", "key_sha256": "c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1", "record_sha256": "c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2", "outcome": "passed", "witness": "server"}], "outcomes": [{"ref": "ref-01651f18401e3159f90d8addf999bff3", "outcome_ref": "outcome-0c6514378eb7c0981f7853155fafd1ec", "version": 1, "state": "accepted", "declaration_sha256": "d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1", "evaluation_sha256": null}], "answer_sha256": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"},
+    "attempt": {"chain": "ref-da2fbb3481d67653be0f15b3701bc39b", "n": 2, "ended": "accepted", "from": "ref-01651f18401e3159f90d8addf999bff3", "continued": false}
+   },
+   "offered-wells": {
+    "action_id": "act_12b927acd6c073a752699f0ec0dbfc81",
+    "at": 1793278800.0,
+    "operation": "table-imports/start",
+    "on_behalf_of": null,
+    "through": null,
+    "parameters": [],
+    "inputs": [],
+    "outputs": [],
+    "plan": null,
+    "checks": [],
+    "outcomes": [],
+    "verdicts": [],
+    "omitted": {"parameters": 0, "checks": 0, "verdicts": 0, "plan": 0, "offered": 1},
+    "offered": {"preview": "preview-be35ed23fcbb0b49baa2e8b1a01a4ab3", "at": 1793278740.0, "candidates": [{"as": "well", "ordinal": 1, "action": "create", "entity": null}, {"as": "well", "ordinal": 2, "action": "already-here", "entity": "entity-f199258c32edafc55621b754bd4f582a"}, {"as": "well", "ordinal": 3, "action": "possible-duplicate", "entity": "entity-b8a3c2daca8654de8719ba1d85057035"}, {"as": "well", "ordinal": 4, "action": "skip", "entity": null}], "checks": [], "outcomes": [], "answer_sha256": "b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1"}
+   },
+   "offered-units": {
+    "action_id": "act_03e1fbe8d12150d5be6da1db55fcf611",
+    "at": 1793282400.0,
+    "operation": "table-imports/start",
+    "on_behalf_of": null,
+    "through": null,
+    "parameters": [],
+    "inputs": [],
+    "outputs": [],
+    "plan": null,
+    "checks": [],
+    "outcomes": [],
+    "verdicts": [],
+    "omitted": {"parameters": 0, "checks": 0, "verdicts": 0, "plan": 0},
+    "offered": {"preview": "preview-1b4e4ef9d8b70ea5a11891f9e0d24dc8", "at": 1793282340.0, "candidates": [{"as": "unit", "ordinal": 1, "action": "land", "entity": "entity-4ec2e2243fbc03183c939db88db0657e"}, {"as": "unit", "ordinal": 2, "action": "reuse", "entity": "entity-4ec2e2243fbc03183c939db88db0657e"}, {"as": "unit", "ordinal": 3, "action": "skip", "entity": null}], "checks": [], "outcomes": [], "answer_sha256": "b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3"}
+   }
+  },
+  "values": {
+   "offered-revision": {
+    "action_id": "act_ed96303918a149569353f76c343d920c",
+    "at": 1793275260.0,
+    "operation": "results/remake-run",
+    "on_behalf_of": null,
+    "through": null,
+    "parameters": [],
+    "inputs": [{"ref": "ref-f9a93fa4ebd98e77b1c9e3413c8b1b9c", "sha256": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1", "kind": "las2/1", "asset_id": "gr-in-7", "revision": "r1"}],
+    "outputs": [{"ref": "ref-01651f18401e3159f90d8addf999bff3", "sha256": "b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1", "kind": "well-curve", "asset_id": "vsh-out-7", "revision": "r1"}],
+    "plan": null,
+    "checks": [{"ref": "ref-f9a93fa4ebd98e77b1c9e3413c8b1b9c", "key_sha256": "c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1", "record_sha256": "c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2", "outcome": "passed", "witness": "server", "name": "Gamma ray check"}],
+    "outcomes": [{"ref": "ref-01651f18401e3159f90d8addf999bff3", "outcome_ref": "outcome-0c6514378eb7c0981f7853155fafd1ec", "version": 1, "state": "accepted", "declaration_sha256": "d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1", "evaluation_sha256": null, "label": "Clay volume below 0.4"}],
+    "verdicts": [{"ref": "ref-01651f18401e3159f90d8addf999bff3", "verdict": "rejected", "by": {"kind": "person", "id": "person-cd9dbe18bb9022661636719d82d2023e"}, "at": 1793275320.0, "because": "wrong-unit", "reason": "tops differ from the published log"}],
+    "omitted": {"parameters": 0, "checks": 0, "verdicts": 0, "plan": 0},
+    "offered": {"preview": "preview-9341903c3c3e8f5b474e0789e95a23e0", "at": 1793275200.0, "candidates": [{"as": "revision", "ref": "ref-f9a93fa4ebd98e77b1c9e3413c8b1b9c", "sha256": "a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1", "kind": "las2/1", "asset_id": "gr-in-7", "revision": "r1"}], "checks": [{"ref": "ref-f9a93fa4ebd98e77b1c9e3413c8b1b9c", "key_sha256": "c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1", "record_sha256": "c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2", "outcome": "passed", "witness": "server", "name": "Gamma ray check"}], "outcomes": [{"ref": "ref-01651f18401e3159f90d8addf999bff3", "outcome_ref": "outcome-0c6514378eb7c0981f7853155fafd1ec", "version": 1, "state": "accepted", "declaration_sha256": "d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1", "evaluation_sha256": null, "label": "Clay volume below 0.4"}], "answer_sha256": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5", "preview_command_id": "e159-preview-remake-01"},
+    "attempt": {"chain": "ref-da2fbb3481d67653be0f15b3701bc39b", "n": 2, "ended": "accepted", "from": "ref-01651f18401e3159f90d8addf999bff3", "continued": false},
+    "request": null,
+    "instruction": null
+   },
+   "offered-wells": {
+    "action_id": "act_12b927acd6c073a752699f0ec0dbfc81",
+    "at": 1793278800.0,
+    "operation": "table-imports/start",
+    "on_behalf_of": null,
+    "through": null,
+    "parameters": [],
+    "inputs": [],
+    "outputs": [],
+    "plan": null,
+    "checks": [],
+    "outcomes": [],
+    "verdicts": [],
+    "omitted": {"parameters": 0, "checks": 0, "verdicts": 0, "plan": 0, "offered": 1},
+    "offered": {"preview": "preview-be35ed23fcbb0b49baa2e8b1a01a4ab3", "at": 1793278740.0, "candidates": [{"as": "well", "ordinal": 1, "action": "create", "entity": null, "name": "GRN-01", "row_key": "row-1"}, {"as": "well", "ordinal": 2, "action": "already-here", "entity": "entity-f199258c32edafc55621b754bd4f582a", "name": null, "row_key": "row-2"}, {"as": "well", "ordinal": 3, "action": "possible-duplicate", "entity": "entity-b8a3c2daca8654de8719ba1d85057035", "name": "GRN-3", "row_key": "row-3"}, {"as": "well", "ordinal": 4, "action": "skip", "entity": null, "name": null, "row_key": "row-4"}], "checks": [], "outcomes": [], "answer_sha256": "b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1", "preview_command_id": "e159-preview-wells-file-01"},
+    "request": null,
+    "instruction": null
+   },
+   "offered-units": {
+    "action_id": "act_03e1fbe8d12150d5be6da1db55fcf611",
+    "at": 1793282400.0,
+    "operation": "table-imports/start",
+    "on_behalf_of": null,
+    "through": null,
+    "parameters": [],
+    "inputs": [],
+    "outputs": [],
+    "plan": null,
+    "checks": [],
+    "outcomes": [],
+    "verdicts": [],
+    "omitted": {"parameters": 0, "checks": 0, "verdicts": 0, "plan": 0},
+    "offered": {"preview": "preview-1b4e4ef9d8b70ea5a11891f9e0d24dc8", "at": 1793282340.0, "candidates": [{"as": "unit", "ordinal": 1, "action": "land", "entity": "entity-4ec2e2243fbc03183c939db88db0657e", "label": "GRN-01 tops"}, {"as": "unit", "ordinal": 2, "action": "reuse", "entity": "entity-4ec2e2243fbc03183c939db88db0657e", "label": "GRN-01 picks"}, {"as": "unit", "ordinal": 3, "action": "skip", "entity": null, "label": null}], "checks": [], "outcomes": [], "answer_sha256": "b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3b3", "preview_command_id": "e159-preview-units-01"},
+    "request": null,
+    "instruction": null
+   }
+  },
+  "invalid": {
+   "null-offered": {"mode": "shape", "row": "offered-revision", "path": ["offered"], "value": null, "field": "offered"},
+   "null-attempt": {"mode": "shape", "row": "offered-revision", "path": ["attempt"], "value": null, "field": "attempt"},
+   "null-nested-because": {"mode": "values", "row": "offered-revision", "path": ["verdicts", 0, "because"], "value": null, "field": "because"},
+   "raw-command-id-as-preview": {"mode": "shape", "row": "offered-revision", "path": ["offered", "preview"], "value": "e159-preview-remake-01", "field": "preview"},
+   "reason-in-a-shape-verdict": {"mode": "shape", "row": "offered-revision", "path": ["verdicts", 0, "reason"], "value": "tops differ from the published log", "field": "reason"},
+   "unknown-ended": {"mode": "shape", "row": "offered-revision", "path": ["attempt", "ended"], "value": "rejected", "field": "ended"}
+  }
  }
 }

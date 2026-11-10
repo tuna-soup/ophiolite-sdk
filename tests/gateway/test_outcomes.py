@@ -85,3 +85,26 @@ def test_a_result_reads_its_outcome_states_by_its_item_and_version_from_the_comm
     assert (code, out, err) == (1, '', '"%s" has no version 2.' % name), (code, out, err)
     code, out, err = run(bob, 'states', name)
     assert (code, out) == (1, '') and err.startswith('This project has no item named "%s".' % name), (code, out, err)
+
+
+def test_an_outcome_naming_data_rules_rejects_with_the_rules_sentence_and_a_revise_keeps_the_rules(run):
+    """E144 s4 C3 (the installed SDK as the external client): declared through the client with two named rules, the
+    result whose tops are off the run's paths reads its rule's sentence by `ITEM@1`; a label-only `revise` from the
+    command line keeps the rules (R1-6). Mutation: drop cli.py's preservation line -> version 2 names none -> red."""
+    from ophiolite import outcomes as told
+    from ophiolite.exchange import ClientTransport
+    from project_gateway.tests.test_outcome_states import Read
+    w = Read(run.web)
+    alice = key(run.web, 'alice')
+    named = ['top-on-path/1', 'tops-unique-name/1']
+    client(run.web, alice).outcome_declare(told.residual_declaration('Tops within 5 m', 5, 'm', 'tops-to-team-database', 'Team database', data_rules=named))
+    _, published = w.publish(w.payload(), 'run-1')
+    assert published.status_code == 200, published.text
+    name = next(i['name'] for i in ClientTransport(client(run.web, alice)).inventory() if i['asset_id'] == published.json()['asset_id'])
+    assert run(alice, 'states', name + '@1') == (0, "Tops within 5 m: Rejected under Tops within 5 m version 1: Each top on the wellbore's path: "
+                                                    "3 tops lie outside the wellbore's path, the first at row 1.", '')
+    checks = "; checks its inputs against Each top on the wellbore's path, Each top named once"
+    assert run(alice, 'revise', 'Tops within 5 m', '--label', 'Tops on their paths') == (
+        0, 'Revised "Tops on their paths" (enabled, version 2): ' + (SAID % ('5 m', 'allowed')).replace('; delivered', checks + '; delivered'), '')
+    code, out, err = run(alice, 'get', 'Tops on their paths', '--json')
+    assert code == 0 and json.loads(out)['declaration']['rule']['data_rules'] == named

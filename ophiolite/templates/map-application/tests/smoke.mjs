@@ -40,7 +40,7 @@ try{
  await details.getByText('Technical details',{exact:true}).click();visible=await details.innerText();assert(visible.includes('well-synthetic-1')&&visible.includes('wells-table'));
  const after=await page.evaluate(async()=>{const {request}=await import('/src/helpers.mjs');return request('_test');});assert.deepEqual(after.mutations,{});
  await page.evaluate(async()=>{const {request}=await import('/src/helpers.mjs');await request('_test',{fault:'expired'});});
- await page.getByRole('button',{name:'Retry',exact:true}).click();await page.getByRole('status').filter({hasText:'ophiolite login'}).waitFor();
+ await page.getByRole('button',{name:'Retry',exact:true}).click();await page.getByRole('status').filter({hasText:'ophiolite account login'}).waitFor();
  await page.evaluate(async()=>{const {request}=await import('/src/helpers.mjs');await request('_test',{clear:true});});
  for(const request of requests){assert(request.url().startsWith(base+'/')||request.url().startsWith('blob:'+base+'/')||request.url().startsWith('data:'),'Browser contacted gateway or external origin: '+request.url());const headers=await request.allHeaders();assert(!headers.authorization);assert(!headers.cookie);}
  for(const response of responses){const body=await response.text();assert(!/access_token|refresh_token|oph_api_/.test(body));}

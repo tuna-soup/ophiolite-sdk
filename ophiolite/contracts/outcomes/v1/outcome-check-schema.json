@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/outcomes/v1/outcome-check-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.outcome-check/1",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -72,6 +72,32 @@
         "not_computed"
       ],
       "title": "CheckRows",
+      "type": "object"
+    },
+    "CheckedDataRules": {
+      "additionalProperties": false,
+      "description": "E144 s4 (D5): the named data rules as run for this record, under one registry snapshot; no sentence is kept.",
+      "properties": {
+        "registry_version": {
+          "maxLength": 32,
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+          "title": "Registry Version",
+          "type": "string"
+        },
+        "results": {
+          "items": {
+            "$ref": "#/$defs/CheckedRuleResult"
+          },
+          "maxItems": 32768,
+          "title": "Results",
+          "type": "array"
+        }
+      },
+      "required": [
+        "registry_version",
+        "results"
+      ],
+      "title": "CheckedDataRules",
       "type": "object"
     },
     "CheckedInput": {
@@ -196,6 +222,167 @@
       "title": "CheckedResult",
       "type": "object"
     },
+    "CheckedRuleResult": {
+      "additionalProperties": false,
+      "description": "E144 s4 (D5): one named data rule's result (ophiolite.rule-results/1's, unchanged) on one bound input version.",
+      "properties": {
+        "rule": {
+          "maxLength": 64,
+          "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*/[1-9][0-9]*$",
+          "title": "Rule",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "passed",
+            "failed",
+            "not-applicable"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Count"
+        },
+        "examples": {
+          "items": {
+            "$ref": "#/$defs/Example"
+          },
+          "maxItems": 5,
+          "title": "Examples",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "title": "Parameters",
+          "type": "object"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "enum": [
+                "offline",
+                "no-column",
+                "no-context"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reason"
+        },
+        "context": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/ContextVersion"
+              },
+              "maxItems": 32,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Context"
+        },
+        "slot": {
+          "minLength": 1,
+          "title": "Slot",
+          "type": "string"
+        },
+        "asset_id": {
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Revision",
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "note",
+            "warn",
+            "error"
+          ],
+          "title": "Severity",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rule",
+        "state",
+        "count",
+        "examples",
+        "parameters",
+        "reason",
+        "context",
+        "slot",
+        "asset_id",
+        "revision",
+        "severity"
+      ],
+      "title": "CheckedRuleResult",
+      "type": "object"
+    },
+    "ContextVersion": {
+      "additionalProperties": false,
+      "description": "Another version of the project a project-context rule read (online only).",
+      "properties": {
+        "asset_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "kind": {
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "asset_id",
+        "revision",
+        "kind"
+      ],
+      "title": "ContextVersion",
+      "type": "object"
+    },
     "EvaluatedAs": {
       "additionalProperties": false,
       "properties": {
@@ -210,6 +397,50 @@
         "person"
       ],
       "title": "EvaluatedAs",
+      "type": "object"
+    },
+    "Example": {
+      "additionalProperties": false,
+      "description": "One failing row, in the file's order: its 1-based data row, and its depth and value when the rule has them.",
+      "properties": {
+        "row": {
+          "minimum": 1,
+          "title": "Row",
+          "type": "integer"
+        },
+        "depth": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Depth"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "row",
+        "depth",
+        "value"
+      ],
+      "title": "Example",
       "type": "object"
     },
     "FailingRow": {
@@ -285,7 +516,7 @@
     }
   },
   "additionalProperties": false,
-  "description": "An acceptance record (E120 C2): one outcome version's built-in rule over one exact result version of one\npublication, with the bound input versions, as its declarer could read them; never changed. `reason` is set exactly\nwhen the verdict is `not_compared`, or `rejected` for validity or inputs (outcome-reasons.json `checks`).",
+  "description": "An acceptance record (E120 C2): one outcome version's built-in rule over one exact result version of one\npublication, with the bound input versions, as its declarer could read them; never changed. `reason` is set exactly\nwhen the verdict is `not_compared`, or `rejected` for validity, inputs or a named data rule (outcome-reasons.json\n`checks`).",
   "properties": {
     "schema": {
       "const": "ophiolite.outcome-check/1",
@@ -335,7 +566,10 @@
             "inputs",
             "unit_mismatch",
             "no_validity",
-            "nothing_computed"
+            "nothing_computed",
+            "data_rule",
+            "data_rule_unread",
+            "data_rule_missing"
           ],
           "type": "string"
         },
@@ -348,6 +582,18 @@
     },
     "rows": {
       "$ref": "#/$defs/CheckRows"
+    },
+    "data_rules": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CheckedDataRules"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "E144 s4: present exactly when the outcome version names data rules"
     },
     "at": {
       "title": "At",

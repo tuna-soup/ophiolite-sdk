@@ -1,0 +1,24 @@
+{
+  "schema": "ophiolite.mapper-reviewed/1",
+  "picks": [
+    {"target": "wells", "table": {"kind": "file", "locator": {"path": "wells.csv"}, "sheet": null},
+     "schema_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+     "fields": {"id": "WELL", "name": "WELL", "x": "EASTING", "y": "NORTHING", "operator": null},
+     "recipe_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "at": "2026-11-04T12:10:00Z"},
+    {"target": "wells", "table": {"kind": "file", "locator": {"path": "wells.xlsx"}, "sheet": "Wells"},
+     "schema_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+     "fields": {"id": "WELL", "name": "WELL", "x": "EASTING", "y": "NORTHING"},
+     "recipe_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "at": "2026-11-04T12:11:00Z"},
+    {"target": "wells", "table": {"kind": "file", "locator": {"path": "wells.xlsx"}, "sheet": "Tops"},
+     "schema_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+     "fields": {"id": "UWI", "name": "WELL"},
+     "recipe_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "at": "2026-11-04T12:12:00+01:00"},
+    {"target": "wells", "table": {"kind": "bucket-prefix", "locator": {"endpoint": "http://127.0.0.1:9000", "region": "us-east-1", "bucket": "synthetic-logs", "prefix": "wells/"}, "sheet": null},
+     "schema_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+     "fields": {"id": ["WELL", "UWI"]},
+     "recipe_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "at": "2026-11-04T12:13:00Z"}
+  ],
+  "aliases": [
+    {"target": "wells", "spelling": "syn-a03", "canonical": "SYN-A3", "recipe_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "at": "2026-11-04T12:10:00Z"}
+  ]
+}

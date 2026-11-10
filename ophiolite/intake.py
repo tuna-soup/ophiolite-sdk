@@ -1,5 +1,5 @@
 """E107a C6: read a file of a folder upload on this computer with one of the project's read procedures, and send what
-it made into the same upload (`ophiolite intake read RUN FILE`).
+it made into the same upload (`ophiolite exchange intake read RUN FILE`).
 
 The upload's row is a file Ophiolite does not read itself but a read procedure version of the project recognises
 (`needs-procedure`, with the versions listed). Before anything runs, the local file must be the row's file (its size

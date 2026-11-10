@@ -36,6 +36,14 @@ def digest(raw):
     return hashlib.sha256(raw).hexdigest()
 
 
+def osdu_pair(profile):
+    """E168 s0: a descriptor's osdu_kind and osdu_kind_reason, from the export matrix by the one lookup (D6)."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('osdu_kind', CONTRACTS / 'mapper/v1/osdu_kind.py')
+    module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+    return module.pair(profile)
+
+
 def schemas():
     """Publish the Pydantic-generated schemas listed in the registry."""
     from project_gateway.scientific_assets import (Asset, AssetSummary, Curve, ScientificContext, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface,
@@ -45,6 +53,7 @@ def schemas():
     from project_gateway.scientific_assets import WellSet  # E119a
     from project_gateway.scientific_assets import WellResidual  # E119b
     from project_gateway.scientific_assets import SeismicLine  # E137 s0
+    from project_gateway.scientific_assets import SeismicVolumeNative  # E140 s0
     from project_gateway.domain import RelationshipRegistry, Entity, EntityAssets, Lineage
     from project_gateway.scientific_assets import DerivationRecord, Parameters  # E94
     from project_gateway.scientific_assets import DerivationRecordV2  # E106
@@ -59,11 +68,20 @@ def schemas():
     from project_gateway.verdicts import Verdict  # E132
     from project_gateway.behaviour_consent import BehaviourConsent  # E133
     from project_gateway.work_episodes import WorkEpisode, WorkEpisodes  # E134
+    from project_gateway.data_rules import DataRule, RuleResults  # E144
+    from project_gateway.volume_windows import VolumeWindow  # E141 s0
+    from project_gateway.volume_windows import VolumeWindow2  # E140 s3
+    from project_gateway.org_search import SearchRequest, SearchAnswer, SearchAnswerByMeaning  # E145 (s2b: by meaning)
+    from project_gateway.profile_migration import ProfileMigration  # E148 s3
+    from project_gateway.survey_contract import SurveyRevision, SurveyPage  # E142 s0
+    from project_gateway.work_turns import WorkTurn; write(CONTRACTS / WorkTurn.CONTRACT['path'], WorkTurn.model_json_schema())  # E160 s0: one line, apart from the shared tuple
+    from project_gateway.tool_verifications import ToolVerification  # E165 s0
     for model in (CheckRecord, DerivationRecord, DerivationRecordV2, Parameters, Asset, Curve, ScientificContext, AssetSummary, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface, PointSet, PolylineSet, SeismicVolume, SeismicSlice,
                   RelationshipRegistry, Entity, EntityAssets, Lineage, ImportRecipe, PointSet2, WellLocationUpload, WellLocation,
                   Wavelet, ModelSection, SeismicSection, TimeDepth, FeatureSet, ImportRecipe2, CurveColumnsHeader, TableFile, SourceProvenance, WellPath, BasisGrouping, WellSet,
                   WellResidual, SeismicLine, OutcomeDeclaration, OutcomeCheck, OutcomeClaim, ResqmlRead, LocalFrame, ResqmlObject, Verdict, BehaviourConsent, WorkEpisodes, WorkEpisode,
-                  PointColumnsHeader):  # E53; E57; E56; E23b; E100b; E58b; E122; E125 s3a; E123; E119a; E119b; E120 (s3: the claim); E124 (s1: the object); E132; E133; E134; E137 s0; E139
+                  PointColumnsHeader, DataRule, RuleResults, VolumeWindow, SeismicVolumeNative, SearchRequest, SearchAnswer, ProfileMigration,
+                  SurveyRevision, SurveyPage, SearchAnswerByMeaning, VolumeWindow2, ToolVerification):  # E53; E57; E56; E23b; E100b; E58b; E122; E125 s3a; E123; E119a; E119b; E120 (s3: the claim); E124 (s1: the object); E132; E133; E134; E137 s0; E139; E144; E141 s0; E140 s0; E145; E148 s3; E142 s0; E145 s2b; E140 s3; E165 s0
         write(CONTRACTS / model.CONTRACT['path'], model.model_json_schema())
 
 
@@ -124,6 +142,7 @@ def fixtures(target=FIX):
           'parents':[source] if name=='derived' else [],
           'provenance':{'evidence':'script-declared' if name=='derived' else 'source-declared','method':'Add 2 over source depths 100–103; skip missing samples' if name=='derived' else None,'code_reference':None,'environment_reference':None,'omissions':['Synthetic offline fixture, not a server publication','No independently verified execution environment']},
           'supported_operations':['read','export','use-as-input'],'authorization':{'status':'not-evaluated'}}
+        descriptor.update(osdu_pair(descriptor['profile']))
         Asset.model_validate(descriptor)
         write(FIX / f'{name}.json', descriptor)
     sourced(FIX)
@@ -248,6 +267,7 @@ def typed(FIX):
             'relationships': {'well_log': None}, 'parents': [],
             'provenance': {'evidence': 'source-declared', 'method': None, 'code_reference': None, 'environment_reference': None, 'omissions': ['Synthetic offline fixture, not a server publication']},
             'supported_operations': ['read', 'export'], 'authorization': {'status': 'not-evaluated'}}
+        descriptor.update(osdu_pair(descriptor['profile']))
         Asset.model_validate(descriptor)
         write(FIX / f'{name}.json', descriptor)
 
@@ -312,6 +332,7 @@ def recipe_points(FIX):
         'provenance': {'evidence': 'source-declared', 'method': None, 'code_reference': None, 'environment_reference': None, 'omissions': ['Synthetic offline fixture, not a server publication']},
         'supported_operations': ['read', 'export'], 'authorization': {'status': 'not-evaluated'}}
     from project_gateway.scientific_assets import Asset
+    descriptor.update(osdu_pair(descriptor['profile']))
     Asset.model_validate(descriptor)
     write(FIX / 'point-set-2.json', descriptor)
 
@@ -489,6 +510,11 @@ TARGETS = {'table-target-schema.json': 'targets/table-target-schema.json',  # E8
            'vocabulary/v1/coordinate-systems.json': 'coordinate_systems.json',
            'vocabulary/v1/coordinate-systems.NOTICE': 'coordinate_systems.NOTICE',
            'vocabulary/v1/qgis-reach.json': 'reach/v1/qgis-reach.json',  # E91: what QGIS can open, read by the What's next card
+           'rules/v1/registry.json': 'data_rules/v1/registry.json',  # E144: the data-rule registry index and its immutable snapshots
+           **{'rules/v1/registries/%s.json' % v: 'data_rules/v1/registries/%s.json' % v for v in ('1.0.0', '1.1.0', '1.2.0', '1.3.0')},  # E144 s2 C5: 1.3.0 current
+           **{'rules/v1/rules/%s.json' % r: 'data_rules/v1/rules/%s.json' % r  # E144 s1: each released rule's document
+              for r in ('depth-increasing-1', 'geometry-present-1', 'gr-range-1', 'in-area-of-use-1', 'null-sentinel-1', 'station-step-1',
+                        'top-on-path-1', 'tops-unique-name-1', 'trace-order-1', 'unit-known-1')},  # E144 s2: the last three in 1.3.0
            **{'targets/v1/%s.json' % name: 'targets/v1/%s.json' % name
               for name in ('wells', 'well-tops', 'deviation-survey', 'point-set', 'time-depth', 'table')}}
 

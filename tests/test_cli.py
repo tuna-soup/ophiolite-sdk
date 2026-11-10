@@ -29,7 +29,7 @@ def test_doctor_is_local_and_does_not_open_credentials(tmp_path,monkeypatch,caps
 
 def test_doctor_online_is_explicit(tmp_path,monkeypatch,capsys):
     config=configuration(tmp_path);calls=[]
-    monkeypatch.setattr(cli.auth,'request',lambda url:calls.append(url) or {'version':'1.17.0'})
+    monkeypatch.setattr(cli.auth,'request',lambda url,**options:calls.append(url) or {'version':'1.17.0'})  # E148: options carries the run's notifier
     cli.main(['doctor','--configuration',str(config),'--online'])
     assert calls==['http://localhost/api/v1/contracts']
     assert 'Server contracts: 1.17.0' in capsys.readouterr().out
@@ -98,7 +98,8 @@ def test_legacy_help_sentences_and_flags():
     frozen=json.loads((Path(__file__).parent/'fixtures/cli-0.2-help.json').read_text())
     parser=cli.parser();assert parser.description==frozen['description']
     sub=next(a for a in parser._actions if isinstance(a,argparse._SubParsersAction))
-    descriptions={choice.dest:choice.help for choice in sub._choices_actions}
+    from cli_tree import old_lines
+    descriptions=old_lines(parser)  # E163 s1: a command's one line is its verb line in its group
     for name,expected in frozen['commands'].items():
         assert descriptions[name]==expected['help']
         actions={a.dest:a for a in sub.choices[name]._actions}
@@ -199,7 +200,7 @@ def test_doctor_online_checks_reach_and_expiry(tmp_path,monkeypatch,capsys):
     """E31 S4: doctor --online says whether the credential reaches the configured project, and until when."""
     import ophiolite.account
     config=configuration(tmp_path)
-    monkeypatch.setattr(cli.auth,'request',lambda url:{'version':'1.21.0'})
+    monkeypatch.setattr(cli.auth,'request',lambda url,**options:{'version':'1.21.0'})
     monkeypatch.setenv('OPHIOLITE_ACCESS_KEY','oph_key_example')
     class Reach:
         def __init__(self,*a,**k):pass
@@ -443,3 +444,35 @@ def test_rights_attach_and_renew_send_what_was_given_and_renew_reads_the_generat
     with pytest.raises(Refused,match='--uses and --last-day'):_rights_cli(tmp_path,monkeypatch,state,'attach','--kind','release','--ref','r1')
     with pytest.raises(Refused,match='attach them first'):
         _rights_cli(tmp_path,monkeypatch,{'basis':None,'can_change':True},'renew','--kind','release','--ref','r1','--uses','read','--last-day','2027-06-30')
+
+
+def _trajectories_cli(tmp_path,monkeypatch,scope,calls=None):
+    """`ophiolite trajectories export --scope SCOPE` against a fake client: the project it opened and what it was asked."""
+    config=configuration(tmp_path);calls=[] if calls is None else calls
+    class FakeClient:
+        def __init__(self,url,project,credential):calls.append(('open',project))
+        def __enter__(self):return self
+        def __exit__(self,*a):return False
+        def export_trajectories(self,destination,**kw):
+            calls.append(('export',str(destination),kw));return {'episodes':3,'values':1,'destination':str(destination),'parquet':False}
+    monkeypatch.delenv('OPHIOLITE_ACCESS_KEY',raising=False)
+    monkeypatch.setattr(cli,'Client',FakeClient);monkeypatch.setattr(cli.Credential,'from_file',staticmethod(lambda path:object()))
+    cli.main(['trajectories','export','--scope',scope,'--purpose','training','--destination',str(tmp_path/'out'),'--configuration',str(config)])
+    return calls
+
+
+@pytest.mark.parametrize('scope,kind,whose',[('project:q','own','your own work'),('members:q','members',"the consenting members' work")],ids=['own','members'])
+def test_s4_s11_the_trajectories_scope_names_the_project_the_request_and_whose_work(tmp_path,monkeypatch,capsys,scope,kind,whose):
+    """E134 s4 S11: `members:ID` opens project ID, asks `scope='members'` and says "the consenting members' work";
+    `project:ID` asks `own` and still says "your own work". Mutation: the scope not passed to the client -> red."""
+    calls=_trajectories_cli(tmp_path,monkeypatch,scope)
+    assert calls==[('open','q'),('export',str(tmp_path/'out'),{'purpose':'training','mode':'auto','window_seconds':None,'seed':0,'until':None,'scope':kind})]
+    assert capsys.readouterr().out=='Exported 3 episodes of %s to %s (1 with values).\n' % (whose,tmp_path/'out')
+
+
+@pytest.mark.parametrize('scope',['members:','member:q','organisation:q','q'])
+def test_s4_s11_another_scope_form_is_refused_before_any_call(tmp_path,monkeypatch,scope):
+    """Only project:ID and members:ID, each with an id; nothing is opened or asked."""
+    calls=[]
+    with pytest.raises(Refused) as caught:_trajectories_cli(tmp_path,monkeypatch,scope,calls)
+    assert (str(caught.value),calls)==('--scope takes project:ID or members:ID.',[])

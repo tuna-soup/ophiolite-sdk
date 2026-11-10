@@ -1,0 +1,62 @@
+{
+  "schema": "ophiolite.agent-precedents/1",
+  "operation": "results/remake-run",
+  "limit": 5,
+  "request_sha256": "c4d8f794fe916a2b9bd911f9003f40d96740eebacd966c6f35e2d61470fac9f1",
+  "precedents": [
+    {
+      "project_id": "groningen",
+      "asset_id": "residual-gr-01",
+      "revision": "r2",
+      "shape": {
+        "operation": "results/remake-run",
+        "parameters": [{"key": "window.length", "value": 25.0, "unit": "m"}],
+        "inputs": [{"kind": "well-log", "sha256": "16e990e6835b696fa8bacda79bc6e4575629450da90b1155f524fd552173d7e2"}],
+        "outcome": {"state": "accepted"},
+        "verdict": "accepted",
+        "verdict_ids": ["verdict-9dd1d21fd41050e0dd9d1a5c8691b636", "verdict-d3ed396edc9c83d2ffe5676e4cd422b0"],
+        "at": 1793606400.0
+      },
+      "detail": {
+        "reasons": [
+          {"verdict_id": "verdict-9dd1d21fd41050e0dd9d1a5c8691b636", "verdict": "accepted", "reason": "Matches the core porosity within 2 p.u."},
+          {"verdict_id": "verdict-d3ed396edc9c83d2ffe5676e4cd422b0", "verdict": "accepted", "reason": null}
+        ],
+        "method": {"name": "residual", "declared": true, "library": "ophiolite-petro", "version": "1.4.0", "parameters": {"window": 25}, "script_sha256": null}
+      }
+    },
+    {
+      "project_id": "groningen",
+      "asset_id": "residual-gr-02",
+      "revision": "r1",
+      "shape": {
+        "operation": "results/remake-run",
+        "parameters": [],
+        "inputs": [{"kind": "well-log", "sha256": "e2dbb589ada0231e594253e593338b91a9f4740b95ea83e4142bfba5f19ce41c"}],
+        "outcome": null,
+        "verdict": "accepted",
+        "verdict_ids": ["verdict-5b438bf1cd5616fa94893ba4f02427ff"],
+        "at": 1793520000.0
+      },
+      "detail": {
+        "reasons": [{"verdict_id": "verdict-5b438bf1cd5616fa94893ba4f02427ff", "verdict": "accepted", "reason": "Good enough for the field plan."}],
+        "method": null
+      }
+    },
+    {
+      "project_id": "groningen-north",
+      "asset_id": "residual-gn-07",
+      "revision": "r3",
+      "shape": {
+        "operation": "results/remake-run",
+        "parameters": [{"key": "window.length", "value": 30.0, "unit": "m"}],
+        "inputs": [],
+        "outcome": {"state": "not_checked"},
+        "verdict": "accepted",
+        "verdict_ids": ["verdict-16e990e6835b696fa8bacda79bc6e457"],
+        "at": 1793692800.0
+      },
+      "detail": null
+    }
+  ]
+}

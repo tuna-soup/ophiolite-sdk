@@ -90,5 +90,7 @@
   ],
   "authorization": {
     "status": "not-evaluated"
-  }
+  },
+  "osdu_kind": "osdu:wks:work-product-component--WellLog:1.5.0",
+  "osdu_kind_reason": null
 }

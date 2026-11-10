@@ -1,0 +1,1 @@
+{"decisions":[],"interpretation":{"mapping":"polyline-set/1","null_policy":"empty cell or declared NODATA value is missing; never zero-filled","parsing_policy":"package-strict/1","reader":"asset_connectors.petrel_faults/1"},"package_digest":"f8c6525d789ce0c42d39068d3131e2d0977b1d61bd4c647063c20bd5af59f7bd","schema":"ophiolite.package-read/1"}

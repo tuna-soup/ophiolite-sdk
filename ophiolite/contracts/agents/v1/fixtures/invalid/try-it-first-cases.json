@@ -1,0 +1,25 @@
+{
+  "description": "E150 s0: one change to one valid fixture per case; the document then fails at `fails`. `document` names the valid fixture, `shape` the schema and definition it is read with, `set` puts a value at a path (a list of keys and indexes) and `delete` removes one; `fragment_bytes` makes the first choice's fragment exactly that many bytes of canonical JSON. `by` says who refuses it: the schema, or choice.py's choice_problems (run only on a document the schema accepts).",
+  "cases": [
+    {"name": "refused-without-refusal", "document": "dry-run-refused.json", "shape": "dry-run-schema.json", "delete": ["would", "refusal"], "by": "schema", "fails": ["$.would"]},
+    {"name": "refused-with-effects", "document": "dry-run-refused.json", "shape": "dry-run-schema.json", "set": [["would", "effects"], [{"action": "create", "kind": "record", "count": 1}]], "by": "schema", "fails": ["$.would.effects"]},
+    {"name": "proceeds-with-a-refusal", "document": "dry-run-proceeds.json", "shape": "dry-run-schema.json", "set": [["would", "refusal"], {"code": "PERMISSION_DENIED", "message": "No"}], "by": "schema", "fails": ["$.would"]},
+    {"name": "an-unknown-kind", "document": "dry-run-proceeds.json", "shape": "dry-run-schema.json", "set": [["would", "effects", 0, "kind"], "invoice"], "by": "schema", "fails": ["$.would.effects[0].kind"]},
+    {"name": "dry-run-false", "document": "dry-run-proceeds.json", "shape": "dry-run-schema.json", "set": [["dry_run"], false], "by": "schema", "fails": ["$.dry_run"]},
+    {"name": "one-choice", "document": "choice.json", "shape": "choice-schema.json", "set": [["choices"], [{"id": "c1", "fragment": {"option": "first"}}]], "by": "schema", "fails": ["$.choices"]},
+    {"name": "nine-choices", "document": "choice.json", "shape": "choice-schema.json", "set": [["choices"], [{"id": "c1", "fragment": {}}, {"id": "c2", "fragment": {}}, {"id": "c3", "fragment": {}}, {"id": "c4", "fragment": {}}, {"id": "c5", "fragment": {}}, {"id": "c6", "fragment": {}}, {"id": "c7", "fragment": {}}, {"id": "c8", "fragment": {}}, {"id": "c8", "fragment": {}}]], "by": "schema", "fails": ["$.choices"]},
+    {"name": "ids-out-of-order", "document": "choice.json", "shape": "choice-schema.json", "set": [["choices"], [{"id": "c2", "fragment": {"option": "first"}}, {"id": "c1", "fragment": {"option": "second"}}]], "by": "rules", "fails": ["$.choices[0].id", "$.choices[1].id"]},
+    {"name": "ids-alike", "document": "choice.json", "shape": "choice-schema.json", "set": [["choices", 1, "id"], "c1"], "by": "rules", "fails": ["$.choices[1].id"]},
+    {"name": "a-fragment-that-is-a-string", "document": "choice.json", "shape": "choice-schema.json", "set": [["choices", 0, "fragment"], "first"], "by": "schema", "fails": ["$.choices[0].fragment"]},
+    {"name": "a-fragment-of-seventeen-properties", "document": "choice.json", "shape": "choice-schema.json", "set": [["choices", 0, "fragment"], {"a": 1, "b": 1, "c": 1, "d": 1, "e": 1, "f": 1, "g": 1, "h": 1, "i": 1, "j": 1, "k": 1, "l": 1, "m": 1, "n": 1, "o": 1, "p": 1, "q": 1}], "by": "schema", "fails": ["$.choices[0].fragment"]},
+    {"name": "a-fragment-of-4097-bytes", "document": "choice.json", "shape": "choice-schema.json", "fragment_bytes": 4097, "by": "rules", "fails": ["$.choices[0].fragment"]},
+    {"name": "answered-by-the-agent", "document": "choice.json", "shape": "choice-schema.json", "set": [["answered_by"], "agent"], "by": "schema", "fails": ["$.answered_by"]},
+    {"name": "a-token-without-its-prefix", "document": "choice.json", "shape": "choice-schema.json", "set": [["choice_token"], "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8"], "by": "schema", "fails": ["$.choice_token"]},
+    {"name": "wait-zero-hours", "document": "agent-policy-save.json", "shape": "agent-policy-schema.json#/$defs/save", "set": [["wait_hours"], 0], "by": "schema", "fails": ["$.wait_hours"]},
+    {"name": "wait-169-hours", "document": "agent-policy-save.json", "shape": "agent-policy-schema.json#/$defs/save", "set": [["wait_hours"], 169], "by": "schema", "fails": ["$.wait_hours"]},
+    {"name": "wait-a-fraction-of-an-hour", "document": "agent-policy-save.json", "shape": "agent-policy-schema.json#/$defs/save", "set": [["wait_hours"], 24.5], "by": "schema", "fails": ["$.wait_hours"]},
+    {"name": "a-save-without-its-generation", "document": "agent-policy-save.json", "shape": "agent-policy-schema.json#/$defs/save", "delete": ["expected_generation"], "by": "schema", "fails": ["$"]},
+    {"name": "a-policy-naming-an-approver", "document": "agent-policy.json", "shape": "agent-policy-schema.json", "set": [["approver"], "alice"], "by": "schema", "fails": ["$"]},
+    {"name": "a-read-with-a-wait", "document": "agent-policy-read.json", "shape": "agent-policy-schema.json#/$defs/read", "set": [["wait_hours"], 24], "by": "schema", "fails": ["$"]}
+  ]
+}

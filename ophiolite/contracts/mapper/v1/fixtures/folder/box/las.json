@@ -1,0 +1,21 @@
+{
+  "schema": "ophiolite.project-folder/1",
+  "mapper": "ophiolite-mapper 0.3.0",
+  "recipe": {"path": "recipe.json", "sha256": "c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0"},
+  "osdu": {"tag": "v0.30.1", "commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6", "namespace": "synthetic"},
+  "files": [
+    {"path": "recipe.json", "role": "recipe", "media_type": "application/json", "asset": null, "sha256": "c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0", "bytes": 3800},
+    {"path": "originals/hon-gt-01-gamma-ray-excerpt.las", "role": "original", "media_type": "text/plain", "asset": null, "sha256": "c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1", "bytes": 37466},
+    {"path": "originals/hon-gt-01-relog.las", "role": "original", "media_type": "text/plain", "asset": null, "sha256": "c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2c2", "bytes": 900},
+    {"path": "originals/syn-w2.las", "role": "original", "media_type": "text/plain", "asset": null, "sha256": "c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3", "bytes": 900},
+    {"path": "originals/syn-w2b.las", "role": "original", "media_type": "text/plain", "asset": null, "sha256": "c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4", "bytes": 900},
+    {"path": "originals/syn-w3.las", "role": "original", "media_type": "text/plain", "asset": null, "sha256": "c5c5c5c5c5c5c5c5c5c5c5c5c5c5c5c5c5c5c5c5c5c5c5c5c5c5c5c5c5c5c5c5", "bytes": 900},
+    {"path": "originals/syn-w4.las", "role": "original", "media_type": "text/plain", "asset": null, "sha256": "c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6c6", "bytes": 900},
+    {"path": "originals/syn-w4b.las", "role": "original", "media_type": "text/plain", "asset": null, "sha256": "c7c7c7c7c7c7c7c7c7c7c7c7c7c7c7c7c7c7c7c7c7c7c7c7c7c7c7c7c7c7c7c7", "bytes": 900},
+    {"path": "items/well-log.parquet", "role": "item", "media_type": "application/vnd.apache.parquet", "asset": null, "sha256": "c8c8c8c8c8c8c8c8c8c8c8c8c8c8c8c8c8c8c8c8c8c8c8c8c8c8c8c8c8c8c8c8", "bytes": 9000},
+    {"path": "identity/entities.parquet", "role": "identity-entities", "media_type": "application/vnd.apache.parquet", "asset": null, "sha256": "c9c9c9c9c9c9c9c9c9c9c9c9c9c9c9c9c9c9c9c9c9c9c9c9c9c9c9c9c9c9c9c9", "bytes": 2000},
+    {"path": "identity/aliases.parquet", "role": "identity-aliases", "media_type": "application/vnd.apache.parquet", "asset": null, "sha256": "cacacacacacacacacacacacacacacacacacacacacacacacacacacacacacacaca", "bytes": 1500},
+    {"path": "identity/relationships.parquet", "role": "identity-relationships", "media_type": "application/vnd.apache.parquet", "asset": null, "sha256": "cbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcbcb", "bytes": 1800},
+    {"path": "lineage/prov.json", "role": "lineage-prov", "media_type": "application/json", "asset": null, "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "bytes": 2400}
+  ]
+}

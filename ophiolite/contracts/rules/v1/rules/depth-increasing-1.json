@@ -1,0 +1,13 @@
+{
+ "schema": "ophiolite.data-rule/1",
+ "id": "depth-increasing/1",
+ "title": "Depth moves one way",
+ "description": "The index (column 1) moves strictly one way. The direction is the sign of the last non-null index minus the first; equal, or fewer than two non-null values, is increasing, so a descending log passes. Row 1 fails when its index is null; a later row fails when it is null or does not move strictly in the direction from the last non-null index before it.",
+ "class": "file-local",
+ "kinds": ["las2/1"],
+ "context_kinds": null,
+ "severity": "error",
+ "parameters": [],
+ "words": {"template": "{count} rows break the depth order of the log, the first at {first}.", "examples": "rows"},
+ "since": "1.1.0"
+}

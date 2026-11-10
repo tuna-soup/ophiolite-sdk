@@ -1,0 +1,14 @@
+{
+  "schema": "ophiolite.agent-dry-run/1",
+  "dry_run": true,
+  "operation": "verdicts/record",
+  "project_id": "p",
+  "would": {
+    "outcome": "proceeds",
+    "effects": [
+      {"action": "create", "kind": "verdict", "count": 1, "label": "Accepted"},
+      {"action": "create", "kind": "record", "count": 1}
+    ]
+  },
+  "digest": "a9ee30fa2a2da59ba56a5ab6b6ec96169668290445d47d4bab969c07003ec368"
+}

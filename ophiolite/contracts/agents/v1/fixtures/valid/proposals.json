@@ -1,0 +1,27 @@
+{
+  "proposals": [
+    {
+      "plan": "a14fb7c24d01b1f8a387b1fae034cc1982cce7b1a694ade50c1291ef889d6ae2",
+      "operation": "jobs/run",
+      "summary": "Run 3 steps in order: applications/configure, then applications/start, then applications/get",
+      "evidence": null,
+      "budget": {"runs": 2, "publications": 1},
+      "expires_at": 1793000000.0,
+      "review_url": "https://workspace.example/project/p/settings?proposal=a14fb7c24d01b1f8a387b1fae034cc1982cce7b1a694ade50c1291ef889d6ae2#agents",
+      "question": "Which of the two options should this step take?",
+      "choices": [
+        {"id": "c1", "fragment": {"option": "first"}},
+        {"id": "c2", "fragment": {"option": "second"}}
+      ]
+    },
+    {
+      "plan": "5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+      "operation": "applications/configure",
+      "summary": "Configure the curve offset application on GR",
+      "evidence": {"id": "ev-example-1", "generation": 1, "digest": "0d5b1c4c3a8e2f7b6a9d8c7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a"},
+      "budget": {"runs": 2, "publications": 1},
+      "expires_at": 1793000000.0,
+      "review_url": "https://workspace.example/project/p/settings?proposal=5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef#agents"
+    }
+  ]
+}

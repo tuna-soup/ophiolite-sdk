@@ -1,0 +1,23 @@
+{
+  "schema": "ophiolite.survey-roles/1",
+  "version": "1.0.0",
+  "roles": [
+    {"id": "cube", "profiles": ["ophiolite.seismic-volume/1", "ophiolite.seismic-volume/2"]},
+    {"id": "line", "profiles": ["ophiolite.seismic-line/1", "ophiolite.seismic-section/1"]},
+    {"id": "horizon", "profiles": ["ophiolite.regular-grid-surface/1", "ophiolite.triangulated-surface/1", "ophiolite.point-set/1", "ophiolite.point-set/2",
+                                   "ophiolite.point-columns/1"]},
+    {"id": "fault-set", "profiles": ["ophiolite.polyline-set/1", "ophiolite.triangulated-surface/1"]},
+    {"id": "well", "profiles": ["ophiolite.well-path/1", "ophiolite.trajectory/1", "ophiolite/well-curve/1", "ophiolite.application-curve/1",
+                                "ophiolite.curve-columns/1", "ophiolite.well-tops/1"]},
+    {"id": "time-depth", "profiles": ["ophiolite.time-depth/1"]},
+    {"id": "pickset", "profiles": ["ophiolite.point-set/1", "ophiolite.point-set/2", "ophiolite.point-columns/1"]},
+    {"id": "other", "profiles": "*"}
+  ],
+  "relations": [
+    {"predicate": "horizon-of", "subject": ["horizon"], "object": ["cube", "line"]},
+    {"predicate": "fault-in", "subject": ["fault-set"], "object": ["cube", "line"]},
+    {"predicate": "well-in", "subject": ["well"], "object": ["cube", "line"]},
+    {"predicate": "line-of", "subject": ["line"], "object": ["cube"]},
+    {"predicate": "time-depth-of", "subject": ["time-depth"], "object": ["well"]}
+  ]
+}

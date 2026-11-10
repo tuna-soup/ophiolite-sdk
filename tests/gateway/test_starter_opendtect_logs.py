@@ -291,3 +291,32 @@ def test_r2_8h_a_word_longer_than_a_line_is_cut():
     # split at the last space within 300 ('not placed: log'), then the 700-letter word cut at 298 letters a line
     assert [len(line) for line in lines] == [15, 300, 300, 200] and len(EXISTS) == 89
     assert lines[:2] == ['not placed: log', '… ' + 'W' * 298] and lines[3] == '… ' + 'W' * 104 + ' GR: ' + EXISTS
+
+
+# == E137 s6a C3 (F-3, D-3): the import's refusal keeps its details across the process boundary ======================
+
+ENVELOPE = {'refused': 'OpendTect stopped while writing “X”.', 'details': {'id': '100012.1', 'equal': False, 'samples_equal': True}}
+
+
+def connector_refusal(stdout_lines):
+    """The SDK's refusal of an import that printed STDOUT_LINES and the sentence on stderr, then exited 2."""
+    import sys
+    from ophiolite.errors import Refused
+    script = 'import sys\nfor l in %r: print(l)\nprint(%r, file=sys.stderr)\nsys.exit(2)\n' % (list(stdout_lines), 'the stderr sentence.')
+    with pytest.raises(Refused) as caught: starter._connector(sys.executable, ['-c', script], 60)
+    return str(caught.value), caught.value.details
+
+
+def test_an_import_refusal_line_gives_the_sdk_its_details():
+    """Catches: `_connector` reading stderr only (the details lost, as F3's cube in E137 s5)."""
+    assert connector_refusal([json.dumps(ENVELOPE)]) == (starter.IMPORT_REFUSED % ENVELOPE['refused'], ENVELOPE['details'])
+
+
+@pytest.mark.parametrize('lines', [
+    [], [''], ['{"refused": "x", "deta'], [json.dumps({'refused': 1, 'details': {}})], [json.dumps({'refused': 'x'})],
+    [json.dumps({'refused': 'x', 'details': [1]})], [json.dumps({**ENVELOPE, 'more': 1})], [json.dumps(ENVELOPE), 'not json'],
+], ids=['nothing', 'empty-line', 'truncated', 'sentence-not-text', 'no-details', 'details-not-object', 'other-key', 'envelope-not-last'])
+def test_anything_but_the_envelope_falls_back_to_the_stderr_sentence(lines):
+    """An older pack's import.py, or a broken line: today's sentence, no details, no traceback. Catches: any JSON
+    accepted (a TypeError or a list as details)."""
+    assert connector_refusal(lines) == (starter.IMPORT_REFUSED % 'the stderr sentence.', {})

@@ -18,9 +18,9 @@ sent = held.send("porosity.csv", name="Porosity points", profile="points-csv/1",
 ```
 
 ```sh
-ophiolite check
-ophiolite get --item ID --output surface
-ophiolite send porosity.csv --profile points-csv/1 --name Porosity --how kriging --based-on ID
+ophiolite data check
+ophiolite data get --item ID --output surface
+ophiolite exchange send porosity.csv --profile points-csv/1 --name Porosity --how kriging --based-on ID
 ```
 
 Every call ends in one outcome with a sentence for people. A send replaces only the version

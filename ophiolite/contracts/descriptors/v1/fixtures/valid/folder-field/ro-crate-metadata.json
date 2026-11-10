@@ -1,0 +1,63 @@
+{
+  "@context": ["https://w3id.org/ro/crate/1.1/context", {"sha256": "https://schema.org/sha256"}],
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"},
+      "about": {"@id": "./"}
+    },
+    {
+      "@id": "./",
+      "@type": "Dataset",
+      "name": "Synthetic field: four wells",
+      "description": "Four made-up wells (SYN-F1 to SYN-F4) at made-up RD New coordinates, as a project folder any program can read. Synthetic data; no observed well.",
+      "datePublished": "2026-11-04",
+      "license": {"@id": "#licence"},
+      "conditionsOfAccess": "Shared under the terms of the project it was taken from; not an open licence. Ask the publisher before passing it on.",
+      "author": [
+        {"@id": "https://ror.org/0abcdef12"}
+      ],
+      "publisher": {"@id": "https://ror.org/0abcdef12"},
+      "hasPart": [
+        {"@id": "items/wells.parquet"},
+        {"@id": "lineage/prov.json"},
+        {"@id": "manifest.json"}
+      ]
+    },
+    {
+      "@id": "https://ror.org/0abcdef12",
+      "@type": "Organization",
+      "name": "Synthetic Survey Organisation"
+    },
+    {
+      "@id": "#licence",
+      "@type": "CreativeWork",
+      "name": "No open licence",
+      "description": "Shared under the terms of the project it was taken from; not an open licence. Ask the publisher before passing it on."
+    },
+    {
+      "@id": "manifest.json",
+      "@type": "File",
+      "name": "The bundle manifest",
+      "encodingFormat": "application/json"
+    },
+    {
+      "@id": "items/wells.parquet",
+      "@type": "File",
+      "name": "wells.parquet",
+      "sha256": "db06126568877ea19db58189e430bf2f2b72cab5c27530e205b7aa8c61adb4d8",
+      "contentSize": "8541",
+      "encodingFormat": "application/vnd.apache.parquet"
+    },
+    {
+      "@id": "lineage/prov.json",
+      "@type": "File",
+      "name": "Lineage (PROV-JSON)",
+      "sha256": "09b9893b28c84de1f9ef429af8a6aecedf1fa30a62c465e4076c1ac8e571f2ae",
+      "contentSize": "1217",
+      "encodingFormat": "application/json",
+      "conformsTo": {"@id": "https://www.w3.org/submissions/prov-json/"}
+    }
+  ]
+}

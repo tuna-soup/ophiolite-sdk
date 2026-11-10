@@ -17,7 +17,7 @@ from ophiolite.errors import Refused, ValidationFailed
 from test_starter_archive_pack import (CRS, RESULT, another, build, current, nothing_landed, odbind, pack_files, project, qualified, rebound,  # noqa: F401 (fixtures)
                                      replaced_file, survey_at, typed_reader)
 from test_starter_build import failing, landed_entry
-from test_starter_export import CONTENTS, FAKE, CONNECTOR, made, run
+from test_starter_export import APACHE, CONTENTS, FAKE, CONNECTOR, made, run
 
 from asset_connectors import faults as connector_faults  # noqa: E402 (the Connectors' reader, F1's twin)
 
@@ -379,3 +379,72 @@ def test_an_interrupted_qualification_with_faults_resumes_to_the_same_bytes(tmp_
     doc, result = qualified(folder, survey, project)
     assert pack_files(folder) == expected
     assert [line for line in doc['targets'][0]['oracle']['compared'] if line.startswith('fault ')] == FAULT_LINES
+
+
+NONE = {**FAULT_TOPICS, 'crs': 'none stated'}
+
+
+def nocrs_exported(folder, out):
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setenv('PYTHONPATH', os.pathsep.join([str(FAKE), str(CONNECTOR)]))
+        mp.setenv('FAKE_ODBIND_VARIANT', 'nocrs')
+        return run(folder, out)
+
+
+def test_faults_of_a_survey_without_a_crs_are_none_stated(tmp_path):
+    """E137 s6a C2 (F-2, the MNSH and Rockall shape): a survey that states no coordinate system agrees with the
+    decision `none stated`, and a pack of faults alone writes an outline with no feature. Catches: `agreed` comparing
+    the survey's empty crs (the decision is refused); the transformer built before any feature needs it."""
+    folder, out = made(tmp_path / 'definition', edit=lambda d: faulted(d, keep=(), topics=NONE)), tmp_path / 'out'
+    report, export = nocrs_exported(folder, out)
+    assert [(f['kind'], f['object']) for f in report['files']] == [('faults', 'SynF'), ('faults', 'SynF3D')]
+    assert json.loads((export / 'files/export.json').read_text())['survey']['crs'] == ''
+    assert features(export) == []
+    doc = json.loads((export / 'files/export.json').read_text())  # the same survey with no crs key at all
+    del doc['survey']['crs']
+    defn = sa.definition(folder / 'definition.json')
+    sa.agreed(defn, doc)
+    assert sa.outline(defn, doc, APACHE, export / 'files')['features'] == []
+
+
+def test_faults_of_a_survey_without_a_crs_reach_their_step_and_are_placed_by_you(tmp_path, project, odbind, monkeypatch):
+    """E137 s6b D-6 (S3, the MNSH and Rockall faults): export -> build -> the pack's own import.py on a survey that
+    states no coordinate system. The step first, then the person's import read back, its oracle lines saying neither
+    side states one. Catches: the build's `unknown` crs not read as none stated by the import (FAULT_MEANING); the
+    survey's empty crs not normalised (FAULT_UNSTATED); the oracle sentence dropped."""
+    folder, export = made(tmp_path / 'definition', edit=lambda d: faulted(d, keep=(), topics=NONE)), tmp_path / 'export'
+    nocrs_exported(folder, export)
+    build(folder, export, project)
+    monkeypatch.setenv('FAKE_ODBIND_VARIANT', 'nocrs')  # the import's survey states no crs either
+    survey = survey_at(tmp_path)
+    person(odbind)
+    doc, result = qualified(folder, survey, project)
+    assert [n for n in result['not_placed'] if n['kind'] == 'faults'] == [
+        {'kind': 'faults', 'object': name, 'file': 'faults/%s.dat' % name, 'reason': STEP % (name, name)} for name in ('SynF', 'SynF3D')]
+    person(odbind, SynF=SYNF, SynF3D=SYNF3D)
+    doc, result = qualified(folder, survey, project)
+    assert [(e['object'], e['differences'], e.get('crs')) for e in fault_rows(result)] == [
+        ('SynF', 0, 'none stated'), ('SynF3D', 0, 'none stated')]
+    assert [n for n in result['not_placed'] if n['kind'] == 'faults'] == [] and result['differences'] == 0
+    assert [line for line in doc['targets'][0]['oracle']['compared'] if line.startswith('fault ')] == [line + starter.NEITHER for line in FAULT_LINES]
+
+
+def test_a_survey_without_a_crs_refuses_a_feature_that_needs_a_position(tmp_path):
+    """E137 s6a C2: faults beside a 2D line of a survey without a crs refuse by name before anything is published.
+    Catches: the outline written without the line; the refusal sent after a derived.json exists."""
+    def edit(d):
+        faulted(d, keep=(), topics=NONE)
+        d['contents'] += [{'kind': 'seismic-2d', 'ids': ['Syn2D/L1']}]
+        d['decisions'] += [{'topic': t, 'subject': 'Syn2D/L1', 'value': v, 'source': 'data'}
+                           for t, v in (('crs', 'none stated'), ('domain', 'time'), ('units', 'ms'), ('nulls', 'non-finite refused'))]
+    folder, out = made(tmp_path / 'definition', edit=edit), tmp_path / 'out'
+    with pytest.raises(Refused) as caught: nocrs_exported(folder, out)
+    assert str(caught.value) == ('The survey states no coordinate system, so the outline cannot place the 1 cubes, wells and 2D lines this pack '
+                                 'holds. Nothing was sent.')
+    assert not (out / 'derived.json').exists() and list(out.glob('exports/*/derived.json')) == []
+
+
+def test_none_stated_is_refused_where_the_survey_states_a_crs(tmp_path):
+    """E137 s6a C2: `none stated` is a statement about the survey, not a wildcard. Catches: accepting it always."""
+    folder, out = made(tmp_path / 'definition', edit=lambda d: faulted(d, keep=(), topics=NONE)), tmp_path / 'out'
+    assert refused(exported, folder, out) == 'Decision crs for SynF is none stated; the survey says EPSG:32631. Nothing was sent.'

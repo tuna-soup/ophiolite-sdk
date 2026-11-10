@@ -1,0 +1,13 @@
+{
+ "schema": "ophiolite.data-rule/1",
+ "id": "null-sentinel/1",
+ "title": "No unnamed null values",
+ "description": "No sample of a curve other than the index equals -999.25, -999 or -9999 unless that value is the header NULL (-999.25 is the NULL the CWLS LAS 2.0 standard shows). A data row fails once; its example is the first such sample in ~Curve order.",
+ "class": "file-local",
+ "kinds": ["las2/1"],
+ "context_kinds": null,
+ "severity": "warn",
+ "parameters": [],
+ "words": {"template": "{count} rows hold a common null value the header does not name as NULL, the first at {first}.", "examples": "depths"},
+ "since": "1.1.0"
+}

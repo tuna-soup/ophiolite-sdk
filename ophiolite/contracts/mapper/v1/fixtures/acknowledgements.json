@@ -1,0 +1,13 @@
+{
+  "description": "mapper.unacknowledged over the table engine's finding groups (literal, as diagnose reports them) and valid/wells-csv.json, whose findings acknowledge x / not-numeric / 1 row and leave depth / out-of-range / 2 rows unacknowledged. listed names each group write refuses on as [field, code]. A group's own severity is ignored: severity is mapping-check-words'.",
+  "cases": [
+    {"name": "bound", "groups": [{"field": "x", "code": "not-numeric", "severity": "invalid", "rows": 1, "examples": []}], "listed": []},
+    {"name": "count-changed", "groups": [{"field": "x", "code": "not-numeric", "severity": "invalid", "rows": 3, "examples": []}], "listed": [["x", "not-numeric"]]},
+    {"name": "other-field", "groups": [{"field": "y", "code": "not-numeric", "severity": "invalid", "rows": 1, "examples": []}], "listed": [["y", "not-numeric"]]},
+    {"name": "snapshot-only-not-acknowledged", "groups": [{"field": "depth", "code": "out-of-range", "severity": "invalid", "rows": 2, "examples": []}], "listed": [["depth", "out-of-range"]]},
+    {"name": "unusual-never-listed", "groups": [{"field": null, "code": "outside-usual-area", "severity": "unusual", "rows": 5, "examples": []}], "listed": []},
+    {"name": "severity-from-the-words", "groups": [{"field": "y", "code": "not-numeric", "severity": "unusual", "rows": 2, "examples": []}], "listed": [["y", "not-numeric"]]},
+    {"name": "not-supported-with-rows", "groups": [{"field": "depth_unit", "code": "declaration-not-numeric", "severity": "not-supported", "rows": 4, "examples": []}], "listed": [["depth_unit", "declaration-not-numeric"]]},
+    {"name": "structural-not-listed", "groups": [{"field": "id", "code": "field-not-mapped", "severity": "not-supported", "rows": null, "examples": []}], "listed": []}
+  ]
+}

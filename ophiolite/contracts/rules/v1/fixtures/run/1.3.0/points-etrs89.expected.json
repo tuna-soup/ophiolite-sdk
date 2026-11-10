@@ -1,0 +1,8 @@
+{
+ "schema": "ophiolite.rule-results/1",
+ "kind": "points-csv/1",
+ "registry_version": "1.3.0",
+ "results": [
+  {"rule": "in-area-of-use/1", "state": "failed", "count": 5, "examples": [{"row": 5, "depth": null, "value": "-16.2 50.5"}, {"row": 6, "depth": null, "value": "38.02 50.5"}, {"row": 7, "depth": null, "value": "5.5 33.25"}, {"row": 8, "depth": null, "value": "5.5 84.74"}, {"row": 9, "depth": null, "value": "50.5 5.5"}], "parameters": {}, "reason": null, "context": null}
+ ]
+}

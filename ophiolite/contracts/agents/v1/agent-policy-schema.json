@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ophiolite.agent-policy/1",
+  "title": "A project's agent policy: how long a proposal waits for its person (E150)",
+  "description": "Three shapes. `read` asks for the policy (any member), `save` sets it (a project administrator, compare-and-set on `expected_generation`), and the root is the policy itself. `wait_hours` is a whole number of hours from 1 to 168; a project that never saved one waits 24 hours, at generation 0. The policy says how long, never who approves or which operations: the person an agent acts for always approves (E5), and the operations a policy may approve stay applications/configure and applications/start (R-A3).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "project_id", "wait_hours", "generation"],
+  "properties": {
+    "schema": {"const": "ophiolite.agent-policy/1"},
+    "project_id": {"$ref": "#/$defs/project_id"},
+    "wait_hours": {"$ref": "#/$defs/wait_hours"},
+    "generation": {"type": "integer", "minimum": 0}
+  },
+  "$defs": {
+    "project_id": {"type": "string", "minLength": 1, "maxLength": 200},
+    "wait_hours": {"type": "integer", "minimum": 1, "maximum": 168, "default": 24},
+    "read": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["project_id"],
+      "properties": {"project_id": {"$ref": "#/$defs/project_id"}}
+    },
+    "save": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["project_id", "wait_hours", "expected_generation"],
+      "properties": {
+        "project_id": {"$ref": "#/$defs/project_id"},
+        "wait_hours": {"$ref": "#/$defs/wait_hours"},
+        "expected_generation": {"type": "integer", "minimum": 0}
+      }
+    }
+  }
+}

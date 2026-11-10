@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/mapper/v1/export-report-schema.json",
+  "title": "OSDU export report",
+  "description": "The structure of osdu/export-report.json (ophiolite.osdu-export-report/1, E169): what ophiolite-mapper manifest made from an exported bundle. One document is both the report (every asset left unwritten with its reason, every declared loss) and the sidecar (which asset and revision became which record and payload, and the source system it came from). Structure only: the rules a schema cannot state (records and unwritten partition the bundle's assets, the empty flags, the counts per kind, each sentence being rules.json's for its reason, the record ids' namespace and kind) are mapper/v1/mapper.py's check_export_report. No sample value, credential or address appears in it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "mapper", "bundle", "manifest", "masters", "records", "unwritten", "losses", "empty"],
+  "properties": {
+    "schema": {"const": "ophiolite.osdu-export-report/1"},
+    "mapper": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "rules_version"],
+      "properties": {
+        "version": {"type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"},
+        "rules_version": {"type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"}
+      }
+    },
+    "bundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["digest", "bundle_version", "assets"],
+      "properties": {
+        "digest": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["algorithm", "over", "value"],
+          "properties": {
+            "algorithm": {"const": "sha256"},
+            "over": {"enum": ["bytes", "members"]},
+            "value": {"$ref": "#/$defs/sha256"}
+          }
+        },
+        "bundle_version": {"type": "string", "pattern": "^2\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"},
+        "assets": {"type": "integer", "minimum": 0, "maximum": 100000}
+      }
+    },
+    "manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "kinds"],
+      "properties": {
+        "path": {"const": "osdu/manifest.json"},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "kinds": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "osdu:wks:master-data--Well:1.5.0": {"$ref": "#/$defs/count"},
+            "osdu:wks:master-data--Wellbore:1.5.1": {"$ref": "#/$defs/count"},
+            "osdu:wks:work-product-component--WellLog:1.5.0": {"$ref": "#/$defs/count"},
+            "osdu:wks:dataset--File.Generic:1.1.0": {"$ref": "#/$defs/count"}
+          }
+        }
+      }
+    },
+    "masters": {"type": "array", "maxItems": 100000, "items": {"$ref": "#/$defs/master"}},
+    "records": {"type": "array", "maxItems": 100000, "items": {"$ref": "#/$defs/record"}},
+    "unwritten": {"type": "array", "maxItems": 100000, "items": {"$ref": "#/$defs/unwritten"}},
+    "losses": {"type": "array", "maxItems": 100000, "items": {"$ref": "#/$defs/loss"}},
+    "empty": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unwritten", "losses"],
+      "properties": {"unwritten": {"type": "boolean"}, "losses": {"type": "boolean"}}
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "count": {"type": "integer", "minimum": 1, "maximum": 100000},
+    "text": {"type": "string", "minLength": 1, "maxLength": 400},
+    "asset_id": {"type": "string", "minLength": 1, "maxLength": 160},
+    "profile": {"type": "string", "minLength": 1, "maxLength": 120},
+    "record_id": {"type": "string", "minLength": 1, "maxLength": 300, "pattern": "^([A-Za-z0-9][A-Za-z0-9-]{0,63}|\\{\\{NAMESPACE\\}\\}):[a-z-]+--[A-Za-z.]+:[^:]+$"},
+    "master": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entity_id", "kind", "name", "record_id"],
+      "properties": {
+        "entity_id": {"$ref": "#/$defs/asset_id"},
+        "kind": {"enum": ["well", "wellbore"]},
+        "name": {"$ref": "#/$defs/text"},
+        "record_id": {"$ref": "#/$defs/record_id"}
+      }
+    },
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["asset_id", "revision", "profile", "name", "record_id", "kind", "wellbore_record_id", "source_system", "payload"],
+      "properties": {
+        "asset_id": {"$ref": "#/$defs/asset_id"},
+        "revision": {"$ref": "#/$defs/sha256"},
+        "profile": {"$ref": "#/$defs/profile"},
+        "name": {"$ref": "#/$defs/text"},
+        "record_id": {"$ref": "#/$defs/record_id"},
+        "kind": {"const": "osdu:wks:work-product-component--WellLog:1.5.0"},
+        "wellbore_record_id": {"$ref": "#/$defs/record_id"},
+        "source_system": {"anyOf": [{"type": "null"}, {"type": "string", "minLength": 1, "maxLength": 200}]},
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "sha256", "bytes"],
+          "properties": {
+            "path": {"type": "string", "maxLength": 200, "pattern": "^originals/[A-Za-z0-9][A-Za-z0-9._-]*\\.las$"},
+            "sha256": {"$ref": "#/$defs/sha256"},
+            "bytes": {"type": "integer", "minimum": 1}
+          }
+        }
+      }
+    },
+    "unwritten": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["asset_id", "revision", "name", "profile", "type", "reason", "sentence", "detail"],
+      "properties": {
+        "asset_id": {"$ref": "#/$defs/asset_id"},
+        "revision": {"$ref": "#/$defs/sha256"},
+        "name": {"$ref": "#/$defs/text"},
+        "profile": {"$ref": "#/$defs/profile"},
+        "type": {"type": "string", "minLength": 1, "maxLength": 80},
+        "reason": {"enum": ["profile-without-kind", "profile-not-listed", "kind-not-written", "curves-on-different-axes", "revision-repeated", "curve-text-unwritable"]},
+        "sentence": {"$ref": "#/$defs/text"},
+        "detail": {"anyOf": [{"type": "null"}, {"type": "string", "minLength": 1, "maxLength": 2000}]}
+      }
+    },
+    "loss": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["asset_id", "revision", "profile", "origin", "text"],
+      "properties": {
+        "asset_id": {"$ref": "#/$defs/asset_id"},
+        "revision": {"$ref": "#/$defs/sha256"},
+        "profile": {"$ref": "#/$defs/profile"},
+        "origin": {"enum": ["export-matrix", "bundle"]},
+        "text": {"type": "string", "minLength": 1, "maxLength": 2000}
+      }
+    }
+  }
+}

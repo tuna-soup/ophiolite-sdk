@@ -57,12 +57,29 @@
           "routes": [
             {
               "route": "features",
-              "state": "not-yet",
-              "transport": null,
+              "state": "open",
+              "transport": "ogc-api-features",
               "asset_kinds": [
                 "well-set"
               ],
-              "slice": null
+              "collections": [
+                "well-set-wellbores"
+              ],
+              "layer": "Well sets",
+              "slice": null,
+              "evidence": "integration:docs/verification/E123-s7-qgis-well-set-2026-11-02.md (QGIS 4.2.2 headless on Linux: the s3 well set's 7 wellbores as the layer Well sets, 6 placed)",
+              "client": {
+                "name": "QGIS",
+                "versions": [
+                  "4.2.2"
+                ],
+                "platforms": [
+                  "linux"
+                ],
+                "limits": [
+                  "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
+                ]
+              }
             }
           ]
         },
@@ -713,6 +730,22 @@
               "transport": null,
               "asset_kinds": [
                 "seismic-line"
+              ],
+              "slice": null
+            }
+          ]
+        },
+        {
+          "profile": "segy/2",
+          "noun": "8-bit seismic volumes",
+          "asset_kind": "seismic-volume",
+          "routes": [
+            {
+              "route": "features",
+              "state": "not-yet",
+              "transport": null,
+              "asset_kinds": [
+                "seismic-volume"
               ],
               "slice": null
             }

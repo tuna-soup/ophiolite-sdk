@@ -1,0 +1,131 @@
+{
+  "schema": "ophiolite.mapper-recipe/1",
+  "created": {
+    "tool": "ophiolite-mapper 0.4.0",
+    "rules_version": "1.2.0",
+    "at": "2026-11-04T08:10:40Z"
+  },
+  "source": {
+    "kind": "folder",
+    "locator": {
+      "path": "logs"
+    },
+    "reader": "las2/1",
+    "digest": {
+      "algorithm": "sha256",
+      "over": "members",
+      "value": "131163fb5bead2f814b2c5c21c299b31f435572d0d8b60c7964b294d094fdf71"
+    },
+    "bytes": 1688
+  },
+  "target": {
+    "kind": "reader-profile",
+    "id": "las2/1"
+  },
+  "layout": null,
+  "identity": {
+    "basis": "provisional",
+    "column": null,
+    "decision": {
+      "by": "A. Person",
+      "at": "2026-11-04T09:00:00Z",
+      "action": "accept"
+    }
+  },
+  "fields": [],
+  "columns": {},
+  "declarations": [],
+  "missing": [],
+  "wells": [
+    {
+      "spelling": "SYN-W2",
+      "match": "exact",
+      "canonical": "SYN-W2",
+      "entity": {
+        "kind": "wellbore",
+        "key": "SYN-W2",
+        "basis": "provisional",
+        "well": {
+          "key": "SYN-W2",
+          "basis": "provisional"
+        }
+      },
+      "decision": {
+        "by": "A. Person",
+        "at": "2026-11-04T09:00:00Z",
+        "action": "new-entity"
+      }
+    },
+    {
+      "spelling": "syn w2",
+      "match": "normalised",
+      "canonical": "SYN-W2",
+      "entity": null,
+      "decision": {
+        "by": "A. Person",
+        "at": "2026-11-04T09:00:00Z",
+        "action": "accept-alias"
+      }
+    },
+    {
+      "spelling": "SYN-W3",
+      "match": "exact",
+      "canonical": "SYN-W3",
+      "entity": {
+        "kind": "wellbore",
+        "key": "SYN-W3",
+        "basis": "provisional",
+        "well": {
+          "key": "SYN-W3",
+          "basis": "provisional"
+        }
+      },
+      "decision": {
+        "by": "A. Person",
+        "at": "2026-11-04T09:00:00Z",
+        "action": "new-entity"
+      }
+    },
+    {
+      "spelling": "SYN-W4",
+      "match": "exact",
+      "canonical": "SYN-W4",
+      "entity": {
+        "kind": "wellbore",
+        "key": "SYN-W4",
+        "basis": "provisional",
+        "well": {
+          "key": "SYN-W4",
+          "basis": "provisional"
+        }
+      },
+      "decision": {
+        "by": "A. Person",
+        "at": "2026-11-04T09:00:00Z",
+        "action": "new-entity"
+      }
+    },
+    {
+      "spelling": "SYN_W4",
+      "match": "normalised",
+      "canonical": "SYN-W4",
+      "entity": null,
+      "decision": {
+        "by": "A. Person",
+        "at": "2026-11-04T09:00:00Z",
+        "action": "reject-alias"
+      }
+    }
+  ],
+  "findings": [],
+  "osdu": {
+    "namespace": "synthetic",
+    "legal_tag": "{{LEGAL_TAG}}",
+    "owners": [
+      "data.default.owners@{{DATA_PARTITION}}"
+    ],
+    "viewers": [
+      "data.default.viewers@{{DATA_PARTITION}}"
+    ]
+  }
+}

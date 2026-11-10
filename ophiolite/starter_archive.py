@@ -33,11 +33,13 @@ from datetime import datetime, timezone
 from decimal import Decimal
 from pathlib import Path, PurePosixPath
 
-from . import starter, starter_kinds
+from . import native_form, starter, starter_kinds
 from .errors import MissingExtra
 from .starter import refuse, sha256, dumped, replaced
 
 REPORT, EXPORT = 'ophiolite.starter-export/1', 'ophiolite.opendtect-export/1'
+NATIVE_EXPORT = 'ophiolite.opendtect-export/2'  # E140 s1 (D-K): an export holding an 8-bit cube; every cube entry names its form
+NATIVE_CARD = 'C 5 OPHIOLITE 8-BIT CODES; UNDEFINED '  # card 5 of a format 8 cube, then -128 or NONE
 FOLDER = {k.key: k.folder for k in starter_kinds.CATALOGUE}  # E137 s0 D-01: KINDS, the kinds this SDK reads back, follows READERS
 VOLUME_KINDS, VOLUME_TOPICS = ('seismic-3d', 'horizons', 'seismic-2d'), ('crs', 'domain', 'units', 'nulls')  # E137 s1 D-3: a line's decisions are a volume's
 FAULT_TOPICS, FAULT_UNIT = ('crs', 'domain', 'units'), 's'  # E137 s2 D-5: a fault's coordinate z is in seconds (M-1a), whatever the survey's zunit
@@ -56,7 +58,12 @@ HOW = {'seismic-3d': 'odbind Seismic3D.getdata of cube %s, written as SEG-Y rev 
        'wellbore-paths': 'odbind Well.track of well %s, written as md,x,y,tvdss, unchanged',
        'wellbore-logs': 'odbind Well.logs of well %s resampled on the log step by linear interpolation, written as LAS 2.0',
        'seismic-2d': 'odbind Seismic2D.getdata of line %s, written as SEG-Y rev 1 IEEE format 5 by ophiolite_opendtect.export, x and y to 0.01 m',
-       'faults': 'odbind FaultStickSet or Fault3D getstick of fault %s, written as OpendTect FaultStickSet ASCII by ophiolite_opendtect.export, z in seconds, unchanged'}
+       'faults': 'odbind FaultStickSet or Fault3D getstick of fault %s, written as OpendTect FaultStickSet ASCII by ophiolite_opendtect.export, z in seconds, unchanged',
+       'tops': "odbind Well.marker_info of well %s, every marker's name and depth along hole in OpendTect's order, written as well-tops-csv/1 name,md; marker colours not carried"}  # E137 s4 D-6
+HOW_NATIVE = ('odbind Seismic3D.getdata of cube %s, every value an 8-bit code, written as SEG-Y rev 1 format 8 by ophiolite_opendtect.export, '
+              'card 5 naming the code for no value')  # E140 s3 C5 (D-S): the exporter's rule chose format 8 for this cube
+HOW_2D = 'odbind Horizon2D.getz and getxy of line %s of the 2D horizon %s, written as points-csv/1 x,y,z,trace, its defined picks in trace order, unchanged'  # E137 s6b
+H2D_HEADER = 'x,y,z,trace'  # E137 s6b D-1': a 2D horizon's line, `trace` a number attribute
 HORIZON_HEADER = 'x,y,z,inline,crossline'  # E129 sc C1: horizons are points-csv/1 (OSD E42); the outline is the record outline, never derived
 INTEGER = re.compile(r'-?\d+')
 
@@ -96,12 +103,16 @@ def definition(path, *, readers=None, export_profile=None, agreements=None):
         if not isinstance(c, dict) or set(c) != {'kind', 'ids'} or not isinstance(c['kind'], str) or c['kind'] in seen or not isinstance(c['ids'], list) or not c['ids'] \
                 or len(set(c['ids'])) != len(c['ids']) or not all(isinstance(x, str) and x and x != 'pack' for x in c['ids']):
             bad('contents must be [{kind (%s), ids}], each kind once, with distinct ids' % ', '.join(KINDS))
+        if starter_kinds.refused(c['kind']): refuse(starter_kinds.refused(c['kind']) + NOTHING)  # E137 s8 D-5'
         if not starter_kinds.known(c['kind']): bad('contents ' + starter_kinds.NOT_A_KIND % c['kind'])
         if starter_kinds.BY_KEY[c['kind']].identity == 'dataset/line':  # E137 s0 D-04: before the writer check, before extraction
             try: starter_kinds.line_paths(c['ids'])
             except ValueError as e: refuse(str(e) + NOTHING)
         if not writable(c['kind'], readers, export_profile): refuse(starter_kinds.cannot_hold(c['kind']) + NOTHING)  # E137 s0 D-02, D-03: before extraction
         seen.add(c['kind']); contents.append({'kind': c['kind'], 'ids': list(c['ids']), 'count': len(c['ids'])})
+    paths = next((c['ids'] for c in contents if c['kind'] == 'wellbore-paths'), [])
+    for well in next((c['ids'] for c in contents if c['kind'] == 'tops'), []):  # E137 s4 D-4: a well's tops travel with its path
+        if well not in paths: refuse(TOPS_NO_PATH % (well, well) + NOTHING)
     if not isinstance(defn['decisions'], list) or not defn['decisions']: bad('names no decisions')
     for d in defn['decisions']:
         if not isinstance(d, dict) or not {'topic', 'subject', 'value', 'source'} <= set(d) or set(d) - {'topic', 'subject', 'value', 'source', 'note'} \
@@ -184,15 +195,24 @@ def members(path):
     except (OSError, zipfile.BadZipFile): refuse('The archive is not a zip file.' + NOTHING)
 
 
-def extracted(path, dest, survey):
+def bounded(infos, max_uncompressed=UNCOMPRESSED):
+    """E140 s2 C4 (D-F, Q3): the extraction bounds over a zip's INFOS, before anything is written: at most MEMBERS
+    members and MAX_UNCOMPRESSED bytes in all, as the archive states them. MAX_UNCOMPRESSED is a local extraction
+    policy (the keyword, else the 8 GiB default), not a deployment limit: the starter export holds no client."""
+    if len(infos) > MEMBERS: refuse('The archive has %d members; at most %d are read.' % (len(infos), MEMBERS) + NOTHING)
+    total = sum(i.file_size for i in infos)
+    if total > max_uncompressed: refuse('The archive holds more than %d bytes uncompressed: it holds %d.' % (max_uncompressed, total) + NOTHING)
+
+
+def extracted(path, dest, survey, *, max_uncompressed=UNCOMPRESSED):
     """Every member of the zip at PATH under DEST, refusing absolute or escaping paths, links and special files,
-    duplicates, more than MEMBERS members or UNCOMPRESSED bytes, and an archive without the survey folder."""
+    duplicates, more than MEMBERS members or MAX_UNCOMPRESSED bytes (`bounded`), and an archive without the survey
+    folder."""
     try: z = zipfile.ZipFile(path)
     except (OSError, zipfile.BadZipFile): refuse('The archive is not a zip file.' + NOTHING)
     with z:
         infos = z.infolist()
-        if len(infos) > MEMBERS: refuse('The archive has %d members; at most %d are read.' % (len(infos), MEMBERS) + NOTHING)
-        if sum(i.file_size for i in infos) > UNCOMPRESSED: refuse('The archive holds more than %d bytes uncompressed.' % UNCOMPRESSED + NOTHING)
+        bounded(infos, max_uncompressed)
         names = {}
         for i in infos:
             n = i.filename
@@ -246,6 +266,9 @@ TD_NO_HEADER = 'The time-depth file for %s has no line %d to read as its header.
 TD_COLUMN = 'The header of the time-depth file for %s does not name the column %r exactly once.'
 TD_ROW = 'The time-depth model of %s: %s No repair was applied.'  # the profile's sentence, with the well's name
 TD_TOO_LARGE = 'The time-depth model of %s would be larger than 16 MiB written; a starter pack cannot hold it.'
+TOPS_NO_PATH = "The well tops of %s need the well's path in the pack: list %s under wellbore-paths too."  # E137 s4 D-4
+OUTLINE_NO_CRS = 'The survey states no coordinate system, so the outline cannot place the %d cubes, wells and 2D lines this pack holds.'  # E137 s6a D-2
+TOPS_HEADER = 'name,md'
 HOW_TD = 'the archive file %s, columns %s (depth) and %s (time) from header line %d, written as time-depth-csv/1 depth,time, the text unchanged'
 
 
@@ -364,7 +387,8 @@ def converted(work, stage, specs):
 
 def exported(python, root, survey, stage, objects, step, timeout):
     """Run the OpendTect connector's exporter; its export.json, of its form."""
-    argv = [python, '-m', 'ophiolite_opendtect.export', str(root), survey, str(stage), '--objects', json.dumps(objects), '--log-step', repr(float(step))]
+    argv = [python, '-m', 'ophiolite_opendtect.export', str(root), survey, str(stage), '--objects', json.dumps(objects), '--log-step', repr(float(step)),
+            '--forms', 'int8']  # E140 s3 C5 (D-S): a cube of 8-bit codes is written as format 8; any other value restarts it as format 5
     try: done = subprocess.run(argv, capture_output=True, text=True, timeout=timeout)
     except OSError: refuse('The OpendTect connector interpreter %s cannot be started.' % python + NOTHING)
     except subprocess.TimeoutExpired: refuse('The export did not finish within %d seconds.' % timeout + NOTHING)
@@ -373,12 +397,37 @@ def exported(python, root, survey, stage, objects, step, timeout):
     try: doc = json.loads((Path(stage) / 'export.json').read_text(encoding='utf-8'))
     except (OSError, ValueError): doc = None
     files = doc.get('files') if isinstance(doc, dict) else None
-    keys = {'format', 'survey', 'cubes', 'wells', 'files', 'not_read'}  # E137 s1 D-3: and `lines` when the export wrote 2D lines
-    if not isinstance(doc, dict) or doc.get('format') != EXPORT or set(doc) not in (keys, keys | {'lines'}) or not isinstance(doc.get('lines', {}), dict) \
+    keys = {'format', 'survey', 'cubes', 'wells', 'files', 'not_read'}  # E137 s1 D-3: and `lines` when the export wrote 2D lines; E137 s6b: `horizons2d` (empty lines)
+    if not isinstance(doc, dict) or doc.get('format') not in (EXPORT, NATIVE_EXPORT) or set(doc) - {'lines', 'horizons2d'} != keys or not isinstance(doc.get('lines', {}), dict) \
+            or not isinstance(doc.get('horizons2d', {}), dict) or not all(isinstance(h, dict) and set(h) == {'empty_lines'} and isinstance(h['empty_lines'], list)
+                                                                      for h in doc.get('horizons2d', {}).values()) \
             or not isinstance(files, list) or not all(isinstance(f, dict) and {'path', 'kind', 'object', 'axes', 'digest'} <= set(f) and starter_kinds.known(f['kind']) for f in files) \
             or not isinstance(doc['survey'], dict) or not isinstance(doc['cubes'], dict) or not isinstance(doc['wells'], dict) or not isinstance(doc['not_read'], list):
         refuse('The export wrote no export.json of its form (%s).' % EXPORT + NOTHING)
+    forms(doc)
     return doc
+
+
+def native(f):
+    """E140 s3 C5 (D-S): F (an export.json, report or derived entry) is a cube the exporter wrote as 8-bit codes."""
+    return f.get('kind') == 'seismic-3d' and f.get('form') == native_form.FORM
+
+
+def forms(doc):
+    """E140 s1 (D-K): under /2 every cube entry names its form, int8 with its code for no value, and one cube is int8;
+    under /1 no cube entry names one (a format 8 file then fails `scanned`)."""
+    for f in doc['files']:  # E137 s6b D-3: a horizon is 3D (no form) or a 2D horizon's line, named
+        if f['kind'] == 'horizons' and ('form' in f or 'line' in f) and (f.get('form') != '2d' or not isinstance(f.get('line'), str) or not f['line']):
+            refuse('export.json names a horizon %s of no form this SDK reads (none, or 2d with its line).' % f['path'] + NOTHING)
+    cubes = [f for f in doc['files'] if f['kind'] == 'seismic-3d']
+    if doc['format'] == EXPORT:
+        if any('form' in f or 'undefined_code' in f for f in cubes): refuse('export.json (%s) names a cube form; only %s does.' % (EXPORT, NATIVE_EXPORT) + NOTHING)
+        return
+    for f in cubes:
+        form = f.get('form')
+        if form not in ('int8', 'float32') or (form == 'int8') != ('undefined_code' in f) or f.get('undefined_code', -128) not in (-128, None):
+            refuse('export.json (%s) does not state the form of %s (int8 with its undefined_code -128 or null, or float32).' % (NATIVE_EXPORT, f['path']) + NOTHING)
+    if not any(f['form'] == 'int8' for f in cubes): refuse('export.json is %s but holds no 8-bit cube.' % NATIVE_EXPORT + NOTHING)
 
 
 # --- read back (D2, D9) ---------------------------------------------------------------------------------------------
@@ -415,21 +464,24 @@ def differs(f, what):
     refuse('%s does not hold what export.json states: %s.' % (f['path'], what) + NOTHING)
 
 
-def scanned(path, name, each):
+def scanned(path, name, each, native=False, undefined_code=None):
     """D3's SEG-Y, read here and only in this form: rev 1, format 5, big-endian, fixed trace length, no extended
     headers, scalar -100, one delay and interval on every trace, inline-major traces on a full grid of finite samples.
     EACH(inline, crossline, x, y, samples) is called per trace in file order (x and y in hundredths, the samples as the
-    file's big-endian bytes). Returns the axes read; NAME is the file's path in the refusal."""
+    file's big-endian bytes). Returns the axes read; NAME is the file's path in the refusal. E140 s1 (D-K): NATIVE reads
+    format 8 instead (one byte a code, every code a sample), card 5 naming UNDEFINED_CODE."""
     def bad(what): refuse('%s is not the SEG-Y the export writes: %s.' % (name, what) + NOTHING)
-    traces, delay = [], None
+    grid, delay = Grid(), None
     with open(path, 'rb') as stream:
-        stream.read(3200)
+        text = stream.read(3200)
         binary = stream.read(400)
         if len(binary) != 400: bad('too short')
         interval, count, code = struct.unpack('>H', binary[16:18])[0], struct.unpack('>H', binary[20:22])[0], struct.unpack('>h', binary[24:26])[0]
         revision, fixed, extended = struct.unpack('>H', binary[300:302])[0], struct.unpack('>h', binary[302:304])[0], struct.unpack('>h', binary[304:306])[0]
-        if (code, revision, fixed, extended) != (5, 0x0100, 1, 0) or not count or not interval: bad('format %d, revision %#x, fixed-length flag %d' % (code, revision, fixed))
-        length = 240 + 4 * count
+        if (code, revision, fixed, extended) != (8 if native else 5, 0x0100, 1, 0) or not count or not interval: bad('format %d, revision %#x, fixed-length flag %d' % (code, revision, fixed))
+        card = (NATIVE_CARD + ('NONE' if undefined_code is None else str(undefined_code))).ljust(80).encode('ascii')
+        if native and text[320:400] != card: bad('card 5 does not state the code for no value export.json gives (%s)' % undefined_code)
+        length = 240 + (1 if native else 4) * count
         size = os.fstat(stream.fileno()).st_size - 3600
         if size <= 0 or size % length: bad('the traces are not of one fixed length')
         for _ in range(size // length):
@@ -440,34 +492,84 @@ def scanned(path, name, each):
             if struct.unpack('>HH', t[114:118]) != (count, interval): bad('a trace states other sampling')
             delay = own_delay if delay is None else delay
             if own_delay != delay: bad('the traces start at different times')
-            if not all(math.isfinite(v) for v in struct.unpack('>%df' % count, t[240:])): bad('a sample is not finite')
-            traces.append((i, c))
+            if not native and not all(math.isfinite(v) for v in struct.unpack('>%df' % count, t[240:])): bad('a sample is not finite')
+            grid.add(i, c)
             each(i, c, x, y, t[240:])
-    inlines, crosslines = sorted({i for i, _ in traces}), sorted({c for _, c in traces})
-    ia, ca = axis(inlines), axis(crosslines)
-    if ia is None or ca is None or traces != [(i, c) for i in inlines for c in crosslines]: bad('the traces are not a full inline-major grid')
+    ia, ca = grid.axes()
+    if ia is None: bad('the traces are not a full inline-major grid')
     return {'inline': ia, 'crossline': ca, 'z': [delay, interval, count]}
+
+
+class Grid:
+    """E140 s2 C4 (D-M, R14): `scanned`'s grid check while the traces stream, in constant memory. The traces must be one
+    full inline-major grid: strictly increasing (inline, crossline), every inline holding the first inline's crosslines,
+    and both axes evenly spaced (as `axis` requires). Running state only: the first inline and crossline, each axis's
+    step, the crossline count of the first inline and the position in the current one. A defect is remembered, not
+    raised, so a later defect of another kind is still the one named, as when the whole list was compared at the end."""
+
+    def __init__(self):
+        self.inline = self.first = self.crossline = None
+        self.inline_step = self.crossline_step = self.width = None
+        self.at, self.broken = 0, False
+
+    def add(self, i, c):
+        if self.inline is None:
+            self.inline = self.first = i
+            self.crossline, self.at = c, 0
+        elif i == self.inline:
+            self.at += 1
+            if self.width is None and self.at == 1:
+                self.crossline_step = c - self.crossline
+                if self.crossline_step <= 0: self.broken = True
+            elif self.width is not None and self.at >= self.width: self.broken = True
+            elif c != self.crossline + self.at * self.crossline_step: self.broken = True
+        else:
+            self.ended()
+            step = i - self.inline
+            if step <= 0 or (self.inline_step is not None and step != self.inline_step): self.broken = True
+            self.inline_step = step if self.inline_step is None else self.inline_step
+            self.inline, self.at = i, 0
+            if c != self.crossline: self.broken = True
+
+    def ended(self):
+        """The current inline is complete: the first sets the crossline count, every later one must match it."""
+        if self.width is None: self.width = self.at + 1
+        elif self.at + 1 != self.width: self.broken = True
+
+    def axes(self):
+        """(inline axis, crossline axis) as `axis` gives them, or (None, None) when the traces are not that grid."""
+        if self.inline is None: return None, None
+        self.ended()
+        if self.broken: return None, None
+        step = self.crossline_step or 1
+        return [self.first, self.inline, self.inline_step or 1], [self.crossline, self.crossline + (self.width - 1) * step, step]
 
 
 def read_cube(path, f):
     """D3's SEG-Y (`scanned`): its axes and D9 digest (the stream is hashed after the header export.json states; the
     axes read must then equal those)."""
-    digest = hashlib.sha256(head(f['kind'], f['object'], f['axes']))
-    axes = scanned(path, f['path'], lambda i, c, x, y, samples: digest.update(struct.pack('>iiqq', i, c, x, y) + samples))
+    native = f.get('form') == 'int8'  # E140 s1 (D-K): read as format 8, hashed after native_form.head
+    digest = hashlib.sha256(native_form.head(f['kind'], f['object'], f['axes'], f['undefined_code']) if native else head(f['kind'], f['object'], f['axes']))
+    axes = scanned(path, f['path'], lambda i, c, x, y, samples: digest.update(struct.pack('>iiqq', i, c, x, y) + samples),
+                   native, f.get('undefined_code'))
     return axes, digest.hexdigest()
 
 
-def cube_inline(path, name, pick):
+def cube_inline(path, name, pick, undefined_code=False):
     """E129 (e) D1: the trace headers and one inline of D3's SEG-Y at PATH, read with the same checks (`scanned`).
     PICK(axes) names the inline once the axes are known. Returns (axes, headers, inline, samples): headers
     [(inline, crossline, x, y)] of every trace with x and y in coordinate units (the scalar -100 applied), samples
     [[float32 values as floats] per crossline of that inline, in crossline order]. The file is read twice (headers, then
-    the inline), so only one inline is ever held."""
+    the inline), so only one inline is ever held. E140 s3 C5 (D-S): with UNDEFINED_CODE given (-128 or None) the file
+    is a native cube, read as format 8 and each code decoded by `native_form` (NaN where it means no value)."""
     headers, line = [], []
-    axes = scanned(path, name, lambda i, c, x, y, samples: headers.append((i, c, x / 100, y / 100)))
+    native = undefined_code is not False
+    code = undefined_code if native else None
+    axes = scanned(path, name, lambda i, c, x, y, samples: headers.append((i, c, x / 100, y / 100)), native, code)
     inline = pick(axes)
     count = axes['z'][2]
-    again = scanned(path, name, lambda i, c, x, y, samples: line.append(list(struct.unpack('>%df' % count, samples))) if i == inline else None)
+    decode = (lambda samples: native_form.values(samples, code)) if native else (lambda samples: list(struct.unpack('>%df' % count, samples)))
+    again = scanned(path, name, lambda i, c, x, y, samples: line.append(decode(samples)) if i == inline else None, native, code)
     if again != axes: refuse('%s changed while it was read.' % name + NOTHING)
     return axes, headers, inline, line
 
@@ -493,6 +595,29 @@ def read_horizon(path, f):
         defined.append(z is not None)
         if z is not None: body += struct.pack('>iiqqf', i, c, x, y, z)
     return axes, hashlib.sha256(head(f['kind'], f['object'], axes) + mask(defined) + bytes(body)).hexdigest()
+
+
+def read_horizon_line(path, f):
+    """E137 s6b D-2: points-csv/1 `x,y,z,trace` of one line of a 2D horizon: the header, then export.json's count of
+    defined picks, each finite, z float32-exact, trace numbers increasing. The digest is the file's own bytes."""
+    raw = Path(path).read_bytes()
+    lines = raw.decode('ascii').splitlines()
+    if not lines or lines[0] != H2D_HEADER: refuse('%s does not start %s.' % (f['path'], H2D_HEADER) + NOTHING)
+    last = None
+    for line in lines[1:]:
+        parts = line.split(',')
+        try:
+            if len(parts) != 4 or not INTEGER.fullmatch(parts[3]): raise ValueError
+            x, y, z, t = float(parts[0]), float(parts[1]), float(parts[2]), int(parts[3])
+            if not all(math.isfinite(v) for v in (x, y, z)) or struct.unpack('>f', struct.pack('>f', z))[0] != z or last is not None and t <= last: raise ValueError
+        except (ValueError, OverflowError, struct.error): refuse('%s has a row not of the form x,y,z,trace in trace order: %r.' % (f['path'], line) + NOTHING)
+        last = t
+    return {'count': len(lines) - 1}, hashlib.sha256(raw).hexdigest()
+
+
+def read_horizons(path, f):
+    """E137 s6b D-3: a 2D horizon's line (`form` '2d') or a 3D horizon (no form, every existing pack)."""
+    return read_horizon_line(path, f) if f.get('form') == '2d' else read_horizon(path, f)
 
 
 def read_positions(path, f):
@@ -634,8 +759,27 @@ def read_time_depth(path, f):
     return {'pairs': len(rows)}, time_depth_digest(rows)
 
 
-READERS = {'seismic-3d': read_cube, 'horizons': read_horizon, 'wellbore-paths': read_positions, 'wellbore-logs': read_las,
-           'seismic-2d': read_line, 'faults': read_faults, 'time-depth': read_time_depth}  # E137 s1 C3, s2 C3, s3 C2
+def read_tops(path, f):
+    """E137 s4 D-6: the tops file as the exporter writes it: `name,md`, then one name and one finite depth per row, LF
+    endings; axes {count} and the digest of every name and depth (D-3), recomputed from what was read."""
+    try: lines = Path(path).read_bytes().decode('utf-8').split('\n')
+    except UnicodeDecodeError: lines = []
+    if not lines or lines[0] != TOPS_HEADER or lines[-1] != '': refuse('%s does not start name,md or does not end with a line end.' % f['path'] + NOTHING)
+    body = b''
+    for line in lines[1:-1]:
+        cells = line.split(',')
+        try:
+            if len(cells) != 2 or not cells[0] or cells[0] != cells[0].strip() or cells[1] != cells[1].strip(): raise ValueError
+            md = float(cells[1])
+            if not math.isfinite(md): raise ValueError
+        except ValueError: refuse('%s has a row not of the form name,md with a finite depth: %r.' % (f['path'], line) + NOTHING)
+        body += cells[0].encode('utf-8') + b'\n' + struct.pack('>d', md)
+    axes = {'count': len(lines) - 2}
+    return axes, hashlib.sha256(head(f['kind'], f['object'], axes) + body).hexdigest()
+
+
+READERS = {'seismic-3d': read_cube, 'horizons': read_horizons, 'wellbore-paths': read_positions, 'wellbore-logs': read_las,
+           'seismic-2d': read_line, 'faults': read_faults, 'time-depth': read_time_depth, 'tops': read_tops}  # E137 s1 C3, s2 C3, s3 C2, s4 C2
 KINDS = tuple(READERS)  # E137 s0 D-01: a catalogue kind without a reader here is refused by name (starter_kinds.cannot_hold)
 
 
@@ -660,7 +804,8 @@ def read_back(stage, doc, defn, *, readers=None, export_profile=None):
     for kind, name in sorted({(f['kind'], f['object']) for f in doc['files']} - listed): refuse('The export wrote %s %s, which contents does not list.' % (kind, name) + NOTHING)
     for f in doc['files']:
         p = PurePosixPath(f['path']) if isinstance(f['path'], str) else None
-        if p is None or p.is_absolute() or '..' in p.parts or len(p.parts) != starter_kinds.depth(f['kind']) or p.parts[0] != FOLDER[f['kind']]:
+        segments, first = starter_kinds.pack_path(f['kind'], f.get('form'))  # E137 s6b: a 2D horizon's line has its own folder
+        if p is None or p.is_absolute() or '..' in p.parts or len(p.parts) != segments or p.parts[0] != first:
             refuse('The export wrote %r, not a file of its own folders.' % (f['path'],) + NOTHING)
         axes, digest = readers[f['kind']](stage / f['path'], f)
         if axes != f['axes']: differs(f, 'its axes are %s, not %s' % (json.dumps(axes), json.dumps(f['axes'])))
@@ -690,6 +835,7 @@ def agreed(defn, doc, agreements=None):
     the survey's and its units metres. E137 s0 (R2-3): AGREEMENTS, {kind: (topics, survey -> {topic: value})}, is a
     test's stub-kind path; no kind of the module has one."""
     values, s = defn['values'], doc['survey']
+    s = {**s, 'crs': s.get('crs') or starter_kinds.NONE_STATED}  # E137 s6a D-2: missing or empty, the survey states none
     domain = {'twt': 'time', 'depth': 'depth'}.get(s.get('zdomain'))
     for c in defn['contents']:
         for oid in c['ids']:
@@ -697,6 +843,8 @@ def agreed(defn, doc, agreements=None):
                 want = agreements[c['kind']][1](s)
             elif c['kind'] == 'faults':  # E137 s2 D-5: time, seconds, the survey's CRS
                 want = {'crs': s.get('crs'), 'domain': 'time', 'units': FAULT_UNIT}
+            elif c['kind'] == 'tops':  # E137 s4 D-4: OpendTect's marker depths are along hole, in metres, from the kelly bushing
+                want = {'crs': s.get('crs'), 'units': 'm', 'depth-kind': 'MD', 'depth-reference': starter.OPENDTECT_MD_REFERENCE}
             elif c['kind'] in VOLUME_KINDS:
                 if c['kind'] == 'seismic-2d' and (domain, s.get('zunit')) != ('time', 'ms'):  # E137 s1 R1-1: lines in time (ms) only
                     refuse(starter.LINE_DOMAIN % (s.get('zdomain'), s.get('zunit')) + NOTHING)
@@ -718,9 +866,13 @@ def outline(defn, doc, licence, stage=None):
     R2-10)."""
     try: from pyproj import Transformer
     except ImportError: raise MissingExtra(starter.EXTRA) from None
-    crs = doc['survey'].get('crs')
-    try: t = Transformer.from_crs(crs, 'EPSG:4326', always_xy=True)
-    except Exception: refuse('The survey\'s CRS %s is not one this computer can transform.' % crs + NOTHING)
+    crs, lines = doc['survey'].get('crs'), [f for f in doc['files'] if f['kind'] == 'seismic-2d']
+    placed = len(doc['cubes']) + len(doc['wells']) + len(lines)
+    t = None
+    if placed:  # E137 s6a D-2: a transformer only when a feature needs a position
+        if not crs: refuse(OUTLINE_NO_CRS % placed + NOTHING)
+        try: t = Transformer.from_crs(crs, 'EPSG:4326', always_xy=True)
+        except Exception: refuse('The survey\'s CRS %s is not one this computer can transform.' % crs + NOTHING)
     def at(x, y):
         lon, lat = t.transform(x, y)
         if not (math.isfinite(lon) and math.isfinite(lat)): refuse('A position of the survey does not transform to WGS84.' + NOTHING)
@@ -735,7 +887,7 @@ def outline(defn, doc, licence, stage=None):
         features.append(feature('survey-3d', name, {'type': 'Polygon', 'coordinates': [ring + [ring[0]]]}))
     for name in sorted(doc['wells']):
         features.append(feature('wellbore', name, {'type': 'Point', 'coordinates': at(doc['wells'][name]['x'], doc['wells'][name]['y'])}))
-    for f in sorted((f for f in doc['files'] if f['kind'] == 'seismic-2d'), key=lambda f: f['object']):
+    for f in sorted(lines, key=lambda f: f['object']):
         path = [at(x, y) for _, _, x, y in line_positions(Path(stage) / f['path'], f)]
         geometry = {'type': 'Point', 'coordinates': path[0]} if len(path) == 1 else {'type': 'LineString', 'coordinates': path}
         features.append(feature('survey-2d', f['object'], geometry, LINE_SOURCE))
@@ -770,10 +922,11 @@ def fresh(out, now):
 
 
 def export(definition_path, out, *, catalogue, verification, custody, python=None, timeout=TIMEOUT, now=time.time,
-           readers=None, export_profile=None, how=None, agreements=None):
+           readers=None, export_profile=None, how=None, agreements=None, max_uncompressed=UNCOMPRESSED):
     """`ophiolite starter export`: the derived files of the definition's archive in a fresh OUT/exports/<name>/,
     published by OUT/derived.json. Returns (report, folder). E137 s0 (R2-3): READERS, EXPORT_PROFILE, HOW and
-    AGREEMENTS are the module tables unless a test passes its own."""
+    AGREEMENTS are the module tables unless a test passes its own. E140 s2 C4 (Q3): MAX_UNCOMPRESSED is the extraction
+    total (`--max-uncompressed-bytes`), else the 8 GiB default."""
     defn = definition(definition_path, readers=readers, export_profile=export_profile, agreements=agreements)
     _, licence = evidence(defn, catalogue, verification, custody)
     path = checked_file(defn)
@@ -789,7 +942,7 @@ def export(definition_path, out, *, catalogue, verification, custody, python=Non
         try:
             work.mkdir(); stage.mkdir()
             specs = time_depth_checked(archive['archive'], defn['contents'], defn['values'], members(path))  # E137 s3 D-1: before extraction
-            extracted(path, work, archive['archive']['survey'])
+            extracted(path, work, archive['archive']['survey'], max_uncompressed=max_uncompressed)
             objects = {c['kind']: c['ids'] for c in defn['contents']}
             doc = exported(python, work, archive['archive']['survey'], stage, objects, archive['archive']['log_step'], timeout)
             doc['files'] += converted(work, stage, specs)  # D-4: inside work/, before it is removed
@@ -801,13 +954,17 @@ def export(definition_path, out, *, catalogue, verification, custody, python=Non
         derived = []  # E129 sc C1: the outline stays in the folder and the report's `outline` field, never a derived file (OSD E42)
         for f in doc['files']:
             digest, size = digest_of(stage / f['path'])
-            told = specs[f['object']]['how'] if f['kind'] == 'time-depth' else (HOW if how is None else how)[f['kind']] % f['object']
+            told = specs[f['object']]['how'] if f['kind'] == 'time-depth' else HOW_2D % (f['line'], f['object']) if f.get('form') == '2d' \
+                else HOW_NATIVE % f['object'] if native(f) else (HOW if how is None else how)[f['kind']] % f['object']
             derived.append({'path': f['path'], 'sha256': digest, 'bytes': size, 'from': archive['sha256'], 'how': told})
         report = {'format': REPORT, 'record_id': defn['record_id'], 'definition': sha256(Path(definition_path).read_bytes()),
                   'archive': {'name': archive['name'], 'sha256': archive['sha256']}, 'survey': doc['survey'], 'derived': derived,
-                  'files': [{'path': f['path'], 'kind': f['kind'], 'object': f['object'], **({'of': doc['lines'][f['object']]['of']} if f['kind'] == 'seismic-2d' else {})}
+                  'files': [{'path': f['path'], 'kind': f['kind'], 'object': f['object'], **({'of': doc['lines'][f['object']]['of']} if f['kind'] == 'seismic-2d' else {}),
+                             **({'form': '2d', 'line': f['line']} if f.get('form') == '2d' else {}),
+                             **({'form': native_form.FORM, 'undefined_code': f['undefined_code']} if native(f) else {})}  # E140 s3 C5 (D-S)
                             for f in doc['files']],  # E137 s1 D-3: a line's `of` (D84's M)
-                  'outline': 'outline.geojson', 'not_read': doc['not_read'], 'tools': starter.tools()}
+                  'outline': 'outline.geojson', 'not_read': doc['not_read'], 'tools': starter.tools(),
+                  **({'horizons2d': doc['horizons2d']} if doc.get('horizons2d') else {})}  # E137 s6b D-2: each 2D horizon's empty lines
         replaced(folder / 'derived.json', dumped(report))
         replaced(out / 'derived.json', dumped({'export': 'exports/' + folder.name}))
     return report, folder

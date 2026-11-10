@@ -1,0 +1,26 @@
+{
+  "description": "E160 s0 C4: one row per acceptance subcase of EPICS.md §E160, with today's answer (`now`, asserted by tests/test_e160_journeys.py), the slice that changes it (`flips_in`) and the expected values written by hand. The folder is the contract's conformance folder (contracts/scientific/v1/fixtures/work-episodes/folder) exported through a fake client; the turn and Croissant values are the contract's work-turns and descriptor fixtures. A slice that flips a row replaces its `now` with the expected answer and moves the assertion.",
+  "journeys": [
+    {"case": 1, "subject": "a fresh export's manifest carries tier and files with the digests of the payloads only; load refuses a folder whose payload digest differs",
+     "now": "the manifest has neither tier nor files", "flips_in": "s1",
+     "expected": {"tier": "local-evaluation", "files": [["episodes.jsonl", 2191, "a9d44e7c9be1a5e2cc4ef0575e1a4d3b2daa1935adeaceeaba88b885264ff394"]],
+                  "parquet": "appended by the SDK when pyarrow imports; its digest repeats only in the same pyarrow environment (R2)"}},
+    {"case": 2, "subject": "trajectories export --describe writes croissant.json that mlcroissant accepts and the comparator reports equal to the manifest, its field names the schema's for the mode",
+     "now": "Describing the folder is not available yet.", "flips_in": "s2",
+     "expected": {"values": ["episode", "mode", "split", "n", "attempt.chain", "attempt.n", "attempt.from", "attempt.continued",
+                             "action.action_id", "action.at", "action.operation", "action.through.client", "action.through.version",
+                             "action.on_behalf_of.kind", "action.on_behalf_of.id", "action.plan.plan_sha256", "action.plan.evidence_sha256",
+                             "action.instruction", "judgement.attempt_ended", "omitted.parameters", "omitted.checks", "omitted.verdicts",
+                             "omitted.plan", "omitted.offered"],
+                  "shape_leaves_out": ["action.instruction"]}},
+    {"case": 3, "subject": "turns.jsonl has one line per action row and the round trip row to line to row is byte-identical in both modes",
+     "now": "Reading turns is not available yet.", "flips_in": "s2",
+     "expected": {"lines": {"shape": 3, "auto": 4, "empty": 0}}},
+    {"case": 4, "subject": "the Agent Lightning and ART loader tests read every line of the fixture file (a skip is a red)",
+     "now": "ophiolite.trajectories has no to_art and no to_agent_lightning", "flips_in": "s3",
+     "expected": {"lines_read": {"shape": 3, "auto": 4}}},
+    {"case": 5, "subject": "a folder exported without --describe differs from E134's only by the manifest's tier and files",
+     "now": "the conformance folder exports as E134 wrote it", "flips_in": "s1",
+     "expected": {"differs_by": ["files", "tier"]}}
+  ]
+}

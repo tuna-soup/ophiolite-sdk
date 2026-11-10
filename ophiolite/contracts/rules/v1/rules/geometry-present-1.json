@@ -1,0 +1,13 @@
+{
+ "schema": "ophiolite.data-rule/1",
+ "id": "geometry-present/1",
+ "title": "Each feature located",
+ "description": "Each feature has a geometry. A feature without one (a JSON null geometry, RFC 7946 section 3.2, or a Shapefile null shape, shape type 0 in the ESRI Shapefile Technical Description) is valid but unlocated, and fails. The example row is the feature's 1-based position in the file.",
+ "class": "file-local",
+ "kinds": ["esri-shapefile/1", "geojson/1", "ogc-geopackage/1"],
+ "context_kinds": null,
+ "severity": "warn",
+ "parameters": [],
+ "words": {"template": "{count} features have no geometry, the first at {first}.", "examples": "rows"},
+ "since": "1.3.0"
+}

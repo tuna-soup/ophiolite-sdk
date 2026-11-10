@@ -1,0 +1,16 @@
+{
+ "schema": "ophiolite.data-rules-snapshot/1",
+ "registry_version": "1.3.0",
+ "rules": [
+  {"id": "depth-increasing/1", "path": "rules/depth-increasing-1.json", "sha256": "5a419d9be28d1c89c93fdd677a6cc0cb113cd4cab8589a9e4de47b31962757a9"},
+  {"id": "geometry-present/1", "path": "rules/geometry-present-1.json", "sha256": "bbda209e8d56710ad115084b88e486e1763697a50264d4a67610cac7a769293a"},
+  {"id": "gr-range/1", "path": "rules/gr-range-1.json", "sha256": "33bb0af7593d09d4eff8be7bcfb34a80c40e98be4ad15dec8f51132fdefa72cc"},
+  {"id": "in-area-of-use/1", "path": "rules/in-area-of-use-1.json", "sha256": "1e33066d6e3a728efeb9fbab66ca909871bfa84063f055c46bcd3f51b606f189"},
+  {"id": "null-sentinel/1", "path": "rules/null-sentinel-1.json", "sha256": "d386bf33ac78e44b97323468039003040f2b51dc937ef87a50d62d6390e2da21"},
+  {"id": "station-step/1", "path": "rules/station-step-1.json", "sha256": "666e6740b3e38c771c1c438ee1277fd7e249e5fa353a351af0da173d6c305e83"},
+  {"id": "top-on-path/1", "path": "rules/top-on-path-1.json", "sha256": "983d67248ed47bd49ee94515291d3c2dd7d9aa00c04f8046ed713866be441c5d"},
+  {"id": "tops-unique-name/1", "path": "rules/tops-unique-name-1.json", "sha256": "435c9e6cd3c07b6c9a2a167d5326bc58b0038698341f8391a778786db18eb50a"},
+  {"id": "trace-order/1", "path": "rules/trace-order-1.json", "sha256": "e663d5105bc84bf9edb4151ade79025a574c66b579ff4b9c75655597eb62d891"},
+  {"id": "unit-known/1", "path": "rules/unit-known-1.json", "sha256": "1177b273005a608634298551da1c2ccbbc9e1a11bf2a31bd1acad764342155ef"}
+ ]
+}

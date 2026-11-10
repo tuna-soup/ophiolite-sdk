@@ -6,13 +6,15 @@ import math
 import os
 import time
 from pathlib import Path
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
 import httpx
 from . import _client_header  # E93
 from . import _core
+from . import _deprecation  # E148: one warning per deprecated route
 from . import _ranges  # E100d1: ranged reads, shared with aio
+from . import surveys as _surveys  # E142 s1
 from .errors import (AuthenticationRequired, PermissionRefused, IntegrityConflict, CapacityExceeded, Refused, Busy,
-                     Incompatible, Unavailable, VerificationFailed)
+                     Incompatible, OphioliteError, Unavailable, VerificationFailed)
 
 MAX_BYTES=32*1024*1024
 # E94: every descriptor request declares the revision manifest profiles this library verifies (/3 carries how a result was made;
@@ -133,9 +135,10 @@ from .access_history import AccessHistoryClient  # noqa: E402  (E67b)
 from .outcomes import OutcomeClient  # noqa: E402  (E120)
 from .verdicts import VerdictClient  # noqa: E402  (E132)
 from .trajectories import TrajectoryClient  # noqa: E402  (E134)
+from .rule_results import RuleResultsClient  # noqa: E402  (E144 s3)
 
 
-class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient, ProcedureClient, ToolClient, AccessHistoryClient, OutcomeClient, VerdictClient, TrajectoryClient):  # E29: wells() and extent(); E50a: sources(); E96: checks; E105b: procedures; E131 s1: tools; E67b: access history and teams; E120: outcomes; E132: verdicts; E134: export_trajectories
+class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient, ProcedureClient, ToolClient, AccessHistoryClient, OutcomeClient, VerdictClient, TrajectoryClient, RuleResultsClient):  # E29: wells() and extent(); E50a: sources(); E96: checks; E105b: procedures; E131 s1: tools; E67b: access history and teams; E120: outcomes; E132: verdicts; E134: export_trajectories; E144 s3: rule_results
     def __init__(self,url,project,credential=None,http=None):
         self.url=origin(url)
         if not isinstance(project,str) or not project:raise Refused('Choose a project.')
@@ -143,6 +146,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         self.prefix='/api/v1/projects/'+quote(project,safe='')+'/scientific-assets'
         self._owns_http=http is None
         self.http=http or httpx.Client(timeout=60,follow_redirects=False,trust_env=False)
+        self._notifier=_deprecation.Notifier()  # E148: this client's once-set; nothing is installed on http
 
     @classmethod
     def from_configuration(cls,path='configuration.json',*,credential=None,http=None):
@@ -300,6 +304,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         for attempt in range(3):
             try:
                 with self.http.stream('GET',self.url+path,headers=headers,follow_redirects=False) as response:
+                    _deprecation.note(_deprecation.of(self),'GET',self.url+path,response)
                     delay=0
                     if response.status_code in (429,503):
                         try:delay=float(response.headers.get('Retry-After','0'))
@@ -314,7 +319,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
                         if response.status_code==422 and meta.get('message'):message=meta['message']  # H48: the server's reason, not the generic sentence
                         if kind is Busy:raise Busy(message,meta.get('remedy',''),status=response.status_code,retry_after=delay,code=meta.get('code'),**policy.carried(meta))
                         raise kind(message,meta.get('remedy',''),status=response.status_code,code=meta.get('code'),**policy.carried(meta))
-                    if answer is not None:answer.update({k.lower():v for k,v in response.headers.items() if k.lower() in ('content-range','x-content-sha256','etag','x-ophiolite-access-generation','x-ophiolite-revision','content-disposition')})  # E100a: window validators; E58b: a file's revision and name
+                    if answer is not None:answer.update({k.lower():v for k,v in response.headers.items() if k.lower() in ('content-range','x-content-sha256','etag','x-ophiolite-access-generation','x-ophiolite-revision','content-disposition','x-ophiolite-window','x-ophiolite-piece','x-ophiolite-header-positions')})  # E100a: window validators; E58b: a file's revision and name; E141: a piece's identity; E141 s2: the header positions
                     content=bytearray()
                     for chunk in response.iter_bytes():
                         content.extend(chunk)
@@ -463,6 +468,87 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
             raise VerificationFailed('The server wrote the file from another revision than the one asked for; nothing was saved.')
         return save_verified(destination,written(raw,answer.get('x-content-sha256')))
 
+    def read_window(self,asset,revision,*,inline=None,crossline=None,trace=None,sample=None,by=None,description=None):
+        """E141: part of a seismic volume (inline, crossline, sample) or of a 2D line (trace, sample) at an exact
+        revision, read and verified (ophiolite.volume_windows.VolumeWindowResult: .values in C order, .window_digest,
+        .to_numpy()). Ranges are n, (first, last) or 'first:last', both ends included; inline and crossline need
+        by='label' or 'ordinal'; a line is addressed by trace position in file order. A window the syntax or the server
+        refuses raises WindowRefused by name; the document is checked before any piece is asked, each piece against its
+        headers and digest. The whole window is held decoded (about 8-9 x its stored bytes); iter_window holds one piece.
+        `description=` reuses a previous result's `.description` of the same revision."""
+        reader=self.iter_window(asset,revision,inline=inline,crossline=crossline,trace=trace,sample=sample,by=by,description=description)
+        from .volume_windows import VolumeWindowResult
+        traces=[]
+        for piece in reader:traces.extend(piece.values)
+        return VolumeWindowResult(reader.window,traces)
+
+    def iter_window(self,asset,revision,*,inline=None,crossline=None,trace=None,sample=None,by=None,description=None):
+        """E141: the window of read_window as an iterator of verified pieces (ophiolite.volume_windows.WindowReader;
+        WindowPiece(index, count, traces, values)); `.complete` and `.window_digest` once the last piece is verified.
+        The document is asked and checked now; each piece when iterated, asked once more after a transport failure."""
+        from .volume_windows import Window,WindowReader,asked,check_document,parse_window,window_path
+        if not all(isinstance(x,str) and x for x in (asset,revision)):raise Refused('Choose an asset and exact revision.')
+        query=parse_window(inline=inline,crossline=crossline,trace=trace,sample=sample,by=by)
+        base=window_path(self.prefix,asset,revision)
+        description=self._window_description(asset,revision,description)  # E140 s3: first, so a native cube asks windows=2 (R5)
+        request=asked(query,description)
+        document=self._window_json(base+('?'+urlencode(request) if request else ''))
+        return WindowReader(self,Window(check_document(document,asset=asset,revision=revision,query=query,description=description),query,description,base))
+
+    def _window_get(self,path,limit,answer=None):
+        """A window read: a server `window-refused` answer raises WindowRefused with its reason and sentence."""
+        from .volume_windows import server_refusal
+        try:return self._get(path,limit,answer=answer)
+        except OphioliteError as error:
+            refused=server_refusal(error)
+            if refused is not None:raise refused from None
+            raise
+
+    def _window_json(self,path):
+        from .volume_windows import DOCUMENT_BYTES
+        try:return json.loads(self._window_get(path,DOCUMENT_BYTES))
+        except (ValueError,UnicodeError) as exc:
+            if isinstance(exc,OphioliteError):raise
+            raise VerificationFailed('The window document is not valid JSON.') from None
+
+    def _window_description(self,asset,revision,description):
+        """What the window's axes are checked against: the volume's described context, or the line's stored description
+        (representations/data, verified against its digest); the original is never asked."""
+        from .volume_windows import WindowDescription,describe_line,describe_volume,line_representation
+        if description is not None:
+            if not isinstance(description,WindowDescription) or (description.asset,description.revision)!=(asset,revision):raise Refused('description= is a window description of this exact revision.')
+            return description
+        path=self.prefix+'/'+quote(asset,safe='')+'/revisions/'+quote(revision,safe='')
+        descriptor=self._window_descriptor(asset,revision)
+        found=describe_volume(asset,revision,descriptor)
+        if found is not None:return found
+        rep=line_representation(descriptor)
+        raw=self._artifact(path+'/representations/'+quote(rep['id'],safe=''),rep['bytes'])
+        _core.verify_bytes(rep,raw)
+        return describe_line(asset,revision,raw)
+
+    def _window_descriptor(self,asset,revision):
+        """The verified typed descriptor of an exact revision (metadata only; no representation is asked)."""
+        path=self.prefix+'/'+quote(asset,safe='')+'/revisions/'+quote(revision,safe='')
+        descriptor=self._json(path+'?'+PROFILES[1:],256*1024)
+        _core.verify_typed_descriptor(descriptor,self.project,asset,revision)
+        return descriptor
+
+    def _window_file_header(self,base,query,document):
+        """E141 s2 (D-H): the original's 3,600-byte file header for a checked window, with the answer's headers (its
+        identity, digest and X-Ophiolite-Header-Positions); checked by volume_windows.check_file_header."""
+        from .volume_windows import FILE_HEADER
+        answer={}
+        body=self._window_get(base+'/file-header?'+urlencode(list(query)+[('window',document['window_id'])]),FILE_HEADER,answer)
+        return body,answer
+
+    def _window_headers(self,base,query,document,index,length):
+        """E141 s2 (D-H): headers answer `index` of a checked window (`length` bytes: 240 per trace), with its headers;
+        checked by volume_windows.check_headers."""
+        answer={}
+        body=self._window_get(base+'/headers/%d?' % index+urlencode(list(query)+[('window',document['window_id'])]),length,answer)
+        return body,answer
+
     def read_slice(self,asset,revision,axis,label,*,volume=None):
         """E16: one slice of a seismic volume at an exact revision. `axis` is 'inline', 'crossline'
         or 'sample'; `label` is the inline or crossline number from the trace headers, or the
@@ -502,19 +588,33 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
     def read_many(self,selections,**options):
         return [self.read(asset,revision,curves,**options) for asset,revision,curves in selections]
 
-    def export(self,selections,destination,*,groups=True,entities=True):
+    def export(self,selections,destination,*,groups=True,entities=True,citation=None):
         """Export exact revisions [(asset, revision, [curves] or None)] into a new portable bundle.
 
         Every item is read through the ordinary exact-read path, so the server's current
         permissions apply to each representation; one refusal fails the whole export and
         nothing is published. The bundle becomes visible only after it checks as a reader
-        would. Returns the opened Bundle."""
+        would. Returns the opened Bundle.
+
+        E147 s2: CITATION {title, description[, version]} makes a cited bundle (2.15): the creators are the
+        persons the selected versions' stories name, the publisher the project's organisation and the licence
+        the files' one open licence, or a notice."""
         from .bundle import write_bundle
+        from . import export_citation
         if not isinstance(selections,(list,tuple)) or not selections:raise Refused('Choose at least one exact revision to export.')
+        if citation is not None:  # E147 s2 (D1-D3): the words first, then the organisation and the makers, before any read
+            words=export_citation.given(citation);organisation=export_citation.publisher(self)
+            makers=export_citation.creators(export_citation.stories(self,selections),organisation)
         items=[];state={}  # E122 s5b: this export's own record state, never the client's
+        copies=None  # E162 s2a: the kept copies, listed only once an exact read refuses
         for asset,revision,curves in selections:
             if not curves:  # E11: well tops, trajectories and grids have no curves (bundle 2)
-                read=self.read_data(asset,revision)
+                try:read=self.read_data(asset,revision)
+                except Incompatible as error:  # the exact read does not serve a kept wells table (422); every other refusal stays as it was
+                    if copies is None:
+                        from .well_sources import KeptCopies
+                        copies=KeptCopies(self)
+                    items.append(({'asset_id':asset,'revision':revision,'curves':[]},self._kept_well_table(asset,revision,copies,error)));continue
                 if read.type=='seismic-volume':raise Refused('A seismic volume is exported as chosen slices (export_slices); the complete volume is not exported.')
                 if read._wire_descriptor.get('package') is not None:read.package_rows=self._package_rows(asset,revision,read._wire_descriptor)  # E23c (C4)
                 read.provenance=self._kept_original(asset,revision,read._wire_descriptor)  # E107a C6b
@@ -530,8 +630,27 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         if left_out and left_out!='not requested':
             import warnings
             warnings.warn('Wells and wellbores were left out of this bundle: '+left_out+'.',UserWarning,stacklevel=2)
+        cited=None
+        if citation is not None:  # E147 s2 (D4): the licence from the files read
+            licence,notice=export_citation.licence_of(items)
+            cited=export_citation.check(export_citation.complete(words,creators=makers,publisher=organisation,licence=licence,notice=notice))
         return write_bundle(destination,items,groups=found,groups_omitted=omitted,graph=graph,entities_omitted=left_out,
-                            source_records_omitted=state.get('omitted'))
+                            source_records_omitted=state.get('omitted'),citation=cited)
+
+    def _kept_well_table(self,asset,revision,copies,error):
+        """E162 s2a (bundle 2.17): the wells table a wells import kept (sql-wells/1), which the exact read does not serve:
+        its bytes as kept and its source manifest as served, read through the package routes (ophiolite.well_sources)
+        and verified (bundle.WellTable). For anything else the exact read's own ERROR is raised unchanged."""
+        from .bundle import WellTable,WELL_TABLE_PROFILE
+        try:found=copies.captures().get(asset)
+        except OphioliteError:found=None
+        if found is None:raise error
+        got=copies.kept(asset,revision)
+        if isinstance(got,str):raise Refused(got+' Nothing was written.')
+        payload,row=got
+        source=row.get('source') if isinstance(row,dict) else None
+        if not isinstance(source,dict) or (source.get('reference') or {}).get('profile')!=WELL_TABLE_PROFILE:raise error
+        return WellTable(payload,source,row.get('name'))
 
     def _kept_original(self,asset,revision,descriptor):
         """E107a C6b (B1): the original a file read on a computer was read from, when it was kept: the revision manifest
@@ -632,6 +751,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
             if (self.url,self.project)!=(url,project):raise RecoveryUnavailable('The gateway or project changed during this operation.')
             try:
                 with self.http.stream('POST',url+path,content=raw,headers=captured,follow_redirects=False,**({'timeout':timeout} if timeout else {})) as response:
+                    _deprecation.note(_deprecation.of(self),'POST',url+path,response)
                     refusal=None if response.is_success else policy.head_bytes(response)
                     if response.status_code in (429,503) and attempt+1<attempts and policy.retried(response,refusal):
                         time.sleep(policy.delay(response));continue
@@ -655,6 +775,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         for attempt in range(3):
             try:
                 with self.http.stream('POST',path,content=raw,headers=headers,follow_redirects=False) as response:
+                    _deprecation.note(_deprecation.of(self),'POST',path,response)
                     refusal=None if response.is_success else policy.head_bytes(response)
                     if response.status_code in (429,503) and attempt<2 and policy.retried(response,refusal):
                         time.sleep(policy.delay(response));continue
@@ -747,6 +868,34 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         """Rank what you may read by its description ('words', or 'embedding' with the deployment's local model)."""
         return self._post('search','query',{'text':text,'limit':limit,**({'method':method} if method else {})})
 
+    def find(self,organization,text=None,*,method=None,kinds=None,well=None,bbox=None,since=None,until=None,published_by=None,projects=None,include_archived=False,limit=20,cursor=None):
+        """E145 s3: one page of the versions you may read in every project of `organization` (organizations/search):
+        an ophiolite.search/2 answer, or /3 when answered by meaning. A field left None is the server's default; the
+        server checks the question. bbox is {'minx','miny','maxx','maxy'[,'crs']}. find_all follows next_cursor."""
+        from . import publish as planning
+        from .models.generated import SearchAnswer,SearchAnswerByMeaning
+        given={'text':text,'method':method,'kinds':None if kinds is None else list(kinds),'well':well,'bbox':bbox,'since':since,'until':until,
+               'published_by':published_by,'projects':None if projects is None else list(projects),'cursor':cursor}
+        body={'organization_id':organization,**{k:v for k,v in given.items() if v is not None},**({'include_archived':True} if include_archived else {}),'limit':limit}
+        from .errors import OphioliteError
+        from .access_history import _headers,_post  # the organisation-level read of person_history (no project in the body or headers)
+        try:answer=_post(self.http,self.url,'/api/v1/organizations/search',body,_headers(self.credential,self.url,None),notifier=getattr(self,'_notifier',None))
+        except OphioliteError as refused:  # the server's sentence (the filter it names; E14's without a model), not the transport's generic one
+            if not refused.server_message or refused.server_message==refused.message:raise
+            raise type(refused)(refused.server_message,refused.recovery,status=refused.status,code=refused.code,remedy=refused.remedy,
+                                docs=refused.docs,request_id=refused.request_id,server_message=refused.server_message,details=refused.details) from None
+        by_meaning=isinstance(answer,dict) and answer.get('schema')=='ophiolite.search/3'
+        return planning.parse(SearchAnswerByMeaning if by_meaning else SearchAnswer,answer)
+
+    def find_all(self,organization,text=None,*,limit=50,**filters):
+        """E145 s3: every row of find(...) in the server's order, one page held at a time, following next_cursor to its end."""
+        cursor=None
+        while True:
+            page=self.find(organization,text,limit=limit,cursor=cursor,**filters)
+            yield from page.results
+            cursor=page.next_cursor
+            if not cursor:return
+
     def export_corpus(self,selections,destination,*,purpose,seed=0,fractions=(0.8,0.1,0.1),groups=None):
         """An AI corpus of exact curves the server authorized for `purpose`; see ophiolite.corpus."""
         from .corpus import export_corpus
@@ -764,6 +913,78 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         from .models.api import ResultDiff
         pick=lambda x:{k:v for k,v in planning.selection(x).items() if k in ('asset_id','revision')} if not isinstance(x,(tuple,list)) else {'asset_id':x[0],'revision':x[1]}
         return planning.parse(ResultDiff,self._post('result-groups','diff',{'a':pick(a),'b':pick(b)}))
+
+    # --- E142 s1: surveys, one unit to a script ---------------------------------------------------------------------
+
+    def _pages(self,operation,body,items):
+        """Every page of a cursor read, guarded like assets(): a repeated or over-long cursor stops the read."""
+        cursor=None;seen=set()
+        for _ in range(_surveys.MAX_PAGES):
+            page=self._post('surveys',operation,{**body,**({'cursor':cursor} if cursor else {})},retry=True)
+            if not isinstance(page,dict) or not isinstance(page.get(items),list):raise VerificationFailed('Invalid survey response.')
+            yield page;cursor=page.get('next_cursor')
+            if cursor is None:return
+            if not isinstance(cursor,str) or len(cursor)>1024 or cursor in seen:raise VerificationFailed('Invalid or repeated survey cursor.')
+            seen.add(cursor)
+        raise VerificationFailed('The survey read did not end.')
+
+    def surveys(self):
+        """The project's surveys you may see (a member you may read, or your own), oldest first: dicts with survey_id,
+        name, identity, revision and count (the members you may read)."""
+        for page in self._pages('list',{},'surveys'):yield from page['surveys']
+
+    def survey_pages(self,survey_id,revision=None,*,view='revision',limit=None):
+        """The pages of one survey revision (ophiolite.survey/1), first page first; see survey()."""
+        from . import publish as planning
+        from .models.generated import SurveyPage
+        body={'survey_id':survey_id,'view':view,**({'revision':revision} if revision is not None else {}),**({'limit':limit} if limit else {})}
+        for page in self._pages('get',body,'members'):yield planning.parse(SurveyPage,page)
+
+    def survey(self,survey_id,revision=None,*,view='revision'):
+        """A survey revision (the latest when none is named) with every member and relation you may read, read page
+        by page. view='latest' serves each member's newest revision you may read where its role still holds."""
+        return _surveys.gathered(self.survey_pages(survey_id,revision,view=view))
+
+    def survey_history(self,survey_id):
+        """The survey's events, newest first, each only when you may read every version it names."""
+        for page in self._pages('history',{'survey_id':survey_id},'events'):yield from page['events']
+
+    def _survey_command(self,kind,body,command_id):
+        return self._post('surveys',kind,_surveys.command(body,command_id),retry=True)  # one command id across the retry
+
+    def create_survey(self,name,members,*,relations=(),identity=None,context=None,source=None,command_id=None):
+        """A new survey of MEMBERS ({role, asset_id, revision}); identity {authority, key}, else provisional."""
+        body={'name':name,'identity':identity or {'provisional':True},'context':context or {},'members':list(members),'relations':list(relations),
+              **({'source':source} if source is not None else {})}
+        return self._survey_command('create',body,command_id)
+
+    def add_survey_members(self,survey_id,expected_revision,members,*,command_id=None):
+        return self._survey_command('add',{'survey_id':survey_id,'expected_revision':expected_revision,'members':list(members)},command_id)
+
+    def remove_survey_members(self,survey_id,expected_revision,members,*,command_id=None):
+        """Removes members (their relations close in the same revision)."""
+        return self._survey_command('remove',{'survey_id':survey_id,'expected_revision':expected_revision,'members':[_surveys.key(m) for m in members]},command_id)
+
+    def replace_survey_member(self,survey_id,expected_revision,old,new,*,command_id=None):
+        """Replaces OLD with NEW ({role, asset_id, revision}); relations are re-pointed and checked again."""
+        return self._survey_command('replace',{'survey_id':survey_id,'expected_revision':expected_revision,'from':_surveys.key(old),'to':new},command_id)
+
+    def relate_survey_members(self,survey_id,expected_revision,relations,*,command_id=None):
+        return self._survey_command('relate',{'survey_id':survey_id,'expected_revision':expected_revision,'relations':list(relations)},command_id)
+
+    def unrelate_survey_members(self,survey_id,expected_revision,relations,*,command_id=None):
+        return self._survey_command('unrelate',{'survey_id':survey_id,'expected_revision':expected_revision,'relations':list(relations)},command_id)
+
+    def rename_survey(self,survey_id,expected_revision,name,*,command_id=None):
+        return self._survey_command('rename',{'survey_id':survey_id,'expected_revision':expected_revision,'name':name},command_id)
+
+    def identify_survey(self,survey_id,expected_revision,identity,*,command_id=None):
+        """Gives a provisional survey its identity {authority, key}; once per project and identity."""
+        return self._survey_command('identify',{'survey_id':survey_id,'expected_revision':expected_revision,'identity':identity},command_id)
+
+    def withdraw_survey(self,survey_id,expected_revision,*,command_id=None):
+        """Withdraws the survey: no longer listed or read; nothing it names is changed."""
+        return self._survey_command('withdraw',{'survey_id':survey_id,'expected_revision':expected_revision},command_id)
 
     def history(self,asset):
         """Every version of a result you can read, oldest first."""
@@ -866,7 +1087,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
 
     def _grant_status(self,headers):
         from .auth import request
-        return request(self.url+'/api/v1/application-access/status',{'id':headers['X-Ophiolite-Application-Grant']},_client_header.stamp(headers),http=self.http)
+        return request(self.url+'/api/v1/application-access/status',{'id':headers['X-Ophiolite-Application-Grant']},_client_header.stamp(headers),http=self.http,notifier=_deprecation.of(self))
 
     def work_folder(self,path,**options):
         from .publish import WorkFolder
@@ -1048,20 +1269,24 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         results=[]
         for position,step in enumerate(plan):
             if step['state']!='ready':results.append(step);continue
-            try:
-                kept=None
-                if step.get('provenance') is not None:  # E107a C6b (B2): stage the kept original under the step's own command, then upload with it
-                    kept=self._stage_kept(step['command_id'],step['provenance'])
-                    if kept is None:results.append({**_public(step),'state':'refused','reason':IMPORTED_WITHOUT});continue  # I1: imports never upgrade
-                done=self.upload_data(step['original'],profile=step['profile'],name=step['name'],attribution=attribution,audience=list(audience),
-                                      rights_confirmed=rights_confirmed,declared=step['declared'] or None,filename=step['filename'],well_log=step['well_log'],
-                                      command_id=step['command_id'],origin=step['origin'],provenance=kept)
+            try:results.append(self._import_step(step,audience=audience,attribution=attribution,rights_confirmed=rights_confirmed))
             except Exception as error:
                 results.append({**_public(step),'state':'failed','reason':str(error)[:300]})
                 results+=[{**_public(s),'state':'not attempted' if s['state']=='ready' else s['state']} for s in plan[position+1:]]
                 raise ImportIncomplete('The import stopped; repeat it to continue (finished assets are not duplicated).',details={'assets':results}) from error
-            results.append({**_public(step),'state':'imported','destination':{'asset_id':done.asset_id,'revision':done.revision}})
         return [_public(r) if 'original' in r else r for r in results]
+
+    def _import_step(self,step,*,audience,attribution,rights_confirmed):
+        """E18: one ready step of an import plan uploaded; its result row (E162 s2a: extracted from import_bundle unchanged,
+        so ophiolite.restore uploads the same way). Raises what the upload raises."""
+        kept=None
+        if step.get('provenance') is not None:  # E107a C6b (B2): stage the kept original under the step's own command, then upload with it
+            kept=self._stage_kept(step['command_id'],step['provenance'])
+            if kept is None:return {**_public(step),'state':'refused','reason':IMPORTED_WITHOUT}  # I1: imports never upgrade
+        done=self.upload_data(step['original'],profile=step['profile'],name=step['name'],attribution=attribution,audience=list(audience),
+                              rights_confirmed=rights_confirmed,declared=step['declared'] or None,filename=step['filename'],well_log=step['well_log'],
+                              command_id=step['command_id'],origin=step['origin'],provenance=kept)
+        return {**_public(step),'state':'imported','destination':{'asset_id':done.asset_id,'revision':done.revision}}
 
     def _stage_kept(self,command_id,raw):
         """E107a C6b: las-uploads/provenance-stage. The upload's `provenance` reference, or None when the item was imported
@@ -1095,6 +1320,24 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         return result
 
     def members(self):return self._post('las-uploads','members',{})
+
+    def proposals(self):
+        """E151 s2: what your agents wait for you on in this project, newest first: every pending plan and every job
+        waiting at a step for your choice. Each is a dict of ophiolite.agent-proposals/1 (`plan`, `operation`,
+        `summary`, `evidence`, `budget`, `expires_at`, `review_url`; a waiting job also `question`, `choices` and
+        `choice_token`). The answer is checked against that contract (VerificationFailed otherwise). Only a person's
+        credential reads it; an agent's is refused by the gateway."""
+        from . import publish as planning
+        return planning.parse_proposals(self._post('agents','proposals',{},retry=True))
+
+    def answer(self,choice_token,choice):
+        """E151 s2: answer the question a job of your agent waits on, with one offered choice id ('c1' ... 'c8'), by the
+        `choice_token` of `proposals()` or of the agent's `ChoiceRequired`. Returns {plan, step, state: 'running',
+        choice}; the agent's `resume(plan)` then carries on from that step. A used, foreign or stale token, or one of
+        another person's job, raises ChoiceRefused with the gateway's reason in `details['reason']` (token-used,
+        token-foreign, token-stale, not-the-delegator). Only the job's delegator answers; an agent's credential is
+        refused by the gateway."""
+        return self._post('jobs','answer',{'choice_token':choice_token,'choice':choice})
 
     def result_preview(self,asset):
         from . import publish as planning

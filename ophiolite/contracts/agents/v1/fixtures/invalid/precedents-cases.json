@@ -1,0 +1,27 @@
+{
+  "description": "E158 s0: documents ophiolite.agent-precedents/1 refuses, each changed from a valid fixture (`document`) or from the valid request below (`instance`: \"request\"), with the JSON paths the schema names.",
+  "request": {"project_id": "groningen", "operation": "results/remake-run", "input_kinds": ["well-log"], "limit": 5},
+  "cases": [
+    {"name": "limit-zero", "instance": "request", "shape": "precedents-schema.json#/$defs/request", "set": [["limit"], 0], "fails": ["$.limit"]},
+    {"name": "limit-21", "instance": "request", "shape": "precedents-schema.json#/$defs/request", "set": [["limit"], 21], "fails": ["$.limit"]},
+    {"name": "limit-text", "instance": "request", "shape": "precedents-schema.json#/$defs/request", "set": [["limit"], "5"], "fails": ["$.limit"]},
+    {"name": "request-unknown-key", "instance": "request", "shape": "precedents-schema.json#/$defs/request", "set": [["since"], 0], "fails": ["$"]},
+    {"name": "request-without-project", "instance": "request", "shape": "precedents-schema.json#/$defs/request", "delete": ["project_id"], "fails": ["$"]},
+    {"name": "operation-malformed", "instance": "request", "shape": "precedents-schema.json#/$defs/request", "set": [["operation"], "results remake-run"], "fails": ["$.operation"]},
+    {"name": "kind-malformed", "instance": "request", "shape": "precedents-schema.json#/$defs/request", "set": [["input_kinds", 0], "Well Log"], "fails": ["$.input_kinds[0]"]},
+    {"name": "kinds-repeated", "instance": "request", "shape": "precedents-schema.json#/$defs/request", "set": [["input_kinds"], ["well-log", "well-log"]], "fails": ["$.input_kinds"]},
+    {"name": "kinds-nine", "instance": "request", "shape": "precedents-schema.json#/$defs/request", "set": [["input_kinds"], ["k1", "k2", "k3", "k4", "k5", "k6", "k7", "k8", "k9"]], "fails": ["$.input_kinds"]},
+    {"name": "kinds-empty", "instance": "request", "shape": "precedents-schema.json#/$defs/request", "set": [["input_kinds"], []], "fails": ["$.input_kinds"]},
+    {"name": "shape-with-reason", "document": "precedents.json", "shape": "precedents-schema.json", "set": [["precedents", 0, "shape", "reason"], "Matches the core porosity"], "fails": ["$.precedents[0].shape"]},
+    {"name": "detail-absent", "document": "precedents.json", "shape": "precedents-schema.json", "delete": ["precedents", 2, "detail"], "fails": ["$.precedents[2]"]},
+    {"name": "verdict-rejected", "document": "precedents.json", "shape": "precedents-schema.json", "set": [["precedents", 0, "shape", "verdict"], "rejected"], "fails": ["$.precedents[0].shape.verdict"]},
+    {"name": "verdict-ids-empty", "document": "precedents.json", "shape": "precedents-schema.json", "set": [["precedents", 1, "shape", "verdict_ids"], []], "fails": ["$.precedents[1].shape.verdict_ids"]},
+    {"name": "verdict-id-malformed", "document": "precedents.json", "shape": "precedents-schema.json", "set": [["precedents", 1, "shape", "verdict_ids", 0], "verdict-XYZ"], "fails": ["$.precedents[1].shape.verdict_ids[0]"]},
+    {"name": "parameter-without-unit", "document": "precedents.json", "shape": "precedents-schema.json", "delete": ["precedents", 0, "shape", "parameters", 0, "unit"], "fails": ["$.precedents[0].shape.parameters[0]"]},
+    {"name": "input-with-ref", "document": "precedents.json", "shape": "precedents-schema.json", "set": [["precedents", 0, "shape", "inputs", 0, "ref"], "ref-16e990e6835b696fa8bacda79bc6e457"], "fails": ["$.precedents[0].shape.inputs[0]"]},
+    {"name": "detail-with-shape-field", "document": "precedents.json", "shape": "precedents-schema.json", "set": [["precedents", 1, "detail", "operation"], "results/remake-run"], "fails": ["$.precedents[1].detail"]},
+    {"name": "twenty-one-precedents", "document": "precedents.json", "shape": "precedents-schema.json", "repeat": [["precedents"], 21], "fails": ["$.precedents"]},
+    {"name": "evidence-null", "document": "precedents-evidence.json", "shape": "precedents-schema.json#/$defs/evidence", "replace": null, "fails": ["$"]},
+    {"name": "evidence-version-without-revision", "document": "precedents-evidence.json", "shape": "precedents-schema.json#/$defs/evidence", "delete": [0, "versions", 0, "revision"], "fails": ["$[0].versions[0]"]}
+  ]
+}

@@ -1,0 +1,13 @@
+[
+  {
+    "request_sha256": "c4d8f794fe916a2b9bd911f9003f40d96740eebacd966c6f35e2d61470fac9f1",
+    "response_sha256": "c517b737b1c5f16a25c4db46cd52611605d06cfa5d76b82b249a60be65cf831d",
+    "verdict_ids": ["verdict-9dd1d21fd41050e0dd9d1a5c8691b636", "verdict-d3ed396edc9c83d2ffe5676e4cd422b0", "verdict-5b438bf1cd5616fa94893ba4f02427ff",
+                    "verdict-16e990e6835b696fa8bacda79bc6e457"],
+    "versions": [
+      {"project_id": "groningen", "asset_id": "residual-gr-01", "revision": "r2"},
+      {"project_id": "groningen", "asset_id": "residual-gr-02", "revision": "r1"},
+      {"project_id": "groningen-north", "asset_id": "residual-gn-07", "revision": "r3"}
+    ]
+  }
+]

@@ -4,7 +4,8 @@ import math
 import re
 from .errors import (AuthenticationRequired,PermissionRefused,Unavailable,IntegrityConflict,
                      CapacityExceeded,Refused,Busy,ShareOutcomeUnknown,VerificationFailed,
-                     SourceNeedsReview,SourceRevisionUnavailable,SourceDetached,SourceSignInRowsDiffer,SOURCE_GUIDE,RightsConflict,RightsEnded)
+                     SourceNeedsReview,SourceRevisionUnavailable,SourceDetached,SourceSignInRowsDiffer,SOURCE_GUIDE,RightsConflict,RightsEnded,
+                     ChoiceRequired,ChoiceRefused,DryRunUnavailable,DryRunRefused)
 
 MAX_RESPONSE=48*1024*1024  # bounded JSON envelope including a 32 MiB base64 artifact
 SHARE_RECOVERY='Read the current recipients first with client.grants(asset), then decide and call share again with the full intended audience and expected_generation from that snapshot.'
@@ -99,13 +100,41 @@ def envelope(response,raw=None):
             if isinstance(body.get(key),str) and CODE.match(body[key]):meta[key]=body[key]
         if isinstance(body.get('path'),str) and len(body['path'])<=300:meta['path']=body['path']
     if meta.get('code')=='rights-ended' and isinstance(body.get('last_day'),str) and DAY.match(body['last_day']):meta['last_day']=body['last_day']  # E35a
+    if meta.get('code')=='choice-required':meta['choice']=choice(body)  # E150
     return meta
 
 
+CHOICE_ID=re.compile(r'^c[1-8]$')
+CHOICE_TOKEN=re.compile(r'^ct1\.[A-Za-z0-9_-]{43}$')
+FRAGMENT_BYTES=4096  # ophiolite.agent-choice-rules/1
+
+
+def choice(body):
+    """E150: the five fields of ophiolite.agent-choice/1, each kept only within its bounds (a question of at most 300
+    characters; 2 to 8 choices c1, c2, ... in order, each fragment an object of at most 16 keys and 4,096 bytes; why's
+    class and rule; answered_by 'person'; the token's pattern). A field outside them is None."""
+    question,choices,why,token=body.get('question'),body.get('choices'),body.get('why'),body.get('choice_token')
+    def fragment(value):
+        try:return isinstance(value,dict) and len(value)<=16 and len(json.dumps(value,separators=(',',':')).encode())<=FRAGMENT_BYTES
+        except (TypeError,ValueError):return False
+    ok=(isinstance(choices,list) and 2<=len(choices)<=8 and all(isinstance(c,dict) and set(c)=={'id','fragment'} and c['id']=='c%d'%(i+1) and fragment(c['fragment'])
+                                                                for i,c in enumerate(choices)))
+    return {'question':question if isinstance(question,str) and 0<len(question)<=300 else None,
+            'choices':[{'id':c['id'],'fragment':c['fragment']} for c in choices] if ok else None,
+            'why':{'class':why['class'],'rule':why['rule']} if isinstance(why,dict) and set(why)=={'class','rule'} and all(isinstance(why[k],str) and REASON.match(why[k]) for k in why) else None,
+            'answered_by':'person' if body.get('answered_by')=='person' else None,
+            'choice_token':token if isinstance(token,str) and CHOICE_TOKEN.match(token) else None}
+
+
+WORDS={'choice-required':ChoiceRequired,'choice-refused':ChoiceRefused,'dry-run-unavailable':DryRunUnavailable,'dry-run-refused':DryRunRefused}  # E150, by code
+
+
 def carried(meta):
-    """The error keyword arguments a parsed envelope supplies (E51a: also the server's own sentence and a credential's stage)."""
+    """The error keyword arguments a parsed envelope supplies (E51a: also the server's own sentence and a credential's stage;
+    E150: a choice's five fields, which only ChoiceRequired takes)."""
     return {'remedy':meta.get('remedy'),'docs':meta.get('docs'),'request_id':meta.get('request_id'),'stage':meta.get('stage'),'server_message':meta.get('message'),
-            'details':{k:meta[k] for k in ('field','reason','rule','path') if k in meta} or None}  # E119a: a refusal's field and reason together
+            'details':{k:meta[k] for k in ('field','reason','rule','path') if k in meta} or None,  # E119a: a refusal's field and reason together
+            **meta.get('choice',{})}
 
 
 def status(response,operation,raw=None):
@@ -124,6 +153,8 @@ def status(response,operation,raw=None):
     if meta.get('code')=='rights-ended':  # E35a (D10): the server's sentence, and the last permitted day
         raise RightsEnded(meta.get('message') or 'The rights to use this data ended.',meta.get('remedy',''),status=code,code=meta['code'],
                           last_day=meta.get('last_day'),**carried(meta))
+    if meta.get('code') in WORDS:  # E150: the server's sentence and code; a choice carries its five fields
+        raise WORDS[meta['code']](meta.get('message') or 'The request was refused.',meta.get('remedy',''),status=code,code=meta['code'],**carried(meta))
     if meta.get('code')=='rights-conflict':
         raise RightsConflict(meta.get('message') or 'The rights changed since you read them.',meta.get('remedy',''),status=code,code=meta['code'],**carried(meta))
     if operation=='share' and code>=500:

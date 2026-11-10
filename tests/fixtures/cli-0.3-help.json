@@ -1,0 +1,125 @@
+{
+ "columns": 100,
+ "top": "usage: ophiolite [-h] [--version] <group> ...\n\nStart here:\n  ophiolite demo --bundle PATH  A demo project on this computer, with three commands to try\n  ophiolite account login       Approve this project in your browser\n  ophiolite data wells list     The wells you may read, located\nGroups:\n  account   Sign in, check this computer, and who can see what\n  data      Read what you may see: curves, wells, lists and exact revisions\n  exchange  Bring files in and take bundles out\n  results   Make, publish and follow results\n  tools     Write, check and run your own tools\n  starter   Starter packs of one catalogue record\n  demo      A demo project on this computer, with three commands to try\nRun 'ophiolite <group> --help' for its commands; 'ophiolite --version' for the release.\n",
+ "groups": {
+  "account": {
+   "help": "usage: ophiolite account [-h] <command> ...\n\nSign in, check this computer, and who can see what\n\npositional arguments:\n  <command>\n    login         Approve this project in your browser\n    logout        Revoke application access\n    status        Check application access\n    doctor        Check local setup without running code or contacting the server\n    projects      List the projects a credential reaches (no configuration or project needed)\n    orgs          List the organisations holding a project the credential reaches\n    teams         The teams: the project's (administrators), or an organisation's with\n                  --organization (owners)\n    access-history\n                  Who had access to what, and when: the project's history (administrators) or one\n                  person's (organisation owners), or a CSV or JSON Lines file\n    ai-use        Whether your own work may be used for AI\n    share         Give colleagues read or reuse access to a result or original you own\n    audience      Who can see an uploaded original of yours and who can build on it: show it, or\n                  change it in one step\n    rights        The rights to use data: show them, or attach or renew them (project\n                  administrators, or who added the original)\n\noptions:\n  -h, --help      show this help message and exit\n",
+   "verbs": {
+    "login": "Approve this project in your browser",
+    "logout": "Revoke application access",
+    "status": "Check application access",
+    "doctor": "Check local setup without running code or contacting the server",
+    "projects": "List the projects a credential reaches (no configuration or project needed)",
+    "orgs": "List the organisations holding a project the credential reaches",
+    "teams": "The teams: the project's (administrators), or an organisation's with --organization (owners)",
+    "access-history": "Who had access to what, and when: the project's history (administrators) or one person's (organisation owners), or a CSV or JSON Lines file",
+    "ai-use": "Whether your own work may be used for AI",
+    "share": "Give colleagues read or reuse access to a result or original you own",
+    "audience": "Who can see an uploaded original of yours and who can build on it: show it, or change it in one step",
+    "rights": "The rights to use data: show them, or attach or renew them (project administrators, or who added the original)"
+   }
+  },
+  "data": {
+   "help": "usage: ophiolite data [-h] <command> ...\n\nRead what you may see: curves, wells, lists and exact revisions\n\npositional arguments:\n  <command>\n    curves    A depth window of one exact curve for display: every sample (level 0) or blocks with\n              their extrema\n    wells     The wells you may read, located (list), or their extent; from-run RUN...: the wells\n              your files name\n    list      List permitted scientific assets without a run\n    fetch     Read an exact revision into a new local folder\n    read-data\n              Read well tops, a trajectory, a horizon grid or a kept table at an exact revision\n              and save it; --format parquet, geoparquet or csv saves one file\n    entities  List the wells and wellbores you may read\n    changes   The project event log: its head, pages after a cursor, or follow it live\n    check     Say what is newer than what you hold, what is new and what you can no longer see\n    get       Get the latest version of an item into a new or held folder; you then hold it\n    find      Find the versions you may read in every project of an organisation, by words, kind,\n              well, place or time\n    kinds     The OSDU kind of each profile, or why it has none (offline)\n    surveys   List the surveys you may see, with the members you may read\n    survey    One survey: its members and relations you may read, at a revision or as of now\n\noptions:\n  -h, --help  show this help message and exit\n",
+   "verbs": {
+    "curves": "A depth window of one exact curve for display: every sample (level 0) or blocks with their extrema",
+    "wells": "The wells you may read, located (list), or their extent; from-run RUN...: the wells your files name",
+    "list": "List permitted scientific assets without a run",
+    "fetch": "Read an exact revision into a new local folder",
+    "read-data": "Read well tops, a trajectory, a horizon grid or a kept table at an exact revision and save it; --format parquet, geoparquet or csv saves one file",
+    "entities": "List the wells and wellbores you may read",
+    "changes": "The project event log: its head, pages after a cursor, or follow it live",
+    "check": "Say what is newer than what you hold, what is new and what you can no longer see",
+    "get": "Get the latest version of an item into a new or held folder; you then hold it",
+    "find": "Find the versions you may read in every project of an organisation, by words, kind, well, place or time",
+    "kinds": "The OSDU kind of each profile, or why it has none (offline)",
+    "surveys": "List the surveys you may see, with the members you may read",
+    "survey": "One survey: its members and relations you may read, at a revision or as of now"
+   }
+  },
+  "exchange": {
+   "help": "usage: ophiolite exchange [-h] <command> ...\n\nBring files in and take bundles out\n\npositional arguments:\n  <command>\n    import         Add a table file as wells, well tops, deviation surveys, point sets or time-\n                   depth pairs: table FILE --target T (--dry-run to review), list, status ID,\n                   pause ID, resume ID, cancel ID\n    upload         Upload a file, a folder, a .zip or an https address: every file it can read is\n                   added, and one report says what became of each\n    export         Export exact revisions into a new portable bundle\n    bundle         Check or summarize a portable bundle offline (no server or account needed)\n    send           Send a file as a new item, or as the next version of one you hold; it is\n                   private until you share it\n    deliver        Deliver exact versions to a team's system with a send tool of the project, from\n                   this computer\n    intake         Read a file of an upload on this computer with a read tool of the project, and\n                   send what it made\n    source         Run a source tool of the project on this computer and add what it reads from a\n                   team's system\n    sources        Your upstream source selections: list them, describe one (costs one full read),\n                   or read its rows\n    repositories   Public repositories (NLOG): search SERVICE --name N, bring-in SERVICE CODE...\n                   --audience P, check SERVICE [CODE...]\n    well-imports   Import a copy of an approved well table as wells: list, status ID, start\n                   (--dry-run to preview), resume ID, cancel ID\n    sample         Start from the NLOG sample: one gamma-ray log and 2,222 wells (project\n                   administrators)\n    new-data       What new files start with in this project: who can see them, depth reference,\n                   coordinate system, units and attribution\n    templates      The table targets you can download a template for, their units and formats\n    template       Download a template for a table target: its header in your units and one\n                   example row the import skips\n    targets        What each type of table needs: its fields, which are required and the choices\n                   that describe it (offline)\n    layouts        The project's layouts: list, show NAME, rename NAME NEW, retire NAME, use-again\n                   NAME, export [NAME...] --out FILE, import FILE, keep CONNECTION TABLE, update\n                   NAME, reconnect NAME CONNECTION TABLE\n    org-connections\n                   Your organisation's database connections that you use or administer, with your\n                   own readiness\n\noptions:\n  -h, --help       show this help message and exit\n",
+   "verbs": {
+    "import": "Add a table file as wells, well tops, deviation surveys, point sets or time-depth pairs: table FILE --target T (--dry-run to review), list, status ID, pause ID, resume ID, cancel ID",
+    "upload": "Upload a file, a folder, a .zip or an https address: every file it can read is added, and one report says what became of each",
+    "export": "Export exact revisions into a new portable bundle",
+    "bundle": "Check or summarize a portable bundle offline (no server or account needed)",
+    "send": "Send a file as a new item, or as the next version of one you hold; it is private until you share it",
+    "deliver": "Deliver exact versions to a team's system with a send tool of the project, from this computer",
+    "intake": "Read a file of an upload on this computer with a read tool of the project, and send what it made",
+    "source": "Run a source tool of the project on this computer and add what it reads from a team's system",
+    "sources": "Your upstream source selections: list them, describe one (costs one full read), or read its rows",
+    "repositories": "Public repositories (NLOG): search SERVICE --name N, bring-in SERVICE CODE... --audience P, check SERVICE [CODE...]",
+    "well-imports": "Import a copy of an approved well table as wells: list, status ID, start (--dry-run to preview), resume ID, cancel ID",
+    "sample": "Start from the NLOG sample: one gamma-ray log and 2,222 wells (project administrators)",
+    "new-data": "What new files start with in this project: who can see them, depth reference, coordinate system, units and attribution",
+    "templates": "The table targets you can download a template for, their units and formats",
+    "template": "Download a template for a table target: its header in your units and one example row the import skips",
+    "targets": "What each type of table needs: its fields, which are required and the choices that describe it (offline)",
+    "layouts": "The project's layouts: list, show NAME, rename NAME NEW, retire NAME, use-again NAME, export [NAME...] --out FILE, import FILE, keep CONNECTION TABLE, update NAME, reconnect NAME CONNECTION TABLE",
+    "org-connections": "Your organisation's database connections that you use or administer, with your own readiness"
+   }
+  },
+  "results": {
+   "help": "usage: ophiolite results [-h] <command> ...\n\nMake, publish and follow results\n\npositional arguments:\n  <command>\n    prepare        Fetch exact input; no computation or publication\n    run            Execute your prepared Python script on this computer\n    publish        Publish the prepared result; does not share it\n    correct        Run and explicitly publish the bounded offset example\n    publish-derived\n                   Publish a file you derived from exact revisions, with its declared method (a\n                   command id or a work folder is required)\n    remake         Make an exact result version again and compare; nothing is saved without --save\n    recover        Recover a saved exact request from its private work folder\n    withdraw       Withdraw one result version, with your reason (this also records that you\n                   reject it)\n    verdicts       Verdicts: whether you accept or reject one result version, and why\n    outcomes       Outcomes: what this project accepts for residual results and where they are\n                   delivered (administrators change them)\n    story          How an exact result version was made: its inputs and their inputs, a page at a\n                   time\n    what-changed   What differs in how two exact result versions were made\n    dependents     The results made from an exact version you may read\n    trajectories   Your own work in a project as episodes a model may learn from\n    try            What one request would do, kept nowhere (a dry run)\n\noptions:\n  -h, --help       show this help message and exit\n",
+   "verbs": {
+    "prepare": "Fetch exact input; no computation or publication",
+    "run": "Execute your prepared Python script on this computer",
+    "publish": "Publish the prepared result; does not share it",
+    "correct": "Run and explicitly publish the bounded offset example",
+    "publish-derived": "Publish a file you derived from exact revisions, with its declared method (a command id or a work folder is required)",
+    "remake": "Make an exact result version again and compare; nothing is saved without --save",
+    "recover": "Recover a saved exact request from its private work folder",
+    "withdraw": "Withdraw one result version, with your reason (this also records that you reject it)",
+    "verdicts": "Verdicts: whether you accept or reject one result version, and why",
+    "outcomes": "Outcomes: what this project accepts for residual results and where they are delivered (administrators change them)",
+    "story": "How an exact result version was made: its inputs and their inputs, a page at a time",
+    "what-changed": "What differs in how two exact result versions were made",
+    "dependents": "The results made from an exact version you may read",
+    "trajectories": "Your own work in a project as episodes a model may learn from",
+    "try": "What one request would do, kept nowhere (a dry run)"
+   }
+  },
+  "tools": {
+   "help": "usage: ophiolite tools [-h] [--json]\n                       {new,validate,run,register,list,show,enable,withdraw,trust,verify,verifications,publish,again,init,skills,checks,rules,residuals,recipes}\n                       ...\n\npositional arguments:\n  {new,validate,run,register,list,show,enable,withdraw,trust,verify,verifications,publish,again,init,skills,checks,rules,residuals,recipes}\n    new                 Write a starting tool folder\n    validate            Say whether Ophiolite would accept a tool folder, and why not\n    run                 Run a tool on local files; writes its outputs and run.json into a new\n                        folder\n    register            Register a tool folder as a private version of this project\n    list                The tools of this project you can see\n    show                One tool: what it reads and makes, its settings and who registered it\n    enable              Enable a version for everyone in this project (administrators)\n    withdraw            Withdraw a version: it is never fetched or run again\n    trust               Trust a version, so running it asks nothing\n    verify              Verify a version against a passed check of a result it made or a published\n                        method, or withdraw a verification\n    verifications       Who verified a version, against what and when\n    publish             Publish a run made with run --from-project on project versions (--input\n                        SLOT=@RESULT:REVISION): each output once, under the run\n    again               Run a tool-made result again on this computer; the project says whether it\n                        is the same result\n    init                Start an application from a packaged template (map-application, derive-\n                        and-publish, sync-worker, notebook, agent-workflow)\n    skills              Locate packaged SDK guidance\n    checks              Checks against a reference: publish, list, compare a result with a file,\n                        and who may publish\n    rules               Data rules: the results of the rules checked when a version landed, or on\n                        a file on this computer\n    residuals           Residuals at wells: run a residual tool on a well selection and a surface,\n                        on this computer\n    recipes             Run a recipe (the residual report again) step by step, and continue it\n                        after a stop\n\noptions:\n  -h, --help            show this help message and exit\n  --json                Print the documented JSON result (errors as {\"error\": {...}})\n",
+   "verbs": {
+    "new": "Write a starting tool folder",
+    "validate": "Say whether Ophiolite would accept a tool folder, and why not",
+    "run": "Run a tool on local files; writes its outputs and run.json into a new folder",
+    "register": "Register a tool folder as a private version of this project",
+    "list": "The tools of this project you can see",
+    "show": "One tool: what it reads and makes, its settings and who registered it",
+    "enable": "Enable a version for everyone in this project (administrators)",
+    "withdraw": "Withdraw a version: it is never fetched or run again",
+    "trust": "Trust a version, so running it asks nothing",
+    "verify": "Verify a version against a passed check of a result it made or a published method, or withdraw a verification",
+    "verifications": "Who verified a version, against what and when",
+    "publish": "Publish a run made with run --from-project on project versions (--input SLOT=@RESULT:REVISION): each output once, under the run",
+    "again": "Run a tool-made result again on this computer; the project says whether it is the same result",
+    "init": "Start an application from a packaged template (map-application, derive-and-publish, sync-worker, notebook, agent-workflow)",
+    "skills": "Locate packaged SDK guidance",
+    "checks": "Checks against a reference: publish, list, compare a result with a file, and who may publish",
+    "rules": "Data rules: the results of the rules checked when a version landed, or on a file on this computer",
+    "residuals": "Residuals at wells: run a residual tool on a well selection and a surface, on this computer",
+    "recipes": "Run a recipe (the residual report again) step by step, and continue it after a stop"
+   }
+  },
+  "starter": {
+   "help": "usage: ophiolite starter [-h] [--json] {build,opendtect,python,resinsight,finalise,export} ...\n\npositional arguments:\n  {build,opendtect,python,resinsight,finalise,export}\n    build               Land the inputs, then write starter.json (unpublished, no keys), its\n                        fidelity document and the python target; the same command again continues\n    opendtect           Run the pack's import.py into an existing OpendTect survey, read each\n                        placed object back and compare it with the landed item at its pinned\n                        version; writes files/targets/opendtect/result.json, then starter.json's\n                        oracle\n    python              Run the pack notebook on the pack folder with the network blocked; writes\n                        files/targets/python/result.json, then starter.json's oracle; reads this\n                        computer only\n    resinsight          Run the pack's ResInsight import.py into a new project, read every well\n                        path and log back through rips (again after reopening) and compare it with\n                        the pack; writes files/targets/resinsight/result.json, then starter.json's\n                        oracle\n    finalise            Write each artefact's key from its held custody document; reads this\n                        computer only\n    export              Export a survey archive's cubes, horizons and wells with the OpendTect\n                        connector, read them back and write derived.json; reads this computer only\n\noptions:\n  -h, --help            show this help message and exit\n  --json                Print the documented JSON result (errors as {\"error\": {...}})\n",
+   "verbs": {
+    "build": "Land the inputs, then write starter.json (unpublished, no keys), its fidelity document and the python target; the same command again continues",
+    "opendtect": "Run the pack's import.py into an existing OpendTect survey, read each placed object back and compare it with the landed item at its pinned version; writes files/targets/opendtect/result.json, then starter.json's oracle",
+    "python": "Run the pack notebook on the pack folder with the network blocked; writes files/targets/python/result.json, then starter.json's oracle; reads this computer only",
+    "resinsight": "Run the pack's ResInsight import.py into a new project, read every well path and log back through rips (again after reopening) and compare it with the pack; writes files/targets/resinsight/result.json, then starter.json's oracle",
+    "finalise": "Write each artefact's key from its held custody document; reads this computer only",
+    "export": "Export a survey archive's cubes, horizons and wells with the OpendTect connector, read them back and write derived.json; reads this computer only"
+   }
+  },
+  "demo": {
+   "help": "usage: ophiolite demo [-h] [--json] [--bundle BUNDLE] <command> ...\n\nServe a demo bundle on this computer and print three commands that run on it.\n\npositional arguments:\n  <command>\n    stop           End the demo server; its publications are gone\n\noptions:\n  -h, --help       show this help message and exit\n  --json           Print the documented JSON result (errors as {\"error\": {...}})\n  --bundle BUNDLE  The demo bundle file (needed until the bundle is published for download)\n",
+   "verbs": {
+    "stop": "End the demo server; its publications are gone"
+   }
+  }
+ }
+}

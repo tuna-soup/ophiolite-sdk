@@ -1,0 +1,16 @@
+{
+ "subject": "E160 s0 C1: manifest-1.2.json with one change each. `set` replaces the named manifest keys. `schema` says whether JSON Schema alone refuses the case (the three cross-field rules are the model's, named in the README). `path` is the refused field as JSON Schema and the model name it.",
+ "cases": [
+  {"name": "croissant-listed", "set": {"files": [{"name": "episodes.jsonl", "bytes": 2191, "sha256": "a9d44e7c9be1a5e2cc4ef0575e1a4d3b2daa1935adeaceeaba88b885264ff394"}, {"name": "croissant.json", "bytes": 10, "sha256": "1111111111111111111111111111111111111111111111111111111111111111"}]}, "schema": "refuses", "path": ["files", 1, "name"]},
+  {"name": "trajectories-listed", "set": {"files": [{"name": "episodes.jsonl", "bytes": 2191, "sha256": "a9d44e7c9be1a5e2cc4ef0575e1a4d3b2daa1935adeaceeaba88b885264ff394"}, {"name": "trajectories.json", "bytes": 10, "sha256": "1111111111111111111111111111111111111111111111111111111111111111"}]}, "schema": "refuses", "path": ["files", 1, "name"]},
+  {"name": "a-repeated-name", "set": {"files": [{"name": "episodes.jsonl", "bytes": 2191, "sha256": "a9d44e7c9be1a5e2cc4ef0575e1a4d3b2daa1935adeaceeaba88b885264ff394"}, {"name": "episodes.jsonl", "bytes": 2191, "sha256": "a9d44e7c9be1a5e2cc4ef0575e1a4d3b2daa1935adeaceeaba88b885264ff394"}]}, "schema": "accepts", "path": ["files"]},
+  {"name": "the-wrong-order", "set": {"files": [{"name": "turns.jsonl", "bytes": 5, "sha256": "2222222222222222222222222222222222222222222222222222222222222222"}, {"name": "episodes.jsonl", "bytes": 2191, "sha256": "a9d44e7c9be1a5e2cc4ef0575e1a4d3b2daa1935adeaceeaba88b885264ff394"}]}, "schema": "accepts", "path": ["files"]},
+  {"name": "negative-bytes", "set": {"files": [{"name": "episodes.jsonl", "bytes": -1, "sha256": "a9d44e7c9be1a5e2cc4ef0575e1a4d3b2daa1935adeaceeaba88b885264ff394"}]}, "schema": "refuses", "path": ["files", 0, "bytes"]},
+  {"name": "an-uppercase-digest", "set": {"files": [{"name": "episodes.jsonl", "bytes": 2191, "sha256": "A9D44E7C9BE1A5E2CC4EF0575E1A4D3B2DAA1935ADEACEEABA88B885264FF394"}]}, "schema": "refuses", "path": ["files", 0, "sha256"]},
+  {"name": "four-entries", "set": {"files": [{"name": "episodes.jsonl", "bytes": 2191, "sha256": "a9d44e7c9be1a5e2cc4ef0575e1a4d3b2daa1935adeaceeaba88b885264ff394"}, {"name": "episodes.parquet", "bytes": 3, "sha256": "3333333333333333333333333333333333333333333333333333333333333333"}, {"name": "turns.jsonl", "bytes": 5, "sha256": "2222222222222222222222222222222222222222222222222222222222222222"}, {"name": "turns.jsonl", "bytes": 5, "sha256": "2222222222222222222222222222222222222222222222222222222222222222"}]}, "schema": "refuses", "path": ["files"]},
+  {"name": "tier-nowhere", "set": {"tier": "nowhere"}, "schema": "refuses", "path": ["tier"]},
+  {"name": "files-without-episodes", "set": {"files": [{"name": "turns.jsonl", "bytes": 5, "sha256": "2222222222222222222222222222222222222222222222222222222222222222"}]}, "schema": "accepts", "path": ["files"]},
+  {"name": "tier-null", "set": {"tier": null}, "schema": "refuses", "path": ["tier"]},
+  {"name": "files-null", "set": {"files": null}, "schema": "refuses", "path": ["files"]}
+ ]
+}

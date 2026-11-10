@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ophiolite.agent-job/1",
+  "title": "One of an agent's own jobs, step by step: the answer of jobs/status (E151)",
+  "description": "A job is a plan whose operation is jobs/run: up to eight steps in order under one approval, a later step naming an earlier answer by its JSON pointer. `state` is the plan's while no step has run (pending, declined, expired) and the job's afterwards; `step` is the step a running, waiting, released or failed job stands at (1 before the first). `word` says why a job was released or failed. Each step shows its operation, whether it is pending, reserved or completed, and the SHA-256 of its stored answer; no answer is shown. A read computes expiry and never writes it. A waiting job also shows the question its step asks, the offered choices and the `choice_token` its person answers with (`jobs/answer`). `review_url` is the page where the job's person reviews the proposal.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["plan", "state", "step", "steps", "review_url"],
+  "properties": {
+    "plan": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "state": {"enum": ["pending", "declined", "expired", "running", "waiting", "completed", "released", "failed"]},
+    "step": {"type": "integer", "minimum": 1, "maximum": 8},
+    "word": {"type": "string", "pattern": "^[a-z][a-z0-9-]{0,63}$"},
+    "question": {"type": "string", "minLength": 1, "maxLength": 300},
+    "choices": {"type": "array", "minItems": 2, "maxItems": 8, "items": {"$ref": "#/$defs/choice"}},
+    "choice_token": {"type": "string", "pattern": "^ct1\\.[A-Za-z0-9_-]{43}$"},
+    "steps": {"type": "array", "minItems": 1, "maxItems": 8, "items": {"$ref": "#/$defs/step"}},
+    "review_url": {"type": "string", "minLength": 1, "maxLength": 2048}
+  },
+  "$defs": {
+    "choice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "fragment"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^c[1-8]$"},
+        "fragment": {"type": "object", "maxProperties": 16}
+      }
+    },
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operation", "state", "answer_sha256"],
+      "properties": {
+        "operation": {"type": "string", "pattern": "^[a-z][a-z0-9-]*/[a-z][a-z0-9-]*$"},
+        "state": {"enum": ["pending", "reserved", "completed"]},
+        "answer_sha256": {"anyOf": [{"type": "string", "pattern": "^[0-9a-f]{64}$"}, {"type": "null"}]}
+      }
+    }
+  }
+}

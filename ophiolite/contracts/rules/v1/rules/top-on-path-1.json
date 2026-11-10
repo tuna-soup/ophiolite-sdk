@@ -1,0 +1,13 @@
+{
+ "schema": "ophiolite.data-rule/1",
+ "id": "top-on-path/1",
+ "title": "Each top on the wellbore's path",
+ "description": "Each top's measured depth lies within the measured depths of the first and last station of the wellbore's newest readable path (a survey or a well path), both ends included. Depths in m are compared as written and in ft times 0.3048; any other unit on either side gives no context. Datums stated on both sides (not empty, not unknown) that differ after trimming and case-folding give no context. A top without a measured depth is not compared. Each top outside the path fails; its example depth and value are its measured depth as written. Offline the rule does not apply.",
+ "class": "project-context",
+ "kinds": ["well-tops-csv/1"],
+ "context_kinds": ["deviation-csv/1", "well-path-positions-csv/1"],
+ "severity": "error",
+ "parameters": [],
+ "words": {"template": "{count} tops lie outside the wellbore's path, the first at {first}.", "examples": "rows"},
+ "since": "1.2.0"
+}

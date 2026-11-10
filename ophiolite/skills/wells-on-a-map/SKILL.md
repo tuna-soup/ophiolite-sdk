@@ -22,5 +22,5 @@ without one. A box always needs its CRS (`bbox_crs`): nothing is guessed from th
 Show each well's name; keep identifiers, the source revision and row under "Technical details". The supported
 CRSs are OGC:CRS84, EPSG:4326 (latitude first in OGC API answers), EPSG:3857, EPSG:28992, EPSG:32631 and EPSG:23031; another is
 refused (`Refused`, before anything is sent). GIS tools can open the same wells as an OGC API – Features collection at
-/api/v1/projects/{project}/features/collections/{collection}/items (the collection is `wells`). `ophiolite init map-application` starts a map page
+/api/v1/projects/{project}/features/collections/{collection}/items (the collection is `wells`). `ophiolite tools init map-application` starts a map page
 whose backend holds the credential.

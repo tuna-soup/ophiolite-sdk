@@ -2,7 +2,8 @@
 test-only pyzgy line carries the Linux x86_64 marker (pyzgy pulls segyio, LGPL-3.0, which has no Linux aarch64 wheel).
 segyio itself is named only by `dev` and E129 (e)'s `pack` extra, which pin it unconditionally since main d1bce63fc.
 Mutations: pyzgy appended to `dependencies`, the pyzgy marker dropped, or segyio added to another extra, RED."""
-import tomllib
+try: import tomllib
+except ModuleNotFoundError: import tomli as tomllib  # Python 3.10 (the dev extra installs tomli there)
 from pathlib import Path
 
 PYPROJECT = Path(__file__).resolve().parents[1] / 'pyproject.toml'

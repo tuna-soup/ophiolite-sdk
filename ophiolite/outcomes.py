@@ -6,7 +6,7 @@ A declaration is `ophiolite.outcome/1` (`ophiolite/contracts/outcomes/v1/`); the
 one reason (`error.details['reason']`). From slice 1 the server evaluates every enabled outcome over a residual result
 after it is published, with the declarer's reading rights, and keeps an acceptance record (`ophiolite.outcome-check/1`);
 `outcome_states` reads a result version's states as sentences ("Accepted on ... under Tops within 5 m version 1").
-From slice 3 `ophiolite deliver NAME --as OUTCOME` (`Client.deliver(..., as_=...)`) asks the project's gate first: the
+From slice 3 `ophiolite exchange deliver NAME --as OUTCOME` (`Client.deliver(..., as_=...)`) asks the project's gate first: the
 delivery runs only when the version is accepted under the outcome's current version and goes to its declared
 destination; every claim, claimed or refused, is kept on the server (`ophiolite.outcome-claim/1`, `outcome_claims`).
 """
@@ -17,10 +17,12 @@ RULE = 'well-residual-within/1'
 INPUTS = ['deviation-csv/1', 'esri-ascii-grid/1', 'well-set/1', 'well-tops-csv/1']  # what a residual result is made from
 
 
-def residual_declaration(label, tolerance, unit, procedure, destination, not_computed='allowed'):
-    """The declaration of an outcome over residual results: every computed residual within `tolerance` `unit`."""
-    return {'schema': 'ophiolite.outcome/1', 'label': label, 'kind': KIND,
-            'rule': {'name': RULE, 'settings': {'tolerance': {'value': tolerance, 'unit': unit}, 'not_computed': not_computed}},
+def residual_declaration(label, tolerance, unit, procedure, destination, not_computed='allowed', data_rules=None):
+    """The declaration of an outcome over residual results: every computed residual within `tolerance` `unit`. E144 s4:
+    `data_rules`, the data rule ids run on the inputs first (sorted, once each); None names none and sends no key."""
+    rule = {'name': RULE, 'settings': {'tolerance': {'value': tolerance, 'unit': unit}, 'not_computed': not_computed}}
+    if data_rules is not None: rule['data_rules'] = list(data_rules)
+    return {'schema': 'ophiolite.outcome/1', 'label': label, 'kind': KIND, 'rule': rule,
             'inputs': list(INPUTS), 'destination': {'procedure': procedure, 'label': destination}}
 
 

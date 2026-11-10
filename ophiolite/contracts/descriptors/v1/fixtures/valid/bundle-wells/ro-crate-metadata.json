@@ -1,0 +1,92 @@
+{
+  "@context": ["https://w3id.org/ro/crate/1.1/context", {"sha256": "https://schema.org/sha256"}],
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"},
+      "about": {"@id": "./"}
+    },
+    {
+      "@id": "./",
+      "@type": "Dataset",
+      "name": "Synthetic gamma ray log of well SYNTHETIC-M1",
+      "description": "One gamma ray curve (GR, five samples) of a made-up well, with the LAS file it was read from. Synthetic data for the descriptor contract; no observed well.",
+      "datePublished": "2026-11-05",
+      "version": "1.0.0",
+      "license": {"@id": "https://spdx.org/licenses/CC-BY-4.0"},
+      "author": [
+        {"@id": "https://orcid.org/0000-0002-1825-0097"},
+        {"@id": "#creator-2"}
+      ],
+      "publisher": {"@id": "https://ror.org/0abcdef12"},
+      "keywords": ["well log", "gamma ray", "synthetic"],
+      "hasPart": [
+        {"@id": "assets/0/original.las"},
+        {"@id": "assets/0/descriptor-GR.json"},
+        {"@id": "assets/0/curve-GR.json"},
+        {"@id": "prov.json"},
+        {"@id": "manifest.json"}
+      ]
+    },
+    {
+      "@id": "https://orcid.org/0000-0002-1825-0097",
+      "@type": "Person",
+      "name": "Josiah Carberry"
+    },
+    {
+      "@id": "#creator-2",
+      "@type": "Person",
+      "name": "Ada Synthetic"
+    },
+    {
+      "@id": "https://ror.org/0abcdef12",
+      "@type": "Organization",
+      "name": "Synthetic Survey Organisation"
+    },
+    {
+      "@id": "https://spdx.org/licenses/CC-BY-4.0",
+      "@type": "CreativeWork",
+      "name": "Creative Commons Attribution 4.0 International"
+    },
+    {
+      "@id": "manifest.json",
+      "@type": "File",
+      "name": "The bundle manifest",
+      "encodingFormat": "application/json"
+    },
+    {
+      "@id": "prov.json",
+      "@type": "File",
+      "name": "Provenance (PROV-JSON)",
+      "sha256": "97bbadab562c0dc0baa6133e65481c939b03788e78f6e01edc898b9cbd8f5844",
+      "contentSize": "1613",
+      "encodingFormat": "application/json",
+      "conformsTo": {"@id": "https://www.w3.org/submissions/prov-json/"}
+    },
+    {
+      "@id": "assets/0/original.las",
+      "@type": "File",
+      "name": "original.las",
+      "sha256": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
+      "contentSize": "311",
+      "encodingFormat": "text/plain"
+    },
+    {
+      "@id": "assets/0/descriptor-GR.json",
+      "@type": "File",
+      "name": "descriptor-GR.json",
+      "sha256": "7bb6af90ffb90a754b3985f1679eaa16f2a32efa384aef028c6b5d0d0719145d",
+      "contentSize": "2479",
+      "encodingFormat": "application/json"
+    },
+    {
+      "@id": "assets/0/curve-GR.json",
+      "@type": "File",
+      "name": "curve-GR.json",
+      "sha256": "81992992a1a15daac792bebf5979c51e0f8c3c1869a75a125999e6466e38bfba",
+      "contentSize": "1076",
+      "encodingFormat": "application/json"
+    }
+  ]
+}

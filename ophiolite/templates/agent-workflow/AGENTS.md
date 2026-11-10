@@ -1,6 +1,6 @@
 # Scientific workflow rules
 
-Use the public SDK. Run `ophiolite skills path` and read the relevant installed
+Use the public SDK. Run `ophiolite tools skills path` and read the relevant installed
 guide before a live workflow. Never inspect credential files to copy tokens into
 prompts, logs, scripts or notebooks. Synthetic fixture credentials are test-only.
 

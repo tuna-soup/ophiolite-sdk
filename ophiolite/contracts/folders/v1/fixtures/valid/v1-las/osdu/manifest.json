@@ -1,0 +1,526 @@
+{
+ "kind": "osdu:wks:Manifest:1.0.0",
+ "MasterData": [
+  {
+   "id": "synthetic:master-data--Well:well-da2ea3d64ef893a29bbadde38159c645",
+   "kind": "osdu:wks:master-data--Well:1.5.0",
+   "acl": {
+    "owners": [
+     "data.default.owners@{{DATA_PARTITION}}"
+    ],
+    "viewers": [
+     "data.default.viewers@{{DATA_PARTITION}}"
+    ]
+   },
+   "legal": {
+    "legaltags": [
+     "{{LEGAL_TAG}}"
+    ],
+    "otherRelevantDataCountries": []
+   },
+   "data": {
+    "FacilityName": "SYN-W2"
+   }
+  },
+  {
+   "id": "synthetic:master-data--Wellbore:wellbore-a16b1fde71e9f664e805f297b25316b6",
+   "kind": "osdu:wks:master-data--Wellbore:1.5.1",
+   "acl": {
+    "owners": [
+     "data.default.owners@{{DATA_PARTITION}}"
+    ],
+    "viewers": [
+     "data.default.viewers@{{DATA_PARTITION}}"
+    ]
+   },
+   "legal": {
+    "legaltags": [
+     "{{LEGAL_TAG}}"
+    ],
+    "otherRelevantDataCountries": []
+   },
+   "data": {
+    "FacilityName": "SYN-W2",
+    "WellID": "synthetic:master-data--Well:well-da2ea3d64ef893a29bbadde38159c645:"
+   }
+  },
+  {
+   "id": "synthetic:master-data--Well:well-567a7b05722b7abc511ac4b8fb3a3f96",
+   "kind": "osdu:wks:master-data--Well:1.5.0",
+   "acl": {
+    "owners": [
+     "data.default.owners@{{DATA_PARTITION}}"
+    ],
+    "viewers": [
+     "data.default.viewers@{{DATA_PARTITION}}"
+    ]
+   },
+   "legal": {
+    "legaltags": [
+     "{{LEGAL_TAG}}"
+    ],
+    "otherRelevantDataCountries": []
+   },
+   "data": {
+    "FacilityName": "SYN-W3"
+   }
+  },
+  {
+   "id": "synthetic:master-data--Wellbore:wellbore-90b4e0b1ed4a09a899cfa4398e13ac97",
+   "kind": "osdu:wks:master-data--Wellbore:1.5.1",
+   "acl": {
+    "owners": [
+     "data.default.owners@{{DATA_PARTITION}}"
+    ],
+    "viewers": [
+     "data.default.viewers@{{DATA_PARTITION}}"
+    ]
+   },
+   "legal": {
+    "legaltags": [
+     "{{LEGAL_TAG}}"
+    ],
+    "otherRelevantDataCountries": []
+   },
+   "data": {
+    "FacilityName": "SYN-W3",
+    "WellID": "synthetic:master-data--Well:well-567a7b05722b7abc511ac4b8fb3a3f96:"
+   }
+  },
+  {
+   "id": "synthetic:master-data--Well:well-335a226bb2ba38fe7adb247f2705f477",
+   "kind": "osdu:wks:master-data--Well:1.5.0",
+   "acl": {
+    "owners": [
+     "data.default.owners@{{DATA_PARTITION}}"
+    ],
+    "viewers": [
+     "data.default.viewers@{{DATA_PARTITION}}"
+    ]
+   },
+   "legal": {
+    "legaltags": [
+     "{{LEGAL_TAG}}"
+    ],
+    "otherRelevantDataCountries": []
+   },
+   "data": {
+    "FacilityName": "SYN-W4"
+   }
+  },
+  {
+   "id": "synthetic:master-data--Wellbore:wellbore-1c06ba5acde92339947049b6f05a9837",
+   "kind": "osdu:wks:master-data--Wellbore:1.5.1",
+   "acl": {
+    "owners": [
+     "data.default.owners@{{DATA_PARTITION}}"
+    ],
+    "viewers": [
+     "data.default.viewers@{{DATA_PARTITION}}"
+    ]
+   },
+   "legal": {
+    "legaltags": [
+     "{{LEGAL_TAG}}"
+    ],
+    "otherRelevantDataCountries": []
+   },
+   "data": {
+    "FacilityName": "SYN-W4",
+    "WellID": "synthetic:master-data--Well:well-335a226bb2ba38fe7adb247f2705f477:"
+   }
+  }
+ ],
+ "Data": {
+  "WorkProductComponents": [
+   {
+    "id": "synthetic:work-product-component--WellLog:welllog-8a4a78024a24ddb6d5ea0c68174c4103",
+    "kind": "osdu:wks:work-product-component--WellLog:1.5.0",
+    "acl": {
+     "owners": [
+      "data.default.owners@{{DATA_PARTITION}}"
+     ],
+     "viewers": [
+      "data.default.viewers@{{DATA_PARTITION}}"
+     ]
+    },
+    "legal": {
+     "legaltags": [
+      "{{LEGAL_TAG}}"
+     ],
+     "otherRelevantDataCountries": []
+    },
+    "data": {
+     "Name": "syn-w2.las",
+     "WellboreID": "synthetic:master-data--Wellbore:wellbore-a16b1fde71e9f664e805f297b25316b6:",
+     "Datasets": [
+      "synthetic:dataset--File.Generic:file-b797a6efb53aff6c4dfd453b22d38ab8:"
+     ],
+     "LineageAssertions": [
+      {
+       "ID": "synthetic:dataset--File.Generic:file-b797a6efb53aff6c4dfd453b22d38ab8:",
+       "LineageRelationshipType": "synthetic:reference-data--LineageRelationshipType:Direct:"
+      }
+     ],
+     "ReferenceCurveID": "DEPT",
+     "SamplingStart": 1000.0,
+     "SamplingStop": 1001.0,
+     "Curves": [
+      {
+       "Mnemonic": "DEPT",
+       "CurveUnit": "synthetic:reference-data--UnitOfMeasure:m:"
+      },
+      {
+       "Mnemonic": "GR",
+       "CurveUnit": "synthetic:reference-data--UnitOfMeasure:gAPI:"
+      },
+      {
+       "Mnemonic": "RHOB",
+       "CurveUnit": "synthetic:reference-data--UnitOfMeasure:g%2Fcm3:"
+      }
+     ],
+     "SamplingDomainTypeID": "synthetic:reference-data--WellLogSamplingDomainType:Depth:"
+    },
+    "meta": [
+     {
+      "kind": "Unit",
+      "name": "m",
+      "persistableReference": "{\"abcd\":{\"a\":0.0,\"b\":1.0,\"c\":1.0,\"d\":0.0},\"symbol\":\"m\",\"baseMeasurement\":{\"ancestry\":\"L\",\"type\":\"UM\"},\"type\":\"UAD\"}",
+      "unitOfMeasureID": "synthetic:reference-data--UnitOfMeasure:m:",
+      "propertyNames": [
+       "SamplingStart",
+       "SamplingStop"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "synthetic:work-product-component--WellLog:welllog-3db5f987a274a7ddd4f6480dfc4f63ae",
+    "kind": "osdu:wks:work-product-component--WellLog:1.5.0",
+    "acl": {
+     "owners": [
+      "data.default.owners@{{DATA_PARTITION}}"
+     ],
+     "viewers": [
+      "data.default.viewers@{{DATA_PARTITION}}"
+     ]
+    },
+    "legal": {
+     "legaltags": [
+      "{{LEGAL_TAG}}"
+     ],
+     "otherRelevantDataCountries": []
+    },
+    "data": {
+     "Name": "syn-w2b.las",
+     "WellboreID": "synthetic:master-data--Wellbore:wellbore-a16b1fde71e9f664e805f297b25316b6:",
+     "Datasets": [
+      "synthetic:dataset--File.Generic:file-4182031d951eb318de2e646f442414eb:"
+     ],
+     "LineageAssertions": [
+      {
+       "ID": "synthetic:dataset--File.Generic:file-4182031d951eb318de2e646f442414eb:",
+       "LineageRelationshipType": "synthetic:reference-data--LineageRelationshipType:Direct:"
+      }
+     ],
+     "ReferenceCurveID": "DEPT",
+     "SamplingStart": 1002.0,
+     "SamplingStop": 1002.5,
+     "Curves": [
+      {
+       "Mnemonic": "DEPT",
+       "CurveUnit": "synthetic:reference-data--UnitOfMeasure:m:"
+      },
+      {
+       "Mnemonic": "GR",
+       "CurveUnit": "synthetic:reference-data--UnitOfMeasure:gAPI:"
+      }
+     ],
+     "SamplingDomainTypeID": "synthetic:reference-data--WellLogSamplingDomainType:Depth:"
+    },
+    "meta": [
+     {
+      "kind": "Unit",
+      "name": "m",
+      "persistableReference": "{\"abcd\":{\"a\":0.0,\"b\":1.0,\"c\":1.0,\"d\":0.0},\"symbol\":\"m\",\"baseMeasurement\":{\"ancestry\":\"L\",\"type\":\"UM\"},\"type\":\"UAD\"}",
+      "unitOfMeasureID": "synthetic:reference-data--UnitOfMeasure:m:",
+      "propertyNames": [
+       "SamplingStart",
+       "SamplingStop"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "synthetic:work-product-component--WellLog:welllog-a0b95be8278ec25549c7701e1dea1dd5",
+    "kind": "osdu:wks:work-product-component--WellLog:1.5.0",
+    "acl": {
+     "owners": [
+      "data.default.owners@{{DATA_PARTITION}}"
+     ],
+     "viewers": [
+      "data.default.viewers@{{DATA_PARTITION}}"
+     ]
+    },
+    "legal": {
+     "legaltags": [
+      "{{LEGAL_TAG}}"
+     ],
+     "otherRelevantDataCountries": []
+    },
+    "data": {
+     "Name": "syn-w3.las",
+     "WellboreID": "synthetic:master-data--Wellbore:wellbore-90b4e0b1ed4a09a899cfa4398e13ac97:",
+     "Datasets": [
+      "synthetic:dataset--File.Generic:file-1d74e9cb6a6f3fd52e754c0380126791:"
+     ],
+     "LineageAssertions": [
+      {
+       "ID": "synthetic:dataset--File.Generic:file-1d74e9cb6a6f3fd52e754c0380126791:",
+       "LineageRelationshipType": "synthetic:reference-data--LineageRelationshipType:Direct:"
+      }
+     ],
+     "ReferenceCurveID": "DEPT",
+     "SamplingStart": 500.0,
+     "SamplingStop": 501.5,
+     "Curves": [
+      {
+       "Mnemonic": "DEPT",
+       "CurveUnit": "synthetic:reference-data--UnitOfMeasure:m:"
+      },
+      {
+       "Mnemonic": "GR",
+       "CurveUnit": "synthetic:reference-data--UnitOfMeasure:gAPI:"
+      },
+      {
+       "Mnemonic": "GR",
+       "CurveUnit": "synthetic:reference-data--UnitOfMeasure:gAPI:"
+      }
+     ],
+     "SamplingDomainTypeID": "synthetic:reference-data--WellLogSamplingDomainType:Depth:"
+    },
+    "meta": [
+     {
+      "kind": "Unit",
+      "name": "m",
+      "persistableReference": "{\"abcd\":{\"a\":0.0,\"b\":1.0,\"c\":1.0,\"d\":0.0},\"symbol\":\"m\",\"baseMeasurement\":{\"ancestry\":\"L\",\"type\":\"UM\"},\"type\":\"UAD\"}",
+      "unitOfMeasureID": "synthetic:reference-data--UnitOfMeasure:m:",
+      "propertyNames": [
+       "SamplingStart",
+       "SamplingStop"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "synthetic:work-product-component--WellLog:welllog-2c9482ef192076a36b68a02dd7cc406b",
+    "kind": "osdu:wks:work-product-component--WellLog:1.5.0",
+    "acl": {
+     "owners": [
+      "data.default.owners@{{DATA_PARTITION}}"
+     ],
+     "viewers": [
+      "data.default.viewers@{{DATA_PARTITION}}"
+     ]
+    },
+    "legal": {
+     "legaltags": [
+      "{{LEGAL_TAG}}"
+     ],
+     "otherRelevantDataCountries": []
+    },
+    "data": {
+     "Name": "syn-w4.las",
+     "WellboreID": "synthetic:master-data--Wellbore:wellbore-1c06ba5acde92339947049b6f05a9837:",
+     "Datasets": [
+      "synthetic:dataset--File.Generic:file-a5932e2c9ae6a2963fd1987d02373265:"
+     ],
+     "LineageAssertions": [
+      {
+       "ID": "synthetic:dataset--File.Generic:file-a5932e2c9ae6a2963fd1987d02373265:",
+       "LineageRelationshipType": "synthetic:reference-data--LineageRelationshipType:Direct:"
+      }
+     ],
+     "ReferenceCurveID": "DEPT",
+     "SamplingStart": 750.0,
+     "SamplingStop": 750.5,
+     "Curves": [
+      {
+       "Mnemonic": "DEPT",
+       "CurveUnit": "synthetic:reference-data--UnitOfMeasure:m:"
+      },
+      {
+       "Mnemonic": "DT",
+       "CurveUnit": "synthetic:reference-data--UnitOfMeasure:us%2Fft:"
+      }
+     ],
+     "SamplingDomainTypeID": "synthetic:reference-data--WellLogSamplingDomainType:Depth:"
+    },
+    "meta": [
+     {
+      "kind": "Unit",
+      "name": "m",
+      "persistableReference": "{\"abcd\":{\"a\":0.0,\"b\":1.0,\"c\":1.0,\"d\":0.0},\"symbol\":\"m\",\"baseMeasurement\":{\"ancestry\":\"L\",\"type\":\"UM\"},\"type\":\"UAD\"}",
+      "unitOfMeasureID": "synthetic:reference-data--UnitOfMeasure:m:",
+      "propertyNames": [
+       "SamplingStart",
+       "SamplingStop"
+      ]
+     }
+    ]
+   }
+  ],
+  "Datasets": [
+   {
+    "id": "synthetic:dataset--File.Generic:file-b797a6efb53aff6c4dfd453b22d38ab8",
+    "kind": "osdu:wks:dataset--File.Generic:1.1.0",
+    "acl": {
+     "owners": [
+      "data.default.owners@{{DATA_PARTITION}}"
+     ],
+     "viewers": [
+      "data.default.viewers@{{DATA_PARTITION}}"
+     ]
+    },
+    "legal": {
+     "legaltags": [
+      "{{LEGAL_TAG}}"
+     ],
+     "otherRelevantDataCountries": []
+    },
+    "data": {
+     "Name": "syn-w2.las",
+     "DatasetProperties": {
+      "FileSourceInfo": {
+       "FileSource": "originals/syn-w2.las",
+       "Name": "syn-w2.las",
+       "FileSize": "360",
+       "Checksum": "667d1d5a356f5fe78033d191fc380a9efc21892afa5e3c844f0cba37adde87d8",
+       "ChecksumAlgorithm": "SHA-256"
+      }
+     }
+    }
+   },
+   {
+    "id": "synthetic:dataset--File.Generic:file-4182031d951eb318de2e646f442414eb",
+    "kind": "osdu:wks:dataset--File.Generic:1.1.0",
+    "acl": {
+     "owners": [
+      "data.default.owners@{{DATA_PARTITION}}"
+     ],
+     "viewers": [
+      "data.default.viewers@{{DATA_PARTITION}}"
+     ]
+    },
+    "legal": {
+     "legaltags": [
+      "{{LEGAL_TAG}}"
+     ],
+     "otherRelevantDataCountries": []
+    },
+    "data": {
+     "Name": "syn-w2b.las",
+     "DatasetProperties": {
+      "FileSourceInfo": {
+       "FileSource": "originals/syn-w2b.las",
+       "Name": "syn-w2b.las",
+       "FileSize": "321",
+       "Checksum": "b18ba0177eaeb34d77680503bb9de0a6c696a1ca88ded164211790f3b495f03d",
+       "ChecksumAlgorithm": "SHA-256"
+      }
+     }
+    }
+   },
+   {
+    "id": "synthetic:dataset--File.Generic:file-1d74e9cb6a6f3fd52e754c0380126791",
+    "kind": "osdu:wks:dataset--File.Generic:1.1.0",
+    "acl": {
+     "owners": [
+      "data.default.owners@{{DATA_PARTITION}}"
+     ],
+     "viewers": [
+      "data.default.viewers@{{DATA_PARTITION}}"
+     ]
+    },
+    "legal": {
+     "legaltags": [
+      "{{LEGAL_TAG}}"
+     ],
+     "otherRelevantDataCountries": []
+    },
+    "data": {
+     "Name": "syn-w3.las",
+     "DatasetProperties": {
+      "FileSourceInfo": {
+       "FileSource": "originals/syn-w3.las",
+       "Name": "syn-w3.las",
+       "FileSize": "384",
+       "Checksum": "e09474862ae51b2f9363b20d4e50159e0cd7613c7cda40ffb8569a69d509d73a",
+       "ChecksumAlgorithm": "SHA-256"
+      }
+     }
+    }
+   },
+   {
+    "id": "synthetic:dataset--File.Generic:file-a5932e2c9ae6a2963fd1987d02373265",
+    "kind": "osdu:wks:dataset--File.Generic:1.1.0",
+    "acl": {
+     "owners": [
+      "data.default.owners@{{DATA_PARTITION}}"
+     ],
+     "viewers": [
+      "data.default.viewers@{{DATA_PARTITION}}"
+     ]
+    },
+    "legal": {
+     "legaltags": [
+      "{{LEGAL_TAG}}"
+     ],
+     "otherRelevantDataCountries": []
+    },
+    "data": {
+     "Name": "syn-w4.las",
+     "DatasetProperties": {
+      "FileSourceInfo": {
+       "FileSource": "originals/syn-w4.las",
+       "Name": "syn-w4.las",
+       "FileSize": "307",
+       "Checksum": "40adc57baf9165156f3bfe0d8f94545ecac6d335efd850ca3984343b4565f554",
+       "ChecksumAlgorithm": "SHA-256"
+      }
+     }
+    }
+   },
+   {
+    "id": "synthetic:dataset--File.Generic:file-b0d589092d1143c8d49c4316cba6ead1",
+    "kind": "osdu:wks:dataset--File.Generic:1.1.0",
+    "acl": {
+     "owners": [
+      "data.default.owners@{{DATA_PARTITION}}"
+     ],
+     "viewers": [
+      "data.default.viewers@{{DATA_PARTITION}}"
+     ]
+    },
+    "legal": {
+     "legaltags": [
+      "{{LEGAL_TAG}}"
+     ],
+     "otherRelevantDataCountries": []
+    },
+    "data": {
+     "Name": "syn-w4b.las",
+     "DatasetProperties": {
+      "FileSourceInfo": {
+       "FileSource": "originals/syn-w4b.las",
+       "Name": "syn-w4b.las",
+       "FileSize": "316",
+       "Checksum": "4ca54d0dfbed437290ecf12b58d682686ec4e02140cd791924f58127fde3da8b",
+       "ChecksumAlgorithm": "SHA-256"
+      }
+     }
+    }
+   }
+  ]
+ }
+}

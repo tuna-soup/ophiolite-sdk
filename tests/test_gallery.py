@@ -29,28 +29,37 @@ def ipc_folder():
     return folder
 
 
-def client(notebook, folder, sockets):
+def client(notebook, folder, sockets, kernel='python3'):
     """H23: the kernel's channels over IPC sockets in SOCKETS, not TCP ports: a port chosen free can be taken by another
     process before the kernel binds it (Visual 37884770925, sdk-templates: 'Address already in use', port 32777)."""
     from traitlets.config import Config
     nbclient = pytest.importorskip('nbclient')
     config = Config({'KernelManager': {'transport': 'ipc', 'ip': os.path.join(sockets, 'kernel')}})
-    return nbclient.NotebookClient(notebook, timeout=120, kernel_name='python3', resources={'metadata': {'path': str(folder)}}, config=config)
+    return nbclient.NotebookClient(notebook, timeout=120, kernel_name=kernel, resources={'metadata': {'path': str(folder)}}, config=config)
 
 
-def run(slug, tmp_path, monkeypatch, check=None):
+# E116 s5 C5 (D3): the kernel whose environment also has ophiolite-mapper installed (visual.yml's sdk-templates job makes
+# it); `python3`, the same environment without the box, runs every other notebook test.
+BOX_KERNEL = 'ophiolite-gallery-box'
+
+
+def run(slug, tmp_path, monkeypatch, check=None, kernel='python3', twice=False):
     if os.environ.get('OPHIOLITE_RUN_TEMPLATES') != '1': pytest.skip('Provision the notebook lock and an installed SDK, and run the required template lane')
     nbformat = pytest.importorskip('nbformat'); nbclient = pytest.importorskip('nbclient')
+    if kernel != 'python3':
+        from jupyter_client.kernelspec import KernelSpecManager
+        if kernel not in KernelSpecManager().find_kernel_specs(): pytest.skip(f'Install the {kernel} kernel (visual.yml sdk-templates) to run this notebook with ophiolite-mapper')
     for name in [k for k in os.environ if k.startswith('OPHIOLITE_') or k == 'PYTHONPATH']: monkeypatch.delenv(name)
     monkeypatch.setenv('HOME', str(tmp_path))  # no saved sign-in, no address: the synthetic mode a new reader gets
     folder = tmp_path / 'download'; folder.mkdir()
     shutil.copy(ROOT / 'notebooks' / slug / 'notebook.ipynb', folder / (slug + '.ipynb'))
     notebook = nbformat.read(folder / (slug + '.ipynb'), as_version=4)
+    if twice: notebook.cells += [nbformat.v4.new_code_cell(cell.source) for cell in notebook.cells if cell.cell_type == 'code']  # E116 s5: Run all again, same session
     if check: notebook.cells.append(nbformat.v4.new_code_cell(check + '\nprint("CHECKED")'))  # E126b: asserts on the notebook's own variables
     notebook.cells.append(nbformat.v4.new_code_cell('import ophiolite\nprint("SDK:", ophiolite.__file__)'))
     sockets = ipc_folder()
     try:
-        executed = client(notebook, folder, sockets).execute()
+        executed = client(notebook, folder, sockets, kernel).execute()
     finally:
         shutil.rmtree(sockets, ignore_errors=True)
     outputs = [output for cell in executed.cells for output in cell.get('outputs', [])]
@@ -84,9 +93,23 @@ def test_the_gallery_kernel_talks_over_ipc_sockets(tmp_path):
 
 
 def test_read_a_well_log_runs_from_an_empty_directory(tmp_path, monkeypatch):
-    text = run('read-a-well-log', tmp_path, monkeypatch)
+    text = run('read-a-well-log', tmp_path, monkeypatch, check='assert not mapped')
     assert 'Synthetic gamma ray - 5 samples of GR in gAPI against depth in M' in text
     assert 'Missing samples stay missing: 1 of 5 at [102.0] M' in text
+    assert 'With ophiolite-mapper installed (pip install "ophiolite-mapper[las]"), this log is first made into a project folder' in text
+
+
+def test_read_a_well_log_with_the_mapper_reads_the_curve_back_from_its_project_folder(tmp_path, monkeypatch):
+    """E116 s5 C5 (D3): with ophiolite-mapper in the kernel, the synthetic LAS file goes through inspect, the recipe's
+    decisions and write, open_bundle checks the folder, and the curve is read from items/well-log.parquet; twice in
+    one session. Literals from the notebook's LAS text. Mutations: the null zero-filled; the bare branch taken."""
+    text = run('read-a-well-log', tmp_path, monkeypatch, kernel=BOX_KERNEL, twice=True, check='\n'.join([
+        'assert mapped and (unit, depth_unit) == ("gAPI", "M")',
+        'assert depths == [100.0, 101.0, 102.0, 103.0, 104.0] and values == [45.2, 60.1, None, 82.0, 75.5], (depths, values)',
+        'assert missing == [102.0] and {row["path"] for row in folder.folder} >= {"items/well-log.parquet", "originals/synthetic.las", "osdu/manifest.json"}']))
+    assert text.count('Read back from the project folder: 8 files checked, items/well-log.parquet among them') == 2
+    assert text.count('synthetic.las - 5 samples of GR in gAPI against depth in M') == 2 and 'Missing samples stay missing: 1 of 5 at [102.0] M' in text
+    assert 'With ophiolite-mapper installed' not in text and 'Synthetic gamma ray' not in text
 
 
 def test_shale_volume_runs_publishes_two_versions_and_prints_the_hand_worked_means(tmp_path, monkeypatch):
@@ -163,17 +186,44 @@ def test_layers_for_a_gis_follows_the_next_link_and_says_why_a_path_is_not_place
 
 
 def test_where_are_my_wells_draws_the_located_wells_and_reads_a_well_with_its_wellbore_synthetic(tmp_path, monkeypatch):
-    text = run('where-are-my-wells', tmp_path, monkeypatch)
+    text = run('where-are-my-wells', tmp_path, monkeypatch, check='assert not mapped')
     assert '2 wells located, within [5.1, 52.1, 6.2, 52.9] (longitude and latitude)' in text
     assert '3 wells, 2 located, 1 without a location' in text and 'Wrote where-are-my-wells.png with 2 wells' in text
     assert 'Synthetic well 1: 0 filed on the well, 1 with its wellbores' in text and '  Synthetic well 1 main: 1' in text  # E66
+    assert 'With ophiolite-mapper installed (pip install ophiolite-mapper), these wells are first made into a project folder' in text
+
+
+def test_where_are_my_wells_with_the_mapper_draws_the_wells_read_back_from_its_project_folder(tmp_path, monkeypatch):
+    """E116 s5 C5 (D3): with ophiolite-mapper in the kernel, the synthetic table goes through inspect, the recipe's
+    decisions and write, open_bundle checks the folder, and two wells' easting and northing come from
+    items/wells.parquet; twice in one session. Mutations: x and y swapped; the bare branch taken."""
+    text = run('where-are-my-wells', tmp_path, monkeypatch, kernel=BOX_KERNEL, twice=True, check='\n'.join([
+        'xy = located.set_index("name")[["x", "y"]]',
+        'assert mapped and xy.loc["Synthetic 1"].tolist() == [431000.0, 6521000.0] and xy.loc["Synthetic 2"].tolist() == [431250.5, 6521125.0], xy',
+        'assert len(frame) == 3 and "items/wells.parquet" in {row["path"] for row in folder.folder}']))
+    assert text.count('Read back from the project folder: 8 files checked, items/wells.parquet among them') == 2
+    assert '3 wells located, in EPSG:23031 (easting and northing, metres)' in text and text.count('Wrote where-are-my-wells.png with 3 wells') == 2
+    assert 'The project folder holds the wells only; set OPHIOLITE_URL' in text and 'longitude and latitude' not in text
 
 
 def test_well_logs_in_a_bucket_pins_its_logs_and_reports_a_changed_one_synthetic(tmp_path, monkeypatch):
-    text = run('well-logs-in-a-bucket', tmp_path, monkeypatch)
+    text = run('well-logs-in-a-bucket', tmp_path, monkeypatch, check='assert not mapped')
     assert 'wells/: 3 files' in text and 'W-1/gamma.las' in text and 'notes.txt' in text and 'only as a copy' in text
     assert 'Synthetic mode: nothing is sent. In your project the 2 logs are added' in text
     assert 'After W-1/gamma.las changed: a different digest; reading it reports that the revision is unavailable' in text
+    assert 'With ophiolite-mapper installed (pip install "ophiolite-mapper[las]"), these logs are made into a project folder' in text
+
+
+def test_well_logs_in_a_bucket_with_the_mapper_keeps_its_logs_and_refuses_a_changed_one(tmp_path, monkeypatch):
+    """E116 s5 C5 (D3): with ophiolite-mapper in the kernel, the two logs go through inspect, the recipe's decisions and
+    write; the folder keeps each original at the digest of its bytes (open_bundle's rows), and a write after one log
+    changed is refused; twice in one session. Mutations: the change not made; the bare branch taken."""
+    text = run('well-logs-in-a-bucket', tmp_path, monkeypatch, kernel=BOX_KERNEL, twice=True, check='\n'.join([
+        'assert mapped and sorted(kept) == ["originals/W-1.las", "originals/W-2.las"] and again == 2, (kept, again)',
+        'assert hashlib.sha256((logs / "W-1.las").read_bytes()).hexdigest() != kept["originals/W-1.las"]']))
+    assert text.count('Synthetic mode: nothing is sent. The project folder keeps the 2 logs at these digests:') == 2
+    assert text.count('After W-1.las changed: writing the folder again is refused, because the log is not the one the recipe read.') == 2
+    assert 'wells/: 3 files' in text and 'In your project the 2 logs are added' not in text and 'With ophiolite-mapper installed' not in text
 
 
 def test_wells_from_sql_server_and_oracle_compares_both_systems_on_this_computer_synthetic(tmp_path, monkeypatch):

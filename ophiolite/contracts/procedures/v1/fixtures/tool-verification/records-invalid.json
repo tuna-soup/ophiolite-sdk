@@ -1,0 +1,19 @@
+{
+  "note": "E165 s0 (R9, R13): records the contract refuses, one defect each on the first valid record of records.json. `set` replaces top-level fields, `reference` replaces the reference, `drop` removes a reference field. Each case is refused by the model and, separately, by the published JSON Schema.",
+  "cases": [
+    {"name": "a publication without a link", "set": {"kind": "publication"},
+     "reference": {"title": "Shift corrections in deviated wells", "authors": ["A. Example"], "year": 2019}},
+    {"name": "kind check with a publication reference",
+     "reference": {"title": "Shift corrections in deviated wells", "authors": ["A. Example"], "year": 2019,
+                   "link": {"kind": "doi", "value": "10.0000/synthetic.example"}}},
+    {"name": "kind withdrawn with a check reference", "set": {"kind": "withdrawn"}},
+    {"name": "an agent author", "set": {"by": {"kind": "agent", "id": "a-helper", "name_at_time": "Helper"}}},
+    {"name": "an id of the wrong form", "set": {"id": "verification-1"}},
+    {"name": "an unknown field", "set": {"verified": true}},
+    {"name": "kind witnessed (E113's)", "set": {"kind": "witnessed"}},
+    {"name": "a link of another kind", "set": {"kind": "publication"},
+     "reference": {"title": "A method note", "authors": ["C. Example"], "year": 2024, "link": {"kind": "isbn", "value": "0000000000"}}},
+    {"name": "a statement over 2000 characters", "set": {"statement": "REPEAT:2001"}},
+    {"name": "a digest that is not 64 hex", "set": {"digest": "edf86682"}}
+  ]
+}

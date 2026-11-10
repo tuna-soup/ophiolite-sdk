@@ -32,5 +32,7 @@
   },
   "table_target": {
     "none": "read-by-recipe"
-  }
+  },
+  "osdu_kind": null,
+  "osdu_kind_reason": "work-product-component--GenericRepresentation is not a kind the box vendors at v0.30.1"
 }

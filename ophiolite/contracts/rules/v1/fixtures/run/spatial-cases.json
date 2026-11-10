@@ -1,0 +1,165 @@
+[
+ {
+  "name": "points-rd",
+  "kind": "points-csv/1",
+  "file": "points-rd.csv",
+  "declared": {
+   "crs": "EPSG:28992"
+  },
+  "planted": {
+   "in-area-of-use/1": {
+    "count": 7,
+    "rows": [
+     5,
+     6,
+     7,
+     8,
+     13,
+     14,
+     15
+    ]
+   }
+  }
+ },
+ {
+  "name": "points-etrs89",
+  "kind": "points-csv/1",
+  "file": "points-etrs89.csv",
+  "declared": {
+   "crs": "EPSG:4258"
+  },
+  "planted": {
+   "in-area-of-use/1": {
+    "count": 5,
+    "rows": [
+     5,
+     6,
+     7,
+     8,
+     9
+    ]
+   }
+  }
+ },
+ {
+  "name": "points-unknown",
+  "kind": "points-csv/1",
+  "file": "points-rd.csv",
+  "declared": {
+   "crs": "unknown"
+  },
+  "planted": {
+   "in-area-of-use/1": null
+  }
+ },
+ {
+  "name": "points-uncatalogued",
+  "kind": "points-csv/1",
+  "file": "points-rd.csv",
+  "declared": {
+   "crs": "EPSG:2154"
+  },
+  "planted": {
+   "in-area-of-use/1": null
+  }
+ },
+ {
+  "name": "grid-rd",
+  "kind": "esri-ascii-grid/1",
+  "file": "grid-rd.asc",
+  "declared": {
+   "crs": "EPSG:28992"
+  },
+  "planted": {
+   "in-area-of-use/1": {
+    "count": 4,
+    "rows": [
+     3,
+     6,
+     7,
+     8
+    ]
+   }
+  }
+ },
+ {
+  "name": "features-rd",
+  "kind": "geojson/1",
+  "file": "features-rd.geojson",
+  "declared": null,
+  "planted": {
+   "geometry-present/1": {
+    "count": 1,
+    "rows": [
+     2
+    ]
+   },
+   "in-area-of-use/1": {
+    "count": 2,
+    "rows": [
+     3,
+     4
+    ]
+   }
+  }
+ },
+ {
+  "name": "line-ed50",
+  "kind": "segy-line/1",
+  "file": "line-ed50.sgy",
+  "declared": {
+   "z_domain": "time",
+   "crs": "EPSG:23031"
+  },
+  "planted": {
+   "in-area-of-use/1": {
+    "count": 2,
+    "rows": [
+     3,
+     4
+    ]
+   },
+   "trace-order/1": {
+    "count": 1,
+    "rows": [
+     3
+    ]
+   }
+  }
+ },
+ {
+  "name": "line-descending",
+  "kind": "segy-line/1",
+  "file": "line-descending.sgy",
+  "declared": {
+   "z_domain": "time",
+   "crs": "unknown"
+  },
+  "planted": {
+   "in-area-of-use/1": null,
+   "trace-order/1": {
+    "count": 0,
+    "rows": []
+   }
+  }
+ },
+ {
+  "name": "line-single",
+  "kind": "segy-line/1",
+  "file": "line-single.sgy",
+  "declared": {
+   "z_domain": "time",
+   "crs": "EPSG:23031"
+  },
+  "planted": {
+   "in-area-of-use/1": {
+    "count": 0,
+    "rows": []
+   },
+   "trace-order/1": {
+    "count": 0,
+    "rows": []
+   }
+  }
+ }
+]

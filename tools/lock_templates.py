@@ -8,7 +8,8 @@ import argparse
 import re
 import subprocess
 import tempfile
-import tomllib
+try: import tomllib
+except ModuleNotFoundError: import tomli as tomllib  # Python 3.10 (the dev extra installs tomli there)
 import zipfile
 from email import message_from_bytes
 from pathlib import Path

@@ -1,0 +1,15 @@
+{
+  "description": "Single-defect reviewed files (E116 s4): each case applies its edits to valid/<base>.json (set replaces or adds the value at the path, delete removes it) and names mapper.check_reviewed's code and JSON path. by: schema means reviewed-schema.json refuses it too (JSON Schema Draft 2020-12); by: validator means only mapper.py does.",
+  "cases": [
+    {"name": "other-schema", "base": "picks", "set": [[["schema"], "ophiolite.mapper-reviewed"]], "code": "schema-const", "path": "$.schema", "by": "schema"},
+    {"name": "unknown-key", "base": "picks", "set": [[["layouts"], []]], "code": "schema-additionalProperties", "path": "$.layouts", "by": "schema"},
+    {"name": "digest-not-hex", "base": "picks", "set": [[["picks", 0, "schema_digest"], "sha256:aaaa"]], "code": "schema-pattern", "path": "$.picks[0].schema_digest", "by": "schema"},
+    {"name": "two-picks-of-one-key", "base": "picks", "set": [[["picks", 2, "table", "sheet"], "Wells"]], "code": "pick-repeated", "path": "$.picks[2]", "by": "validator"},
+    {"name": "two-aliases-of-one-spelling", "base": "picks", "set": [[["aliases", 1], {"target": "wells", "spelling": "syn-a03", "canonical": "SYN-A4", "recipe_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "at": "2026-11-04T12:11:00Z"}]], "code": "alias-repeated", "path": "$.aliases[1]", "by": "validator"},
+    {"name": "a-secret-in-the-locator", "base": "picks", "set": [[["picks", 3, "table", "locator", "secret"], "x"]], "code": "schema-additionalProperties", "path": "$.picks[3].table.locator.secret", "by": "validator"},
+    {"name": "credentials-in-the-endpoint", "base": "picks", "set": [[["picks", 3, "table", "locator", "endpoint"], "https://reader@objects.example.org"]], "code": "locator-credentials", "path": "$.picks[3].table.locator.endpoint", "by": "validator"},
+    {"name": "a-sheet-of-a-bucket", "base": "picks", "set": [[["picks", 3, "table", "sheet"], "Wells"]], "code": "reading-misplaced", "path": "$.picks[3].table.sheet", "by": "validator"},
+    {"name": "at-without-zone", "base": "picks", "set": [[["picks", 1, "at"], "2026-11-04T12:11:00"]], "code": "at-invalid", "path": "$.picks[1].at", "by": "validator"},
+    {"name": "too-many-picks", "base": "picks", "repeat": [["picks"], 1001], "code": "schema-items", "path": "$.picks", "by": "schema"}
+  ]
+}

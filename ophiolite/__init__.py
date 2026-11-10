@@ -1,6 +1,17 @@
 """Preview scientific client. Local import never initializes credentials or transport."""
 from ._version import __version__
 
+# E163 s1: what `from ophiolite import *` and an editor show; each name is still served lazily by __getattr__.
+# Left out but still served: __contracts__ (a dunder), procedure (D78: `tool` is the word) and oauth_app (its
+# submodule of the same name replaces it as an attribute once imported).
+__all__ = ['Client', 'Credential', 'CurveSet', 'AsyncClient', 'Descriptor', 'connect', 'Account', 'Sync', 'Checkpoint',
+           'ResyncRequired', 'tool', 'tools', 'compared', 'delivered', 'refused', 'not_delivered', 'unknown',
+           'WrittenOriginal', 'OAuthApp', 'OphioliteDeprecationWarning', 'kinds', 'profiles_for']
+
+
+def __dir__():
+    return sorted(set(globals()) | set(__all__) | {'__contracts__', 'procedure', 'oauth_app'})
+
 
 def __getattr__(name):
     if name == 'AsyncClient':
@@ -40,8 +51,14 @@ def __getattr__(name):
         from .writers import WrittenOriginal
         return WrittenOriginal
     if name in ('OAuthApp', 'oauth_app'):  # E33: colleagues sign in to your application's server
-        from . import oauth_app
-        return getattr(oauth_app, name)
+        import importlib  # E163 s1: `from . import oauth_app` asks this function for `oauth_app` first and never returns
+        return getattr(importlib.import_module('.oauth_app', __name__), name)
+    if name == 'OphioliteDeprecationWarning':  # E148: a server answered a deprecated route
+        from ._deprecation import OphioliteDeprecationWarning
+        return OphioliteDeprecationWarning
+    if name in ('kinds', 'profiles_for'):  # E168 s1: the export matrix's OSDU kinds, read from the packaged table
+        from . import osdu
+        return getattr(osdu, name)
     if name in ('Client', 'CurveSet', 'Credential'):
         from . import client
         return getattr(client, name)

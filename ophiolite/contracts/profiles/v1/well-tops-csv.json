@@ -29,5 +29,7 @@
     "normalized": 1,
     "total": 2
   },
-  "table_target": "ophiolite.table-target/well-tops/1"
+  "table_target": "ophiolite.table-target/well-tops/1",
+  "osdu_kind": "osdu:wks:work-product-component--WellboreMarkerSet:1.5.1",
+  "osdu_kind_reason": null
 }

@@ -1,0 +1,9 @@
+{
+ "schema": "ophiolite.data-rules/1",
+ "id": "ophiolite.data-rules/1",
+ "current": "1.1.0",
+ "snapshots": [
+  {"registry_version": "1.0.0", "path": "registries/1.0.0.json", "sha256": "1bf79c1eea429997a212ff84f046de2fe0f91c5070e7b033e2960b37c9698568"},
+  {"registry_version": "1.1.0", "path": "registries/1.1.0.json", "sha256": "76814b9d7c880b2729562adf4eb3f534380476eabe080a1e4fcce216a75bfff9"}
+ ]
+}

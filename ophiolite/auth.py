@@ -68,8 +68,10 @@ def _token(value):
     return value
 
 
-def request(url, body=None, headers=None, *, form=False, http=None, empty=False):
-    """One bounded request; refresh and mutation requests are never replayed."""
+def request(url, body=None, headers=None, *, form=False, http=None, empty=False, notifier=None):
+    """One bounded request; refresh and mutation requests are never replayed. `notifier` (E148): the owning client's,
+    for an Ophiolite server's answer; a provider's token endpoint passes none."""
+    from . import _deprecation
     owns = http is None
     client = http or httpx.Client(timeout=30, follow_redirects=False, trust_env=False)
     try:
@@ -77,6 +79,7 @@ def request(url, body=None, headers=None, *, form=False, http=None, empty=False)
         if body is not None:
             kwargs['data' if form else 'json'] = body
         with client.stream('GET' if body is None else 'POST', url, **kwargs) as response:
+            _deprecation.note(notifier, 'GET' if body is None else 'POST', url, response)
             if 300 <= response.status_code < 400:
                 _fail('Authentication redirect refused; check the configured endpoint.')
             raw = bytearray()
@@ -151,7 +154,7 @@ def _read(path):
             _token(data['access_key'])
             if not data['access_key'].startswith(KEY_PREFIX): raise ValueError()
         except (KeyError, TypeError, ValueError):
-            _fail('Invalid saved project access key. Run ophiolite login --key again.')
+            _fail('Invalid saved project access key. Run ophiolite account login --key again.')
         return value
     try:
         origin(data['url'])
@@ -340,7 +343,7 @@ class Credential:
 
     def revoke(self):
         if self.path is None: _fail('Open an SDK credential store before revoking it.')
-        if self.kind == 'access_key': _fail('A project access key is removed from the account page; ophiolite logout removes only this copy.')
+        if self.kind == 'access_key': _fail('A project access key is removed from the account page; ophiolite account logout removes only this copy.')
         failures = []
         with _lock(self.path):
             value = self._current()

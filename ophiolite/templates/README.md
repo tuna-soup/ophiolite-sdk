@@ -1,6 +1,6 @@
 # Start with a working scientific example
 
-These preview templates start an application on the public SDK. Copy one with `ophiolite init <name>
+These preview templates start an application on the public SDK. Copy one with `ophiolite tools init <name>
 [--output DIR]` (the templates ship inside the SDK wheel), or from this directory.
 
 - **map-application:** wells on a web map (MapLibre GL); a Python backend holds the credential.
@@ -23,7 +23,7 @@ The SDK reference is the immutable accepted C7 source commit. Locks were resolve
 against its built wheel; no developer filesystem path is in the locks. The React
 project also requires Node 22 and `npm ci`. See each README for commands.
 
-For real data, set `OPHIOLITE_URL` and `OPHIOLITE_PROJECT`, run `ophiolite login`,
+For real data, set `OPHIOLITE_URL` and `OPHIOLITE_PROJECT`, run `ophiolite account login`,
 and choose the actions explicitly. The SDK owns private credential discovery and
 refresh; `OPHIOLITE_CREDENTIAL` can select an explicit SDK credential file. No
 credential belongs in configuration examples, notebooks, browser storage or Git.

@@ -1,4 +1,4 @@
-"""E94: a story page (`results/story` or `results/dependents`) as plain lines, the way `ophiolite story` prints it.
+"""E94: a story page (`results/story` or `results/dependents`) as plain lines, the way `ophiolite results story` prints it.
 
 The Workspace words the same JSON in the Journey's sentences with dates in words (its app/tests/story.mjs); these lines
 keep ISO dates. Identifiers stay out of the lines: they are under `technical` in the JSON (`--json`)."""
@@ -95,6 +95,8 @@ def details(node, names):
     again = node.get('made_again_from')
     if again: out.append('Made again from %s.' % _title(again))
     if node.get('newer_input'): out.append('Newer input available.')
+    moved = node.get('migration')
+    if moved: out.append('Saved in a newer format from version %s.' % moved['from_profile'].rsplit('/', 1)[-1])  # E148 s3 (V1): the profile ids stay in the JSON
     out.extend(v['line'] for v in node.get('verdicts') or [])  # E132: the server's line, verbatim (a reason keeps its newlines)
     return out
 

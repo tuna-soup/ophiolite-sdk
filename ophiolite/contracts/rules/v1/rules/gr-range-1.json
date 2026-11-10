@@ -1,0 +1,16 @@
+{
+ "schema": "ophiolite.data-rule/1",
+ "id": "gr-range/1",
+ "title": "Gamma ray within its plausible range",
+ "description": "Every Gamma Ray sample lies from minimum to maximum, both included. A curve is Gamma Ray when its upper-cased mnemonic is in the Gamma Ray quantity's suggest_from mnemonics and its unit, as written, is in that quantity's units (quantities.json); all such curves are checked. A sample equal to the header NULL, or missing, is not a value. A data row fails once; its example is the first failing sample in ~Curve order. No Gamma Ray curve: not applicable (no-column).",
+ "class": "file-local",
+ "kinds": ["las2/1"],
+ "context_kinds": null,
+ "severity": "warn",
+ "parameters": [
+  {"name": "minimum", "type": "quantity", "unit": "gAPI", "default": 0, "minimum": 0, "maximum": 0, "compare": "inclusive", "choices": null, "source": "API units are counted against the University of Houston calibration pit of 200 API units (Kansas Geological Survey, Geological Log Analysis, The Gamma Ray Log); a reading below zero is not a measurement."},
+  {"name": "maximum", "type": "quantity", "unit": "gAPI", "default": 4000, "minimum": 150, "maximum": 5000, "compare": "inclusive", "choices": null, "source": "Kansas Geological Survey, Geological Log Analysis, The Gamma Ray Log: about 3700 API units is the most expected for the black shale with the most elevated uranium content; rounded up to 4000."}
+ ],
+ "words": {"template": "{count} rows have a gamma ray outside {minimum} to {maximum}, the first at {first}.", "examples": "depths"},
+ "since": "1.1.0"
+}

@@ -13,7 +13,8 @@ import os
 import socket
 import subprocess
 import sys
-import tomllib
+try: import tomllib
+except ModuleNotFoundError: import tomli as tomllib  # Python 3.10 (the dev extra installs tomli there)
 from pathlib import Path
 
 import pytest

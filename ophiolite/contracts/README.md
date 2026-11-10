@@ -16,6 +16,7 @@ itself, so it can move to a public Contracts repository without renaming.
 | `relationships/v1/` | the relationship predicate registry (E20) and the lineage document schema |
 | `entities/v1/` | the entity (well, wellbore) and entity-assets schemas (E20) |
 | `connectors/v1/` | the connector semantics vocabulary, copied byte for byte into Connectors and pinned by digest there |
+| `osdu/v1/` | the OSDU compatibility summary (E167 s1): `compatibility.json`, served to a person and a tool, "not yet verified" until a dated load record lands; its schema and its one check |
 | `tools/generate.py` | maintainer generator for every derived document |
 
 The gateway loads the index and every document it names at start

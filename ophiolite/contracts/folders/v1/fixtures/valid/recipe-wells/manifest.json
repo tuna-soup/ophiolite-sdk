@@ -1,0 +1,91 @@
+{
+  "schema": "ophiolite.portable-bundle/2",
+  "bundle_version": "2.14.0",
+  "created_at": "2026-11-04T09:00:00Z",
+  "exporter": {
+    "name": "ophiolite-mapper",
+    "version": "0.3.0"
+  },
+  "scope": "selection",
+  "selection": [],
+  "assets": [],
+  "groups": null,
+  "recommendations": null,
+  "limits": {
+    "max_assets": 128,
+    "max_file_bytes": 33554432,
+    "max_total_bytes": 536870912
+  },
+  "notice": "Checksums show the integrity of this copy, not authorship or scientific correctness. Exported copies cannot be recalled; holding one grants no new upstream, sharing or AI-training rights.",
+  "folder": {
+    "schema": "ophiolite.project-folder/2",
+    "writer": {
+      "name": "ophiolite-mapper",
+      "version": "0.3.0"
+    },
+    "recipe": {
+      "path": "recipe.json",
+      "sha256": "bb30eeefb567902186a02c61c942874a5637646ef16661ad55916d2e834c5071"
+    },
+    "osdu": {
+      "tag": "v0.30.1",
+      "commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
+      "namespace": "synthetic"
+    },
+    "items": [
+      {
+        "path": "items/wells.parquet",
+        "profile": "ophiolite.table-target/wells/1",
+        "kind": "wells",
+        "osdu": {
+          "kind": "osdu:wks:master-data--Well:1.5.0"
+        },
+        "declarations": [
+          {
+            "name": "crs",
+            "value": "EPSG:28992"
+          },
+          {
+            "name": "depth_unit",
+            "value": "m"
+          }
+        ],
+        "rows": 4
+      }
+    ],
+    "files": [
+      {
+        "path": "recipe.json",
+        "role": "recipe",
+        "media_type": "application/json",
+        "asset": null,
+        "sha256": "bb30eeefb567902186a02c61c942874a5637646ef16661ad55916d2e834c5071",
+        "bytes": 3556
+      },
+      {
+        "path": "originals/wells.csv",
+        "role": "original",
+        "media_type": "text/csv",
+        "asset": null,
+        "sha256": "a4755b91553e5a0387fc1c5c1389691ed5851548b53836ed25b0bb06618c1f83",
+        "bytes": 172
+      },
+      {
+        "path": "items/wells.parquet",
+        "role": "item",
+        "media_type": "application/vnd.apache.parquet",
+        "asset": null,
+        "sha256": "75f380353b31e69e96716ac512b8acbd3b1369757020a9f517d1a48a0a27974e",
+        "bytes": 2966
+      },
+      {
+        "path": "lineage/prov.json",
+        "role": "lineage-prov",
+        "media_type": "application/json",
+        "asset": null,
+        "sha256": "25c19855d1993d1c98d12fe9ec95b88d9096214b288fb848aa01bbc493132350",
+        "bytes": 2345
+      }
+    ]
+  }
+}

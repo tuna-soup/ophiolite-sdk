@@ -2,7 +2,8 @@
  "schema": "ophiolite.outcome-fixtures/1",
  "valid": [
   "tops-within-5m",
-  "tops-within-1m"
+  "tops-within-1m",
+  "tops-within-5m-on-path"
  ],
  "invalid": {
   "unknown-key": "schema",
@@ -11,6 +12,10 @@
   "without-well-set": "inputs",
   "with-las2": "inputs",
   "identifier-label": "label",
-  "address-in-destination": "destination"
+  "address-in-destination": "destination",
+  "named-rules-none": "schema",
+  "named-rule-not-allowed": "data_rules",
+  "named-rules-unsorted": "data_rules",
+  "named-rules-twice": "data_rules"
  }
 }

@@ -1,0 +1,44 @@
+{
+  "description": "Synthetic identity rows for four wells SYN-A1 to SYN-A4, one wellbore each: six aliases (four canonical, two accepted), four part-of rows (wellbore to well) and four of-entity rows (a representation's payload to its wellbore, E20's direction); SYN-A5X stayed unmatched. invalid edits these rows (set as recipe/invalid.json) and names mapper.check_tables' code and path.",
+  "tables": {
+    "identity/entities.parquet": [
+      {"entity_id": "SYN-A1", "kind": "well", "basis": "external", "external_id": "SYN-EXT-0001", "name": "SYN-A1", "osdu_id": "synthetic:master-data--Well:SYN-A1"},
+      {"entity_id": "SYN-A2", "kind": "well", "basis": "external", "external_id": "SYN-EXT-0002", "name": "SYN-A2", "osdu_id": "synthetic:master-data--Well:SYN-A2"},
+      {"entity_id": "SYN-A3", "kind": "well", "basis": "provisional", "external_id": null, "name": "SYN-A3", "osdu_id": "synthetic:master-data--Well:SYN-A3"},
+      {"entity_id": "SYN-A4", "kind": "well", "basis": "provisional", "external_id": null, "name": "SYN-A4", "osdu_id": "synthetic:master-data--Well:SYN-A4"},
+      {"entity_id": "SYN-A1-B1", "kind": "wellbore", "basis": "external", "external_id": "SYN-EXT-0001-1", "name": "SYN-A1-B1", "osdu_id": "synthetic:master-data--Wellbore:SYN-A1-B1"},
+      {"entity_id": "SYN-A2-B1", "kind": "wellbore", "basis": "external", "external_id": "SYN-EXT-0002-1", "name": "SYN-A2-B1", "osdu_id": "synthetic:master-data--Wellbore:SYN-A2-B1"},
+      {"entity_id": "SYN-A3-B1", "kind": "wellbore", "basis": "provisional", "external_id": null, "name": "SYN-A3-B1", "osdu_id": "synthetic:master-data--Wellbore:SYN-A3-B1"},
+      {"entity_id": "SYN-A4-B1", "kind": "wellbore", "basis": "provisional", "external_id": null, "name": "SYN-A4-B1", "osdu_id": "synthetic:master-data--Wellbore:SYN-A4-B1"}
+    ],
+    "identity/aliases.parquet": [
+      {"entity_id": "SYN-A1", "spelling": "SYN-A1", "status": "canonical", "decided_by": null, "decided_at": null},
+      {"entity_id": "SYN-A2", "spelling": "SYN-A2", "status": "canonical", "decided_by": null, "decided_at": null},
+      {"entity_id": "SYN-A3", "spelling": "SYN-A3", "status": "canonical", "decided_by": null, "decided_at": null},
+      {"entity_id": "SYN-A4", "spelling": "SYN-A4", "status": "canonical", "decided_by": null, "decided_at": null},
+      {"entity_id": "SYN-A1", "spelling": "SYN A-1", "status": "accepted", "decided_by": "A. Reviewer", "decided_at": "2026-11-02T12:06:00Z"},
+      {"entity_id": "SYN-A2", "spelling": "syn-a02", "status": "accepted", "decided_by": "A. Reviewer", "decided_at": "2026-11-02T12:06:00Z"}
+    ],
+    "identity/relationships.parquet": [
+      {"subject": "SYN-A1-B1", "subject_kind": "wellbore", "predicate": "part-of", "object": "SYN-A1", "object_kind": "well"},
+      {"subject": "SYN-A2-B1", "subject_kind": "wellbore", "predicate": "part-of", "object": "SYN-A2", "object_kind": "well"},
+      {"subject": "SYN-A3-B1", "subject_kind": "wellbore", "predicate": "part-of", "object": "SYN-A3", "object_kind": "well"},
+      {"subject": "SYN-A4-B1", "subject_kind": "wellbore", "predicate": "part-of", "object": "SYN-A4", "object_kind": "well"},
+      {"subject": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1", "subject_kind": "payload", "predicate": "of-entity", "object": "SYN-A1-B1", "object_kind": "wellbore"},
+      {"subject": "sha256:a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2", "subject_kind": "payload", "predicate": "of-entity", "object": "SYN-A2-B1", "object_kind": "wellbore"},
+      {"subject": "sha256:a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3", "subject_kind": "payload", "predicate": "of-entity", "object": "SYN-A3-B1", "object_kind": "wellbore"},
+      {"subject": "sha256:a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4", "subject_kind": "payload", "predicate": "of-entity", "object": "SYN-A4-B1", "object_kind": "wellbore"}
+    ]
+  },
+  "unmatched": ["SYN-A5X"],
+  "invalid": [
+    {"name": "of-entity-reversed", "set": [[["identity/relationships.parquet", 4], {"subject": "SYN-A1-B1", "subject_kind": "wellbore", "predicate": "of-entity", "object": "sha256:a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1", "object_kind": "payload"}]], "code": "table-value", "path": "identity/relationships.parquet[4].object_kind"},
+    {"name": "of-entity-reversed-kinds-only", "set": [[["identity/relationships.parquet", 4, "subject_kind"], "wellbore"]], "code": "predicate-kinds", "path": "identity/relationships.parquet[4]"},
+    {"name": "part-of-names-an-absent-well", "set": [[["identity/relationships.parquet", 0, "object"], "SYN-A9"]], "code": "entity-unknown", "path": "identity/relationships.parquet[0].object"},
+    {"name": "payload-not-a-digest", "set": [[["identity/relationships.parquet", 5, "subject"], "SYN-A2-B1"]], "code": "payload-subject", "path": "identity/relationships.parquet[5].subject"},
+    {"name": "alias-of-an-absent-entity", "set": [[["identity/aliases.parquet", 5, "entity_id"], "SYN-A9"]], "code": "entity-unknown", "path": "identity/aliases.parquet[5].entity_id"},
+    {"name": "name-null", "set": [[["identity/entities.parquet", 0, "name"], null]], "code": "table-null", "path": "identity/entities.parquet[0].name"},
+    {"name": "entity-id-twice", "set": [[["identity/entities.parquet", 1, "entity_id"], "SYN-A1"]], "code": "entity-repeated", "path": "identity/entities.parquet[1].entity_id"},
+    {"name": "part-of-ends-swapped", "set": [[["identity/relationships.parquet", 0, "subject"], "SYN-A1"], [["identity/relationships.parquet", 0, "object"], "SYN-A1-B1"]], "code": "entity-unknown", "path": "identity/relationships.parquet[0].subject"}
+  ]
+}

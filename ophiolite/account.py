@@ -9,6 +9,7 @@ import json
 from urllib.parse import quote
 import httpx
 from . import _client_header  # E93
+from . import _deprecation  # E148
 from ._core import origin
 from .access_history import AccessHistoryAccount  # E67b: teams and a person's access history (owners)
 from .errors import AuthenticationRequired, PermissionRefused, Refused, Unavailable
@@ -29,6 +30,7 @@ class Account(AccessHistoryAccount):
         if credential is None: raise Refused('Choose a credential (a project access key or a saved sign-in).')
         self._owns_http = http is None
         self.http = http or httpx.Client(timeout=60, follow_redirects=False, trust_env=False)
+        self._notifier = _deprecation.Notifier()  # E148: discovery and the organisation reads
 
     def close(self):
         if self._owns_http: self.http.close()
@@ -39,6 +41,7 @@ class Account(AccessHistoryAccount):
         headers = _client_header.stamp(self.credential.discovery_headers(self.url))  # E93
         try: response = self.http.post(self.url + '/api/v1/projects/' + quote(operation, safe=''), json=body, headers=headers, follow_redirects=False)
         except httpx.HTTPError: raise Unavailable('Cannot reach the service. Check its address and network connection.', code='unreachable') from None
+        _deprecation.note(_deprecation.of(self), 'POST', self.url + '/api/v1/projects/' + quote(operation, safe=''), response)
         if response.status_code != 200:
             from .application_transport import envelope, carried
             meta = envelope(response); more = {'code': meta.get('code'), **carried(meta)}  # E31

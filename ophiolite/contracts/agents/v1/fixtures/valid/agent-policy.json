@@ -1,0 +1,6 @@
+{
+  "schema": "ophiolite.agent-policy/1",
+  "project_id": "p",
+  "wait_hours": 24,
+  "generation": 0
+}

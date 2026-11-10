@@ -1,0 +1,383 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/surveys/v1/survey-revision-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.survey-revision/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "Identity": {
+      "additionalProperties": false,
+      "description": "External (authority, key) declared by a person, or provisional (both null).",
+      "properties": {
+        "authority": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Authority"
+        },
+        "key": {
+          "anyOf": [
+            {
+              "maxLength": 160,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Key"
+        },
+        "provisional": {
+          "title": "Provisional",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "provisional"
+      ],
+      "title": "Identity",
+      "type": "object"
+    },
+    "SurveyContext": {
+      "additionalProperties": false,
+      "description": "Defaults only: a member's own domain, units and datum always win (E123 precedence).",
+      "properties": {
+        "crs": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Crs"
+        },
+        "z_domain": {
+          "anyOf": [
+            {
+              "enum": [
+                "time",
+                "depth"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Z Domain"
+        },
+        "z_unit": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Z Unit"
+        },
+        "xy_unit": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Xy Unit"
+        },
+        "depth_unit": {
+          "anyOf": [
+            {
+              "maxLength": 64,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Depth Unit"
+        }
+      },
+      "title": "SurveyContext",
+      "type": "object"
+    },
+    "SurveyEntity": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "well",
+            "wellbore"
+          ],
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "kind"
+      ],
+      "title": "SurveyEntity",
+      "type": "object"
+    },
+    "SurveyMember": {
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "enum": [
+            "cube",
+            "line",
+            "horizon",
+            "fault-set",
+            "well",
+            "time-depth",
+            "pickset",
+            "other"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "asset_id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "entity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SurveyEntity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "role",
+        "asset_id",
+        "revision"
+      ],
+      "title": "SurveyMember",
+      "type": "object"
+    },
+    "SurveyMemberKey": {
+      "additionalProperties": false,
+      "properties": {
+        "asset_id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "asset_id",
+        "revision"
+      ],
+      "title": "SurveyMemberKey",
+      "type": "object"
+    },
+    "SurveyRelation": {
+      "additionalProperties": false,
+      "properties": {
+        "predicate": {
+          "enum": [
+            "horizon-of",
+            "fault-in",
+            "well-in",
+            "line-of",
+            "time-depth-of"
+          ],
+          "title": "Predicate",
+          "type": "string"
+        },
+        "subject": {
+          "$ref": "#/$defs/SurveyMemberKey"
+        },
+        "object": {
+          "$ref": "#/$defs/SurveyMemberKey"
+        }
+      },
+      "required": [
+        "predicate",
+        "subject",
+        "object"
+      ],
+      "title": "SurveyRelation",
+      "type": "object"
+    },
+    "SurveySource": {
+      "additionalProperties": false,
+      "description": "The producer reference D-4 reads: `<system>:<instance>` is the identity's authority, the container its key.",
+      "properties": {
+        "system": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$",
+          "title": "System",
+          "type": "string"
+        },
+        "instance": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$",
+          "title": "Instance",
+          "type": "string"
+        },
+        "container": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Container",
+          "type": "string"
+        }
+      },
+      "required": [
+        "system",
+        "instance",
+        "container"
+      ],
+      "title": "SurveySource",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "ophiolite.survey-revision/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "survey_id": {
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "title": "Survey Id",
+      "type": "string"
+    },
+    "number": {
+      "minimum": 1,
+      "title": "Number",
+      "type": "integer"
+    },
+    "name": {
+      "maxLength": 160,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "identity": {
+      "$ref": "#/$defs/Identity"
+    },
+    "source": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SurveySource"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "context": {
+      "$ref": "#/$defs/SurveyContext"
+    },
+    "members": {
+      "items": {
+        "$ref": "#/$defs/SurveyMember"
+      },
+      "maxItems": 10000,
+      "title": "Members",
+      "type": "array"
+    },
+    "relations": {
+      "items": {
+        "$ref": "#/$defs/SurveyRelation"
+      },
+      "maxItems": 20000,
+      "title": "Relations",
+      "type": "array"
+    },
+    "created_at": {
+      "title": "Created At",
+      "type": "number"
+    },
+    "created_by": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Created By",
+      "type": "string"
+    },
+    "command_id": {
+      "anyOf": [
+        {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Command Id"
+    }
+  },
+  "required": [
+    "schema",
+    "survey_id",
+    "number",
+    "name",
+    "identity",
+    "source",
+    "context",
+    "members",
+    "relations",
+    "created_at",
+    "created_by",
+    "command_id"
+  ],
+  "title": "SurveyRevision",
+  "type": "object"
+}

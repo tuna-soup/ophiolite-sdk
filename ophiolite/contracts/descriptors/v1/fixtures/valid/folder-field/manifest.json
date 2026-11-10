@@ -1,0 +1,104 @@
+{
+  "schema": "ophiolite.portable-bundle/2",
+  "bundle_version": "2.15.0",
+  "created_at": "2026-11-04T12:00:00Z",
+  "exporter": {
+    "name": "ophiolite-examples",
+    "version": "1"
+  },
+  "scope": "selection",
+  "selection": [],
+  "assets": [],
+  "groups": null,
+  "recommendations": null,
+  "limits": {
+    "max_assets": 128,
+    "max_file_bytes": 33554432,
+    "max_total_bytes": 536870912
+  },
+  "notice": "Checksums show the integrity of this copy, not authorship or scientific correctness. Exported copies cannot be recalled; holding one grants no new upstream, sharing or AI-training rights.",
+  "folder": {
+    "schema": "ophiolite.project-folder/2",
+    "writer": {
+      "name": "ophiolite-examples",
+      "version": "1"
+    },
+    "osdu": {
+      "tag": "v0.30.1",
+      "commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
+      "namespace": "synthetic"
+    },
+    "items": [
+      {
+        "path": "items/wells.parquet",
+        "profile": "ophiolite.table-target/wells/1",
+        "kind": "wells",
+        "osdu": {
+          "kind": "osdu:wks:master-data--Well:1.5.0"
+        },
+        "declarations": [
+          {
+            "name": "crs",
+            "value": "EPSG:28992"
+          },
+          {
+            "name": "depth_unit",
+            "value": "m"
+          },
+          {
+            "name": "depth_kind",
+            "value": "MD"
+          },
+          {
+            "name": "depth_reference",
+            "value": "unknown"
+          }
+        ],
+        "rows": 4
+      }
+    ],
+    "files": [
+      {
+        "path": "items/wells.parquet",
+        "role": "item",
+        "media_type": "application/vnd.apache.parquet",
+        "asset": null,
+        "sha256": "db06126568877ea19db58189e430bf2f2b72cab5c27530e205b7aa8c61adb4d8",
+        "bytes": 8541
+      },
+      {
+        "path": "lineage/prov.json",
+        "role": "lineage-prov",
+        "media_type": "application/json",
+        "asset": null,
+        "sha256": "09b9893b28c84de1f9ef429af8a6aecedf1fa30a62c465e4076c1ac8e571f2ae",
+        "bytes": 1217
+      }
+    ]
+  },
+  "citation": {
+    "schema": "ophiolite.citation/1",
+    "title": "Synthetic field: four wells",
+    "description": "Four made-up wells (SYN-F1 to SYN-F4) at made-up RD New coordinates, as a project folder any program can read. Synthetic data; no observed well.",
+    "published": "2026-11-04",
+    "creators": [
+      {
+        "name": "Synthetic Survey Organisation",
+        "kind": "organisation",
+        "identifier": "https://ror.org/0abcdef12"
+      }
+    ],
+    "publisher": {
+      "name": "Synthetic Survey Organisation",
+      "identifier": "https://ror.org/0abcdef12"
+    },
+    "licence": null,
+    "notice": "Shared under the terms of the project it was taken from; not an open licence. Ask the publisher before passing it on.",
+    "doi": null,
+    "descriptors": [
+      "ro-crate-metadata.json",
+      "croissant.json",
+      "datacite.json"
+    ]
+  }
+}

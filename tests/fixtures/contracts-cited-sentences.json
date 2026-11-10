@@ -1,0 +1,19 @@
+{
+  "about": "Sentences of the former SDK README that the changelog and the program records cite for a statement; each must stay verbatim in CONTRACTS.md (line breaks aside). Frozen when the README became a quick start; the citing locations are in that lane's validation record.",
+  "sentences": [
+    "Ophiolite SDK — preview contracts, supported client",
+    "Contracts remain preview contracts.",
+    "No production-support or complete open-source release qualification is claimed.",
+    "Recovery replays a saved exact request and checks the response.",
+    "Direct `client.configure/start/publish` calls are available but are **not recoverable after a process restart**.",
+    "| Reads, inspect, options, info, members, results and downloads | Up to three attempts for transient transport/busy responses. |",
+    "| Configure, start, upload and publish | Up to three attempts with the same command/body; folders persist them for later recovery. |",
+    "| Share with `expected_generation` | Once more with the identical command: returns the applied result, or `IntegrityConflict` if anyone changed the recipients meanwhile. |",
+    "| Login, refresh and revoke | Never after an ambiguous request outcome. |",
+    "This replaces the audience; it is not an additive invitation.",
+    "`expected_generation` is required: since the E7 transition release servers refuse unconditional replacement (428).",
+    "Source installation is available; PyPI/npm publication and managed-service release qualification are separate delivery gates.",
+    "The SDK, TypeScript client, templates, packaged guides and extracted contracts are Apache-2.0.",
+    "Server licensing and the complete open-source release have separate qualification requirements."
+  ]
+}

@@ -1,0 +1,8 @@
+{
+ "schema": "ophiolite.rule-results/1",
+ "kind": "esri-ascii-grid/1",
+ "registry_version": "1.3.0",
+ "results": [
+  {"rule": "in-area-of-use/1", "state": "failed", "count": 4, "examples": [{"row": 3, "depth": null, "value": "284447.3 306771.2"}, {"row": 6, "depth": null, "value": "284447.3 306671.2"}, {"row": 7, "depth": null, "value": "284247.3 306571.2"}, {"row": 8, "depth": null, "value": "284347.3 306571.2"}], "parameters": {}, "reason": null, "context": null}
+ ]
+}

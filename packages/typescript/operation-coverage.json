@@ -174,6 +174,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/deployment/health",
+    "function": "postDeploymentHealth",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "GET /api/v1/openapi.json",
     "function": "getOpenapiJson",
     "request": "explicitly-untyped",
@@ -438,6 +444,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/organizations/search",
+    "function": "postOrganizationsSearch",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/organizations/team",
     "function": "postOrganizationsTeam",
     "request": "schema",
@@ -476,6 +488,18 @@
   {
     "operation": "POST /api/v1/organizations/teams",
     "function": "postOrganizationsTeams",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/agent-policy",
+    "function": "postProjectsAgentPolicy",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/agent-policy-save",
+    "function": "postProjectsAgentPolicySave",
     "request": "schema",
     "response": "schema"
   },
@@ -612,6 +636,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/agents/declarations",
+    "function": "postProjectsProjectAgentsDeclarations",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/agents/decline",
     "function": "postProjectsProjectAgentsDecline",
     "request": "schema",
@@ -632,6 +662,18 @@
   {
     "operation": "POST /api/v1/projects/{project}/agents/plans",
     "function": "postProjectsProjectAgentsPlans",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/agents/precedents",
+    "function": "postProjectsProjectAgentsPrecedents",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/agents/proposals",
+    "function": "postProjectsProjectAgentsProposals",
     "request": "schema",
     "response": "schema"
   },
@@ -1242,6 +1284,30 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/jobs/answer",
+    "function": "postProjectsProjectJobsAnswer",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/jobs/propose",
+    "function": "postProjectsProjectJobsPropose",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/jobs/status",
+    "function": "postProjectsProjectJobsStatus",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/jobs/step",
+    "function": "postProjectsProjectJobsStep",
+    "request": "schema",
+    "response": "explicitly-untyped"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/las-uploads/audience",
     "function": "postProjectsProjectLasUploadsAudience",
     "request": "schema",
@@ -1686,6 +1752,18 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/procedures/verifications",
+    "function": "postProjectsProjectProceduresVerifications",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/procedures/verify",
+    "function": "postProjectsProjectProceduresVerify",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/procedures/withdraw",
     "function": "postProjectsProjectProceduresWithdraw",
     "request": "schema",
@@ -2046,6 +2124,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/rule-results/get",
+    "function": "postProjectsProjectRuleResultsGet",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/runners/cancel",
     "function": "postProjectsProjectRunnersCancel",
     "request": "schema",
@@ -2102,6 +2186,30 @@
   {
     "operation": "GET /api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/slices/{axis}/{label}",
     "function": "getProjectsProjectScientificAssetsAssetRevisionsRevisionSlicesAxisLabel",
+    "request": "explicitly-untyped",
+    "response": "schema"
+  },
+  {
+    "operation": "GET /api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/volume-windows",
+    "function": "getProjectsProjectScientificAssetsAssetRevisionsRevisionVolumeWindows",
+    "request": "explicitly-untyped",
+    "response": "schema"
+  },
+  {
+    "operation": "GET /api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/volume-windows/file-header",
+    "function": "getProjectsProjectScientificAssetsAssetRevisionsRevisionVolumeWindowsFileHeader",
+    "request": "explicitly-untyped",
+    "response": "schema"
+  },
+  {
+    "operation": "GET /api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/volume-windows/headers/{index}",
+    "function": "getProjectsProjectScientificAssetsAssetRevisionsRevisionVolumeWindowsHeadersIndex",
+    "request": "explicitly-untyped",
+    "response": "schema"
+  },
+  {
+    "operation": "GET /api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/volume-windows/pieces/{index}",
+    "function": "getProjectsProjectScientificAssetsAssetRevisionsRevisionVolumeWindowsPiecesIndex",
     "request": "explicitly-untyped",
     "response": "schema"
   },
@@ -2498,6 +2606,78 @@
   {
     "operation": "POST /api/v1/projects/{project}/subscriptions/unsubscribe",
     "function": "postProjectsProjectSubscriptionsUnsubscribe",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/surveys/add",
+    "function": "postProjectsProjectSurveysAdd",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/surveys/create",
+    "function": "postProjectsProjectSurveysCreate",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/surveys/get",
+    "function": "postProjectsProjectSurveysGet",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/surveys/history",
+    "function": "postProjectsProjectSurveysHistory",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/surveys/identify",
+    "function": "postProjectsProjectSurveysIdentify",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/surveys/list",
+    "function": "postProjectsProjectSurveysList",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/surveys/relate",
+    "function": "postProjectsProjectSurveysRelate",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/surveys/remove",
+    "function": "postProjectsProjectSurveysRemove",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/surveys/rename",
+    "function": "postProjectsProjectSurveysRename",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/surveys/replace",
+    "function": "postProjectsProjectSurveysReplace",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/surveys/unrelate",
+    "function": "postProjectsProjectSurveysUnrelate",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/surveys/withdraw",
+    "function": "postProjectsProjectSurveysWithdraw",
     "request": "schema",
     "response": "schema"
   },

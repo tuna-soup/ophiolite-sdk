@@ -18,9 +18,9 @@ def tool(function):
     return procedure(function)
 
 
-# The 13 public methods of `procedures.ProcedureClient`, frozen when E131 s1 opened (f1d813538).
+# The 13 public methods of `procedures.ProcedureClient`, frozen when E131 s1 opened (f1d813538), and E165 s1's two.
 VERBS = ('register', 'list', 'get', 'bundle', 'enable', 'withdraw', 'trust', 'version', 'run', 'publish', 'run_get',
-         'prepare_again', 'again')
+         'prepare_again', 'again', 'verify', 'verifications')
 
 
 def _twin(verb):

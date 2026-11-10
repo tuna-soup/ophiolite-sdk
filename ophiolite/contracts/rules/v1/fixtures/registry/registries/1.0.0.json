@@ -1,0 +1,7 @@
+{
+ "schema": "ophiolite.data-rules-snapshot/1",
+ "registry_version": "1.0.0",
+ "rules": [
+  {"id": "fixture-range/1", "path": "rules/fixture-range-1.json", "sha256": "faf8bb258cadc1f6c07820656210af6fe2565103e44146c634985816f694aa18"}
+ ]
+}

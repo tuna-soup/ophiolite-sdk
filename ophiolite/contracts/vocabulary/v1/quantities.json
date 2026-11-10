@@ -4,8 +4,8 @@
  "title": "Curve quantities: what a curve measures, each with its OSDU LogCurveFamily name",
  "osdu": {
   "repository": "https://community.opengroup.org/osdu/data/data-definitions",
-  "commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
-  "committed": "2026-07-17",
+  "commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
+  "committed": "2026-10-05",
   "list": "ReferenceValues/Manifests/reference-data/LOCAL/LogCurveFamily.1.json"
  },
  "quantities": [
@@ -14,7 +14,8 @@
    "osdu_log_curve_family": "Gamma Ray",
    "units": [
     "gAPI",
-    "API"
+    "API",
+    "GAPI"
    ],
    "suggest_from": {
     "mnemonics": [
@@ -30,6 +31,12 @@
      "gAPI",
      "API"
     ]
+   },
+   "range": {
+    "unit": "gAPI",
+    "minimum": 0,
+    "maximum": 4000,
+    "source": "Kansas Geological Survey, Geological Log Analysis, The Gamma Ray Log: API units are counted against the University of Houston pit of 200 API units, and about 3700 API units is the most expected for the most uranium-rich black shale; rounded up to 4000 (E144 gr-range/1)."
    }
   },
   {

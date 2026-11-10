@@ -33,5 +33,7 @@
     "normalized": 1,
     "total": 2
   },
-  "table_target": "ophiolite.table-target/point-set/1"
+  "table_target": "ophiolite.table-target/point-set/1",
+  "osdu_kind": null,
+  "osdu_kind_reason": "work-product-component--GenericRepresentation is not a kind the box vendors at v0.30.1"
 }

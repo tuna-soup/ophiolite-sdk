@@ -1,0 +1,37 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "segy/2",
+  "kind": "source",
+  "lifecycle": "preview",
+  "display_name": "8-bit seismic cube (SEG-Y)",
+  "description": "A SEG-Y volume (revision 1 or 2, one-byte two's complement integer samples, big-endian, fixed-length traces on a full grid) kept byte for byte in its native 8-bit form; the value of a code is the code, and the upload states whether -128 means no value.",
+  "serves": [
+    "ophiolite.scientific-asset/1"
+  ],
+  "connector": {
+    "scientific_profile": "seismic-volume-source/1",
+    "source_schema": "SEG-Y/rev1-2,format-8,big-endian,fixed",
+    "mapping_version": "seismic-volume/2",
+    "history": "retained-exact-read"
+  },
+  "role": "artifact",
+  "media_types": [
+    "application/octet-stream"
+  ],
+  "normalized_profile": "ophiolite.seismic-volume/2",
+  "context_schema": "ophiolite.typed-context/1",
+  "representation_rules": {
+    "artifact_kind_by_origin": {
+      "source-reference": "original",
+      "retained-capture": "original",
+      "managed-derived": "derived-artifact"
+    },
+    "normalized": 1,
+    "total": 2
+  },
+  "table_target": {
+    "none": "not-a-table"
+  },
+  "osdu_kind": null,
+  "osdu_kind_reason": "work-product-component--SeismicTraceData is not a kind the box vendors at v0.30.1"
+}

@@ -1,0 +1,1054 @@
+{
+ "f": {
+  "<folders>/recipe-wells": {
+   "check": {
+    "files": [
+     {
+      "path": "recipe.json",
+      "role": "recipe",
+      "verdict": "ok"
+     },
+     {
+      "path": "originals/wells.csv",
+      "role": "original",
+      "verdict": "ok"
+     },
+     {
+      "path": "items/wells.parquet",
+      "role": "item",
+      "verdict": "ok"
+     },
+     {
+      "path": "lineage/prov.json",
+      "role": "lineage-prov",
+      "verdict": "ok"
+     }
+    ],
+    "first_problem": null,
+    "items": [
+     {
+      "derived": "manifest",
+      "kind": "wells",
+      "osdu": {
+       "kind": "osdu:wks:master-data--Well:1.5.0"
+      },
+      "path": "items/wells.parquet",
+      "verdict": "ok"
+     }
+    ],
+    "ok": true,
+    "schema": "ophiolite.project-folder/2",
+    "verified": "bytes"
+   },
+   "cli": [
+    [
+     0,
+     "Project folder verified: 1 item (wells, 4 rows). Checksums show integrity, not authorship.\n"
+    ],
+    [
+     0,
+     "Project folder verified: 1 item (wells, 4 rows). Checksums show integrity, not authorship.\n  recipe.json (recipe): ok\n  originals/wells.csv (original): ok\n  items/wells.parquet (item): ok\n  lineage/prov.json (lineage-prov): ok\n"
+    ],
+    [
+     0,
+     "{\n  \"ok\": true,\n  \"verified\": \"bytes\",\n  \"schema\": \"ophiolite.project-folder/2\",\n  \"files\": [\n    {\n      \"path\": \"recipe.json\",\n      \"role\": \"recipe\",\n      \"verdict\": \"ok\"\n    },\n    {\n      \"path\": \"originals/wells.csv\",\n      \"role\": \"original\",\n      \"verdict\": \"ok\"\n    },\n    {\n      \"path\": \"items/wells.parquet\",\n      \"role\": \"item\",\n      \"verdict\": \"ok\"\n    },\n    {\n      \"path\": \"lineage/prov.json\",\n      \"role\": \"lineage-prov\",\n      \"verdict\": \"ok\"\n    }\n  ],\n  \"items\": [\n    {\n      \"path\": \"items/wells.parquet\",\n      \"kind\": \"wells\",\n      \"osdu\": {\n        \"kind\": \"osdu:wks:master-data--Well:1.5.0\"\n      },\n      \"derived\": \"manifest\",\n      \"verdict\": \"ok\"\n    }\n  ],\n  \"first_problem\": null\n}\n"
+    ]
+   ],
+   "open": [
+    "ok",
+    [
+     {
+      "assets": 0,
+      "bundle_version": "2.14.0",
+      "curves": 0,
+      "folder_files": 4,
+      "groups": null,
+      "recommendations": null,
+      "scope": "selection",
+      "types": [],
+      "unlisted_files": []
+     },
+     []
+    ]
+   ],
+   "pack": [
+    "ok",
+    [
+     "9d737f8fac83b52109e96d9c85942f421d3d3b80dace3d386d4155419dc6cd6b",
+     [
+      "manifest.json",
+      "items/wells.parquet",
+      "lineage/prov.json",
+      "originals/wells.csv",
+      "recipe.json"
+     ]
+    ]
+   ],
+   "zip": [
+    "ok",
+    [
+     {
+      "assets": 0,
+      "bundle_version": "2.14.0",
+      "curves": 0,
+      "folder_files": 4,
+      "groups": null,
+      "recommendations": null,
+      "scope": "selection",
+      "types": [],
+      "unlisted_files": []
+     },
+     []
+    ]
+   ],
+   "zip-new": null
+  },
+  "<folders>/v1-las": {
+   "check": {
+    "files": [
+     {
+      "path": "recipe.json",
+      "role": "recipe",
+      "verdict": "ok"
+     },
+     {
+      "path": "originals/syn-w2.las",
+      "role": "original",
+      "verdict": "ok"
+     },
+     {
+      "path": "originals/syn-w2b.las",
+      "role": "original",
+      "verdict": "ok"
+     },
+     {
+      "path": "originals/syn-w3.las",
+      "role": "original",
+      "verdict": "ok"
+     },
+     {
+      "path": "originals/syn-w4.las",
+      "role": "original",
+      "verdict": "ok"
+     },
+     {
+      "path": "originals/syn-w4b.las",
+      "role": "original",
+      "verdict": "ok"
+     },
+     {
+      "path": "items/well-log.parquet",
+      "role": "item",
+      "verdict": "ok"
+     },
+     {
+      "path": "identity/entities.parquet",
+      "role": "identity-entities",
+      "verdict": "ok"
+     },
+     {
+      "path": "identity/aliases.parquet",
+      "role": "identity-aliases",
+      "verdict": "ok"
+     },
+     {
+      "path": "identity/relationships.parquet",
+      "role": "identity-relationships",
+      "verdict": "ok"
+     },
+     {
+      "path": "lineage/prov.json",
+      "role": "lineage-prov",
+      "verdict": "ok"
+     },
+     {
+      "path": "osdu/manifest.json",
+      "role": "osdu-manifest",
+      "verdict": "ok"
+     }
+    ],
+    "first_problem": null,
+    "items": [
+     {
+      "derived": "recipe",
+      "kind": "well-log",
+      "osdu": {
+       "kind": "osdu:wks:work-product-component--WellLog:1.5.0"
+      },
+      "path": "items/well-log.parquet",
+      "verdict": "ok"
+     }
+    ],
+    "ok": true,
+    "schema": "ophiolite.project-folder/1",
+    "verified": "bytes"
+   },
+   "cli": [
+    [
+     0,
+     "Project folder verified: 1 item (well-log, 19 rows). Checksums show integrity, not authorship.\n"
+    ],
+    [
+     0,
+     "Project folder verified: 1 item (well-log, 19 rows). Checksums show integrity, not authorship.\n  recipe.json (recipe): ok\n  originals/syn-w2.las (original): ok\n  originals/syn-w2b.las (original): ok\n  originals/syn-w3.las (original): ok\n  originals/syn-w4.las (original): ok\n  originals/syn-w4b.las (original): ok\n  items/well-log.parquet (item): ok\n  identity/entities.parquet (identity-entities): ok\n  identity/aliases.parquet (identity-aliases): ok\n  identity/relationships.parquet (identity-relationships): ok\n  lineage/prov.json (lineage-prov): ok\n  osdu/manifest.json (osdu-manifest): ok\n"
+    ],
+    [
+     0,
+     "{\n  \"ok\": true,\n  \"verified\": \"bytes\",\n  \"schema\": \"ophiolite.project-folder/1\",\n  \"files\": [\n    {\n      \"path\": \"recipe.json\",\n      \"role\": \"recipe\",\n      \"verdict\": \"ok\"\n    },\n    {\n      \"path\": \"originals/syn-w2.las\",\n      \"role\": \"original\",\n      \"verdict\": \"ok\"\n    },\n    {\n      \"path\": \"originals/syn-w2b.las\",\n      \"role\": \"original\",\n      \"verdict\": \"ok\"\n    },\n    {\n      \"path\": \"originals/syn-w3.las\",\n      \"role\": \"original\",\n      \"verdict\": \"ok\"\n    },\n    {\n      \"path\": \"originals/syn-w4.las\",\n      \"role\": \"original\",\n      \"verdict\": \"ok\"\n    },\n    {\n      \"path\": \"originals/syn-w4b.las\",\n      \"role\": \"original\",\n      \"verdict\": \"ok\"\n    },\n    {\n      \"path\": \"items/well-log.parquet\",\n      \"role\": \"item\",\n      \"verdict\": \"ok\"\n    },\n    {\n      \"path\": \"identity/entities.parquet\",\n      \"role\": \"identity-entities\",\n      \"verdict\": \"ok\"\n    },\n    {\n      \"path\": \"identity/aliases.parquet\",\n      \"role\": \"identity-aliases\",\n      \"verdict\": \"ok\"\n    },\n    {\n      \"path\": \"identity/relationships.parquet\",\n      \"role\": \"identity-relationships\",\n      \"verdict\": \"ok\"\n    },\n    {\n      \"path\": \"lineage/prov.json\",\n      \"role\": \"lineage-prov\",\n      \"verdict\": \"ok\"\n    },\n    {\n      \"path\": \"osdu/manifest.json\",\n      \"role\": \"osdu-manifest\",\n      \"verdict\": \"ok\"\n    }\n  ],\n  \"items\": [\n    {\n      \"path\": \"items/well-log.parquet\",\n      \"kind\": \"well-log\",\n      \"osdu\": {\n        \"kind\": \"osdu:wks:work-product-component--WellLog:1.5.0\"\n      },\n      \"derived\": \"recipe\",\n      \"verdict\": \"ok\"\n    }\n  ],\n  \"first_problem\": null\n}\n"
+    ]
+   ],
+   "open": [
+    "ok",
+    [
+     {
+      "assets": 0,
+      "bundle_version": "2.12.0",
+      "curves": 0,
+      "folder_files": 12,
+      "groups": null,
+      "recommendations": null,
+      "scope": "selection",
+      "types": [],
+      "unlisted_files": []
+     },
+     []
+    ]
+   ],
+   "pack": [
+    "ok",
+    [
+     "0f31d91f1ab36e4d0a51f9ba8ed445268b213576eddbf8c3325fe7412cb6b9b4",
+     [
+      "manifest.json",
+      "identity/aliases.parquet",
+      "identity/entities.parquet",
+      "identity/relationships.parquet",
+      "items/well-log.parquet",
+      "lineage/prov.json",
+      "originals/syn-w2.las",
+      "originals/syn-w2b.las",
+      "originals/syn-w3.las",
+      "originals/syn-w4.las",
+      "originals/syn-w4b.las",
+      "osdu/manifest.json",
+      "recipe.json"
+     ]
+    ]
+   ],
+   "zip": [
+    "ok",
+    [
+     {
+      "assets": 0,
+      "bundle_version": "2.12.0",
+      "curves": 0,
+      "folder_files": 12,
+      "groups": null,
+      "recommendations": null,
+      "scope": "selection",
+      "types": [],
+      "unlisted_files": []
+     },
+     []
+    ]
+   ],
+   "zip-new": null
+  },
+  "<folders>/v1-wells": {
+   "check": {
+    "files": [
+     {
+      "path": "recipe.json",
+      "role": "recipe",
+      "verdict": "ok"
+     },
+     {
+      "path": "originals/wells.csv",
+      "role": "original",
+      "verdict": "ok"
+     },
+     {
+      "path": "items/wells.parquet",
+      "role": "item",
+      "verdict": "ok"
+     },
+     {
+      "path": "identity/entities.parquet",
+      "role": "identity-entities",
+      "verdict": "ok"
+     },
+     {
+      "path": "identity/aliases.parquet",
+      "role": "identity-aliases",
+      "verdict": "ok"
+     },
+     {
+      "path": "identity/relationships.parquet",
+      "role": "identity-relationships",
+      "verdict": "ok"
+     },
+     {
+      "path": "lineage/prov.json",
+      "role": "lineage-prov",
+      "verdict": "ok"
+     },
+     {
+      "path": "osdu/manifest.json",
+      "role": "osdu-manifest",
+      "verdict": "ok"
+     }
+    ],
+    "first_problem": null,
+    "items": [
+     {
+      "derived": "recipe",
+      "kind": "wells",
+      "osdu": {
+       "kind": "osdu:wks:master-data--Well:1.5.0"
+      },
+      "path": "items/wells.parquet",
+      "verdict": "ok"
+     }
+    ],
+    "ok": true,
+    "schema": "ophiolite.project-folder/1",
+    "verified": "bytes"
+   },
+   "cli": [
+    [
+     0,
+     "Project folder verified: 1 item (wells, 4 rows). Checksums show integrity, not authorship.\n"
+    ],
+    [
+     0,
+     "Project folder verified: 1 item (wells, 4 rows). Checksums show integrity, not authorship.\n  recipe.json (recipe): ok\n  originals/wells.csv (original): ok\n  items/wells.parquet (item): ok\n  identity/entities.parquet (identity-entities): ok\n  identity/aliases.parquet (identity-aliases): ok\n  identity/relationships.parquet (identity-relationships): ok\n  lineage/prov.json (lineage-prov): ok\n  osdu/manifest.json (osdu-manifest): ok\n"
+    ],
+    [
+     0,
+     "{\n  \"ok\": true,\n  \"verified\": \"bytes\",\n  \"schema\": \"ophiolite.project-folder/1\",\n  \"files\": [\n    {\n      \"path\": \"recipe.json\",\n      \"role\": \"recipe\",\n      \"verdict\": \"ok\"\n    },\n    {\n      \"path\": \"originals/wells.csv\",\n      \"role\": \"original\",\n      \"verdict\": \"ok\"\n    },\n    {\n      \"path\": \"items/wells.parquet\",\n      \"role\": \"item\",\n      \"verdict\": \"ok\"\n    },\n    {\n      \"path\": \"identity/entities.parquet\",\n      \"role\": \"identity-entities\",\n      \"verdict\": \"ok\"\n    },\n    {\n      \"path\": \"identity/aliases.parquet\",\n      \"role\": \"identity-aliases\",\n      \"verdict\": \"ok\"\n    },\n    {\n      \"path\": \"identity/relationships.parquet\",\n      \"role\": \"identity-relationships\",\n      \"verdict\": \"ok\"\n    },\n    {\n      \"path\": \"lineage/prov.json\",\n      \"role\": \"lineage-prov\",\n      \"verdict\": \"ok\"\n    },\n    {\n      \"path\": \"osdu/manifest.json\",\n      \"role\": \"osdu-manifest\",\n      \"verdict\": \"ok\"\n    }\n  ],\n  \"items\": [\n    {\n      \"path\": \"items/wells.parquet\",\n      \"kind\": \"wells\",\n      \"osdu\": {\n        \"kind\": \"osdu:wks:master-data--Well:1.5.0\"\n      },\n      \"derived\": \"recipe\",\n      \"verdict\": \"ok\"\n    }\n  ],\n  \"first_problem\": null\n}\n"
+    ]
+   ],
+   "open": [
+    "ok",
+    [
+     {
+      "assets": 0,
+      "bundle_version": "2.12.0",
+      "curves": 0,
+      "folder_files": 8,
+      "groups": null,
+      "recommendations": null,
+      "scope": "selection",
+      "types": [],
+      "unlisted_files": []
+     },
+     []
+    ]
+   ],
+   "pack": [
+    "ok",
+    [
+     "95d377c08eeac42f31fe1f77c7f66e72cbff85826c6bf6f1e585db79abd1584d",
+     [
+      "manifest.json",
+      "identity/aliases.parquet",
+      "identity/entities.parquet",
+      "identity/relationships.parquet",
+      "items/wells.parquet",
+      "lineage/prov.json",
+      "originals/wells.csv",
+      "osdu/manifest.json",
+      "recipe.json"
+     ]
+    ]
+   ],
+   "zip": [
+    "ok",
+    [
+     {
+      "assets": 0,
+      "bundle_version": "2.12.0",
+      "curves": 0,
+      "folder_files": 8,
+      "groups": null,
+      "recommendations": null,
+      "scope": "selection",
+      "types": [],
+      "unlisted_files": []
+     },
+     []
+    ]
+   ],
+   "zip-new": null
+  },
+  "<folders>/wells-grid": {
+   "check": {
+    "files": [
+     {
+      "path": "items/wells.parquet",
+      "role": "item",
+      "verdict": "ok"
+     },
+     {
+      "path": "items/grid.tif",
+      "role": "item",
+      "verdict": "ok"
+     }
+    ],
+    "first_problem": null,
+    "items": [
+     {
+      "derived": "manifest",
+      "kind": "wells",
+      "osdu": {
+       "kind": "osdu:wks:master-data--Well:1.5.0"
+      },
+      "path": "items/wells.parquet",
+      "verdict": "ok"
+     },
+     {
+      "derived": "manifest",
+      "kind": "grid",
+      "osdu": {
+       "kind": "osdu:wks:work-product-component--SeismicHorizon:2.1.0"
+      },
+      "path": "items/grid.tif",
+      "verdict": "ok"
+     }
+    ],
+    "ok": true,
+    "schema": "ophiolite.project-folder/2",
+    "verified": "bytes"
+   },
+   "cli": [
+    [
+     0,
+     "Project folder verified: 2 items (wells, 4 rows; grid). Checksums show integrity, not authorship.\n"
+    ],
+    [
+     0,
+     "Project folder verified: 2 items (wells, 4 rows; grid). Checksums show integrity, not authorship.\n  items/wells.parquet (item): ok\n  items/grid.tif (item): ok\n"
+    ],
+    [
+     0,
+     "{\n  \"ok\": true,\n  \"verified\": \"bytes\",\n  \"schema\": \"ophiolite.project-folder/2\",\n  \"files\": [\n    {\n      \"path\": \"items/wells.parquet\",\n      \"role\": \"item\",\n      \"verdict\": \"ok\"\n    },\n    {\n      \"path\": \"items/grid.tif\",\n      \"role\": \"item\",\n      \"verdict\": \"ok\"\n    }\n  ],\n  \"items\": [\n    {\n      \"path\": \"items/wells.parquet\",\n      \"kind\": \"wells\",\n      \"osdu\": {\n        \"kind\": \"osdu:wks:master-data--Well:1.5.0\"\n      },\n      \"derived\": \"manifest\",\n      \"verdict\": \"ok\"\n    },\n    {\n      \"path\": \"items/grid.tif\",\n      \"kind\": \"grid\",\n      \"osdu\": {\n        \"kind\": \"osdu:wks:work-product-component--SeismicHorizon:2.1.0\"\n      },\n      \"derived\": \"manifest\",\n      \"verdict\": \"ok\"\n    }\n  ],\n  \"first_problem\": null\n}\n"
+    ]
+   ],
+   "open": [
+    "ok",
+    [
+     {
+      "assets": 0,
+      "bundle_version": "2.14.0",
+      "curves": 0,
+      "folder_files": 2,
+      "groups": null,
+      "recommendations": null,
+      "scope": "selection",
+      "types": [],
+      "unlisted_files": []
+     },
+     []
+    ]
+   ],
+   "pack": [
+    "ok",
+    [
+     "7c9b8f96611db6e08ca72c09f8565297021488e291f4c4f5bcc6087bbcd7d217",
+     [
+      "manifest.json",
+      "items/grid.tif",
+      "items/wells.parquet"
+     ]
+    ]
+   ],
+   "zip": [
+    "ok",
+    [
+     {
+      "assets": 0,
+      "bundle_version": "2.14.0",
+      "curves": 0,
+      "folder_files": 2,
+      "groups": null,
+      "recommendations": null,
+      "scope": "selection",
+      "types": [],
+      "unlisted_files": []
+     },
+     []
+    ]
+   ],
+   "zip-new": null
+  },
+  "<released>/2.0": {
+   "check": {
+    "files": [
+     {
+      "path": "assets/0/original.csv",
+      "role": "original",
+      "verdict": "ok"
+     },
+     {
+      "path": "assets/0/descriptor.json",
+      "role": "descriptor",
+      "verdict": "ok"
+     },
+     {
+      "path": "assets/0/data.json",
+      "role": "normalized",
+      "verdict": "ok"
+     }
+    ],
+    "first_problem": null,
+    "items": [],
+    "ok": true,
+    "schema": null,
+    "verified": "bytes"
+   },
+   "cli": [
+    [
+     0,
+     "Bundle verified: 1 exact revisions, 0 curves, 1 other data. Checksums show integrity, not authorship.\n"
+    ],
+    [
+     0,
+     "Bundle verified: 1 exact revisions, 0 curves, 1 other data. Checksums show integrity, not authorship.\n"
+    ],
+    [
+     0,
+     "{\n  \"verified\": true,\n  \"revisions\": 1,\n  \"curves\": 0,\n  \"other_data\": 1\n}\n"
+    ]
+   ],
+   "open": [
+    "ok",
+    [
+     {
+      "assets": 1,
+      "bundle_version": "2.0.0",
+      "curves": 0,
+      "groups": null,
+      "recommendations": null,
+      "scope": "selection",
+      "types": [
+       "well-tops"
+      ],
+      "unlisted_files": []
+     },
+     []
+    ]
+   ],
+   "pack": [
+    "ok",
+    [
+     "d9690635e421171163a06969cd60999eeae1d40f3758bff96d278ec9c4b3c50d",
+     [
+      "manifest.json",
+      "assets/0/data.json",
+      "assets/0/descriptor.json",
+      "assets/0/original.csv"
+     ]
+    ]
+   ],
+   "zip": [
+    "ok",
+    [
+     {
+      "assets": 1,
+      "bundle_version": "2.0.0",
+      "curves": 0,
+      "groups": null,
+      "recommendations": null,
+      "scope": "selection",
+      "types": [
+       "well-tops"
+      ],
+      "unlisted_files": []
+     },
+     []
+    ]
+   ],
+   "zip-new": null
+  },
+  "<released>/2.11": {
+   "check": {
+    "files": [
+     {
+      "path": "assets/0/original.txt",
+      "role": "original",
+      "verdict": "ok"
+     },
+     {
+      "path": "assets/0/descriptor.json",
+      "role": "descriptor",
+      "verdict": "ok"
+     },
+     {
+      "path": "assets/0/data.json",
+      "role": "normalized",
+      "verdict": "ok"
+     },
+     {
+      "path": "assets/0/package.json",
+      "role": "package",
+      "verdict": "ok"
+     },
+     {
+      "path": "assets/0/companion-1.bin",
+      "role": "companion",
+      "verdict": "ok"
+     },
+     {
+      "path": "assets/0/interpretation.json",
+      "role": "interpretation",
+      "verdict": "ok"
+     }
+    ],
+    "first_problem": null,
+    "items": [],
+    "ok": true,
+    "schema": null,
+    "verified": "bytes"
+   },
+   "cli": [
+    [
+     0,
+     "Bundle verified: 1 exact revisions, 0 curves, 1 other data. Checksums show integrity, not authorship.\n"
+    ],
+    [
+     0,
+     "Bundle verified: 1 exact revisions, 0 curves, 1 other data. Checksums show integrity, not authorship.\n"
+    ],
+    [
+     0,
+     "{\n  \"verified\": true,\n  \"revisions\": 1,\n  \"curves\": 0,\n  \"other_data\": 1\n}\n"
+    ]
+   ],
+   "open": [
+    "ok",
+    [
+     {
+      "assets": 1,
+      "bundle_version": "2.11.0",
+      "curves": 0,
+      "groups": null,
+      "recommendations": null,
+      "scope": "selection",
+      "types": [
+       "polyline-set"
+      ],
+      "unlisted_files": []
+     },
+     []
+    ]
+   ],
+   "pack": [
+    "ok",
+    [
+     "7f51454497e855c5842cc017dd1cf2d08305478ccd6919c86ab57b11e8722d9a",
+     [
+      "manifest.json",
+      "assets/0/companion-1.bin",
+      "assets/0/data.json",
+      "assets/0/descriptor.json",
+      "assets/0/interpretation.json",
+      "assets/0/original.txt",
+      "assets/0/package.json"
+     ]
+    ]
+   ],
+   "zip": [
+    "ok",
+    [
+     {
+      "assets": 1,
+      "bundle_version": "2.11.0",
+      "curves": 0,
+      "groups": null,
+      "recommendations": null,
+      "scope": "selection",
+      "types": [
+       "polyline-set"
+      ],
+      "unlisted_files": []
+     },
+     []
+    ]
+   ],
+   "zip-new": null
+  },
+  "<tmp>/bundle-wells": {
+   "check": {
+    "files": [
+     {
+      "path": "assets/0/original.las",
+      "role": "original",
+      "verdict": "ok"
+     },
+     {
+      "path": "assets/0/descriptor-GR.json",
+      "role": "descriptor",
+      "verdict": "ok"
+     },
+     {
+      "path": "assets/0/curve-GR.json",
+      "role": "normalized",
+      "verdict": "ok"
+     }
+    ],
+    "first_problem": null,
+    "items": [],
+    "ok": true,
+    "schema": null,
+    "verified": "bytes"
+   },
+   "cli": [
+    [
+     0,
+     "Bundle verified: 1 exact revisions, 1 curves, 0 other data. Checksums show integrity, not authorship.\n"
+    ],
+    [
+     0,
+     "Bundle verified: 1 exact revisions, 1 curves, 0 other data. Checksums show integrity, not authorship.\n"
+    ],
+    [
+     0,
+     "{\n  \"verified\": true,\n  \"revisions\": 1,\n  \"curves\": 1,\n  \"other_data\": 0\n}\n"
+    ]
+   ],
+   "open": [
+    "ok",
+    [
+     {
+      "assets": 1,
+      "bundle_version": "2.14.0",
+      "curves": 1,
+      "groups": null,
+      "recommendations": null,
+      "scope": "selection",
+      "types": [
+       "well-log"
+      ],
+      "unlisted_files": []
+     },
+     []
+    ]
+   ],
+   "pack": [
+    "ok",
+    [
+     "69fb77aee8878e44ee7130e9508d0bc48ef6f93c094b62be1f8e778fd60bdd19",
+     [
+      "manifest.json",
+      "assets/0/curve-GR.json",
+      "assets/0/descriptor-GR.json",
+      "assets/0/original.las"
+     ]
+    ]
+   ],
+   "zip": [
+    "ok",
+    [
+     {
+      "assets": 1,
+      "bundle_version": "2.14.0",
+      "curves": 1,
+      "groups": null,
+      "recommendations": null,
+      "scope": "selection",
+      "types": [
+       "well-log"
+      ],
+      "unlisted_files": []
+     },
+     []
+    ]
+   ],
+   "zip-new": null
+  },
+  "<tmp>/unlisted": {
+   "check": {
+    "files": [
+     {
+      "path": "assets/0/original.las",
+      "role": "original",
+      "verdict": "ok"
+     },
+     {
+      "path": "assets/0/descriptor-GR.json",
+      "role": "descriptor",
+      "verdict": "ok"
+     },
+     {
+      "path": "assets/0/curve-GR.json",
+      "role": "normalized",
+      "verdict": "ok"
+     },
+     {
+      "path": "croissant.json",
+      "role": null,
+      "verdict": "file-unlisted"
+     }
+    ],
+    "first_problem": {
+     "code": "file-unlisted",
+     "path": "croissant.json"
+    },
+    "items": [],
+    "ok": false,
+    "schema": null,
+    "verified": "bytes"
+   },
+   "cli": [
+    [
+     0,
+     "Bundle verified: 1 exact revisions, 1 curves, 0 other data. Checksums show integrity, not authorship.\n"
+    ],
+    [
+     0,
+     "Bundle verified: 1 exact revisions, 1 curves, 0 other data. Checksums show integrity, not authorship.\n"
+    ],
+    [
+     0,
+     "{\n  \"verified\": true,\n  \"revisions\": 1,\n  \"curves\": 1,\n  \"other_data\": 0\n}\n"
+    ]
+   ],
+   "open": [
+    "ok",
+    [
+     {
+      "assets": 1,
+      "bundle_version": "2.14.0",
+      "curves": 1,
+      "groups": null,
+      "recommendations": null,
+      "scope": "selection",
+      "types": [
+       "well-log"
+      ],
+      "unlisted_files": [
+       "croissant.json"
+      ]
+     },
+     [
+      "croissant.json"
+     ]
+    ]
+   ],
+   "pack": [
+    "Refused",
+    "The bundle folder holds files it does not list (croissant.json); remove them before packing."
+   ],
+   "zip": [
+    "VerificationFailed",
+    "A bundle is a directory."
+   ],
+   "zip-new": null
+  }
+ },
+ "g": {
+  "<tmp>/bundle-wells": {
+   "check": {
+    "files": [
+     {
+      "path": "assets/0/original.las",
+      "role": "original",
+      "verdict": "ok"
+     },
+     {
+      "path": "assets/0/descriptor-GR.json",
+      "role": "descriptor",
+      "verdict": "ok"
+     },
+     {
+      "path": "assets/0/curve-GR.json",
+      "role": "normalized",
+      "verdict": "ok"
+     },
+     {
+      "path": "croissant.json",
+      "role": null,
+      "verdict": "file-unlisted"
+     },
+     {
+      "path": "datacite.json",
+      "role": null,
+      "verdict": "file-unlisted"
+     },
+     {
+      "path": "prov.json",
+      "role": null,
+      "verdict": "file-unlisted"
+     },
+     {
+      "path": "ro-crate-metadata.json",
+      "role": null,
+      "verdict": "file-unlisted"
+     }
+    ],
+    "first_problem": {
+     "code": "file-unlisted",
+     "path": "croissant.json"
+    },
+    "items": [],
+    "ok": false,
+    "schema": null,
+    "verified": "bytes"
+   },
+   "cli": [
+    [
+     0,
+     "Bundle verified: 1 exact revisions, 1 curves, 0 other data. Checksums show integrity, not authorship.\n"
+    ],
+    [
+     0,
+     "Bundle verified: 1 exact revisions, 1 curves, 0 other data. Checksums show integrity, not authorship.\n"
+    ],
+    [
+     0,
+     "{\n  \"verified\": true,\n  \"revisions\": 1,\n  \"curves\": 1,\n  \"other_data\": 0\n}\n"
+    ]
+   ],
+   "open": [
+    "ok",
+    [
+     {
+      "assets": 1,
+      "bundle_version": "2.15.0",
+      "curves": 1,
+      "groups": null,
+      "recommendations": null,
+      "scope": "selection",
+      "types": [
+       "well-log"
+      ],
+      "unlisted_files": [
+       "croissant.json",
+       "datacite.json",
+       "prov.json",
+       "ro-crate-metadata.json"
+      ]
+     },
+     [
+      "croissant.json",
+      "datacite.json",
+      "prov.json",
+      "ro-crate-metadata.json"
+     ]
+    ]
+   ],
+   "pack": [
+    "Refused",
+    "The bundle folder holds files it does not list (croissant.json, datacite.json, prov.json); remove them before packing."
+   ],
+   "zip": [
+    "VerificationFailed",
+    "A bundle is a directory."
+   ],
+   "zip-new": [
+    "VerificationFailed",
+    "An archive entry name is unsafe or outside the bundle layout."
+   ]
+  },
+  "<tmp>/folder-field": {
+   "check": {
+    "files": [
+     {
+      "path": "items/wells.parquet",
+      "role": "item",
+      "verdict": "ok"
+     },
+     {
+      "path": "lineage/prov.json",
+      "role": "lineage-prov",
+      "verdict": "ok"
+     },
+     {
+      "path": "croissant.json",
+      "role": null,
+      "verdict": "file-unlisted"
+     },
+     {
+      "path": "datacite.json",
+      "role": null,
+      "verdict": "file-unlisted"
+     },
+     {
+      "path": "ro-crate-metadata.json",
+      "role": null,
+      "verdict": "file-unlisted"
+     }
+    ],
+    "first_problem": {
+     "code": "file-unlisted",
+     "path": "croissant.json"
+    },
+    "items": [
+     {
+      "derived": "manifest",
+      "kind": "wells",
+      "osdu": {
+       "kind": "osdu:wks:master-data--Well:1.5.0"
+      },
+      "path": "items/wells.parquet",
+      "verdict": "ok"
+     }
+    ],
+    "ok": false,
+    "schema": "ophiolite.project-folder/2",
+    "verified": "bytes"
+   },
+   "cli": [
+    [
+     1,
+     "Project folder not verified: croissant.json: the manifest does not list it.\n"
+    ],
+    [
+     1,
+     "Project folder not verified: croissant.json: the manifest does not list it.\n  items/wells.parquet (item): ok\n  lineage/prov.json (lineage-prov): ok\n  croissant.json (not listed): file-unlisted\n  datacite.json (not listed): file-unlisted\n  ro-crate-metadata.json (not listed): file-unlisted\n  first problem: file-unlisted at croissant.json\n"
+    ],
+    [
+     1,
+     "{\n  \"ok\": false,\n  \"verified\": \"bytes\",\n  \"schema\": \"ophiolite.project-folder/2\",\n  \"files\": [\n    {\n      \"path\": \"items/wells.parquet\",\n      \"role\": \"item\",\n      \"verdict\": \"ok\"\n    },\n    {\n      \"path\": \"lineage/prov.json\",\n      \"role\": \"lineage-prov\",\n      \"verdict\": \"ok\"\n    },\n    {\n      \"path\": \"croissant.json\",\n      \"role\": null,\n      \"verdict\": \"file-unlisted\"\n    },\n    {\n      \"path\": \"datacite.json\",\n      \"role\": null,\n      \"verdict\": \"file-unlisted\"\n    },\n    {\n      \"path\": \"ro-crate-metadata.json\",\n      \"role\": null,\n      \"verdict\": \"file-unlisted\"\n    }\n  ],\n  \"items\": [\n    {\n      \"path\": \"items/wells.parquet\",\n      \"kind\": \"wells\",\n      \"osdu\": {\n        \"kind\": \"osdu:wks:master-data--Well:1.5.0\"\n      },\n      \"derived\": \"manifest\",\n      \"verdict\": \"ok\"\n    }\n  ],\n  \"first_problem\": {\n    \"code\": \"file-unlisted\",\n    \"path\": \"croissant.json\"\n  }\n}\n"
+    ]
+   ],
+   "open": [
+    "ok",
+    [
+     {
+      "assets": 0,
+      "bundle_version": "2.15.0",
+      "curves": 0,
+      "folder_files": 2,
+      "groups": null,
+      "recommendations": null,
+      "scope": "selection",
+      "types": [],
+      "unlisted_files": [
+       "croissant.json",
+       "datacite.json",
+       "ro-crate-metadata.json"
+      ]
+     },
+     [
+      "croissant.json",
+      "datacite.json",
+      "ro-crate-metadata.json"
+     ]
+    ]
+   ],
+   "pack": [
+    "Refused",
+    "The bundle folder holds files it does not list (croissant.json, datacite.json, ro-crate-metadata.json); remove them before packing."
+   ],
+   "zip": [
+    "VerificationFailed",
+    "A bundle is a directory."
+   ],
+   "zip-new": [
+    "VerificationFailed",
+    "An archive entry name is unsafe or outside the bundle layout."
+   ]
+  }
+ }
+}

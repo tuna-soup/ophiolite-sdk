@@ -1,0 +1,67 @@
+{
+  "schema": "ophiolite.portable-bundle/2",
+  "bundle_version": "2.2.0",
+  "created_at": "2026-11-02T18:16:37+00:00",
+  "exporter": {
+    "name": "ophiolite-sdk",
+    "version": "2026.11.4"
+  },
+  "scope": "selection",
+  "selection": [
+    {
+      "asset_id": "synthetic-points",
+      "revision": "9f0095c2dfdc7fd26ad36f47c5c924bd6ea091848557168c9e6a31d0b50f753b",
+      "curves": []
+    }
+  ],
+  "assets": [
+    {
+      "asset_id": "synthetic-points",
+      "revision": "9f0095c2dfdc7fd26ad36f47c5c924bd6ea091848557168c9e6a31d0b50f753b",
+      "origin": "retained-capture",
+      "profile": "points-csv/1",
+      "type": "point-set",
+      "name": null,
+      "files": [
+        {
+          "path": "assets/0/original.csv",
+          "role": "original",
+          "sha256": "9f0095c2dfdc7fd26ad36f47c5c924bd6ea091848557168c9e6a31d0b50f753b",
+          "bytes": 33
+        },
+        {
+          "path": "assets/0/descriptor.json",
+          "role": "descriptor",
+          "sha256": "5c4d540d62d4216dfa351e5db991a574ff9c0672887b9a23b5aff096e7a02c5f",
+          "bytes": 3045
+        },
+        {
+          "path": "assets/0/data.json",
+          "role": "normalized",
+          "sha256": "90acd93fb33b361e86d6d35a00fe54656f5e7efafe2f4c9acdff547f340b04ee",
+          "bytes": 1734
+        }
+      ],
+      "history": null,
+      "parents": [],
+      "parent_visibility": "complete",
+      "relationships": {
+        "well_log": null
+      },
+      "omissions": [
+        "Synthetic offline fixture, not a server publication"
+      ],
+      "losses": [
+        "Text formatting (whitespace, quoting, line endings, number spelling) is kept only in the exact original"
+      ]
+    }
+  ],
+  "groups": null,
+  "recommendations": null,
+  "limits": {
+    "max_assets": 128,
+    "max_file_bytes": 33554432,
+    "max_total_bytes": 536870912
+  },
+  "notice": "Checksums show the integrity of this copy, not authorship or scientific correctness. Exported copies cannot be recalled; holding one grants no new upstream, sharing or AI-training rights."
+}

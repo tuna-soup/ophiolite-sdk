@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/search/v1/search-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.search/2",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "Facet": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Label"
+        },
+        "count": {
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "value",
+        "label",
+        "count"
+      ],
+      "title": "Facet",
+      "type": "object"
+    },
+    "Facets": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "items": {
+            "$ref": "#/$defs/Facet"
+          },
+          "title": "Kind",
+          "type": "array"
+        },
+        "project": {
+          "items": {
+            "$ref": "#/$defs/Facet"
+          },
+          "title": "Project",
+          "type": "array"
+        },
+        "well": {
+          "items": {
+            "$ref": "#/$defs/Facet"
+          },
+          "title": "Well",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "project",
+        "well"
+      ],
+      "title": "Facets",
+      "type": "object"
+    },
+    "SearchRow": {
+      "additionalProperties": false,
+      "description": "One current version: where it is, what it is, and its score rounded to 6 places (the value it is ranked by).",
+      "properties": {
+        "project": {
+          "title": "Project",
+          "type": "string"
+        },
+        "asset": {
+          "title": "Asset",
+          "type": "string"
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "string"
+        },
+        "kind": {
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+          "title": "Kind",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "well": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Well"
+        },
+        "score": {
+          "minimum": 0,
+          "title": "Score",
+          "type": "number"
+        },
+        "why": {
+          "items": {
+            "maxLength": 60,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 8,
+          "title": "Why",
+          "type": "array"
+        }
+      },
+      "required": [
+        "project",
+        "asset",
+        "revision",
+        "kind",
+        "name",
+        "well",
+        "score",
+        "why"
+      ],
+      "title": "SearchRow",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "The answer to one question: a page of current versions in one order, the count and facets of every readable match,\nand the cursor of the next page (E145).",
+  "properties": {
+    "schema": {
+      "const": "ophiolite.search/2",
+      "title": "Schema",
+      "type": "string"
+    },
+    "organization_id": {
+      "title": "Organization Id",
+      "type": "string"
+    },
+    "method": {
+      "enum": [
+        "words",
+        "embedding"
+      ],
+      "title": "Method",
+      "type": "string"
+    },
+    "matched": {
+      "minimum": 0,
+      "title": "Matched",
+      "type": "integer"
+    },
+    "results": {
+      "items": {
+        "$ref": "#/$defs/SearchRow"
+      },
+      "maxItems": 50,
+      "title": "Results",
+      "type": "array"
+    },
+    "facets": {
+      "$ref": "#/$defs/Facets"
+    },
+    "next_cursor": {
+      "anyOf": [
+        {
+          "maxLength": 2000,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Next Cursor"
+    },
+    "not_searched_by_meaning": {
+      "minimum": 0,
+      "title": "Not Searched By Meaning",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema",
+    "organization_id",
+    "method",
+    "matched",
+    "results",
+    "facets",
+    "next_cursor",
+    "not_searched_by_meaning"
+  ],
+  "title": "SearchAnswer",
+  "type": "object"
+}

@@ -1,0 +1,224 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/rules/v1/rule-results-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.rule-results/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "ContextVersion": {
+      "additionalProperties": false,
+      "description": "Another version of the project a project-context rule read (online only).",
+      "properties": {
+        "asset_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "kind": {
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "asset_id",
+        "revision",
+        "kind"
+      ],
+      "title": "ContextVersion",
+      "type": "object"
+    },
+    "Example": {
+      "additionalProperties": false,
+      "description": "One failing row, in the file's order: its 1-based data row, and its depth and value when the rule has them.",
+      "properties": {
+        "row": {
+          "minimum": 1,
+          "title": "Row",
+          "type": "integer"
+        },
+        "depth": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Depth"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "row",
+        "depth",
+        "value"
+      ],
+      "title": "Example",
+      "type": "object"
+    },
+    "RuleResult": {
+      "additionalProperties": false,
+      "properties": {
+        "rule": {
+          "maxLength": 64,
+          "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*/[1-9][0-9]*$",
+          "title": "Rule",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "passed",
+            "failed",
+            "not-applicable"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Count"
+        },
+        "examples": {
+          "items": {
+            "$ref": "#/$defs/Example"
+          },
+          "maxItems": 5,
+          "title": "Examples",
+          "type": "array"
+        },
+        "parameters": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "title": "Parameters",
+          "type": "object"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "enum": [
+                "offline",
+                "no-column",
+                "no-context"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reason"
+        },
+        "context": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/ContextVersion"
+              },
+              "maxItems": 32,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Context"
+        }
+      },
+      "required": [
+        "rule",
+        "state",
+        "count",
+        "examples",
+        "parameters",
+        "reason",
+        "context"
+      ],
+      "title": "RuleResult",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "The rules run on one version under one registry snapshot: one result per rule that applies to its kind. No id,\ntime or person: the stored row binds it to its version, so an offline run and the stored block are byte-identical.",
+  "properties": {
+    "schema": {
+      "const": "ophiolite.rule-results/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "kind": {
+      "maxLength": 128,
+      "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+      "title": "Kind",
+      "type": "string"
+    },
+    "registry_version": {
+      "maxLength": 32,
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+      "title": "Registry Version",
+      "type": "string"
+    },
+    "results": {
+      "items": {
+        "$ref": "#/$defs/RuleResult"
+      },
+      "maxItems": 64,
+      "title": "Results",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema",
+    "kind",
+    "registry_version",
+    "results"
+  ],
+  "title": "RuleResults",
+  "type": "object"
+}

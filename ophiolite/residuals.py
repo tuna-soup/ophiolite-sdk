@@ -62,7 +62,7 @@ SENTENCES = {
     'formation': 'Name the formation the surface represents (1 to 64 characters).',
     'display-unit': 'Show depths in m or ft.',
     'version': 'Name {what} as @ASSET:REVISION.',
-    'local': 'Residual at wells runs on project versions; use ophiolite residuals run.',
+    'local': 'Residual at wells runs on project versions; use ophiolite tools residuals run.',
 }
 
 

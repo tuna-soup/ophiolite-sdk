@@ -176,6 +176,44 @@
       }
     },
     {
+      "profile": "well-set/1",
+      "data": "Well sets",
+      "direction": "read",
+      "exact_old_revisions": "unavailable",
+      "change_detection": "none",
+      "losses": [
+        "A member without a frame is listed without geometry",
+        "Display styling is QGIS-side and not returned"
+      ],
+      "unsupported": [
+        "editing in place",
+        "sending a layer from QGIS"
+      ],
+      "qualification": {
+        "status": "partly-qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-11-02",
+        "evidence": "integration:docs/verification/E123-s7-qgis-well-set-2026-11-02.md (QGIS 4.2.2 headless on Linux: the s3 well set's 7 wellbores as the layer Well sets, 6 placed)"
+      },
+      "reach": {
+        "route": "features",
+        "collections": [
+          "well-set-wellbores"
+        ],
+        "layer": "Well sets",
+        "asset_kinds": [
+          "well-set"
+        ],
+        "transport": "ogc-api-features",
+        "slice": null,
+        "client_limits": [
+          "Checked with QGIS 4.2.2 headless on Linux; not yet on macOS or Windows"
+        ]
+      }
+    },
+    {
       "profile": "well-tops-csv/1",
       "data": "Formation tops",
       "direction": "read",

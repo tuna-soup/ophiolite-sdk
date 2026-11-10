@@ -98,11 +98,11 @@ def test_a_start_runs_to_finished_and_prints_every_skipped_row(table, run):
     code, out, err = run(*start_args(table))
     ident = table.imports.list()[0]['id']
     assert (code, err) == (0, '') and out.splitlines() == [
-        'Import %s started. If it stops, continue with: ophiolite well-imports resume %s' % (ident, ident),
+        'Import %s started. If it stops, continue with: ophiolite exchange well-imports resume %s' % (ident, ident),
         'Finished with skipped rows: 2 added, 0 already here, 1 skipped.', 'Skipped rows:', '  W-3: A coordinate is missing']
     assert run('status', ident)[1].splitlines()[0] == 'Finished with skipped rows: 2 added, 0 already here, 1 skipped.'
     assert run('list')[1] == '%s  w: Finished with skipped rows (2 added, 0 already here, 1 skipped)' % ident
-    assert run('resume') == (1, '', 'Give the import id: ophiolite well-imports resume ID (see `ophiolite well-imports list`).')
+    assert run('resume') == (1, '', 'Give the import id: ophiolite exchange well-imports resume ID (see `ophiolite exchange well-imports list`).')
     assert run('list', ident) == (1, '', 'well-imports list takes no id.')
     assert run('status', ident, '--dry-run')[:2] == (1, '')  # only start previews
 
@@ -143,7 +143,7 @@ def test_a_killed_start_is_resumed_from_a_new_process(table, when):
         out, _ = held['process'].communicate(timeout=60)
         assert held['process'].returncode == -9
         ident = table.imports.list()[0]['id']
-        assert out.strip() == 'Import %s started. If it stops, continue with: ophiolite well-imports resume %s' % (ident, ident)
+        assert out.strip() == 'Import %s started. If it stops, continue with: ophiolite exchange well-imports resume %s' % (ident, ident)
         assert table.imports.status(ident)['state'] == ('importing' if when == 'before' else 'complete-with-skipped')
         code, out, err = child(table, server.url, 'resume', ident)
     assert (code, err) == (0, '') and out.splitlines()[:2] == ['Finished with skipped rows: 2 added, 0 already here, 1 skipped.', 'Skipped rows:']

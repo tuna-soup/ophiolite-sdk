@@ -1,10 +1,10 @@
 """E96: checks against a reference. Publish the check records the conformance scientific mode produces, list the checks
 of a result or of an implementation, and compare a result with a file you trust (the comparison is kept for you only).
 
-`ophiolite checks publish | list | compare | publishers` prints these in words; a refusal's sentence never names a
+`ophiolite tools checks publish | list | compare | publishers` prints these in words; a refusal's sentence never names a
 field path, which is in `--json` (`error.field`) instead. The sentences are a closed copy keyed by the server's field.
 
-E110 (D7, D9): a check folder that `ophiolite procedures run` wrote for a check procedure holds a `procedure-report`
+E110 (D7, D9): a check folder that `ophiolite tools run` wrote for a check procedure holds a `procedure-report`
 check.json (the version checked, the procedure digest, the reference, the settings, the outcome and the counts). `checks
 publish` sends it on purpose, after refusing locally what the server refuses (M5: the counts and outcome rules); the
 server stores it as reported, never checked by the server, and reads its labels from the catalogue."""

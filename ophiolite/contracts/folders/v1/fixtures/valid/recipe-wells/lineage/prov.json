@@ -1,0 +1,62 @@
+{
+  "prefix": {
+    "ophiolite": "https://ophiolite.dev/ns/"
+  },
+  "entity": {
+    "ophiolite:sha256-a4755b91553e5a0387fc1c5c1389691ed5851548b53836ed25b0bb06618c1f83": {
+      "prov:label": "originals/wells.csv",
+      "prov:type": "ophiolite:original"
+    },
+    "ophiolite:sha256-bb30eeefb567902186a02c61c942874a5637646ef16661ad55916d2e834c5071": {
+      "prov:label": "recipe.json",
+      "prov:type": "ophiolite:recipe"
+    },
+    "ophiolite:sha256-1d0f874faa4a4cd8ff91f1b19c2fb6ab03d452ab7cea508242edc72ab52e372e": {
+      "prov:label": "items/wells.parquet",
+      "prov:type": "ophiolite:item"
+    }
+  },
+  "activity": {
+    "ophiolite:write-bb30eeefb567902186a02c61c942874a5637646ef16661ad55916d2e834c5071": {
+      "prov:startTime": "2026-11-04T08:10:40Z",
+      "prov:endTime": "2026-11-04T08:10:41Z",
+      "prov:type": "ophiolite:write",
+      "ophiolite:rows_written": 4,
+      "ophiolite:rows_left_out": 0
+    }
+  },
+  "agent": {
+    "ophiolite:ophiolite-mapper-0.4.0": {
+      "prov:type": "prov:SoftwareAgent",
+      "prov:label": "ophiolite-mapper 0.4.0"
+    }
+  },
+  "used": {
+    "_:used-1": {
+      "prov:activity": "ophiolite:write-bb30eeefb567902186a02c61c942874a5637646ef16661ad55916d2e834c5071",
+      "prov:entity": "ophiolite:sha256-a4755b91553e5a0387fc1c5c1389691ed5851548b53836ed25b0bb06618c1f83"
+    },
+    "_:used-2": {
+      "prov:activity": "ophiolite:write-bb30eeefb567902186a02c61c942874a5637646ef16661ad55916d2e834c5071",
+      "prov:entity": "ophiolite:sha256-bb30eeefb567902186a02c61c942874a5637646ef16661ad55916d2e834c5071"
+    }
+  },
+  "wasGeneratedBy": {
+    "_:generated-1": {
+      "prov:entity": "ophiolite:sha256-1d0f874faa4a4cd8ff91f1b19c2fb6ab03d452ab7cea508242edc72ab52e372e",
+      "prov:activity": "ophiolite:write-bb30eeefb567902186a02c61c942874a5637646ef16661ad55916d2e834c5071"
+    }
+  },
+  "wasDerivedFrom": {
+    "_:derived-1-1": {
+      "prov:generatedEntity": "ophiolite:sha256-1d0f874faa4a4cd8ff91f1b19c2fb6ab03d452ab7cea508242edc72ab52e372e",
+      "prov:usedEntity": "ophiolite:sha256-a4755b91553e5a0387fc1c5c1389691ed5851548b53836ed25b0bb06618c1f83"
+    }
+  },
+  "wasAssociatedWith": {
+    "_:associated-1": {
+      "prov:activity": "ophiolite:write-bb30eeefb567902186a02c61c942874a5637646ef16661ad55916d2e834c5071",
+      "prov:agent": "ophiolite:ophiolite-mapper-0.4.0"
+    }
+  }
+}

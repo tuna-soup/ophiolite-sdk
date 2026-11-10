@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/outcomes/v1/outcome-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.outcome/1",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -46,6 +46,26 @@
           "description": "The rule's settings; which keys and values a rule takes is the server's check",
           "title": "Settings",
           "type": "object"
+        },
+        "data_rules": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 64,
+                "pattern": "^[a-z0-9][a-z0-9.-]*/[0-9]+$",
+                "type": "string"
+              },
+              "maxItems": 8,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "E144 s4: the data rules (ophiolite.data-rules/1) run on the inputs before the built-in rule, sorted and once each; which may be named is the kind's `data_rules` (rules.json) and the server's check",
+          "title": "Data Rules"
         }
       },
       "required": [

@@ -87,5 +87,7 @@
   ],
   "authorization": {
     "status": "not-evaluated"
-  }
+  },
+  "osdu_kind": null,
+  "osdu_kind_reason": "OSDU has no author-owned list of wellbores with a chosen trajectory revision and frame per member"
 }

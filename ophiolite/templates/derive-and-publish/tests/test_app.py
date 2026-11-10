@@ -23,7 +23,7 @@ def test_expired_capacity_and_changed_input_guidance():
     with synthetic_server() as server:
         with Client(server.url,'p',Credential.bearer('expired')) as client:
             with pytest.raises(AuthenticationRequired) as error:list(client.assets())
-            assert 'ophiolite login' in guidance(error.value)
+            assert 'ophiolite account login' in guidance(error.value)
         with client_for(server.url,fixture=True) as client:
             server.template_faults['capacity']=True
             with pytest.raises(CapacityExceeded) as error:list(client.assets())

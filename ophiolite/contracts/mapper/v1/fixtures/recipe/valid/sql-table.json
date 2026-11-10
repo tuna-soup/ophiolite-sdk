@@ -1,0 +1,27 @@
+{
+  "schema": "ophiolite.mapper-recipe/1",
+  "created": {"tool": "ophiolite-mapper 0.1.0", "rules_version": "1.5.0", "at": "2026-11-02T12:00:00-05:00"},
+  "source": {
+    "kind": "sql-table",
+    "locator": {"source": "synthetic-warehouse", "schema": "public", "table": "well_headers"},
+    "reader": "well-location/1",
+    "digest": {"algorithm": "sha256", "over": "rows", "value": "5555555555555555555555555555555555555555555555555555555555555555"},
+    "bytes": null
+  },
+  "target": {"kind": "table-target", "id": "wells"},
+  "layout": null,
+  "fields": [
+    {"field": "id", "required": true, "multiple": false, "column": "well_id", "evidence": "declared", "decision": null},
+    {"field": "name", "required": true, "multiple": false, "column": "well_name", "evidence": "declared", "decision": null},
+    {"field": "x", "required": true, "multiple": false, "column": "x", "evidence": "declared", "decision": null},
+    {"field": "y", "required": true, "multiple": false, "column": "y", "evidence": "declared", "decision": null}
+  ],
+  "columns": {},
+  "declarations": [
+    {"name": "crs", "value": "EPSG:28992", "evidence": "project-default", "decision": null}
+  ],
+  "missing": [],
+  "wells": [],
+  "findings": [],
+  "osdu": {"namespace": "synthetic", "legal_tag": "synthetic-legal-tag", "owners": ["owners@synthetic"], "viewers": ["viewers@synthetic"]}
+}

@@ -1,0 +1,24 @@
+{
+  "note": "E165 s0 (R13): request bodies `procedures/verify` refuses, one defect each on `base`. `code` is a closed refusal (tool_verifications.REASONS) with its field, or `type` is the model's error type at `loc`.",
+  "base": {"kind": "check", "digest": "edf8668204255edd264cccb9f91d941c4c28d34312f9e264de10d4df31c5dda7",
+           "reference": {"check_id": "check-0001"}, "statement": null, "command_id": "verify-1"},
+  "valid": [
+    {"name": "a check", "set": {}},
+    {"name": "a publication with a URL", "set": {"kind": "publication",
+      "reference": {"title": "A method note", "authors": ["C. Example"], "year": 2024, "link": {"kind": "url", "value": "https://example.org/method-note"}}}},
+    {"name": "a withdrawal without a statement", "drop": ["statement"], "set": {"kind": "withdrawn",
+      "reference": {"withdraws": "verification-000000000000000000000000000000a1"}}}
+  ],
+  "cases": [
+    {"name": "who verified, sent by the client", "set": {"by": {"kind": "person", "id": "u-anna", "name_at_time": "Anna"}}, "code": "server-owned", "field": "by"},
+    {"name": "when, sent by the client", "set": {"at": 1762300800.0}, "code": "server-owned", "field": "at"},
+    {"name": "a publication without a link", "set": {"kind": "publication",
+      "reference": {"title": "A method note", "authors": ["C. Example"], "year": 2024}}, "code": "publication-link", "field": "reference.link"},
+    {"name": "an id, sent by the client", "set": {"id": "verification-000000000000000000000000000000a1"}, "type": "extra_forbidden", "loc": ["check", "id"]},
+    {"name": "an unknown key", "set": {"verified": true}, "type": "extra_forbidden", "loc": ["check", "verified"]},
+    {"name": "kind witnessed", "set": {"kind": "witnessed"}, "type": "union_tag_invalid", "loc": []},
+    {"name": "the check's label, sent by the client", "set": {"reference": {"check_id": "check-0001", "label": "Mine"}}, "type": "extra_forbidden", "loc": ["check", "reference", "label"]},
+    {"name": "a statement over 2000 characters", "set": {"statement": "REPEAT:2001"}, "type": "string_too_long", "loc": ["check", "statement"]},
+    {"name": "a NUL in the statement", "set": {"statement": "before\u0000after"}, "type": "string_pattern_mismatch", "loc": ["check", "statement"]}
+  ]
+}

@@ -5,7 +5,7 @@ contract's own file, `ophiolite/contracts/procedures/v1/delivery.py`, byte-ident
 from its source text (no bytecode is read or written), so a payload the SDK accepts is one the server accepts.
 `DeliveryObservation` is the body of `activity/deliver` (profile `procedure-delivery/1`): the exact versions read,
 the procedure, the destination's label (never its configuration) and the payload. Nothing in this release sends it:
-`ophiolite deliver` answers that delivering is not available on this deployment yet.
+`ophiolite exchange deliver` answers that delivering is not available on this deployment yet.
 """
 import types
 from pathlib import Path

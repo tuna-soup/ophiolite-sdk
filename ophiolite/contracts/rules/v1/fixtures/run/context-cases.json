@@ -1,0 +1,269 @@
+[
+ {
+  "name": "on-path-m",
+  "kind": "well-tops-csv/1",
+  "file": "tops-path.csv",
+  "declared": {
+   "depth_unit": "m"
+  },
+  "context": {
+   "version": {
+    "asset_id": "path-1",
+    "revision": "r1",
+    "kind": "deviation-csv/1"
+   },
+   "path": {
+    "depth_unit": "m",
+    "datum": "KB",
+    "first": 0.0,
+    "last": 3000.0
+   }
+  },
+  "planted": {
+   "top-on-path/1": {
+    "count": 2,
+    "rows": [
+     4,
+     5
+    ]
+   },
+   "tops-unique-name/1": {
+    "count": 0,
+    "rows": []
+   }
+  }
+ },
+ {
+  "name": "on-path-tops-ft",
+  "kind": "well-tops-csv/1",
+  "file": "tops-path-ft.csv",
+  "declared": {
+   "depth_unit": "ft"
+  },
+  "context": {
+   "version": {
+    "asset_id": "path-1",
+    "revision": "r1",
+    "kind": "deviation-csv/1"
+   },
+   "path": {
+    "depth_unit": "m",
+    "datum": null,
+    "first": 0.0,
+    "last": 3000.0
+   }
+  },
+  "planted": {
+   "top-on-path/1": {
+    "count": 1,
+    "rows": [
+     3
+    ]
+   },
+   "tops-unique-name/1": {
+    "count": 0,
+    "rows": []
+   }
+  }
+ },
+ {
+  "name": "on-path-path-ft",
+  "kind": "well-tops-csv/1",
+  "file": "tops-path.csv",
+  "declared": {
+   "depth_unit": "m"
+  },
+  "context": {
+   "version": {
+    "asset_id": "path-1",
+    "revision": "r1",
+    "kind": "deviation-csv/1"
+   },
+   "path": {
+    "depth_unit": "ft",
+    "datum": null,
+    "first": 1640.42,
+    "last": 9842.519
+   }
+  },
+  "planted": {
+   "top-on-path/1": {
+    "count": 4,
+    "rows": [
+     1,
+     3,
+     4,
+     5
+    ]
+   },
+   "tops-unique-name/1": {
+    "count": 0,
+    "rows": []
+   }
+  }
+ },
+ {
+  "name": "on-positions-same-datum",
+  "kind": "well-tops-csv/1",
+  "file": "tops-path.csv",
+  "declared": {
+   "depth_unit": "m",
+   "depth_datum": "kb"
+  },
+  "context": {
+   "version": {
+    "asset_id": "path-2",
+    "revision": "r4",
+    "kind": "well-path-positions-csv/1"
+   },
+   "path": {
+    "depth_unit": "m",
+    "datum": "KB",
+    "first": 0.0,
+    "last": 3000.0
+   }
+  },
+  "planted": {
+   "top-on-path/1": {
+    "count": 2,
+    "rows": [
+     4,
+     5
+    ]
+   },
+   "tops-unique-name/1": {
+    "count": 0,
+    "rows": []
+   }
+  }
+ },
+ {
+  "name": "datum-differs",
+  "kind": "well-tops-csv/1",
+  "file": "tops-path.csv",
+  "declared": {
+   "depth_unit": "m",
+   "depth_datum": "KB"
+  },
+  "context": {
+   "version": {
+    "asset_id": "path-1",
+    "revision": "r1",
+    "kind": "deviation-csv/1"
+   },
+   "path": {
+    "depth_unit": "m",
+    "datum": "GL",
+    "first": 0.0,
+    "last": 3000.0
+   }
+  },
+  "planted": {
+   "top-on-path/1": {
+    "reason": "no-context"
+   },
+   "tops-unique-name/1": {
+    "count": 0,
+    "rows": []
+   }
+  }
+ },
+ {
+  "name": "path-unit-unknown",
+  "kind": "well-tops-csv/1",
+  "file": "tops-path.csv",
+  "declared": {
+   "depth_unit": "m"
+  },
+  "context": {
+   "version": {
+    "asset_id": "path-1",
+    "revision": "r1",
+    "kind": "deviation-csv/1"
+   },
+   "path": {
+    "depth_unit": "unknown",
+    "datum": null,
+    "first": 0.0,
+    "last": 3000.0
+   }
+  },
+  "planted": {
+   "top-on-path/1": {
+    "reason": "no-context"
+   },
+   "tops-unique-name/1": {
+    "count": 0,
+    "rows": []
+   }
+  }
+ },
+ {
+  "name": "tops-unit-unknown",
+  "kind": "well-tops-csv/1",
+  "file": "tops-path.csv",
+  "declared": {
+   "depth_unit": "unknown"
+  },
+  "context": {
+   "version": {
+    "asset_id": "path-1",
+    "revision": "r1",
+    "kind": "deviation-csv/1"
+   },
+   "path": {
+    "depth_unit": "m",
+    "datum": null,
+    "first": 0.0,
+    "last": 3000.0
+   }
+  },
+  "planted": {
+   "top-on-path/1": {
+    "reason": "no-context"
+   },
+   "tops-unique-name/1": {
+    "count": 0,
+    "rows": []
+   }
+  }
+ },
+ {
+  "name": "no-path",
+  "kind": "well-tops-csv/1",
+  "file": "tops-path.csv",
+  "declared": {
+   "depth_unit": "m"
+  },
+  "context": {
+   "path": null
+  },
+  "planted": {
+   "top-on-path/1": {
+    "reason": "no-context"
+   },
+   "tops-unique-name/1": {
+    "count": 0,
+    "rows": []
+   }
+  }
+ },
+ {
+  "name": "offline",
+  "kind": "well-tops-csv/1",
+  "file": "tops-path.csv",
+  "declared": {
+   "depth_unit": "m"
+  },
+  "context": null,
+  "planted": {
+   "top-on-path/1": {
+    "reason": "offline"
+   },
+   "tops-unique-name/1": {
+    "count": 0,
+    "rows": []
+   }
+  }
+ }
+]

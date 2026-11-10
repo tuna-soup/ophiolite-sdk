@@ -1,0 +1,16 @@
+{
+  "format": "ophiolite.starter-evidence/1",
+  "record": {
+    "id": "synthetic-survey/two-wells",
+    "title": "Two synthetic wells",
+    "summary": "Two made-up wells and a small cube, listed for the descriptor contract.",
+    "publisher": {"name": "Synthetic Survey Organisation", "url": "https://example.org/synthetic-survey"},
+    "licence": {"name": "Creative Commons Attribution 4.0 International", "spdx": "CC-BY-4.0",
+                "url": "https://creativecommons.org/licenses/by/4.0/", "redistribution": "allowed", "attribution": "required",
+                "statement": "Contains synthetic data of the Synthetic Survey Organisation."}
+  },
+  "catalog": {"source_commit": null, "verification_commit": null, "built_at": "2026-11-05T00:00:00Z",
+              "records_digest": "7777777777777777777777777777777777777777777777777777777777777777"},
+  "verification": null,
+  "deposits": {}
+}

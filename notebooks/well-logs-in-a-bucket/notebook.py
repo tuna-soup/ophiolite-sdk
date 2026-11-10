@@ -12,16 +12,22 @@
 #     python -m ipykernel install --user --name ophiolite-gallery
 #
 # Open the notebook with the `ophiolite-gallery` kernel. Without `OPHIOLITE_URL` a small folder of logs is made on your
-# own computer to show what is pinned, and nothing is sent. To work in your project, put the `configuration.json` from
+# own computer to show what is pinned, and nothing is sent. With `ophiolite-mapper` installed as well (`pip install
+# "ophiolite-mapper[las]"`), the mapper turns those logs into a project folder that keeps each one with its SHA-256, and
+# refuses to write again once a log changed (it reads `s3://` bucket prefixes the same way, with your own keys). To
+# work in your project, put the `configuration.json` from
 # Connect → Use Python in this folder and run `ophiolite login` here; then set `OPHIOLITE_URL` and `OPHIOLITE_PROJECT`
 # to the address and project it names, `OPHIOLITE_STORAGE_CONNECTION` to the storage connection's id (Sources →
 # Technical details) and `OPHIOLITE_STORAGE_FOLDER` to its folder (for example `wells/`) before you start Jupyter.
 # Ophiolite reads the bucket with your own key, which the deployment holds; it never writes to your storage.
 # %%
 import hashlib
+import importlib.util
+import json
 import os
 import tempfile
 import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 import matplotlib
 matplotlib.use('Agg')
@@ -32,6 +38,7 @@ client = connect()
 CONNECTION = os.environ.get('OPHIOLITE_STORAGE_CONNECTION')
 FOLDER = os.environ.get('OPHIOLITE_STORAGE_FOLDER', 'wells/')
 here = synthetic() or not CONNECTION  # without a storage connection the folder is made on this computer
+mapped = synthetic() and importlib.util.find_spec('ophiolite_mapper') is not None
 TAG = uuid.uuid4().hex[:6].upper()
 
 
@@ -61,9 +68,39 @@ for name, size, in_place in files:
 # ## Add the folder, read from your storage each time
 # Every file is read once and its SHA-256 recorded; nothing is copied. Well logs (LAS 2.0) and GeoTIFF grids are read
 # in place; any other file is added only as a copy, which your organisation must allow. Running the import again adds
-# nothing new.
+# nothing new. With the mapper, the logs become a project folder on this computer instead, which keeps them the same way.
+# The mapper reads one flat folder of LAS files today, so the two logs are first copied into one folder and the notes
+# file is left out.
 # %%
-if here:
+if mapped:
+    from ophiolite.bundle import open_bundle
+    from ophiolite_mapper.cli import main as mapper
+    work = Path(tempfile.mkdtemp(prefix='ophiolite-mapper-'))
+    logs = work / 'logs'  # the mapper reads a folder of LAS files only (or an s3:// prefix of them)
+    logs.mkdir()
+    for path in sorted(root.rglob('*.las')): (logs / (path.parent.name + '.las')).write_bytes(path.read_bytes())
+    assert mapper(['inspect', str(logs), '--recipe', str(work / 'recipe.json'), '--no-reviewed']) == 0
+    # Your decisions, written into the recipe: each log's well name is a new wellbore, told apart by its name.
+    recipe = json.loads((work / 'recipe.json').read_text(encoding='utf-8'))
+    you = {'by': 'Gallery reader', 'at': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')}
+    for row in recipe['wells']: row['decision'] = dict(you, action='new-entity')
+    recipe['identity']['decision'] = dict(you, action='accept')
+    (work / 'recipe.json').write_text(json.dumps(recipe, indent=2), encoding='utf-8')
+    assert mapper(['write', str(work / 'recipe.json'), '--out', str(work / 'folder'), '--no-reviewed']) == 0
+    kept = {row['path']: row['sha256'] for row in open_bundle(str(work / 'folder')).folder if row['path'].startswith('originals/')}
+    pinned = {path: hashlib.sha256(path.read_bytes()).hexdigest() for path in sorted(logs.glob('*.las'))}
+    assert kept == {'originals/' + path.name: digest for path, digest in pinned.items()}
+    print(f'Synthetic mode: nothing is sent. The project folder keeps the {len(kept)} logs at these digests:')
+    for path, digest in kept.items():
+        print(f'  {path} {digest[:12]}')
+    changed = next(iter(pinned))
+    changed.write_bytes(changed.read_bytes().replace(b' 82', b' 83', 1))  # someone edits the file in the bucket
+    again = mapper(['write', str(work / 'recipe.json'), '--out', str(work / 'again'), '--no-reviewed'])
+    print(f'After {changed.name} changed: writing the folder again {"is refused" if again else "succeeded"}, because the log is not the one the recipe read.')
+    results = {'Kept in the folder': len(kept), 'Not a log': len(files) - len(kept)}
+elif here:
+    if synthetic():
+        print('With ophiolite-mapper installed (pip install "ophiolite-mapper[las]"), these logs are made into a project folder on this computer.')
     pinned = {p: hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(root.rglob('*.las'))}
     print(f'Synthetic mode: nothing is sent. In your project the {len(pinned)} logs are added, pinned at these digests:')
     for path, digest in pinned.items():

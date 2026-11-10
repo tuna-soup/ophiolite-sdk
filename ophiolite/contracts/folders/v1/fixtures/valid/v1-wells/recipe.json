@@ -1,0 +1,170 @@
+{
+  "schema": "ophiolite.mapper-recipe/1",
+  "created": {
+    "tool": "ophiolite-mapper 0.4.0",
+    "rules_version": "1.2.0",
+    "at": "2026-11-04T08:10:40Z"
+  },
+  "source": {
+    "kind": "file",
+    "locator": {
+      "path": "wells.csv"
+    },
+    "reader": "well-location/1",
+    "digest": {
+      "algorithm": "sha256",
+      "over": "bytes",
+      "value": "a4755b91553e5a0387fc1c5c1389691ed5851548b53836ed25b0bb06618c1f83"
+    },
+    "bytes": 172
+  },
+  "target": {
+    "kind": "table-target",
+    "id": "wells"
+  },
+  "layout": null,
+  "identity": {
+    "basis": "external",
+    "column": "UWI",
+    "decision": {
+      "by": "A. Person",
+      "at": "2026-11-04T09:00:00Z",
+      "action": "accept"
+    }
+  },
+  "fields": [
+    {
+      "field": "id",
+      "required": true,
+      "multiple": false,
+      "column": "UWI",
+      "evidence": "inferred",
+      "decision": {
+        "by": "A. Person",
+        "at": "2026-11-04T09:00:00Z",
+        "action": "choose",
+        "column": "UWI"
+      }
+    },
+    {
+      "field": "name",
+      "required": true,
+      "multiple": false,
+      "column": "NAME",
+      "evidence": "inferred",
+      "decision": {
+        "by": "A. Person",
+        "at": "2026-11-04T09:00:00Z",
+        "action": "choose",
+        "column": "NAME"
+      }
+    },
+    {
+      "field": "x",
+      "required": true,
+      "multiple": false,
+      "column": "X",
+      "evidence": "inferred",
+      "decision": {
+        "by": "A. Person",
+        "at": "2026-11-04T09:00:00Z",
+        "action": "choose",
+        "column": "X"
+      }
+    },
+    {
+      "field": "y",
+      "required": true,
+      "multiple": false,
+      "column": "Y",
+      "evidence": "inferred",
+      "decision": {
+        "by": "A. Person",
+        "at": "2026-11-04T09:00:00Z",
+        "action": "choose",
+        "column": "Y"
+      }
+    },
+    {
+      "field": "depth",
+      "required": false,
+      "multiple": false,
+      "column": null,
+      "evidence": "none",
+      "decision": {
+        "by": "A. Person",
+        "at": "2026-11-04T09:00:00Z",
+        "action": "choose",
+        "column": "TD"
+      }
+    },
+    {
+      "field": "operator",
+      "required": false,
+      "multiple": false,
+      "column": null,
+      "evidence": "none",
+      "decision": {
+        "by": "A. Person",
+        "at": "2026-11-04T09:00:00Z",
+        "action": "leave-unmapped"
+      }
+    }
+  ],
+  "columns": {},
+  "declarations": [
+    {
+      "name": "crs",
+      "value": "EPSG:28992",
+      "evidence": "none",
+      "decision": {
+        "by": "A. Person",
+        "at": "2026-11-04T09:00:00Z",
+        "action": "accept"
+      }
+    },
+    {
+      "name": "depth_unit",
+      "value": "m",
+      "evidence": "none",
+      "decision": {
+        "by": "A. Person",
+        "at": "2026-11-04T09:00:00Z",
+        "action": "accept"
+      }
+    },
+    {
+      "name": "depth_kind",
+      "value": "MD",
+      "evidence": "none",
+      "decision": {
+        "by": "A. Person",
+        "at": "2026-11-04T09:00:00Z",
+        "action": "accept"
+      }
+    },
+    {
+      "name": "depth_reference",
+      "value": "unknown",
+      "evidence": "none",
+      "decision": {
+        "by": "A. Person",
+        "at": "2026-11-04T09:00:00Z",
+        "action": "accept"
+      }
+    }
+  ],
+  "missing": [],
+  "wells": [],
+  "findings": [],
+  "osdu": {
+    "namespace": "synthetic",
+    "legal_tag": "{{LEGAL_TAG}}",
+    "owners": [
+      "data.default.owners@{{DATA_PARTITION}}"
+    ],
+    "viewers": [
+      "data.default.viewers@{{DATA_PARTITION}}"
+    ]
+  }
+}

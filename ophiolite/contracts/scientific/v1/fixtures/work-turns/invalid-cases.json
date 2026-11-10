@@ -1,0 +1,13 @@
+{
+ "subject": "E160 s0 C2: one line of a fixture folder (`folder`, 1-based `line`) with one change each: `set` puts a value at a path, `drop` removes the key at a path. `path` is the refused field as the model names it (the schema names the same field or the object holding it); `schema` says whether JSON Schema alone refuses the case (the attempt group is the model's and the converter's).",
+ "cases": [
+  {"name": "an-unknown-key", "folder": "shape", "line": 3, "set": [[["action", "label"], "Clay volume"]], "drop": [], "schema": "refuses", "path": ["action", "label"]},
+  {"name": "offered-omitted-not-null", "folder": "auto", "line": 1, "set": [], "drop": [["observation", "offered"]], "schema": "refuses", "path": ["observation", "offered"]},
+  {"name": "n-zero", "folder": "shape", "line": 1, "set": [[["n"], 0]], "drop": [], "schema": "refuses", "path": ["n"]},
+  {"name": "a-values-line-without-request", "folder": "auto", "line": 2, "set": [], "drop": [["action", "request"]], "schema": "refuses", "path": ["action", "request"]},
+  {"name": "request-in-a-shape-line", "folder": "shape", "line": 1, "set": [[["action", "request"], {"gr_min": 35}]], "drop": [], "schema": "refuses", "path": ["action", "request"]},
+  {"name": "reason-in-a-shape-verdict", "folder": "shape", "line": 1, "set": [[["judgement", "verdicts", 0, "reason"], "tops differ from the published log"]], "drop": [], "schema": "refuses", "path": ["judgement", "verdicts", 0, "reason"]},
+  {"name": "attempt-null-but-ended", "folder": "shape", "line": 1, "set": [[["attempt"], null]], "drop": [], "schema": "accepts", "path": []},
+  {"name": "ended-without-attempt", "folder": "auto", "line": 1, "set": [[["judgement", "attempt_ended"], "open"]], "drop": [], "schema": "accepts", "path": []}
+ ]
+}

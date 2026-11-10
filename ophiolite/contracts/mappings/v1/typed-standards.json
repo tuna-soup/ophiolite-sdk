@@ -1,9 +1,9 @@
 {
   "schema": "ophiolite.standards-declaration/1",
   "id": "ophiolite.mapping/typed-standards/1",
-  "status": "declaration only: no import or export to these standards is implemented; names are for orientation and future connectors",
+  "status": "export: Well, Wellbore and WellLog records and original files, from ophiolite-mapper's wells table and LAS targets (mapper/v1/export-matrix.json); every other row is declared, not written; no import is implemented",
   "pinned": {
-    "osdu": "OSDU Data Platform schemas M23 (well-known names)",
+    "osdu": "OSDU data-definitions v0.30.1 (ff89d87c)",
     "energistics": "RESQML 2.0.1, WITSML 2.1",
     "evo": "not declared: no public, version-pinned schema was verified for this checkpoint"
   },
@@ -11,6 +11,7 @@
     {
       "profile": "ophiolite.well-tops/1",
       "osdu": "work-product-component--WellboreMarkerSet (Markers[].MarkerName, MarkerMeasuredDepth, VerticalMeasurementID)",
+      "osdu_export": {"kind": "osdu:wks:work-product-component--WellboreMarkerSet:1.5.1"},
       "energistics": "WITSML 2.1 WellboreMarkerSet / RESQML WellboreMarkerFrameRepresentation",
       "differences": [
         "No wellbore identity is carried: the tops are associated explicitly with an exact uploaded well log, never matched by name.",
@@ -21,6 +22,7 @@
     {
       "profile": "ophiolite.trajectory/1",
       "osdu": "work-product-component--WellboreTrajectory (stations: MD, Inclination, AzimuthTN/AzimuthGN; AzimuthReferenceType)",
+      "osdu_export": {"kind": "osdu:wks:work-product-component--WellboreTrajectory:1.4.0"},
       "energistics": "WITSML 2.1 Trajectory / TrajectoryStation; RESQML WellboreTrajectoryRepresentation",
       "differences": [
         "Only measured depth, inclination, azimuth and an optional provided TVD are kept; no tie-in point, grid convergence, magnetic declination or survey tool.",
@@ -31,6 +33,7 @@
     {
       "profile": "ophiolite.regular-grid-surface/1",
       "osdu": "work-product-component--SeismicHorizon / Grid2dRepresentation-like regular lattice (no direct OSDU storage schema declared)",
+      "osdu_export": {"kind": "osdu:wks:work-product-component--SeismicHorizon:2.1.0"},
       "energistics": "RESQML 2.0.1 Grid2dRepresentation on a HorizonInterpretation (Point3dLatticeArray)",
       "differences": [
         "Axis-aligned lattice only (no rotation, single cell size); first row is the northmost as in ESRI ASCII grids.",
@@ -41,6 +44,7 @@
     {
       "profile": "ophiolite.triangulated-surface/1",
       "osdu": "work-product-component--SeismicHorizon / generic surface (no direct OSDU storage schema declared)",
+      "osdu_export": {"kind": "osdu:wks:work-product-component--SeismicHorizon:2.1.0"},
       "energistics": "RESQML 2.0.1 TriangulatedSetRepresentation",
       "differences": [
         "One triangle patch; no split edges, faults or multiple patches.",
@@ -51,6 +55,7 @@
     {
       "profile": "ophiolite.point-set/1",
       "osdu": "work-product-component--GenericRepresentation / point-set-like (no direct OSDU storage schema declared)",
+      "osdu_export": {"none": "work-product-component--GenericRepresentation is not a kind the box vendors at v0.30.1"},
       "energistics": "RESQML 2.0.1 PointSetRepresentation",
       "differences": [
         "A single patch of points; no property kinds beyond numeric attributes.",
@@ -60,6 +65,7 @@
     {
       "profile": "ophiolite.point-set/2",
       "osdu": "work-product-component--GenericRepresentation / point-set-like (no direct OSDU storage schema declared)",
+      "osdu_export": {"none": "work-product-component--GenericRepresentation is not a kind the box vendors at v0.30.1"},
       "energistics": "RESQML 2.0.1 PointSetRepresentation with continuous, discrete (text) and categorical properties",
       "differences": [
         "A single patch of points; text and category attributes are kept as written, with no RESQML property-kind or string-lookup mapping.",
@@ -69,6 +75,7 @@
     {
       "profile": "ophiolite.polyline-set/1",
       "osdu": "work-product-component--FaultInterpretation with polyline geometry (no one-to-one stick set)",
+      "osdu_export": {"none": "work-product-component--FaultInterpretation is not a kind the box vendors at v0.30.1"},
       "energistics": "RESQML 2.0.1 PolylineSetRepresentation (fault sticks as polylines of a FaultInterpretation)",
       "opendtect": "FaultStickSet ASCII export (x y z stick-index [node-index])",
       "evo": "not declared: an Evo line-segment mapping was not verified against a public, version-pinned schema",
@@ -81,6 +88,7 @@
     {
       "profile": "ophiolite.seismic-volume/1",
       "osdu": "work-product-component--SeismicTraceData (with a SeismicBinGrid)",
+      "osdu_export": {"none": "work-product-component--SeismicTraceData is not a kind the box vendors at v0.30.1"},
       "energistics": "RESQML 2.0.1 Grid2dRepresentation for the survey geometry; samples stay in the SEG-Y original",
       "segy": "SEG-Y rev 1 / rev 2.0: formats 1 and 5, big-endian, fixed-length traces, full inline × crossline grid",
       "evo": "not declared",
@@ -93,6 +101,7 @@
     {
       "profile": "ophiolite.seismic-line/1",
       "osdu": "work-product-component--SeismicTraceData (with a SeismicLineGeometry)",
+      "osdu_export": {"none": "work-product-component--SeismicTraceData is not a kind the box vendors at v0.30.1"},
       "energistics": "RESQML 2.0.1 SeismicLineFeature with a PolylineRepresentation for the trace positions; samples stay in the SEG-Y original",
       "segy": "SEG-Y rev 1 / rev 2.0: formats 1 and 5, big-endian, fixed-length traces, marked on textual header line C6 by Ophiolite's exporter",
       "evo": "not declared",
@@ -105,6 +114,7 @@
     {
       "profile": "ophiolite.well-location-upload/1",
       "osdu": "master-data--Well (SpatialLocation.Wgs84Coordinates / AsIngestedCoordinates with its CRS)",
+      "osdu_export": {"kind": "osdu:wks:master-data--Well:1.5.0"},
       "energistics": "WITSML 2.1 Well / WellLocation (Easting, Northing or Latitude, Longitude with a CRS)",
       "differences": [
         "One surface point per file; no location history, survey or wellbore path.",
@@ -115,7 +125,8 @@
     {
       "profile": "ophiolite.wavelet/1",
       "osdu": "work-product-component--WellLog with LogCurveFamily Waveform (as the SeismicWellTie example WellLog.Ricker40.json)",
-      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "osdu_export": {"kind": "osdu:wks:work-product-component--WellLog:1.5.0"},
+      "osdu_commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
       "energistics": "not declared: no Energistics object holds a standalone wavelet",
       "differences": [
         "Samples, interval, first time and polarity are the file's own statements; the declared kind and frequency are recorded as written, not checked against the samples.",
@@ -125,7 +136,8 @@
     {
       "profile": "ophiolite.model-section/1",
       "osdu": "none: no OSDU kind holds a rock-index grid of P-wave velocity and density on 2D section axes",
-      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "osdu_export": {"none": "no OSDU kind holds a rock-index grid of P-wave velocity and density on 2D section axes"},
+      "osdu_commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
       "energistics": "not declared",
       "differences": [
         "Rocks carry one P-wave velocity and one density each; property grids are not represented.",
@@ -135,7 +147,8 @@
     {
       "profile": "ophiolite.seismic-section/1",
       "osdu": "work-product-component--SeismicTraceData (a 2D line; no SeismicLineGeometry is carried)",
-      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "osdu_export": {"none": "work-product-component--SeismicTraceData is not a kind the box vendors at v0.30.1"},
+      "osdu_commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
       "energistics": "not declared",
       "differences": [
         "No trace headers or map position: the axes are the file's declared vertical and horizontal axes.",
@@ -145,25 +158,26 @@
     {
       "profile": "wavelet-text/1",
       "osdu": "none: a text format; its normalized profile is ophiolite.wavelet/1",
-      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "osdu_commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
       "normalized_profile": "ophiolite.wavelet/1"
     },
     {
       "profile": "model-section-text/1",
       "osdu": "none: a text format; its normalized profile is ophiolite.model-section/1",
-      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "osdu_commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
       "normalized_profile": "ophiolite.model-section/1"
     },
     {
       "profile": "seismic-section-text/1",
       "osdu": "none: a text format; its normalized profile is ophiolite.seismic-section/1",
-      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "osdu_commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
       "normalized_profile": "ophiolite.seismic-section/1"
     },
     {
       "profile": "ophiolite.time-depth/1",
       "osdu": "work-product-component--WellLog 1.5.0 (LogCurveMainFamily TimeDepth; curves CheckshotOneWayTime or CheckshotTwoWayTime against depth; SeismicReferenceElevation)",
-      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "osdu_export": {"kind": "osdu:wks:work-product-component--WellLog:1.5.0"},
+      "osdu_commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
       "energistics": "WITSML 2.1 Log with a time-depth curve pair (no dedicated object)",
       "differences": [
         "Depth type, time kind, units and the datum are the uploader's statements; unstated ones stay unknown, never defaulted.",
@@ -174,18 +188,19 @@
     {
       "profile": "time-depth-csv/1",
       "osdu": "none: a text format; its normalized profile is ophiolite.time-depth/1",
-      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "osdu_commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
       "normalized_profile": "ophiolite.time-depth/1"
     },
     {
       "profile": "table/1",
       "osdu": "none: a generic table from a connected database; its meaning is the person's declarations, and no OSDU kind is a generic table",
-      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+      "osdu_commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6"
     },
     {
       "profile": "ophiolite.feature-set/1",
       "osdu": "none: no OSDU kind models a general feature collection (data-definitions master 2026-07-17); a field outline is closest to master-data--Field geometry, a fault trace to work-product-component--FaultSystem, neither general",
-      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "osdu_export": {"none": "no OSDU kind models a general feature collection"},
+      "osdu_commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
       "energistics": "none (RESQML models interpretations, not generic GIS layers)",
       "differences": [
         "Coordinates, axes and ring orientation are kept as stored; nothing is converted (E64 owns conversion).",
@@ -196,61 +211,62 @@
     {
       "profile": "zmap-plus-grid/1",
       "osdu": "none: a file format; its normalized profile is ophiolite.regular-grid-surface/1",
-      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "osdu_commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
       "normalized_profile": "ophiolite.regular-grid-surface/1"
     },
     {
       "profile": "cps3-ascii-grid/1",
       "osdu": "none: a file format; its normalized profile is ophiolite.regular-grid-surface/1",
-      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "osdu_commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
       "normalized_profile": "ophiolite.regular-grid-surface/1"
     },
     {
       "profile": "irap-ascii-grid/1",
       "osdu": "none: a file format; its normalized profile is ophiolite.regular-grid-surface/1",
-      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "osdu_commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
       "normalized_profile": "ophiolite.regular-grid-surface/1"
     },
     {
       "profile": "petrel-scattered-data/1",
       "osdu": "none: a file format; its normalized profile is ophiolite.regular-grid-surface/1, or ophiolite.point-set/1 when its rows are not on the declared lattice",
-      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "osdu_commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
       "normalized_profile": "ophiolite.regular-grid-surface/1"
     },
     {
       "profile": "petrel-faultsticks/1",
       "osdu": "none: a file format; its normalized profile is ophiolite.polyline-set/1",
-      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "osdu_commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
       "normalized_profile": "ophiolite.polyline-set/1"
     },
     {
       "profile": "petrel-well-tops/1",
       "osdu": "none: a file format; its normalized profile is ophiolite.well-tops/1",
-      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "osdu_commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
       "normalized_profile": "ophiolite.well-tops/1"
     },
     {
       "profile": "esri-shapefile/1",
       "osdu": "none: a file format; its normalized profile is ophiolite.feature-set/1",
-      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "osdu_commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
       "normalized_profile": "ophiolite.feature-set/1"
     },
     {
       "profile": "ogc-geopackage/1",
       "osdu": "none: a file format; its normalized profile is ophiolite.feature-set/1",
-      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "osdu_commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
       "normalized_profile": "ophiolite.feature-set/1"
     },
     {
       "profile": "geojson/1",
       "osdu": "none: a file format; its normalized profile is ophiolite.feature-set/1",
-      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "osdu_commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
       "normalized_profile": "ophiolite.feature-set/1"
     },
     {
       "profile": "ophiolite.well-path/1",
       "osdu": "work-product-component--WellboreTrajectory 1.x (AvailableTrajectoryStationProperties MD, X, Y, TVDSS; the station positions without inclination and azimuth)",
-      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "osdu_export": {"kind": "osdu:wks:work-product-component--WellboreTrajectory:1.4.0"},
+      "osdu_commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
       "energistics": "RESQML 2.0.1 WellboreTrajectoryRepresentation with explicit positions (candidate; E124)",
       "differences": [
         "The CRS, units, measured-depth reference and TVDSS datum are the uploader's statements; unstated ones stay unknown, never defaulted.",
@@ -261,13 +277,14 @@
     {
       "profile": "well-path-positions-csv/1",
       "osdu": "none: a text format; its normalized profile is ophiolite.well-path/1",
-      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "osdu_commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
       "normalized_profile": "ophiolite.well-path/1"
     },
     {
       "profile": "ophiolite.well-set/1",
       "osdu": "none: OSDU has no author-owned list of wellbores with a chosen trajectory revision and frame per member; the nearest are work-product--WorkProduct (a grouping of components) and master-data--Wellbore with its projected location",
-      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "osdu_export": {"none": "OSDU has no author-owned list of wellbores with a chosen trajectory revision and frame per member"},
+      "osdu_commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
       "energistics": "none: RESQML 2.0.1 groups wellbores in a WellboreFrameRepresentation per wellbore, not as a set (candidate; E124)",
       "differences": [
         "A member names a well and a wellbore by their project ids and, optionally, one exact trajectory revision; the server checks each against the project from slice 1.",
@@ -278,13 +295,14 @@
     {
       "profile": "well-set/1",
       "osdu": "none: a JSON document of this program; its normalized profile is ophiolite.well-set/1",
-      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "osdu_commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
       "normalized_profile": "ophiolite.well-set/1"
     },
     {
       "profile": "ophiolite.well-residual/1",
       "osdu": "none: OSDU has no record of a surface-to-marker misfit per wellbore; the nearest are work-product-component--WellboreMarkerSet (the tops) and work-product-component--SeismicHorizon (the surface), each without the difference",
-      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "osdu_export": {"none": "OSDU has no record of a surface-to-marker misfit per wellbore"},
+      "osdu_commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
       "energistics": "none: RESQML 2.0.1 has WellboreMarkerFrameRepresentation and HorizonInterpretation, but no residual between them",
       "differences": [
         "A row names a wellbore by its project id, one top of the chosen formation by its tops version and index, and the trajectory version used.",
@@ -295,9 +313,9 @@
     {
       "profile": "well-residual/1",
       "osdu": "none: a JSON document of this program, written by a procedure run; its normalized profile is ophiolite.well-residual/1",
-      "osdu_commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
+      "osdu_commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
       "normalized_profile": "ophiolite.well-residual/1"
     }
   ],
-  "licences": "The standards are referenced by name only; no schema text is copied."
+  "licences": "The OSDU data-definitions v0.30.1 schemas ophiolite-mapper validates against are vendored unmodified under the Apache-2.0 licence, with its LICENSE and a NOTICE (mapper/v1/osdu/v0.30.1/); every other standard is referenced by name only."
 }

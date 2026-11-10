@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/scientific/v1/work-episodes.json",
   "x-ophiolite": {
     "id": "ophiolite.work-episodes/1",
-    "version": "1.0.0",
+    "version": "1.2.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -65,6 +65,38 @@
       "title": "EpisodeCounts",
       "type": "object"
     },
+    "EpisodeFile": {
+      "additionalProperties": false,
+      "description": "E160 s0 (D1): one payload file of the folder by name, size and digest. The manifest never lists itself or a\ndescriptor (which digest it), so nothing digests a file that digests it.",
+      "properties": {
+        "name": {
+          "enum": [
+            "episodes.jsonl",
+            "episodes.parquet",
+            "turns.jsonl"
+          ],
+          "title": "Name",
+          "type": "string"
+        },
+        "bytes": {
+          "minimum": 0,
+          "title": "Bytes",
+          "type": "integer"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "bytes",
+        "sha256"
+      ],
+      "title": "EpisodeFile",
+      "type": "object"
+    },
     "EpisodeFractions": {
       "additionalProperties": false,
       "properties": {
@@ -95,7 +127,29 @@
       "title": "EpisodeFractions",
       "type": "object"
     },
-    "EpisodeScope": {
+    "MembersScope": {
+      "additionalProperties": false,
+      "description": "Every consenting member's work in the project: the folder is the project's and names no person.",
+      "properties": {
+        "kind": {
+          "const": "members",
+          "title": "Kind",
+          "type": "string"
+        },
+        "project": {
+          "pattern": "^project-[0-9a-f]{32}$",
+          "title": "Project",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "project"
+      ],
+      "title": "MembersScope",
+      "type": "object"
+    },
+    "OwnScope": {
       "additionalProperties": false,
       "properties": {
         "kind": {
@@ -119,7 +173,7 @@
         "person",
         "project"
       ],
-      "title": "EpisodeScope",
+      "title": "OwnScope",
       "type": "object"
     },
     "ReliedBasis": {
@@ -245,7 +299,22 @@
       "type": "string"
     },
     "scope": {
-      "$ref": "#/$defs/EpisodeScope"
+      "discriminator": {
+        "mapping": {
+          "members": "#/$defs/MembersScope",
+          "own": "#/$defs/OwnScope"
+        },
+        "propertyName": "kind"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/OwnScope"
+        },
+        {
+          "$ref": "#/$defs/MembersScope"
+        }
+      ],
+      "title": "Scope"
     },
     "mode": {
       "enum": [
@@ -316,6 +385,27 @@
     "exported_at": {
       "title": "Exported At",
       "type": "number"
+    },
+    "tier": {
+      "description": "1.2.0 (E160): the deployment tier of the capture setting the export ran under",
+      "enum": [
+        "public-demonstration",
+        "local-evaluation",
+        "self-managed",
+        "managed-dedicated",
+        "shared-cloud"
+      ],
+      "title": "Tier",
+      "type": "string"
+    },
+    "files": {
+      "description": "1.2.0 (E160): the payload files with their sizes and digests; episodes.jsonl always, the derived files as the SDK writes them; names once each, in the order episodes.jsonl, episodes.parquet, turns.jsonl (checked by the model, not the schema)",
+      "items": {
+        "$ref": "#/$defs/EpisodeFile"
+      },
+      "maxItems": 3,
+      "title": "Files",
+      "type": "array"
     }
   },
   "required": [

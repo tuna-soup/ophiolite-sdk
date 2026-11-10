@@ -140,7 +140,7 @@ def test_the_cli_page_documents_reading_access_history_and_teams():
     from pathlib import Path
     text = (Path(__file__).resolve().parents[1] / 'docs/cli.md').read_text()
     section = text.split('## Reading access history and teams', 1)[1].split('\n## ', 1)[0]
-    for words in ('ophiolite access-history', 'ophiolite teams', '--project', '--person', '--export', 'Client.access_history', 'Client.access_teams',
+    for words in ('ophiolite account access-history', 'ophiolite account teams', '--project', '--person', '--export', 'Client.access_history', 'Client.access_teams',
                   'Client.export_access_history', 'Account.teams', 'Account.team', 'Account.person_history', 'access key',
                   'a saved sign-in is refused', 'HISTORY_GRANT_REFUSED', 'HISTORY_AGENT_REFUSED'):
         assert words in section, words

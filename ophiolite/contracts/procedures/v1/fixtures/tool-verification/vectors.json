@@ -1,0 +1,46 @@
+{
+  "note": "E165 s0: state() and words() over sequences of one digest's records, written by hand (acceptance 3, R12, R14, R-V3). A step adds a compact record (the test expands it to the stored shape) and states the expected state, id and catalogue line. D = depth-shift, O = team-las. 1793836800 is 5 November 2026 00:00 UTC (a vector first written with the 2025 epoch was caught by these lines).",
+  "digests": {"D": "edf8668204255edd264cccb9f91d941c4c28d34312f9e264de10d4df31c5dda7",
+              "O": "81cb03b2aa046fd8eb5e8176b859059fb027061d42ad5a35c1c70e2848a18f17"},
+  "names": {"anna": "Anna", "ben": "Ben", "cleo": "Cleo"},
+  "sequences": [
+    {"name": "acceptance 3: two verify, the older withdraws, then the newer, then a third verifies again",
+     "steps": [
+      {"add": {"id": "verification-000000000000000000000000000000a1", "kind": "check", "by": "anna", "at": 1793836800, "label": "Depth shift against hand-picked tops"},
+       "expect": {"state": "verified", "id": "verification-000000000000000000000000000000a1", "line": "Verified by Anna against Depth shift against hand-picked tops on 5 November 2026"}},
+      {"add": {"id": "verification-000000000000000000000000000000b1", "kind": "publication", "by": "ben", "at": 1793923200, "label": "Shift corrections in deviated wells"},
+       "expect": {"state": "verified", "id": "verification-000000000000000000000000000000b1", "line": "Verified by Ben against Shift corrections in deviated wells on 6 November 2026"}},
+      {"add": {"id": "verification-000000000000000000000000000000a2", "kind": "withdrawn", "by": "anna", "at": 1794009600, "withdraws": "verification-000000000000000000000000000000a1"},
+       "expect": {"state": "verified", "id": "verification-000000000000000000000000000000b1", "line": "Verified by Ben against Shift corrections in deviated wells on 6 November 2026"}},
+      {"add": {"id": "verification-000000000000000000000000000000b2", "kind": "withdrawn", "by": "ben", "at": 1794096000, "withdraws": "verification-000000000000000000000000000000b1"},
+       "expect": {"state": "withdrawn", "id": "verification-000000000000000000000000000000b2", "line": "Verification withdrawn by Ben on 8 November 2026"}},
+      {"add": {"id": "verification-000000000000000000000000000000c1", "kind": "check", "by": "cleo", "at": 1794182400, "label": "Depth shift against hand-picked tops"},
+       "expect": {"state": "verified", "id": "verification-000000000000000000000000000000c1", "line": "Verified by Cleo against Depth shift against hand-picked tops on 9 November 2026"}}]},
+    {"name": "R12: the newest is withdrawn first, the state falls back to the older",
+     "steps": [
+      {"add": {"id": "verification-000000000000000000000000000000a1", "kind": "check", "by": "anna", "at": 1793836800, "label": "Depth shift against hand-picked tops"}},
+      {"add": {"id": "verification-000000000000000000000000000000b1", "kind": "check", "by": "ben", "at": 1793923200, "label": "Second reference well"}},
+      {"add": {"id": "verification-000000000000000000000000000000b2", "kind": "withdrawn", "by": "ben", "at": 1794009600, "withdraws": "verification-000000000000000000000000000000b1"},
+       "expect": {"state": "verified", "id": "verification-000000000000000000000000000000a1", "line": "Verified by Anna against Depth shift against hand-picked tops on 5 November 2026"}}]},
+    {"name": "tie on at: the larger id is the newer, whichever was added first (a mutation ordering by at only is caught)",
+     "steps": [
+      {"add": {"id": "verification-0000000000000000000000000000000b", "kind": "check", "by": "ben", "at": 1793836800, "label": "Second reference well"}},
+      {"add": {"id": "verification-0000000000000000000000000000000a", "kind": "check", "by": "anna", "at": 1793836800, "label": "Depth shift against hand-picked tops"},
+       "expect": {"state": "verified", "id": "verification-0000000000000000000000000000000b", "line": "Verified by Ben against Second reference well on 5 November 2026"}}]},
+    {"name": "tie on at, the larger id added last",
+     "steps": [
+      {"add": {"id": "verification-0000000000000000000000000000000a", "kind": "check", "by": "anna", "at": 1793836800, "label": "Depth shift against hand-picked tops"}},
+      {"add": {"id": "verification-0000000000000000000000000000000b", "kind": "check", "by": "ben", "at": 1793836800, "label": "Second reference well"},
+       "expect": {"state": "verified", "id": "verification-0000000000000000000000000000000b", "line": "Verified by Ben against Second reference well on 5 November 2026"}}]},
+    {"name": "R14: identifier-shaped words read the neutral fallback",
+     "steps": [
+      {"add": {"id": "verification-000000000000000000000000000000d1", "kind": "check", "by": "nobody", "name_at_time": "", "at": 1793836800, "label": "edf8668204255edd264cccb9f91d941c4c28d34312f9e264de10d4df31c5dda7"},
+       "expect": {"state": "verified", "id": "verification-000000000000000000000000000000d1", "line": "Verified by Not recorded against Not recorded on 5 November 2026"}},
+      {"add": {"id": "verification-000000000000000000000000000000d2", "kind": "check", "by": "anna", "at": 1793923200, "label": "procedures/v1/fixtures/bundles/depth-shift"},
+       "expect": {"state": "verified", "id": "verification-000000000000000000000000000000d2", "line": "Verified by Anna against Not recorded on 6 November 2026"}},
+      {"add": {"id": "verification-000000000000000000000000000000d3", "kind": "check", "by": "ghost", "name_at_time": "home/u-ghost/profile", "at": 1794009600, "label": "Second reference well"},
+       "expect": {"state": "verified", "id": "verification-000000000000000000000000000000d3", "line": "Verified by Not recorded against Second reference well on 7 November 2026"}}]},
+    {"name": "R-V3: another digest has none", "digest": "O",
+     "steps": [{"expect": {"state": "none", "id": null, "line": "Not verified"}}]}
+  ]
+}

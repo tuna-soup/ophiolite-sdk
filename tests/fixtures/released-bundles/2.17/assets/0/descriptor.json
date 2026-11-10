@@ -1,0 +1,21 @@
+{
+  "schema": "ophiolite.source-snapshot/1",
+  "reference": {
+    "authority": "synthetic",
+    "key": "w",
+    "revision": "283412683d43b035e2ecb23168ea2194c935269f73bb32fde965f6852cee06a9",
+    "profile": "sql-wells/1"
+  },
+  "metadata": {
+    "kind": "well",
+    "name": "Synthetic wells"
+  },
+  "sha256": "283412683d43b035e2ecb23168ea2194c935269f73bb32fde965f6852cee06a9",
+  "bytes": 642,
+  "media_type": "application/json",
+  "contract": {},
+  "losses": [
+    "Synthetic loss"
+  ],
+  "scientific_validation": "source-declared; review required"
+}

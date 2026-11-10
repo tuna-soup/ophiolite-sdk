@@ -1,0 +1,38 @@
+{
+  "prefix": {
+    "ophiolite": "https://ophiolite.dev/ns/"
+  },
+  "entity": {
+    "ophiolite:sha256-db06126568877ea19db58189e430bf2f2b72cab5c27530e205b7aa8c61adb4d8": {
+      "prov:label": "items/wells.parquet",
+      "prov:type": "ophiolite:item"
+    }
+  },
+  "activity": {
+    "ophiolite:write-db06126568877ea19db58189e430bf2f2b72cab5c27530e205b7aa8c61adb4d8": {
+      "prov:startTime": "2026-11-04T12:00:00Z",
+      "prov:endTime": "2026-11-04T12:00:00Z",
+      "prov:type": "ophiolite:write",
+      "ophiolite:rows_written": 4,
+      "ophiolite:rows_left_out": 0
+    }
+  },
+  "agent": {
+    "ophiolite:ophiolite-examples-1": {
+      "prov:type": "prov:SoftwareAgent",
+      "prov:label": "ophiolite-examples 1"
+    }
+  },
+  "wasGeneratedBy": {
+    "_:generated-1": {
+      "prov:entity": "ophiolite:sha256-db06126568877ea19db58189e430bf2f2b72cab5c27530e205b7aa8c61adb4d8",
+      "prov:activity": "ophiolite:write-db06126568877ea19db58189e430bf2f2b72cab5c27530e205b7aa8c61adb4d8"
+    }
+  },
+  "wasAssociatedWith": {
+    "_:associated-1": {
+      "prov:activity": "ophiolite:write-db06126568877ea19db58189e430bf2f2b72cab5c27530e205b7aa8c61adb4d8",
+      "prov:agent": "ophiolite:ophiolite-examples-1"
+    }
+  }
+}

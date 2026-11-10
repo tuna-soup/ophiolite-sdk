@@ -1,0 +1,9 @@
+{
+ "schema": "ophiolite.rule-results/1",
+ "kind": "well-tops-csv/1",
+ "registry_version": "1.2.0",
+ "results": [
+  {"rule": "top-on-path/1", "state": "not-applicable", "count": null, "examples": [], "parameters": {}, "reason": "no-context", "context": null},
+  {"rule": "tops-unique-name/1", "state": "passed", "count": 0, "examples": [], "parameters": {}, "reason": null, "context": null}
+ ]
+}

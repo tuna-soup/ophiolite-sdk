@@ -4,8 +4,8 @@
  "note": "E55: every file reader is declared once here; the upload dialog, the report, the capability pages and the OSDU check read this document. E85: each entry also says what a file of its kind states about itself (`states`) and how it lands (`landing`).",
  "osdu": {
   "repository": "https://community.opengroup.org/osdu/data/data-definitions",
-  "commit": "99f8fc88d8ad838b5738ac5ad92ac643538b5766",
-  "committed": "2026-07-17"
+  "commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
+  "committed": "2026-10-05"
  },
  "limits": {
   "head_bytes": 65536,
@@ -31,7 +31,7 @@
    "recipe": false,
    "osdu": {
     "kind": "work-product-component--WellLog",
-    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+    "revision": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6"
    },
    "route": {
     "document": "las-upload",
@@ -114,7 +114,7 @@
    "recipe": false,
    "osdu": {
     "kind": "work-product-component--WellboreMarkerSet",
-    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+    "revision": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6"
    },
    "route": {
     "document": "typed-upload",
@@ -177,7 +177,7 @@
    "recipe": false,
    "osdu": {
     "kind": "work-product-component--WellboreTrajectory",
-    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+    "revision": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6"
    },
    "route": {
     "document": "typed-upload",
@@ -264,7 +264,7 @@
    "recipe": false,
    "osdu": {
     "kind": "work-product-component--SeismicHorizon",
-    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+    "revision": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6"
    },
    "route": {
     "document": "typed-upload",
@@ -367,7 +367,7 @@
    "recipe": false,
    "osdu": {
     "kind": "work-product-component--SeismicHorizon",
-    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+    "revision": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6"
    },
    "route": {
     "document": "typed-upload",
@@ -454,7 +454,7 @@
    "recipe": false,
    "osdu": {
     "kind": "work-product-component--GenericRepresentation",
-    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+    "revision": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6"
    },
    "route": {
     "document": "typed-upload",
@@ -540,7 +540,7 @@
    "recipe": false,
    "osdu": {
     "kind": "work-product-component--FaultInterpretation",
-    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+    "revision": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6"
    },
    "route": {
     "document": "typed-upload",
@@ -604,7 +604,7 @@
    "recipe": false,
    "osdu": {
     "kind": "work-product-component--SeismicTraceData",
-    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+    "revision": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6"
    },
    "route": {
     "document": "typed-upload",
@@ -718,7 +718,7 @@
    "recipe": true,
    "osdu": {
     "kind": "work-product-component--GenericRepresentation",
-    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+    "revision": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6"
    },
    "route": {
     "document": "typed-upload",
@@ -808,7 +808,7 @@
    "recipe": true,
    "osdu": {
     "kind": "work-product-component--SeismicHorizon",
-    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+    "revision": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6"
    },
    "route": {
     "document": "typed-upload",
@@ -846,7 +846,7 @@
    "recipe": false,
    "osdu": {
     "kind": "master-data--Well",
-    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+    "revision": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6"
    },
    "route": {
     "document": "typed-upload",
@@ -1120,7 +1120,7 @@
    "recipe": false,
    "osdu": {
     "kind": "work-product-component--WellLog",
-    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+    "revision": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6"
    },
    "route": {
     "document": "typed-upload",
@@ -1218,7 +1218,7 @@
    "recipe": false,
    "osdu": {
     "kind": "work-product-component--SeismicHorizon",
-    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+    "revision": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6"
    },
    "route": {
     "document": "typed-upload",
@@ -1338,7 +1338,7 @@
    "recipe": false,
    "osdu": {
     "kind": "work-product-component--SeismicHorizon",
-    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+    "revision": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6"
    },
    "route": {
     "document": "typed-upload",
@@ -1442,7 +1442,7 @@
    "recipe": false,
    "osdu": {
     "kind": "work-product-component--SeismicHorizon",
-    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+    "revision": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6"
    },
    "route": {
     "document": "typed-upload",
@@ -1849,7 +1849,7 @@
    "recipe": false,
    "osdu": {
     "kind": "work-product-component--WellboreTrajectory",
-    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+    "revision": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6"
    },
    "route": {
     "document": "typed-upload",
@@ -2067,7 +2067,7 @@
    "recipe": true,
    "osdu": {
     "kind": "work-product-component--SeismicHorizon",
-    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+    "revision": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6"
    },
    "route": {
     "document": "typed-upload",
@@ -2154,7 +2154,7 @@
    "recipe": false,
    "osdu": {
     "kind": "work-product-component--SeismicHorizon",
-    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+    "revision": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6"
    },
    "route": {
     "document": "typed-upload",
@@ -2254,7 +2254,7 @@
    "recipe": false,
    "osdu": {
     "kind": "work-product-component--FaultInterpretation",
-    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+    "revision": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6"
    },
    "route": {
     "document": "typed-upload",
@@ -2316,7 +2316,7 @@
    "recipe": false,
    "osdu": {
     "kind": "work-product-component--WellboreMarkerSet",
-    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+    "revision": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6"
    },
    "route": {
     "document": "typed-upload",
@@ -2383,7 +2383,7 @@
    "recipe": false,
    "osdu": {
     "kind": "work-product-component--SeismicTraceData",
-    "revision": "99f8fc88d8ad838b5738ac5ad92ac643538b5766"
+    "revision": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6"
    },
    "route": {
     "document": "typed-upload",
@@ -2399,6 +2399,93 @@
    "report": "{traces:,} traces, {samples:,} samples per trace",
    "type": "seismic-line",
    "mapping": "seismic-line/1",
+   "states": {
+    "function": "segy",
+    "items": [
+     {
+      "key": "sample_interval",
+      "label": "Sample interval",
+      "from": "head"
+     },
+     {
+      "key": "samples_per_trace",
+      "label": "Samples per trace",
+      "from": "head"
+     },
+     {
+      "key": "sample_format",
+      "label": "Sample format",
+      "from": "head"
+     }
+    ]
+   },
+   "landing": "retained"
+  },
+  {
+   "profile": "segy/2",
+   "label": "8-bit seismic volume (SEG-Y)",
+   "extensions": [],
+   "detect": "segy_native_header",
+   "limits": {
+    "names": [
+     "file_bytes"
+    ],
+    "template": "SEG-Y rev 1 or 2, big-endian, 1-byte two's complement samples (format 8), one trace length, a full inline × crossline grid, at most 50,000,000 traces of at most 20,000 samples · up to {file_bytes}. The file is kept byte for byte; each code is its own value, and the upload says whether code -128 means no value."
+   },
+   "declared": [
+    {
+     "key": "z_domain",
+     "label": "Samples are",
+     "kind": "choice",
+     "choices": {
+      "time": "Time",
+      "depth": "Depth",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "crs",
+     "label": "Coordinate system",
+     "kind": "crs",
+     "hint": "EPSG code such as EPSG:23031"
+    },
+    {
+     "key": "datum",
+     "label": "Datum",
+     "kind": "text",
+     "hint": "For example mean sea level"
+    },
+    {
+     "key": "undefined_code",
+     "label": "Code for no value",
+     "kind": "choice",
+     "choices": {
+      "-128": "Code -128 means no value",
+      "none": "Every code is a value",
+      "unknown": "Not stated"
+     }
+    }
+   ],
+   "companions": [],
+   "recipe": false,
+   "osdu": {
+    "kind": "work-product-component--SeismicTraceData",
+    "revision": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6"
+   },
+   "route": {
+    "document": "typed-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "synthetic",
+    "path": "tests/fixtures/readers/native-volume.sgy",
+    "sha256": "4166cb7dfeb4ad4b66e0f48e942de38a7b2a56b83c82fb2f94b780869d2b7303",
+    "bytes": 12385,
+    "exception": "D75"
+   },
+   "report": "{traces:,} traces, {samples:,} samples per trace",
+   "type": "seismic-volume",
+   "mapping": "seismic-volume/2",
    "states": {
     "function": "segy",
     "items": [

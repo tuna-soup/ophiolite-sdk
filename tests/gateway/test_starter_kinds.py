@@ -85,6 +85,15 @@ def test_a_kind_outside_the_record_vocabulary_is_named(tmp_path, spies):
     assert spies == []
 
 
+def test_a_definition_naming_picksets_is_refused_in_plain_words(tmp_path, spies):
+    """E137 s8 D-5': OpendTect lists picksets but cannot read them; refused before anything is extracted."""
+    folder = made(tmp_path / 'definition', edit=adding('picksets', ['SynP']))
+    out = refused(run, folder, tmp_path / 'out')
+    assert "OpendTect's Python lists a survey's picksets but cannot read their points, so a starter pack cannot carry them." in out
+    assert 'not a kind of' not in out
+    assert spies == []
+
+
 def test_read_back_refuses_a_file_of_a_kind_it_cannot_read(tmp_path, exported_once, monkeypatch):
     """R1-11, R2-5: an otherwise valid export document, its supported files first and one 2D line file last; no reader
     is called before the refusal."""

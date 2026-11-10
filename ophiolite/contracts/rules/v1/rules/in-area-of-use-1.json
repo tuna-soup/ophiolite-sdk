@@ -1,0 +1,13 @@
+{
+ "schema": "ophiolite.data-rule/1",
+ "id": "in-area-of-use/1",
+ "title": "Positions inside the coordinate system's area of use",
+ "description": "Each node lies inside the declared coordinate system's area of use as coordinate-systems.json records it from the EPSG Dataset: for a geographic system west to east and south to north in degrees (across 180 degrees when west exceeds east), for a projected one its native extent in its own units; edges are inside, a non-finite coordinate is outside. Nodes: grid cell centres (missing cells excluded), points, traces, or a feature's positions (one failure per feature). An unknown or uncatalogued system, or unknown axes, does not apply (no-column).",
+ "class": "file-local",
+ "kinds": ["cps3-ascii-grid/1", "esri-ascii-grid/1", "esri-shapefile/1", "geojson/1", "geotiff/1", "irap-ascii-grid/1", "ogc-geopackage/1", "petrel-scattered-data/1", "points-csv/1", "segy-line/1", "zmap-plus-grid/1"],
+ "context_kinds": null,
+ "severity": "warn",
+ "parameters": [],
+ "words": {"template": "{count} positions lie outside the coordinate system's area of use, the first at {first}.", "examples": "rows"},
+ "since": "1.3.0"
+}

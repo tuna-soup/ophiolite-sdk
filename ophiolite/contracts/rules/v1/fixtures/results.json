@@ -1,0 +1,70 @@
+{
+ "description": "Rule-result blocks (E144 s0) checked against the fixture registry (registry/). `valid` blocks pass every stage; each `refused` case is a valid block with one change (`set` pairs a path with a value, `delete` removes a key, `raw` replaces the bytes) and the stage, code and field that refuses it first. Synthetic; no reader ran.",
+ "valid": [
+  {"name": "las2-passed", "block": {"schema": "ophiolite.rule-results/1", "kind": "las2/1", "registry_version": "1.1.0", "results": [
+   {"rule": "fixture-range/1", "state": "passed", "count": 0, "examples": [], "parameters": {"high": 300}, "reason": null, "context": null}]}},
+  {"name": "las2-failed-1.0.0", "block": {"schema": "ophiolite.rule-results/1", "kind": "las2/1", "registry_version": "1.0.0", "results": [
+   {"rule": "fixture-range/1", "state": "failed", "count": 7, "examples": [{"row": 12, "depth": 1520.5, "value": 312.4}, {"row": 40, "depth": 1534.0, "value": 305}], "parameters": {"high": 300}, "reason": null, "context": null}]}},
+  {"name": "tops-failed-on-path", "block": {"schema": "ophiolite.rule-results/1", "kind": "well-tops-csv/1", "registry_version": "1.1.0", "results": [
+   {"rule": "fixture-on-path/1", "state": "failed", "count": 1, "examples": [{"row": 3, "depth": 1210.0, "value": "Fixture top A"}], "parameters": {"margin": 5, "mode": "measured"}, "reason": null,
+    "context": [{"asset_id": "fixture-path", "revision": "r2", "kind": "deviation-csv/1"}, {"asset_id": "fixture-location", "revision": "r1", "kind": "well-location/1"}]},
+   {"rule": "fixture-range/1", "state": "passed", "count": 0, "examples": [], "parameters": {"high": 300}, "reason": null, "context": null}]}},
+  {"name": "tops-offline", "block": {"schema": "ophiolite.rule-results/1", "kind": "well-tops-csv/1", "registry_version": "1.1.0", "results": [
+   {"rule": "fixture-on-path/1", "state": "not-applicable", "count": null, "examples": [], "parameters": {"margin": 0, "mode": "measured"}, "reason": "offline", "context": null},
+   {"rule": "fixture-range/1", "state": "not-applicable", "count": null, "examples": [], "parameters": {"high": 300}, "reason": "no-column", "context": null}]}},
+  {"name": "tops-1.0.0", "block": {"schema": "ophiolite.rule-results/1", "kind": "well-tops-csv/1", "registry_version": "1.0.0", "results": [
+   {"rule": "fixture-range/1", "state": "passed", "count": 0, "examples": [], "parameters": {"high": 300}, "reason": null, "context": null}]}},
+  {"name": "no-rule-applies", "block": {"schema": "ophiolite.rule-results/1", "kind": "deviation-csv/1", "registry_version": "1.1.0", "results": []}},
+  {"name": "tops-failed-on-one-context-kind", "block": {"schema": "ophiolite.rule-results/1", "kind": "well-tops-csv/1", "registry_version": "1.1.0", "results": [
+   {"rule": "fixture-on-path/1", "state": "failed", "count": 1, "examples": [{"row": 3, "depth": 1210.0, "value": "Fixture top A"}], "parameters": {"margin": 5, "mode": "measured"}, "reason": null,
+    "context": [{"asset_id": "fixture-path", "revision": "r2", "kind": "deviation-csv/1"}]},
+   {"rule": "fixture-range/1", "state": "passed", "count": 0, "examples": [], "parameters": {"high": 300}, "reason": null, "context": null}]}}
+ ],
+ "refused": [
+  {"name": "state-other", "base": "las2-passed", "set": [[["results", 0, "state"], "skipped"]], "expect": {"stage": "schema", "code": "schema", "field": "results[0].state"}},
+  {"name": "count-negative", "base": "las2-failed-1.0.0", "set": [[["results", 0, "count"], -1]], "expect": {"stage": "schema", "code": "schema", "field": "results[0].count"}},
+  {"name": "six-examples", "base": "las2-failed-1.0.0", "set": [[["results", 0, "examples"], [{"row": 1, "depth": null, "value": null}, {"row": 2, "depth": null, "value": null}, {"row": 3, "depth": null, "value": null}, {"row": 4, "depth": null, "value": null}, {"row": 5, "depth": null, "value": null}, {"row": 6, "depth": null, "value": null}]]], "expect": {"stage": "schema", "code": "schema", "field": "results[0].examples"}},
+  {"name": "row-zero", "base": "las2-failed-1.0.0", "set": [[["results", 0, "examples", 0, "row"], 0]], "expect": {"stage": "schema", "code": "schema", "field": "results[0].examples[0].row"}},
+  {"name": "context-empty-list", "base": "tops-failed-on-path", "set": [[["results", 0, "context"], []]], "expect": {"stage": "schema", "code": "schema", "field": "results[0].context"}},
+  {"name": "run-time-added", "base": "las2-passed", "set": [[["ran_at"], "2026-11-02T12:00:00Z"]], "expect": {"stage": "schema", "code": "schema", "field": "ran_at"}},
+  {"name": "registry-version-not-semver", "base": "las2-passed", "set": [[["registry_version"], "1.1"]], "expect": {"stage": "schema", "code": "schema", "field": "registry_version"}},
+  {"name": "value-infinite", "base": "las2-passed", "raw": "{\"schema\": \"ophiolite.rule-results/1\", \"kind\": \"las2/1\", \"registry_version\": \"1.1.0\", \"results\": [{\"rule\": \"fixture-range/1\", \"state\": \"failed\", \"count\": 1, \"examples\": [{\"row\": 1, \"depth\": null, \"value\": Infinity}], \"parameters\": {\"high\": 300}, \"reason\": null, \"context\": null}]}", "expect": {"stage": "schema", "code": "not-json", "field": ""}},
+  {"name": "registry-unknown", "base": "las2-passed", "set": [[["registry_version"], "2.0.0"]], "expect": {"stage": "registered", "code": "registry-unknown", "field": "registry_version"}},
+  {"name": "kind-unknown", "base": "las2-passed", "set": [[["kind"], "las3/1"]], "expect": {"stage": "consistent", "code": "kind-unknown", "field": "kind"}},
+  {"name": "duplicate-rule", "base": "tops-failed-on-path", "set": [[["results", 1, "rule"], "fixture-on-path/1"]], "expect": {"stage": "consistent", "code": "duplicate-rule", "field": "results[1].rule"}},
+  {"name": "on-path-for-las2", "base": "tops-failed-on-path", "set": [[["kind"], "las2/1"]], "expect": {"stage": "consistent", "code": "unexpected-rule", "field": "results[0].rule"}},
+  {"name": "on-path-before-it-was-released", "base": "tops-failed-on-path", "set": [[["registry_version"], "1.0.0"]], "expect": {"stage": "consistent", "code": "unexpected-rule", "field": "results[0].rule"}},
+  {"name": "missing-rule", "base": "tops-1.0.0", "set": [[["registry_version"], "1.1.0"]], "expect": {"stage": "consistent", "code": "missing-rule", "field": "results"}},
+  {"name": "out-of-order", "base": "tops-offline", "set": [[["results"], [{"rule": "fixture-range/1", "state": "not-applicable", "count": null, "examples": [], "parameters": {"high": 300}, "reason": "no-column", "context": null}, {"rule": "fixture-on-path/1", "state": "not-applicable", "count": null, "examples": [], "parameters": {"margin": 0, "mode": "measured"}, "reason": "offline", "context": null}]]], "expect": {"stage": "consistent", "code": "out-of-order", "field": "results"}},
+  {"name": "passed-with-count", "base": "las2-passed", "set": [[["results", 0, "count"], 2]], "expect": {"stage": "consistent", "code": "passed-with-count", "field": "results[0].count"}},
+  {"name": "passed-with-examples", "base": "las2-passed", "set": [[["results", 0, "examples"], [{"row": 1, "depth": null, "value": null}]]], "expect": {"stage": "consistent", "code": "passed-with-examples", "field": "results[0].examples"}},
+  {"name": "passed-with-reason", "base": "las2-passed", "set": [[["results", 0, "reason"], "no-column"]], "expect": {"stage": "consistent", "code": "reason-on-result", "field": "results[0].reason"}},
+  {"name": "failed-count-zero", "base": "las2-failed-1.0.0", "set": [[["results", 0, "count"], 0]], "expect": {"stage": "consistent", "code": "failed-without-count", "field": "results[0].count"}},
+  {"name": "failed-count-null", "base": "las2-failed-1.0.0", "set": [[["results", 0, "count"], null]], "expect": {"stage": "consistent", "code": "failed-without-count", "field": "results[0].count"}},
+  {"name": "failed-without-example", "base": "las2-failed-1.0.0", "set": [[["results", 0, "examples"], []]], "expect": {"stage": "consistent", "code": "failed-without-example", "field": "results[0].examples"}},
+  {"name": "examples-above-count", "base": "las2-failed-1.0.0", "set": [[["results", 0, "count"], 1]], "expect": {"stage": "consistent", "code": "examples-above-count", "field": "results[0].examples"}},
+  {"name": "rows-repeated", "base": "las2-failed-1.0.0", "set": [[["results", 0, "examples", 1, "row"], 12]], "expect": {"stage": "consistent", "code": "rows-not-increasing", "field": "results[0].examples"}},
+  {"name": "rows-decreasing", "base": "las2-failed-1.0.0", "set": [[["results", 0, "examples", 1, "row"], 11]], "expect": {"stage": "consistent", "code": "rows-not-increasing", "field": "results[0].examples"}},
+  {"name": "failed-with-reason", "base": "las2-failed-1.0.0", "set": [[["results", 0, "reason"], "no-column"]], "expect": {"stage": "consistent", "code": "reason-on-result", "field": "results[0].reason"}},
+  {"name": "not-applicable-with-count", "base": "tops-offline", "set": [[["results", 1, "count"], 0]], "expect": {"stage": "consistent", "code": "not-applicable-with-count", "field": "results[1].count"}},
+  {"name": "not-applicable-with-examples", "base": "tops-offline", "set": [[["results", 1, "examples"], [{"row": 1, "depth": null, "value": null}]]], "expect": {"stage": "consistent", "code": "not-applicable-with-examples", "field": "results[1].examples"}},
+  {"name": "reason-missing", "base": "tops-offline", "set": [[["results", 1, "reason"], null]], "expect": {"stage": "consistent", "code": "reason-missing", "field": "results[1].reason"}},
+  {"name": "parameter-missing", "base": "tops-failed-on-path", "delete": [["results", 0, "parameters", "mode"]], "expect": {"stage": "consistent", "code": "parameter-missing", "field": "results[0].parameters.mode"}},
+  {"name": "parameter-extra", "base": "las2-passed", "set": [[["results", 0, "parameters", "low"], 0]], "expect": {"stage": "consistent", "code": "parameter-extra", "field": "results[0].parameters.low"}},
+  {"name": "quantity-as-text", "base": "las2-passed", "set": [[["results", 0, "parameters", "high"], "300"]], "expect": {"stage": "consistent", "code": "parameter-type", "field": "results[0].parameters.high"}},
+  {"name": "quantity-as-boolean", "base": "las2-passed", "set": [[["results", 0, "parameters", "high"], true]], "expect": {"stage": "consistent", "code": "parameter-type", "field": "results[0].parameters.high"}},
+  {"name": "quantity-above-maximum", "base": "las2-passed", "set": [[["results", 0, "parameters", "high"], 1000.5]], "expect": {"stage": "consistent", "code": "parameter-out-of-bounds", "field": "results[0].parameters.high"}},
+  {"name": "quantity-below-minimum", "base": "las2-passed", "set": [[["results", 0, "parameters", "high"], -0.5]], "expect": {"stage": "consistent", "code": "parameter-out-of-bounds", "field": "results[0].parameters.high"}},
+  {"name": "choice-not-listed", "base": "tops-failed-on-path", "set": [[["results", 0, "parameters", "mode"], "lateral"]], "expect": {"stage": "consistent", "code": "parameter-out-of-bounds", "field": "results[0].parameters.mode"}},
+  {"name": "choice-as-number", "base": "tops-failed-on-path", "set": [[["results", 0, "parameters", "mode"], 1]], "expect": {"stage": "consistent", "code": "parameter-type", "field": "results[0].parameters.mode"}},
+  {"name": "context-on-file-local", "base": "las2-passed", "set": [[["results", 0, "context"], [{"asset_id": "fixture-path", "revision": "r2", "kind": "deviation-csv/1"}]]], "expect": {"stage": "consistent", "code": "context-on-file-local", "field": "results[0].context"}},
+  {"name": "offline-on-file-local", "base": "tops-offline", "set": [[["results", 1, "reason"], "offline"]], "expect": {"stage": "consistent", "code": "offline-on-file-local", "field": "results[1].reason"}},
+  {"name": "no-context-on-file-local", "base": "tops-offline", "set": [[["results", 1, "reason"], "no-context"]], "expect": {"stage": "consistent", "code": "no-context-on-file-local", "field": "results[1].reason"}},
+  {"name": "context-on-not-applicable", "base": "tops-offline", "set": [[["results", 0, "context"], [{"asset_id": "fixture-path", "revision": "r2", "kind": "deviation-csv/1"}]]], "expect": {"stage": "consistent", "code": "context-on-not-applicable", "field": "results[0].context"}},
+  {"name": "context-missing-on-failed", "base": "tops-failed-on-path", "set": [[["results", 0, "context"], null]], "expect": {"stage": "consistent", "code": "context-empty", "field": "results[0].context"}},
+  {"name": "context-kind-unexpected", "base": "tops-failed-on-path", "set": [[["results", 0, "context", 1, "kind"], "las2/1"]], "expect": {"stage": "consistent", "code": "context-kind-unexpected", "field": "results[0].context[1].kind"}},
+  {"name": "context-duplicated", "base": "tops-failed-on-path", "set": [[["results", 0, "context", 1], {"asset_id": "fixture-path", "revision": "r2", "kind": "well-location/1"}]], "expect": {"stage": "consistent", "code": "context-duplicated", "field": "results[0].context[1]"}},
+  {"name": "context-out-of-order", "base": "tops-failed-on-path", "set": [[["results", 0, "context"], [{"asset_id": "fixture-location", "revision": "r1", "kind": "well-location/1"}, {"asset_id": "fixture-path", "revision": "r2", "kind": "deviation-csv/1"}]]], "expect": {"stage": "consistent", "code": "context-out-of-order", "field": "results[0].context"}},
+  {"name": "context-kind-foreign", "base": "tops-failed-on-one-context-kind", "set": [[["results", 0, "context", 0, "kind"], "well-path-positions-csv/1"]], "expect": {"stage": "consistent", "code": "context-kind-unexpected", "field": "results[0].context[0].kind"}}
+ ]
+}

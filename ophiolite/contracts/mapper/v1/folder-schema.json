@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/mapper/v1/folder-schema.json",
+  "title": "Project folder",
+  "description": "The structure of the folder block of a bundle v2 manifest.json (ophiolite.project-folder/1, E116): the files ophiolite-mapper write adds beside the bundle's assets. Structure only: agreement with the enclosing manifest, roles, paths and media types are mapper/v1/mapper.py's (validate_folder). tables lists the identity tables' columns and prov the lineage document's keys, as data the writers and their tests read. 1.1 (E116 s1, bundle 2.12): a folder the box writes alone carries no server assets; its sources travel as role original (originals/<name>, the source's own bytes) and its typed tables as role item (items/<target>.parquet, the stem a table target of the recipe), at least one of each when the manifest lists no assets. 1.2 (E116 s2, bundle 2.12): an original may also be text/plain (a LAS file); a reader profile's item takes the stem profile_items names (items/well-log.parquet for las2/1), whose columns items lists; an entity id is listed once (entity-repeated). 1.3 (E116 s4, bundle 2.12): an original may also be an Excel workbook (.xlsx, .xlsm or .xls, with its own media type), and a bucket prefix's members travel as originals under their names after the prefix.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "mapper", "recipe", "osdu", "files"],
+  "properties": {
+    "schema": {"const": "ophiolite.project-folder/1"},
+    "mapper": {"type": "string", "minLength": 1, "maxLength": 80},
+    "recipe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"const": "recipe.json"},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "osdu": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tag", "commit", "namespace"],
+      "properties": {
+        "tag": {"const": "v0.30.1"},
+        "commit": {"const": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6"},
+        "namespace": {"type": "string", "pattern": "^([A-Za-z0-9][A-Za-z0-9-]{0,63}|\\{\\{NAMESPACE\\}\\})$"}
+      }
+    },
+    "files": {"type": "array", "minItems": 2, "maxItems": 1006, "items": {"$ref": "#/$defs/file"}}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "role", "media_type", "asset", "sha256", "bytes"],
+      "properties": {
+        "path": {"type": "string", "pattern": "^(recipe\\.json|identity/(entities|aliases|relationships)\\.parquet|lineage/prov\\.json|osdu/manifest\\.json|assets/[0-9]{1,3}/data\\.parquet|originals/[A-Za-z0-9._-]{1,120}|items/[a-z][a-z0-9-]{0,63}\\.parquet)$"},
+        "role": {"enum": ["recipe", "representation", "identity-entities", "identity-aliases", "identity-relationships", "lineage-prov", "osdu-manifest", "original", "item"]},
+        "media_type": {"enum": ["application/json", "application/vnd.apache.parquet", "text/csv", "text/plain", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel.sheet.macroEnabled.12", "application/vnd.ms-excel"]},
+        "asset": {"type": ["integer", "null"], "minimum": 0, "maximum": 999},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "bytes": {"type": "integer", "minimum": 0}
+      }
+    }
+  },
+  "roles": {
+    "recipe": {"path": "recipe.json", "media_type": "application/json", "asset": false, "count": "one"},
+    "representation": {"path": "assets/{asset}/data.parquet", "media_type": "application/vnd.apache.parquet", "asset": true, "count": "per-asset"},
+    "identity-entities": {"path": "identity/entities.parquet", "media_type": "application/vnd.apache.parquet", "asset": false, "count": "identity"},
+    "identity-aliases": {"path": "identity/aliases.parquet", "media_type": "application/vnd.apache.parquet", "asset": false, "count": "identity"},
+    "identity-relationships": {"path": "identity/relationships.parquet", "media_type": "application/vnd.apache.parquet", "asset": false, "count": "identity"},
+    "lineage-prov": {"path": "lineage/prov.json", "media_type": "application/json", "asset": false, "count": "one"},
+    "osdu-manifest": {"path": "osdu/manifest.json", "media_type": "application/json", "asset": false, "count": "optional"},
+    "original": {"pattern": "^originals/[A-Za-z0-9._-]{1,120}$", "media_types": ["text/csv", "text/plain", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel.sheet.macroEnabled.12", "application/vnd.ms-excel"], "asset": false, "count": "without-assets"},
+    "item": {"pattern": "^items/[a-z][a-z0-9-]{0,63}\\.parquet$", "media_type": "application/vnd.apache.parquet", "asset": false, "count": "without-assets"}
+  },
+  "profile_items": {"las2/1": "well-log"},
+  "items": {
+    "items/well-log.parquet": [
+      {"column": "payload", "type": "string", "nullable": false},
+      {"column": "wellbore", "type": "string", "nullable": false},
+      {"column": "index", "type": "float64", "nullable": false},
+      {"column": "index_curve", "type": "string", "nullable": false},
+      {"column": "index_unit", "type": "string", "nullable": true},
+      {"column": "curve", "type": "string", "nullable": false},
+      {"column": "unit", "type": "string", "nullable": true},
+      {"column": "value", "type": "float64", "nullable": true}
+    ]
+  },
+  "tables": {
+    "identity/entities.parquet": [
+      {"column": "entity_id", "type": "string", "nullable": false},
+      {"column": "kind", "type": "string", "nullable": false, "values": ["well", "wellbore"]},
+      {"column": "basis", "type": "string", "nullable": false, "values": ["external", "provisional"]},
+      {"column": "external_id", "type": "string", "nullable": true},
+      {"column": "name", "type": "string", "nullable": false},
+      {"column": "osdu_id", "type": "string", "nullable": false}
+    ],
+    "identity/aliases.parquet": [
+      {"column": "entity_id", "type": "string", "nullable": false},
+      {"column": "spelling", "type": "string", "nullable": false},
+      {"column": "status", "type": "string", "nullable": false, "values": ["canonical", "accepted"]},
+      {"column": "decided_by", "type": "string", "nullable": true},
+      {"column": "decided_at", "type": "string", "nullable": true}
+    ],
+    "identity/relationships.parquet": [
+      {"column": "subject", "type": "string", "nullable": false},
+      {"column": "subject_kind", "type": "string", "nullable": false, "values": ["wellbore", "payload"]},
+      {"column": "predicate", "type": "string", "nullable": false, "values": ["part-of", "of-entity"]},
+      {"column": "object", "type": "string", "nullable": false},
+      {"column": "object_kind", "type": "string", "nullable": false, "values": ["well", "wellbore"]}
+    ]
+  },
+  "predicates": {
+    "part-of": {"subject_kind": ["wellbore"], "object_kind": ["well"]},
+    "of-entity": {"subject_kind": ["payload"], "object_kind": ["well", "wellbore"]}
+  },
+  "prov": {
+    "keys": ["prefix", "entity", "activity", "agent", "wasGeneratedBy", "used", "wasDerivedFrom", "wasAssociatedWith"],
+    "prefix": {"ophiolite": "https://ophiolite.dev/ns/"},
+    "entity_id": "^ophiolite:sha256-[0-9a-f]{64}$"
+  }
+}

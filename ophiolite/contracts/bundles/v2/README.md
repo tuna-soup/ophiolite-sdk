@@ -128,3 +128,51 @@ point set or feature set (2.8): Petrel fault sticks travel with their `.crsmeta.
 `ophiolite.package-read/1` interpretation. Exporters write 2.11 only when such a set travels; every other export keeps
 its minor. Readers before 2.11 refuse the bundle on its file roles ("Bundle 1.0 carries exactly one original per asset
 and only known file roles."); they never read it without the package.
+
+## 2.12 — a project folder (E116 s1)
+
+A manifest may carry a top-level `folder` block, `ophiolite.project-folder/1`
+([schema](../../mapper/v1/folder-schema.json)), checked by `mapper/v1/mapper.py` `validate_folder` with the manifest:
+the files `ophiolite-mapper write` adds beside the assets, each with its path, role, media type, size and SHA-256.
+With a folder block, and only with one, `assets` and `selection` may be empty: a folder the box writes alone holds no
+exact server revision (an asset is one, verified against its original), so its sources travel as the block's
+`originals/<name>` and its typed tables as `items/<target>.parquet`. Readers from 2.12 verify every folder file as an
+asset file (no link on the way, size, digest, the bundle's file and total limits) and count them as listed. Readers
+before 2.12 refuse a folder written by the box alone ("The bundle lists no assets or too many."); a bundle that carries
+the block beside server assets they read as before, its core payloads checked, with the folder files listed as
+unlisted.
+
+## 2.13 — surveys (E142 s0)
+
+A manifest may carry a top-level `surveys` list (at least one entry when present): each survey as the exporter could
+read it at export ([survey revision](../../surveys/v1/README.md)) with its id, name, identity, producer reference,
+default context, the revision exported (`meaning: survey-at-export`) or the base revision of a live view
+(`survey-latest-at-export`), and `complete`, true only when every member of that revision is listed. A member is
+`{role, asset_id, revision, entity_ref, asset}`: `asset` is the position in `assets` holding exactly that revision
+when its bytes travel, else `null` (membership travels without the bytes); `entity_ref` is an `entity_id` of the
+manifest's `entities` (2.4), so two members of one provisional well share it and two same-named provisional wells have
+two. A relation names two members by asset and revision. `survey_contract.portable_problems` checks the block beside
+the schema (`survey-asset-position`, `survey-asset-revision`, `survey-entity-ref`, then every survey rule on the
+rebuilt snapshot). The `selection` and `assets` caps stay 128. The 2.12 schema accepts a 2.13 manifest (the block
+is an extension to it); what a reader keeps of it on import is E142 s2, and a partial block never replaces a survey on import.
+
+## 2.14 — a project folder of its own format (E117 s1)
+
+The `folder` block may be `ophiolite.project-folder/2` ([the format's page](../../folders/v1/README.md)), which any
+program may write: it lists each item with its kind, profile, OSDU kind, declarations and row count beside the files.
+A /2 block needs bundle 2.14 or later (`folders/v1/folder.py` `MINOR` is the one answer; a /1 block keeps 2.12) and is
+checked by `folders/v1/folder.py` `validate`; a /1 block is checked as in 2.12. Readers from 2.14 verify a /2 block's
+files exactly as a /1 block's and list its items. A /2 block beside server assets is not read yet. Readers before
+2.14 refuse a /2 block: their 2.12 check applies the /1 rules to it and names the first one it breaks.
+
+## 2.15 — a release says what it is (E147 s0)
+
+A manifest may carry a `citation` block ([the release descriptors page](../../descriptors/v1/README.md),
+`ophiolite.citation/1`): title, creators, publisher, publication date, version, an open licence by its SPDX id or a
+notice, and the standard descriptors at the bundle's root derived from it (`ro-crate-metadata.json`, `croissant.json`,
+`datacite.json`). A bundle's own PROV-JSON travels as `prov.json`, digested in `citation.prov`. An asset file row may
+carry `media_type`; a manifest with a citation needs bundle 2.15 or later and a `media_type` on every asset file row
+(`descriptors/v1/descriptors.py` `validate_citation`). Descriptor bytes are not digested: a reader derives what each
+must hold from the manifest and refuses one that disagrees (`descriptor-disagrees`, naming the file and the place).
+Readers before 2.15 report the descriptors and `prov.json` as files the manifest does not list, and their `pack`
+refuses them. Nothing writes a citation yet.

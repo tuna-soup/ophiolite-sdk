@@ -1,0 +1,9 @@
+{
+ "schema": "ophiolite.rule-results/1",
+ "kind": "geojson/1",
+ "registry_version": "1.3.0",
+ "results": [
+  {"rule": "geometry-present/1", "state": "failed", "count": 1, "examples": [{"row": 2, "depth": null, "value": null}], "parameters": {}, "reason": null, "context": null},
+  {"rule": "in-area-of-use/1", "state": "failed", "count": 2, "examples": [{"row": 3, "depth": null, "value": "300000.5 450000.75"}, {"row": 4, "depth": null, "value": "150000.5 700000.25"}], "parameters": {}, "reason": null, "context": null}
+ ]
+}

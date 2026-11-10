@@ -1,0 +1,22 @@
+{
+  "schema": "ophiolite.mapper-recipe/1",
+  "created": {"tool": "ophiolite-mapper 0.1.0", "rules_version": "1.5.0", "at": "2026-11-02T12:00:00Z"},
+  "source": {
+    "kind": "bucket-prefix",
+    "locator": {"endpoint": "https://objects.example.org:9000/store", "region": "eu-west-1", "bucket": "synthetic-logs", "prefix": "wells/SYN-A/"},
+    "reader": "las2/1",
+    "digest": {"algorithm": "sha256", "over": "members", "value": "4444444444444444444444444444444444444444444444444444444444444444"},
+    "bytes": null
+  },
+  "target": {"kind": "reader-profile", "id": "las2/1"},
+  "layout": null,
+  "fields": [],
+  "columns": {},
+  "declarations": [],
+  "missing": [],
+  "wells": [
+    {"spelling": "SYN-A1", "match": "exact", "canonical": "SYN-A1", "entity": null, "decision": null}
+  ],
+  "findings": [],
+  "osdu": {"namespace": "synthetic", "legal_tag": "synthetic-legal-tag", "owners": ["owners@synthetic"], "viewers": ["viewers@synthetic"]}
+}

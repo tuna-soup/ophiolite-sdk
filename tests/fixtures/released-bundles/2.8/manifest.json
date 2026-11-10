@@ -1,0 +1,130 @@
+{
+  "schema": "ophiolite.portable-bundle/2",
+  "bundle_version": "2.8.0",
+  "created_at": "2026-11-02T18:16:45+00:00",
+  "exporter": {
+    "name": "ophiolite-sdk",
+    "version": "2026.11.4"
+  },
+  "scope": "selection",
+  "selection": [
+    {
+      "asset_id": "synthetic-feature-set",
+      "revision": "26c66c9fa30d2077262e218ee9108f84264bdaf0846a75443b601b5ec5974bcc",
+      "curves": []
+    }
+  ],
+  "assets": [
+    {
+      "asset_id": "synthetic-feature-set",
+      "revision": "26c66c9fa30d2077262e218ee9108f84264bdaf0846a75443b601b5ec5974bcc",
+      "origin": "retained-capture",
+      "profile": "esri-shapefile/1",
+      "type": "feature-set",
+      "name": null,
+      "files": [
+        {
+          "path": "assets/0/original.shp",
+          "role": "original",
+          "sha256": "26c66c9fa30d2077262e218ee9108f84264bdaf0846a75443b601b5ec5974bcc",
+          "bytes": 441
+        },
+        {
+          "path": "assets/0/descriptor.json",
+          "role": "descriptor",
+          "sha256": "9000d09de08828a60dac1c6283538209691c9da8ba047669aa55d4ee8b68d04a",
+          "bytes": 4387
+        },
+        {
+          "path": "assets/0/data.json",
+          "role": "normalized",
+          "sha256": "efc4834a6e305e9bf7804086551fa98fa3eb1f3b778b47e928282892f8cfd44d",
+          "bytes": 1943
+        },
+        {
+          "path": "assets/0/package.json",
+          "role": "package",
+          "sha256": "aad9877ac65ffb9de30e3de43113a9dc9fd970e5a3004a02cf260d456fcf71dc",
+          "bytes": 649
+        },
+        {
+          "path": "assets/0/companion-1.bin",
+          "role": "companion",
+          "sha256": "6489d726f942856ef6da89b2167abe7f45868e25a6fcdd2281caa0453dcbbf8f",
+          "bytes": 11
+        },
+        {
+          "path": "assets/0/companion-2.bin",
+          "role": "companion",
+          "sha256": "ceda4ac1bdf098795e4480b1cd42c7fe0abe660b08129046e4fac0fa9089e42d",
+          "bytes": 29
+        },
+        {
+          "path": "assets/0/companion-3.bin",
+          "role": "companion",
+          "sha256": "7c62dd78ea12b12595071c45e68f3ba278c61005e5b6cd1f84ea21202c22e12a",
+          "bytes": 14
+        },
+        {
+          "path": "assets/0/interpretation.json",
+          "role": "interpretation",
+          "sha256": "2ae6604cdcebf1690d6e9f187d9b02c582dd2b89fe219b2bc4dc12313f47f70a",
+          "bytes": 467
+        }
+      ],
+      "history": null,
+      "parents": [],
+      "parent_visibility": "complete",
+      "relationships": {
+        "well_log": null
+      },
+      "omissions": [
+        "Synthetic offline fixture, not a server publication"
+      ],
+      "losses": [],
+      "package": {
+        "package_digest": "ab35aee995e3e4caa269b74a8fbc32b526982267b7e2957ae65d0c730a003d32",
+        "members": [
+          {
+            "name": "fields.dbf",
+            "role": "companion",
+            "sha256": "6489d726f942856ef6da89b2167abe7f45868e25a6fcdd2281caa0453dcbbf8f",
+            "bytes": 11,
+            "file": "assets/0/companion-1.bin"
+          },
+          {
+            "name": "fields.prj",
+            "role": "crs-metadata",
+            "sha256": "ceda4ac1bdf098795e4480b1cd42c7fe0abe660b08129046e4fac0fa9089e42d",
+            "bytes": 29,
+            "file": "assets/0/companion-2.bin"
+          },
+          {
+            "name": "fields.shp",
+            "role": "primary",
+            "sha256": "26c66c9fa30d2077262e218ee9108f84264bdaf0846a75443b601b5ec5974bcc",
+            "bytes": 441,
+            "file": "assets/0/original.shp"
+          },
+          {
+            "name": "fields.shx",
+            "role": "companion",
+            "sha256": "7c62dd78ea12b12595071c45e68f3ba278c61005e5b6cd1f84ea21202c22e12a",
+            "bytes": 14,
+            "file": "assets/0/companion-3.bin"
+          }
+        ],
+        "recipe": null,
+        "interpretation": "assets/0/interpretation.json"
+      }
+    }
+  ],
+  "groups": null,
+  "recommendations": null,
+  "limits": {
+    "max_assets": 128,
+    "max_file_bytes": 33554432,
+    "max_total_bytes": 536870912
+  },
+  "notice": "Checksums show the integrity of this copy, not authorship or scientific correctness. Exported copies cannot be recalled; holding one grants no new upstream, sharing or AI-training rights."
+}

@@ -1,0 +1,140 @@
+{
+  "description": "Answers to questions to an organisation (E145 s0), ophiolite.search/2, each beside its question (ophiolite.search-request/2). `valid` are accepted by both stages. Each `refused` case is one valid answer (`base`) with one change to the answer: `set` pairs a path (keys and list indices) with a value, `delete` removes a key. `expect` is the stage that refuses it first (`schema`: the model; `consistent`: check_answer), the field it names and the closed reason; `schema_expressible` is true only when the published JSON Schema alone refuses it. The tie cases put name order and asset order against project order, so dropping any one key of the order accepts one of them. Hand-written and synthetic; the asset ids are not landed ones.",
+  "valid": [
+    {"name": "q1-first-page", "request": {"organization_id": "org-e145", "text": "gamma ray", "limit": 3}, "answer": {
+      "schema": "ophiolite.search/2", "organization_id": "org-e145", "method": "words", "matched": 56,
+      "results": [
+        {"project": "proj-a", "asset": "a-0003", "revision": "r1", "kind": "las2/1", "name": "34/10-A-1 gamma ray", "well": "34/10-A-1", "score": 0.721348, "why": ["gamma", "ray"]},
+        {"project": "proj-a", "asset": "a-0011", "revision": "r1", "kind": "las2/1", "name": "34/10-A-2 gamma ray", "well": "34/10-A-2", "score": 0.721348, "why": ["gamma", "ray"]},
+        {"project": "proj-a", "asset": "a-0002", "revision": "r2", "kind": "las2/1", "name": "34/10-A-1 gamma ray run 2", "well": "34/10-A-1", "score": 0.62133, "why": ["gamma", "ray"]}
+      ],
+      "facets": {
+        "kind": [{"value": "las2/1", "label": "LAS 2.0 log", "count": 56}],
+        "project": [{"value": "proj-a", "label": "Project A", "count": 56}],
+        "well": [
+          {"value": "34/10-A-1", "label": "34/10-A-1", "count": 7}, {"value": "34/10-A-2", "label": "34/10-A-2", "count": 7},
+          {"value": "34/10-A-3", "label": "34/10-A-3", "count": 7}, {"value": "34/10-A-4", "label": "34/10-A-4", "count": 7},
+          {"value": "34/10-A-5", "label": "34/10-A-5", "count": 7}, {"value": "34/10-A-6", "label": "34/10-A-6", "count": 7},
+          {"value": "34/10-A-7", "label": "34/10-A-7", "count": 7}, {"value": "34/10-A-8", "label": "34/10-A-8", "count": 7}
+        ]
+      },
+      "next_cursor": "opaque-cursor-1", "not_searched_by_meaning": 0}},
+    {"name": "q6-empty", "request": {"organization_id": "org-e145", "text": "obsolete"}, "answer": {
+      "schema": "ophiolite.search/2", "organization_id": "org-e145", "method": "words", "matched": 0, "results": [],
+      "facets": {"kind": [], "project": [], "well": []}, "next_cursor": null, "not_searched_by_meaning": 0}},
+    {"name": "last-page", "request": {"organization_id": "org-e145", "text": "density log", "cursor": "opaque-cursor-2", "limit": 50}, "answer": {
+      "schema": "ophiolite.search/2", "organization_id": "org-e145", "method": "words", "matched": 8,
+      "results": [
+        {"project": "proj-b", "asset": "b-0040", "revision": "r1", "kind": "las2/1", "name": "density log", "well": "35/11-B-2", "score": 0.558111, "why": ["density", "log"]},
+        {"project": "proj-b", "asset": "b-0047", "revision": "r1", "kind": "las2/1", "name": "density log", "well": null, "score": 0.558111, "why": ["density", "log"]}
+      ],
+      "facets": {
+        "kind": [{"value": "las2/1", "label": "LAS 2.0 log", "count": 8}],
+        "project": [{"value": "proj-a", "label": "Project A", "count": 6}, {"value": "proj-b", "label": "Project B", "count": 2}],
+        "well": [
+          {"value": "34/10-A-3", "label": "34/10-A-3", "count": 1}, {"value": "34/10-A-4", "label": "34/10-A-4", "count": 1},
+          {"value": "34/10-A-5", "label": "34/10-A-5", "count": 1}, {"value": "34/10-A-6", "label": "34/10-A-6", "count": 1},
+          {"value": "34/10-A-7", "label": "34/10-A-7", "count": 1}, {"value": "34/10-A-8", "label": "34/10-A-8", "count": 1},
+          {"value": "35/11-B-2", "label": "35/11-B-2", "count": 1}, {"value": null, "label": null, "count": 1}
+        ]
+      },
+      "next_cursor": null, "not_searched_by_meaning": 0}},
+    {"name": "filter-only", "request": {"organization_id": "org-e145", "kinds": ["well-tops-csv/1", "deviation-csv/1"]}, "answer": {
+      "schema": "ophiolite.search/2", "organization_id": "org-e145", "method": "words", "matched": 3,
+      "results": [
+        {"project": "proj-a", "asset": "a-0201", "revision": "r1", "kind": "deviation-csv/1", "name": "34/10-A-1 deviation", "well": "34/10-A-1", "score": 0.0, "why": []},
+        {"project": "proj-a", "asset": "a-0101", "revision": "r1", "kind": "well-tops-csv/1", "name": "34/10-A-1 tops", "well": "34/10-A-1", "score": 0.0, "why": []},
+        {"project": "proj-a", "asset": "a-0102", "revision": "r1", "kind": "well-tops-csv/1", "name": "34/10-A-2 tops", "well": "34/10-A-2", "score": 0.0, "why": []}
+      ],
+      "facets": {
+        "kind": [{"value": "well-tops-csv/1", "label": "Well tops table", "count": 2}, {"value": "deviation-csv/1", "label": "Deviation survey table", "count": 1}],
+        "project": [{"value": "proj-a", "label": "Project A", "count": 3}],
+        "well": [{"value": "34/10-A-1", "label": "34/10-A-1", "count": 2}, {"value": "34/10-A-2", "label": "34/10-A-2", "count": 1}]
+      },
+      "next_cursor": null, "not_searched_by_meaning": 0}},
+    {"name": "ties", "request": {"organization_id": "org-e145", "text": "caliper", "include_archived": true}, "answer": {
+      "schema": "ophiolite.search/2", "organization_id": "org-e145", "method": "words", "matched": 5,
+      "results": [
+        {"project": "proj-a", "asset": "a-10", "revision": "r1", "kind": "las2/1", "name": "caliper log a", "well": "34/10-A-1", "score": 0.455119, "why": ["caliper"]},
+        {"project": "proj-a", "asset": "a-90", "revision": "r1", "kind": "las2/1", "name": "caliper log a", "well": "34/10-A-1", "score": 0.455119, "why": ["caliper"]},
+        {"project": "proj-a", "asset": "a-05", "revision": "r1", "kind": "las2/1", "name": "caliper log b", "well": "34/10-A-2", "score": 0.455119, "why": ["caliper"]},
+        {"project": "proj-b", "asset": "a-01", "revision": "r1", "kind": "las2/1", "name": "caliper log a", "well": "35/11-B-1", "score": 0.455119, "why": ["caliper"]},
+        {"project": "proj-c", "asset": "a-07", "revision": "r1", "kind": "las2/1", "name": "caliper log a", "well": "31/2-C-1", "score": 0.455119, "why": ["caliper"]}
+      ],
+      "facets": {
+        "kind": [{"value": "las2/1", "label": "LAS 2.0 log", "count": 5}],
+        "project": [{"value": "proj-a", "label": "Project A", "count": 3}, {"value": "proj-b", "label": "Project B", "count": 1}, {"value": "proj-c", "label": "Project C", "count": 1}],
+        "well": [{"value": "34/10-A-1", "label": "34/10-A-1", "count": 2}, {"value": "31/2-C-1", "label": "31/2-C-1", "count": 1},
+                 {"value": "34/10-A-2", "label": "34/10-A-2", "count": 1}, {"value": "35/11-B-1", "label": "35/11-B-1", "count": 1}]
+      },
+      "next_cursor": null, "not_searched_by_meaning": 0}},
+    {"name": "rounded-tie", "request": {"organization_id": "org-e145", "text": "gamma", "include_archived": true}, "answer": {
+      "schema": "ophiolite.search/2", "organization_id": "org-e145", "method": "words", "matched": 2,
+      "results": [
+        {"project": "proj-a", "asset": "a-1", "revision": "r1", "kind": "las2/1", "name": "gamma log", "well": "34/10-A-1", "score": 0.5, "why": ["gamma"]},
+        {"project": "proj-c", "asset": "c-1", "revision": "r1", "kind": "las2/1", "name": "gamma log", "well": "31/2-C-1", "score": 0.5, "why": ["gamma"]}
+      ],
+      "facets": {
+        "kind": [{"value": "las2/1", "label": "LAS 2.0 log", "count": 2}],
+        "project": [{"value": "proj-a", "label": "Project A", "count": 1}, {"value": "proj-c", "label": "Project C", "count": 1}],
+        "well": [{"value": "31/2-C-1", "label": "31/2-C-1", "count": 1}, {"value": "34/10-A-1", "label": "34/10-A-1", "count": 1}]
+      },
+      "next_cursor": null, "not_searched_by_meaning": 0}}
+  ],
+  "refused": [
+    {"name": "matched-below-facets", "base": "q1-first-page", "set": [[["matched"], 55]], "expect": {"stage": "consistent", "field": "matched", "reason": "facet-sum"}, "schema_expressible": false},
+    {"name": "matched-above-facets", "base": "q1-first-page", "set": [[["matched"], 57]], "expect": {"stage": "consistent", "field": "matched", "reason": "facet-sum"}, "schema_expressible": false},
+    {"name": "rows-out-of-order", "base": "q1-first-page", "set": [[["results"], [
+      {"project": "proj-a", "asset": "a-0002", "revision": "r2", "kind": "las2/1", "name": "34/10-A-1 gamma ray run 2", "well": "34/10-A-1", "score": 0.62133, "why": ["gamma", "ray"]},
+      {"project": "proj-a", "asset": "a-0011", "revision": "r1", "kind": "las2/1", "name": "34/10-A-2 gamma ray", "well": "34/10-A-2", "score": 0.721348, "why": ["gamma", "ray"]},
+      {"project": "proj-a", "asset": "a-0003", "revision": "r1", "kind": "las2/1", "name": "34/10-A-1 gamma ray", "well": "34/10-A-1", "score": 0.721348, "why": ["gamma", "ray"]}]]],
+      "expect": {"stage": "consistent", "field": "results.1", "reason": "out-of-order"}, "schema_expressible": false},
+    {"name": "tie-not-broken-by-project", "base": "ties", "set": [[["results"], [
+      {"project": "proj-b", "asset": "a-01", "revision": "r1", "kind": "las2/1", "name": "caliper log a", "well": "35/11-B-1", "score": 0.455119, "why": ["caliper"]},
+      {"project": "proj-c", "asset": "a-07", "revision": "r1", "kind": "las2/1", "name": "caliper log a", "well": "31/2-C-1", "score": 0.455119, "why": ["caliper"]},
+      {"project": "proj-a", "asset": "a-10", "revision": "r1", "kind": "las2/1", "name": "caliper log a", "well": "34/10-A-1", "score": 0.455119, "why": ["caliper"]},
+      {"project": "proj-a", "asset": "a-90", "revision": "r1", "kind": "las2/1", "name": "caliper log a", "well": "34/10-A-1", "score": 0.455119, "why": ["caliper"]},
+      {"project": "proj-a", "asset": "a-05", "revision": "r1", "kind": "las2/1", "name": "caliper log b", "well": "34/10-A-2", "score": 0.455119, "why": ["caliper"]}]]],
+      "expect": {"stage": "consistent", "field": "results.2", "reason": "out-of-order"}, "schema_expressible": false},
+    {"name": "tie-not-broken-by-name", "base": "ties", "set": [[["results"], [
+      {"project": "proj-a", "asset": "a-05", "revision": "r1", "kind": "las2/1", "name": "caliper log b", "well": "34/10-A-2", "score": 0.455119, "why": ["caliper"]},
+      {"project": "proj-a", "asset": "a-10", "revision": "r1", "kind": "las2/1", "name": "caliper log a", "well": "34/10-A-1", "score": 0.455119, "why": ["caliper"]},
+      {"project": "proj-a", "asset": "a-90", "revision": "r1", "kind": "las2/1", "name": "caliper log a", "well": "34/10-A-1", "score": 0.455119, "why": ["caliper"]},
+      {"project": "proj-b", "asset": "a-01", "revision": "r1", "kind": "las2/1", "name": "caliper log a", "well": "35/11-B-1", "score": 0.455119, "why": ["caliper"]},
+      {"project": "proj-c", "asset": "a-07", "revision": "r1", "kind": "las2/1", "name": "caliper log a", "well": "31/2-C-1", "score": 0.455119, "why": ["caliper"]}]]],
+      "expect": {"stage": "consistent", "field": "results.1", "reason": "out-of-order"}, "schema_expressible": false},
+    {"name": "tie-not-broken-by-asset", "base": "ties", "set": [[["results"], [
+      {"project": "proj-a", "asset": "a-90", "revision": "r1", "kind": "las2/1", "name": "caliper log a", "well": "34/10-A-1", "score": 0.455119, "why": ["caliper"]},
+      {"project": "proj-a", "asset": "a-10", "revision": "r1", "kind": "las2/1", "name": "caliper log a", "well": "34/10-A-1", "score": 0.455119, "why": ["caliper"]},
+      {"project": "proj-a", "asset": "a-05", "revision": "r1", "kind": "las2/1", "name": "caliper log b", "well": "34/10-A-2", "score": 0.455119, "why": ["caliper"]},
+      {"project": "proj-b", "asset": "a-01", "revision": "r1", "kind": "las2/1", "name": "caliper log a", "well": "35/11-B-1", "score": 0.455119, "why": ["caliper"]},
+      {"project": "proj-c", "asset": "a-07", "revision": "r1", "kind": "las2/1", "name": "caliper log a", "well": "31/2-C-1", "score": 0.455119, "why": ["caliper"]}]]],
+      "expect": {"stage": "consistent", "field": "results.1", "reason": "out-of-order"}, "schema_expressible": false},
+    {"name": "order-on-unrounded-score", "base": "rounded-tie", "set": [[["results"], [
+      {"project": "proj-c", "asset": "c-1", "revision": "r1", "kind": "las2/1", "name": "gamma log", "well": "31/2-C-1", "score": 0.5000004, "why": ["gamma"]},
+      {"project": "proj-a", "asset": "a-1", "revision": "r1", "kind": "las2/1", "name": "gamma log", "well": "34/10-A-1", "score": 0.5000001, "why": ["gamma"]}]]],
+      "expect": {"stage": "consistent", "field": "results.1", "reason": "out-of-order"}, "schema_expressible": false},
+    {"name": "duplicate-row", "base": "q1-first-page", "set": [[["results", 2], {"project": "proj-a", "asset": "a-0011", "revision": "r1", "kind": "las2/1", "name": "34/10-A-2 gamma ray", "well": "34/10-A-2", "score": 0.721348, "why": ["gamma", "ray"]}]],
+      "expect": {"stage": "consistent", "field": "results.2", "reason": "duplicate-row"}, "schema_expressible": false},
+    {"name": "rows-above-limit", "base": "q1-first-page", "set": [[["results", 3], {"project": "proj-a", "asset": "a-0004", "revision": "r1", "kind": "las2/1", "name": "34/10-A-3 gamma ray run 2", "well": "34/10-A-3", "score": 0.6, "why": ["gamma", "ray"]}]],
+      "expect": {"stage": "consistent", "field": "results", "reason": "above-limit"}, "schema_expressible": false},
+    {"name": "score-zero-with-text", "base": "q1-first-page", "set": [[["results", 0, "score"], 0.0]], "expect": {"stage": "consistent", "field": "results.0.score", "reason": "unmatched-row"}, "schema_expressible": false},
+    {"name": "score-nonzero-without-text", "base": "filter-only", "set": [[["results", 0, "score"], 0.5]], "expect": {"stage": "consistent", "field": "results.0.score", "reason": "score-without-words"}, "schema_expressible": false},
+    {"name": "why-nonempty-without-text", "base": "filter-only", "set": [[["results", 0, "why"], ["deviation"]]], "expect": {"stage": "consistent", "field": "results.0.why", "reason": "why-without-words"}, "schema_expressible": false},
+    {"name": "why-not-a-token", "base": "q1-first-page", "set": [[["results", 0, "why"], ["gamma", "density"]]], "expect": {"stage": "consistent", "field": "results.0.why", "reason": "why-not-asked"}, "schema_expressible": false},
+    {"name": "facet-unordered", "base": "ties", "set": [[["facets", "project"], [{"value": "proj-b", "label": "Project B", "count": 1}, {"value": "proj-a", "label": "Project A", "count": 3}, {"value": "proj-c", "label": "Project C", "count": 1}]]],
+      "expect": {"stage": "consistent", "field": "facets.project", "reason": "facet-order"}, "schema_expressible": false},
+    {"name": "facet-duplicate-value", "base": "q1-first-page", "set": [[["facets", "well", 1, "value"], "34/10-A-1"]], "expect": {"stage": "consistent", "field": "facets.well", "reason": "duplicate-value"}, "schema_expressible": false},
+    {"name": "facet-count-zero", "base": "q1-first-page", "set": [[["facets", "well", 7, "count"], 0]], "expect": {"stage": "schema", "field": "facets.well.7.count", "reason": "schema"}, "schema_expressible": true},
+    {"name": "facet-kind-null", "base": "q1-first-page", "set": [[["facets", "kind", 0, "value"], null]], "expect": {"stage": "consistent", "field": "facets.kind", "reason": "null-value"}, "schema_expressible": false},
+    {"name": "facet-project-null", "base": "q1-first-page", "set": [[["facets", "project", 0, "value"], null]], "expect": {"stage": "consistent", "field": "facets.project", "reason": "null-value"}, "schema_expressible": false},
+    {"name": "facet-well-null-twice", "base": "last-page", "set": [[["facets", "well", 6, "value"], null]], "expect": {"stage": "consistent", "field": "facets.well", "reason": "null-twice"}, "schema_expressible": false},
+    {"name": "kind-facet-outside-kinds", "base": "filter-only", "set": [[["facets", "kind", 1, "value"], "las2/1"]], "expect": {"stage": "consistent", "field": "facets.kind", "reason": "kind-not-asked"}, "schema_expressible": false},
+    {"name": "organization-differs-from-request", "base": "q1-first-page", "set": [[["organization_id"], "org-other"]], "expect": {"stage": "consistent", "field": "organization_id", "reason": "other-organization"}, "schema_expressible": false},
+    {"name": "method-embedding-without-text", "base": "filter-only", "set": [[["method"], "embedding"]], "expect": {"stage": "consistent", "field": "method", "reason": "embedding-needs-text"}, "schema_expressible": false},
+    {"name": "not-searched-nonzero-for-words", "base": "q1-first-page", "set": [[["not_searched_by_meaning"], 2]], "expect": {"stage": "consistent", "field": "not_searched_by_meaning", "reason": "nothing-withheld"}, "schema_expressible": false},
+    {"name": "not-searched-nonzero-without-text", "base": "filter-only", "set": [[["not_searched_by_meaning"], 1]], "expect": {"stage": "consistent", "field": "not_searched_by_meaning", "reason": "nothing-withheld"}, "schema_expressible": false},
+    {"name": "cursor-missing-on-short-first-page", "base": "q1-first-page", "set": [[["next_cursor"], null]], "expect": {"stage": "consistent", "field": "next_cursor", "reason": "missing-cursor"}, "schema_expressible": false},
+    {"name": "extra-key", "base": "q1-first-page", "set": [[["score_formula"], "lexical"]], "expect": {"stage": "schema", "field": "score_formula", "reason": "schema"}, "schema_expressible": true}
+  ]
+}

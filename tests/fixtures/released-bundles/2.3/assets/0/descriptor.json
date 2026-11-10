@@ -1,0 +1,112 @@
+{
+  "schema": "ophiolite.scientific-asset/1",
+  "asset_id": "synthetic-faults",
+  "revision": "937325c602a1a388ac2320f09e539a6b8d180d24ee12c29bd021c617543d9a04",
+  "project_id": "synthetic-project",
+  "authority": "ophiolite:uploaded",
+  "origin": "retained-capture",
+  "custodian": "ophiolite:managed",
+  "source_reference": {
+    "authority": "ophiolite:uploaded",
+    "key": "synthetic-faults",
+    "revision": "937325c602a1a388ac2320f09e539a6b8d180d24ee12c29bd021c617543d9a04",
+    "profile": "opendtect-faultsticks/1"
+  },
+  "profile": "opendtect-faultsticks/1",
+  "scientific": {
+    "type": "polyline-set",
+    "crs": "EPSG:23031",
+    "xy_unit": "m",
+    "z_unit": "m",
+    "z_meaning": "depth",
+    "positive": "down",
+    "vertical_datum": "unknown",
+    "attributes": [],
+    "sticks": 2,
+    "points": 4,
+    "x_range": [
+      500100.5,
+      500310.0
+    ],
+    "y_range": [
+      5800200.25,
+      5800410.0
+    ],
+    "z_range": [
+      1100.0,
+      1350.0
+    ],
+    "fidelity": {
+      "status": "assessed",
+      "preserved": [
+        "every stick in first-appearance order",
+        "every point in file order",
+        "stick indices as written",
+        "geometry survives writing back as OpendTect FaultStickSet ASCII"
+      ],
+      "losses": [
+        "Text formatting (whitespace, quoting, line endings, number spelling) is kept only in the exact original"
+      ],
+      "unknown_context": [
+        "vertical_datum"
+      ]
+    }
+  },
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "mapping": "polyline-set/1",
+    "parsing_policy": "typed-strict/1",
+    "null_policy": "empty cell or declared NODATA value is missing; never zero-filled"
+  },
+  "interpretation_evidence": "live",
+  "recorded_interpretation": null,
+  "representations": [
+    {
+      "id": "artifact",
+      "kind": "original",
+      "media_type": "text/plain",
+      "profile": "opendtect-faultsticks/1",
+      "bytes": 131,
+      "sha256": "937325c602a1a388ac2320f09e539a6b8d180d24ee12c29bd021c617543d9a04",
+      "available": true,
+      "losses": []
+    },
+    {
+      "id": "data",
+      "kind": "normalized",
+      "media_type": "application/json",
+      "profile": "ophiolite.polyline-set/1",
+      "bytes": 2017,
+      "sha256": "94ed84297e96cda60ea2481898e50946b81e93d9a45c7ef259574e244cb28da2",
+      "available": true,
+      "losses": [
+        "Text formatting (whitespace, quoting, line endings, number spelling) is kept only in the exact original"
+      ]
+    }
+  ],
+  "retention": {
+    "mode": "retained",
+    "policy": "until authorized lifecycle operation",
+    "historical_reads": "while-retained-and-authorized"
+  },
+  "relationships": {
+    "well_log": null
+  },
+  "parents": [],
+  "provenance": {
+    "evidence": "source-declared",
+    "method": null,
+    "code_reference": null,
+    "environment_reference": null,
+    "omissions": [
+      "Synthetic offline fixture, not a server publication"
+    ]
+  },
+  "supported_operations": [
+    "read",
+    "export"
+  ],
+  "authorization": {
+    "status": "not-evaluated"
+  }
+}

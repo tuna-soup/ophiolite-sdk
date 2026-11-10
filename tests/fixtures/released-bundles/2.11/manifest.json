@@ -1,0 +1,106 @@
+{
+  "schema": "ophiolite.portable-bundle/2",
+  "bundle_version": "2.11.0",
+  "created_at": "2026-11-02T18:16:48+00:00",
+  "exporter": {
+    "name": "ophiolite-sdk",
+    "version": "2026.11.4"
+  },
+  "scope": "selection",
+  "selection": [
+    {
+      "asset_id": "synthetic-faults",
+      "revision": "937325c602a1a388ac2320f09e539a6b8d180d24ee12c29bd021c617543d9a04",
+      "curves": []
+    }
+  ],
+  "assets": [
+    {
+      "asset_id": "synthetic-faults",
+      "revision": "937325c602a1a388ac2320f09e539a6b8d180d24ee12c29bd021c617543d9a04",
+      "origin": "retained-capture",
+      "profile": "petrel-faultsticks/1",
+      "type": "polyline-set",
+      "name": null,
+      "files": [
+        {
+          "path": "assets/0/original.txt",
+          "role": "original",
+          "sha256": "937325c602a1a388ac2320f09e539a6b8d180d24ee12c29bd021c617543d9a04",
+          "bytes": 131
+        },
+        {
+          "path": "assets/0/descriptor.json",
+          "role": "descriptor",
+          "sha256": "58ccb8d40cbde35b038eca3fdfa4d4a495d059e3c6919b0aeac9eb907fde91ed",
+          "bytes": 3625
+        },
+        {
+          "path": "assets/0/data.json",
+          "role": "normalized",
+          "sha256": "1cb42e2ea8f9e7b3364c3dbaaf336913756c5c38fc7445759035e4cd60e96dfc",
+          "bytes": 1488
+        },
+        {
+          "path": "assets/0/package.json",
+          "role": "package",
+          "sha256": "7cfd17a391395c4631e69d2ba74eaa222ca5dc1bb3936ce68c92ba001bbf5baa",
+          "bytes": 393
+        },
+        {
+          "path": "assets/0/companion-1.bin",
+          "role": "companion",
+          "sha256": "44c92e0137e916f4aa7485687d092820fdd0eaabffff11581f4b66a0c0eb78a3",
+          "bytes": 41
+        },
+        {
+          "path": "assets/0/interpretation.json",
+          "role": "interpretation",
+          "sha256": "102608bf8aa28bcf06fcd5524d8d28d6c7dcfc27e555553545f2bfe360187b7a",
+          "bytes": 344
+        }
+      ],
+      "history": null,
+      "parents": [],
+      "parent_visibility": "complete",
+      "relationships": {
+        "well_log": null
+      },
+      "omissions": [
+        "Synthetic offline fixture, not a server publication"
+      ],
+      "losses": [
+        "Text formatting (whitespace, quoting, line endings, number spelling) is kept only in the exact original"
+      ],
+      "package": {
+        "package_digest": "f8c6525d789ce0c42d39068d3131e2d0977b1d61bd4c647063c20bd5af59f7bd",
+        "members": [
+          {
+            "name": "faults.crs",
+            "role": "crs-metadata",
+            "sha256": "44c92e0137e916f4aa7485687d092820fdd0eaabffff11581f4b66a0c0eb78a3",
+            "bytes": 41,
+            "file": "assets/0/companion-1.bin"
+          },
+          {
+            "name": "faults.txt",
+            "role": "primary",
+            "sha256": "937325c602a1a388ac2320f09e539a6b8d180d24ee12c29bd021c617543d9a04",
+            "bytes": 131,
+            "file": "assets/0/original.txt"
+          }
+        ],
+        "recipe": null,
+        "interpretation": "assets/0/interpretation.json"
+      }
+    }
+  ],
+  "groups": null,
+  "recommendations": null,
+  "limits": {
+    "max_assets": 128,
+    "max_file_bytes": 33554432,
+    "max_total_bytes": 536870912
+  },
+  "notice": "Checksums show the integrity of this copy, not authorship or scientific correctness. Exported copies cannot be recalled; holding one grants no new upstream, sharing or AI-training rights."
+}

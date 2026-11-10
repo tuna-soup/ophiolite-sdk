@@ -1,0 +1,174 @@
+{
+  "schema": "ophiolite.portable-bundle/2",
+  "bundle_version": "2.13.0",
+  "created_at": "2026-11-03T20:00:00Z",
+  "exporter": {"name": "ophiolite-sdk", "version": "0.1.0"},
+  "scope": "selection",
+  "selection": [
+    {
+      "asset_id": "syn-well-log",
+      "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "curves": ["GR"]
+    }
+  ],
+  "assets": [
+    {
+      "asset_id": "syn-well-log",
+      "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "origin": "retained-capture",
+      "profile": "las2/1",
+      "name": "Synthetic well W-1 log",
+      "files": [
+        {
+          "path": "assets/0/original.las",
+          "role": "original",
+          "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "bytes": 18
+        },
+        {
+          "path": "assets/0/descriptor-GR.json",
+          "role": "descriptor",
+          "curve": "GR",
+          "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "bytes": 10
+        },
+        {
+          "path": "assets/0/curve-GR.json",
+          "role": "normalized",
+          "curve": "GR",
+          "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "bytes": 10
+        }
+      ],
+      "history": null,
+      "parents": [],
+      "parent_visibility": "complete",
+      "omissions": [],
+      "losses": [],
+      "type": "well-log"
+    }
+  ],
+  "groups": null,
+  "recommendations": null,
+  "limits": {"max_assets": 128, "max_file_bytes": 33554432, "max_total_bytes": 536870912},
+  "notice": "Checksums show integrity, not authorship or scientific correctness.",
+  "entities": [
+    {
+      "entity_id": "syn-well-W",
+      "kind": "well",
+      "name": "W",
+      "identity": {"authority": "opendtect:synthetic-install-1", "key": "W", "provisional": false}
+    },
+    {
+      "entity_id": "syn-wellbore-W-1",
+      "kind": "wellbore",
+      "name": "W-1",
+      "identity": {"authority": "opendtect:synthetic-install-1", "key": "W-1", "provisional": false}
+    }
+  ],
+  "relationships": [
+    {
+      "predicate": "part-of",
+      "subject": {"kind": "wellbore", "entity_id": "syn-wellbore-W-1"},
+      "object": {"kind": "well", "entity_id": "syn-well-W"},
+      "evidence": null
+    },
+    {
+      "predicate": "of-entity",
+      "subject": {
+        "kind": "revision",
+        "asset_id": "syn-well-log",
+        "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "object": {"kind": "wellbore", "entity_id": "syn-wellbore-W-1"},
+      "evidence": {
+        "source": {"asset_id": "syn-well-log", "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+      }
+    }
+  ],
+  "surveys": [
+    {
+      "survey_id": "00000000-0000-4000-8000-000000000007",
+      "name": "Synthetic survey SEVEN",
+      "identity": {"authority": "opendtect:synthetic-install-1", "key": "SYN_SEVEN", "provisional": false},
+      "source": {"system": "opendtect", "instance": "synthetic-install-1", "container": "SYN_SEVEN"},
+      "context": {"crs": "EPSG:23031", "z_domain": "time", "z_unit": "ms", "xy_unit": "m", "depth_unit": "m"},
+      "revision": 1,
+      "meaning": "survey-at-export",
+      "complete": true,
+      "members": [
+        {
+          "role": "cube",
+          "asset_id": "syn-cube",
+          "revision": "1111111111111111111111111111111111111111111111111111111111111111",
+          "entity_ref": null,
+          "asset": null
+        },
+        {
+          "role": "horizon",
+          "asset_id": "syn-horizon",
+          "revision": "2222222222222222222222222222222222222222222222222222222222222222",
+          "entity_ref": null,
+          "asset": null
+        },
+        {
+          "role": "fault-set",
+          "asset_id": "syn-faults",
+          "revision": "3333333333333333333333333333333333333333333333333333333333333333",
+          "entity_ref": null,
+          "asset": null
+        },
+        {
+          "role": "well",
+          "asset_id": "syn-well-path",
+          "revision": "4444444444444444444444444444444444444444444444444444444444444444",
+          "entity_ref": "syn-well-W",
+          "asset": null
+        },
+        {
+          "role": "well",
+          "asset_id": "syn-well-log",
+          "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "entity_ref": "syn-wellbore-W-1",
+          "asset": 0
+        },
+        {
+          "role": "time-depth",
+          "asset_id": "syn-time-depth",
+          "revision": "6666666666666666666666666666666666666666666666666666666666666666",
+          "entity_ref": null,
+          "asset": null
+        },
+        {
+          "role": "pickset",
+          "asset_id": "syn-picks",
+          "revision": "7777777777777777777777777777777777777777777777777777777777777777",
+          "entity_ref": null,
+          "asset": null
+        }
+      ],
+      "relations": [
+        {
+          "predicate": "horizon-of",
+          "subject": {"asset_id": "syn-horizon", "revision": "2222222222222222222222222222222222222222222222222222222222222222"},
+          "object": {"asset_id": "syn-cube", "revision": "1111111111111111111111111111111111111111111111111111111111111111"}
+        },
+        {
+          "predicate": "fault-in",
+          "subject": {"asset_id": "syn-faults", "revision": "3333333333333333333333333333333333333333333333333333333333333333"},
+          "object": {"asset_id": "syn-cube", "revision": "1111111111111111111111111111111111111111111111111111111111111111"}
+        },
+        {
+          "predicate": "well-in",
+          "subject": {"asset_id": "syn-well-path", "revision": "4444444444444444444444444444444444444444444444444444444444444444"},
+          "object": {"asset_id": "syn-cube", "revision": "1111111111111111111111111111111111111111111111111111111111111111"}
+        },
+        {
+          "predicate": "time-depth-of",
+          "subject": {"asset_id": "syn-time-depth", "revision": "6666666666666666666666666666666666666666666666666666666666666666"},
+          "object": {"asset_id": "syn-well-path", "revision": "4444444444444444444444444444444444444444444444444444444444444444"}
+        }
+      ]
+    }
+  ]
+}

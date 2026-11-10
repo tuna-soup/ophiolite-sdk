@@ -1,0 +1,271 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/rules/v1/data-rule-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.data-rule/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "RuleParameter": {
+      "additionalProperties": false,
+      "description": "One setting of a rule. `minimum`/`maximum` bound the admissible value (inclusive); `compare` is how the rule\ncompares data with the value; `source` cites the default and the range.",
+      "properties": {
+        "name": {
+          "pattern": "^[a-z][a-z0-9_]{0,31}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "quantity",
+            "number",
+            "integer",
+            "choice",
+            "boolean"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "maxLength": 32,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Unit"
+        },
+        "default": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "maxLength": 64,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "boolean"
+            }
+          ],
+          "title": "Default"
+        },
+        "minimum": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Minimum"
+        },
+        "maximum": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Maximum"
+        },
+        "compare": {
+          "anyOf": [
+            {
+              "enum": [
+                "inclusive",
+                "exclusive"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Compare"
+        },
+        "choices": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 8,
+              "minItems": 2,
+              "type": "array",
+              "uniqueItems": true
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Choices"
+        },
+        "source": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "type",
+        "unit",
+        "default",
+        "minimum",
+        "maximum",
+        "compare",
+        "choices",
+        "source"
+      ],
+      "title": "RuleParameter",
+      "type": "object"
+    },
+    "Words": {
+      "additionalProperties": false,
+      "description": "The sentence a person reads for a result, in the E86 form: a template and how its examples are written (\u00a71.5).",
+      "properties": {
+        "template": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Template",
+          "type": "string"
+        },
+        "examples": {
+          "enum": [
+            "rows",
+            "depths",
+            "none"
+          ],
+          "title": "Examples",
+          "type": "string"
+        }
+      },
+      "required": [
+        "template",
+        "examples"
+      ],
+      "title": "Words",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "One released data rule: the kinds it applies to, its class, severity, parameters and sentence (E144).",
+  "properties": {
+    "schema": {
+      "const": "ophiolite.data-rule/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "id": {
+      "maxLength": 64,
+      "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*/[1-9][0-9]*$",
+      "title": "Id",
+      "type": "string"
+    },
+    "title": {
+      "maxLength": 80,
+      "minLength": 1,
+      "title": "Title",
+      "type": "string"
+    },
+    "description": {
+      "maxLength": 600,
+      "minLength": 1,
+      "title": "Description",
+      "type": "string"
+    },
+    "class": {
+      "enum": [
+        "file-local",
+        "project-context"
+      ],
+      "title": "Class",
+      "type": "string"
+    },
+    "kinds": {
+      "items": {
+        "maxLength": 128,
+        "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+        "type": "string"
+      },
+      "maxItems": 12,
+      "minItems": 1,
+      "title": "Kinds",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "context_kinds": {
+      "anyOf": [
+        {
+          "items": {
+            "maxLength": 128,
+            "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+            "type": "string"
+          },
+          "maxItems": 6,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Context Kinds"
+    },
+    "severity": {
+      "enum": [
+        "note",
+        "warn",
+        "error"
+      ],
+      "title": "Severity",
+      "type": "string"
+    },
+    "parameters": {
+      "items": {
+        "$ref": "#/$defs/RuleParameter"
+      },
+      "maxItems": 8,
+      "title": "Parameters",
+      "type": "array"
+    },
+    "words": {
+      "$ref": "#/$defs/Words"
+    },
+    "since": {
+      "maxLength": 32,
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+      "title": "Since",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema",
+    "id",
+    "title",
+    "description",
+    "class",
+    "kinds",
+    "context_kinds",
+    "severity",
+    "parameters",
+    "words",
+    "since"
+  ],
+  "title": "DataRule",
+  "type": "object"
+}

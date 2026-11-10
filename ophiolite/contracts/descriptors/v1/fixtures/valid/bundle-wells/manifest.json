@@ -1,0 +1,108 @@
+{
+  "schema": "ophiolite.portable-bundle/2",
+  "bundle_version": "2.15.0",
+  "created_at": "2026-11-05T12:00:00Z",
+  "exporter": {
+    "name": "ophiolite-sdk",
+    "version": "2026.11.5"
+  },
+  "scope": "selection",
+  "selection": [
+    {
+      "asset_id": "curve-a",
+      "revision": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
+      "curves": [
+        "GR"
+      ]
+    }
+  ],
+  "assets": [
+    {
+      "asset_id": "curve-a",
+      "revision": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
+      "origin": "source-reference",
+      "profile": "las2/1",
+      "name": null,
+      "type": "well-log",
+      "files": [
+        {
+          "path": "assets/0/original.las",
+          "role": "original",
+          "media_type": "text/plain",
+          "sha256": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
+          "bytes": 311
+        },
+        {
+          "path": "assets/0/descriptor-GR.json",
+          "role": "descriptor",
+          "media_type": "application/json",
+          "sha256": "7bb6af90ffb90a754b3985f1679eaa16f2a32efa384aef028c6b5d0d0719145d",
+          "bytes": 2479,
+          "curve": "GR"
+        },
+        {
+          "path": "assets/0/curve-GR.json",
+          "role": "normalized",
+          "media_type": "application/json",
+          "sha256": "81992992a1a15daac792bebf5979c51e0f8c3c1869a75a125999e6466e38bfba",
+          "bytes": 1076,
+          "curve": "GR"
+        }
+      ],
+      "history": null,
+      "parents": [],
+      "parent_visibility": "complete",
+      "omissions": [
+        "Synthetic offline fixture, not a server publication",
+        "No independently verified execution environment"
+      ],
+      "losses": [
+        "Selected curve only; other LAS headers and curves remain in artifact"
+      ]
+    }
+  ],
+  "groups": null,
+  "recommendations": null,
+  "limits": {
+    "max_assets": 128,
+    "max_file_bytes": 33554432,
+    "max_total_bytes": 536870912
+  },
+  "notice": "Checksums show the integrity of this copy, not authorship or scientific correctness. Exported copies cannot be recalled; holding one grants no new upstream, sharing or AI-training rights.",
+  "citation": {
+    "schema": "ophiolite.citation/1",
+    "title": "Synthetic gamma ray log of well SYNTHETIC-M1",
+    "description": "One gamma ray curve (GR, five samples) of a made-up well, with the LAS file it was read from. Synthetic data for the descriptor contract; no observed well.",
+    "published": "2026-11-05",
+    "version": "1.0.0",
+    "creators": [
+      {
+        "name": "Josiah Carberry",
+        "kind": "person",
+        "identifier": "https://orcid.org/0000-0002-1825-0097"
+      },
+      {
+        "name": "Ada Synthetic",
+        "kind": "person"
+      }
+    ],
+    "publisher": {
+      "name": "Synthetic Survey Organisation",
+      "identifier": "https://ror.org/0abcdef12"
+    },
+    "licence": {
+      "spdx": "CC-BY-4.0"
+    },
+    "doi": null,
+    "prov": {
+      "path": "prov.json",
+      "sha256": "97bbadab562c0dc0baa6133e65481c939b03788e78f6e01edc898b9cbd8f5844",
+      "bytes": 1613
+    },
+    "descriptors": [
+      "ro-crate-metadata.json",
+      "croissant.json",
+      "datacite.json"
+    ]
+  }
+}

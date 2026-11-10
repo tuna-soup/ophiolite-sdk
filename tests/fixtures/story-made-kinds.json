@@ -1,0 +1,21 @@
+{
+  "schema": "e147s2.story-made-kinds/1",
+  "about": "E147 s2 (strategy D2, C1 T3): the root node's `made` of a results/story answer for each way a version is made, as the Platform's story.py writes it (project_gateway/tests/test_story_creators.py asserts these equal its output), and the names the answer gives. The SDK's export citation tests (test_export_citation.py) serve these pages. Synthetic people; no observed data.",
+  "made": {
+    "upload": {"at": "2026-11-05T08:00:00Z", "by": "alice", "by_kind": "person", "by_name": null, "on_behalf_of": null, "through": null, "reported_by": null},
+    "executed-person": {"at": "2026-11-05T08:00:00Z", "by": "bob", "by_kind": "person", "by_name": null, "on_behalf_of": null, "through": null, "reported_by": null},
+    "executed-agent": {"at": "2026-11-05T08:00:00Z", "by": null, "by_kind": "agent", "by_name": "Well tidy", "on_behalf_of": "carol", "through": null, "reported_by": null},
+    "reported-person": {"at": "2026-11-05T08:00:00Z", "by": "bob", "by_kind": "person", "by_name": null, "on_behalf_of": null, "through": null, "reported_by": "bob"},
+    "reported-agent": {"at": "2026-11-05T08:00:00Z", "by": null, "by_kind": "agent", "by_name": null, "on_behalf_of": "carol", "through": null, "reported_by": null},
+    "declared": {"at": "2026-11-05T08:00:00Z", "by": "owner-1", "by_kind": null, "by_name": null, "on_behalf_of": null, "through": null, "reported_by": "owner-1"}
+  },
+  "creator": {
+    "upload": "alice",
+    "executed-person": "bob",
+    "executed-agent": "carol",
+    "reported-person": "bob",
+    "reported-agent": "carol",
+    "declared": null
+  },
+  "member_names": {"alice": "Alice Example", "bob": "Bob Example", "carol": "Carol Example", "owner-1": "Owner Example"}
+}

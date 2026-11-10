@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/folders/v1/folder-schema.json",
+  "title": "Project folder 2",
+  "description": "The structure of the folder block of a bundle v2 manifest.json (ophiolite.project-folder/2, E117 s0): a project folder any program may write, whose items say what they are. Structure only: agreement with the enclosing manifest, roles, the kinds table, the export matrix and the declarations are folders/v1/folder.py's (validate). roles gives each file role's paths, media types and counts per writer; the identity tables' columns and the lineage keys stay those of ophiolite.project-folder/1 (mapper/v1/folder-schema.json tables and prov, one source). ophiolite.project-folder/1 stays readable by its own validator (mapper/v1/mapper.py).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "writer", "osdu", "items", "files"],
+  "properties": {
+    "schema": {"const": "ophiolite.project-folder/2"},
+    "writer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1, "maxLength": 80},
+        "version": {"type": "string", "minLength": 1, "maxLength": 80}
+      }
+    },
+    "recipe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {"path": {"const": "recipe.json"}, "sha256": {"$ref": "#/$defs/sha256"}}
+    },
+    "osdu": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tag", "commit", "namespace"],
+      "properties": {
+        "tag": {"const": "v0.30.1"},
+        "commit": {"const": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6"},
+        "namespace": {"type": "string", "pattern": "^([A-Za-z0-9][A-Za-z0-9-]{0,63}|\\{\\{NAMESPACE\\}\\})$"}
+      }
+    },
+    "items": {"type": "array", "minItems": 1, "maxItems": 256, "items": {"$ref": "#/$defs/item"}},
+    "files": {"type": "array", "minItems": 2, "maxItems": 1006, "items": {"$ref": "#/$defs/file"}}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "profile", "kind", "osdu", "declarations", "rows"],
+      "properties": {
+        "path": {"type": "string", "pattern": "^items/[a-z][a-z0-9-]{0,63}\\.(parquet|tif)$"},
+        "profile": {"type": "string", "minLength": 1, "maxLength": 128},
+        "kind": {"type": "string", "pattern": "^[a-z][a-z0-9-]{0,63}$"},
+        "osdu": {"anyOf": [
+          {"type": "object", "additionalProperties": false, "required": ["kind"], "properties": {"kind": {"type": "string", "minLength": 1, "maxLength": 200}}},
+          {"type": "object", "additionalProperties": false, "required": ["none"], "properties": {"none": {"type": "string", "minLength": 1, "maxLength": 200}}}
+        ]},
+        "declarations": {"type": "array", "maxItems": 32, "items": {"$ref": "#/$defs/declaration"}},
+        "rows": {"type": ["integer", "null"], "minimum": 0}
+      }
+    },
+    "declaration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "value"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1, "maxLength": 64},
+        "value": {"anyOf": [{"type": "number"}, {"type": "string", "minLength": 1, "maxLength": 200}]}
+      }
+    },
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "role", "media_type", "asset", "sha256", "bytes"],
+      "properties": {
+        "path": {"type": "string", "pattern": "^(recipe\\.json|identity/(entities|aliases|relationships)\\.parquet|lineage/prov\\.json|osdu/manifest\\.json|assets/[0-9]{1,3}/data\\.parquet|originals/[A-Za-z0-9._-]{1,120}|items/[a-z][a-z0-9-]{0,63}\\.(parquet|tif))$"},
+        "role": {"enum": ["recipe", "representation", "identity-entities", "identity-aliases", "identity-relationships", "lineage-prov", "osdu-manifest", "original", "item"]},
+        "media_type": {"enum": ["application/json", "application/vnd.apache.parquet", "text/csv", "text/plain", "image/tiff"]},
+        "asset": {"type": ["integer", "null"], "minimum": 0, "maximum": 999},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "bytes": {"type": "integer", "minimum": 0}
+      }
+    }
+  },
+  "roles": {
+    "recipe": {"path": "recipe.json", "media_types": ["application/json"], "asset": false, "mapper": "one", "other": "none"},
+    "representation": {"path": "assets/{asset}/data.parquet", "media_types": ["application/vnd.apache.parquet"], "asset": true, "mapper": "per-asset", "other": "per-asset"},
+    "identity-entities": {"path": "identity/entities.parquet", "media_types": ["application/vnd.apache.parquet"], "asset": false, "mapper": "identity", "other": "identity"},
+    "identity-aliases": {"path": "identity/aliases.parquet", "media_types": ["application/vnd.apache.parquet"], "asset": false, "mapper": "identity", "other": "identity"},
+    "identity-relationships": {"path": "identity/relationships.parquet", "media_types": ["application/vnd.apache.parquet"], "asset": false, "mapper": "identity", "other": "identity"},
+    "lineage-prov": {"path": "lineage/prov.json", "media_types": ["application/json"], "asset": false, "mapper": "one", "other": "optional"},
+    "osdu-manifest": {"path": "osdu/manifest.json", "media_types": ["application/json"], "asset": false, "mapper": "optional", "other": "optional"},
+    "original": {"pattern": "^originals/[A-Za-z0-9._-]{1,120}$", "media_types": ["text/csv", "text/plain"], "asset": false, "mapper": "without-assets", "other": "any"},
+    "item": {"pattern": "^items/[a-z][a-z0-9-]{0,63}\\.(parquet|tif)$", "media_types": ["application/vnd.apache.parquet", "image/tiff"], "asset": false, "mapper": "without-assets", "other": "at-least-one"}
+  },
+  "tables": "mapper/v1/folder-schema.json#/tables",
+  "prov": "mapper/v1/folder-schema.json#/prov"
+}

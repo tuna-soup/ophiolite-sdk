@@ -14,7 +14,7 @@ recovered = client.recover(private_folder)
 ```
 
 ```sh
-ophiolite recover --configuration configuration.json --work private-folder
+ophiolite results recover --configuration configuration.json --work private-folder
 ```
 
 The SDK validates saved request/body identities, credential ownership and durable

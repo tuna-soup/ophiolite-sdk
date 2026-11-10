@@ -1,0 +1,106 @@
+{
+  "@context": [
+    "https://w3id.org/ro/crate/1.1/context",
+    {
+      "sha256": "https://schema.org/sha256"
+    }
+  ],
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      },
+      "about": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": "Dataset",
+      "name": "Synthetic gamma ray log of well SYNTHETIC-M1",
+      "description": "One gamma ray curve (GR, five samples) of a made-up well, with the LAS file it was read from. Synthetic data for the descriptor contract; no observed well.",
+      "datePublished": "2026-11-05",
+      "version": "1.0.0",
+      "license": {
+        "@id": "https://spdx.org/licenses/CC-BY-4.0"
+      },
+      "author": [
+        {
+          "@id": "https://orcid.org/0000-0002-1825-0097"
+        },
+        {
+          "@id": "#creator-2"
+        }
+      ],
+      "publisher": {
+        "@id": "https://ror.org/0abcdef12"
+      },
+      "hasPart": [
+        {
+          "@id": "assets/0/original.csv"
+        },
+        {
+          "@id": "assets/0/descriptor.json"
+        },
+        {
+          "@id": "assets/0/data.json"
+        },
+        {
+          "@id": "manifest.json"
+        }
+      ]
+    },
+    {
+      "@id": "https://orcid.org/0000-0002-1825-0097",
+      "@type": "Person",
+      "name": "Josiah Carberry"
+    },
+    {
+      "@id": "#creator-2",
+      "@type": "Person",
+      "name": "Ada Synthetic"
+    },
+    {
+      "@id": "https://ror.org/0abcdef12",
+      "@type": "Organization",
+      "name": "Synthetic Survey Organisation"
+    },
+    {
+      "@id": "https://spdx.org/licenses/CC-BY-4.0",
+      "@type": "CreativeWork",
+      "name": "Creative Commons Attribution 4.0 International"
+    },
+    {
+      "@id": "manifest.json",
+      "@type": "File",
+      "name": "The bundle manifest",
+      "encodingFormat": "application/json"
+    },
+    {
+      "@id": "assets/0/original.csv",
+      "@type": "File",
+      "name": "original.csv",
+      "sha256": "7bca6c523913b58113d3fa23aa97424ce907af3b27915c18ada91b845b71a594",
+      "contentSize": "65",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "assets/0/descriptor.json",
+      "@type": "File",
+      "name": "descriptor.json",
+      "sha256": "2dd7494de3d35cba7f7194759daefea7ad5692e618d0d93e4173f56b5e0917c1",
+      "contentSize": "2736",
+      "encodingFormat": "application/json"
+    },
+    {
+      "@id": "assets/0/data.json",
+      "@type": "File",
+      "name": "data.json",
+      "sha256": "eae5778eca7ced6e1010cbe7ef342efb23298da1de5a634e9a4c9f3bb70e305b",
+      "contentSize": "1419",
+      "encodingFormat": "application/json"
+    }
+  ]
+}

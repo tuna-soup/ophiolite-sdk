@@ -37,6 +37,8 @@ class Descriptor(Contract):
     workspace_url: str | None
     contracts: dict
     display: dict
+    osdu_kind: str | None  # E168 s1 (D1): as the gateway served it; None for both from a gateway before E168 s0
+    osdu_kind_reason: str | None
 
     def attach(self,frame):
         frame.attrs['ophiolite']=self.model_dump()
@@ -98,7 +100,8 @@ def descriptor(data):
         artifact_sha256=next(r.sha256 for r in asset.representations if r.kind!='normalized'),
         curve_sha256=normalized,workspace_url=workspace_url(data),
         contracts={'registry_version':index['version'],'schema_ids':['ophiolite.scientific-asset/1','ophiolite.application-curve/1']},
-        display=asset.display.model_dump(exclude_unset=True) if asset.display else {})
+        display=asset.display.model_dump(exclude_unset=True) if asset.display else {},
+        osdu_kind=asset.osdu_kind,osdu_kind_reason=asset.osdu_kind_reason)
 
 
 def to_numpy(data):

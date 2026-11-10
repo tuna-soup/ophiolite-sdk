@@ -1,0 +1,39 @@
+{
+  "schema": "ophiolite.osdu-export-report/1",
+  "mapper": {"version": "0.6.0", "rules_version": "1.5.0"},
+  "bundle": {"digest": {"algorithm": "sha256", "over": "bytes", "value": "6666666666666666666666666666666666666666666666666666666666666666"}, "bundle_version": "2.16.0", "assets": 3},
+  "manifest": {
+    "path": "osdu/manifest.json",
+    "sha256": "7777777777777777777777777777777777777777777777777777777777777777",
+    "kinds": {"osdu:wks:master-data--Well:1.5.0": 1, "osdu:wks:master-data--Wellbore:1.5.1": 1, "osdu:wks:work-product-component--WellLog:1.5.0": 1, "osdu:wks:dataset--File.Generic:1.1.0": 1}
+  },
+  "masters": [
+    {"entity_id": "well-a1", "kind": "well", "name": "SYN-A1", "record_id": "{{NAMESPACE}}:master-data--Well:exported-0123456789abcdef0123456789abcdef"},
+    {"entity_id": "wellbore-a1", "kind": "wellbore", "name": "SYN-A1", "record_id": "{{NAMESPACE}}:master-data--Wellbore:exported-fedcba9876543210fedcba9876543210"}
+  ],
+  "records": [
+    {
+      "asset_id": "asset-vsh-a1", "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "profile": "las2/1", "name": "VSH SYN-A1",
+      "record_id": "{{NAMESPACE}}:work-product-component--WellLog:welllog-00112233445566778899aabbccddeeff",
+      "kind": "osdu:wks:work-product-component--WellLog:1.5.0",
+      "wellbore_record_id": "{{NAMESPACE}}:master-data--Wellbore:exported-fedcba9876543210fedcba9876543210",
+      "source_system": "application:vshale-example",
+      "payload": {"path": "originals/asset-vsh-a1.las", "sha256": "8888888888888888888888888888888888888888888888888888888888888888", "bytes": 2048}
+    }
+  ],
+  "unwritten": [
+    {
+      "asset_id": "asset-points", "revision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "name": "Synthetic points", "profile": "points-csv/1", "type": "point-set",
+      "reason": "profile-without-kind", "sentence": "This version cannot export this data as OSDU records.",
+      "detail": "work-product-component--GenericRepresentation is not a kind the box vendors at v0.30.1"
+    },
+    {
+      "asset_id": "asset-tops", "revision": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "name": "Synthetic tops", "profile": "well-tops-csv/1", "type": "well-tops",
+      "reason": "kind-not-written", "sentence": "This version does not write this kind of OSDU record yet.", "detail": null
+    }
+  ],
+  "losses": [
+    {"asset_id": "asset-vsh-a1", "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "profile": "las2/1", "origin": "bundle", "text": "The curve's parameters are not carried into the LAS file."}
+  ],
+  "empty": {"unwritten": false, "losses": false}
+}

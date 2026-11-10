@@ -1,0 +1,24 @@
+{
+  "description": "E153 s0: one change to one row of valid/mapping-evidence.json per case; validation then fails at `path` by `keyword`, and nowhere else. `row` is the row's index, `set` puts keys, `delete` removes them.",
+  "cases": [
+    {"name": "supported-by-on-none", "row": 5, "set": {"supported_by": {"mapping_version": 1}}, "path": "$.rows[5].supported_by", "keyword": "const"},
+    {"name": "supported-by-on-inferred", "row": 4, "set": {"supported_by": {"import_id": "wi-0001"}}, "path": "$.rows[4].supported_by", "keyword": "const"},
+    {"name": "two-tags", "row": 1, "set": {"supported_by": {"mapping_version": 2, "import_id": "wi-0001"}}, "path": "$.rows[1].supported_by", "keyword": "oneOf"},
+    {"name": "a-layout-without-version", "row": 3, "set": {"supported_by": {"layout": "layout-a1"}}, "path": "$.rows[3].supported_by", "keyword": "oneOf"},
+    {"name": "a-bare-mapping-version", "row": 1, "set": {"supported_by": 2}, "path": "$.rows[1].supported_by", "keyword": "oneOf"},
+    {"name": "previously-reviewed-without-support", "row": 1, "delete": ["supported_by"], "path": "$.rows[1]", "keyword": "required"},
+    {"name": "previously-reviewed-null-support", "row": 2, "set": {"supported_by": null}, "path": "$.rows[2].supported_by", "keyword": "not"},
+    {"name": "by-on-previously-reviewed", "row": 1, "set": {"by": "you"}, "path": "$.rows[1].by", "keyword": "const"},
+    {"name": "by-on-none", "row": 5, "set": {"by": "you"}, "path": "$.rows[5].by", "keyword": "const"},
+    {"name": "declared-without-by", "row": 6, "delete": ["by"], "path": "$.rows[6]", "keyword": "required"},
+    {"name": "declared-null-by", "row": 0, "set": {"by": null}, "path": "$.rows[0].by", "keyword": "type"},
+    {"name": "reuse-on-inferred", "row": 4, "set": {"reuse": "same-table"}, "path": "$.rows[4].reuse", "keyword": "const"},
+    {"name": "field-and-declaration", "row": 0, "set": {"declaration": "depth_unit"}, "path": "$.rows[0]", "keyword": "oneOf"},
+    {"name": "neither-field-nor-declaration", "row": 0, "delete": ["field"], "path": "$.rows[0]", "keyword": "oneOf"},
+    {"name": "layout-reuse-without-how", "row": 3, "delete": ["how"], "path": "$.rows[3]", "keyword": "required"},
+    {"name": "how-without-layout-reuse", "row": 1, "set": {"how": "exact"}, "path": "$.rows[1]", "keyword": "not"},
+    {"name": "an-unknown-class", "row": 5, "set": {"class": "guessed"}, "path": "$.rows[5].class", "keyword": "enum"},
+    {"name": "an-unknown-how", "row": 3, "set": {"how": "close"}, "path": "$.rows[3].how", "keyword": "enum"},
+    {"name": "an-unknown-key", "row": 0, "set": {"column": "UWI"}, "path": "$.rows[0]", "keyword": "additionalProperties"}
+  ]
+}

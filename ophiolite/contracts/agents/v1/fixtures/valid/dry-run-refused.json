@@ -1,0 +1,12 @@
+{
+  "schema": "ophiolite.agent-dry-run/1",
+  "dry_run": true,
+  "operation": "procedures/trust",
+  "project_id": "p",
+  "would": {
+    "outcome": "refused",
+    "effects": [],
+    "refusal": {"code": "PERMISSION_DENIED", "message": "Only a project member who may compute can trust a procedure"}
+  },
+  "digest": "7cb0194c5f6c77c122f00185c23192869ad119c81be546a9b04f6d3cb897cd11"
+}

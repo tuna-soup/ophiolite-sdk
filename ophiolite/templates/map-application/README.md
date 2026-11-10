@@ -1,7 +1,7 @@
 # Wells on a map
 
 Preview template version **0.1.0**. Compare `template_version` with the SDK CHANGELOG before upgrading.
-`ophiolite init map-application` copies this directory and `../support.py`.
+`ophiolite tools init map-application` copies this directory and `../support.py`.
 
 ```sh
 python3 -m venv .venv && . .venv/bin/activate
@@ -26,6 +26,6 @@ against browser cross-origin requests, not against a malicious local process.
 
 ## Live mode
 
-Set `OPHIOLITE_URL` and `OPHIOLITE_PROJECT`, sign in with `ophiolite login` (or set `OPHIOLITE_ACCESS_KEY`)
-and run `make live`. Expired sign-in: run `ophiolite login`. No well shown: check that a table of wells or a
+Set `OPHIOLITE_URL` and `OPHIOLITE_PROJECT`, sign in with `ophiolite account login` (or set `OPHIOLITE_ACCESS_KEY`)
+and run `make live`. Expired sign-in: run `ophiolite account login`. No well shown: check that a table of wells or a
 well-location file you may read is associated with the wells (see the "Wells on a map" guide).

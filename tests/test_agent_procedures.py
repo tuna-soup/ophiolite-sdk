@@ -48,7 +48,8 @@ def test_an_agent_proposes_an_upload_start_but_never_one_of_its_covered_steps():
 
 
 ONLY = ('Agents change application configurations, runs, publications, recipients, runner jobs, recalculations, procedure runs, '
-        'deliveries as an outcome, trust in a procedure version and verdicts on a result only.')  # E132 s3
+        'deliveries as an outcome, trust in a procedure version, verdicts on a result, table imports, table mappings, layouts and '
+        'requests for an organization database only.')  # E132 s3, E153 s1, s1b, E154 s0
 
 
 @pytest.mark.parametrize('operation, request_', [

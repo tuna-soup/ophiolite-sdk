@@ -1,0 +1,39 @@
+{
+  "description": "Answers by meaning to questions to an organisation (E145 s2b), ophiolite.search/3, each beside its question (ophiolite.search-request/2); the answers by words are ophiolite.search/2 in answers.json. `valid` are accepted by both stages: a first page whose rows name some, or none, of the question's words, and an answer where nothing could be sent to the model. Each `refused` case is one valid answer (`base`) with one change to the answer, in answers.json's form (`set`, `delete`, `expect`, `schema_expressible`). Hand-written and synthetic; the asset ids are not landed ones.",
+  "valid": [
+    {
+      "name": "meaning-first-page",
+      "request": {"organization_id": "org-e145", "text": "shale near the top", "limit": 3},
+      "answer": {
+        "schema": "ophiolite.search/3", "organization_id": "org-e145", "method": "embedding", "matched": 5,
+        "results": [
+          {"project": "proj-a", "asset": "a-0007", "revision": "r1", "kind": "las2/1", "name": "34/10-A-3 clay volume", "well": "34/10-A-3", "score": 0.912871, "why": []},
+          {"project": "proj-b", "asset": "b-0002", "revision": "r3", "kind": "las2/1", "name": "34/10-B-1 shale marker log", "well": "34/10-B-1", "score": 0.774597, "why": ["shale"]},
+          {"project": "proj-a", "asset": "a-0003", "revision": "r1", "kind": "las2/1", "name": "34/10-A-1 gamma ray", "well": "34/10-A-1", "score": 0.316228, "why": []}
+        ],
+        "facets": {
+          "kind": [{"value": "las2/1", "label": "LAS 2.0 log", "count": 5}],
+          "project": [{"value": "proj-a", "label": "Project A", "count": 3}, {"value": "proj-b", "label": "Project B", "count": 2}],
+          "well": [{"value": "34/10-A-1", "label": "34/10-A-1", "count": 1}, {"value": "34/10-A-3", "label": "34/10-A-3", "count": 1}, {"value": "34/10-B-1", "label": "34/10-B-1", "count": 1}, {"value": "34/10-B-2", "label": "34/10-B-2", "count": 1}, {"value": null, "label": null, "count": 1}]
+        },
+        "next_cursor": "opaque-cursor-1", "not_searched_by_meaning": 4
+      }
+    },
+    {
+      "name": "meaning-nothing-permitted",
+      "request": {"organization_id": "org-e145", "text": "shale near the top"},
+      "answer": {
+        "schema": "ophiolite.search/3", "organization_id": "org-e145", "method": "embedding", "matched": 0, "results": [],
+        "facets": {"kind": [], "project": [], "well": []}, "next_cursor": null, "not_searched_by_meaning": 12
+      }
+    }
+  ],
+  "refused": [
+    {"name": "meaning-score-zero", "base": "meaning-first-page", "set": [[["results", 2, "score"], 0]], "expect": {"stage": "consistent", "field": "results.2.score", "reason": "unmatched-row"}, "schema_expressible": false},
+    {"name": "meaning-score-above-one", "base": "meaning-first-page", "set": [[["results", 0, "score"], 1.5]], "expect": {"stage": "consistent", "field": "results.0.score", "reason": "score-above-one"}, "schema_expressible": false},
+    {"name": "meaning-why-not-asked", "base": "meaning-first-page", "set": [[["results", 0, "why"], ["clay"]]], "expect": {"stage": "consistent", "field": "results.0.why", "reason": "why-not-asked"}, "schema_expressible": false},
+    {"name": "meaning-out-of-order", "base": "meaning-first-page", "set": [[["results", 2, "score"], 0.95]], "expect": {"stage": "consistent", "field": "results.2", "reason": "out-of-order"}, "schema_expressible": false},
+    {"name": "meaning-method-words", "base": "meaning-first-page", "set": [[["method"], "words"]], "expect": {"stage": "schema", "field": "method", "reason": "schema"}, "schema_expressible": true},
+    {"name": "meaning-facet-sum", "base": "meaning-nothing-permitted", "set": [[["matched"], 1]], "expect": {"stage": "consistent", "field": "matched", "reason": "facet-sum"}, "schema_expressible": false}
+  ]
+}

@@ -128,15 +128,15 @@ def test_piped_the_old_spelling_answers_byte_for_byte_as_the_new(tmp_path, colum
 
 
 def test_the_old_spelling_is_left_out_of_the_command_list(columns):
-    top = call('--help')[1]
-    assert '{list,fetch,' in top and ',tools,' in top and 'procedures' not in top
-    assert '    tools Write, check and run your own tools on this computer (offline; nothing is published)' in unwrap(top)
+    top = call('--help')[1]  # E163 s1: the top help lists groups; tools is one, procedures stays hidden
+    assert '\n  tools     Write, check and run your own tools\n' in top and 'procedures' not in top
 
 
 def test_tools_help_says_tools(columns):
     sub = next(a for a in cli.parser()._actions if isinstance(a, argparse._SubParsersAction))
     verbs = list(sub.choices['tools']._subparsers._group_actions[0].choices)
-    assert verbs == ['new', 'validate', 'run', 'register', 'list', 'show', 'enable', 'withdraw', 'trust', 'publish', 'again']
+    assert verbs == ['new', 'validate', 'run', 'register', 'list', 'show', 'enable', 'withdraw', 'trust', 'verify', 'verifications', 'publish', 'again',
+                     'init', 'skills', 'checks', 'rules', 'residuals', 'recipes']  # E163 s1: the tools group's other verbs
     for argv in [['tools', '--help']] + [['tools', verb, '--help'] for verb in verbs]:
         code, text, err = call(*argv)
         assert (code, err) == (0, '') and text.startswith('usage: ophiolite tools'), argv

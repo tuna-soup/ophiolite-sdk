@@ -1,0 +1,132 @@
+"""E165 s2 (D6): the released SDK (PyPI ophiolite 2026.11.4, ophiolite/models/generated.py, sha256 e5e710d5...c45084)
+models of the derivation/2 record and what they use, copied verbatim class by class, so the older reader is tested as
+it was released. Loaded by tests/test_bundle_verification.py, which checks this file's digest first."""
+from __future__ import annotations
+from typing import Annotated, Any, ClassVar, Literal
+from pydantic import BaseModel, ConfigDict, Field
+
+class Contract(BaseModel):
+    model_config = ConfigDict(extra='allow', strict=True, allow_inf_nan=False)
+    __strict_extras__: ClassVar[bool] = False
+
+class ArrayNode(Contract):
+    type: Literal['array'] = Field(...)
+    items: Annotated[list[Annotated[NumberLeaf | IntegerLeaf | StringLeaf | BooleanLeaf | NullLeaf | ObjectNode | ArrayNode, Field(discriminator='type')]], Field(max_length=256)] = Field(...)
+
+class BooleanLeaf(Contract):
+    type: Literal['boolean'] = Field(...)
+    value: bool = Field(...)
+
+class DerivationDisplayV2(Contract):
+    method: Annotated[str, Field(min_length=1, max_length=120)] = Field(...)
+    parameters: Annotated[list[ParameterLabelV2], Field(max_length=64)] = Field(...)
+
+class DerivationInput(Contract):
+    slot: Annotated[str, Field(min_length=1, max_length=40)] = Field(...)
+    commitment: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+
+class DerivationOutput(Contract):
+    role: Annotated[str, Field(min_length=1, max_length=40)] = Field(...)
+    digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+
+class DerivationProcedure(Contract):
+    digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    rules_version: Annotated[str, Field(min_length=1, max_length=40)] = Field(...)
+    label: Annotated[str, Field(min_length=1, max_length=100)] = Field(...)
+    version_label: Annotated[str, Field(min_length=1, max_length=100)] | None = Field(...)
+    step: Literal['read', 'source', 'process', 'send', 'check'] = Field(...)
+    run_id: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    envelope_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    runner: ProcedureRunner = Field(...)
+    again_of: MadeAgain | None = Field(...)
+
+class DerivationRecordV2(Contract):
+    schema_: Literal['ophiolite.derivation/2'] = Field(..., alias='schema')
+    kind: Literal['executed', 'declared', 'edited', 'received', 'reported'] = Field(...)
+    implementation: ImplementationV2 = Field(...)
+    display: DerivationDisplayV2 = Field(...)
+    parameters: Parameters = Field(...)
+    script_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] | None = Field(...)
+    release: ReleaseRecord | None = Field(...)
+    inputs: Annotated[list[DerivationInput], Field(max_length=64)] = Field(...)
+    outputs: Annotated[list[DerivationOutput], Field(max_length=16)] = Field(...)
+    execution_id: Annotated[str, Field(min_length=1, max_length=128)] | None = Field(...)
+    request_id: Annotated[str, Field(min_length=1, max_length=128)] | None = Field(...)
+    procedure: DerivationProcedure | None = Field(...)
+    derivation_digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+
+class ImplementationV2(Contract):
+    id: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+    version: Annotated[str, Field(min_length=1, max_length=40)] = Field(...)
+    version_label: Annotated[str, Field(min_length=1, max_length=120)] = Field(...)
+
+class IntegerLeaf(Contract):
+    type: Literal['integer'] = Field(...)
+    value: Annotated[str, Field(pattern='^-?(0|[1-9][0-9]{0,30})$')] = Field(...)
+
+class MadeAgain(Contract):
+    commitment: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+
+class NullLeaf(Contract):
+    type: Literal['null'] = Field(...)
+
+class NumberLeaf(Contract):
+    type: Literal['number'] = Field(...)
+    value: Annotated[str, Field(min_length=1, max_length=40)] = Field(...)
+
+class ObjectNode(Contract):
+    type: Literal['object'] = Field(...)
+    entries: Annotated[list[ParameterEntry], Field(max_length=64)] = Field(...)
+
+class ParameterChoice(Contract):
+    value: Annotated[str, Field(min_length=1, max_length=100)] = Field(...)
+    label: Annotated[str, Field(min_length=1, max_length=100)] = Field(...)
+
+class ParameterEntry(Contract):
+    key: Annotated[str, Field(min_length=1, max_length=80)] = Field(...)
+    value: Annotated[NumberLeaf | IntegerLeaf | StringLeaf | BooleanLeaf | NullLeaf | ObjectNode | ArrayNode, Field(discriminator='type')] = Field(...)
+
+class ParameterLabelV2(Contract):
+    key: Annotated[str, Field(min_length=1, max_length=80)] = Field(...)
+    label: Annotated[str, Field(min_length=1, max_length=100)] = Field(...)
+    unit: Annotated[str, Field(max_length=40)] | None = Field(None)
+    choices: Annotated[list[ParameterChoice], Field(max_length=32)] | None = Field(None)
+
+class Parameters(Contract):
+    schema_: Literal['ophiolite.parameters/1'] = Field(..., alias='schema')
+    request: Annotated[NumberLeaf | IntegerLeaf | StringLeaf | BooleanLeaf | NullLeaf | ObjectNode | ArrayNode, Field(discriminator='type')] = Field(...)
+    resolved: Annotated[NumberLeaf | IntegerLeaf | StringLeaf | BooleanLeaf | NullLeaf | ObjectNode | ArrayNode, Field(discriminator='type')] = Field(...)
+
+class ProcedureRunner(Contract):
+    kind: Literal['person', 'agent'] = Field(...)
+    principal: Annotated[str, Field(min_length=1, max_length=200)] = Field(...)
+    on_behalf_of: Annotated[str, Field(min_length=1, max_length=200)] | None = Field(...)
+
+class ReleaseRecord(Contract):
+    number: Annotated[str, Field(pattern='^[0-9]{4}\\.[0-9]{1,2}\\.[0-9]{1,4}$')] = Field(...)
+    digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+
+class StringLeaf(Contract):
+    type: Literal['string'] = Field(...)
+    value: Annotated[str, Field(max_length=1024)] = Field(...)
+
+ArrayNode.model_rebuild()
+BooleanLeaf.model_rebuild()
+DerivationDisplayV2.model_rebuild()
+DerivationInput.model_rebuild()
+DerivationOutput.model_rebuild()
+DerivationProcedure.model_rebuild()
+DerivationRecordV2.model_rebuild()
+ImplementationV2.model_rebuild()
+IntegerLeaf.model_rebuild()
+MadeAgain.model_rebuild()
+NullLeaf.model_rebuild()
+NumberLeaf.model_rebuild()
+ObjectNode.model_rebuild()
+ParameterChoice.model_rebuild()
+ParameterEntry.model_rebuild()
+ParameterLabelV2.model_rebuild()
+Parameters.model_rebuild()
+ProcedureRunner.model_rebuild()
+ReleaseRecord.model_rebuild()
+StringLeaf.model_rebuild()

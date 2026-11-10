@@ -91,5 +91,7 @@
   ],
   "authorization": {
     "status": "not-evaluated"
-  }
+  },
+  "osdu_kind": null,
+  "osdu_kind_reason": "OSDU has no record of a surface-to-marker misfit per wellbore"
 }

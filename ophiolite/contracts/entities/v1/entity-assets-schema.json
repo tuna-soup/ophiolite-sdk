@@ -3,13 +3,23 @@
   "$id": "https://ophiolite.dev/contracts/entities/v1/entity-assets-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.entity-assets/1",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "lifecycle": "preview"
   },
   "$defs": {
     "AssociatedEntityRevision": {
       "additionalProperties": false,
       "description": "An `entities/assets` item with the entity it is associated with (H3 associations; E66 a well read with its wellbores).",
+      "if": {
+        "properties": {
+          "osdu_kind_reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "osdu_kind_reason"
+        ]
+      },
       "properties": {
         "asset_id": {
           "maxLength": 512,
@@ -51,6 +61,34 @@
         },
         "association": {
           "$ref": "#/$defs/Association"
+        },
+        "osdu_kind": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^osdu:wks:[a-z-]+--[A-Za-z]+:\\d+\\.\\d+\\.\\d+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Osdu Kind"
+        },
+        "osdu_kind_reason": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Osdu Kind Reason"
         },
         "entity": {
           "$ref": "#/$defs/EntityRef"
@@ -64,11 +102,31 @@
         "association",
         "entity"
       ],
+      "then": {
+        "properties": {
+          "osdu_kind": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "osdu_kind"
+        ]
+      },
       "title": "AssociatedEntityRevision",
       "type": "object"
     },
     "AssociatedRevision": {
       "additionalProperties": false,
+      "if": {
+        "properties": {
+          "osdu_kind_reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "osdu_kind_reason"
+        ]
+      },
       "properties": {
         "asset_id": {
           "maxLength": 512,
@@ -110,6 +168,34 @@
         },
         "association": {
           "$ref": "#/$defs/Association"
+        },
+        "osdu_kind": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "pattern": "^osdu:wks:[a-z-]+--[A-Za-z]+:\\d+\\.\\d+\\.\\d+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Osdu Kind"
+        },
+        "osdu_kind_reason": {
+          "anyOf": [
+            {
+              "maxLength": 512,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Osdu Kind Reason"
         }
       },
       "required": [
@@ -119,6 +205,16 @@
         "name",
         "association"
       ],
+      "then": {
+        "properties": {
+          "osdu_kind": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "osdu_kind"
+        ]
+      },
       "title": "AssociatedRevision",
       "type": "object"
     },

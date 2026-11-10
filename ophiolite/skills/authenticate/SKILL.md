@@ -9,9 +9,9 @@ from Workspace → Connect → Use Python. It identifies the service/project and
 not a credential. Do not copy provider or gateway tokens into the configuration.
 
 ```sh
-ophiolite doctor --configuration configuration.json
-ophiolite login --configuration configuration.json
-ophiolite status --configuration configuration.json
+ophiolite account doctor --configuration configuration.json
+ophiolite account login --configuration configuration.json
+ophiolite account status --configuration configuration.json
 ```
 
 Use `login --write` only when publication is part of the authorized task. Login

@@ -1,0 +1,53 @@
+{
+  "format": "osd.starter/1",
+  "id": "synthetic-survey/two-wells/starter",
+  "record_id": "synthetic-survey/two-wells",
+  "title": "Synthetic starter pack: two wells",
+  "summary": "Two made-up wells with a log each and a small cube, packed for Python and ResInsight. Synthetic values only.",
+  "unpublished": true,
+  "recipe": {"id": "ophiolite.starter/synthetic", "tools": {"ophiolite": "0.0.0"}},
+  "contents": [{"kind": "wellbore-logs", "objects": ["SYN-W1", "SYN-W2"]}],
+  "inputs": [
+    {"name": "SYN-W1.las", "sha256": "1111111111111111111111111111111111111111111111111111111111111111", "bytes": 2048,
+     "held": {"as": "verified", "path": "SYN-W1.las", "verifier_run": {"checked_at": "2026-11-01T00:00:00Z", "tool_version": "0.0.0"}}}
+  ],
+  "derived": [],
+  "decisions": [],
+  "targets": [
+    {
+      "application": "python",
+      "version": "3.12.3",
+      "import": "targets/python/open_pack.py",
+      "oracle": ["nothing yet"],
+      "artefacts": [
+        {"path": "targets/python/open_pack.py", "sha256": "2222222222222222222222222222222222222222222222222222222222222222", "bytes": 1200},
+        {"path": "targets/python/heads/SYN-W1.geojson", "sha256": "3333333333333333333333333333333333333333333333333333333333333333", "bytes": 310},
+        {"path": "ATTRIBUTION.md", "sha256": "4444444444444444444444444444444444444444444444444444444444444444", "bytes": 420}
+      ]
+    },
+    {
+      "application": "resinsight",
+      "version": "2024.12.1",
+      "import": "targets/resinsight/import.py",
+      "oracle": ["nothing yet"],
+      "artefacts": [
+        {"path": "targets/resinsight/import.py", "sha256": "5555555555555555555555555555555555555555555555555555555555555555", "bytes": 900},
+        {"path": "ATTRIBUTION.md", "sha256": "4444444444444444444444444444444444444444444444444444444444444444", "bytes": 420},
+        {"path": "seismic-3d/SYN-CUBE.sgy", "sha256": "6666666666666666666666666666666666666666666666666666666666666666", "bytes": 16}
+      ]
+    }
+  ],
+  "licence": {
+    "name": "Creative Commons Attribution 4.0 International",
+    "spdx": "CC-BY-4.0",
+    "url": "https://creativecommons.org/licenses/by/4.0/",
+    "redistribution": "allowed",
+    "attribution": "required",
+    "statement": "Contains synthetic data of the Synthetic Survey Organisation.",
+    "sources": [{"input": "SYN-W1.las", "licence": {"name": "Creative Commons Attribution 4.0 International", "spdx": "CC-BY-4.0",
+                 "url": "https://creativecommons.org/licenses/by/4.0/", "redistribution": "allowed", "attribution": "required",
+                 "statement": "Contains synthetic data of the Synthetic Survey Organisation."}}]
+  },
+  "fidelity": "fidelity/synthetic-survey__two-wells__starter.json",
+  "built_at": "2026-11-05T09:30:00Z"
+}

@@ -81,7 +81,8 @@ def made(tmp_path, raw=None, edit=None):
     if edit: edit(defn)
     (tmp_path / 'definition.json').write_text(json.dumps(defn))
     (tmp_path / 'records.json').write_text(json.dumps({'catalog': {'source_commit': None, 'verification_commit': None, 'built_at': '2026-10-28T00:00:00Z', 'records_digest': 'd' * 64},
-                                                       'records': [{'id': RID, 'title': 'Two synthetic wells', 'licence': dict(APACHE)}]}))
+                                                       'records': [{'id': RID, 'title': 'Two synthetic wells', 'licence': dict(APACHE),
+                                                                    'publisher': {'name': 'Synthetic Well Organisation', 'url': 'https://example.org/wells'}}]}))  # E147 s3: OSD record/5 requires publisher
     (tmp_path / 'verification').mkdir(exist_ok=True)
     (tmp_path / 'verification' / 'ophiolite-synthetic__two-wells.json').write_text(json.dumps(
         {'record_id': RID, **RUN, 'level': 2, 'checks': [], 'files': [{'path': 'logs/%s' % n, 'bytes': len(raw[n]), 'sha256': sha(raw[n])} for n in raw if n != 'syn-1-tops.csv']}))

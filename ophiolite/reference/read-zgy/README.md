@@ -20,8 +20,8 @@ The folder ships inside the SDK: `ophiolite.zgy.PROCEDURE` is its path. Register
 read the cube of an upload with it:
 
 ```sh
-ophiolite procedures register "$(python -c 'import ophiolite.zgy as z; print(z.PROCEDURE)')"
-ophiolite intake read RUN cube.zgy --keep-original --setting crs=EPSG:23031 --setting z_domain=time
+ophiolite tools register "$(python -c 'import ophiolite.zgy as z; print(z.PROCEDURE)')"
+ophiolite exchange intake read RUN cube.zgy --keep-original --setting crs=EPSG:23031 --setting z_domain=time
 ```
 
 The first read of a cube without the settings asks one question, before any sample is decoded: a ZGY states no

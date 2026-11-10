@@ -78,7 +78,7 @@ def test_match_lists_every_layout_and_says_another_order():
 
 def test_a_missing_name_is_j7_11_with_the_command_that_lists_them():
     with pytest.raises(Unavailable) as missing: Layouts(Fake(**{'layouts/list': A['listed']})).rename('Tubberge tops', 'x')
-    assert str(missing.value) == 'This project has no layout called "Tubberge tops". List them with: ophiolite layouts list.'
+    assert str(missing.value) == 'This project has no layout called "Tubberge tops". List them with: ophiolite exchange layouts list.'
 
 
 def test_a_change_names_the_generation_it_read_and_a_refusal_keeps_its_sentence():

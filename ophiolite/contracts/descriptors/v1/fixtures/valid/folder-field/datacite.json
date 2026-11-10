@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "http://datacite.org/schema/kernel-4",
+  "types": {
+    "resourceTypeGeneral": "Dataset",
+    "resourceType": "Project folder"
+  },
+  "titles": [
+    {"title": "Synthetic field: four wells"}
+  ],
+  "creators": [
+    {
+      "name": "Synthetic Survey Organisation",
+      "nameType": "Organizational",
+      "nameIdentifiers": [
+        {"nameIdentifier": "https://ror.org/0abcdef12", "nameIdentifierScheme": "ROR", "schemeUri": "https://ror.org"}
+      ]
+    }
+  ],
+  "publisher": "Synthetic Survey Organisation",
+  "publicationYear": "2026",
+  "dates": [
+    {"date": "2026-11-04", "dateType": "Issued"}
+  ],
+  "descriptions": [
+    {
+      "description": "Four made-up wells (SYN-F1 to SYN-F4) at made-up RD New coordinates, as a project folder any program can read. Synthetic data; no observed well.",
+      "descriptionType": "Abstract"
+    },
+    {
+      "description": "Shared under the terms of the project it was taken from; not an open licence. Ask the publisher before passing it on.",
+      "descriptionType": "Other"
+    }
+  ],
+  "sizes": ["9758 bytes"],
+  "formats": ["application/json", "application/vnd.apache.parquet"]
+}

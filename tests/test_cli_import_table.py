@@ -48,7 +48,7 @@ def test_a_run_prints_its_id_first_then_one_line_per_set(workbook, capsys):
     run(['import', 'table', workbook, '--target', 'well-tops', '--map', *MAP, '--declare', 'depth_unit=m'], fake)
     ident = A['tops']['start']['id']
     assert capsys.readouterr().out.splitlines() == [
-        'Import %s started. If it stops, continue with: ophiolite import resume %s' % (ident, ident), 'Finished',
+        'Import %s started. If it stops, continue with: ophiolite exchange import resume %s' % (ident, ident), 'Finished',
         'HON-GT-01 tops: Added: 24 tops, linked to well HON-GT-01', 'NLW-GT-01 tops: Added: 37 tops. No well named NLW-GT-01 was found, so these are not linked yet.']
     assert fake.sent[1][1]['mapping']['declarations'] == {'depth_unit': 'm'}
 
@@ -61,7 +61,7 @@ def test_json_gives_the_documented_answers(workbook, capsys):
 
 def test_a_paused_run_exits_4_with_who_paused_it(workbook):
     fake = Fake('pause', read=A['tops']['read'], preview=A['tops']['preview'], step=A['pause']['step'])
-    with pytest.raises(IntegrityConflict, match=r'^Paused; continue when you are ready Paused by carol .* Continue with: ophiolite import resume '):
+    with pytest.raises(IntegrityConflict, match=r'^Paused; continue when you are ready Paused by carol .* Continue with: ophiolite exchange import resume '):
         run(['import', 'table', workbook, '--target', 'well-tops', '--map', *MAP], fake)
     assert cli.exit_code(IntegrityConflict('x')) == 4
 

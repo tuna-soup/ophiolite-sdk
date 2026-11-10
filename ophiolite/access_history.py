@@ -35,12 +35,13 @@ def _headers(credential, url, project):
     return {**_client_header.stamp(headers), 'Content-Type': 'application/json'}
 
 
-def _post(http, url, path, body, headers, *, raw=False):
-    """One POST; a refusal carries the deployment's own sentence and code."""
-    from . import application_transport as policy
+def _post(http, url, path, body, headers, *, raw=False, notifier=None):
+    """One POST; a refusal carries the deployment's own sentence and code. `notifier`: the owning client's (E148)."""
+    from . import _deprecation, application_transport as policy
     from .publish import json_bytes
     try:
         with http.stream('POST', url + path, content=json_bytes(body), headers=headers, follow_redirects=False) as response:
+            _deprecation.note(notifier, 'POST', url + path, response)
             if not response.is_success:
                 head = policy.head_bytes(response)
                 if response.status_code == 403:
@@ -90,7 +91,8 @@ class AccessHistoryClient:
     def _access_read(self, operation, body, *, raw=False):
         if 'project_id' in body and body['project_id'] != self.project: raise Refused('The request belongs to another project.')
         path = '/api/v1/projects/' + quote(self.project, safe='') + '/access/' + operation
-        return _post(self.http, self.url, path, {'project_id': self.project, **body}, _headers(self.credential, self.url, self.project), raw=raw)
+        return _post(self.http, self.url, path, {'project_id': self.project, **body}, _headers(self.credential, self.url, self.project), raw=raw,
+                     notifier=getattr(self, '_notifier', None))
 
     def access_history(self, *, kinds=None, person=None, actor=None, since=None, until=None, limit=100):
         """Every entry of the project's access history, newest first (all pages): dicts with id, at, kind, parts, actor,
@@ -114,7 +116,8 @@ class AccessHistoryAccount:
     """Mixed into Account: an organisation's teams and one person's access history (organisation owners)."""
 
     def _organization_read(self, operation, body, *, raw=False):
-        return _post(self.http, self.url, '/api/v1/organizations/' + operation, body, _headers(self.credential, self.url, None), raw=raw)
+        return _post(self.http, self.url, '/api/v1/organizations/' + operation, body, _headers(self.credential, self.url, None), raw=raw,
+                     notifier=getattr(self, '_notifier', None))
 
     def teams(self, organization_id):
         """The organisation's teams: id, name, members, projects, adoptable."""

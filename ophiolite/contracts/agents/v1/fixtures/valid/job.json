@@ -1,0 +1,11 @@
+{
+  "plan": "a14fb7c24d01b1f8a387b1fae034cc1982cce7b1a694ade50c1291ef889d6ae2",
+  "state": "running",
+  "step": 2,
+  "steps": [
+    {"operation": "applications/configure", "state": "completed", "answer_sha256": "5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"},
+    {"operation": "applications/start", "state": "pending", "answer_sha256": null},
+    {"operation": "applications/get", "state": "pending", "answer_sha256": null}
+  ],
+  "review_url": "https://workspace.example/project/p/settings?proposal=a14fb7c24d01b1f8a387b1fae034cc1982cce7b1a694ade50c1291ef889d6ae2#agents"
+}

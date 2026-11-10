@@ -1,0 +1,65 @@
+{
+  "schema": "ophiolite.portable-bundle/2",
+  "bundle_version": "2.7.0",
+  "created_at": "2026-11-02T18:16:43+00:00",
+  "exporter": {
+    "name": "ophiolite-sdk",
+    "version": "2026.11.4"
+  },
+  "scope": "selection",
+  "selection": [
+    {
+      "asset_id": "synthetic-feature-set",
+      "revision": "26c66c9fa30d2077262e218ee9108f84264bdaf0846a75443b601b5ec5974bcc",
+      "curves": []
+    }
+  ],
+  "assets": [
+    {
+      "asset_id": "synthetic-feature-set",
+      "revision": "26c66c9fa30d2077262e218ee9108f84264bdaf0846a75443b601b5ec5974bcc",
+      "origin": "retained-capture",
+      "profile": "geojson/1",
+      "type": "feature-set",
+      "name": null,
+      "files": [
+        {
+          "path": "assets/0/original.geojson",
+          "role": "original",
+          "sha256": "26c66c9fa30d2077262e218ee9108f84264bdaf0846a75443b601b5ec5974bcc",
+          "bytes": 441
+        },
+        {
+          "path": "assets/0/descriptor.json",
+          "role": "descriptor",
+          "sha256": "3fa57e06cc9d48f315b25a79ad5fdedcbe7a78ee17ec16b5f3f8e571b0122c43",
+          "bytes": 3427
+        },
+        {
+          "path": "assets/0/data.json",
+          "role": "normalized",
+          "sha256": "33b2e0914114c2cf29ce40e875c51047279e0531f56e97dd85249e9b91fa4a15",
+          "bytes": 2759
+        }
+      ],
+      "history": null,
+      "parents": [],
+      "parent_visibility": "complete",
+      "relationships": {
+        "well_log": null
+      },
+      "omissions": [
+        "Synthetic offline fixture, not a server publication"
+      ],
+      "losses": []
+    }
+  ],
+  "groups": null,
+  "recommendations": null,
+  "limits": {
+    "max_assets": 128,
+    "max_file_bytes": 33554432,
+    "max_total_bytes": 536870912
+  },
+  "notice": "Checksums show the integrity of this copy, not authorship or scientific correctness. Exported copies cannot be recalled; holding one grants no new upstream, sharing or AI-training rights."
+}

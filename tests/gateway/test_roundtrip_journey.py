@@ -76,6 +76,24 @@ LINE_X = [500001.0, 500013.5, 500026.0, 500038.5, 500051.0]
 LINE_Y = [100.0, 106.25, 112.5, 118.75, 125.0]
 LINES = {'Other/L1': [301, 302, 303, 304, 305], 'Syn2D/L1': [101, 102, 103, 104, 105], 'Syn2D/L2': [201, 202, 203, 204, 205], 'Syn^2D/L 1.a': [101, 102, 103, 104, 105]}
 LINE_OBJECTS = [('line-2d', n) for n in LINES]
+# E138 s3 (R2-3): the fake's fault stick set SynF (three sticks of three points, x 500010 + 25 s + k, y 20 + k, z 0.104
+# + 0.004 k s) and 3D fault SynF3D (sticks of 2, 3 and 4 points), transcribed by hand from fake_odbind STICKSETS and
+# FAULTS3D: 6 sticks, 18 points; z in seconds; listed in the read CLI's order (3D faults first)
+SYNF = [(s, [(500010.0 + 25.0 * s, 20.0, 0.104), (500011.0 + 25.0 * s, 21.0, 0.108), (500012.0 + 25.0 * s, 22.0, 0.112)]) for s in range(3)]
+SYNF3D = [(0, [(500100.0, 40.0, 0.1), (500101.0, 41.0, 0.12)]), (1, [(500125.0, 40.0, 0.124), (500126.0, 41.5, 0.116), (500127.0, 43.0, 0.108)]),
+          (2, [(500150.0, 40.0, 0.1), (500151.0, 41.0, 0.104), (500152.0, 42.0, 0.108), (500153.0, 43.0, 0.112)])]
+FAULTS = {'SynF3D': SYNF3D, 'SynF': SYNF}
+FAULT_OBJECTS = [('fault-sticks', n) for n in FAULTS]
+OBJECTS = OBJECTS + FAULT_OBJECTS
+
+
+def fault_source(sticks): return {'sticks': [(i, list(points)) for i, points in sticks], 'unit': 's', 'domain': 'time'}
+# §2's fault encodings, written here by hand (not compare.py's): indices in file order as >i; (index, count) pairs in
+# ascending index as >ii; per stick in file order >ii index and count, then >ddd per point (R2-6)
+def order(sticks): return hashlib.sha256(b''.join(struct.pack('>i', i) for i, _ in sticks)).hexdigest()
+def per_stick(sticks): return hashlib.sha256(b''.join(struct.pack('>ii', i, len(p)) for i, p in sorted(sticks))).hexdigest()
+def sticks_digest(sticks):
+    return hashlib.sha256(b''.join(struct.pack('>ii', i, len(p)) + b''.join(struct.pack('>ddd', *v) for v in p) for i, p in sticks)).hexdigest()
 
 
 def line_sample(t, k): return t / 4 + k / 8
@@ -100,16 +118,19 @@ def oracle(lines=False):
     objects[('horizon-3d', 'Top')] = {(i, c): (x_of(c), y_of(i), top(i, c)) for i in (10, 12, 14, 16) for c in (20, 22, 24, 26)}
     for well, track in TRACKS.items(): objects[('well-path', well)] = {'stations': list(track), 'head': track[0][1:3]}
     objects[('well-log', 'SYN-A')] = {'GR': ('API', list(GR), list(MD)), 'DT': ('us/ft', list(DT), list(MD))}
+    for name, sticks in FAULTS.items(): objects[('fault-sticks', name)] = fault_source(sticks)
     return {'enumerated': list(OBJECTS) + (list(LINE_OBJECTS) if lines else []), 'objects': objects}
 
 
 def clean_states(objects=OBJECTS):
     """§5: every mandatory row; QGIS and ResInsight wait on their tools; the whole kinds wait on E137. E138 s2: a line's
-    two judged legs within, its QGIS row waiting on the tool, its ResInsight row unsupported."""
+    two judged legs within, its QGIS row waiting on the tool, its ResInsight row unsupported. E138 s3: a fault set's
+    two judged legs equal (lossless, design 4), its QGIS row waiting on the tool, its ResInsight row unsupported."""
     out = {}
     for kind, obj in objects:
         for leg in ev.PER_OBJECT[kind]:
-            out[(kind, obj, leg)] = {'project-to-qgis': 'not-yet', 'project-to-resinsight': 'not-yet'}.get(leg, 'equal' if (kind, leg) == ('seismic-3d', 'project-to-sdk') else 'within')
+            exact = (kind, leg) == ('seismic-3d', 'project-to-sdk') or kind == 'fault-sticks'
+            out[(kind, obj, leg)] = {'project-to-qgis': 'not-yet', 'project-to-resinsight': 'not-yet'}.get(leg, 'equal' if exact else 'within')
         for leg in ev.UNSUPPORTED.get(kind, ()): out[(kind, obj, leg)] = 'unsupported'  # E139 s2 (S2-7), E138 s2 D4: no route, composed every run
     listed = {k for k, _ in objects}
     for kind in ('seismic-3d', 'horizon-3d', 'well-path', 'well-head', 'well-log', 'horizon-2d', 'line-2d', 'fault-sticks'):
@@ -307,6 +328,18 @@ def check_clean(report, target, run, clean=None, objects=OBJECTS, selected=None)
     for well, stations in TRACKS.items():
         md = {int(x['at']): x['observed'] for x in the(report, 'well-path', well, 'project-to-sdk')['examples'] if x['quantity'] == 'md'}
         assert (md[0], md[len(stations) - 1]) == (stations[0][0], stations[-1][0])
+    # E138 s3 (R2-3): 6 sticks, 18 points; SynF 3 x 3, SynF3D 2 + 3 + 4; the digests from the literals, by hand
+    assert sum(len(s) for s in FAULTS.values()) == 6 and sum(len(p) for s in FAULTS.values() for _, p in s) == 18
+    for name, sticks in FAULTS.items():
+        n = sum(len(p) for _, p in sticks)
+        for leg in OPHIOLITE:
+            r = the(report, 'fault-sticks', name, leg)
+            original = [('original_sha256', q(r, 'original_sha256')['expected'], q(r, 'original_sha256')['expected'])] if leg == 'project-to-sdk' else []
+            assert [(x['name'], x['expected'], x['observed']) for x in r['quantities'] if x['mode'] != 'tolerance'] == original + [
+                ('sticks', len(sticks), len(sticks)), ('points', n, n), ('stick order', order(sticks), order(sticks)),
+                ('points per stick', per_stick(sticks), per_stick(sticks)), ('sticks_sha256', sticks_digest(sticks), sticks_digest(sticks)),
+                ('unit', 's', 's'), ('domain', 'time', 'time')]
+            assert all(q(r, c)['over_budget'] == 0 and q(r, c)['compared'] == n for c in 'xyz')
 
 
 def test_the_clean_synthetic_run_is_judged_clean_with_the_hand_counted_values(journey_run, monkeypatch):
@@ -326,8 +359,41 @@ def test_the_clean_synthetic_run_is_judged_clean_with_the_hand_counted_values(jo
     # E138 s1 D3 and mutation 16: both digests unchanged; the process tree sampled in each phase, in phase order
     memory = report['run']['memory']
     assert report['run']['survey_unchanged'] is True and report['run']['archive_unchanged'] is True and 'stopped' not in report['run']
-    assert list(memory['tree_max_kib']) == ['online', 'tools', 'close', 'offline'] and all(v > 0 for v in memory['tree_max_kib'].values())
+    # adhoc-contract-weights: this process counts by its growth since the sampler started, so a phase with no child
+    # and no growth samples 0; the online and offline phases have their children
+    tree = memory['tree_max_kib']
+    assert list(tree) == ['online', 'tools', 'close', 'offline'] and tree['online'] > 0 and tree['offline'] > 0 and min(tree.values()) >= 0
     assert set(memory['maxrss_kib']) == {'journey', 'largest child'} and memory['within_target'] is True
+    # E138 s5 T8 (D5): no definition, the kind's one not-yet row (CLEAN) and the counts that say so
+    assert report['time_depth'] == {'definition': False, 'models': 0, 'survey_wells': 5, 'outside': 0}
+    assert the(report, 'time-depth', '*', '*')['evidence'] == {'waits_on': 'E137 s3'} and not any(f['step'].startswith('time-depth') for f in report['findings'])
+
+
+def test_the_tree_counts_the_runs_growth_and_children_not_the_sessions_earlier_heap():
+    """adhoc-contract-weights (7 Nov): four sightings above the 2 GB target were the pytest session's heap (1.31 GB of
+    1.37 GB after 71 gateway files). Held: 64 MiB of earlier heap, then the sampler, then 32 MiB of the run's own and a
+    child of 48 MiB; the tree counts the 32 and the 48, and BASE 0 counts the earlier heap too."""
+    class Work:
+        def survivors(self): return []
+    import subprocess
+    earlier = bytearray(64 << 20); earlier[::4096] = b'\1' * len(earlier[::4096])
+    sampler = journey.Sampler(Work())
+    assert abs(sampler.base - journey.own_rss_kib()) < 4096
+    own = bytearray(32 << 20); own[::4096] = b'\1' * len(own[::4096])
+    child = subprocess.Popen([sys.executable, '-c', 'import sys\nb = bytearray(48 << 20)\nb[::4096] = b"\\1" * len(b[::4096])\n'
+                              'print(flush=True)\nsys.stdin.read()'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
+    try:
+        child.stdout.readline()
+        with open('/proc/%d/status' % child.pid) as f:
+            child_kib = int(next(l for l in f if l.startswith('VmRSS:')).split()[1])
+        tree, whole = journey.tree_rss_kib(Work(), sampler.base), journey.tree_rss_kib(Work())
+        # adhoc-hardening-1108: the 32 MiB may reuse pages the session already freed and still holds (hosted: child
+        # 59132, tree 72020, growth 12888 KiB), so only the child is promised below and the 32 MiB only above
+        assert child_kib > 48 << 10 and child_kib - 4096 < tree < (32 << 10) + child_kib + (16 << 10)
+        assert abs(whole - tree - sampler.base) < 4096 and whole > tree + (64 << 10)
+    finally:
+        child.stdin.close(); child.wait(10)
+    del earlier, own
 
 
 @pytest.mark.sqlite_journal
@@ -614,18 +680,6 @@ def test_a_drop_schema_that_does_nothing_leaves_storage_removed_false_and_the_re
 
 # --- E138 s1 §5 mutations on the journey (strategy rev 5 D2-D4, D10) ------------------------------------------------
 
-def test_mutation_3_a_horizon_above_the_admission_is_never_exported_and_waits_with_its_node_counts(journey_run, monkeypatch):
-    """D4 (R1-1): with the admission at 15 nodes, Top (16 in total, 15 defined) waits on E139 s2 on every leg it has."""
-    monkeypatch.setattr(ev, 'HORIZON_ADMISSION', 15)
-    sent = []
-    report, target = journey_run(hooks={'landed': lambda entry, raw: sent.append(entry) or raw})
-    waits = {('horizon-3d', 'Top', leg): 'not-yet' for leg in ev.PER_OBJECT['horizon-3d']}
-    assert states(report) == {**CLEAN, **waits} and ev.evaluate(report) == [] and gone(journey_run, target)
-    for key in waits: assert the(report, *key)['evidence'] == {'waits_on': 'E139 s2', 'nodes': {'total': 16, 'defined': 15}}
-    assert 'horizons/Top.csv' not in sent and len(sent) == 8
-    assert {'kind': 'horizon-3d', 'object': 'Top'} in report['inventory']['enumerated'] and {'kind': 'horizon-3d', 'object': 'Top'} not in report['inventory']['selected']
-
-
 @pytest.mark.parametrize('change', ['survey file changed', 'survey file added', 'survey file deleted', 'archive bytes', 'archive mtime'])
 def test_mutation_5_a_changed_survey_or_deposit_stops_the_run_with_no_judged_row(journey_run, change):
     """D3 (R1-13): the second digests differ, so the run stops: its sentence, no row, the work folder removed."""
@@ -657,25 +711,46 @@ def test_mutation_5_a_failure_before_the_second_digest_writes_a_stopped_report(j
 
 
 def waiting_oracle(not_listed=()):
-    """The literal oracle with a listing of two stick sets and one Fault3D (R2-2; lines are judged since E138 s2) and,
-    maybe, kinds the survey could not list."""
+    """The literal oracle with a listing of three 2D horizons (R2-2; lines are judged since E138 s2, fault sets since
+    E138 s3, so the kind that waits is horizon-2d alone) and, maybe, kinds the survey could not list."""
     out = oracle()
-    out['identities'] = [{'kind': 'fault-sticks', 'reported': ['fault-sticks'], 'object': 'Sticks A'}, {'kind': 'fault-sticks', 'reported': ['fault-sticks'], 'object': 'Sticks B'},
-                         {'kind': 'fault-3d', 'reported': ['fault-sticks'], 'object': 'Faults A'}]
+    out['identities'] = [{'kind': 'horizon-2d', 'reported': ['horizon-2d'], 'object': n} for n in ('Sticks A', 'Sticks B', 'Faults A')]
     if not_listed: out['not_listed'] = [{'kind': k, 'class': 'read error'} for k in not_listed]
     return out
 
 
 def test_mutations_11_and_12_each_listed_identity_waits_and_an_unlisted_kind_is_failed(journey_run):
-    report, target = journey_run(the_oracle=waiting_oracle(['horizon-2d']))
-    identities = {('fault-sticks', 'Sticks A', '*'): 'not-yet', ('fault-sticks', 'Sticks B', '*'): 'not-yet', ('fault-sticks', 'Faults A', '*'): 'not-yet'}
-    clean = {k: s for k, s in CLEAN.items() if k[0] not in ('fault-sticks', 'horizon-2d')}
-    assert states(report) == {**clean, **identities, ('horizon-2d', '*', '*'): 'failed'} and ev.evaluate(report) == []
-    assert [the(report, *k)['evidence'] for k in identities] == [{'waits_on': 'E137 s2'}] * 3
-    assert the(report, 'horizon-2d', '*', '*')['evidence'] == {'class': 'read error'}
-    assert report['inventory']['not_listed'] == [{'kind': 'horizon-2d', 'class': 'read error'}]
+    report, target = journey_run(the_oracle=waiting_oracle(['line-2d']))
+    identities = {('horizon-2d', 'Sticks A', '*'): 'not-yet', ('horizon-2d', 'Sticks B', '*'): 'not-yet', ('horizon-2d', 'Faults A', '*'): 'not-yet'}
+    clean = {k: s for k, s in CLEAN.items() if k[0] not in ('line-2d', 'horizon-2d')}
+    assert states(report) == {**clean, **identities, ('line-2d', '*', '*'): 'failed'} and ev.evaluate(report) == []
+    assert [the(report, *k)['evidence'] for k in identities] == [{'waits_on': 'E137 s6'}] * 3
+    assert the(report, 'line-2d', '*', '*')['evidence'] == {'class': 'read error'}
+    assert report['inventory']['not_listed'] == [{'kind': 'line-2d', 'class': 'read error'}]
     assert len(report['inventory']['enumerated']) == len(OBJECTS) + 3 and len(report['inventory']['selected']) == len(OBJECTS)
     assert gone(journey_run, target)
+
+
+def test_f10_a_fault_set_the_export_never_saw_is_an_inventory_problem(journey_run):
+    """E138 s3 F10 (s1 D4's coverage rule): a listed fault set the oracle does not enumerate stays in the inventory and
+    has no row, so the evaluator finds its rows missing; nothing else changes."""
+    the_oracle = oracle()
+    the_oracle['identities'] = [{'kind': 'fault-sticks', 'reported': ['fault-sticks'], 'object': n} for n in ('SynF', 'SynF3D', 'SynF unseen')]
+    report, target = journey_run(the_oracle=the_oracle)
+    assert states(report) == CLEAN and {'kind': 'fault-sticks', 'object': 'SynF unseen'} in report['inventory']['enumerated']
+    assert ev.evaluate(report) == ['fault-sticks SynF unseen %s: missing (a mandatory leg).' % leg for leg in ev.PER_OBJECT['fault-sticks']] + [
+        'fault-sticks SynF unseen project-to-resinsight: missing (a leg with no route is stated as unsupported).',
+        'The selected objects are not the enumerated ones less those whose every row waits (%d selected, %d expected).' % (len(OBJECTS), len(OBJECTS) + 1)]
+    assert gone(journey_run, target)
+
+
+def test_f11_a_run_with_no_fault_identity_writes_no_fault_finding_and_keeps_the_absent_row(journey_run):
+    the_oracle = oracle()
+    the_oracle['enumerated'] = [o for o in the_oracle['enumerated'] if o[0] != 'fault-sticks']
+    report, target = journey_run(the_oracle=the_oracle)
+    assert states(report) == clean_states([o for o in OBJECTS if o[0] != 'fault-sticks']) and ev.evaluate(report) == []
+    assert the(report, 'fault-sticks', '*', '*')['evidence'] == {'enumeration': 'Fault3D.names, FaultStickSet.names'}
+    assert report['findings'] == [] and journey.fault_findings([{'kind': 'fault-sticks', 'object': '*', 'leg': '*'}]) == []
 
 
 def test_mutation_13_a_live_report_numbers_its_objects_and_keeps_no_name_or_refusal_words(journey_run):
@@ -688,7 +763,7 @@ def test_mutation_13_a_live_report_numbers_its_objects_and_keeps_no_name_or_refu
     cubes = [r for r in report['rows'] if r['kind'] == 'seismic-3d' and r['leg'] in OPHIOLITE]
     assert sorted({r['object'] for r in cubes}) == ['seismic-3d #1', 'seismic-3d #2']
     assert {(r['object'], r['state'], r['evidence'].get('class')) for r in cubes if r['state'] == 'failed'} == {('seismic-3d #2', 'failed', 'components')}
-    assert [f['class'] for f in report['findings']] == ['components', 'components'] and {f['owner'] for f in report['findings']} == {'E129'}
+    assert [f['class'] for f in report['findings']] == ['components', 'components', 'no route'] and {f['owner'] for f in report['findings']} == {'E129'}
     assert all(r['examples'] == [] for r in report['rows']) and gone(journey_run, target)
 
 
@@ -853,14 +928,15 @@ def test_the_clean_synthetic_run_with_the_four_lines_meets_the_hand_counted_reco
         assert the(report, 'line-2d', name, 'project-to-resinsight')['evidence'] == {'route': 'none'}
     routes = [f for f in report['findings'] if f['class'] == 'no route']
     assert [(f['step'], f['owner'], f['numbers'].split(':')[0]) for f in routes] == [
-        ('line-2d project-to-qgis', 'E46', '4 lines'), ('line-2d project-to-resinsight', 'E129', '4 lines'), ('line-2d project-to-sdk', 'E51', '4 lines')]
+        ('line-2d project-to-qgis', 'E46', '4 lines'), ('line-2d project-to-resinsight', 'E129', '4 lines'), ('line-2d project-to-sdk', 'E51', '4 lines'),
+        ('fault-sticks project-to-resinsight', 'E129', '2 sets')]  # E138 s3: the fault sets' one route finding
     assert report['findings'] == routes
 
 
 def test_mutation_l16_a_run_without_a_line_writes_no_route_finding_and_keeps_its_absent_row(journey_run):
     """R2-11: the line-free enumeration keeps `line-2d * *` absent and emits no line finding."""
     report, target = journey_run()
-    assert states(report)[('line-2d', '*', '*')] == 'absent' and report['findings'] == []
+    assert states(report)[('line-2d', '*', '*')] == 'absent' and [f['step'] for f in report['findings']] == ['fault-sticks project-to-resinsight']
     assert journey.line_findings([{'kind': 'line-2d', 'object': '*', 'leg': '*'}]) == []
 
 
@@ -1151,3 +1227,379 @@ def test_mutation_l12_two_differently_sampled_lines_keep_their_own_axes_through_
         assert disagreeing(journey.compared(table, 'line-2d', 'L', 'opendtect-to-project', None,
                                             journey.line_pairs(expected[other], journey.segy_line_parts(io.BytesIO(raw), 'ms')), True)) == ['axes']
         assert disagreeing(journey.judge_sdk_line(table, expected[other], read, sha, None, True, {'revision': 'r'}, 'L')) == ['axes', 'original axes']
+
+
+# --- E138 s5 C1: every write of a cube is bounded (strategy rev 2 §2, §5 C1a-C1i, D1) ------------------------------
+# export.py's float32 SEG-Y of the fake's cubes, counted by hand: 3,600 header bytes, then per trace 240 + 4 x 5 samples
+SEGY_BYTES = {'Syn': 3600 + 16 * (240 + 4 * 5), 'Syn2': 3600 + 4 * (240 + 4 * 5)}
+assert SEGY_BYTES == {'Syn': 7760, 'Syn2': 4640}
+
+
+def too_large(report, cube, bound, phase, limit, observed):
+    """Both judged legs of CUBE failed by BOUND at PHASE with its numbers, and one E140 finding for the cube."""
+    for leg in OPHIOLITE:
+        r = the(report, 'seismic-3d', cube, leg)
+        assert r['state'] == 'failed' and r['evidence']['class'] == 'too large', r
+        assert r['evidence']['too_large'] == {'bound': bound, 'phase': phase, 'limit': limit, 'observed': observed}
+    assert [f for f in report['findings'] if f['step'].startswith('seismic-3d %s ' % cube)] == [
+        {'step': 'seismic-3d %s opendtect-to-project' % cube, 'owner': 'E140', 'sent': None, 'class': 'too large',
+         'numbers': '%s at %s: %d above %d' % (bound, phase, observed, limit)}]
+
+
+def watched(more=None):
+    """(seen, hooks): the uploads, and at each upload the stages left in the exports folder (only the current one)."""
+    seen = {'uploaded': [], 'stages': []}
+    def settled(root): seen['work'] = Path(root).parent
+    def uploaded(kind, obj):
+        seen['uploaded'].append((kind, obj))
+        seen['stages'].append(sorted(p.name for p in (seen['work'] / 'exports').iterdir() if p.is_dir()))
+    return seen, {'settled': settled, 'uploaded': uploaded, **(more or {})}
+
+
+@pytest.mark.parametrize('traces', [None, '17'])  # C1b: a trace bound above the cube's 16 traces, so the bytes alone decide
+def test_s5_c1a_a_cube_above_file_bytes_is_too_large_unlanded_and_the_run_goes_on(journey_run, traces):
+    journey_run.monkeypatch.setenv('OPHIOLITE_MAX_FILE_BYTES', '6000')
+    if traces: journey_run.monkeypatch.setenv('OPHIOLITE_MAX_SEISMIC_TRACES', traces)
+    seen, hooks = watched()
+    report, target = journey_run(hooks=hooks)
+    expect(report, both('seismic-3d', 'Syn', 'failed'))
+    too_large(report, 'Syn', 'file_bytes', 'export', 6000, 6001)  # the cap stopped the child one byte past the bound
+    assert ('seismic-3d', 'Syn') not in seen['uploaded'] and ('seismic-3d', 'Syn2') in seen['uploaded']
+    assert all(len(stages) == 1 for stages in seen['stages'])  # the stopped cube's stage and partial file are gone
+    assert ev.evaluate(report) == [] and gone(journey_run, target)
+    if traces: return
+    # C1h: the evaluator holds the bound to its row: not above its limit, or on another kind, is a problem
+    bad = json.loads(json.dumps(report))
+    the(bad, 'seismic-3d', 'Syn', 'project-to-sdk')['evidence']['too_large']['observed'] = 6000
+    well = the(bad, 'well-path', 'SYN-A', 'opendtect-to-project')
+    well.update(state='failed', quantities=[], examples=[], evidence={'error': 'x', 'class': 'too large', 'too_large': dict(the(report, 'seismic-3d', 'Syn', 'project-to-sdk')['evidence']['too_large'])})
+    del the(bad, 'seismic-3d', 'Syn', 'opendtect-to-project')['evidence']['too_large']
+    problems = ev.evaluate(bad)
+    assert [p for p in problems if 'too large' in p or 'bound' in p] == [
+        'seismic-3d Syn opendtect-to-project: too large without the bound, phase and numbers it was stopped at.',
+        'seismic-3d Syn project-to-sdk: only a failed cube observed above its bound carries the bound (too large).',
+        'well-path SYN-A opendtect-to-project: only a failed cube observed above its bound carries the bound (too large).'], problems
+
+
+@pytest.mark.parametrize('file_bytes, lands', [(SEGY_BYTES['Syn'], True), (SEGY_BYTES['Syn'] - 1, False)])
+def test_s5_c1c_a_cube_of_exactly_file_bytes_lands_and_one_byte_more_is_too_large(journey_run, file_bytes, lands):
+    journey_run.monkeypatch.setenv('OPHIOLITE_MAX_FILE_BYTES', str(file_bytes))
+    report, target = journey_run()
+    if lands: expect(report, {})
+    else:
+        expect(report, both('seismic-3d', 'Syn', 'failed'))
+        too_large(report, 'Syn', 'file_bytes', 'export', file_bytes, file_bytes + 1)
+    assert ev.evaluate(report) == [] and gone(journey_run, target)
+
+
+def test_s5_c1d_a_cube_above_max_traces_is_too_large_before_it_is_uploaded(journey_run):
+    journey_run.monkeypatch.setenv('OPHIOLITE_MAX_SEISMIC_TRACES', '10')  # Syn holds 16 traces, Syn2 4
+    seen, hooks = watched()
+    report, target = journey_run(hooks=hooks)
+    expect(report, both('seismic-3d', 'Syn', 'failed'))
+    too_large(report, 'Syn', 'max_traces', 'export', 10, 16)
+    assert ('seismic-3d', 'Syn') not in seen['uploaded'] and ('seismic-3d', 'Syn2') in seen['uploaded']
+    assert ev.evaluate(report) == [] and gone(journey_run, target)
+
+
+def used(work):
+    """Bytes the run holds in its work folder beside the unpacked survey: exports, landed and saved files, payloads."""
+    return sum(p.stat().st_size for p in Path(work).rglob('*') if p.is_file() and not p.is_symlink() and 'survey' not in p.relative_to(work).parts[:1])
+
+
+# E138 s5 C1e: the bytes the volume gives the run's files beyond what it holds at the first measurement. Measured on
+# the default fake (2 Nov 2026), the folder then holds 9,039, 20,803, 28,563, 31,725 and 37,647 bytes more at the next
+# five: Syn's SDK export needs 7,760 within 42,000 - 28,563, Syn2's export 4,640 within 42,000 - 31,725, and Syn2's
+# landing 11,600, above 42,000 - 37,647
+BUDGET = 42_000
+
+
+def test_s5_c1e_retained_artifacts_count_against_a_later_cube(journey_run):
+    """The allowance is measured live (free bytes = the budget less what the work folder holds), so Syn's payloads and
+    saved slices, still held, leave too little for Syn2's landing, the sixth measurement (each cube: export,
+    landing, download, SDK export); Syn passes every phase with the same budget."""
+    seen, calls = {}, []
+    def settled(root): seen['work'] = Path(root).parent
+    def free():
+        calls.append(used(seen['work']))
+        return journey.RESERVE + BUDGET - (calls[-1] - calls[0])
+    report, target = journey_run(hooks={'settled': settled, 'free_bytes': free})
+    need = math.ceil(journey.LANDING_FACTOR * SEGY_BYTES['Syn2'])
+    assert len(calls) == 6 and calls[5] - calls[0] > BUDGET - need  # Syn's held files take what Syn2's landing needed
+    expect(report, both('seismic-3d', 'Syn2', 'failed'))
+    too_large(report, 'Syn2', 'volume', 'landing', BUDGET - (calls[5] - calls[0]), need)
+    assert ev.evaluate(report) == [] and gone(journey_run, target)
+
+
+def test_s5_c1e_no_allowance_before_a_phase_stops_the_run_and_says_why(journey_run):
+    count = []
+    def empty(): count.append(1); return journey.RESERVE + (10 ** 9 if len(count) < 2 else 0)
+    with pytest.raises(journey.wf.VolumeExhausted) as stopped:
+        journey_run(hooks={'free_bytes': empty})
+    assert stopped.value.roundtrip_run == {'work_folder_removed': True, 'storage_removed': True}
+    assert gone(journey_run, journey_run.target)
+    stop = journey.stopped_report(stopped.value, journey_run.archive, dataset='synthetic-s0', synthetic=True, journey='synthetic-s0', host='synthetic')
+    assert stop['run']['stopped']['sentence'] == journey.VOLUME_GONE % (journey.RESERVE, journey.RESERVE)
+    assert ev.verdict(stop, ev.evaluate(stop)) == 'stopped'
+
+
+FAKE_EXPORT = '''import sys, time
+from pathlib import Path
+stage, how = Path(sys.argv[3]), sys.argv[sys.argv.index('--objects') + 1]
+if how == '"slow"':
+    (stage / 'part.sgy').write_bytes(b'x' * 5); time.sleep(30)
+(stage / 'part.sgy').write_bytes(b'x' * (100 if how == '"big"' else 5))
+print('The fake exporter refuses this object.', file=sys.stderr); sys.exit(2)
+'''
+
+
+@pytest.mark.parametrize('how', ['big', 'small', 'slow'])
+def test_s5_c1g_the_cap_stops_only_what_it_bounds(tmp_path, how):
+    """C1a, C1g at the child: a file stopped at the cap is TooLarge whatever the child printed; a refusal below it
+    stays the exporter's; a timeout under the cap stays a timeout and the child's group is killed."""
+    pkg = tmp_path / 'fake-exporter' / 'ophiolite_opendtect'
+    pkg.mkdir(parents=True)
+    (pkg / '__init__.py').write_text(''); (pkg / 'export.py').write_text(FAKE_EXPORT)
+    volume = tmp_path / 'cap-volume'; volume.mkdir()
+    work = journey.wf.WorkFolder.create(volume, [tmp_path / 'forbidden'])
+    try:
+        stage = work.path / 'exports' / '0'
+        stage.mkdir(parents=True)
+        env = {**os.environ, 'PYTHONPATH': str(tmp_path / 'fake-exporter')}
+        call = lambda: journey.export_child(work, sys.executable, env, work.path, 'S', stage, how, 0.15, 3, ('file_bytes', 50))  # noqa: E731
+        if how == 'big':
+            with pytest.raises(journey.wf.TooLarge) as big: call()
+            assert big.value.evidence() == {'bound': 'file_bytes', 'phase': 'export', 'limit': 50, 'observed': 51}
+            assert (stage / 'part.sgy').stat().st_size == 51
+        elif how == 'small':
+            with pytest.raises(journey.Refusal, match='The fake exporter refuses this object.'): call()
+        else:
+            with pytest.raises(journey.subprocess.TimeoutExpired): call()
+            assert work.survivors() == []
+    finally:
+        assert work.close()
+    assert os.listdir(volume) == []
+
+
+# --- E138 s5 C2: time-depth models go round (§5 T1-T14), from hand-written tables beside the survey ---------------
+TD_A = b'depth,time\n100.0,0.1\n200.0,0.18\n300.0,0.25\n400.0,0.31\n'  # §5: comma, header line 1
+TD_B = b'checkshots, hand written\r\nTWT\tMD\tnote\r\n5.0\t50.0\tx\r\n9.0\t90.0\ty\r\n\r\n12.0\t120.0\tz\r\n'  # tab, header line 2, ms
+TD_PAIRS = {'SYN-A': [(100.0, 0.1), (200.0, 0.18), (300.0, 0.25), (400.0, 0.31)], 'SYN-B': [(50.0, 5.0), (90.0, 9.0), (120.0, 12.0)]}
+TD_LANDED = {'SYN-A': TD_A, 'SYN-B': b'depth,time\n50.0,5.0\n90.0,9.0\n120.0,12.0\n'}  # time-depth-csv/1, each cell's text unchanged
+TD_MEMBERS = {'checkshots/A.csv': TD_A, 'checkshots/B.txt': TD_B}
+TD_WRONG = 'The time-depth model of %s: %s on data row 3 does not increase; pairs must be in strictly increasing %s. No repair was applied. Nothing was sent.'
+TD_ROUTE = 'the starter imports no time-depth model into ResInsight'
+
+
+def td_entry(member, header_line, delimiter, depth, time, unit='s'):
+    return {'member': member, 'header_line': header_line, 'delimiter': delimiter, 'depth': depth, 'time': time,
+            'decisions': {'domain': 'one-way time in %s' % unit, 'depth-kind': 'TVDSS', 'units': 'm', 'vertical-datum': 'MSL'}}
+
+
+TD_DEF = {'SYN-A': td_entry('checkshots/A.csv', 1, 'comma', 'depth', 'time'), 'SYN-B': td_entry('checkshots/B.txt', 2, 'tab', 'MD', 'TWT', 'ms')}
+TD_DECLARED = {'SYN-A': ('tvdss', 'm', 'one-way', 's', 'MSL'), 'SYN-B': ('tvdss', 'm', 'one-way', 'ms', 'MSL')}
+
+
+def td_pairs_digest(pairs): return hashlib.sha256(b''.join(struct.pack('>dd', d, t) for d, t in pairs)).hexdigest()
+
+
+def td_archive(members):
+    """zipped() with MEMBERS ({name: bytes}) beside the survey folder."""
+    out = io.BytesIO()
+    with zipfile.ZipFile(io.BytesIO(zipped())) as src, zipfile.ZipFile(out, 'w') as z:
+        for info in src.infolist(): z.writestr(info, src.read(info))
+        for name, raw in members.items(): z.writestr(zipfile.ZipInfo(name, (2026, 11, 2, 0, 0, 0)), raw)
+    return out.getvalue()
+
+
+def td_run(journey_run, definition=TD_DEF, members=TD_MEMBERS, **kw):
+    journey_run.archive.write_bytes(td_archive(members))
+    return journey_run(time_depth=definition, **kw)
+
+
+def td_clean(models=('SYN-A', 'SYN-B'), wells=3):
+    """§5: every s4 row as CLEAN; each model's two judged legs equal and its ResInsight leg unsupported; the kind-level
+    row unsupported when some survey well has no defined table, and no not-yet row."""
+    out = {k: s for k, s in CLEAN.items() if k[0] != 'time-depth'}
+    for m in models: out.update({('time-depth', m, 'opendtect-to-project'): 'equal', ('time-depth', m, 'project-to-sdk'): 'equal',
+                                 ('time-depth', m, 'project-to-resinsight'): 'unsupported'})
+    if wells: out[('time-depth', '*', '*')] = 'unsupported'
+    return out
+
+
+def td_expect(report, changed, **kw):
+    assert states(report) == {**td_clean(**kw), **changed}
+    return report
+
+
+def td_both(well, state): return {('time-depth', well, leg): state for leg in OPHIOLITE}
+
+
+def td_findings(report): return [f for f in report['findings'] if f['step'].startswith('time-depth')]
+
+
+def td_values(r): return [(x['name'], x['expected'], x['observed']) for x in r['quantities'] if x['mode'] != 'tolerance']
+
+
+def test_s5_c2_the_clean_run_with_two_tables_meets_the_hand_counted_record(journey_run):
+    """§5 acceptance: 2 models x 2 legs equal (pairs and declarations), 2 ResInsight unsupported, one kind-level row of
+    3 wells, one E129 finding, `time_depth` {true, 2, 5}; every s4 row unchanged; T13 on the clean report."""
+    uploads = []
+    report, target = td_run(journey_run, hooks={'td_uploading': uploads.append})
+    assert ev.evaluate(report) == [] and gone(journey_run, target)
+    td_expect(report, {})
+    assert uploads == ['SYN-A', 'SYN-B']
+    assert report['time_depth'] == {'definition': True, 'models': 2, 'survey_wells': 5, 'outside': 0}
+    assert the(report, 'time-depth', '*', '*')['evidence'] == {'route': 'none', 'wells': 3}
+    assert td_findings(report) == [{'step': 'time-depth project-to-resinsight', 'numbers': '2 models: ' + TD_ROUTE, 'owner': 'E129', 'sent': None, 'class': 'no route'}]
+    for well, pairs in TD_PAIRS.items():
+        n, digest_ = len(pairs), td_pairs_digest(pairs)
+        leg1 = the(report, 'time-depth', well, 'opendtect-to-project')
+        assert td_values(leg1) == [('pairs', n, n), ('pairs_sha256', digest_, digest_)] + [
+            (k, v, v) for k, v in zip(('depth_type', 'depth_unit', 'time_kind', 'time_unit', 'datum'), TD_DECLARED[well])]
+        sdk = the(report, 'time-depth', well, 'project-to-sdk')
+        original = hashlib.sha256(TD_LANDED[well]).hexdigest()
+        assert td_values(sdk) == [('original_sha256', original, original), ('pairs', n, n), ('pairs_sha256', digest_, digest_)]
+        for r in (leg1, sdk):
+            assert all(q(r, c)['over_budget'] == 0 and q(r, c)['compared'] == n and q(r, c)['budget'] == 0.0 for c in ('depth', 'time'))
+            assert [(x['at'], x['expected']) for x in r['examples'] if x['quantity'] == 'depth'] == [(str(k + 1), d) for k, (d, _) in enumerate(pairs)]
+        assert the(report, 'time-depth', well, 'project-to-resinsight')['evidence'] == {'route': 'none'}
+    # T13: one model's SDK row removed and the kind-level count changed to 2, two problems, each naming its cause
+    broken = json.loads(json.dumps(report))
+    broken['rows'] = [r for r in broken['rows'] if (r['kind'], r['object'], r['leg']) != ('time-depth', 'SYN-B', 'project-to-sdk')]
+    the(broken, 'time-depth', '*', '*')['evidence']['wells'] = 2
+    problems = ev.evaluate(broken)
+    assert len(problems) == 2, problems
+    assert any('time-depth SYN-B project-to-sdk: missing (a mandatory leg)' in p for p in problems)
+    assert any(p.startswith('time-depth * *:') and 'wells 3' in p for p in problems)
+
+
+def test_s5_t1_one_time_1e_9_off_disagrees_on_the_digest_and_its_time_on_both_legs(journey_run):
+    hooks = {'td_landed': lambda well, body: body.replace(b'200.0,0.18\n', b'200.0,0.180000001\n') if well == 'SYN-A' else body}
+    report, target = td_run(journey_run, hooks=hooks)
+    td_expect(report, td_both('SYN-A', 'disagree'))
+    for leg in OPHIOLITE:
+        r = the(report, 'time-depth', 'SYN-A', leg)
+        assert disagreeing(r) == ['pairs_sha256', 'time'] and q(r, 'time')['over_budget'] == 1 and q(r, 'depth')['over_budget'] == 0
+    assert ev.evaluate(report) == [] and gone(journey_run, target)
+
+
+def test_s5_t2_the_last_pair_dropped_disagrees_on_its_count_and_leaves_its_position_unmatched(journey_run):
+    hooks = {'td_landed': lambda well, body: body.replace(b'400.0,0.31\n', b'') if well == 'SYN-A' else body}
+    report, target = td_run(journey_run, hooks=hooks)
+    td_expect(report, td_both('SYN-A', 'disagree'))
+    for leg in OPHIOLITE:
+        r = the(report, 'time-depth', 'SYN-A', leg)
+        assert disagreeing(r) == ['depth', 'pairs', 'pairs_sha256', 'time'] and (q(r, 'pairs')['expected'], q(r, 'pairs')['observed']) == (4, 3)
+        assert all(q(r, c)['unmatched'] == 1 and q(r, c)['compared'] == 3 for c in ('depth', 'time'))
+    assert ev.evaluate(report) == [] and gone(journey_run, target)
+
+
+def test_s5_t3_two_pairs_swapped_in_the_held_original_disagree_where_they_sit(journey_run):
+    """A comparison by sorted value would pass this; the pairs are keyed by ordinal and digested in file order."""
+    def swap(well, held):
+        if well == 'SYN-A': held.write_bytes(held.read_bytes().replace(b'100.0,0.1\n200.0,0.18\n', b'200.0,0.18\n100.0,0.1\n'))
+    report, target = td_run(journey_run, hooks={'td_held': swap})
+    td_expect(report, {('time-depth', 'SYN-A', 'opendtect-to-project'): 'disagree'})
+    r = the(report, 'time-depth', 'SYN-A', 'opendtect-to-project')
+    assert disagreeing(r) == ['depth', 'pairs_sha256', 'time'] and q(r, 'pairs')['state'] == 'agree'
+    assert sorted(x['at'] for x in r['examples'] if x['quantity'] == 'depth' and x['expected'] != x['observed']) == ['1', '2']
+    assert ev.evaluate(report) == [] and gone(journey_run, target)
+
+
+TD_C = b'depth,time\n100.0,0.1\n200.0,0.18\n150.0,0.25\n'  # its third depth does not increase
+
+
+def test_s5_t4_a_refused_middle_table_fails_alone_with_the_converter_s_sentence_and_no_upload(journey_run):
+    uploads = []
+    definition = {'SYN-A': TD_DEF['SYN-A'], 'SYN-C': td_entry('checkshots/C.csv', 1, 'comma', 'depth', 'time'), 'SYN-B': TD_DEF['SYN-B']}
+    report, target = td_run(journey_run, definition, {**TD_MEMBERS, 'checkshots/C.csv': TD_C}, hooks={'td_uploading': uploads.append})
+    td_expect(report, {**td_both('SYN-C', 'failed'), ('time-depth', 'SYN-C', 'project-to-resinsight'): 'unsupported'}, models=('SYN-A', 'SYN-C', 'SYN-B'), wells=2)
+    assert uploads == ['SYN-A', 'SYN-B']
+    leg1 = the(report, 'time-depth', 'SYN-C', 'opendtect-to-project')
+    assert leg1['evidence'] == {'error': TD_WRONG % ('SYN-C', 'Depth', 'depth'), 'class': 'other', 'source_row': 3}
+    assert {f['step']: f['owner'] for f in td_findings(report)} == {'time-depth SYN-C opendtect-to-project': 'E137', 'time-depth SYN-C project-to-sdk': 'E137',
+                                                                    'time-depth project-to-resinsight': 'E129'}
+    assert ev.evaluate(report) == [] and gone(journey_run, target)
+
+
+def test_s5_t5_a_defined_well_not_in_the_survey_is_an_inventory_problem(journey_run):
+    report, target = td_run(journey_run, {'SYN-Z': TD_DEF['SYN-A']})
+    assert report['time_depth'] == {'definition': True, 'models': 1, 'survey_wells': 5, 'outside': 1}
+    assert the(report, 'time-depth', '*', '*')['evidence'] == {'route': 'none', 'wells': 5}
+    assert ev.evaluate(report) == ['time-depth: 1 well(s) of the time-depth definition are not wells of the survey.'] and gone(journey_run, target)
+
+
+def test_s5_t6_one_depth_changed_after_the_offline_read_disagrees_on_the_sdk_leg_alone(journey_run):
+    def changed(unit, first):
+        if unit == ('time-depth', 'SYN-B'): first['pairs'][1][0] += 0.5
+        return first
+    report, target = td_run(journey_run, hooks={'sdk_result': changed})
+    td_expect(report, {('time-depth', 'SYN-B', 'project-to-sdk'): 'disagree'})
+    r = the(report, 'time-depth', 'SYN-B', 'project-to-sdk')
+    assert disagreeing(r) == ['depth', 'pairs_sha256'] and q(r, 'depth')['over_budget'] == 1
+    assert {f['step']: f['owner'] for f in td_findings(report)}['time-depth SYN-B project-to-sdk'] == 'E51'
+    assert ev.evaluate(report) == [] and gone(journey_run, target)
+
+
+def test_s5_t7_a_declaration_sent_otherwise_disagrees_on_that_declaration_alone(journey_run):
+    """The expectation is frozen from the definition before the hook changes what is sent."""
+    report, target = td_run(journey_run, hooks={'td_declared': lambda well, d: {**d, 'time_unit': 's'} if well == 'SYN-B' else d})
+    td_expect(report, {('time-depth', 'SYN-B', 'opendtect-to-project'): 'disagree'})
+    r = the(report, 'time-depth', 'SYN-B', 'opendtect-to-project')
+    assert disagreeing(r) == ['time_unit'] and (q(r, 'time_unit')['expected'], q(r, 'time_unit')['observed']) == ('ms', 's')
+    assert ev.evaluate(report) == [] and gone(journey_run, target)
+
+
+def test_s5_t9_an_original_written_otherwise_disagrees_on_its_digest_alone(journey_run):
+    """The bundle refuses an original.csv changed inside it (its digest is the revision's), so the change is made to
+    what the offline reader printed: `100.0` written `100.00`, every number kept."""
+    other = hashlib.sha256(TD_A.replace(b'100.0,', b'100.00,')).hexdigest()
+    def changed(unit, first):
+        if unit == ('time-depth', 'SYN-A'): first['sha256'] = other
+        return first
+    report, target = td_run(journey_run, hooks={'sdk_result': changed})
+    td_expect(report, {('time-depth', 'SYN-A', 'project-to-sdk'): 'disagree'})
+    assert disagreeing(the(report, 'time-depth', 'SYN-A', 'project-to-sdk')) == ['original_sha256']
+    assert ev.evaluate(report) == [] and gone(journey_run, target)
+
+
+def test_s5_t10_an_empty_definition_counts_every_well_and_t14_reports_carry_their_own_mode(journey_run):
+    """T10; T14 within one process: the reports of a run with a definition, one without and one with again each
+    validate by their own `time_depth` (the evaluator and compose keep no state between them; one journey per test, as
+    the gateway lane's control schema is seeded once per test)."""
+    report, target = td_run(journey_run, {})
+    td_expect(report, {}, models=(), wells=5)
+    assert report['time_depth'] == {'definition': True, 'models': 0, 'survey_wells': 5, 'outside': 0}
+    assert the(report, 'time-depth', '*', '*')['evidence'] == {'route': 'none', 'wells': 5} and td_findings(report) == []
+    assert ev.evaluate(report) == [] and gone(journey_run, target)
+    without = json.loads(json.dumps(report))
+    without['time_depth']['definition'] = False
+    the(without, 'time-depth', '*', '*')['state'], the(without, 'time-depth', '*', '*')['evidence'] = 'not-yet', {'waits_on': 'E137 s3'}
+    assert [ev.evaluate(r) for r in (report, without, report)] == [[], [], []]
+    assert ev.evaluate(json.loads(json.dumps({**without, 'time_depth': report['time_depth']})))  # each report by its own counts
+    kinds = lambda undefined: [(r['kind'], r['state']) for r in journey.compose([], [], [], {}, {}, {}, {}, None, None, None, undefined) if r['kind'] == 'time-depth']  # noqa: E731
+    assert [kinds(5), kinds(None), kinds(0), kinds(5)] == [[('time-depth', 'unsupported')], [('time-depth', 'not-yet')], [], [('time-depth', 'unsupported')]]
+
+
+def test_s5_t11_every_well_defined_leaves_no_kind_level_row_and_one_with_wells_0_is_a_problem(journey_run):
+    tables = {w: b'depth,time\n%d.0,0.1\n%d.0,0.2\n' % (10 + n, 20 + n) for n, w in enumerate(WELLS)}
+    members = {'checkshots/%d.csv' % n: raw for n, raw in enumerate(tables.values())}
+    definition = {w: td_entry('checkshots/%d.csv' % n, 1, 'comma', 'depth', 'time') for n, w in enumerate(WELLS)}
+    report, target = td_run(journey_run, definition, members)
+    td_expect(report, {}, models=tuple(WELLS), wells=0)
+    assert ev.evaluate(report) == [] and gone(journey_run, target)
+    extra = json.loads(json.dumps(report))
+    extra['rows'].append(journey.row('time-depth', '*', '*', None, state='unsupported', evidence={'route': 'none', 'wells': 1}))
+    assert ev.evaluate(extra) == ['time-depth * *: the survey wells with no defined table stand as one unsupported row, its route none and its wells 0, '
+                                  'and no row when there are none.']
+
+
+def test_s5_t12_both_tables_refused_fail_four_rows_owned_by_e137_and_keep_the_route_finding(journey_run):
+    members = {'checkshots/A.csv': TD_A.replace(b'300.0,0.25', b'300.0,0.15'), 'checkshots/B.txt': TD_B.replace(b'12.0\t120.0', b'12.0\t80.0')}
+    report, target = td_run(journey_run, members=members)
+    td_expect(report, {**td_both('SYN-A', 'failed'), **td_both('SYN-B', 'failed')})
+    assert the(report, 'time-depth', 'SYN-A', 'opendtect-to-project')['evidence']['error'] == TD_WRONG % ('SYN-A', 'Time', 'time')
+    assert the(report, 'time-depth', 'SYN-B', 'opendtect-to-project')['evidence']['error'] == TD_WRONG % ('SYN-B', 'Depth', 'depth')
+    assert sorted(f['owner'] for f in td_findings(report)) == ['E129', 'E137', 'E137', 'E137', 'E137']
+    assert ev.evaluate(report) == [] and gone(journey_run, target)

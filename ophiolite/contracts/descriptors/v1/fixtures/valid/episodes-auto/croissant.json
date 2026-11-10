@@ -1,0 +1,49 @@
+{
+ "@context": {"@language": "en", "@vocab": "https://schema.org/", "citeAs": "cr:citeAs", "column": "cr:column", "conformsTo": "dct:conformsTo", "cr": "http://mlcommons.org/croissant/", "rai": "http://mlcommons.org/croissant/RAI/", "data": {"@id": "cr:data", "@type": "@json"}, "dataType": {"@id": "cr:dataType", "@type": "@vocab"}, "dct": "http://purl.org/dc/terms/", "equivalentProperty": "cr:equivalentProperty", "examples": {"@id": "cr:examples", "@type": "@json"}, "extract": "cr:extract", "field": "cr:field", "fileProperty": "cr:fileProperty", "fileObject": "cr:fileObject", "fileSet": "cr:fileSet", "format": "cr:format", "includes": "cr:includes", "isLiveDataset": "cr:isLiveDataset", "jsonPath": "cr:jsonPath", "key": "cr:key", "md5": "cr:md5", "parentField": "cr:parentField", "path": "cr:path", "recordSet": "cr:recordSet", "references": "cr:references", "regex": "cr:regex", "repeated": "cr:repeated", "replace": "cr:replace", "samplingRate": "cr:samplingRate", "sc": "https://schema.org/", "separator": "cr:separator", "source": "cr:source", "subField": "cr:subField", "transform": "cr:transform"},
+ "@type": "sc:Dataset",
+ "conformsTo": "http://mlcommons.org/croissant/1.0",
+ "name": "Work episodes from dep-e134-test",
+ "description": "Work episodes for training, exported in auto mode: 2 episodes, 1 with values and 1 shape only.",
+ "creator": [{"@type": "Organization", "@id": "#creator-1", "name": "dep-e134-test"}],
+ "publisher": {"@type": "Organization", "@id": "#publisher", "name": "dep-e134-test"},
+ "datePublished": "2026-10-29",
+ "version": "2026.10.130",
+ "conditionsOfAccess": "The values in this folder rely on more than one licence (CC-BY-4.0, CC0-1.0); each value's terms are in the record it links to.",
+ "rai:dataCollection": "Captured by consent on a local-evaluation deployment and exported by release 2026.10.130 up to cursor 20.",
+ "rai:personalSensitiveInformation": "Pseudonyms in this folder can be linked to the named record by anyone who can read the deployment.",
+ "rai:dataUseCases": "training",
+ "usageInfo": ["rights-1 v2 sha256:702b241b1cb67d6f8b453cf287043f28935c67d7e8cfba0fe887eaa19a6d68a2", "rights-4 v1 sha256:8b28005528ba83cd482eef224d70604a2649d650932edeb03011bdf7dd34f0fc"],
+ "distribution": [
+  {"@type": "cr:FileObject", "@id": "trajectories.json", "name": "trajectories.json", "contentUrl": "trajectories.json", "encodingFormat": "application/json", "sha256": "e62b26d5e9494984fd5424391896a7892673a4c081eaba004bd99aa7a4cafa47", "contentSize": "1528 B"},
+  {"@type": "cr:FileObject", "@id": "episodes.jsonl", "name": "episodes.jsonl", "contentUrl": "episodes.jsonl", "encodingFormat": "application/jsonlines", "sha256": "1053467d23aa24dc01381784ef685859c7a974185d5319e03240a7c1a091c1f5", "contentSize": "6168 B"},
+  {"@type": "cr:FileObject", "@id": "turns.jsonl", "name": "turns.jsonl", "contentUrl": "turns.jsonl", "encodingFormat": "application/jsonlines", "sha256": "f912b1217f8f29c013a0d350c93adb4ca3cf8b8c6886def800768508dab24fdc", "contentSize": "6147 B"}
+ ],
+ "recordSet": [
+  {"@type": "cr:RecordSet", "@id": "turns", "name": "turns", "description": "One record per line of turns.jsonl (ophiolite.work-turn/1), its scalar places. The lists and objects of a line (inputs, parameters, outputs, checks, outcomes, verdicts, offered, request) are in turns.jsonl, read whole with ophiolite.trajectories.load_turns.", "field": [
+   {"@type": "cr:Field", "@id": "turns/episode", "name": "episode", "dataType": "sc:Text", "source": {"fileObject": {"@id": "turns.jsonl"}, "extract": {"column": "episode"}}},
+   {"@type": "cr:Field", "@id": "turns/mode", "name": "mode", "dataType": "sc:Text", "source": {"fileObject": {"@id": "turns.jsonl"}, "extract": {"column": "mode"}}},
+   {"@type": "cr:Field", "@id": "turns/split", "name": "split", "dataType": "sc:Text", "source": {"fileObject": {"@id": "turns.jsonl"}, "extract": {"column": "split"}}},
+   {"@type": "cr:Field", "@id": "turns/n", "name": "n", "dataType": "sc:Integer", "source": {"fileObject": {"@id": "turns.jsonl"}, "extract": {"column": "n"}}},
+   {"@type": "cr:Field", "@id": "turns/attempt.chain", "name": "attempt.chain", "dataType": "sc:Text", "source": {"fileObject": {"@id": "turns.jsonl"}, "extract": {"column": "attempt"}, "transform": {"jsonPath": "$.chain"}}},
+   {"@type": "cr:Field", "@id": "turns/attempt.n", "name": "attempt.n", "dataType": "sc:Integer", "source": {"fileObject": {"@id": "turns.jsonl"}, "extract": {"column": "attempt"}, "transform": {"jsonPath": "$.n"}}},
+   {"@type": "cr:Field", "@id": "turns/attempt.from", "name": "attempt.from", "dataType": "sc:Text", "source": {"fileObject": {"@id": "turns.jsonl"}, "extract": {"column": "attempt"}, "transform": {"jsonPath": "$.from"}}},
+   {"@type": "cr:Field", "@id": "turns/attempt.continued", "name": "attempt.continued", "dataType": "sc:Boolean", "source": {"fileObject": {"@id": "turns.jsonl"}, "extract": {"column": "attempt"}, "transform": {"jsonPath": "$.continued"}}},
+   {"@type": "cr:Field", "@id": "turns/action.action_id", "name": "action.action_id", "dataType": "sc:Text", "source": {"fileObject": {"@id": "turns.jsonl"}, "extract": {"column": "action"}, "transform": {"jsonPath": "$.action_id"}}},
+   {"@type": "cr:Field", "@id": "turns/action.at", "name": "action.at", "dataType": "sc:Float", "source": {"fileObject": {"@id": "turns.jsonl"}, "extract": {"column": "action"}, "transform": {"jsonPath": "$.at"}}},
+   {"@type": "cr:Field", "@id": "turns/action.operation", "name": "action.operation", "dataType": "sc:Text", "source": {"fileObject": {"@id": "turns.jsonl"}, "extract": {"column": "action"}, "transform": {"jsonPath": "$.operation"}}},
+   {"@type": "cr:Field", "@id": "turns/action.through.client", "name": "action.through.client", "dataType": "sc:Text", "source": {"fileObject": {"@id": "turns.jsonl"}, "extract": {"column": "action"}, "transform": {"jsonPath": "$.through.client"}}},
+   {"@type": "cr:Field", "@id": "turns/action.through.version", "name": "action.through.version", "dataType": "sc:Text", "source": {"fileObject": {"@id": "turns.jsonl"}, "extract": {"column": "action"}, "transform": {"jsonPath": "$.through.version"}}},
+   {"@type": "cr:Field", "@id": "turns/action.on_behalf_of.kind", "name": "action.on_behalf_of.kind", "dataType": "sc:Text", "source": {"fileObject": {"@id": "turns.jsonl"}, "extract": {"column": "action"}, "transform": {"jsonPath": "$.on_behalf_of.kind"}}},
+   {"@type": "cr:Field", "@id": "turns/action.on_behalf_of.id", "name": "action.on_behalf_of.id", "dataType": "sc:Text", "source": {"fileObject": {"@id": "turns.jsonl"}, "extract": {"column": "action"}, "transform": {"jsonPath": "$.on_behalf_of.id"}}},
+   {"@type": "cr:Field", "@id": "turns/action.plan.plan_sha256", "name": "action.plan.plan_sha256", "dataType": "sc:Text", "source": {"fileObject": {"@id": "turns.jsonl"}, "extract": {"column": "action"}, "transform": {"jsonPath": "$.plan.plan_sha256"}}},
+   {"@type": "cr:Field", "@id": "turns/action.plan.evidence_sha256", "name": "action.plan.evidence_sha256", "dataType": "sc:Text", "source": {"fileObject": {"@id": "turns.jsonl"}, "extract": {"column": "action"}, "transform": {"jsonPath": "$.plan.evidence_sha256"}}},
+   {"@type": "cr:Field", "@id": "turns/action.instruction", "name": "action.instruction", "dataType": "sc:Text", "source": {"fileObject": {"@id": "turns.jsonl"}, "extract": {"column": "action"}, "transform": {"jsonPath": "$.instruction"}}},
+   {"@type": "cr:Field", "@id": "turns/judgement.attempt_ended", "name": "judgement.attempt_ended", "dataType": "sc:Text", "source": {"fileObject": {"@id": "turns.jsonl"}, "extract": {"column": "judgement"}, "transform": {"jsonPath": "$.attempt_ended"}}},
+   {"@type": "cr:Field", "@id": "turns/omitted.parameters", "name": "omitted.parameters", "dataType": "sc:Integer", "source": {"fileObject": {"@id": "turns.jsonl"}, "extract": {"column": "omitted"}, "transform": {"jsonPath": "$.parameters"}}},
+   {"@type": "cr:Field", "@id": "turns/omitted.checks", "name": "omitted.checks", "dataType": "sc:Integer", "source": {"fileObject": {"@id": "turns.jsonl"}, "extract": {"column": "omitted"}, "transform": {"jsonPath": "$.checks"}}},
+   {"@type": "cr:Field", "@id": "turns/omitted.verdicts", "name": "omitted.verdicts", "dataType": "sc:Integer", "source": {"fileObject": {"@id": "turns.jsonl"}, "extract": {"column": "omitted"}, "transform": {"jsonPath": "$.verdicts"}}},
+   {"@type": "cr:Field", "@id": "turns/omitted.plan", "name": "omitted.plan", "dataType": "sc:Integer", "source": {"fileObject": {"@id": "turns.jsonl"}, "extract": {"column": "omitted"}, "transform": {"jsonPath": "$.plan"}}},
+   {"@type": "cr:Field", "@id": "turns/omitted.offered", "name": "omitted.offered", "dataType": "sc:Integer", "source": {"fileObject": {"@id": "turns.jsonl"}, "extract": {"column": "omitted"}, "transform": {"jsonPath": "$.offered"}}}
+  ]}
+ ]
+}

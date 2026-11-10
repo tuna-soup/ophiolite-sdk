@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.83.0",
+  "version": "1.104.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -29,7 +29,7 @@
     },
     {
       "id": "ophiolite.contract-profile/1",
-      "version": "1.7.0",
+      "version": "1.8.0",
       "lifecycle": "preview",
       "path": "profile-schema.json",
       "title": "ContractProfile",
@@ -37,7 +37,7 @@
     },
     {
       "id": "ophiolite.scientific-asset/1",
-      "version": "1.34.0",
+      "version": "1.36.0",
       "lifecycle": "preview",
       "path": "assets/v1/schema.json",
       "title": "ScientificAsset",
@@ -85,7 +85,7 @@
     },
     {
       "id": "ophiolite.asset-summary/1",
-      "version": "1.4.0",
+      "version": "1.5.0",
       "lifecycle": "preview",
       "path": "assets/v1/summary-schema.json",
       "title": "AssetSummary",
@@ -93,11 +93,11 @@
     },
     {
       "id": "ophiolite.typed-context/1",
-      "version": "1.12.0",
+      "version": "1.13.0",
       "lifecycle": "preview",
       "path": "assets/v1/typed-context-schema.json",
       "title": "TypedContext",
-      "description": "Observed and declared context of a typed asset (tops, trajectory, grid, triangulated surface, point set, fault sticks, seismic volume, wavelet, rock model section, seismic section, time-depth table, feature set, well path given as positions, well set, residual result, 2D seismic line) with its fidelity report."
+      "description": "Observed and declared context of a typed asset (tops, trajectory, grid, triangulated surface, point set, fault sticks, seismic volume in float or 8-bit form, wavelet, rock model section, seismic section, time-depth table, feature set, well path given as positions, well set, residual result, 2D seismic line) with its fidelity report."
     },
     {
       "id": "ophiolite.well-tops/1",
@@ -189,11 +189,11 @@
     },
     {
       "id": "ophiolite.portable-bundle/2",
-      "version": "2.11.0",
+      "version": "2.16.0",
       "lifecycle": "preview",
       "path": "bundles/v2/manifest-schema.json",
       "title": "PortableBundleManifestV2",
-      "description": "Portable bundle 2: exact selected revisions of well logs, well tops, trajectories, regular-grid surfaces, meshes, point sets, fault sticks, seismic slices, wavelets, rock model sections, seismic sections, time-depth tables and feature sets with files, digests, served context, permitted lineage and relationships; 2.8 (E23c) carries the source package, its companion members and the interpretation of a recipe-read point set or a Shapefile-read feature set; 2.9 (E107a) carries the original a file read on a computer was read from, beside the recorded reading; 1.10/2.10 (E122 s5b) carry each exported revision's source record as the gateway served it; 2.11 (E123 S1f-c) carries a packaged polyline set (Petrel fault sticks)."
+      "description": "Portable bundle 2: exact selected revisions of well logs, well tops, trajectories, regular-grid surfaces, meshes, point sets, fault sticks, seismic slices, wavelets, rock model sections, seismic sections, time-depth tables and feature sets with files, digests, served context, permitted lineage and relationships; 2.8 (E23c) carries the source package, its companion members and the interpretation of a recipe-read point set or a Shapefile-read feature set; 2.9 (E107a) carries the original a file read on a computer was read from, beside the recorded reading; 1.10/2.10 (E122 s5b) carry each exported revision's source record as the gateway served it; 2.11 (E123 S1f-c) carries a packaged polyline set (Petrel fault sticks); 2.12 (E116 s1) carries a project folder block, and with it may list no assets (a folder ophiolite-mapper writes alone); 2.13 (E142 s0) carries surveys, their members by exact revision and the relations between them; 2.14 (E117 s1) carries a project folder block of its own format (ophiolite.project-folder/2), which any program may write; 2.15 (E147 s0) carries a citation block and the standard descriptors derived from it, and a media type on asset files; 2.16 (E147 s2b) describes a cited bundle's well tops, deviation surveys, time-depth tables and point sets as Croissant record sets read from their normalized data."
     },
     {
       "id": "ophiolite.polyline-set/1",
@@ -316,6 +316,14 @@
       "description": "A 2D seismic line description: every trace's position in file order (trace number, source point or none, x and y), sample meaning, header decisions, up to 64 traces that needed a decision and the digests of runs of at most 1,024 whole traces (E137 s0). Samples stay in the exact original."
     },
     {
+      "id": "ophiolite.seismic-volume/2",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/seismic-volume-2-schema.json",
+      "title": "SeismicVolumeNative",
+      "description": "An 8-bit seismic cube description: grid, sample meaning, the code for no value (-128 or none), header decisions and per-inline digests of one-byte samples (E140 s0). Samples stay in the exact original."
+    },
+    {
       "id": "ophiolite.seismic-slice/1",
       "version": "1.0.0",
       "lifecycle": "preview",
@@ -324,12 +332,44 @@
       "description": "One inline, crossline or sample slice of a seismic volume at an exact revision, with exact samples and its declared scope."
     },
     {
+      "id": "ophiolite.volume-window/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/volume-window-schema.json",
+      "title": "VolumeWindow",
+      "description": "Part of a seismic volume or 2D line at an exact revision: inclusive ranges of inlines and crosslines (by label or by ordinal, never mixed) or of a line's traces in file order, and of zero-based samples; the stored 4-byte words it holds, their physical sample start and how they are cut into pieces of at most 32 MiB, with what a client checks (E141 s0). The document holds no sample."
+    },
+    {
+      "id": "ophiolite.volume-window/2",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/volume-window-2-schema.json",
+      "title": "VolumeWindow2",
+      "description": "Part of an 8-bit seismic cube (mapping seismic-volume/2) at an exact revision, at native size: inclusive ranges of inlines and crosslines (by label or by ordinal, never mixed) and of zero-based samples; the stored one-byte codes it holds (SEG-Y data format 8, the code for no value stated as in the stored description), their physical sample start and how they are cut into pieces of at most 32 MiB, with what a client checks (E140 s3). The document holds no sample."
+    },
+    {
       "id": "ophiolite.relationship-registry/1",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "lifecycle": "preview",
       "path": "relationships/v1/registry-schema.json",
       "title": "RelationshipRegistry",
-      "description": "The registered relationship predicates: class, joined kinds, cardinality, exact-revision binding, asserting party and required evidence (E20)."
+      "description": "The registered relationship predicates: class, joined kinds, cardinality, exact-revision binding, asserting party and required evidence (E20); 1.2.0 (E142 s0) adds the survey kind."
+    },
+    {
+      "id": "ophiolite.survey-revision/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "surveys/v1/survey-revision-schema.json",
+      "title": "SurveyRevision",
+      "description": "One complete, immutable revision of a survey: its name, identity, producer reference and default context, every member (an exact revision in a role; a well member with its well or wellbore) and every relation between two members (E142 s0). Never served as is; a reader is served ophiolite.survey/1."
+    },
+    {
+      "id": "ophiolite.survey/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "surveys/v1/survey-schema.json",
+      "title": "SurveyPage",
+      "description": "One page of a survey as one reader may see it: the members the reader may read in role order, the relations whose both ends the reader may read, the authorised count and the cursor; a pinned revision or the live view (E142 s0)."
     },
     {
       "id": "ophiolite.entity/1",
@@ -341,7 +381,7 @@
     },
     {
       "id": "ophiolite.entity-assets/1",
-      "version": "1.2.0",
+      "version": "1.3.0",
       "lifecycle": "preview",
       "path": "entities/v1/entity-assets-schema.json",
       "title": "EntityAssets",
@@ -373,7 +413,7 @@
     },
     {
       "id": "ophiolite.outcome/1",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "lifecycle": "preview",
       "path": "outcomes/v1/outcome-schema.json",
       "title": "OutcomeDeclaration",
@@ -381,7 +421,7 @@
     },
     {
       "id": "ophiolite.outcome-check/1",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "lifecycle": "preview",
       "path": "outcomes/v1/outcome-check-schema.json",
       "title": "OutcomeCheck",
@@ -397,7 +437,7 @@
     },
     {
       "id": "ophiolite.verdict/1",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "lifecycle": "preview",
       "path": "scientific/v1/verdict.json",
       "title": "Verdict",
@@ -413,7 +453,7 @@
     },
     {
       "id": "ophiolite.work-episodes/1",
-      "version": "1.0.0",
+      "version": "1.2.0",
       "lifecycle": "preview",
       "path": "scientific/v1/work-episodes.json",
       "title": "WorkEpisodes",
@@ -421,11 +461,27 @@
     },
     {
       "id": "ophiolite.work-episode/1",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "lifecycle": "preview",
       "path": "scientific/v1/work-episode.json",
       "title": "WorkEpisode",
       "description": "One episode of one person's or agent's work in one project: consecutive actions less than the window apart, each with its inputs, outputs, checks, outcomes and verdicts; in shape mode only digests, pseudonyms and words of closed sets, in values mode also the values the rights allow (E134)."
+    },
+    {
+      "id": "ophiolite.work-turn/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "scientific/v1/work-turn.json",
+      "title": "WorkTurn",
+      "description": "One line of a folder's turns.jsonl: one row of a work episode as the observation (what was offered and read), the action and its judgement (checks, outcomes, verdicts, how the attempt ended), with its episode, position, mode and split; a re-arrangement of the row that converts back byte for byte (E160)."
+    },
+    {
+      "id": "ophiolite.profile-migration/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "scientific/v1/profile-migration.json",
+      "title": "ProfileMigration",
+      "description": "A stored item moved to a released profile version: the revision it was moved from and the new revision it was written as, the profile and stored digest of each data form, the release that ran the move and the system actor; the old revision is kept as it was; never changed (E148)."
     },
     {
       "id": "ophiolite.resqml-read/1",
@@ -469,11 +525,11 @@
     },
     {
       "id": "ophiolite.derivation/2",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "lifecycle": "preview",
       "path": "scientific/v1/derivation-2.json",
       "title": "DerivationRecordV2",
-      "description": "derivation/1 plus kind reported: a result a person or an agent made by running a catalogue procedure version, with the procedure block (version, run, envelope digest, runner, made-again-from), every input occurrence as slot[n] and the choice labels of its settings (E106)."
+      "description": "derivation/1 plus kind reported: a result a person or an agent made by running a catalogue procedure version, with the procedure block (version, run, envelope digest, runner, made-again-from), every input occurrence as slot[n] and the choice labels of its settings (E106). 1.1.0: the procedure block's optional verification, the tool version's verification as it stood when the result was published, with its sentence (E165 s2)."
     },
     {
       "id": "ophiolite.parameters/1",
@@ -490,6 +546,54 @@
       "path": "table-target-schema.json",
       "title": "TableTarget",
       "description": "What a table must hold to become one type of data: its fields, the choices that describe the whole table and, for a free table, the questions asked of each column (E86)."
+    },
+    {
+      "id": "ophiolite.data-rule/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "rules/v1/data-rule-schema.json",
+      "title": "DataRule",
+      "description": "One released data rule: the kinds it applies to, whether it reads one file or the project, its severity, its parameters with their admissible range, comparison and source, the sentence a person reads and the registry version it first appeared in (E144)."
+    },
+    {
+      "id": "ophiolite.rule-results/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "rules/v1/rule-results-schema.json",
+      "title": "RuleResults",
+      "description": "The data rules run on one version under one registry snapshot: one result per rule that applies to its kind, passed, failed with a count and up to five examples, or not applicable with a reason; no id, time or person (E144)."
+    },
+    {
+      "id": "ophiolite.search-request/2",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "search/v1/search-request-schema.json",
+      "title": "SearchRequest",
+      "description": "A question to every project of one organisation the caller may read: words, data types, a well, a box in a named coordinate system, a publication period, a publisher, projects and archived projects, with a cursor and a page size; an unknown key is refused, naming it (E145)."
+    },
+    {
+      "id": "ophiolite.search/2",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "search/v1/search-schema.json",
+      "title": "SearchAnswer",
+      "description": "The answer to a question to an organisation: a page of current versions ordered by score rounded to 6 places, project, name and asset, each with why it matched; the count and the data type, project and well facets of every readable match; the next cursor (E145)."
+    },
+    {
+      "id": "ophiolite.search/3",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "search/v1/search-meaning-schema.json",
+      "title": "SearchAnswerByMeaning",
+      "description": "The answer to a question to an organisation by meaning, served beside ophiolite.search/2: the same shape, each score the cosine of the question and the version's description (above 0, at most 1), each row naming the question's words it contains, possibly none; the count of readable matches not sent to the model (E145 s2b)."
+    },
+    {
+      "id": "ophiolite.tool-verification/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "procedures/v1/tool-verification.json",
+      "title": "ToolVerification",
+      "description": "A person's verification of one procedure digest in one project, against a check of a result that version reported or against a publication with a DOI or a URL, or the withdrawal of one by its author or an administrator: who and when set by the server, a statement of at most 2000 characters, never changed or deleted; a claim, never a witness, and never inherited by another digest (E165)."
     }
   ],
   "profiles": [
@@ -796,6 +900,22 @@
       "description": "Every trace of the line in file order with its trace number, source point and x and y, the sample meaning, every header decision and the digests of its runs of at most 1,024 whole traces; samples stay in the exact original.",
       "lifecycle": "preview",
       "path": "profiles/v1/seismic-line.json"
+    },
+    {
+      "id": "segy/2",
+      "kind": "source",
+      "display_name": "8-bit seismic cube (SEG-Y)",
+      "description": "A SEG-Y volume (revision 1 or 2, one-byte two's complement integer samples, big-endian, fixed-length traces on a full grid) kept byte for byte in its native 8-bit form; the value of a code is the code, and the upload states whether -128 means no value.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/segy-2.json"
+    },
+    {
+      "id": "ophiolite.seismic-volume/2",
+      "kind": "normalized",
+      "display_name": "8-bit seismic cube description",
+      "description": "The volume grid, sample meaning, the code for no value, every header decision and the digests of its per-inline chunks of one-byte samples.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/seismic-volume-2.json"
     },
     {
       "id": "well-location/1",
@@ -1224,6 +1344,20 @@
       "schema": "ophiolite.portable-bundle/2"
     },
     {
+      "id": "ophiolite.fixture/bundles/survey-complete.json/2",
+      "kind": "fixture",
+      "path": "bundles/v2/fixtures/survey-complete.json",
+      "title": "Portable bundle 2.13 manifest fixture: a complete seven-member survey whose well log travels and whose other members name their exact revisions (E142 s0)",
+      "schema": "ophiolite.portable-bundle/2"
+    },
+    {
+      "id": "ophiolite.fixture/bundles/survey-partial.json/2",
+      "kind": "fixture",
+      "path": "bundles/v2/fixtures/survey-partial.json",
+      "title": "Portable bundle 2.13 manifest fixture: the same survey exported partially as the latest view, four members and two relations (E142 s0)",
+      "schema": "ophiolite.portable-bundle/2"
+    },
+    {
       "id": "ophiolite.fixture/bundles/manifest-v1-version-2-8.json/1",
       "kind": "fixture",
       "path": "bundles/v1/fixtures/manifest-v1-version-2-8.json",
@@ -1561,10 +1695,22 @@
       "title": "Relationship predicate registry (E20): the only predicates Ophiolite accepts"
     },
     {
+      "id": "ophiolite.survey-roles/1",
+      "kind": "vocabulary",
+      "path": "surveys/v1/roles.json",
+      "title": "Survey roles (E142 s0): the profiles each member role admits and the roles each survey relation joins"
+    },
+    {
       "id": "ophiolite.policy/api-versioning/1",
       "kind": "policy",
       "path": "docs/api-versioning.md",
       "title": "API versions and deprecation: what the version numbers mean, additive changes, and the transition every breaking change needs"
+    },
+    {
+      "id": "ophiolite.policy/deprecations/1",
+      "kind": "policy",
+      "path": "deprecations/v1/deprecations.json",
+      "title": "Deprecated routes: each route's Deprecation and Sunset dates, its successor and its removal condition (E148)"
     },
     {
       "id": "ophiolite.label-rule/1",
@@ -1589,6 +1735,192 @@
       "kind": "procedure",
       "path": "procedures/v1/procedure.py",
       "title": "The one procedure validator, bundle digest and archive check, run alike by the Platform and the SDK; never imports a procedure (E105a)"
+    },
+    {
+      "id": "ophiolite.mapper-recipe/1",
+      "kind": "mapper",
+      "path": "mapper/v1/recipe-schema.json",
+      "title": "The structure of ophiolite-mapper's recipe.json: the source without credentials, the target, the field, column, declaration and well decisions, and the findings inspect saw (E116)"
+    },
+    {
+      "id": "ophiolite.project-folder/1",
+      "kind": "mapper",
+      "path": "mapper/v1/folder-schema.json",
+      "title": "The folder block of a bundle v2 manifest: the files ophiolite-mapper write adds, their roles, the identity tables' columns and the lineage keys (E116)"
+    },
+    {
+      "id": "ophiolite.mapper-rules/1",
+      "kind": "mapper",
+      "path": "mapper/v1/rules.json",
+      "title": "What applies without a decision, the blocking severities, the refusal order and every sentence of ophiolite-mapper, under one rules_version (E116)"
+    },
+    {
+      "id": "ophiolite.mapper-validator/1",
+      "kind": "mapper",
+      "path": "mapper/v1/mapper.py",
+      "title": "The one mapper validator: recipe, effective recipe, refusals, acknowledgements, folder block and identity rows, run alike by the Platform and the box; standard library only (E116)"
+    },
+    {
+      "id": "ophiolite.osdu-vocabulary/1",
+      "kind": "mapper",
+      "path": "mapper/v1/osdu-vocabulary.json",
+      "title": "The OSDU data-definitions v0.30.1 kinds, units, unit quantities, curve families, sampling domains and coordinate reference systems the mapper emits, and the digest of every vendored schema, generated by tools/osdu-vocabulary.py at the pinned commit (E116)"
+    },
+    {
+      "id": "ophiolite.osdu-compatibility/1",
+      "kind": "mapper",
+      "path": "osdu/v1/compatibility.json",
+      "title": "The OSDU compatibility summary a person and a tool read: \"not yet verified\" until a dated load record lands, then its date, edition, mapper version, manifest digest and kinds and the sentence they form (E167 s1)"
+    },
+    {
+      "id": "ophiolite.osdu-compatibility-schema/1",
+      "kind": "mapper",
+      "path": "osdu/v1/compatibility-schema.json",
+      "title": "The structure of osdu/v1/compatibility.json: the empty state or one dated load record's values (E167 s1)"
+    },
+    {
+      "id": "ophiolite.osdu-compatibility-check/1",
+      "kind": "mapper",
+      "path": "osdu/v1/compatibility.py",
+      "title": "The one check of the compatibility summary: its sentence, its defects and the document built from a complete load record; standard library only (E167 s1)"
+    },
+    {
+      "id": "ophiolite.osdu-schemas/1",
+      "kind": "mapper",
+      "path": "mapper/v1/osdu/v0.30.1/NOTICE",
+      "title": "The OSDU data-definitions v0.30.1 schemas the mapper validates against, vendored unmodified under Apache-2.0 with LICENSE: the eight kinds and every schema their $ref reach (E116 s3)"
+    },
+    {
+      "id": "ophiolite.osdu-schema-validator/1",
+      "kind": "mapper",
+      "path": "mapper/v1/osdu_schema.py",
+      "title": "The offline check of a document against the vendored OSDU schemas: draft-07 as far as they use it, refusing any keyword it does not apply; standard library only, run alike by the Platform and the box (E116 s3)"
+    },
+    {
+      "id": "ophiolite.osdu-export-matrix/1",
+      "kind": "mapper",
+      "path": "mapper/v1/export-matrix.json",
+      "title": "The OSDU kind every reader profile and table target exports as, or none with the reason, and which ophiolite-mapper writes, generated by tools/export-matrix.py (E116 s3)"
+    },
+    {
+      "id": "ophiolite.mapper-reviewed/1",
+      "kind": "mapper",
+      "path": "mapper/v1/reviewed-schema.json",
+      "title": "The structure of ophiolite-reviewed.json: the column picks per target, table and schema digest and the accepted well-name aliases a person made in finished writes, which inspect brings back for the same table (E116 s4)"
+    },
+    {
+      "id": "ophiolite.osdu-export-report/1",
+      "kind": "mapper",
+      "path": "mapper/v1/export-report-schema.json",
+      "title": "The structure of osdu/export-report.json: which exported asset became which OSDU record and payload, the masters made from the bundle's wells and wellbores, every asset left unwritten with its reason and every declared loss (E169 s0)"
+    },
+    {
+      "id": "ophiolite.project-folder/2",
+      "kind": "project-folder",
+      "path": "folders/v1/folder-schema.json",
+      "title": "The folder block of a bundle v2 manifest as a format of its own: any writer, its items with profile, kind, OSDU statement, declarations and rows, the file roles and their counts per writer (E117 s0)"
+    },
+    {
+      "id": "ophiolite.project-folder-kinds/1",
+      "kind": "project-folder",
+      "path": "folders/v1/kinds.json",
+      "title": "The closed table of what a project folder item may be: per profile its kind word, path suffix and media type (E117 s0)"
+    },
+    {
+      "id": "ophiolite.project-folder-validator/2",
+      "kind": "project-folder",
+      "path": "folders/v1/folder.py",
+      "title": "The one project folder validator, /2 and /1 alike, and the explicit /1 to /2 reading, run alike by the Platform and the SDK; standard library only (E117 s0)"
+    },
+    {
+      "id": "ophiolite.citation/1",
+      "kind": "release-descriptors",
+      "path": "descriptors/v1/citation-schema.json",
+      "title": "The citation block of a bundle v2 manifest from 2.15: title, creators, publisher, publication date, version, an open licence by SPDX id or a notice, the bundle's PROV-JSON and the descriptors beside the manifest (E147 s0)"
+    },
+    {
+      "id": "ophiolite.release-descriptors-mapping/1",
+      "kind": "release-descriptors",
+      "path": "descriptors/v1/mapping.json",
+      "title": "Where each value of the citation, the files and the tables goes in RO-Crate 1.1, Croissant 1.0 and DataCite kernel-4.3 JSON, row for row the table of the descriptors page (E147 s0)"
+    },
+    {
+      "id": "ophiolite.release-descriptors/1",
+      "kind": "release-descriptors",
+      "path": "descriptors/v1/descriptors.py",
+      "title": "The one check of a citation block and of the three descriptors against the manifest, by projection, run alike by the Platform and the SDK; standard library only (E147 s0)"
+    },
+    {
+      "id": "ophiolite.work-turn-mapping/1",
+      "kind": "mapping",
+      "path": "scientific/v1/work-turn-mapping.json",
+      "title": "Where each property of a work-episode row goes in a work-turn line, and back: one entry per place, the optional groups and their null places (E160 s0)"
+    },
+    {
+      "id": "ophiolite.work-turns/1",
+      "kind": "mapping",
+      "path": "scientific/v1/work_turns.py",
+      "title": "The converter that runs that table, row to line and line to row, alike in the Platform and the SDK; standard library only (E160 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/descriptors/bundle-wells/manifest.json/1",
+      "kind": "fixture",
+      "path": "descriptors/v1/fixtures/valid/bundle-wells/manifest.json",
+      "title": "Portable bundle 2.15 manifest fixture: one LAS curve, prov.json and a citation with two persons, a ROR publisher and CC-BY-4.0, beside its three descriptors (E147 s0)",
+      "schema": "ophiolite.portable-bundle/2"
+    },
+    {
+      "id": "ophiolite.fixture/descriptors/episodes-auto/trajectories.json/1",
+      "kind": "fixture",
+      "path": "descriptors/v1/fixtures/valid/episodes-auto/trajectories.json",
+      "title": "Work-episodes 1.2.0 manifest fixture in auto mode: two episodes, two licences and two rights bases, beside its croissant.json (E160 s0)",
+      "schema": "ophiolite.work-episodes/1"
+    },
+    {
+      "id": "ophiolite.fixture/descriptors/episodes-empty/trajectories.json/1",
+      "kind": "fixture",
+      "path": "descriptors/v1/fixtures/valid/episodes-empty/trajectories.json",
+      "title": "Work-episodes 1.2.0 manifest fixture with no episodes, no licence and no rights basis, beside its croissant.json (E160 s0)",
+      "schema": "ophiolite.work-episodes/1"
+    },
+    {
+      "id": "ophiolite.fixture/descriptors/episodes-shape/trajectories.json/1",
+      "kind": "fixture",
+      "path": "descriptors/v1/fixtures/valid/episodes-shape/trajectories.json",
+      "title": "Work-episodes 1.2.0 manifest fixture in shape mode: one episode, one licence and one rights basis, beside its croissant.json (E160 s0)",
+      "schema": "ophiolite.work-episodes/1"
+    },
+    {
+      "id": "ophiolite.fixture/descriptors/folder-field/manifest.json/1",
+      "kind": "fixture",
+      "path": "descriptors/v1/fixtures/valid/folder-field/manifest.json",
+      "title": "Portable bundle 2.15 manifest fixture: the synthetic-field project folder with a citation of a null licence and a notice, beside its three descriptors (E147 s0)",
+      "schema": "ophiolite.portable-bundle/2"
+    },
+    {
+      "id": "ophiolite.fixture/descriptors/bundle-tables/manifest.json/1",
+      "kind": "fixture",
+      "path": "descriptors/v1/fixtures/valid/bundle-tables/manifest.json",
+      "title": "Portable bundle 2.16 manifest fixture: two well tops tables, a time-depth table and a point set with a citation, beside three descriptors whose Croissant holds a record set per table (E147 s2b)",
+      "schema": "ophiolite.portable-bundle/2"
+    },
+    {
+      "id": "ophiolite.fixture/descriptors/starter-citation.json/1",
+      "kind": "fixture",
+      "path": "descriptors/v1/fixtures/valid/starter-citation.json",
+      "title": "A starter pack's citation as slice 3 derives it from starter.json and the OSD record (E147 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/descriptors/starter-pack/starter.json/1",
+      "kind": "fixture",
+      "path": "descriptors/v1/fixtures/valid/starter-pack/starter.json",
+      "title": "A starter pack's starter.json with a Python and a ResInsight target sharing one artefact, beside its catalogue evidence and the three descriptors derived from them (E147 s3)"
+    },
+    {
+      "id": "ophiolite.fixture/descriptors/cases.json/1",
+      "kind": "fixture",
+      "path": "descriptors/v1/fixtures/invalid/cases.json",
+      "title": "One changed thing per case and the code, file and place the descriptors check or the bundle reader reports (E147 s0)"
     },
     {
       "id": "ophiolite.quantities/1",
@@ -1777,6 +2109,313 @@
       "kind": "fixture",
       "path": "outcomes/v1/fixtures/invalid/address-in-destination.json",
       "title": "An outcome refused for one field only: a destination label with an address (E120)"
+    },
+    {
+      "id": "ophiolite.fixture/outcomes/tops-within-5m-on-path.json/1",
+      "kind": "fixture",
+      "path": "outcomes/v1/fixtures/valid/tops-within-5m-on-path.json",
+      "title": "The 5 m outcome naming two data rules on its tops (E144 s4)",
+      "schema": "ophiolite.outcome/1"
+    },
+    {
+      "id": "ophiolite.fixture/outcomes/named-rules-none.json/1",
+      "kind": "fixture",
+      "path": "outcomes/v1/fixtures/invalid/named-rules-none.json",
+      "title": "An outcome refused for one field only: an empty list of data rules (E144 s4)"
+    },
+    {
+      "id": "ophiolite.fixture/outcomes/named-rule-not-allowed.json/1",
+      "kind": "fixture",
+      "path": "outcomes/v1/fixtures/invalid/named-rule-not-allowed.json",
+      "title": "An outcome refused for one field only: a data rule its kind may not name (E144 s4)"
+    },
+    {
+      "id": "ophiolite.fixture/outcomes/named-rules-unsorted.json/1",
+      "kind": "fixture",
+      "path": "outcomes/v1/fixtures/invalid/named-rules-unsorted.json",
+      "title": "An outcome refused for one field only: data rules out of order (E144 s4)"
+    },
+    {
+      "id": "ophiolite.fixture/outcomes/named-rules-twice.json/1",
+      "kind": "fixture",
+      "path": "outcomes/v1/fixtures/invalid/named-rules-twice.json",
+      "title": "An outcome refused for one field only: a data rule named twice (E144 s4)"
+    },
+    {
+      "id": "ophiolite.data-rules/1",
+      "kind": "policy",
+      "path": "rules/v1/registry.json",
+      "title": "The data-rule registry index: every immutable snapshot of the released rules with its digest; the last is current (E144)"
+    },
+    {
+      "id": "ophiolite.data-rules/snapshot-1.0.0/1",
+      "kind": "policy",
+      "path": "rules/v1/registries/1.0.0.json",
+      "title": "Data-rule registry snapshot 1.0.0: no rules released yet (E144 slice 0)"
+    },
+    {
+      "id": "ophiolite.data-rules/snapshot-1.1.0/1",
+      "kind": "policy",
+      "path": "rules/v1/registries/1.1.0.json",
+      "title": "Data-rule registry snapshot 1.1.0: the first library, six rules that read one file (E144 slice 1)"
+    },
+    {
+      "id": "ophiolite.data-rule/depth-increasing/1",
+      "kind": "policy",
+      "path": "rules/v1/rules/depth-increasing-1.json",
+      "title": "Data rule depth-increasing/1: a log's index moves strictly one way (E144)"
+    },
+    {
+      "id": "ophiolite.data-rule/gr-range/1",
+      "kind": "policy",
+      "path": "rules/v1/rules/gr-range-1.json",
+      "title": "Data rule gr-range/1: gamma ray within its plausible range (E144)"
+    },
+    {
+      "id": "ophiolite.data-rule/null-sentinel/1",
+      "kind": "policy",
+      "path": "rules/v1/rules/null-sentinel-1.json",
+      "title": "Data rule null-sentinel/1: no common null value the header does not name (E144)"
+    },
+    {
+      "id": "ophiolite.data-rule/station-step/1",
+      "kind": "policy",
+      "path": "rules/v1/rules/station-step-1.json",
+      "title": "Data rule station-step/1: survey stations close enough in measured depth (E144)"
+    },
+    {
+      "id": "ophiolite.data-rule/tops-unique-name/1",
+      "kind": "policy",
+      "path": "rules/v1/rules/tops-unique-name-1.json",
+      "title": "Data rule tops-unique-name/1: each top named once in a file (E144)"
+    },
+    {
+      "id": "ophiolite.data-rule/unit-known/1",
+      "kind": "policy",
+      "path": "rules/v1/rules/unit-known-1.json",
+      "title": "Data rule unit-known/1: curve units known to their quantity (E144)"
+    },
+    {
+      "id": "ophiolite.fixture/rules/run/cases.json/1",
+      "kind": "fixture",
+      "path": "rules/v1/fixtures/run/cases.json",
+      "title": "Synthetic files the first rule library is run on, with the failing rows planted in each; beside each its hand-checked expected rule-results block (E144 slice 1)"
+    },
+    {
+      "id": "ophiolite.fixture/rules/rules.json/1",
+      "kind": "fixture",
+      "path": "rules/v1/fixtures/rules.json",
+      "title": "Refused data-rule documents: each fixture rule with one change, and the stage, code and field it is refused for (E144)"
+    },
+    {
+      "id": "ophiolite.fixture/rules/results.json/1",
+      "kind": "fixture",
+      "path": "rules/v1/fixtures/results.json",
+      "title": "Rule-result blocks over the fixture registry: valid blocks, and blocks with one change with the stage, code and field they are refused for (E144)"
+    },
+    {
+      "id": "ophiolite.fixture/rules/registry.json/1",
+      "kind": "fixture",
+      "path": "rules/v1/fixtures/registry/registry.json",
+      "title": "A synthetic two-snapshot data-rule registry (1.0.0, 1.1.0) the rule and result fixtures are checked against (E144)"
+    },
+    {
+      "id": "ophiolite.search/filters/1",
+      "kind": "policy",
+      "path": "search/v1/filters.json",
+      "title": "The closed list of fields a question to an organisation may carry, their limits, which bind the question, the order, the page cap and the refusal sentences (E145)"
+    },
+    {
+      "id": "ophiolite.fixture/search/requests.json/1",
+      "kind": "fixture",
+      "path": "search/v1/fixtures/requests.json",
+      "title": "Questions to an organisation: valid ones, and ones with one change with the stage, field and reason they are refused for and whether the schema alone refuses them (E145)"
+    },
+    {
+      "id": "ophiolite.fixture/search/answers.json/1",
+      "kind": "fixture",
+      "path": "search/v1/fixtures/answers.json",
+      "title": "Answers beside their questions: valid ones, and ones with one change with the stage, field and reason they are refused for, including the tie-break orders (E145)"
+    },
+    {
+      "id": "ophiolite.fixture/search/answers-meaning.json/1",
+      "kind": "fixture",
+      "path": "search/v1/fixtures/answers-meaning.json",
+      "title": "Answers by meaning (ophiolite.search/3) beside their questions: valid ones, including a row that names no word and an answer with nothing sent to the model, and ones with one change with the stage, field and reason they are refused for (E145 s2b)"
+    },
+    {
+      "id": "ophiolite.fixture/search/organisation.json/1",
+      "kind": "fixture",
+      "path": "search/v1/fixtures/organisation.json",
+      "title": "The frozen organisation org-e145: three projects (one archived), 20 wells, 160 current versions and 4 superseded revisions, with the literal asset ids the real landing routes returned (E145)"
+    },
+    {
+      "id": "ophiolite.fixture/search/questions.json/1",
+      "kind": "fixture",
+      "path": "search/v1/fixtures/questions.json",
+      "title": "Q1-Q8 over the frozen organisation: each question's counts per viewer state and its frozen pages with literal ids, scores, facets and order (E145)"
+    },
+    {
+      "id": "ophiolite.fixture/search/build-organisation.py/1",
+      "kind": "fixture",
+      "path": "search/v1/fixtures/build_organisation.py",
+      "title": "The builder of the frozen organisation's non-id facts: names, curves, wells, file bytes and times (E145)"
+    },
+    {
+      "id": "ophiolite.agent-declarations/1",
+      "kind": "policy",
+      "path": "agents/v1/declarations-schema.json",
+      "title": "What an agent may do with every operation: per route row its reach (tool, call or person) with the reason, how a change is admitted (proposable, covered by a parent, both or never), whether a policy may approve it (E149 s0) and whether a change is destructive (E149 s1)"
+    },
+    {
+      "id": "ophiolite.fixture/agents/declarations.json/1",
+      "kind": "fixture",
+      "path": "agents/v1/fixtures/valid/declarations.json",
+      "title": "Eleven synthetic agent declarations, one of every reach, admission and reason class (E149 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/agents/invalid-cases.json/1",
+      "kind": "fixture",
+      "path": "agents/v1/fixtures/invalid/cases.json",
+      "title": "One change per structural rule of the agent declarations, each with the path it fails at (E149 s0)"
+    },
+    {
+      "id": "ophiolite.agent-dry-run/1",
+      "kind": "policy",
+      "path": "agents/v1/dry-run-schema.json",
+      "title": "The answer to a dry run: whether the same request would proceed, the effects it would have or its refusal, and the digest a proposal names; kept nowhere (E150 s0)"
+    },
+    {
+      "id": "ophiolite.agent-choice/1",
+      "kind": "policy",
+      "path": "agents/v1/choice-schema.json",
+      "title": "CHOICE_REQUIRED: the question, two to eight literal choices, why a person decides, who answers and the token an answer names (E150 s0)"
+    },
+    {
+      "id": "ophiolite.agent-choice-rules/1",
+      "kind": "policy",
+      "path": "agents/v1/choice.py",
+      "title": "The choice rules a schema cannot state: ids c1..cN in order and fragments of at most 4096 bytes of canonical JSON; standard library only (E150 s0)"
+    },
+    {
+      "id": "ophiolite.agent-policy/1",
+      "kind": "policy",
+      "path": "agents/v1/agent-policy-schema.json",
+      "title": "A project's agent policy: how long a proposal waits for its person (1 to 168 hours, 24 by default), with its read and save requests (E150 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/agents/dry-run-proceeds.json/1",
+      "kind": "fixture",
+      "path": "agents/v1/fixtures/valid/dry-run-proceeds.json",
+      "title": "A dry run of a verdict that would proceed, with its two effects and its digest (E150 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/agents/dry-run-refused.json/1",
+      "kind": "fixture",
+      "path": "agents/v1/fixtures/valid/dry-run-refused.json",
+      "title": "A dry run that would be refused, with no effects (E150 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/agents/dry-run-stream.json/1",
+      "kind": "fixture",
+      "path": "agents/v1/fixtures/valid/dry-run-stream.json",
+      "title": "A dry run of a file sent as bytes, whose digest binds the bytes the gateway received (E150 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/agents/choice.json/1",
+      "kind": "fixture",
+      "path": "agents/v1/fixtures/valid/choice.json",
+      "title": "A neutral CHOICE_REQUIRED answer: an abstract question with two literal fragments (E150 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/agents/agent-policy.json/1",
+      "kind": "fixture",
+      "path": "agents/v1/fixtures/valid/agent-policy.json",
+      "title": "A project's agent policy as a project that never saved one reads it (E150 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/agents/agent-policy-read.json/1",
+      "kind": "fixture",
+      "path": "agents/v1/fixtures/valid/agent-policy-read.json",
+      "title": "A request to read a project's agent policy (E150 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/agents/agent-policy-save.json/1",
+      "kind": "fixture",
+      "path": "agents/v1/fixtures/valid/agent-policy-save.json",
+      "title": "A request to save a project's agent policy (E150 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/agents/try-it-first-cases.json/1",
+      "kind": "fixture",
+      "path": "agents/v1/fixtures/invalid/try-it-first-cases.json",
+      "title": "One change per rule of the dry-run, choice and agent-policy documents, each with the path it fails at and who refuses it (E150 s0)"
+    },
+    {
+      "id": "ophiolite.agent-job/1",
+      "kind": "policy",
+      "path": "agents/v1/job-schema.json",
+      "title": "One of an agent's own jobs, step by step: its state and step, the word a release or failure carries, each step's state and answer digest, and the review page (E151 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/agents/job.json/1",
+      "kind": "fixture",
+      "path": "agents/v1/fixtures/valid/job.json",
+      "title": "A three-step job at its second step, the first completed (E151 s0)"
+    },
+    {
+      "id": "ophiolite.agent-proposals/1",
+      "kind": "policy",
+      "path": "agents/v1/proposals-schema.json",
+      "title": "What an agent waits for its person on in one project: pending plans and jobs waiting for a choice, each with its evidence, budget, expiry and review page (E151 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/agents/proposals.json/1",
+      "kind": "fixture",
+      "path": "agents/v1/fixtures/valid/proposals.json",
+      "title": "A job waiting for its person's choice and a pending plan, newest first (E151 s0)"
+    },
+    {
+      "id": "ophiolite.agent-mapping-evidence/1",
+      "kind": "policy",
+      "path": "agents/v1/mapping-evidence-schema.json",
+      "title": "The evidence of each pick of a mapping: its class, who stated it, and the reviewed mapping, import or layout version that supports it (E153 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/agents/mapping-evidence.json/1",
+      "kind": "fixture",
+      "path": "agents/v1/fixtures/valid/mapping-evidence.json",
+      "title": "One mapping evidence row per source: the connection, a reviewed mapping, a reviewed import, a layout, a suggestion, none, you, and a layout's declaration (E153 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/agents/mapping-evidence-cases.json/1",
+      "kind": "fixture",
+      "path": "agents/v1/fixtures/invalid/mapping-evidence-cases.json",
+      "title": "One defect per rule of the mapping evidence row, each with the path and keyword it fails at (E153 s0)"
+    },
+    {
+      "id": "ophiolite.agent-precedents/1",
+      "kind": "policy",
+      "path": "agents/v1/precedents-schema.json",
+      "title": "The accepted past results on one operation an assistant may read before it proposes a plan: shape always, reasons and method only where the person may read the result; and the evidence a plan keeps of what it read (E158 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/agents/precedents.json/1",
+      "kind": "fixture",
+      "path": "agents/v1/fixtures/valid/precedents.json",
+      "title": "Three precedents, the anchor project's first, one in another project without its detail (E158 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/agents/precedents-evidence.json/1",
+      "kind": "fixture",
+      "path": "agents/v1/fixtures/valid/precedents-evidence.json",
+      "title": "A plan's evidence of one precedents answer, binding its request and response digests (E158 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/agents/precedents-cases.json/1",
+      "kind": "fixture",
+      "path": "agents/v1/fixtures/invalid/precedents-cases.json",
+      "title": "Precedents requests, answers and evidence the schema refuses, with the paths it names (E158 s0)"
     }
   ]
 }

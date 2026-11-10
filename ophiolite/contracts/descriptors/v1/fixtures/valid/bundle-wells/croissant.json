@@ -1,0 +1,82 @@
+{
+  "@context": {
+    "@language": "en",
+    "@vocab": "https://schema.org/",
+    "citeAs": "cr:citeAs",
+    "column": "cr:column",
+    "conformsTo": "dct:conformsTo",
+    "cr": "http://mlcommons.org/croissant/",
+    "rai": "http://mlcommons.org/croissant/RAI/",
+    "data": {"@id": "cr:data", "@type": "@json"},
+    "dataType": {"@id": "cr:dataType", "@type": "@vocab"},
+    "dct": "http://purl.org/dc/terms/",
+    "equivalentProperty": "cr:equivalentProperty",
+    "examples": {"@id": "cr:examples", "@type": "@json"},
+    "extract": "cr:extract",
+    "field": "cr:field",
+    "fileProperty": "cr:fileProperty",
+    "fileObject": "cr:fileObject",
+    "fileSet": "cr:fileSet",
+    "format": "cr:format",
+    "includes": "cr:includes",
+    "isLiveDataset": "cr:isLiveDataset",
+    "jsonPath": "cr:jsonPath",
+    "key": "cr:key",
+    "md5": "cr:md5",
+    "parentField": "cr:parentField",
+    "path": "cr:path",
+    "recordSet": "cr:recordSet",
+    "references": "cr:references",
+    "regex": "cr:regex",
+    "repeated": "cr:repeated",
+    "replace": "cr:replace",
+    "samplingRate": "cr:samplingRate",
+    "sc": "https://schema.org/",
+    "separator": "cr:separator",
+    "source": "cr:source",
+    "subField": "cr:subField",
+    "transform": "cr:transform"
+  },
+  "@type": "sc:Dataset",
+  "conformsTo": "http://mlcommons.org/croissant/1.0",
+  "name": "Synthetic gamma ray log of well SYNTHETIC-M1",
+  "description": "One gamma ray curve (GR, five samples) of a made-up well, with the LAS file it was read from. Synthetic data for the descriptor contract; no observed well.",
+  "creator": [
+    {"@type": "Person", "@id": "https://orcid.org/0000-0002-1825-0097", "name": "Josiah Carberry"},
+    {"@type": "Person", "@id": "#creator-2", "name": "Ada Synthetic"}
+  ],
+  "publisher": {"@type": "Organization", "@id": "https://ror.org/0abcdef12", "name": "Synthetic Survey Organisation"},
+  "datePublished": "2026-11-05",
+  "version": "1.0.0",
+  "license": "https://spdx.org/licenses/CC-BY-4.0",
+  "keywords": ["well log", "gamma ray", "synthetic"],
+  "distribution": [
+    {
+      "@type": "cr:FileObject",
+      "@id": "assets/0/original.las",
+      "name": "original.las",
+      "contentUrl": "assets/0/original.las",
+      "encodingFormat": "text/plain",
+      "sha256": "d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
+      "contentSize": "311 B"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "assets/0/descriptor-GR.json",
+      "name": "descriptor-GR.json",
+      "contentUrl": "assets/0/descriptor-GR.json",
+      "encodingFormat": "application/json",
+      "sha256": "7bb6af90ffb90a754b3985f1679eaa16f2a32efa384aef028c6b5d0d0719145d",
+      "contentSize": "2479 B"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "assets/0/curve-GR.json",
+      "name": "curve-GR.json",
+      "contentUrl": "assets/0/curve-GR.json",
+      "encodingFormat": "application/json",
+      "sha256": "81992992a1a15daac792bebf5979c51e0f8c3c1869a75a125999e6466e38bfba",
+      "contentSize": "1076 B"
+    }
+  ]
+}

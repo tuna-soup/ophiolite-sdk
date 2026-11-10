@@ -1,0 +1,13 @@
+{
+ "schema": "ophiolite.data-rule/1",
+ "id": "trace-order/1",
+ "title": "Traces in line order",
+ "description": "Trace numbers run strictly one way along the line: the direction is that of the last trace number minus the first (one trace: increasing), and each trace after the first fails when its number does not move strictly that way from the trace before. A stacked 2D line is ordered by CDP ensemble number (SEG-Y rev 2.0, trace header bytes 21-24; binary header trace sorting code 4). The example value is the trace number.",
+ "class": "file-local",
+ "kinds": ["segy-line/1"],
+ "context_kinds": null,
+ "severity": "warn",
+ "parameters": [],
+ "words": {"template": "{count} traces break the order of the line, the first at {first}.", "examples": "rows"},
+ "since": "1.3.0"
+}

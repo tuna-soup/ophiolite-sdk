@@ -7,6 +7,7 @@ import re
 import pytest
 from test_in_process_publish import web, shared, app, service  # noqa: F401 (fixtures)
 from test_access_key_chain import keyed, ORIGIN  # noqa: F401
+from test_point_columns_read import served  # noqa: F401 (fixture)
 from test_exchange import key, remove, points, LAS_TEXT
 from ophiolite import Client, Credential, cli
 from ophiolite import exchange
@@ -90,6 +91,25 @@ def test_check_get_and_send_from_the_command_line(run, tmp_path):
 
 EXITS = {'not-visible': 4, 'cannot-read-here': 1, 'damaged': 1, 'map-unavailable': 4, 'newer-version-exists': 4, 'nothing-changed': 4, 'earlier-version': 4, 'access-refused': 3,
          'not-valid': 1, 'not-held': 1, 'too-large': 1, 'outcome-unknown': 5, 'folder-busy': 5, 'rate-limited': 5, 'sign-in-needed': 3, 'could-not-reach': 5}
+
+
+def test_get_names_a_columns_body_data_ophpts(web, served, tmp_path):
+    """E139 s3 (O2): `get` of a horizon stored as columns saves its OPHPTS1 body as data.ophpts and writes no data.json;
+    a JSON point set is still saved as data.json. Mutation: the codec rule inverted, or data.json kept for every read."""
+    from test_in_process_publish import client
+    from test_point_columns_bundle import SMALL
+    from project_gateway.las_uploads import LASUploads, Upload
+    from test_point_columns_read import DECLARED
+    asset, revision, _ = served
+    small = LASUploads(web.a).ingest(Upload(command_id='h-2', name='Small', profile='points-csv/1', declared=DECLARED, project_id='p', filename='small.csv',
+                                            attribution='Synthetic', audience=[], rights_confirmed=True), SMALL, 'alice')
+    transport = exchange.ClientTransport(client(web, 'alice', 'delegate'))
+    transport.fetch({'asset_id': asset, 'kind': 'uploaded', 'revision': revision}, revision, tmp_path / 'big')
+    transport.fetch({'asset_id': small['asset_id'], 'kind': 'uploaded', 'revision': small['revision']}, small['revision'], tmp_path / 'small')
+    assert sorted(p.name for p in (tmp_path / 'big').iterdir()) == ['data.ophpts', 'descriptor.json', 'original']
+    assert (tmp_path / 'big/data.ophpts').read_bytes()[:8] == b'OPHPTS1\n'
+    assert sorted(p.name for p in (tmp_path / 'small').iterdir()) == ['data.json', 'descriptor.json', 'original']
+    assert json.loads((tmp_path / 'small/data.json').read_bytes())['context']['count'] == 3
 
 
 def test_every_refusal_has_its_documented_exit_code():

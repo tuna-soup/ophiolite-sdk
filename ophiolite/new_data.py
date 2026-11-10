@@ -7,7 +7,7 @@
 
 A refusal keeps the deployment's own sentence (not an administrator, the settings changed since you read them, a
 narrower change without a reason). Nothing is fetched again behind your back: a stale snapshot is refused, and you
-read again and decide again. `client.share` and `ophiolite share` are unchanged.
+read again and decide again. `client.share` and `ophiolite account share` are unchanged.
 """
 import uuid
 

@@ -1,0 +1,13 @@
+{
+ "schema": "ophiolite.data-rule/1",
+ "id": "tops-unique-name/1",
+ "title": "Each top named once",
+ "description": "No top repeats the name of an earlier top in the file. Names are compared after removing leading and trailing whitespace, replacing each run of inner whitespace with one space and case-folding. Each repeat fails; its example depth is the measured depth as written and its value the name as written.",
+ "class": "file-local",
+ "kinds": ["well-tops-csv/1"],
+ "context_kinds": null,
+ "severity": "warn",
+ "parameters": [],
+ "words": {"template": "{count} tops repeat an earlier top's name, the first at {first}.", "examples": "rows"},
+ "since": "1.1.0"
+}

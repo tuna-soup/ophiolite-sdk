@@ -25,7 +25,7 @@ import tempfile
 from pathlib import Path
 
 from .errors import IntegrityConflict, MissingExtra, OphioliteError, PermissionRefused, Refused
-from . import starter_kinds
+from . import native_form, starter_kinds
 
 DEFINITION = 'ophiolite.starter-definition/1'
 STARTER, EVIDENCE, LANDING = 'osd.starter/1', 'ophiolite.starter-evidence/1', 'ophiolite.starter-landing/1'
@@ -369,7 +369,10 @@ OPENDTECT_RELEASE = '7.0.10'  # ophiolite_opendtect data/host.json opendtect.rel
 ORACLE_OPENDTECT = {'compared': ['nothing yet: the pack has not been imported into OpendTect and compared (ophiolite starter opendtect)'],
                     'values': 0, 'differences': 0, 'seed': 0}
 EXPORT_PROFILE = {'seismic-3d': 'segy/1', 'horizons': 'points-csv/1', 'wellbore-paths': 'well-path-positions-csv/1',
-                  'wellbore-logs': 'las2/1', 'seismic-2d': 'segy-line/1', 'faults': 'opendtect-faultsticks/1', 'time-depth': 'time-depth-csv/1'}  # E137 s0 D-01 (R1-6): what this SDK lands; each value is its kind's catalogue profile
+                  'wellbore-logs': 'las2/1', 'seismic-2d': 'segy-line/1', 'faults': 'opendtect-faultsticks/1', 'time-depth': 'time-depth-csv/1',
+                  'tops': 'well-tops-csv/1'}  # E137 s0 D-01 (R1-6): what this SDK lands; each value is its kind's catalogue profile
+NATIVE_PROFILE = 'segy/2'  # E140 s3 C5 (D-S): a cube the export wrote as 8-bit codes lands as the 8-bit cube; every other cube as segy/1
+UNDEFINED_DECLARED = {-128: '-128', None: 'none'}  # E140 s3 C5: the export's code for no value as the segy/2 declaration's choice
 MAX_NODES = 100_000  # E139: the nodes a deployment that does not state its `horizon_nodes` takes (e8's B5 ruling, 29 Oct)
 TOO_MANY_NODES = 'This horizon has more nodes than Ophiolite takes ({:,}).'  # E139: the deployment's M, by number
 READ_BACK = '%s reads back from Ophiolite with another value than its file at node %d.' + NOT_WRITTEN  # E139 s2 (S2-12)
@@ -528,15 +531,34 @@ def inventory(report, folder, archive, out, *, readers=None, export_profile=None
         f = files[d['path']]
         if set(d) != {'path', 'sha256', 'bytes', 'from', 'how'} or d['from'] != archive['sha256'] \
                 or f.get('kind') not in (starter_archive.KINDS if readers is None else readers) \
-                or not isinstance(d['path'], str) or len(d['path'].split('/')) != starter_kinds.depth(f['kind']) or d['path'].split('/')[0] != starter_archive.FOLDER[f['kind']] \
-                or not all(SEGMENT.fullmatch(s) for s in d['path'].split('/')):
+                or not isinstance(d['path'], str) or (len(d['path'].split('/')), d['path'].split('/')[0]) != starter_kinds.pack_path(f['kind'], f.get('form')) \
+                or not all(SEGMENT.fullmatch(s) for s in d['path'].split('/')) \
+                or starter_archive.native(f) and f.get('undefined_code', False) not in UNDEFINED_DECLARED \
+                or f['kind'] == 'seismic-3d' and f.get('form', native_form.FORM) != native_form.FORM:  # E140 s3 C5: a cube's form is int8 or none
             refuse(NOT_THE_EXPORT % out)
         p = folder / 'files' / d['path']
         if not p.is_file() or p.is_symlink(): refuse(DERIVED_MISSING % (d['path'], out))
         if starter_archive.digest_of(p) != (d['sha256'], d['bytes']): refuse(DERIVED_CHANGED % (d['path'], out))
         derived.append({**d, 'kind': f['kind'], 'object': f.get('object'), 'local': p,
-                        **({'of': f.get('of')} if f['kind'] == 'seismic-2d' else {})})  # E137 s1: the dataset's line count (D84's M)
+                        **({'of': f.get('of')} if f['kind'] == 'seismic-2d' else {}),  # E137 s1: the dataset's line count (D84's M)
+                        **({'form': '2d', 'line': f.get('line')} if f.get('form') == '2d' else {}),  # E137 s6b D-3
+                        **({'form': native_form.FORM, 'undefined_code': f['undefined_code']} if starter_archive.native(f) else {})})  # E140 s3 C5 (D-S)
     return derived
+
+
+def landing_profile(d):
+    """E140 s3 C5 (D-S): the profile a derived file lands as, per file: an 8-bit cube as segy/2, else its kind's."""
+    from . import starter_archive
+    return NATIVE_PROFILE if starter_archive.native(d) else EXPORT_PROFILE[d['kind']]
+
+
+def declared_of(declared, d):
+    """E140 s3 C5 (D-S): DECLARED (`declarations`' table) for the derived file D: its kind's, and for an 8-bit cube the
+    code for no value its export states (`-128` or `none`; segy/2 refuses a cube that does not say)."""
+    from . import starter_archive
+    own = dict(declared[d['kind']])
+    if starter_archive.native(d): own['undefined_code'] = UNDEFINED_DECLARED[d['undefined_code']]
+    return own
 
 
 def declarations(survey, kinds):
@@ -553,6 +575,7 @@ def declarations(survey, kinds):
             'wellbore-paths': {'crs': crs, 'xy_unit': xy, 'depth_unit': known(survey.get('depth_unit')), 'tvdss_datum': 'MSL',
                                'md_reference': OPENDTECT_MD_REFERENCE},
             'wellbore-logs': {},
+            'tops': {'depth_unit': known(survey.get('depth_unit')), 'depth_basis': 'same-as-log', 'depth_datum': OPENDTECT_MD_REFERENCE},  # E137 s4 D-5
             'faults': {'crs': crs, 'xy_unit': xy, 'z_meaning': 'time', 'z_unit': 's', 'positive': 'down', 'vertical_datum': 'unknown'}}  # E137 s2 D-5
 
 
@@ -673,10 +696,21 @@ def first_station(path, name):
 
 def expected(derived):
     """E137 s3 D-8 (F3): `_expected`, and for a pack with time-depth models their pairs (`time_depth`, path order) last;
-    a pack without models keeps every byte."""
+    a pack without models keeps every byte. E137 s4 D-9: and for a pack with well tops their names and depths (`tops`,
+    path order) after them; a pack without tops keeps every byte."""
     doc = _expected(derived)
-    models = time_depth_expected(derived)
-    return {**doc, 'time_depth': models} if models else doc
+    models, tops = time_depth_expected(derived), tops_expected(derived)
+    return {**doc, **({'time_depth': models} if models else {}), **({'tops': tops} if tops else {})}
+
+
+def tops_expected(derived):
+    """E137 s4 D-9: [{well, path, tops: [[name, md], ...]}] of the pack's tops files in path order, the tops in file
+    order, read from the written well-tops-csv/1 text (header `name,md`; the exporter refuses a name with a comma)."""
+    out = []
+    for d in sorted((d for d in derived if d['kind'] == 'tops'), key=lambda d: d['path']):
+        rows = Path(d['local']).read_text(encoding='utf-8').splitlines()[1:]
+        out.append({'well': d['object'], 'path': d['path'], 'tops': [[name, float(md)] for name, md in (row.split(',') for row in rows)]})
+    return out
 
 
 def time_depth_expected(derived):
@@ -710,7 +744,8 @@ def _expected(derived):
     def middle(axes):
         i0, i1, step = axes['inline']
         return i0 + step * (((i1 - i0) // step) // 2)
-    axes, headers, inline, line = starter_archive.cube_inline(cube['local'], cube['path'], middle)
+    axes, headers, inline, line = starter_archive.cube_inline(cube['local'], cube['path'], middle,
+                                                              *([cube['undefined_code']] if starter_archive.native(cube) else []))  # E140 s3 C5: codes decoded
     lines = affine(headers)
     c0, c1, cstep = axes['crossline']
     count = axes['z'][2]
@@ -760,11 +795,15 @@ NOTEBOOK = Path(__file__).resolve().parent / 'templates' / 'starter-pack'  # the
 ORACLE_PYTHON = {'compared': ['nothing yet: the pack notebook has not been run on this pack (ophiolite starter python)'], 'values': 0, 'differences': 0, 'seed': 0}
 PY_FAULTS_LINE = 'faults: not drawn; the pack notebook does not read fault sticks'  # E137 s2 D-8: last, for a pack with faults
 PY_TD_LINE = 'Time-depth model %s: %d pairs checked'  # E137 s3 D-8 (V): one per model the notebook compared, before PY_FAULTS_LINE
+PY_TOPS_LINE = 'Tops %s: %d tops checked'  # E137 s4 D-9: one per well's tops the notebook compared, after PY_TD_LINE
+PY_H2D_LINE = '2D horizons: not read; the pack notebook does not read 2D horizons'  # E137 s6b D-7: last, for a pack with 2D horizons
 
 
-def python_waiting(faults):
-    """The Python oracle before the notebook runs: ORACLE_PYTHON, with PY_FAULTS_LINE last for a pack with faults."""
-    return {**ORACLE_PYTHON, 'compared': [*ORACLE_PYTHON['compared'], PY_FAULTS_LINE]} if faults else ORACLE_PYTHON
+def python_waiting(faults, h2d=False):
+    """The Python oracle before the notebook runs: ORACLE_PYTHON, with PY_FAULTS_LINE last for a pack with faults (E137
+    s6b D-7: and PY_H2D_LINE after it for a pack with 2D horizons)."""
+    tail = [*([PY_FAULTS_LINE] if faults else []), *([PY_H2D_LINE] if h2d else [])]
+    return {**ORACLE_PYTHON, 'compared': [*ORACLE_PYTHON['compared'], *tail]} if tail else ORACLE_PYTHON
 SHARED = 'artefact %s is listed by two targets with different bytes or keys; a derived file is one artefact in every target.'
 SAME_BYTES = 'artefacts %s and %s of two targets have the same bytes; a file has one path in a pack.'
 
@@ -792,10 +831,11 @@ def across(targets, derived, tail):
 
 
 def artefact_digest(out, path):
-    """(sha256, bytes) of OUT/files/PATH read in blocks (a derived artefact may be a large cube); None when unreadable."""
-    from . import starter_archive
-    try: return starter_archive.digest_of(Path(out) / 'files' / path)
-    except OSError: return None
+    """(sha256, bytes) of OUT/files/PATH read in blocks (a derived artefact may be a large cube); None when unreadable,
+    a link or under one (E147 s3 D4: the reader bundle check uses)."""
+    from .bundle import DescriptorRefused
+    try: return guarded_digest(out, 'files/' + path)
+    except (OSError, DescriptorRefused): return None
 
 
 def copied(source, path, digest, size):
@@ -822,24 +862,27 @@ CUBE_LINE = 'cube: false; wells and logs only (rips %s has no SEG-Y import)' % R
 LINES_LINE = 'lines: not placed; rips %s has no seismic API' % RIPS_RELEASE  # E137 s1 D-4 (R1-15, R1-18): beside CUBE_LINE for a pack with lines
 FAULTS_LINE = 'faults: not placed; rips %s has no fault-stick import' % RIPS_RELEASE  # E137 s2 D-8: after LINES_LINE for a pack with faults
 TD_LINE = 'Time-depth models: not placed; this starter does not import time-depth models into ResInsight'  # E137 s3 D-8 (R2-12): after FAULTS_LINE
+TOPS_LINE = 'Well tops: not placed; this starter does not import well tops into ResInsight'  # E137 s4 D-9: after TD_LINE
+H2D_RI_LINE = '2D horizons: not placed; this starter does not import 2D horizons into ResInsight'  # E137 s6b D-7: after TOPS_LINE
 ORACLE_RESINSIGHT = {'compared': [CUBE_LINE, 'nothing yet: the pack has not been imported into ResInsight and compared (ophiolite starter resinsight)'],
                      'values': 0, 'differences': 0, 'seed': 0}
 NO_PATHS = 'The ResInsight target reads well paths; this export has none.'
 RI_LINES = "\nThe pack's 2D lines are not imported: ResInsight cannot import seismic lines in this version."  # E137 s1 R1-19
 RI_FAULTS = "\nThis version of ResInsight cannot import fault sticks; the pack's faults are not imported."  # E137 s2 D-8
 RI_TD = "\nThis starter does not import time-depth models into ResInsight; the pack's time-depth models are not imported."  # E137 s3 D-8
+RI_TOPS = "\nThis starter does not import well tops into ResInsight; the pack's well tops are not imported."  # E137 s4 D-9
 NO_CONNECTORS = ('Run this import with a Python that has the Connectors package and its resinsight extra installed '
                  '(pip install "arraybridge-connectors[resinsight]"); nothing was imported.')
 RI_CHANGED = '%s is not the file this pack names: its SHA-256 differs; nothing was imported.'
 
 
-def resinsight_import(defn, files, lines=False, faults=False, models=False):
+def resinsight_import(defn, files, lines=False, faults=False, models=False, tops=False):
     """D4's launcher (`targets/resinsight/import.py`), text like `opendtect_import`: the pack's id and its well files
     {path: {sha256, bytes, kind, object}}. It parses its arguments, checks every embedded file's digest before anything
     else (R2-8: no `rips` import before), then hands the import to `asset_connectors.resinsight_starter.run` (R2-5), which
     owns the ResInsight process, the project folder and every `rips` call. The SDK never imports `rips` or the module.
     E137 s1 D-4 (R1-19): for a pack with LINES the text says they are not imported; other packs keep their bytes. E137 s2
-    D-8: so for a pack with FAULTS; E137 s3 D-8: and with time-depth MODELS."""
+    D-8: so for a pack with FAULTS; E137 s3 D-8: and with time-depth MODELS; E137 s4 D-9: and with well TOPS."""
     return ('"""Starter pack %s: the ResInsight import.\n\nReads the pack\'s well paths (wells/<well>-positions.csv) and logs '
             '(wells/<well>.las) and saves them as a new ResInsight\nproject in PROJECT_OUT. The seismic cube is not imported: '
             'ResInsight\'s Python API cannot import SEG-Y in this version.%s\nRun it with a Python that has the Connectors package '
@@ -871,7 +914,7 @@ def resinsight_import(defn, files, lines=False, faults=False, models=False):
             '    except resinsight_starter.Refused as refusal:\n        print(str(refusal), file=sys.stderr)\n        return 2\n'
             '    print(json.dumps(outcome, sort_keys=True) if args.json else resinsight_starter.said(outcome))\n    return 0\n\n\n'
             "if __name__ == '__main__':\n    sys.exit(main(sys.argv[1:]))\n"
-            % (defn['id'], (RI_LINES if lines else '') + (RI_FAULTS if faults else '') + (RI_TD if models else ''), RI_RELEASE, defn['id'], files, RI_CHANGED, NO_CONNECTORS)).encode('utf-8')
+            % (defn['id'], (RI_LINES if lines else '') + (RI_FAULTS if faults else '') + (RI_TD if models else '') + (RI_TOPS if tops else ''), RI_RELEASE, defn['id'], files, RI_CHANGED, NO_CONNECTORS)).encode('utf-8')
 
 
 def resinsight_files(derived):
@@ -898,19 +941,20 @@ def archived(definition_path, out, catalogue, verification, custody):
     wells = resinsight_files(derived) if 'resinsight' in defn['targets'] else None  # E129 (d) D3: refused before anything else
     declared = declarations(report['survey'], {d['kind'] for d in derived})
     def own(d):  # E137 s3 D-3: a time-depth model is declared by its own well's decisions, every other kind per kind
-        return starter_archive.time_depth_declared(defn['values'], d['object']) if d['kind'] == 'time-depth' else dict(declared[d['kind']])
+        return starter_archive.time_depth_declared(defn['values'], d['object']) if d['kind'] == 'time-depth' else declared_of(declared, d)
     landings, lines = [], {}  # E137 s1 D-4 (D84): per dataset, how many of its lines the pack holds
     for d in derived:
         if d['kind'] == 'seismic-2d': lines[d['object'].partition('/')[0]] = lines.get(d['object'].partition('/')[0], 0) + 1
     for d in derived:
         ds = d['object'].partition('/')[0] if d['kind'] == 'seismic-2d' else None
         # B5: a horizon's nodes, compared at build with the deployment's M (E139); over it is recorded, never uploaded
-        landings.append({'name': d['path'], 'path': d['local'], 'sha256': d['sha256'], 'profile': EXPORT_PROFILE[d['kind']], 'declared': own(d),
+        landings.append({'name': d['path'], 'path': d['local'], 'sha256': d['sha256'], 'profile': landing_profile(d), 'declared': own(d),
                          'kind': d['kind'], 'from': d['from'], **({'nodes': nodes(d['local'])} if d['kind'] == 'horizons' else {}),
                          **({'lines': {'field': LINES_OF % ds, 'unit': None, 'value': '%d of %d' % (lines[ds], d['of'])}} if ds else {})})
     sources = licences(defn, evidence)
     lic = computed_licence(sources)
-    placed = {d['path']: {'kind': d['kind'], 'object': d['object'], 'declared': own(d)} for d in derived}
+    placed = {d['path']: {'kind': d['kind'], 'object': d['object'], **({'form': d['form'], 'line': d['line']} if d.get('form') == '2d' else {}),  # E137 s6b; E140 s3 C5: an 8-bit cube is apart from the 2D pairing
+                          'declared': own(d)} for d in derived}
     not_read = [{k: n.get(k) for k in ('kind', 'name', 'reason')} for n in report.get('not_read') or [] if isinstance(n, dict)]
     files = {OPENDTECT_IMPORT: opendtect_import(defn, placed, not_read), ATTRIBUTION: attribution(defn, sources, evidence)}
     # E129 sc C3b: each derived file is also an artefact, at its one path (derived[] path = files/ path), which import.py reads
@@ -921,20 +965,22 @@ def archived(definition_path, out, catalogue, verification, custody):
     if 'python' in defn['targets']:  # E129 (e) D4: the pack notebook, its expected values and the derived files it reads
         made = python_files(derived)
         reads = ({made[1]['cube']} - {None}) | {w['positions'] for w in made[1]['wells']} | {w['las'] for w in made[1]['wells'] if w['las']} \
-            | {line['path'] for line in made[1].get('lines', [])} | {m['path'] for m in made[1].get('time_depth', [])}  # E137 s1 D-4: lines, no cube; E137 s3 R2-3: models
+            | {line['path'] for line in made[1].get('lines', [])} | {m['path'] for m in made[1].get('time_depth', [])} \
+            | {t['path'] for t in made[1].get('tops', [])}  # E137 s1 D-4: lines, no cube; E137 s3 R2-3: models; E137 s4: tops
         own = [{'path': p, 'sha256': sha256(raw), 'bytes': len(raw)} for p, raw in made[0].items()] + [
             {'path': d['path'], 'sha256': d['sha256'], 'bytes': d['bytes']} for d in derived if d['path'] in reads]
         distinct(own, defn['inputs'], ' Nothing was written.', derived=derived)
         targets.append({'application': 'python', 'version': platform.python_version(), 'artefacts': own, 'import': PY_IMPORT,
-                        'oracle': python_waiting(any(d['kind'] == 'faults' for d in derived))})
+                        'oracle': python_waiting(any(d['kind'] == 'faults' for d in derived), any(d.get('form') == '2d' for d in derived))})
         files.update(made[0])
     if wells is not None:  # E129 (d) D2-D4: the launcher and the well files it reads, at their one path; wells and logs only
-        lined, faulted, modelled = (any(d['kind'] == k for d in derived) for k in ('seismic-2d', 'faults', 'time-depth'))
-        launcher = resinsight_import(defn, wells, lined, faulted, modelled)
+        lined, faulted, modelled, topped = (any(d['kind'] == k for d in derived) for k in ('seismic-2d', 'faults', 'time-depth', 'tops'))
+        h2d = any(d.get('form') == '2d' for d in derived)  # E137 s6b D-7
+        launcher = resinsight_import(defn, wells, lined, faulted, modelled, topped)
         own = [{'path': RI_IMPORT, 'sha256': sha256(launcher), 'bytes': len(launcher)}] + [
             {'path': d['path'], 'sha256': d['sha256'], 'bytes': d['bytes']} for d in derived if d['path'] in wells]
         distinct(own, defn['inputs'], ' Nothing was written.', derived=derived)
-        targets.append({'application': 'resinsight', 'version': RI_VERSION, 'artefacts': own, 'import': RI_IMPORT, 'oracle': resinsight_waiting(lined, faulted, modelled)})
+        targets.append({'application': 'resinsight', 'version': RI_VERSION, 'artefacts': own, 'import': RI_IMPORT, 'oracle': resinsight_waiting(lined, faulted, modelled, topped, h2d)})
         files[RI_IMPORT] = launcher
     across(targets, derived, ' Nothing was written.')
     # rule (e) subjects are contents objects or `pack`: the archive's one decision (its log step) is the pack's
@@ -1112,9 +1158,117 @@ def finalise(out, custody):
         keys.append(d['key'])
     keyed = {a['path']: key for a, key in zip(artefacts, keys)}
     for a in every: a['key'] = keyed[a['path']]  # every occurrence of a shared path carries its one key
-    raw = dumped(doc)
-    if raw != before: replaced(out / 'starter.json', raw)
+    writes = list(pack_descriptors(doc, evidence.get('record'), UNCHANGED).items()) + [('starter.json', dumped(doc))]
+    for name, raw in writes:  # E147 s3 D3: everything derived and checked above; the descriptors first, starter.json last
+        try: now = (out / name).read_bytes() if not (out / name).is_symlink() else None
+        except OSError: now = None
+        if raw != now: replaced(out / name, raw)
     return doc
+
+
+# --- the pack's descriptors (E147 s3) ----------------------------------------------------------------------------------
+
+DESCRIBED = 'Starter pack verified: %d artefact%s; its descriptors agree with starter.json.'
+PACK_JSON = ('landing.json', 'evidence.json', 'starter.json')
+PACK_SENTENCES = {'file-missing': '%s is missing', 'file-link': '%s is a link or lies under one', 'file-too-large': '%s exceeds the supported size',
+                  'file-digest': '%s is not the file starter.json names: its SHA-256 or size differs', 'pack-unreadable': '%s is not readable JSON',
+                  'pack-evidence': 'evidence.json is not the evidence this pack was built from: its SHA-256 differs',
+                  'pack-record': 'starter.json names record %s and its evidence.json record %s', 'pack-shape': '%s',
+                  'pack-unfinalised': '%s carries no artefact keys yet: run ophiolite starter finalise'}
+
+
+def pack_descriptors(doc, record, tail):
+    """{name: bytes} of the pack's three descriptors (D1: the contract's starter_documents from starter.json and the
+    catalogue RECORD of its evidence), checked by verify_starter before anything is written (D3)."""
+    from .bundle import _descriptors_contract
+    contract = _descriptors_contract()
+    try:
+        raw = {name: contract.serialize(document) for name, document in contract.starter_documents(doc, record).items()}
+        contract.verify_starter(doc, record, raw)
+    except contract.DescriptorError as error:
+        words = contract.sentence(error)
+        refuse(words[0].upper() + words[1:] + '.' + tail)
+    return raw
+
+
+def _pack_refused(code, file, json_path=None, *values):
+    from .bundle import DescriptorRefused
+    words = PACK_SENTENCES[code]
+    return DescriptorRefused(code, file, json_path, words % (values or (file,)) if '%' in words else words)
+
+
+def guarded(out, path):
+    """OUT/PATH when it is a regular file with no link in any component under OUT (D4), else DescriptorRefused naming
+    PATH (file-missing, file-link)."""
+    place = Path(out)
+    for part in Path(path).parts:
+        place = place / part
+        if place.is_symlink(): raise _pack_refused('file-link', path)
+    if not place.exists(): raise _pack_refused('file-missing', path)
+    if not place.is_file(): raise _pack_refused('file-link', path)
+    return place
+
+
+def guarded_bytes(out, path, most):
+    """The bytes of a guarded file of at most MOST bytes, read without following a link."""
+    place = guarded(out, path)
+    if place.stat().st_size > most: raise _pack_refused('file-too-large', path)
+    fd = os.open(place, os.O_RDONLY | getattr(os, 'O_NOFOLLOW', 0))
+    with os.fdopen(fd, 'rb') as f: return f.read(most + 1)
+
+
+def guarded_digest(out, path):
+    """(sha256, bytes) of a guarded file, read in blocks (an artefact may be a large cube)."""
+    fd = os.open(guarded(out, path), os.O_RDONLY | getattr(os, 'O_NOFOLLOW', 0))
+    h, n = hashlib.sha256(), 0
+    with os.fdopen(fd, 'rb') as f:
+        for block in iter(lambda: f.read(1 << 20), b''): h.update(block); n += len(block)
+    return h.hexdigest(), n
+
+
+def check(out):
+    """`ophiolite exchange bundle check OUT` on a starter pack folder (E147 s3 D4, R-3): the pack's own documents read under the
+    reader's guards and bound to each other as finalise binds them, every artefact hashed again, then the three
+    descriptors compared with the ones starter.json and the evidence give. Raises DescriptorRefused for the first
+    problem; returns {'id', 'artefacts'}."""
+    from .bundle import MAX_FILE_BYTES, _descriptors_contract, DescriptorRefused
+    out = Path(out)
+    docs = {}
+    for name in PACK_JSON:
+        raw = guarded_bytes(out, name, MAX_FILE_BYTES)
+        try: docs[name] = json.loads(raw)
+        except ValueError: raise _pack_refused('pack-unreadable', name) from None
+        if name == 'evidence.json': evidence_raw = raw
+    landing, evidence, doc = docs['landing.json'], docs['evidence.json'], docs['starter.json']
+    if not isinstance(landing, dict) or sha256(evidence_raw) != (landing.get('bindings') or {}).get('evidence.json'):
+        raise _pack_refused('pack-evidence', 'evidence.json')
+    record = evidence.get('record') if isinstance(evidence, dict) else None
+    rid = record.get('id') if isinstance(record, dict) else None
+    if not isinstance(doc, dict) or doc.get('record_id') != rid:
+        raise _pack_refused('pack-record', 'starter.json', '$.record_id', doc.get('record_id') if isinstance(doc, dict) else None, rid)
+    try:
+        shaped(doc)
+        across(doc['targets'], doc.get('derived') or [], '')
+        for t in doc['targets']: distinct(t['artefacts'], doc['inputs'], '', derived=doc.get('derived') or [])
+    except Refused as refusal:
+        raise _pack_refused('pack-shape', 'starter.json', None, str(refusal).replace(UNCHANGED, '').rstrip('.')) from None
+    first = {}
+    for a in (a for t in doc['targets'] for a in t['artefacts']): first.setdefault(a['path'], a)
+    for a in first.values():
+        path = 'files/' + a['path']
+        if guarded_digest(out, path) != (a['sha256'], a['bytes']): raise _pack_refused('file-digest', path)
+    contract = _descriptors_contract()
+    raw = {}
+    for name in contract.NAMES:
+        try: raw[name] = guarded_bytes(out, name, MAX_FILE_BYTES)
+        except DescriptorRefused as refusal:
+            if refusal.code == 'file-missing': raise
+            raise DescriptorRefused('descriptor-unreadable', name, None, contract.sentence(contract.DescriptorError('descriptor-unreadable', name))) from None
+    try: contract.verify_starter(doc, record, raw)
+    except contract.DescriptorError as error: raise DescriptorRefused(error.code, error.file, error.path, contract.sentence(error)) from None
+    if not all('key' in a for a in first.values()):  # D3: finalise writes starter.json last, so a pack it did not finish has no keys
+        raise _pack_refused('pack-unfinalised', 'starter.json')
+    return {'id': doc['id'], 'artefacts': len(first)}
 
 
 def fidelity_of(doc, out):
@@ -1226,15 +1380,29 @@ def bounded(line):
 def label(e):
     """'seismic cube Syn2', 'horizon Top', 'log SYN-C GR', 'well path SYN-C' (V1)."""
     if e['kind'] == 'wellbore-logs' and e.get('curve'): return 'log %s %s' % (e.get('well') or e['object'], e['curve'])
+    if e['kind'] == 'tops': return 'well tops of %s' % e['object']  # E137 s4: a well's tops are one object (the connector's label)
+    if e['kind'] == 'horizons' and e.get('line') is not None: return '2D horizon %s line %s' % (e['object'], e['line'])  # E137 s6b
     return '%s %s' % (starter_kinds.label(e['kind']), e['object'])
+
+
+NEITHER = '; neither the survey nor the pack states a coordinate system, so the coordinates are compared as written'  # E137 s6b D-6
 
 
 def _compared_line(e, verb):
     landed = 'item %s at %s' % (e['item'], e['version']) if e.get('item') else 'not landed in Ophiolite'
     if e['kind'] == 'faults':  # E137 s2 D-7 (c): a fault the person imported, read back
         big = e['largest']
-        return '%s files/%s (%s) %s OpendTect as “%s”: %d values, %d differences (largest x %g m, y %g m, z %g s)' % (
-            starter_kinds.label(e['kind']), e['file'], landed, 'imported by you into' if verb == 'into' else verb, e['object'], e['values'], e['differences'], big['x'], big['y'], big['z'])
+        return '%s files/%s (%s) %s OpendTect as “%s”: %d values, %d differences (largest x %g m, y %g m, z %g s)%s' % (
+            starter_kinds.label(e['kind']), e['file'], landed, 'imported by you into' if verb == 'into' else verb, e['object'], e['values'], e['differences'], big['x'], big['y'], big['z'],
+            NEITHER if e.get('crs') == starter_kinds.NONE_STATED else '')  # E137 s6b D-6
+    if e['kind'] == 'horizons' and e.get('form') == '2d':  # E137 s6b D-5: a 2D horizon line the person imported, read back
+        return '2D horizon line “%s” files/%s (%s) %s OpendTect as “%s”: %d values, %d differences (largest x/y %g m, z %g ms)%s' % (
+            e['line'], e['file'], landed, 'imported by you into' if verb == 'into' else verb, e['object'], e['values'], e['differences'],
+            e['max_xy'], e['max_z'], NEITHER if e.get('crs') == starter_kinds.NONE_STATED else '')
+    if e['kind'] == 'tops':  # E137 s4 D-7a: the person's import of a well's tops, read back as its markers
+        return '%s files/%s (%s) %s OpendTect as “%s”: %d tops, %d differences (%d missing, %d extra)' % (
+            starter_kinds.BY_KEY['tops'].words, e['file'], landed, 'imported by you into' if verb == 'into' else verb, e['object'], e['values'],
+            e['differences'], e['missing'], e['extra'])
     if e['kind'] != 'wellbore-logs':
         return '%s %s (%s) %s OpendTect as “%s”: %d values, %d differences, %d moved' % (
             starter_kinds.label(e['kind']), e['file'], landed, verb, e['object'], e['values'], e['differences'], len(e['moves']))
@@ -1291,13 +1459,25 @@ def _result_shaped(result):
             and rows(result['not_placed'], at_least={'kind', 'object', 'reason'}))
 
 
+def _refusal_of(stdout):
+    """E137 s6a D-3: (sentence, details) of the import's refusal line, the last line of STDOUT when it is exactly
+    {"refused": str, "details": object}; None otherwise (an older pack's import.py prints the sentence only)."""
+    try: said = json.loads((stdout.strip().splitlines() or [''])[-1])
+    except ValueError: return None
+    if not (isinstance(said, dict) and set(said) == {'refused', 'details'} and isinstance(said['refused'], str) and isinstance(said['details'], dict)): return None
+    return said['refused'], said['details']
+
+
 def _connector(python, argv, timeout):
     """One run of the pack's import.py in the connector's interpreter: its JSON line, or the import's refusal."""
     try: done = subprocess.run([python] + argv, capture_output=True, text=True, timeout=timeout, stdin=subprocess.DEVNULL)
     except OSError: refuse(IMPORT_NOT_STARTED % python)
     except subprocess.TimeoutExpired: refuse(IMPORT_TIMEOUT % timeout)
     last = (done.stderr.strip().splitlines() or ['(nothing on stderr)'])[-1]
-    if done.returncode == 2: refuse(IMPORT_REFUSED % last)
+    if done.returncode == 2:
+        said = _refusal_of(done.stdout)
+        if said: raise Refused(IMPORT_REFUSED % said[0], details=said[1])
+        refuse(IMPORT_REFUSED % last)
     if done.returncode != 0: refuse(IMPORT_STOPPED % (done.returncode, last))
     try: return json.loads(done.stdout.strip().splitlines()[-1])
     except (IndexError, ValueError): refuse(IMPORT_STOPPED % (0, 'it printed no outcome'))
@@ -1411,12 +1591,13 @@ PY_RESULT_NOT_NAMED = ('files/%s is the result starter.json names, but the oracl
                        'folder.' % PY_RESULT) + UNCHANGED
 
 
-def python_oracle(result, faults=False):
+def python_oracle(result, faults=False, h2d=False):
     """The Python target's oracle from the notebook's result: what it read and drew, every value compared with
     expected.json (the notebook asserts each; a result it wrote with a difference is never accepted). E137 s2 D-8: for a
     pack with FAULTS, PY_FAULTS_LINE last. E137 s3 D-8: a result with `time_depth` (a pack with models) says each
-    model's pairs checked, two values per pair and one count per model."""
-    if not RESULT_KEYS <= set(result) or set(result) - RESULT_KEYS - {'lines', 'time_depth'} or result['differences'] != []: raise ValueError('not a passing result')
+    model's pairs checked, two values per pair and one count per model. E137 s4 D-9: a result with `tops` (a pack with
+    tops) says each well's tops checked, a name and a depth per top and one count per well, after the models."""
+    if not RESULT_KEYS <= set(result) or set(result) - RESULT_KEYS - {'lines', 'time_depth', 'tops'} or result['differences'] != []: raise ValueError('not a passing result')
     cube = result['inline'] is not None  # E137 s1 D-4: a pack of lines may hold no cube
     lines = ['inline %d: %d samples and the inline sum read with segyio' % (result['inline'], len(result['samples']))] if cube else []
     for w in result['wells']:
@@ -1430,12 +1611,13 @@ def python_oracle(result, faults=False):
     if 'line' in result['plotted']: lines.append('plotted: line %s, read back from the figure' % result['plotted']['line']['object'])
     values = (len(result['samples']) + 1 if cube else 0) + sum((2 if w['inline'] is not None else 0) + (3 if w['curves'] is not None else 0) for w in result['wells']) \
         + sum(4 * line['traces'] + 3 + len(line['samples']) + 2 for line in result.get('lines', [])) \
-        + sum(2 * m['pairs'] + 1 for m in result.get('time_depth', []))
+        + sum(2 * m['pairs'] + 1 for m in result.get('time_depth', [])) + sum(2 * t['tops'] + 1 for t in result.get('tops', []))
     lines += [PY_TD_LINE % (m['well'], m['pairs']) for m in result.get('time_depth', [])]
-    return {'compared': lines + ([PY_FAULTS_LINE] if faults else []), 'values': values, 'differences': 0, 'seed': 0}
+    lines += [PY_TOPS_LINE % (t['well'], t['tops']) for t in result.get('tops', [])]
+    return {'compared': lines + ([PY_FAULTS_LINE] if faults else []) + ([PY_H2D_LINE] if h2d else []), 'values': values, 'differences': 0, 'seed': 0}
 
 
-def _held_python(out, target, faults=False):
+def _held_python(out, target, faults=False, h2d=False):
     """D5 (R2-4) on a resume, as _held_result: a result starter.json names with its bytes must give starter.json's oracle;
     one not named, or named with other bytes, is replaced by this run's. Returns its bytes on disk, or None."""
     try: raw = (out / 'files' / PY_RESULT).read_bytes()
@@ -1446,7 +1628,7 @@ def _held_python(out, target, faults=False):
     if not isinstance(result, dict): refuse(PY_RESULT_UNREADABLE)
     named = next((a for a in target['artefacts'] if a['path'] == PY_RESULT), None)
     if named and (named['sha256'], named['bytes']) == (sha256(raw), len(raw)):
-        try: given = python_oracle(result, faults)
+        try: given = python_oracle(result, faults, h2d)
         except (KeyError, TypeError, ValueError): refuse(PY_RESULT_UNREADABLE)
         if target.get('oracle') != given: refuse(PY_RESULT_NOT_NAMED)
     return raw
@@ -1486,9 +1668,9 @@ def python(out, *, keep=None, timeout=PY_TIMEOUT):
     for a in target['artefacts']:
         if a['path'] == PY_RESULT: continue
         if artefact_digest(out, a['path']) != (a['sha256'], a['bytes']): refuse('artefact %s: the file in files/ is not the one starter.json names.' % a['path'] + UNCHANGED)
-    held_raw = _held_python(out, target, holds_faults(doc))
+    held_raw = _held_python(out, target, holds_faults(doc), holds_h2d(doc))
     result = _notebook(out, keep, timeout)
-    try: oracle = python_oracle(result, holds_faults(doc))
+    try: oracle = python_oracle(result, holds_faults(doc), holds_h2d(doc))
     except (KeyError, TypeError, ValueError): refuse(NOTEBOOK_FAILED % 'its open-a-starter-pack.json is not a passing result')
     raw = dumped(result)
     if raw != held_raw: replaced(out / 'files' / PY_RESULT, raw)  # the result first
@@ -1527,15 +1709,17 @@ def metres(v):
     return format(Decimal('%.3g' % v), 'f')
 
 
-def resinsight_waiting(lines, faults=False, models=False):
+def resinsight_waiting(lines, faults=False, models=False, tops=False, h2d=False):
     """The ResInsight oracle before a comparison: ORACLE_RESINSIGHT, with LINES_LINE after CUBE_LINE for a pack with lines
-    and FAULTS_LINE after them for a pack with faults (E137 s2 D-8), then TD_LINE for a pack with models (E137 s3)."""
-    if not (lines or faults or models): return ORACLE_RESINSIGHT
-    return {**ORACLE_RESINSIGHT, 'compared': [CUBE_LINE, *said_not_placed(lines, faults, models), *ORACLE_RESINSIGHT['compared'][1:]]}
+    and FAULTS_LINE after them for a pack with faults (E137 s2 D-8), then TD_LINE for a pack with models (E137 s3), then
+    TOPS_LINE for a pack with tops (E137 s4)."""
+    if not (lines or faults or models or tops or h2d): return ORACLE_RESINSIGHT
+    return {**ORACLE_RESINSIGHT, 'compared': [CUBE_LINE, *said_not_placed(lines, faults, models, tops, h2d), *ORACLE_RESINSIGHT['compared'][1:]]}
 
 
-def said_not_placed(lines, faults, models):
-    return [*([LINES_LINE] if lines else []), *([FAULTS_LINE] if faults else []), *([TD_LINE] if models else [])]
+def said_not_placed(lines, faults, models, tops=False, h2d=False):
+    return [*([LINES_LINE] if lines else []), *([FAULTS_LINE] if faults else []), *([TD_LINE] if models else []), *([TOPS_LINE] if tops else []),
+            *([H2D_RI_LINE] if h2d else [])]
 
 
 def holds_lines(doc, kind='seismic-2d'):
@@ -1543,6 +1727,11 @@ def holds_lines(doc, kind='seismic-2d'):
     from . import starter_archive
     folder = starter_archive.FOLDER[kind] + '/'
     return any(isinstance(d, dict) and str(d.get('path', '')).startswith(folder) for d in doc.get('derived') or [])
+
+
+def holds_h2d(doc):
+    """E137 s6b D-7: the pack document derives at least one line of a 2D horizon."""
+    return any(isinstance(d, dict) and str(d.get('path', '')).startswith(starter_kinds.H2D_FOLDER + '/') for d in doc.get('derived') or [])
 
 
 def holds_faults(doc):
@@ -1556,7 +1745,12 @@ def holds_time_depth(doc):
     return any(isinstance(d, dict) and str(d.get('path', '')).endswith('-time-depth.csv') for d in doc.get('derived') or [])
 
 
-def resinsight_oracle(result, lines=False, faults=False, models=False):
+def holds_tops(doc):
+    """E137 s4 D-9: the pack document derives at least one well tops file, known by its file's name form."""
+    return any(isinstance(d, dict) and str(d.get('path', '')).endswith('-tops.csv') for d in doc.get('derived') or [])
+
+
+def resinsight_oracle(result, lines=False, faults=False, models=False, tops=False, h2d=False):
     """D5: the ResInsight target's oracle from a passing comparison result (no difference, read back again after the
     project was reopened); its first line is D2's. Values: four per station (part a), three coordinates per sample read
     back (part b), one per sampled log value."""
@@ -1565,7 +1759,7 @@ def resinsight_oracle(result, lines=False, faults=False, models=False):
         raise ValueError('not a passing result')
     wells, tol = result['wells'], result['tolerance_m']
     logs = sum(len(w['logs']) for w in wells)
-    said = [CUBE_LINE, *said_not_placed(lines, faults, models),
+    said = [CUBE_LINE, *said_not_placed(lines, faults, models, tops, h2d),
              "well paths: %d read back at ResInsight's 1 m samples, within x %s m, y %s m, z %s m of the pack's stations interpolated in md"
              % (len(wells), metres(tol['x']), metres(tol['y']), metres(tol['z'])),
              'stations: the %d of the positions files written to the .dev files ResInsight read, each as written; first and last read back '
@@ -1579,7 +1773,7 @@ def resinsight_oracle(result, lines=False, faults=False, models=False):
     return {'compared': said, 'values': values, 'differences': 0, 'seed': 0}
 
 
-def _held_resinsight(out, target, lines=False, faults=False, models=False):
+def _held_resinsight(out, target, lines=False, faults=False, models=False, tops=False, h2d=False):
     """D6 on a resume, as _held_result: a result starter.json names with its bytes must give starter.json's oracle; one
     not named, or named with other bytes (a run stopped between the two writes), is replaced by this run's."""
     try: raw = (out / 'files' / RI_RESULT).read_bytes()
@@ -1590,7 +1784,7 @@ def _held_resinsight(out, target, lines=False, faults=False, models=False):
     if not isinstance(result, dict) or result.get('format') != RI_RESULT_FORMAT: refuse(RI_RESULT_UNREADABLE)
     named = next((a for a in target['artefacts'] if a['path'] == RI_RESULT), None)
     if named and (named['sha256'], named['bytes']) == (sha256(raw), len(raw)):
-        try: given = resinsight_oracle(result, lines, faults, models)
+        try: given = resinsight_oracle(result, lines, faults, models, tops, h2d)
         except (KeyError, TypeError, ValueError): refuse(RI_RESULT_UNREADABLE)
         if target.get('oracle') != given: refuse(RI_RESULT_NOT_NAMED)
     return raw
@@ -1629,7 +1823,7 @@ def resinsight(out, *, port=None, executable=None, python=None, timeout=RI_TIMEO
     for a in target['artefacts']:
         if a['path'] == RI_RESULT: continue
         if artefact_digest(out, a['path']) != (a['sha256'], a['bytes']): refuse('artefact %s: the file in files/ is not the one starter.json names.' % a['path'] + UNCHANGED)
-    held_raw = _held_resinsight(out, target, holds_lines(doc), holds_faults(doc), holds_time_depth(doc))
+    held_raw = _held_resinsight(out, target, holds_lines(doc), holds_faults(doc), holds_time_depth(doc), holds_tops(doc), holds_h2d(doc))
     server = ['--port', str(int(port))] if port is not None else ['--resinsight', str(executable)] if executable else []
     pack = str(out.resolve())
     with tempfile.TemporaryDirectory(prefix='starter-resinsight-') as temporary:
@@ -1640,7 +1834,7 @@ def resinsight(out, *, port=None, executable=None, python=None, timeout=RI_TIMEO
     except (KeyError, TypeError): refuse(RI_STOPPED % (0, 'the comparison printed no result'))
     if found or not isinstance(result, dict) or result.get('differences') != 0:
         refuse(RI_DIFFERS % (len(found) or (result.get('differences') if isinstance(result, dict) else 0) or 0, found[0] if found else 'none named'))
-    try: oracle = resinsight_oracle(result, holds_lines(doc), holds_faults(doc), holds_time_depth(doc))
+    try: oracle = resinsight_oracle(result, holds_lines(doc), holds_faults(doc), holds_time_depth(doc), holds_tops(doc), holds_h2d(doc))
     except (KeyError, TypeError, ValueError): refuse(RI_STOPPED % (0, 'the comparison printed no passing result'))
     raw = (json.dumps(result, indent=2, sort_keys=True) + '\n').encode('utf-8')  # D5: JSON with sorted keys
     if raw != held_raw: replaced(out / 'files' / RI_RESULT, raw)  # the result first

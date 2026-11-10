@@ -92,6 +92,8 @@ def asset(value):
     recipe = 'recipe_schema' in profiles.get(value['profile'], {})  # E23a: read through an import recipe
     packaged = profiles.get(value['profile'], {}).get('package') == 'without-recipe'  # E56: a Shapefile read from its members
     kept = value['interpretation'].get('parsing_policy') == 'table-file/1'  # E58b: a kept table, the original with its table-interpretation.json
+    native = value['scientific'].get('type') == 'seismic-volume' and value['scientific'].get('format_code') == 8  # E140 s0: an 8-bit cube
+    require(native == (value['profile'] == 'segy/2'), 'An 8-bit seismic cube is described through profile segy/2, and only it')
     require(kept == (value['scientific'].get('type') == 'table'), 'Scientific context and interpretation disagree')
     require((recipe or packaged or kept) == (value.get('package') is not None), 'A package is present exactly when the interpretation is recipe- or package-based')
     require(packaged == (value['interpretation'].get('parsing_policy') == 'package-strict/1'), 'Interpretation is not the one this profile declares')
@@ -108,7 +110,8 @@ def asset(value):
                    'well-location': 'well-location/1', 'time-depth': 'time-depth/1', 'feature-set': 'feature-set/1',
                    'well-path': 'well-path/1', 'well-set': 'well-set/1',
                    'well-residual': 'well-residual/1', 'seismic-line': 'seismic-line/1'}  # E53; E74b: a position file or a corrected position; E56; E125 s3a; E119a; E119b; E137 s1
-        require(value['interpretation'].get('mapping') == mapping.get(value['scientific']['type']), 'Scientific context and interpretation disagree')
+        if not native:  # E140 s0: an 8-bit cube's mapping is the one its normalized profile declares (checked below, as the gateway)
+            require(value['interpretation'].get('mapping') == mapping.get(value['scientific']['type']), 'Scientific context and interpretation disagree')
     else:
         context(value['scientific'])
         require(value.get('relationships') is None, 'Relationships belong to typed uploads only')
@@ -207,7 +210,10 @@ def manifest(value, raw, normalized):
     if m['schema'] in ('ophiolite.revision-manifest/3', 'ophiolite.revision-manifest/4'):  # E106 /4: a derivation/2 record, digested the same way
         derivation_record(m)
         require(_sha_utf8({**body, 'schema': 'ophiolite.revision-manifest/2'}) == m['digest_v2'], 'The revision manifest /2 view digest does not match its contents')
-        body['derivation_record'] = m['derivation_record']  # E94 /3: the record of how it was made is digested too
+        record = m['derivation_record']; procedure = record.get('procedure')
+        if procedure is not None and procedure.get('verification', 0) is None:  # E165 s2: an absent block is not served, so not digested
+            record = {**record, 'procedure': {k: v for k, v in procedure.items() if k != 'verification'}}
+        body['derivation_record'] = record  # E94 /3: the record of how it was made is digested too
         require(_sha_utf8(body) == m['digest'], 'The revision manifest digest does not match its contents')
         return
     require(_sha(_canonical(body)) == m['digest'], 'The revision manifest digest does not match its contents')
@@ -290,7 +296,7 @@ def typed_payload(value):
         seismic_context(c)
         il = c['inline']
         require([k['inline'] for k in value['chunks']] == line_numbers(il), 'Chunks do not follow the inline numbers')
-        require(all(k['bytes'] == c['crossline']['count'] * c['samples'] * 4 for k in value['chunks']), 'A chunk has the wrong size')
+        require(all(k['bytes'] == c['crossline']['count'] * c['samples'] * sample_width(c) for k in value['chunks']), 'A chunk has the wrong size')
         require(value['decisions'] == c['fidelity']['decisions'], 'Decisions disagree with the fidelity report')
     elif kind == 'wavelet':  # E53: as the server's payload model states them
         require((c['kind'] == 'ricker') == (c['frequency_hz'] is not None) and (c['kind'] == 'ormsby') == (c['corners_hz'] is not None), 'The wavelet kind and its declared frequencies disagree')
@@ -440,8 +446,13 @@ def seismic_context(c):
     """E16: a volume's grid, trace length and line ranges agree."""
     for axis in ('inline', 'crossline'):
         line = c[axis]; require(line['first'] + (line['count'] - 1) * line['step'] == line['last'], 'Line range, step and count disagree')
-    require(c['inline']['count'] * c['crossline']['count'] == c['traces'] and c['trace_bytes'] == 240 + 4 * c['samples'], 'Trace count, grid and trace length disagree')
+    require(c['inline']['count'] * c['crossline']['count'] == c['traces'] and c['trace_bytes'] == 240 + sample_width(c) * c['samples'], 'Trace count, grid and trace length disagree')
     require(bool(c['fidelity']['decisions']), 'A seismic volume records its header decisions')
+
+
+def sample_width(c):
+    """E140 s0: bytes per sample, one for an 8-bit cube (format 8), four for IBM or IEEE floats."""
+    return 1 if c['format_code'] == 8 else 4
 
 
 SLICE_AXES = {'inline': ('crossline', 'sample'), 'crossline': ('inline', 'sample'), 'sample': ('inline', 'crossline')}

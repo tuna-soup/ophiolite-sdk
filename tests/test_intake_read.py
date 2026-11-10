@@ -100,7 +100,7 @@ def test_every_row_state_parses_and_a_read_row_names_the_command_that_reads_it()
     report = Report(view(items))
     assert [r['result'] for r in report.rows()][8:] == ['Can be read on your computer', 'Being read on your computer', 'Read on your computer']
     assert (report.counts['needs-procedure'], report.counts['converting'], report.counts['converted']) == (1, 1, 1)
-    assert '    To read it on this computer: ophiolite intake read %s f8.pdf' % ('r' * 32) in report.text().splitlines()
+    assert '    To read it on this computer: ophiolite exchange intake read %s f8.pdf' % ('r' * 32) in report.text().splitlines()
     plain = Report(view([row('added')]))
     assert 'needs-procedure' not in plain.counts and 'intake read' not in plain.text()
 
@@ -191,19 +191,26 @@ HELP = Path(__file__).resolve().parent / 'fixtures/cli-help-e107a.json'
 
 def test_older_commands_help_is_unchanged_and_intake_read_has_its_own(monkeypatch):
     """The help of every command that was there reads exactly as before E107a C6 (tests/fixtures/cli-help-e107a.json,
-    recorded from the SDK at b3c56c475, before C6, at 100 columns; `repositories` from main 47a96b3a1, merged with E100d1; `upload` re-recorded by E122 s1 C4, whose only difference is `--source NAME`, by E122 s2 C4 (`--complete | --incremental`, `--scope DIR`), by E17p s1, which drops the dataset name from its example, by E127 s2, whose only difference is `--fidelity FIDELITY`, and by E123 S3b, whose only difference is `--share-basis | --own-basis` and `--basis ITEM=VALUE`)."""
+    recorded from the SDK at b3c56c475, before C6, at 100 columns; `repositories` from main 47a96b3a1, merged with E100d1; `upload` re-recorded by E122 s1 C4, whose only difference is `--source NAME`, by E122 s2 C4 (`--complete | --incremental`, `--scope DIR`), by E17p s1, which drops the dataset name from its example, by E127 s2, whose only difference is `--fidelity FIDELITY`, and by E123 S3b, whose only difference is `--share-basis | --own-basis` and `--basis ITEM=VALUE`; `get` re-recorded by E141 s0 C3, whose only difference is `--window WINDOW`; `export` re-recorded by E147 s2 C3, whose
+    only difference is `--title`, `--description`, `--version` and `--details`)."""
     import argparse
     import sys
     frozen = json.loads(HELP.read_text())
     monkeypatch.setenv('COLUMNS', str(frozen['columns'])); monkeypatch.setattr(sys, 'argv', ['ophiolite'])
-    def helped(*argv):
-        out = io.StringIO()
-        with contextlib.redirect_stdout(out), pytest.raises(SystemExit): cli.parser().parse_args([*argv, '--help'])
-        return out.getvalue()
+    from cli_tree import spelled
+    def helped(*argv):  # E163 s1: rendered with the old spelling's usage prefix, the one difference the groups make
+        return spelled(cli.parser(), ' '.join(argv)).format_help()
     sub = next(a for a in cli.parser()._actions if isinstance(a, argparse._SubParsersAction))
     from test_tools_cli import reworded, unwrap  # E131 s1 (D4.3): the group says tools; both spellings print the same help
     procedures = frozen['help'].pop('procedures')
-    assert unwrap(helped('tools')) == reworded(procedures) and helped('procedures') == helped('tools')
-    assert {name: helped(name) for name in frozen['help']} == frozen['help'] and set(sub.choices) - set(frozen['help']) == {'procedures', 'tools', 'intake', 'source', 'access-history', 'teams', 'rights', 'deliver', 'outcomes', 'residuals', 'recipes', 'starter', 'verdicts', 'withdraw', 'trajectories', 'ai-use'}  # E134 s2: ai-use; E134 s1: trajectories; E131 s1: tools (procedures is checked above); E132 s0: verdicts; E132 s2: withdraw; E129 Sa: starter; E112 s2: recipes; E119b: residuals; E108: source; E67b: the two read verbs; E35a: rights; E109: deliver; E120: outcomes
+    from ophiolite.cli_groups import GROUPS  # E163 s1: the tools group lists six more verbs, the one other difference
+    extra = dict((g, v) for g, _, v in GROUPS)['tools']
+    new = ['verify', 'verifications']  # E165 s1: two more verbs after trust, the same kind of difference
+    tools = [line.replace(',' + ','.join(extra) + '}', '}').replace(',' + ','.join(new) + ',', ',') for line in unwrap(helped('tools'))
+             if line.split(' ', 5)[4:5] not in [[v] for v in [*extra, *new]]]
+    assert tools == reworded(procedures) and len(unwrap(helped('tools'))) == len(tools) + 8
+    assert sub.choices['procedures'].format_help() == sub.choices['tools'].format_help()  # E131: one group, two spellings
+    from cli_tree import flat, regrouped  # E163 s1b: the words name the grouped spelling, the record stays as recorded
+    assert {name: flat(helped(name)) for name in frozen['help']} == {name: regrouped(flat(text)) for name, text in frozen['help'].items()} and set(sub.choices) - set(frozen['help']) == {'account', 'data', 'exchange', 'results', 'procedures', 'tools', 'intake', 'source', 'access-history', 'teams', 'rights', 'deliver', 'outcomes', 'residuals', 'recipes', 'starter', 'verdicts', 'withdraw', 'trajectories', 'ai-use', 'rules', 'find', 'kinds', 'surveys', 'survey', 'try', 'demo'}  # E162 s1: demo; E150 s1b: try; E142 s1: surveys and survey; E168 s1: kinds; E145 s3: find; E144 s3: rules; E134 s2: ai-use; E134 s1: trajectories; E131 s1: tools (procedures is checked above); E132 s0: verdicts; E132 s2: withdraw; E129 Sa: starter; E112 s2: recipes; E119b: residuals; E108: source; E67b: the two read verbs; E35a: rights; E109: deliver; E120: outcomes
     text = helped('intake', 'read')
     for flag in ('RUN', 'FILE', '--keep-original', '--version DIGEST', '--folder FOLDER', '--setting NAME=VALUE', '--yes'): assert flag in text

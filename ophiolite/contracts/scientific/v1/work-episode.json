@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/scientific/v1/work-episode.json",
   "x-ophiolite": {
     "id": "ophiolite.work-episode/1",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "lifecycle": "preview"
   },
   "title": "WorkEpisode",
@@ -31,6 +31,58 @@
         "id"
       ],
       "title": "EpisodeActor",
+      "type": "object"
+    },
+    "EpisodeAttempt": {
+      "additionalProperties": false,
+      "description": "The attempt this row belongs to: its chain, its number and how it ended. (Not `Attempt`: an operation model\nalready publishes that OpenAPI component.)",
+      "properties": {
+        "chain": {
+          "pattern": "^ref-[0-9a-f]{32}$",
+          "title": "Chain",
+          "type": "string"
+        },
+        "n": {
+          "minimum": 1,
+          "title": "N",
+          "type": "integer"
+        },
+        "ended": {
+          "enum": [
+            "accepted",
+            "withdrawn",
+            "superseded",
+            "discarded",
+            "open"
+          ],
+          "title": "Ended",
+          "type": "string"
+        },
+        "from": {
+          "anyOf": [
+            {
+              "pattern": "^ref-[0-9a-f]{32}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "From"
+        },
+        "continued": {
+          "title": "Continued",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "chain",
+        "n",
+        "ended",
+        "from",
+        "continued"
+      ],
+      "title": "EpisodeAttempt",
       "type": "object"
     },
     "EpisodeBehalf": {
@@ -122,6 +174,12 @@
         "plan": {
           "minimum": 0,
           "title": "Plan",
+          "type": "integer"
+        },
+        "offered": {
+          "description": "1.2.0 (E159): offered candidates and checks removed by the readership or the consent gate",
+          "minimum": 0,
+          "title": "Offered",
           "type": "integer"
         }
       },
@@ -335,6 +393,21 @@
         "at": {
           "title": "At",
           "type": "number"
+        },
+        "because": {
+          "description": "1.2.0 (E159): the verdict's reason category (ophiolite.verdict/1 1.1.0); the reason itself is values only",
+          "enum": [
+            "wrong-input",
+            "wrong-method",
+            "wrong-setting",
+            "wrong-unit",
+            "data-quality",
+            "reference-mismatch",
+            "matches",
+            "other"
+          ],
+          "title": "Because",
+          "type": "string"
         }
       },
       "required": [
@@ -402,6 +475,134 @@
         "evaluation_sha256"
       ],
       "title": "FinalEntry",
+      "type": "object"
+    },
+    "OfferedRevision": {
+      "additionalProperties": false,
+      "description": "A revision the preview offered: `EpisodeRevision`'s fields; `as` names the candidate (`kind` is the revision's).",
+      "properties": {
+        "ref": {
+          "description": "The pseudonym of asset#revision",
+          "pattern": "^ref-[0-9a-f]{32}$",
+          "title": "Ref",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "kind": {
+          "pattern": "^[a-z0-9][a-z0-9./-]{0,63}$",
+          "title": "Kind",
+          "type": "string"
+        },
+        "as": {
+          "const": "revision",
+          "title": "As",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref",
+        "sha256",
+        "kind",
+        "as"
+      ],
+      "title": "OfferedRevision",
+      "type": "object"
+    },
+    "OfferedUnit": {
+      "additionalProperties": false,
+      "description": "A unit a landing preview offered, by its ordinal in the answer; the wellbore entity, if any.",
+      "properties": {
+        "as": {
+          "const": "unit",
+          "title": "As",
+          "type": "string"
+        },
+        "ordinal": {
+          "minimum": 1,
+          "title": "Ordinal",
+          "type": "integer"
+        },
+        "action": {
+          "enum": [
+            "land",
+            "reuse",
+            "skip"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "entity": {
+          "anyOf": [
+            {
+              "description": "The pseudonym of an entity",
+              "pattern": "^entity-[0-9a-f]{32}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Entity"
+        }
+      },
+      "required": [
+        "as",
+        "ordinal",
+        "action",
+        "entity"
+      ],
+      "title": "OfferedUnit",
+      "type": "object"
+    },
+    "OfferedWell": {
+      "additionalProperties": false,
+      "description": "A well an import preview offered, by its ordinal in the answer; the entity when it is already here.",
+      "properties": {
+        "as": {
+          "const": "well",
+          "title": "As",
+          "type": "string"
+        },
+        "ordinal": {
+          "minimum": 1,
+          "title": "Ordinal",
+          "type": "integer"
+        },
+        "action": {
+          "enum": [
+            "create",
+            "already-here",
+            "possible-duplicate",
+            "skip"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "entity": {
+          "anyOf": [
+            {
+              "description": "The pseudonym of an entity",
+              "pattern": "^entity-[0-9a-f]{32}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Entity"
+        }
+      },
+      "required": [
+        "as",
+        "ordinal",
+        "action",
+        "entity"
+      ],
+      "title": "OfferedWell",
       "type": "object"
     },
     "ShapeEpisode": {
@@ -476,6 +677,77 @@
         "final"
       ],
       "title": "ShapeEpisode",
+      "type": "object"
+    },
+    "ShapeOffered": {
+      "additionalProperties": false,
+      "description": "What one preview offered before this row acted on it: candidates, checks and outcomes as the preview showed them.",
+      "properties": {
+        "preview": {
+          "description": "The pseudonym of the preview",
+          "pattern": "^preview-[0-9a-f]{32}$",
+          "title": "Preview",
+          "type": "string"
+        },
+        "at": {
+          "title": "At",
+          "type": "number"
+        },
+        "candidates": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "revision": "#/$defs/OfferedRevision",
+                "unit": "#/$defs/OfferedUnit",
+                "well": "#/$defs/OfferedWell"
+              },
+              "propertyName": "as"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/OfferedRevision"
+              },
+              {
+                "$ref": "#/$defs/OfferedWell"
+              },
+              {
+                "$ref": "#/$defs/OfferedUnit"
+              }
+            ]
+          },
+          "title": "Candidates",
+          "type": "array"
+        },
+        "checks": {
+          "items": {
+            "$ref": "#/$defs/EpisodeCheck"
+          },
+          "title": "Checks",
+          "type": "array"
+        },
+        "outcomes": {
+          "items": {
+            "$ref": "#/$defs/EpisodeOutcome"
+          },
+          "title": "Outcomes",
+          "type": "array"
+        },
+        "answer_sha256": {
+          "description": "The sha256 of the canonical bytes of the whole answer as returned (history, not a binding)",
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Answer Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "preview",
+        "at",
+        "candidates",
+        "checks",
+        "outcomes",
+        "answer_sha256"
+      ],
+      "title": "ShapeOffered",
       "type": "object"
     },
     "ShapeRow": {
@@ -571,6 +843,14 @@
         },
         "omitted": {
           "$ref": "#/$defs/EpisodeOmitted"
+        },
+        "offered": {
+          "$ref": "#/$defs/ShapeOffered",
+          "description": "1.2.0 (E159): what the preview this row consumed offered; absent without one"
+        },
+        "attempt": {
+          "$ref": "#/$defs/EpisodeAttempt",
+          "description": "1.2.0 (E159): the attempt this row belongs to; absent outside a chain"
         }
       },
       "required": [
@@ -794,6 +1074,264 @@
         "revision"
       ],
       "title": "ValuesFinal",
+      "type": "object"
+    },
+    "ValuesOffered": {
+      "additionalProperties": false,
+      "description": "`ShapeOffered` plus the preview's own command id and the names, labels and row keys of its candidates.",
+      "properties": {
+        "preview": {
+          "description": "The pseudonym of the preview",
+          "pattern": "^preview-[0-9a-f]{32}$",
+          "title": "Preview",
+          "type": "string"
+        },
+        "at": {
+          "title": "At",
+          "type": "number"
+        },
+        "candidates": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "revision": "#/$defs/ValuesOfferedRevision",
+                "unit": "#/$defs/ValuesOfferedUnit",
+                "well": "#/$defs/ValuesOfferedWell"
+              },
+              "propertyName": "as"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ValuesOfferedRevision"
+              },
+              {
+                "$ref": "#/$defs/ValuesOfferedWell"
+              },
+              {
+                "$ref": "#/$defs/ValuesOfferedUnit"
+              }
+            ]
+          },
+          "title": "Candidates",
+          "type": "array"
+        },
+        "checks": {
+          "items": {
+            "$ref": "#/$defs/ValuesCheck"
+          },
+          "title": "Checks",
+          "type": "array"
+        },
+        "outcomes": {
+          "items": {
+            "$ref": "#/$defs/ValuesOutcome"
+          },
+          "title": "Outcomes",
+          "type": "array"
+        },
+        "answer_sha256": {
+          "description": "The sha256 of the canonical bytes of the whole answer as returned (history, not a binding)",
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Answer Sha256",
+          "type": "string"
+        },
+        "preview_command_id": {
+          "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+          "title": "Preview Command Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "preview",
+        "at",
+        "candidates",
+        "checks",
+        "outcomes",
+        "answer_sha256",
+        "preview_command_id"
+      ],
+      "title": "ValuesOffered",
+      "type": "object"
+    },
+    "ValuesOfferedRevision": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "description": "The pseudonym of asset#revision",
+          "pattern": "^ref-[0-9a-f]{32}$",
+          "title": "Ref",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "kind": {
+          "pattern": "^[a-z0-9][a-z0-9./-]{0,63}$",
+          "title": "Kind",
+          "type": "string"
+        },
+        "asset_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "as": {
+          "const": "revision",
+          "title": "As",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref",
+        "sha256",
+        "kind",
+        "asset_id",
+        "revision",
+        "as"
+      ],
+      "title": "ValuesOfferedRevision",
+      "type": "object"
+    },
+    "ValuesOfferedUnit": {
+      "additionalProperties": false,
+      "properties": {
+        "as": {
+          "const": "unit",
+          "title": "As",
+          "type": "string"
+        },
+        "ordinal": {
+          "minimum": 1,
+          "title": "Ordinal",
+          "type": "integer"
+        },
+        "action": {
+          "enum": [
+            "land",
+            "reuse",
+            "skip"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "entity": {
+          "anyOf": [
+            {
+              "description": "The pseudonym of an entity",
+              "pattern": "^entity-[0-9a-f]{32}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Entity"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The unit label as the preview answered it",
+          "title": "Label"
+        }
+      },
+      "required": [
+        "as",
+        "ordinal",
+        "action",
+        "entity",
+        "label"
+      ],
+      "title": "ValuesOfferedUnit",
+      "type": "object"
+    },
+    "ValuesOfferedWell": {
+      "additionalProperties": false,
+      "properties": {
+        "as": {
+          "const": "well",
+          "title": "As",
+          "type": "string"
+        },
+        "ordinal": {
+          "minimum": 1,
+          "title": "Ordinal",
+          "type": "integer"
+        },
+        "action": {
+          "enum": [
+            "create",
+            "already-here",
+            "possible-duplicate",
+            "skip"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "entity": {
+          "anyOf": [
+            {
+              "description": "The pseudonym of an entity",
+              "pattern": "^entity-[0-9a-f]{32}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Entity"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The well name as the preview answered it",
+          "title": "Name"
+        },
+        "row_key": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The source row key as the preview answered it",
+          "title": "Row Key"
+        }
+      },
+      "required": [
+        "as",
+        "ordinal",
+        "action",
+        "entity",
+        "name",
+        "row_key"
+      ],
+      "title": "ValuesOfferedWell",
       "type": "object"
     },
     "ValuesOutcome": {
@@ -1044,6 +1582,14 @@
         "omitted": {
           "$ref": "#/$defs/EpisodeOmitted"
         },
+        "offered": {
+          "$ref": "#/$defs/ValuesOffered",
+          "description": "1.2.0 (E159): what the preview this row consumed offered, with its values; absent without one"
+        },
+        "attempt": {
+          "$ref": "#/$defs/EpisodeAttempt",
+          "description": "1.2.0 (E159): the attempt this row belongs to; absent outside a chain"
+        },
         "request": {
           "anyOf": [
             {
@@ -1112,6 +1658,21 @@
         "at": {
           "title": "At",
           "type": "number"
+        },
+        "because": {
+          "description": "1.2.0 (E159): the verdict's reason category (ophiolite.verdict/1 1.1.0); the reason itself is values only",
+          "enum": [
+            "wrong-input",
+            "wrong-method",
+            "wrong-setting",
+            "wrong-unit",
+            "data-quality",
+            "reference-mismatch",
+            "matches",
+            "other"
+          ],
+          "title": "Because",
+          "type": "string"
         },
         "reason": {
           "anyOf": [

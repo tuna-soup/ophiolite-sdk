@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/scientific/v1/verdict.json",
   "x-ophiolite": {
     "id": "ophiolite.verdict/1",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -220,6 +220,21 @@
       ],
       "description": "Required and not blank when rejected; kept verbatim",
       "title": "Reason"
+    },
+    "because": {
+      "description": "1.1.0 (E159): the reason category; absent on a record written without one, never null",
+      "enum": [
+        "wrong-input",
+        "wrong-method",
+        "wrong-setting",
+        "wrong-unit",
+        "data-quality",
+        "reference-mismatch",
+        "matches",
+        "other"
+      ],
+      "title": "Because",
+      "type": "string"
     },
     "against": {
       "anyOf": [

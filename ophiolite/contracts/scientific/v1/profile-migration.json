@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/scientific/v1/profile-migration.json",
+  "x-ophiolite": {
+    "id": "ophiolite.profile-migration/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "ReleaseRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "number": {
+          "pattern": "^[0-9]{4}\\.[0-9]{1,2}\\.[0-9]{1,4}$",
+          "title": "Number",
+          "type": "string"
+        },
+        "digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "number",
+        "digest"
+      ],
+      "title": "ReleaseRecord",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "One stored item moved from one revision's form to a released profile version as a new revision; never changed.",
+  "properties": {
+    "schema": {
+      "const": "ophiolite.profile-migration/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "asset_id": {
+      "description": "The logical item; both revisions are versions of it",
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "from_revision": {
+      "description": "The item's head revision when the move started; its rows are never written by the move",
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "From Revision",
+      "type": "string"
+    },
+    "from_storage": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "From Storage",
+      "type": "string"
+    },
+    "from_profile": {
+      "description": "The profile of the from revision's `data` representation",
+      "pattern": "^ophiolite\\.[a-z0-9-]+/[1-9][0-9]*$",
+      "title": "From Profile",
+      "type": "string"
+    },
+    "from_sha256": {
+      "description": "SHA-256 of the from revision's stored `data` representation",
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "From Sha256",
+      "type": "string"
+    },
+    "to_profile": {
+      "description": "A released profile of the same kind, never the from profile",
+      "pattern": "^ophiolite\\.[a-z0-9-]+/[1-9][0-9]*$",
+      "title": "To Profile",
+      "type": "string"
+    },
+    "to_revision": {
+      "description": "The new revision the move wrote; the to of at most one record",
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "To Revision",
+      "type": "string"
+    },
+    "to_storage": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "To Storage",
+      "type": "string"
+    },
+    "to_sha256": {
+      "description": "SHA-256 of the new revision's stored `data` representation",
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "To Sha256",
+      "type": "string"
+    },
+    "release": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ReleaseRecord"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The release that ran the move; null when the deployment names none"
+    },
+    "actor": {
+      "const": "system:profile-migration",
+      "title": "Actor",
+      "type": "string"
+    },
+    "at": {
+      "description": "ISO-8601 UTC",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,6})?Z$",
+      "title": "At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema",
+    "asset_id",
+    "from_revision",
+    "from_storage",
+    "from_profile",
+    "from_sha256",
+    "to_profile",
+    "to_revision",
+    "to_storage",
+    "to_sha256",
+    "release",
+    "actor",
+    "at"
+  ],
+  "title": "ProfileMigration",
+  "type": "object"
+}

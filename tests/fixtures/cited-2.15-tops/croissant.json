@@ -1,0 +1,102 @@
+{
+  "@context": {
+    "@language": "en",
+    "@vocab": "https://schema.org/",
+    "citeAs": "cr:citeAs",
+    "column": "cr:column",
+    "conformsTo": "dct:conformsTo",
+    "cr": "http://mlcommons.org/croissant/",
+    "rai": "http://mlcommons.org/croissant/RAI/",
+    "data": {
+      "@id": "cr:data",
+      "@type": "@json"
+    },
+    "dataType": {
+      "@id": "cr:dataType",
+      "@type": "@vocab"
+    },
+    "dct": "http://purl.org/dc/terms/",
+    "equivalentProperty": "cr:equivalentProperty",
+    "examples": {
+      "@id": "cr:examples",
+      "@type": "@json"
+    },
+    "extract": "cr:extract",
+    "field": "cr:field",
+    "fileProperty": "cr:fileProperty",
+    "fileObject": "cr:fileObject",
+    "fileSet": "cr:fileSet",
+    "format": "cr:format",
+    "includes": "cr:includes",
+    "isLiveDataset": "cr:isLiveDataset",
+    "jsonPath": "cr:jsonPath",
+    "key": "cr:key",
+    "md5": "cr:md5",
+    "parentField": "cr:parentField",
+    "path": "cr:path",
+    "recordSet": "cr:recordSet",
+    "references": "cr:references",
+    "regex": "cr:regex",
+    "repeated": "cr:repeated",
+    "replace": "cr:replace",
+    "samplingRate": "cr:samplingRate",
+    "sc": "https://schema.org/",
+    "separator": "cr:separator",
+    "source": "cr:source",
+    "subField": "cr:subField",
+    "transform": "cr:transform"
+  },
+  "@type": "sc:Dataset",
+  "conformsTo": "http://mlcommons.org/croissant/1.0",
+  "name": "Synthetic gamma ray log of well SYNTHETIC-M1",
+  "description": "One gamma ray curve (GR, five samples) of a made-up well, with the LAS file it was read from. Synthetic data for the descriptor contract; no observed well.",
+  "creator": [
+    {
+      "@type": "Person",
+      "@id": "https://orcid.org/0000-0002-1825-0097",
+      "name": "Josiah Carberry"
+    },
+    {
+      "@type": "Person",
+      "@id": "#creator-2",
+      "name": "Ada Synthetic"
+    }
+  ],
+  "publisher": {
+    "@type": "Organization",
+    "@id": "https://ror.org/0abcdef12",
+    "name": "Synthetic Survey Organisation"
+  },
+  "datePublished": "2026-11-05",
+  "version": "1.0.0",
+  "license": "https://spdx.org/licenses/CC-BY-4.0",
+  "distribution": [
+    {
+      "@type": "cr:FileObject",
+      "@id": "assets/0/original.csv",
+      "name": "original.csv",
+      "contentUrl": "assets/0/original.csv",
+      "encodingFormat": "text/csv",
+      "sha256": "7bca6c523913b58113d3fa23aa97424ce907af3b27915c18ada91b845b71a594",
+      "contentSize": "65 B"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "assets/0/descriptor.json",
+      "name": "descriptor.json",
+      "contentUrl": "assets/0/descriptor.json",
+      "encodingFormat": "application/json",
+      "sha256": "2dd7494de3d35cba7f7194759daefea7ad5692e618d0d93e4173f56b5e0917c1",
+      "contentSize": "2736 B"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "assets/0/data.json",
+      "name": "data.json",
+      "contentUrl": "assets/0/data.json",
+      "encodingFormat": "application/json",
+      "sha256": "eae5778eca7ced6e1010cbe7ef342efb23298da1de5a634e9a4c9f3bb70e305b",
+      "contentSize": "1419 B"
+    }
+  ]
+}

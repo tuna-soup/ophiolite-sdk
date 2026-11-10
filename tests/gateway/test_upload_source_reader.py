@@ -34,7 +34,7 @@ def upload(web, tmp_path, monkeypatch, capsys, root):
     assert cli.entrypoint(['upload', str(root), '--configuration', str(tmp_path / 'configuration.json'), '--credentials', str(tmp_path / 'none.json'),
                            '--attribution', 'NLOG.NL', '--audience', 'me', '--rights-confirmed', '--new', '--source', NAME]) is None
     lines = capsys.readouterr().out.strip().splitlines()
-    return [l for l in lines if 'Run: ophiolite wells from-run' not in l]  # the wells hint is an earlier slice's line, unchanged here
+    return [l for l in lines if 'Run: ophiolite data wells from-run' not in l]  # the wells hint is an earlier slice's line, unchanged here
 
 
 def test_the_same_file_read_by_a_newer_reader_prints_one_changed(web, tmp_path, monkeypatch, capsys):

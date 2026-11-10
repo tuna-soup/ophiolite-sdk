@@ -31,5 +31,7 @@
   },
   "table_target": {
     "none": "not-a-table"
-  }
+  },
+  "osdu_kind": null,
+  "osdu_kind_reason": "work-product-component--FaultInterpretation is not a kind the box vendors at v0.30.1"
 }

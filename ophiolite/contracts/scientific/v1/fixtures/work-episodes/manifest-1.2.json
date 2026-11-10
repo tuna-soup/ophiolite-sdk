@@ -1,0 +1,55 @@
+{
+ "subject": "E160 s0 C1: the manifest of folder/ at 1.2.0, with the capture tier and its one payload file (episodes.jsonl: 2191 bytes, its sha256 hand-copied from sha256sum)",
+ "manifest": {
+  "capture": "by-consent",
+  "consent_texts": [
+   {
+    "sha256": "0cfa7fb17507c15c1120df3a3f21c6409d51a88c4e76cad8f6d762d0f5906aa5",
+    "version": 1
+   }
+  ],
+  "counts": {
+   "episodes": 2,
+   "no_consent": 0,
+   "rights_refused": 0,
+   "scrubbed_fields": 0,
+   "shape": 1,
+   "skipped": 0,
+   "unreadable": 0,
+   "values": 1
+  },
+  "deployment_id": "dep-e134-test",
+  "exported_at": 0.0,
+  "files": [
+   {
+    "name": "episodes.jsonl",
+    "bytes": 2191,
+    "sha256": "a9d44e7c9be1a5e2cc4ef0575e1a4d3b2daa1935adeaceeaba88b885264ff394"
+   }
+  ],
+  "fractions": {
+   "test": 100,
+   "train": 800,
+   "validation": 100
+  },
+  "licences": [],
+  "linkage": "Pseudonyms in this folder can be linked to the named record by anyone who can read the deployment.",
+  "mode": "auto",
+  "purpose": "training",
+  "release": "2026.10.130",
+  "rights_bases": [],
+  "salt_id": "salt-b22f6985db884bc1",
+  "schema": "ophiolite.work-episodes/1",
+  "scope": {
+   "kind": "own",
+   "person": "person-cd9dbe18bb9022661636719d82d2023e",
+   "project": "project-4ef7215685ee9a7a6aacdd596368c113"
+  },
+  "sdk_version": null,
+  "seed": 0,
+  "split_rule": "split/1",
+  "tier": "local-evaluation",
+  "until": 20,
+  "window_seconds": 14400
+ }
+}

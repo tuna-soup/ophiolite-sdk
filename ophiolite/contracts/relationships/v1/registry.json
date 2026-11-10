@@ -1,11 +1,12 @@
 {
   "schema": "ophiolite.relationship-registry/1",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "kinds": [
     {"id": "revision", "title": "An exact revision of an asset"},
     {"id": "well", "title": "Well"},
     {"id": "wellbore", "title": "Wellbore"},
-    {"id": "result-group", "title": "Result group"}
+    {"id": "result-group", "title": "Result group"},
+    {"id": "survey", "title": "Survey"}
   ],
   "predicates": [
     {"id": "part-of", "class": "structural", "title": "A wellbore is part of one well", "subject": ["wellbore"], "object": ["well"],
@@ -18,6 +19,18 @@
     {"id": "derived-from", "class": "derivation", "title": "An exact revision was calculated from another exact revision", "subject": ["revision"], "object": ["revision"],
      "per_subject_and_object_kind": null, "exact_revisions": true, "asserted_by": "system", "evidence": "run", "status": "active", "inverse": "derivations"},
     {"id": "supersedes", "class": "derivation", "title": "A later revision of the same asset replaces an earlier one", "subject": ["revision"], "object": ["revision"],
-     "per_subject_and_object_kind": 1, "exact_revisions": true, "asserted_by": "system", "evidence": "command", "status": "active", "inverse": "superseded-by"}
+     "per_subject_and_object_kind": 1, "exact_revisions": true, "asserted_by": "system", "evidence": "command", "status": "active", "inverse": "superseded-by"},
+    {"id": "in-survey", "class": "structural", "title": "An exact revision is a member of a survey (read-only projection of surveys)", "subject": ["revision"], "object": ["survey"],
+     "per_subject_and_object_kind": null, "exact_revisions": true, "asserted_by": "system", "evidence": "system", "status": "projection", "inverse": "survey-members"},
+    {"id": "horizon-of", "class": "structural", "title": "A survey's horizon was interpreted on its cube or line (written by survey commands)", "subject": ["revision"], "object": ["revision"],
+     "per_subject_and_object_kind": null, "exact_revisions": true, "asserted_by": "system", "evidence": "command", "status": "projection", "inverse": "horizons"},
+    {"id": "fault-in", "class": "structural", "title": "A survey's fault set was interpreted in its cube or line (written by survey commands)", "subject": ["revision"], "object": ["revision"],
+     "per_subject_and_object_kind": null, "exact_revisions": true, "asserted_by": "system", "evidence": "command", "status": "projection", "inverse": "faults"},
+    {"id": "well-in", "class": "structural", "title": "A survey's well data lies in its cube or on its line (written by survey commands)", "subject": ["revision"], "object": ["revision"],
+     "per_subject_and_object_kind": null, "exact_revisions": true, "asserted_by": "system", "evidence": "command", "status": "projection", "inverse": "wells"},
+    {"id": "line-of", "class": "structural", "title": "A survey's 2D line belongs with its cube (written by survey commands)", "subject": ["revision"], "object": ["revision"],
+     "per_subject_and_object_kind": null, "exact_revisions": true, "asserted_by": "system", "evidence": "command", "status": "projection", "inverse": "lines"},
+    {"id": "time-depth-of", "class": "structural", "title": "A survey's time-depth model belongs to its well (written by survey commands)", "subject": ["revision"], "object": ["revision"],
+     "per_subject_and_object_kind": null, "exact_revisions": true, "asserted_by": "system", "evidence": "command", "status": "projection", "inverse": "time-depth-models"}
   ]
 }

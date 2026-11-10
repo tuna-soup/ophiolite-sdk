@@ -1,0 +1,14 @@
+{
+  "schema": "ophiolite.agent-dry-run/1",
+  "dry_run": true,
+  "operation": "publications/derive",
+  "project_id": "p",
+  "would": {
+    "outcome": "proceeds",
+    "effects": [
+      {"action": "create", "kind": "asset-version", "count": 1, "label": "Derived curve"},
+      {"action": "create", "kind": "payload", "count": 1}
+    ]
+  },
+  "digest": "459c3f730e7a10a91c8f7c91f024515e7062b3f451f967c2640f7eb35b4c40c6"
+}

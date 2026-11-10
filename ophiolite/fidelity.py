@@ -1,7 +1,7 @@
 """E127 s2: the fidelity document a catalogue reads back (`osd.fidelity/1`, Open Subsurface Data's schema).
 
 After an upload of a local folder or file that held one catalogue manifest, `UploadRuns.fidelity(report, path)` (or
-`ophiolite upload PATH --fidelity OUT`) says, per file the manifest lists, what became of it: converted (added or
+`ophiolite exchange upload PATH --fidelity OUT`) says, per file the manifest lists, what became of it: converted (added or
 already here, with the item, its kind and the reader that read it), failed (with the upload's reason) or skipped. The
 manifest is read again from PATH and must be the bytes the upload read; the run's listed files are paired with the
 manifest's by their order (`listed-<n>`), never by their labels. Each added item's own bytes are taken from its
@@ -64,7 +64,8 @@ def record(manifest):
 def instant(value):
     """An RFC 3339 date-time (the schema's `date-time`, which OSD checks)."""
     if not isinstance(value, str) or not INSTANT.fullmatch(value): return False
-    try: datetime.fromisoformat(value.upper().replace('Z', '+00:00'))
+    # The fraction is checked by INSTANT and dropped here: Python 3.10's fromisoformat takes only 3 or 6 digits (E148 S-11).
+    try: datetime.fromisoformat(re.sub(r'\.\d+', '', value.upper(), count=1).replace('Z', '+00:00'))
     except ValueError: return False
     return True
 

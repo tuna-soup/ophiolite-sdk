@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "http://datacite.org/schema/kernel-4",
+  "types": {
+    "resourceTypeGeneral": "Dataset",
+    "resourceType": "Starter pack"
+  },
+  "titles": [
+    {
+      "title": "Synthetic starter pack: two wells"
+    }
+  ],
+  "creators": [
+    {
+      "name": "Synthetic Survey Organisation",
+      "nameType": "Organizational"
+    }
+  ],
+  "publisher": "Open Subsurface Data",
+  "publicationYear": "2026",
+  "dates": [
+    {
+      "date": "2026-11-05",
+      "dateType": "Issued"
+    }
+  ],
+  "rightsList": [
+    {
+      "rights": "Creative Commons Attribution 4.0 International",
+      "rightsUri": "https://spdx.org/licenses/CC-BY-4.0",
+      "rightsIdentifier": "CC-BY-4.0",
+      "rightsIdentifierScheme": "SPDX",
+      "schemeUri": "https://spdx.org/licenses/"
+    }
+  ],
+  "descriptions": [
+    {
+      "description": "Two made-up wells with a log each and a small cube, packed for Python and ResInsight. Synthetic values only.",
+      "descriptionType": "Abstract"
+    }
+  ],
+  "sizes": [
+    "2846 bytes"
+  ],
+  "formats": [
+    "application/geo+json",
+    "application/octet-stream",
+    "text/markdown",
+    "text/x-python"
+  ]
+}

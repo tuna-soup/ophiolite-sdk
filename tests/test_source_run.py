@@ -253,7 +253,7 @@ class Recording(Server):
 
 
 def refused_then_uploaded_by_hand(tmp_path, plan, label=None, **options):
-    """A source run whose rows answer as `plan` says, then the documented fallback run as printed: `ophiolite upload`."""
+    """A source run whose rows answer as `plan` says, then the documented fallback run as printed: `ophiolite exchange upload`."""
     root = tmp_path / 'procedure'; root.mkdir()
     (root / 'procedure.json').write_text(json.dumps(manifest())); (root / 'procedure.py').write_text(PLANTED % (WELLS, TOKEN, tuple(WELLS)))
     server = Recording(root, plan)
@@ -265,7 +265,7 @@ def refused_then_uploaded_by_hand(tmp_path, plan, label=None, **options):
 def test_a_refused_run_keeps_only_the_outputs_and_the_fallback_sends_no_log_or_run_record(tmp_path, monkeypatch, capsys):
     """B6 rev 4 (R3-1, disclosure): case 6 refuses every file. The recovery directory holds exactly the outputs the
     manifest lists; the log (with the configuration's token in it) and run.json stay outside it. The fallback printed,
-    `ophiolite upload <kept>`, adds the outputs, and no request of it (URL, headers, the detection header, any body) holds
+    `ophiolite exchange upload <kept>`, adds the outputs, and no request of it (URL, headers, the detection header, any body) holds
     the token, the log's line, the run record or its digest. Mutation: the recovery directory is the run folder (red)."""
     monkeypatch.setenv('OPHIOLITE_PROCEDURE_CACHE', str(tmp_path / 'cache'))
     server, args = refused_then_uploaded_by_hand(tmp_path, [('not-supported', 'source-shared', SHARED)] * 3)
@@ -273,11 +273,11 @@ def test_a_refused_run_keeps_only_the_outputs_and_the_fallback_sends_no_log_or_r
     assert stopped.value.code == cli.EXIT['conflict']
     printed = capsys.readouterr().out
     [line] = [l for l in printed.splitlines() if l.startswith('The files the tool made are kept in')]
-    kept = Path(line.split(' To add them by hand: ophiolite upload ')[1])
-    assert line == 'The files the tool made are kept in %s. To add them by hand: ophiolite upload %s' % (kept, kept)
+    kept = Path(line.split(' To add them by hand: ophiolite exchange upload ')[1])
+    assert line == 'The files the tool made are kept in %s. To add them by hand: ophiolite exchange upload %s' % (kept, kept)
     assert sorted(p.name for p in kept.iterdir()) == ['well_a.json', 'well_b.json', 'well_c.json'] and runs(tmp_path) == 1
     server.hand, server.raw = True, []
-    upload = cli.parser().parse_args(['upload', str(kept), '--attribution', 'Team survey share', '--audience', 'me', '--rights-confirmed'])
+    upload = cli.parser().parse_args(['exchange', 'upload', str(kept), '--attribution', 'Team survey share', '--audience', 'me', '--rights-confirmed'])
     with client(server) as c: cli._upload(upload, c)
     assert [i['state'] for i in server.items] == ['added'] * 3 and runs(tmp_path) == 1
     heads = [h for _, h, _ in server.raw if 'x-ophiolite-upload' in h]
@@ -320,7 +320,7 @@ def test_an_upload_that_fails_after_the_run_keeps_the_outputs_and_says_where(tmp
     server.fail = where
     with client(server) as c, pytest.raises(Exception) as failed: cli._source(args, c)
     kept = Path(failed.value.kept)
-    assert capsys.readouterr().err.splitlines()[-1] == 'The files the tool made are kept in %s. To add them by hand: ophiolite upload %s' % (kept, kept)
+    assert capsys.readouterr().err.splitlines()[-1] == 'The files the tool made are kept in %s. To add them by hand: ophiolite exchange upload %s' % (kept, kept)
     assert sorted(p.name for p in kept.iterdir()) == ['well_a.json', 'well_b.json', 'well_c.json'] and runs(tmp_path) == 1
     [start] = [json.loads(body) for url, _, body in server.raw if url.endswith('/upload-runs/start')]
     assert {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in kept.iterdir()} == {f['path'].rsplit('/', 1)[1]: f['sha256'] for f in start['files']}

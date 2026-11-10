@@ -1,0 +1,91 @@
+{
+  "@context": {
+    "@language": "en",
+    "@vocab": "https://schema.org/",
+    "citeAs": "cr:citeAs",
+    "column": "cr:column",
+    "conformsTo": "dct:conformsTo",
+    "cr": "http://mlcommons.org/croissant/",
+    "rai": "http://mlcommons.org/croissant/RAI/",
+    "data": {"@id": "cr:data", "@type": "@json"},
+    "dataType": {"@id": "cr:dataType", "@type": "@vocab"},
+    "dct": "http://purl.org/dc/terms/",
+    "equivalentProperty": "cr:equivalentProperty",
+    "examples": {"@id": "cr:examples", "@type": "@json"},
+    "extract": "cr:extract",
+    "field": "cr:field",
+    "fileProperty": "cr:fileProperty",
+    "fileObject": "cr:fileObject",
+    "fileSet": "cr:fileSet",
+    "format": "cr:format",
+    "includes": "cr:includes",
+    "isLiveDataset": "cr:isLiveDataset",
+    "jsonPath": "cr:jsonPath",
+    "key": "cr:key",
+    "md5": "cr:md5",
+    "parentField": "cr:parentField",
+    "path": "cr:path",
+    "recordSet": "cr:recordSet",
+    "references": "cr:references",
+    "regex": "cr:regex",
+    "repeated": "cr:repeated",
+    "replace": "cr:replace",
+    "samplingRate": "cr:samplingRate",
+    "sc": "https://schema.org/",
+    "separator": "cr:separator",
+    "source": "cr:source",
+    "subField": "cr:subField",
+    "transform": "cr:transform"
+  },
+  "@type": "sc:Dataset",
+  "conformsTo": "http://mlcommons.org/croissant/1.0",
+  "name": "Synthetic field: four wells",
+  "description": "Four made-up wells (SYN-F1 to SYN-F4) at made-up RD New coordinates, as a project folder any program can read. Synthetic data; no observed well.",
+  "creator": [
+    {"@type": "Organization", "@id": "https://ror.org/0abcdef12", "name": "Synthetic Survey Organisation"}
+  ],
+  "publisher": {"@type": "Organization", "@id": "https://ror.org/0abcdef12", "name": "Synthetic Survey Organisation"},
+  "datePublished": "2026-11-04",
+  "conditionsOfAccess": "Shared under the terms of the project it was taken from; not an open licence. Ask the publisher before passing it on.",
+  "distribution": [
+    {
+      "@type": "cr:FileObject",
+      "@id": "items/wells.parquet",
+      "name": "wells.parquet",
+      "contentUrl": "items/wells.parquet",
+      "encodingFormat": "application/vnd.apache.parquet",
+      "sha256": "db06126568877ea19db58189e430bf2f2b72cab5c27530e205b7aa8c61adb4d8",
+      "contentSize": "8541 B"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "lineage/prov.json",
+      "name": "prov.json",
+      "contentUrl": "lineage/prov.json",
+      "encodingFormat": "application/json",
+      "sha256": "09b9893b28c84de1f9ef429af8a6aecedf1fa30a62c465e4076c1ac8e571f2ae",
+      "contentSize": "1217 B"
+    }
+  ],
+  "recordSet": [
+    {
+      "@type": "cr:RecordSet",
+      "@id": "wells",
+      "name": "wells",
+      "field": [
+        {"@type": "cr:Field", "@id": "wells/id", "name": "id", "dataType": "sc:Text",
+         "source": {"fileObject": {"@id": "items/wells.parquet"}, "extract": {"column": "id"}}},
+        {"@type": "cr:Field", "@id": "wells/name", "name": "name", "dataType": "sc:Text",
+         "source": {"fileObject": {"@id": "items/wells.parquet"}, "extract": {"column": "name"}}},
+        {"@type": "cr:Field", "@id": "wells/x", "name": "x", "dataType": "sc:Float",
+         "source": {"fileObject": {"@id": "items/wells.parquet"}, "extract": {"column": "x"}}},
+        {"@type": "cr:Field", "@id": "wells/y", "name": "y", "dataType": "sc:Float",
+         "source": {"fileObject": {"@id": "items/wells.parquet"}, "extract": {"column": "y"}}},
+        {"@type": "cr:Field", "@id": "wells/depth", "name": "depth", "dataType": "sc:Float",
+         "source": {"fileObject": {"@id": "items/wells.parquet"}, "extract": {"column": "depth"}}},
+        {"@type": "cr:Field", "@id": "wells/operator", "name": "operator", "dataType": "sc:Text",
+         "source": {"fileObject": {"@id": "items/wells.parquet"}, "extract": {"column": "operator"}}}
+      ]
+    }
+  ]
+}

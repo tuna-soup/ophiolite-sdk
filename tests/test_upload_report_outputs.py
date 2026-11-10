@@ -46,7 +46,7 @@ def test_a_manifests_files_follow_it_and_each_file_keeps_its_own_line_and_instru
         '  catalogue/manifest-two-wells.json: Listed file 2: Not added - ' + R2,
         '  catalogue/bad.las: Not read - This file could not be read as Well log (LAS).',
         '  catalogue/survey.dat: Can be read on your computer - Can be read by Ada on your computer.',
-        '    To read it on this computer: ophiolite intake read %s survey.dat' % ('f' * 64)]
+        '    To read it on this computer: ophiolite exchange intake read %s survey.dat' % ('f' * 64)]
     assert not report.ok
 
 

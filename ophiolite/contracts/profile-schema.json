@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/profile-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.contract-profile/1",
-    "version": "1.7.0",
+    "version": "1.8.0",
     "lifecycle": "preview"
   },
   "title": "ContractProfile",
@@ -151,6 +151,32 @@
           }
         }
       ]
+    },
+    "osdu_kind": {
+      "description": "1.8.0 (E168 s0): the OSDU kind this profile exports as, the export matrix row written by tools/export-matrix.py; null with osdu_kind_reason when the row has none.",
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^osdu:wks:[a-z-]+--[A-Za-z]+:\\d+\\.\\d+\\.\\d+$",
+          "maxLength": 128
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "osdu_kind_reason": {
+      "description": "1.8.0 (E168 s0): why the profile has no OSDU kind, the export matrix row's own sentence; null beside a kind.",
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        {
+          "type": "null"
+        }
+      ]
     }
   },
   "$defs": {
@@ -254,6 +280,26 @@
           "type": "string",
           "pattern": "^[a-z0-9][a-z0-9._-]*(/[a-z0-9._-]+)*/[0-9]+$"
         }
+      }
+    }
+  },
+  "if": {
+    "required": [
+      "osdu_kind_reason"
+    ],
+    "properties": {
+      "osdu_kind_reason": {
+        "type": "string"
+      }
+    }
+  },
+  "then": {
+    "required": [
+      "osdu_kind"
+    ],
+    "properties": {
+      "osdu_kind": {
+        "type": "null"
       }
     }
   }

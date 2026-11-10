@@ -597,6 +597,663 @@
         }
       }
     },
+    "/api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/volume-windows": {
+      "get": {
+        "description": "Part of a seismic volume or 2D line at an exact revision (ophiolite.volume-window/1): which traces and samples, in which stored 4-byte form, and how they are cut into pieces of at most 32 MiB. The document holds no sample; X-Content-SHA256 is the digest of the returned document. Every malformed, off-grid or outside request refuses with code window-refused and a closed reason (malformed, unknown-parameter, selection-required, reversed: 400; outside, off-grid, line-by-label, not-a-volume, not-available-yet: 422; window-changed: 409); an asset you cannot read answers 404 whatever the window. The document is computed from the stored description alone and reads no sample; the samples are read piece by piece.",
+        "parameters": [
+          {
+            "name": "project",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "asset",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "revision",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "inline",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Volumes only. Inline labels (by=label) or zero-based ordinals (by=ordinal). Inclusive range first:last or one value (D98); no step. Omitted: every inline."
+          },
+          {
+            "name": "crossline",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Volumes only. Crossline labels (by=label) or zero-based ordinals (by=ordinal). Inclusive range first:last or one value (D98); no step. Omitted: every crossline."
+          },
+          {
+            "name": "trace",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "2D lines only. Zero-based trace positions in file order, never trace numbers. Inclusive range first:last or one value (D98); no step. Omitted: every trace."
+          },
+          {
+            "name": "sample",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Zero-based sample positions, whatever by says. Inclusive range first:last or one value (D98); no step. Omitted: every sample."
+          },
+          {
+            "name": "by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "label",
+                "ordinal"
+              ]
+            },
+            "description": "Whether inline and crossline are labels on the survey grid or zero-based ordinals; required with either, no default. A 2D line is by ordinal only."
+          },
+          {
+            "name": "windows",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "2"
+              ]
+            },
+            "description": "2 asks for an 8-bit cube's window at native size (ophiolite.volume-window/2, one byte per sample). Without it an 8-bit cube is refused with native-form and nothing is read; a float volume or 2D line answers ophiolite.volume-window/1 with or without it."
+          }
+        ],
+        "security": [
+          {
+            "scopedBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authorized window",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./volume-window-schema.json"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Versioned error; see README",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Busy: retry the same exact request after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/volume-windows/pieces/{index}": {
+      "get": {
+        "description": "One piece of a window: the stored 4-byte words, big-endian, in C order of the window's axes, of window traces [n*t, min((n+1)*t, T)-1] (t = traces_per_piece). Ask with the window's own query and window=<window_id>; a window that no longer resolves to that id refuses window-changed (409). The window digest is the sha256 of the piece bodies in index order; the client computes it. Every malformed, off-grid or outside request refuses with code window-refused and a closed reason (malformed, unknown-parameter, selection-required, reversed: 400; outside, off-grid, line-by-label, not-a-volume, not-available-yet: 422; window-changed: 409); an asset you cannot read answers 404 whatever the window. Each piece is authorized on its own and read only from the stored blocks it touches (a volume's inline chunks, a 2D line's trace blocks of the original), one at a time, each verified against its ingest digest (409 integrity-conflict otherwise); the server never assembles the whole window.",
+        "parameters": [
+          {
+            "name": "project",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "asset",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "revision",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "index",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "description": "The piece number, from 0 (decimal)."
+          },
+          {
+            "name": "inline",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Volumes only. Inline labels (by=label) or zero-based ordinals (by=ordinal). Inclusive range first:last or one value (D98); no step. Omitted: every inline."
+          },
+          {
+            "name": "crossline",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Volumes only. Crossline labels (by=label) or zero-based ordinals (by=ordinal). Inclusive range first:last or one value (D98); no step. Omitted: every crossline."
+          },
+          {
+            "name": "trace",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "2D lines only. Zero-based trace positions in file order, never trace numbers. Inclusive range first:last or one value (D98); no step. Omitted: every trace."
+          },
+          {
+            "name": "sample",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Zero-based sample positions, whatever by says. Inclusive range first:last or one value (D98); no step. Omitted: every sample."
+          },
+          {
+            "name": "by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "label",
+                "ordinal"
+              ]
+            },
+            "description": "Whether inline and crossline are labels on the survey grid or zero-based ordinals; required with either, no default. A 2D line is by ordinal only."
+          },
+          {
+            "name": "windows",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "2"
+              ]
+            },
+            "description": "2 asks for an 8-bit cube's window at native size (ophiolite.volume-window/2, one byte per sample). Without it an 8-bit cube is refused with native-form and nothing is read; a float volume or 2D line answers ophiolite.volume-window/1 with or without it."
+          },
+          {
+            "name": "window",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "description": "The window_id of the window document this piece belongs to."
+          }
+        ],
+        "security": [
+          {
+            "scopedBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authorized piece",
+            "headers": {
+              "X-Ophiolite-Window": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The window_id"
+              },
+              "X-Ophiolite-Revision": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The exact revision read"
+              },
+              "X-Ophiolite-Piece": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "n/count"
+              },
+              "X-Content-SHA256": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "sha256 of the piece body"
+              }
+            },
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Versioned error; see README",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Busy: retry the same exact request after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/volume-windows/file-header": {
+      "get": {
+        "description": "A volume window's file header: bytes 0..3599 of the retained original verbatim (the textual and binary file headers), with the trace-header byte positions the volume was read with. Ask with the window's own query and window=<window_id>; a window that no longer resolves to that id refuses window-changed (409). No trace header or sample is read. A 2D line has no window file (422 outside); refusals as the window document's; an asset you cannot read answers 404 whatever the window.",
+        "parameters": [
+          {
+            "name": "project",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "asset",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "revision",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "inline",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Inline labels (by=label) or zero-based ordinals (by=ordinal). Inclusive range first:last or one value (D98); no step. Omitted: every inline."
+          },
+          {
+            "name": "crossline",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Crossline labels (by=label) or zero-based ordinals (by=ordinal). Inclusive range first:last or one value (D98); no step. Omitted: every crossline."
+          },
+          {
+            "name": "sample",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Zero-based sample positions, whatever by says. Inclusive range first:last or one value (D98); no step. Omitted: every sample."
+          },
+          {
+            "name": "by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "label",
+                "ordinal"
+              ]
+            },
+            "description": "Whether inline and crossline are labels on the survey grid or zero-based ordinals; required with either, no default. A 2D line is by ordinal only."
+          },
+          {
+            "name": "windows",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "2"
+              ]
+            },
+            "description": "2 asks for an 8-bit cube's window at native size (ophiolite.volume-window/2, one byte per sample). Without it an 8-bit cube is refused with native-form and nothing is read; a float volume or 2D line answers ophiolite.volume-window/1 with or without it."
+          },
+          {
+            "name": "window",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "description": "The window_id of the window document these headers belong to."
+          }
+        ],
+        "security": [
+          {
+            "scopedBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authorized file header",
+            "headers": {
+              "X-Ophiolite-Window": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The window_id"
+              },
+              "X-Ophiolite-Revision": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The exact revision read"
+              },
+              "X-Ophiolite-Header-Positions": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "inline=<byte>,crossline=<byte>,cdp_x=<byte>,cdp_y=<byte>: the stored 1-based trace-header byte positions"
+              },
+              "X-Content-SHA256": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "sha256 of the body"
+              }
+            },
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Versioned error; see README",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Busy: retry the same exact request after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/projects/{project}/scientific-assets/{asset}/revisions/{revision}/volume-windows/headers/{index}": {
+      "get": {
+        "description": "Headers answer n of a volume window: the 240-byte trace headers of the original, verbatim, of window traces [n*H, min((n+1)*H, T)-1] in C order of the trace axes, H = 139810 (a headers answer is at most 32 MiB whatever the sample count), count = ceil(T/H). Ask with the window's own query and window=<window_id>; a window that no longer resolves to that id refuses window-changed (409). Each answer is authorized on its own; each trace is located by the trace order stored at ingest, read from the stored parts of the original it lies in, each part once, and must carry the inline and crossline it stands for at the stored byte positions (409 integrity-conflict otherwise, as for a damaged or missing trace order). A 2D line has no window file (422 outside); refusals as the pieces'; an asset you cannot read answers 404 whatever the window.",
+        "parameters": [
+          {
+            "name": "project",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "asset",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "revision",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "index",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "description": "The headers answer number, from 0 (decimal)."
+          },
+          {
+            "name": "inline",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Inline labels (by=label) or zero-based ordinals (by=ordinal). Inclusive range first:last or one value (D98); no step. Omitted: every inline."
+          },
+          {
+            "name": "crossline",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Crossline labels (by=label) or zero-based ordinals (by=ordinal). Inclusive range first:last or one value (D98); no step. Omitted: every crossline."
+          },
+          {
+            "name": "sample",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Zero-based sample positions, whatever by says. Inclusive range first:last or one value (D98); no step. Omitted: every sample."
+          },
+          {
+            "name": "by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "label",
+                "ordinal"
+              ]
+            },
+            "description": "Whether inline and crossline are labels on the survey grid or zero-based ordinals; required with either, no default. A 2D line is by ordinal only."
+          },
+          {
+            "name": "windows",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "2"
+              ]
+            },
+            "description": "2 asks for an 8-bit cube's window at native size (ophiolite.volume-window/2, one byte per sample). Without it an 8-bit cube is refused with native-form and nothing is read; a float volume or 2D line answers ophiolite.volume-window/1 with or without it."
+          },
+          {
+            "name": "window",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "description": "The window_id of the window document these headers belong to."
+          }
+        ],
+        "security": [
+          {
+            "scopedBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authorized trace headers",
+            "headers": {
+              "X-Ophiolite-Window": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The window_id"
+              },
+              "X-Ophiolite-Revision": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The exact revision read"
+              },
+              "X-Ophiolite-Piece": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "n/count of the headers answers"
+              },
+              "X-Content-SHA256": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "sha256 of the body"
+              }
+            },
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Versioned error; see README",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Busy: retry the same exact request after Retry-After",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/projects/{project}/wells/{well}/versions/{version}/curve-assets/{asset}/revisions/{revision}/windows": {
       "get": {
         "description": "One page of a depth window of a native well curve asset (ophiolite.curve-window/1, identity.kind native), read through the caller’s own GetCurveAsset; MD, or TVD and TVDSS from the well’s qualified trajectory and datum (otherwise 422 with the reason). A conditional request (If-None-Match) still reads the curve as the caller and answers 304 when the ETag is current.",
@@ -1180,6 +1837,13 @@
           "request_id": {
             "type": "string",
             "description": "Equals the X-Request-Id response header; quote it when reporting a failure"
+          },
+          "technical": {
+            "type": "object",
+            "description": "E140 s3: details for an application, kept out of the sentence a person reads; with code native-form on a volume window, needs (the query parameter to add, windows=2) and contract (ophiolite.volume-window/2)",
+            "additionalProperties": {
+              "type": "string"
+            }
           }
         }
       }

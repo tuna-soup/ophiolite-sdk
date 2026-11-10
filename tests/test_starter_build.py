@@ -512,3 +512,196 @@ def test_a_pack_document_takes_three_targets_one_per_application(built):
     assert not starter.not_imported(doc)
     for targets in (doc['targets'] + [target('petrel', starter.ORACLE)], [python, python], doc['targets'][:2] + [target('python', starter.ORACLE)]):
         assert refused(Refused, starter.shaped, {**doc, 'targets': targets}) == ('starter.json is not a pack document ophiolite starter build wrote.' + starter.UNCHANGED, 1)
+
+
+# --- E147 s3 C2 (strategy E147-s3-starter-descriptors-COMMIT-STRATEGY.md D3, D4; R-1 to R-3; Z-11) -----------------------
+# Mutations (recorded in the s3 Validation Record): descriptors written before the checks; creators from the catalog;
+# the evidence binding unchecked in check; the record-id binding dropped; artefacts not re-hashed in check; links followed.
+
+DESCRIPTORS = ['ro-crate-metadata.json', 'croissant.json', 'datacite.json']
+NOTICE = ('The licence of this starter pack is not one of the open licences these descriptors name; its terms are in '
+          'starter.json and files/ATTRIBUTION.md.')
+VERIFIED = 'Starter pack verified: 4 artefacts; its descriptors agree with starter.json.\n'
+
+
+def finalised(built):
+    folder, doc, keys = built
+    starter.finalise(folder / 'out', folder / 'custody')
+    return folder / 'out', json.loads((folder / 'out/starter.json').read_text())
+
+
+def written(out):
+    return {name: json.loads((out / name).read_text()) for name in DESCRIPTORS}
+
+
+def check(*argv):
+    import contextlib
+    import io
+    said = io.StringIO()
+    with contextlib.redirect_stdout(said):
+        try: cli.entrypoint(['bundle', 'check', *map(str, argv)]); code = 0
+        except SystemExit as exit_: code = exit_.code or 0
+    return code, said.getvalue()
+
+
+def test_finalise_writes_the_three_descriptors_of_the_pack(built):
+    out, doc = finalised(built)
+    ro, cr, dc = (written(out)[name] for name in DESCRIPTORS)
+    rows = [(x['contentUrl'], x['sha256']) for x in cr['distribution']]
+    assert rows == [('files/' + p, next(a['sha256'] for a in doc['targets'][0]['artefacts'] if a['path'] == p)) for p in ARTEFACTS]
+    assert [x['contentUrl'] for x in cr['distribution']] == ['files/targets/python/open_pack.py', 'files/targets/python/heads/SYN-1.geojson',
+                                                             'files/targets/python/heads/SYN-2.geojson', 'files/ATTRIBUTION.md']
+    assert (cr['name'], cr['description'], cr['datePublished']) == ('Two synthetic wells', 'Two wells, their tops and a deviation survey.', '2026-10-28')
+    assert cr['creator'] == [{'@type': 'Organization', '@id': '#creator-1', 'name': 'Synthetic Well Organisation'}]
+    assert cr['publisher'] == {'@type': 'Organization', '@id': '#publisher', 'name': 'Open Subsurface Data'} and 'license' not in cr
+    assert dc['creators'] == [{'name': 'Synthetic Well Organisation', 'nameType': 'Organizational'}] and dc['publisher'] == 'Open Subsurface Data'
+    assert dc['types'] == {'resourceTypeGeneral': 'Dataset', 'resourceType': 'Starter pack'} and 'rightsList' not in dc
+    assert NOTICE in json.dumps(ro)
+    assert [n['name'] for n in ro['@graph'] if n['@id'] == 'starter.json'] == ['The starter pack document']
+
+
+def test_a_second_finalise_writes_nothing(built, monkeypatch):
+    out, _ = finalised(built)
+    folder = built[0]
+    calls = []
+    monkeypatch.setattr(starter, 'replaced', lambda path, raw: calls.append(path))
+    starter.finalise(folder / 'out', folder / 'custody')
+    assert calls == []
+
+
+def test_a_finalise_refusal_writes_no_descriptor(built):
+    folder, doc, keys = built
+    custody_of(folder, last(doc)).unlink()
+    unchanged(folder, starter.finalise, folder / 'out', folder / 'custody')
+    assert [name for name in DESCRIPTORS if (folder / 'out' / name).exists()] == []
+
+
+def test_a_record_without_publisher_is_refused_by_finalise_with_the_words(built):
+    folder, _, _ = built
+    p, landing = folder / 'out/evidence.json', folder / 'out/landing.json'
+    evidence = json.loads(p.read_text()); del evidence['record']['publisher']
+    p.write_text(json.dumps(evidence))
+    bound = json.loads(landing.read_text()); bound['bindings']['evidence.json'] = sha(p.read_bytes()); landing.write_text(json.dumps(bound))
+    assert unchanged(folder, starter.finalise, folder / 'out', folder / 'custody') == (
+        'The catalogue record in evidence.json names no publisher.' + starter.UNCHANGED, 1)
+    assert [name for name in DESCRIPTORS if (folder / 'out' / name).exists()] == []
+
+
+@pytest.mark.parametrize('at', DESCRIPTORS + ['starter.json'])
+def test_a_finalise_interrupted_at_a_write_is_refused_by_check_and_completed_by_a_rerun(built, monkeypatch, at):
+    folder, _, _ = built
+    fired = failing(monkeypatch, lambda path, raw: path.name == at)
+    with pytest.raises(OSError): starter.finalise(folder / 'out', folder / 'custody')
+    assert fired and check(folder / 'out')[0] == 1
+    starter.finalise(folder / 'out', folder / 'custody')
+    assert check(folder / 'out') == (0, VERIFIED)
+
+
+def test_bundle_check_verifies_a_finalised_pack_in_words_and_json(built):
+    out, doc = finalised(built)
+    assert check(out) == (0, VERIFIED)
+    code, said = check(out, '--json')
+    assert (code, json.loads(said)) == (0, {'verified': True, 'starter_pack': PACK, 'artefacts': 4})
+
+
+def _link(out, name):
+    target = out.parent / ('linked-' + name.replace('/', '-'))
+    target.write_bytes((out / name).read_bytes()); (out / name).unlink(); (out / name).symlink_to(target)
+
+
+def _rewrite(name, change):
+    def edit(out):
+        doc = json.loads((out / name).read_text()); change(doc); (out / name).write_text(json.dumps(doc))
+    return edit
+
+
+CHECKS = {  # each on a finalised pack: the default line, then --details' code and place
+    'a removed artefact': (lambda out: (out / 'files/ATTRIBUTION.md').unlink(), 'files/ATTRIBUTION.md is missing', 'file-missing at files/ATTRIBUTION.md'),
+    'an artefact replaced by a link': (lambda out: _link(out, 'files/ATTRIBUTION.md'), 'files/ATTRIBUTION.md is a link or lies under one', 'file-link at files/ATTRIBUTION.md'),
+    'a changed artefact': (lambda out: (out / 'files/ATTRIBUTION.md').write_text('other'),
+                           'files/ATTRIBUTION.md is not the file starter.json names: its SHA-256 or size differs', 'file-digest at files/ATTRIBUTION.md'),
+    'malformed landing.json': (lambda out: (out / 'landing.json').write_text('{'), 'landing.json is not readable JSON', 'pack-unreadable at landing.json'),
+    'malformed evidence.json': (lambda out: (out / 'evidence.json').write_text('{'), 'evidence.json is not readable JSON', 'pack-unreadable at evidence.json'),
+    'malformed starter.json': (lambda out: (out / 'starter.json').write_text('{'), 'starter.json is not readable JSON', 'pack-unreadable at starter.json'),
+    'an edited evidence.json': (lambda out: (out / 'evidence.json').write_bytes((out / 'evidence.json').read_bytes().replace(b'"0.9.0"', b'"0.9.9"')),
+                                'evidence.json is not the evidence this pack was built from: its SHA-256 differs', 'pack-evidence at evidence.json'),
+    'another record id': (_rewrite('starter.json', lambda d: d.update(record_id=RID + '/other')),
+                          'starter.json names record %s/other and its evidence.json record %s' % (RID, RID), 'pack-record at starter.json:$.record_id'),
+    'an edited croissant licence': (_rewrite('croissant.json', lambda d: d.update(license='https://spdx.org/licenses/CC-BY-4.0')),
+                                    'the licence in croissant.json disagrees with starter.json', 'descriptor-disagrees at croissant.json:$.license'),
+    'a missing descriptor': (lambda out: (out / 'datacite.json').unlink(), 'datacite.json is missing', 'file-missing at datacite.json'),
+    'a linked descriptor': (lambda out: _link(out, 'datacite.json'), 'datacite.json cannot be read as JSON within the limits', 'descriptor-unreadable at datacite.json'),
+}
+
+
+@pytest.mark.parametrize('case', sorted(CHECKS))
+def test_bundle_check_refuses_a_pack_with_its_words_and_details(built, case):
+    out, _ = finalised(built)
+    change, words, details = CHECKS[case]
+    change(out)
+    assert check(out) == (1, 'Starter pack not verified: %s.\n' % words)
+    assert check(out, '--details') == (1, 'Starter pack not verified: %s.\n  first problem: %s\n' % (words, details))
+
+
+@pytest.mark.parametrize('name, words', [('starter.json', 'starter.json exceeds the supported size'),
+                                         ('croissant.json', 'croissant.json cannot be read as JSON within the limits')])
+def test_bundle_check_refuses_an_oversized_pack_document_or_descriptor(built, monkeypatch, name, words):
+    from ophiolite import bundle
+    out, _ = finalised(built)
+    most = max((out / n).stat().st_size for n in ('landing.json', 'evidence.json', 'starter.json'))
+    if name != 'starter.json': (out / name).write_bytes((out / name).read_bytes() + b' ' * most)  # still JSON, only larger
+    monkeypatch.setattr(bundle, 'MAX_FILE_BYTES', (out / name).stat().st_size - 1 if name == 'starter.json' else most)
+    assert check(out) == (1, 'Starter pack not verified: %s.\n' % words)
+
+
+def test_bundle_check_json_names_the_refusal_and_its_place(built):
+    out, _ = finalised(built)
+    CHECKS['an edited croissant licence'][0](out)
+    code, said = check(out, '--json')
+    error = json.loads(said)['error']
+    assert (code, error['code'], error['path'], error['message']) == (
+        1, 'descriptor-disagrees', 'croissant.json:$.license', 'The licence in croissant.json disagrees with starter.json.')
+
+
+def test_a_verb_that_adds_an_artefact_after_finalise_is_refused_until_finalise_runs_again(built):
+    """Z-11: a verb writes a result artefact and its oracle (as `starter python` does); the descriptors no longer list
+    it, so check refuses at the croissant distribution; its custody document added and finalise rerun, check passes."""
+    out, doc = finalised(built)
+    folder = built[0]
+    raw = b'{"compared": 1}\n'
+    (out / 'files/targets/python/result.json').write_bytes(raw)
+    doc['targets'][0]['artefacts'].append({'path': 'targets/python/result.json', 'sha256': sha(raw), 'bytes': len(raw)})
+    doc['targets'][0]['oracle'] = {**doc['targets'][0]['oracle'], 'compared': ['result: 1 value read back']}
+    (out / 'starter.json').write_bytes(starter.dumped(doc))
+    assert check(out, '--details') == (1, 'Starter pack not verified: the files in ro-crate-metadata.json disagrees with starter.json.\n'
+                                          '  first problem: descriptor-disagrees at ro-crate-metadata.json:$.@graph[@id=./].hasPart\n')
+    derive(folder)
+    starter.finalise(out, folder / 'custody')
+    assert check(out) == (0, VERIFIED.replace('4 artefacts', '5 artefacts'))
+
+
+def test_a_folder_with_starter_json_and_a_manifest_is_checked_as_a_bundle(built, monkeypatch):
+    out, _ = finalised(built)
+    (out / 'manifest.json').write_text('{}')
+    monkeypatch.setattr(starter, 'check', lambda out: pytest.fail('a folder with a manifest was checked as a pack'))
+    code, said = check(out)
+    assert code != 0 and 'Starter pack' not in said
+
+
+CC_BY = {'name': 'Creative Commons Attribution 4.0 International', 'spdx': 'CC-BY-4.0', 'url': 'https://creativecommons.org/licenses/by/4.0/',
+         'redistribution': 'allowed', 'attribution': 'required'}
+
+
+def test_an_open_pack_licence_is_written_as_its_spdx_url_and_rights(tmp_path, project):
+    folder = made(tmp_path)
+    records = json.loads((folder / 'records.json').read_text()); records['records'][0]['licence'] = dict(CC_BY)
+    (folder / 'records.json').write_text(json.dumps(records))
+    for p in (folder / 'custody').iterdir():
+        d = json.loads(p.read_text()); d['licence'] = dict(CC_BY); p.write_text(json.dumps(d))
+    build(folder, project)
+    derive(folder)
+    starter.finalise(folder / 'out', folder / 'custody')
+    cr, dc = written(folder / 'out')['croissant.json'], written(folder / 'out')['datacite.json']
+    assert cr['license'] == 'https://spdx.org/licenses/CC-BY-4.0'
+    assert [r['rightsIdentifier'] for r in dc['rightsList']] == ['CC-BY-4.0']
+    assert check(folder / 'out') == (0, VERIFIED)

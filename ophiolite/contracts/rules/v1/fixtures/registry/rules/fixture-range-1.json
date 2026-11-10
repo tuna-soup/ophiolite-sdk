@@ -1,0 +1,15 @@
+{
+ "schema": "ophiolite.data-rule/1",
+ "id": "fixture-range/1",
+ "title": "Fixture value below its high bound",
+ "description": "Synthetic fixture rule: every sample of the checked column is below the high bound. Not a released rule.",
+ "class": "file-local",
+ "kinds": ["las2/1", "well-tops-csv/1"],
+ "context_kinds": null,
+ "severity": "error",
+ "parameters": [
+  {"name": "high", "type": "quantity", "unit": "gAPI", "default": 300, "minimum": 0, "maximum": 1000, "compare": "exclusive", "choices": null, "source": "Synthetic fixture value; not a published bound."}
+ ],
+ "words": {"template": "{count} samples are at or above {high}, the first at {first}.", "examples": "depths"},
+ "since": "1.0.0"
+}

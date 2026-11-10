@@ -1,0 +1,14 @@
+{
+  "description": "1.1 (E116 s1): single-defect folder blocks a box writes alone, read with a v2 manifest that lists no assets and no selection: edits to box/wells.json (set/delete as ../invalid.json; recipe_set edits recipe/valid/wells-csv.json, given to validate_folder as the folder's recipe) and the code and path mapper.validate_folder names. by as recipe/invalid.json.",
+  "cases": [
+    {"name": "no-original-without-assets", "delete": [["files", 1]], "code": "role-count", "path": "$.folder.files:original", "by": "validator"},
+    {"name": "no-item-without-assets", "delete": [["files", 2]], "code": "role-count", "path": "$.folder.files:item", "by": "validator"},
+    {"name": "original-named-dot-dot", "set": [[["files", 1, "path"], "originals/.."]], "code": "role-path", "path": "$.folder.files[1].path", "by": "validator"},
+    {"name": "item-under-the-originals", "set": [[["files", 2, "path"], "originals/wells.parquet"]], "code": "role-path", "path": "$.folder.files[2].path", "by": "validator"},
+    {"name": "original-as-parquet", "set": [[["files", 1, "media_type"], "application/vnd.apache.parquet"]], "code": "media-type", "path": "$.folder.files[1].media_type", "by": "validator"},
+    {"name": "item-on-an-asset", "set": [[["files", 2, "asset"], 0]], "code": "asset-misplaced", "path": "$.folder.files[2].asset", "by": "validator"},
+    {"name": "item-of-another-target", "set": [[["files", 2, "path"], "items/tops.parquet"]], "code": "item-target", "path": "$.folder.files[2].path", "by": "validator"},
+    {"name": "recipe-of-another-target", "recipe_set": [[["target", "id"], "points"]], "code": "item-target", "path": "$.folder.files[2].path", "by": "validator"},
+    {"name": "item-path-outside-the-grammar", "set": [[["files", 2, "path"], "items/Wells.parquet"]], "code": "schema-pattern", "path": "$.folder.files[2].path", "by": "schema"}
+  ]
+}

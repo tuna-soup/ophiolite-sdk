@@ -27,7 +27,7 @@ def _paths():
 @lru_cache(maxsize=None)
 def _raw(name):
     paths = _paths()
-    if name not in paths: raise KeyError('No table type is named %r; ophiolite targets lists them.' % name)
+    if name not in paths: raise KeyError('No table type is named %r; ophiolite exchange targets lists them.' % name)
     return _read(paths[name])
 
 

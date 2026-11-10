@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ophiolite.agent-precedents/1",
+  "title": "The accepted past results on one operation an assistant may read before it proposes a plan: the answer of agents/precedents (E158)",
+  "description": "For the delegator, within the projects both the delegator may read and the credential may reach: at most `limit` result versions on `operation` that at least one person accepted and no person rejected (each author's current verdict), same project first, then by the newest qualifying verdict. Each precedent has a shape part, always present and made only of the episode shape allowlist (R-L2) plus the qualifying verdict ids, and a detail part (the verdicts' reasons and the method record), present only when the delegator may read the version and null otherwise. `request_sha256` is the digest of the canonical request with its defaults; a plan's evidence binds it with the digest of this answer ($defs/evidence). Consent is never consulted and nothing new becomes readable.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "operation", "limit", "request_sha256", "precedents"],
+  "properties": {
+    "schema": {"const": "ophiolite.agent-precedents/1"},
+    "operation": {"$ref": "#/$defs/operation"},
+    "limit": {"$ref": "#/$defs/limit"},
+    "request_sha256": {"$ref": "#/$defs/sha256"},
+    "precedents": {"type": "array", "maxItems": 20, "items": {"$ref": "#/$defs/precedent"}}
+  },
+  "$defs": {
+    "operation": {"type": "string", "pattern": "^[a-z][a-z0-9-]*/[A-Za-z][A-Za-z0-9-]*$"},
+    "limit": {"type": "integer", "minimum": 1, "maximum": 20},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "kind": {"type": "string", "pattern": "^[a-z0-9][a-z0-9./-]{0,63}$"},
+    "verdict_id": {"type": "string", "pattern": "^verdict-[0-9a-f]{32}$"},
+    "ident": {"type": "string", "minLength": 1, "maxLength": 200},
+    "request": {
+      "description": "The body of agents/precedents. `project_id` is the project searched first (an agent's own project); `limit` defaults to 5.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["project_id", "operation"],
+      "properties": {
+        "project_id": {"$ref": "#/$defs/ident"},
+        "operation": {"$ref": "#/$defs/operation"},
+        "input_kinds": {"type": "array", "minItems": 1, "maxItems": 8, "uniqueItems": true, "items": {"$ref": "#/$defs/kind"}},
+        "limit": {"$ref": "#/$defs/limit"}
+      }
+    },
+    "version": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["project_id", "asset_id", "revision"],
+      "properties": {
+        "project_id": {"$ref": "#/$defs/ident"},
+        "asset_id": {"$ref": "#/$defs/ident"},
+        "revision": {"$ref": "#/$defs/ident"}
+      }
+    },
+    "precedent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["project_id", "asset_id", "revision", "shape", "detail"],
+      "properties": {
+        "project_id": {"$ref": "#/$defs/ident"},
+        "asset_id": {"$ref": "#/$defs/ident"},
+        "revision": {"$ref": "#/$defs/ident"},
+        "shape": {"$ref": "#/$defs/shape"},
+        "detail": {"anyOf": [{"$ref": "#/$defs/detail"}, {"type": "null"}]}
+      }
+    },
+    "shape": {
+      "description": "Always present. Every key is in the episode shape allowlist (ophiolite.work-episode/1 ShapeRow and its row definitions) except `verdict_ids`, the qualifying verdicts the charter names.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operation", "parameters", "inputs", "outcome", "verdict", "verdict_ids", "at"],
+      "properties": {
+        "operation": {"$ref": "#/$defs/operation"},
+        "parameters": {"type": "array", "maxItems": 64, "items": {
+          "type": "object", "additionalProperties": false, "required": ["key", "value", "unit"],
+          "properties": {"key": {"type": "string", "minLength": 1, "maxLength": 256}, "value": {"type": "number"}, "unit": {"type": "string", "minLength": 1, "maxLength": 32}}}},
+        "inputs": {"type": "array", "maxItems": 64, "items": {
+          "type": "object", "additionalProperties": false, "required": ["kind", "sha256"],
+          "properties": {"kind": {"$ref": "#/$defs/kind"}, "sha256": {"$ref": "#/$defs/sha256"}}}},
+        "outcome": {"anyOf": [{"type": "object", "additionalProperties": false, "required": ["state"],
+          "properties": {"state": {"enum": ["accepted", "rejected", "not_checked", "withdrawn"]}}}, {"type": "null"}]},
+        "verdict": {"const": "accepted"},
+        "verdict_ids": {"type": "array", "minItems": 1, "maxItems": 64, "uniqueItems": true, "items": {"$ref": "#/$defs/verdict_id"}},
+        "at": {"type": "number"}
+      }
+    },
+    "detail": {
+      "description": "Present only when the delegator may read the version: every current verdict's reason in order, and how the version was made.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reasons", "method"],
+      "properties": {
+        "reasons": {"type": "array", "minItems": 1, "maxItems": 64, "items": {
+          "type": "object", "additionalProperties": false, "required": ["verdict_id", "verdict", "reason"],
+          "properties": {"verdict_id": {"$ref": "#/$defs/verdict_id"}, "verdict": {"const": "accepted"},
+            "reason": {"anyOf": [{"type": "string", "maxLength": 2000}, {"type": "null"}]}}}},
+        "method": {"anyOf": [{"$ref": "#/$defs/MethodRecord"}, {"type": "null"}]}
+      }
+    },
+    "MethodRecord": {
+      "description": "A copy of the asset contract's MethodRecord (contracts/assets/v1/schema.json); a test keeps the two equal.",
+      "additionalProperties": false,
+      "properties": {
+        "name": {"maxLength": 80, "minLength": 1, "title": "Name", "type": "string"},
+        "declared": {"default": true, "title": "Declared", "type": "boolean"},
+        "library": {"default": "", "maxLength": 80, "title": "Library", "type": "string"},
+        "version": {"default": "", "maxLength": 40, "title": "Version", "type": "string"},
+        "parameters": {"additionalProperties": true, "title": "Parameters", "type": "object"},
+        "script_sha256": {"anyOf": [{"pattern": "^[0-9a-f]{64}$", "type": "string"}, {"type": "null"}], "default": null, "title": "Script Sha256"}
+      },
+      "required": ["name"],
+      "title": "MethodRecord",
+      "type": "object"
+    },
+    "evidence": {
+      "description": "A plan's `precedents` evidence: one entry per agents/precedents answer the agent read before proposing, in order; an empty list when it read none, never null. Reserved here; agent_evidence accepts it from slice 2.",
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["request_sha256", "response_sha256", "verdict_ids", "versions"],
+        "properties": {
+          "request_sha256": {"$ref": "#/$defs/sha256"},
+          "response_sha256": {"$ref": "#/$defs/sha256"},
+          "verdict_ids": {"type": "array", "maxItems": 1280, "uniqueItems": true, "items": {"$ref": "#/$defs/verdict_id"}},
+          "versions": {"type": "array", "maxItems": 20, "items": {"$ref": "#/$defs/version"}}
+        }
+      }
+    }
+  }
+}

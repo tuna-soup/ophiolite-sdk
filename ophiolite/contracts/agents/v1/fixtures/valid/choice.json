@@ -1,0 +1,16 @@
+{
+  "error": "This step needs a decision from the person the agent acts for",
+  "code": "choice-required",
+  "message": "This step needs a decision from the person the agent acts for",
+  "remedy": "Show the question and the choices to the person you act for; they answer it themselves.",
+  "docs": "/docs/reference/errors/#choice-required",
+  "request_id": "req-example-1",
+  "question": "Which of the two options should this step take?",
+  "choices": [
+    {"id": "c1", "fragment": {"option": "first"}},
+    {"id": "c2", "fragment": {"option": "second"}}
+  ],
+  "why": {"class": "example", "rule": "example"},
+  "answered_by": "person",
+  "choice_token": "ct1.AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8"
+}

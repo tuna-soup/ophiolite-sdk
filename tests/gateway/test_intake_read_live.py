@@ -106,7 +106,7 @@ def test_a_report_only_a_read_procedure_reads_waits_and_its_report_names_the_com
     assert (row['state'], report.counts['needs-procedure']) == ('needs-procedure', 1)
     assert [v['digest'] for v in row['procedures']] == [setting['digest']]
     assert report.rows()[0]['result'] == 'Can be read on your computer'
-    assert "    To read it on this computer: ophiolite intake read %s 'end of well report.pdf'" % report.run_id in report.text().splitlines()
+    assert "    To read it on this computer: ophiolite exchange intake read %s 'end of well report.pdf'" % report.run_id in report.text().splitlines()
 
 
 def test_bob_is_asked_once_and_both_outputs_land_in_the_same_upload(setting):

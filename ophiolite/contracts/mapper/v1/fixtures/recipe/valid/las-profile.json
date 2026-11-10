@@ -1,0 +1,26 @@
+{
+  "schema": "ophiolite.mapper-recipe/1",
+  "created": {"tool": "ophiolite-mapper 0.1.0", "rules_version": "1.5.0", "at": "2026-11-02T12:00:00.250Z"},
+  "source": {
+    "kind": "file",
+    "locator": {"path": "logs/SYN-A1.las"},
+    "reader": "las2/1",
+    "digest": {"algorithm": "sha256", "over": "bytes", "value": "3333333333333333333333333333333333333333333333333333333333333333"},
+    "bytes": 9000
+  },
+  "target": {"kind": "reader-profile", "id": "las2/1"},
+  "layout": {"id": "las2-wrapped-no", "evidence": "inferred", "decision": {"by": "A. Reviewer", "at": "2026-11-02T12:05:00Z", "action": "accept"}},
+  "identity": {"basis": "provisional", "column": null, "decision": {"by": "A. Reviewer", "at": "2026-11-02T12:05:00Z", "action": "accept"}},
+  "fields": [],
+  "columns": {
+    "GR": {"unit": "gAPI", "quantity": "API gamma ray", "missing": ["-999.25"]},
+    "RHOB": {"unit": "g/cm3", "quantity": "mass per volume", "missing": ["-999.25"]}
+  },
+  "declarations": [],
+  "missing": ["-999.25"],
+  "wells": [
+    {"spelling": "SYN A-1", "match": "normalised", "canonical": "SYN-A1", "entity": {"kind": "wellbore", "key": "SYN A-1", "basis": "provisional", "well": {"key": "SYN-A1", "basis": "provisional"}}, "decision": {"by": "A. Reviewer", "at": "2026-11-02T12:06:00Z", "action": "new-entity"}}
+  ],
+  "findings": [],
+  "osdu": {"namespace": "synthetic", "legal_tag": "synthetic-legal-tag", "owners": ["owners@synthetic"], "viewers": ["viewers@synthetic"]}
+}

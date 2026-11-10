@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "ophiolite.procedure-template-pairs/1",
-  "title": "The step and kind pairs `ophiolite procedures new` can start (E112 s0)",
+  "title": "The step and kind pairs `ophiolite tools new` can start (E112 s0)",
   "description": "SDK-local: which step x kind pairs have a start, and the sentence each other pair says. Every step x every kind is in exactly one of listed and refused; that, and agreement with the procedure rules, is checked by the loader (ophiolite.procedure_templates).",
   "type": "object",
   "additionalProperties": false,

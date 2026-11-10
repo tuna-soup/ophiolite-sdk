@@ -186,7 +186,7 @@ def test_a_run_on_held_v2_checks_v1_exactly_and_publishes_nothing(project):
     Exchange(ClientTransport(w), w.work).get('tops-a', output=w.root / 'got')  # this folder holds v2, the head
     before = (w.work / 'held.json').read_bytes()
     text, payload = ran(w)
-    assert text == 'Ran Tops vs reference well, version 1, on this computer: differed. Nothing was published; to report it to the project, run: ophiolite checks publish run-1'
+    assert text == 'Ran Tops vs reference well, version 1, on this computer: differed. Nothing was published; to report it to the project, run: ophiolite tools checks publish run-1'
     report = json.loads((w.root / 'run-1' / 'check.json').read_text())
     assert report == {'kind': 'procedure-report', 'subject': {'kind': 'result', 'asset_id': 'tops-a', 'revision': REV1}, 'procedure_digest': w.digest,
                       'reference': {'kind': 'project-version', 'asset_id': 'tops-ref', 'revision': REF}, 'settings': {'mode': 'compare'},

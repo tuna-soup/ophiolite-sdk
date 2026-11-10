@@ -25,5 +25,5 @@ def test_execute_notebook_figure_descriptor_and_recovery(tmp_path,monkeypatch):
     assert not re.search(r'las2/1|synthetic-file|[0-9a-f]{64}|source-reference',visible)
     assert 'las2/1' in html
     text='\n'.join(output.get('text','') for output in outputs)
-    assert 'different depth units' in text and 'ophiolite login' in text
+    assert 'different depth units' in text and 'ophiolite account login' in text
     assert all(output.output_type!='error' for output in outputs)

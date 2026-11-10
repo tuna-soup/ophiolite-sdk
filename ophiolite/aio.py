@@ -3,11 +3,12 @@ import asyncio
 from functools import partial
 import json
 import math
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
 import anyio
 import httpx
 from . import _client_header  # E93
 from . import _core
+from . import _deprecation  # E148
 from . import _ranges  # E100d1
 from .client import Client, CurveSet, PROFILES
 from .client import (PROVENANCE_BYTES,NO_SOURCE_RECORDS,_provenance_path,_provenance_of,_no_provenance_route,  # E122 s5b
@@ -71,6 +72,7 @@ class AsyncClient(Client):
         for attempt in range(3):
             try:
                 async with self.http.stream('GET',self.url+path,headers=headers,follow_redirects=False) as response:
+                    _deprecation.note(_deprecation.of(self),'GET',self.url+path,response)
                     delay=0
                     if response.status_code in (429,503):
                         try:delay=float(response.headers.get('Retry-After','0'))
@@ -85,7 +87,7 @@ class AsyncClient(Client):
                         if response.status_code==422 and meta.get('message'):message=meta['message']  # H48: the server's reason, not the generic sentence
                         if kind is Busy:raise Busy(message,meta.get('remedy',''),status=response.status_code,retry_after=delay,code=meta.get('code'),**policy.carried(meta))
                         raise kind(message,meta.get('remedy',''),status=response.status_code,code=meta.get('code'),**policy.carried(meta))
-                    if answer is not None:answer.update({k.lower():v for k,v in response.headers.items() if k.lower() in ('content-range','x-content-sha256','etag','x-ophiolite-access-generation')})  # E100a: window validators
+                    if answer is not None:answer.update({k.lower():v for k,v in response.headers.items() if k.lower() in ('content-range','x-content-sha256','etag','x-ophiolite-access-generation','x-ophiolite-revision','content-disposition','x-ophiolite-window','x-ophiolite-piece')})  # E100a: window validators; E141 (R1-7): sync parity and a piece's identity
                     content=bytearray()
                     async for chunk in response.aiter_bytes():
                         content.extend(chunk)
@@ -166,6 +168,55 @@ class AsyncClient(Client):
         body=await self._artifact(path+'/representations/'+quote(normalized['id'],safe=''),normalized['bytes'])  # E139 s2: by ranges above the bound
         return _core.typed_result(data,body,artifact)
 
+    async def read_window(self,asset,revision,*,inline=None,crossline=None,trace=None,sample=None,by=None,description=None):
+        """E141: Client.read_window with the same checks (ophiolite.volume_windows.VolumeWindowResult)."""
+        reader=await self.iter_window(asset,revision,inline=inline,crossline=crossline,trace=trace,sample=sample,by=by,description=description)
+        from .volume_windows import VolumeWindowResult
+        traces=[]
+        async for piece in reader:traces.extend(piece.values)
+        return VolumeWindowResult(reader.window,traces)
+
+    async def iter_window(self,asset,revision,*,inline=None,crossline=None,trace=None,sample=None,by=None,description=None):
+        """E141: Client.iter_window as an AsyncWindowReader (`async for`, `aclose()`, `async with`)."""
+        from .volume_windows import AsyncWindowReader,Window,asked,check_document,parse_window,window_path
+        if not all(isinstance(x,str) and x for x in (asset,revision)):raise Refused('Choose an asset and exact revision.')
+        query=parse_window(inline=inline,crossline=crossline,trace=trace,sample=sample,by=by)
+        base=window_path(self.prefix,asset,revision)
+        description=await self._window_description(asset,revision,description)  # E140 s3: first, so a native cube asks windows=2 (R5)
+        request=asked(query,description)
+        document=await self._window_json(base+('?'+urlencode(request) if request else ''))
+        return AsyncWindowReader(self,Window(check_document(document,asset=asset,revision=revision,query=query,description=description),query,description,base))
+
+    async def _window_get(self,path,limit,answer=None):
+        from .volume_windows import server_refusal
+        try:return await self._get(path,limit,answer=answer)
+        except OphioliteError as error:
+            refused=server_refusal(error)
+            if refused is not None:raise refused from None
+            raise
+
+    async def _window_json(self,path):
+        from .volume_windows import DOCUMENT_BYTES
+        try:return json.loads(await self._window_get(path,DOCUMENT_BYTES))
+        except (ValueError,UnicodeError) as error:
+            if isinstance(error,OphioliteError):raise
+            raise VerificationFailed('The window document is not valid JSON.') from None
+
+    async def _window_description(self,asset,revision,description):
+        from .volume_windows import WindowDescription,describe_line,describe_volume,line_representation
+        if description is not None:
+            if not isinstance(description,WindowDescription) or (description.asset,description.revision)!=(asset,revision):raise Refused('description= is a window description of this exact revision.')
+            return description
+        path=self.prefix+'/'+quote(asset,safe='')+'/revisions/'+quote(revision,safe='')
+        descriptor=await self._json(path+'?'+PROFILES[1:],256*1024)
+        _core.verify_typed_descriptor(descriptor,self.project,asset,revision)
+        found=describe_volume(asset,revision,descriptor)
+        if found is not None:return found
+        rep=line_representation(descriptor)
+        raw=await self._artifact(path+'/representations/'+quote(rep['id'],safe=''),rep['bytes'])
+        _core.verify_bytes(rep,raw)
+        return describe_line(asset,revision,raw)
+
     async def read_slice(self,asset,revision,axis,label,*,volume=None):
         """E16: one slice of a seismic volume; same checks as Client.read_slice."""
         if axis not in ('inline','crossline','sample') or type(label) is not int:raise Refused('Choose an inline, crossline or sample slice by its whole number.')
@@ -226,6 +277,7 @@ class AsyncClient(Client):
             if (self.url,self.project)!=(url,project):raise RecoveryUnavailable('The gateway or project changed during this operation.')
             try:
                 async with self.http.stream('POST',url+path,content=raw,headers=captured,follow_redirects=False) as response:
+                    _deprecation.note(_deprecation.of(self),'POST',url+path,response)
                     refusal=None if response.is_success else await policy.bounded(response)
                     if response.status_code in (429,503) and attempt+1<attempts and policy.retried(response,refusal):
                         await anyio.sleep(policy.delay(response));continue
@@ -251,6 +303,7 @@ class AsyncClient(Client):
             async with self.http.stream('POST',self.url+'/api/v1/application-access/status',
                  content=json_bytes({'id':headers['X-Ophiolite-Application-Grant']}),
                  headers=_client_header.stamp({**headers,'Content-Type':'application/json'}),follow_redirects=False) as response:
+                _deprecation.note(_deprecation.of(self),'POST',self.url+'/api/v1/application-access/status',response)
                 policy.status(response,'status',None if response.is_success else await policy.bounded(response));raw=bytearray()
                 async for chunk in response.aiter_bytes():
                     raw.extend(chunk)
@@ -267,6 +320,22 @@ class AsyncClient(Client):
         return result
 
     def work_folder(self,path,**options):return AsyncWorkFolder(self,path,**options)
+
+    async def _listed(self,name,/,*args,**kwargs):
+        """E142 s1: a paged read of Client gathered into a list in one worker (its HTTP stays on this loop)."""
+        return await _complete(anyio.to_thread.run_sync(lambda:list(getattr(_ApplicationDriver(self),name)(*args,**kwargs)),abandon_on_cancel=False))
+
+    async def surveys(self):
+        """E142 s1: the surveys you may see, as a list; see Client.surveys()."""
+        return await self._listed('surveys')
+
+    async def survey_pages(self,survey_id,revision=None,*,view='revision',limit=None):
+        """E142 s1: every page of one survey revision, as a list; see Client.survey_pages()."""
+        return await self._listed('survey_pages',survey_id,revision,view=view,limit=limit)
+
+    async def survey_history(self,survey_id):
+        """E142 s1: the survey's events you may read, newest first, as a list; see Client.survey_history()."""
+        return await self._listed('survey_history',survey_id)
 
     async def sources(self):
         """E50a: the source selections you bound in this project (every profile); see Client.sources()."""
@@ -343,7 +412,9 @@ def _async_work(name):
 
 for _name in ('configure','start','run_input','publish','download','results','history','grants','share','options','inspect','export',
               'upload_las','inspect_las','upload_info','members','result_preview','result_download','recover',
-              'upload_data','served_limits','download_original'):  # E54: files sent in parts, originals read by ranges
+              'upload_data','served_limits','download_original',  # E54: files sent in parts, originals read by ranges
+              'survey','create_survey','add_survey_members','remove_survey_members','replace_survey_member','relate_survey_members',
+              'unrelate_survey_members','rename_survey','identify_survey','withdraw_survey'):  # E142 s1
     setattr(AsyncClient,_name,_async_application(_name))
 for _name in ('configure','start','input','publish','download','upload_las','recover'):
     setattr(AsyncWorkFolder,_name,_async_work(_name))

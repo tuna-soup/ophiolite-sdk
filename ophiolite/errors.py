@@ -35,6 +35,24 @@ class RightsEnded(PermissionRefused):
         super().__init__(message,recovery,**kw)
         self.last_day=last_day
 
+class ChoiceRequired(IntegrityConflict):
+    """E150: a step needs a decision only the person the agent acts for can make (409, ophiolite.agent-choice/1). The five
+    fields keep their wire names: `question`, `choices` ([{id, fragment}], c1 to c8 in order), `why` ({class, rule}),
+    `answered_by` ('person') and `choice_token`. A field outside the SDK's bounds is dropped (None); `complete` is then
+    False and the message says so."""
+    code='choice-required'
+    FIELDS=('question','choices','why','answered_by','choice_token')
+
+    def __init__(self,message,recovery='',*,question=None,choices=None,why=None,answered_by=None,choice_token=None,**kw):
+        self.question,self.choices,self.why,self.answered_by,self.choice_token=question,choices,why,answered_by,choice_token
+        self.complete=None not in (question,choices,why,answered_by,choice_token)
+        if not self.complete:message+=' (the decision arrived incomplete; ask the person in Workspace)'
+        super().__init__(message,recovery,**kw)
+
+class ChoiceRefused(PermissionRefused): code='choice-refused'  # E150: the choice token was used, foreign, stale, or not the delegator's
+class DryRunUnavailable(Unavailable): code='dry-run-unavailable'  # E150: no dry run of this operation on this deployment yet; nothing ran
+class DryRunRefused(Refused): code='dry-run-refused'  # E150: dry_run in a proposal, or not a boolean
+
 class ResyncRequired(OphioliteError): code='resync-required'  # E28: the server no longer holds this cursor (CURSOR_EXPIRED)
 class AxisMismatch(OphioliteError):
     code='axis-mismatch'
@@ -67,6 +85,7 @@ class ValidationFailed(Refused):
 class RecoveryUnavailable(Refused):code='recovery-unavailable'
 class ShareOutcomeUnknown(Unavailable):code='share-outcome-unknown'
 class ImportIncomplete(OphioliteError):code='import-incomplete'
+class RestoreIncomplete(ImportIncomplete):"""E162 s2a: ophiolite.restore left an item not restored; details['assets'] has one row per bundle item."""
 
 
 # E50a: reading a connected source. Server-sent ones keep the server's code, message, remedy, docs and request id;

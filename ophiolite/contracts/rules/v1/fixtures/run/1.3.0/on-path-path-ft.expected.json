@@ -1,0 +1,9 @@
+{
+ "schema": "ophiolite.rule-results/1",
+ "kind": "well-tops-csv/1",
+ "registry_version": "1.3.0",
+ "results": [
+  {"rule": "top-on-path/1", "state": "failed", "count": 4, "examples": [{"row": 1, "depth": 0.0, "value": 0.0}, {"row": 3, "depth": 3000.0, "value": 3000.0}, {"row": 4, "depth": 3000.001, "value": 3000.001}, {"row": 5, "depth": 3500.0, "value": 3500.0}], "parameters": {}, "reason": null, "context": [{"asset_id": "path-1", "revision": "r1", "kind": "deviation-csv/1"}]},
+  {"rule": "tops-unique-name/1", "state": "passed", "count": 0, "examples": [], "parameters": {}, "reason": null, "context": null}
+ ]
+}

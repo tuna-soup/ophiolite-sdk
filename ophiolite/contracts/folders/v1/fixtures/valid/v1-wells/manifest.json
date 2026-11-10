@@ -1,0 +1,99 @@
+{
+  "schema": "ophiolite.portable-bundle/2",
+  "bundle_version": "2.12.0",
+  "created_at": "2026-11-04T08:10:40Z",
+  "exporter": {
+    "name": "ophiolite-mapper",
+    "version": "0.4.0"
+  },
+  "scope": "selection",
+  "selection": [],
+  "assets": [],
+  "groups": null,
+  "recommendations": null,
+  "limits": {
+    "max_assets": 128,
+    "max_file_bytes": 33554432,
+    "max_total_bytes": 536870912
+  },
+  "notice": "Checksums show the integrity of this copy, not authorship or scientific correctness. Exported copies cannot be recalled; holding one grants no new upstream, sharing or AI-training rights.",
+  "folder": {
+    "schema": "ophiolite.project-folder/1",
+    "mapper": "ophiolite-mapper 0.4.0",
+    "recipe": {
+      "path": "recipe.json",
+      "sha256": "bb30eeefb567902186a02c61c942874a5637646ef16661ad55916d2e834c5071"
+    },
+    "osdu": {
+      "tag": "v0.30.1",
+      "commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
+      "namespace": "synthetic"
+    },
+    "files": [
+      {
+        "path": "recipe.json",
+        "role": "recipe",
+        "media_type": "application/json",
+        "asset": null,
+        "sha256": "bb30eeefb567902186a02c61c942874a5637646ef16661ad55916d2e834c5071",
+        "bytes": 3556
+      },
+      {
+        "path": "originals/wells.csv",
+        "role": "original",
+        "media_type": "text/csv",
+        "asset": null,
+        "sha256": "a4755b91553e5a0387fc1c5c1389691ed5851548b53836ed25b0bb06618c1f83",
+        "bytes": 172
+      },
+      {
+        "path": "items/wells.parquet",
+        "role": "item",
+        "media_type": "application/vnd.apache.parquet",
+        "asset": null,
+        "sha256": "1d0f874faa4a4cd8ff91f1b19c2fb6ab03d452ab7cea508242edc72ab52e372e",
+        "bytes": 3080
+      },
+      {
+        "path": "identity/entities.parquet",
+        "role": "identity-entities",
+        "media_type": "application/vnd.apache.parquet",
+        "asset": null,
+        "sha256": "3830a444aa62fc06051079e76f05685cb2a20dc2348080a93e2a5f4878ed115e",
+        "bytes": 2372
+      },
+      {
+        "path": "identity/aliases.parquet",
+        "role": "identity-aliases",
+        "media_type": "application/vnd.apache.parquet",
+        "asset": null,
+        "sha256": "01706455a25e695587322510dd0ae1addd187a32d3ff3cdb1d585261dd2c9acb",
+        "bytes": 1689
+      },
+      {
+        "path": "identity/relationships.parquet",
+        "role": "identity-relationships",
+        "media_type": "application/vnd.apache.parquet",
+        "asset": null,
+        "sha256": "a20e1e07704534e07741da5abdc8a45aadedd1b56f56558bdfd7a8983f740fcc",
+        "bytes": 981
+      },
+      {
+        "path": "lineage/prov.json",
+        "role": "lineage-prov",
+        "media_type": "application/json",
+        "asset": null,
+        "sha256": "25c19855d1993d1c98d12fe9ec95b88d9096214b288fb848aa01bbc493132350",
+        "bytes": 2345
+      },
+      {
+        "path": "osdu/manifest.json",
+        "role": "osdu-manifest",
+        "media_type": "application/json",
+        "asset": null,
+        "sha256": "37124f2854851e51241feffe231dd13ec6b2b96798931e509879f5da917d8e13",
+        "bytes": 2931
+      }
+    ]
+  }
+}

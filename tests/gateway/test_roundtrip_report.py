@@ -377,7 +377,7 @@ def test_a_mandatory_leg_stays_mandatory_when_its_route_is_deleted_from_the_tabl
 def test_the_report_names_the_table_it_was_made_under_and_both_removals():
     report = example()
     report['tolerances']['sha256'], report['run']['storage_removed'] = D('an edited table'), False
-    assert judged(report) == ['The report was judged against another tolerance table (version 2, sha256 %s).' % D('an edited table'),
+    assert judged(report) == ['The report was judged against another tolerance table (version 4, sha256 %s).' % D('an edited table'),
                               'The run did not verify its storage removed, so the report is not clean.']
 
 
@@ -435,27 +435,36 @@ def test_each_frozen_e129_negative_disagrees_and_a_copying_adapter_misses_it(nam
 
 # --- E138 s1 §5 mutations on the record (strategy rev 5 D3, D4, D10; R1-1, R1-4, R1-14, R2-2, R2-9e, R2-9f) ----------
 
-def horizon_waiting(r, total, defined, kind='horizon-3d', obj='Top'):
-    """Every row of one object stated as waiting on E139 s2 with node counts."""
+REFUSED = 'This horizon has 100001 nodes; this deployment accepts at most 100000. Nothing was added.'
+
+
+def horizon_refused(r, total, defined, admission, kind='horizon-3d', obj='Top', state='failed'):
+    """E138 s3 D3: every judged row of one object failed on the project's refusal by number, with its node counts."""
     for x in r['rows']:
         if (x['kind'], x['object']) == (kind, obj) and x['state'] != 'unsupported':
-            x.update(state='not-yet', evidence={'waits_on': 'E139 s2', 'nodes': {'total': total, 'defined': defined}}, quantities=[], examples=[], tool=None)
-    r['inventory']['selected'] = [i for i in r['inventory']['selected'] if (i['kind'], i['object']) != (kind, obj)]
+            evidence = {'error': REFUSED, 'class': 'other'} if state == 'failed' else {'waits_on': 'deposit e139'}
+            x.update(state=state, evidence={**evidence, 'nodes': {'total': total, 'defined': defined, 'admission': admission}}, quantities=[], examples=[])
 
 
-def test_mutation_3_only_a_horizon_above_the_admission_waits_on_e139_s2():
+def test_h1_only_a_failed_horizon_above_the_served_admission_carries_its_node_counts():
+    """E138 s3 H1 (report side): the s1 waiting row on E139 s2 is gone; a horizon above the served M is failed with
+    {total, defined, admission}, and the counts on anything else are a fault of the report."""
     report = example()
-    horizon_waiting(report, 100_001, 90_000)
+    horizon_refused(report, 100_001, 100_001, 100_000)
     assert judged(report) == []
+    legs = ('opendtect-to-project', 'project-to-sdk', 'project-to-qgis')
+    sentence = '%s %s %s: only a failed horizon of more nodes than the admission carries its node counts.'
+    for args, kind, obj in [((100_000, 100_000, 100_000), 'horizon-3d', 'Top'), ((100_001, 100_002, 100_000), 'horizon-3d', 'Top')]:
+        report = example()
+        horizon_refused(report, *args)
+        assert judged(report) == [sentence % (kind, obj, leg) for leg in legs]
     report = example()
-    horizon_waiting(report, 100_000, 90_000)
-    assert judged(report) == ['horizon-3d Top %s: only a horizon of more than 100000 nodes in total waits on E139 s2, with its node counts.' % leg
-                              for leg in ('opendtect-to-project', 'project-to-sdk', 'project-to-qgis')]
+    horizon_refused(report, 100_001, 100_001, 100_000, 'well-path', 'SYN-A')
+    assert [p for p in judged(report) if 'node counts' in p] == [sentence % ('well-path', 'SYN-A', leg) for leg in ('opendtect-to-project', 'project-to-sdk', 'project-to-resinsight')]
     report = example()
-    horizon_waiting(report, 100_001, 90_000, 'well-path', 'SYN-A')
-    assert [p for p in judged(report) if 'E139 s2' in p] == [
-        'well-path SYN-A %s: only a horizon of more than 100000 nodes in total waits on E139 s2, with its node counts.' % leg
-        for leg in ('opendtect-to-project', 'project-to-sdk', 'project-to-resinsight')]
+    horizon_refused(report, 100_001, 100_001, 100_000, state='not-yet')
+    assert [p for p in judged(report) if 'node counts' in p] == [sentence % ('horizon-3d', 'Top', leg) for leg in legs]
+    assert not any('E139 s2' in p for p in judged(report))  # the s1 wait is no longer a named deposit
 
 
 def test_mutation_2_selected_must_be_the_enumeration_less_the_waiting_objects():
@@ -493,10 +502,10 @@ def test_mutation_11_a_kind_that_could_not_be_listed_is_failed_never_absent():
 
 
 def identities(r):
-    """A listing with two 2D horizons and one Fault3D: three per-identity rows, no whole-kind row for those kinds (E138
-    s2: lines are judged, so the 2D horizons wait here)."""
-    r['rows'] = [x for x in r['rows'] if x['kind'] not in ('horizon-2d', 'fault-sticks')]
-    for kind, obj in (('horizon-2d', 'L1'), ('horizon-2d', 'L2'), ('fault-sticks', 'F1')):
+    """A listing with three 2D horizons: three per-identity rows, no whole-kind row for that kind (E138 s2: lines are
+    judged; E138 s3: so are fault sets, so the 2D horizons alone wait here)."""
+    r['rows'] = [x for x in r['rows'] if x['kind'] != 'horizon-2d']
+    for kind, obj in (('horizon-2d', 'L1'), ('horizon-2d', 'L2'), ('horizon-2d', 'L3')):
         r['inventory']['enumerated'].append({'kind': kind, 'object': obj})
         r['rows'].append(waiting(kind, obj, '*', ev.WAITING[kind]))
 
@@ -504,7 +513,7 @@ def identities(r):
 def test_mutation_12_each_listed_identity_of_a_waiting_kind_has_its_row():
     report = example()
     identities(report)
-    assert judged(report) == [] and [r['evidence']['waits_on'] for r in report['rows'] if r['leg'] == '*' and r['object'] != '*'] == ['E137 s6', 'E137 s6', 'E137 s2']
+    assert judged(report) == [] and [r['evidence']['waits_on'] for r in report['rows'] if r['leg'] == '*' and r['object'] != '*'] == ['E137 s6'] * 3
     report = example()
     identities(report)
     report['rows'] = [r for r in report['rows'] if r['object'] != 'L2']
@@ -516,11 +525,18 @@ def test_mutation_12_each_listed_identity_of_a_waiting_kind_has_its_row():
     assert judged(report) == ['horizon-2d * *: a whole-kind row of an enumerated kind is absent, from an enumeration that lists none.',
                               'horizon-2d L1 *: missing (each identity of a kind that waits has its row).',
                               'horizon-2d L2 *: missing (each identity of a kind that waits has its row).',
-                              'The selected objects are not the enumerated ones less those whose every row waits (5 selected, 7 expected).']
+                              'horizon-2d L3 *: missing (each identity of a kind that waits has its row).',
+                              'The selected objects are not the enumerated ones less those whose every row waits (5 selected, 8 expected).']
     report = example()
+    report['inventory']['enumerated'].append({'kind': 'horizon-2d', 'object': 'L1'})
+    report['rows'].append(waiting('horizon-2d', 'L1', '*', 'E137 s6'))
+    assert judged(report) == ['horizon-2d * *: a whole-kind row of an enumerated kind is absent, from an enumeration that lists none.']
+    report = example()  # E138 s3 D1: a fault set no longer waits; its identity row is refused and its legs are missing
     report['inventory']['enumerated'].append({'kind': 'fault-sticks', 'object': 'F1'})
-    report['rows'].append(waiting('fault-sticks', 'F1', '*', 'E137 s2'))
-    assert judged(report) == ['fault-sticks * *: a whole-kind row of an enumerated kind is absent, from an enumeration that lists none.']
+    report['rows'] = [r for r in report['rows'] if r['kind'] != 'fault-sticks'] + [waiting('fault-sticks', 'F1', '*', 'E137 s2')]
+    assert judged(report) == ['fault-sticks F1 *: not a leg this kind has.'] + [
+        'fault-sticks F1 %s: missing (a mandatory leg).' % leg for leg in ev.PER_OBJECT['fault-sticks']] + [
+        'fault-sticks F1 project-to-resinsight: missing (a leg with no route is stated as unsupported).']
 
 
 def stopped(r):

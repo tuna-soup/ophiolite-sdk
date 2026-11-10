@@ -143,6 +143,20 @@ def test_a_one_trace_line_is_outlined_as_a_point(tmp_path, lines_once):
     assert (feature['geometry'], feature['properties']['kind']) == ({'type': 'Point', 'coordinates': WGS84[0]}, 'survey-2d')
 
 
+def test_a_float32_stop_exports_and_reads_back(tmp_path, monkeypatch):
+    """E137 s6a C1 (F-1b, the USGS shape): odbind gives the stop one float32 unit past the lattice (108.00000762939453
+    for 108 ms); the export reads the line back with no refusal and its report states the file's axis. Catches: the
+    exporter's report keeping odbind's stop (the SDK refuses "the line report in export.json is not its own")."""
+    folder, out = made(tmp_path / 'definition', edit=lambda d: lined(d, ('Edge/f32stop',))), tmp_path / 'out'
+    out.mkdir()
+    monkeypatch.setenv('PYTHONPATH', os.pathsep.join([str(FAKE), str(CONNECTOR)]))
+    monkeypatch.setenv('FAKE_ODBIND_VARIANT', 'edge')
+    report, export = run(folder, out)
+    doc = json.loads((export / 'files' / 'export.json').read_text())
+    assert doc['lines']['Edge/f32stop']['z'] == [100.0, 108.0, 4.0]
+    assert [f['object'] for f in report['files'] if f['kind'] == 'seismic-2d'] == ['Edge/f32stop']
+
+
 def test_lines_are_landed_only_in_time_in_milliseconds(lines_once):
     """R1-1: the declarations and the agreement each refuse a survey in depth for lines, by name; cubes and horizons
     in depth keep landing."""

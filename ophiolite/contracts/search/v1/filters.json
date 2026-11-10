@@ -1,0 +1,39 @@
+{
+  "schema": "ophiolite.search/filters/1",
+  "title": "The fields of a question to an organisation",
+  "description": "The closed list of fields a question (ophiolite.search-request/2) may carry, with their JSON types and limits in the published schema's words, and whether each binds the question (a cursor is valid only for the question it was given for; `cursor` and `limit` do not bind it). A key outside this list is refused, naming it. A question carries words or at least one filter.",
+  "request_schema": "ophiolite.search-request/2",
+  "answer_schema": "ophiolite.search/2",
+  "answer_schema_by_meaning": "ophiolite.search/3",
+  "fields": [
+    {"name": "organization_id", "type": "string", "required": true, "minLength": 1, "maxLength": 80, "binds_question": true},
+    {"name": "text", "type": "string", "required": false, "minLength": 1, "maxLength": 200, "pattern": "\\S", "binds_question": true},
+    {"name": "method", "type": "string", "required": false, "enum": ["words", "embedding"], "binds_question": true},
+    {"name": "kinds", "type": "array", "required": false, "minItems": 1, "maxItems": 12, "uniqueItems": true, "binds_question": true},
+    {"name": "well", "type": "string", "required": false, "minLength": 1, "maxLength": 120, "binds_question": true},
+    {"name": "bbox", "type": "object", "required": false, "binds_question": true},
+    {"name": "since", "type": "string", "required": false, "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$", "binds_question": true},
+    {"name": "until", "type": "string", "required": false, "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$", "binds_question": true},
+    {"name": "published_by", "type": "string", "required": false, "minLength": 1, "maxLength": 80, "binds_question": true},
+    {"name": "projects", "type": "array", "required": false, "minItems": 1, "maxItems": 100, "uniqueItems": true, "binds_question": true},
+    {"name": "include_archived", "type": "boolean", "required": false, "default": false, "binds_question": true},
+    {"name": "cursor", "type": "string", "required": false, "minLength": 1, "maxLength": 2000, "binds_question": false},
+    {"name": "limit", "type": "integer", "required": false, "minimum": 1, "maximum": 50, "default": 20, "binds_question": false}
+  ],
+  "bbox": {
+    "fields": [
+      {"name": "minx", "type": "number", "required": true},
+      {"name": "miny", "type": "number", "required": true},
+      {"name": "maxx", "type": "number", "required": true},
+      {"name": "maxy", "type": "number", "required": true},
+      {"name": "crs", "type": "string", "required": false, "default": "OGC:CRS84"}
+    ],
+    "axes": "minx and maxx bound x (easting or longitude), miny and maxy bound y (northing or latitude) of the named system, whatever its axis order; bounds are inclusive; an item with no location is not in a box.",
+    "systems": "the systems with target true in ophiolite.coordinate-systems/1 (vocabulary/v1/coordinate-systems.json)"
+  },
+  "order": ["score desc", "project", "name", "asset"],
+  "score_places": 6,
+  "page_cap": 50,
+  "unknown_filter_sentence": "Invalid request fields: <name>[, <name>…]",
+  "empty_question_sentence": "Ask with words or at least one filter."
+}

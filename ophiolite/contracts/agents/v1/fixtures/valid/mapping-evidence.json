@@ -1,0 +1,12 @@
+{
+  "rows": [
+    {"field": "id", "class": "declared", "by": "the connection", "reuse": null, "supported_by": null},
+    {"field": "name", "class": "previously-reviewed", "by": null, "reuse": "same-table", "supported_by": {"mapping_version": 2}},
+    {"field": "x", "class": "previously-reviewed", "by": null, "reuse": "same-table", "supported_by": {"import_id": "wi-0001"}},
+    {"field": "depth", "class": "previously-reviewed", "reuse": "layout", "supported_by": {"layout": "layout-a1", "version": 3}, "how": "reordered"},
+    {"field": "y", "class": "inferred", "by": "names", "reuse": null, "supported_by": null},
+    {"field": "operator", "class": "none", "by": null, "reuse": null, "supported_by": null},
+    {"field": "name", "class": "declared", "by": "you", "reuse": null, "supported_by": null},
+    {"declaration": "depth_unit", "class": "previously-reviewed", "supported_by": {"layout": "layout-a1", "version": 3}}
+  ]
+}

@@ -29,5 +29,7 @@
     "normalized": 1,
     "total": 2
   },
-  "table_target": "ophiolite.table-target/time-depth/1"
+  "table_target": "ophiolite.table-target/time-depth/1",
+  "osdu_kind": "osdu:wks:work-product-component--WellLog:1.5.0",
+  "osdu_kind_reason": null
 }

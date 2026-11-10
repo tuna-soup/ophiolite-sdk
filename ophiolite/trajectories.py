@@ -24,6 +24,10 @@ Rules of `load` (s1 §7):
 E134 s3: `until` repeats an export: under unchanged rights, consent, readership, member names, release and SDK version
 the same `until` gives the same `episodes.jsonl` and the same manifest but `exported_at`. With pyarrow installed the
 folder also holds `episodes.parquet`, derived from the lines (its bytes repeat in the same pyarrow environment only).
+
+E134 s4: `scope='members'` (a project's administrators) exports every consenting member's work in the project, each
+person and agent under its own pseudonym, as the administrator reads it; the folder has the same shape and its manifest
+names the project, no person (`MembersScope`). `own` (the default) sends no `scope`, so the body is the one before s4.
 """
 import hashlib
 import json
@@ -39,7 +43,11 @@ MANIFEST, EPISODES, PARQUET = 'trajectories.json', 'episodes.jsonl', 'episodes.p
 PARQUET_FIELDS = (('episode_id', 'string'), ('mode', 'string'), ('split', 'string'), ('start', 'float64'), ('end', 'float64'),
                   ('rows', 'int64'), ('episode', 'string'))
 LIMIT = 1000
+SCOPES = ('own', 'members')  # s4: whose work; the request's `scope`
 CHANGED = 'The record changed while exporting; export again.'
+# E160 s0 D4: the two entry points that exist before they act (s2 writes croissant.json and turns.jsonl)
+DESCRIBE_LATER = 'Describing the folder is not available yet.'
+TURNS_LATER = 'Reading turns is not available yet.'
 
 
 def canonical(value):
@@ -167,15 +175,24 @@ def pages(client, body):
         after = page['next']
 
 
-def export(client, destination, *, purpose, mode='auto', window_seconds=None, seed=0, until=None):
-    """Write your own work in the client's project to `destination` (a new folder): {episodes, values, destination,
-    parquet}. `until` (s3): the boundary of an earlier export's manifest, to repeat it; default the highest row now."""
+def load_turns(folder):
+    """E160 s0: the typed lines of a folder's `turns.jsonl` (`ophiolite.work-turn/1`); refused until E160 s2 writes them."""
+    raise Refused(TURNS_LATER)
+
+
+def export(client, destination, *, purpose, mode='auto', window_seconds=None, seed=0, until=None, scope='own', describe=False):
+    """Write your own work (s4: `scope='members'`, every consenting member's work) in the client's project to
+    `destination` (a new folder): {episodes, values, destination, parquet}. `until` (s3): the boundary of an earlier
+    export's manifest, to repeat it; default the highest row now. `describe` (E160 s0): refused before anything is
+    sent or written until E160 s2 writes `croissant.json`."""
     from ._version import __version__
+    if describe: raise Refused(DESCRIBE_LATER)
+    if scope not in SCOPES: raise Refused("The scope is own or members.")
     destination = Path(destination)
     if destination.exists() or destination.is_symlink(): raise Refused('The destination exists; name a new folder.')
     if not destination.parent.is_dir(): raise Refused('The destination\'s folder does not exist.')
     body = {'purpose': purpose, 'mode': mode, 'seed': seed, **({'window_seconds': window_seconds} if window_seconds is not None else {}),
-            **({'until': until} if until is not None else {})}
+            **({'until': until} if until is not None else {}), **({'scope': scope} if scope != 'own' else {})}
     staging = destination.parent / ('.%s.partial-%s' % (destination.name, secrets.token_hex(4)))
     os.mkdir(staging, 0o700)
     try:
@@ -186,6 +203,7 @@ def export(client, destination, *, purpose, mode='auto', window_seconds=None, se
                     written.append(canonical(e).decode())
                     lines.write(canonical(e) + b'\n')
                 manifest = page['manifest']
+        if (manifest.get('scope') or {}).get('kind') != scope: raise VerificationFailed('The server answered another scope than the one asked; export again.')
         write_manifest(staging / MANIFEST, manifest, __version__)
         parquet = write_parquet(written, staging / PARQUET)
         load(staging)
@@ -198,8 +216,12 @@ def export(client, destination, *, purpose, mode='auto', window_seconds=None, se
 
 
 class TrajectoryClient:
-    def export_trajectories(self, destination, *, purpose, mode='auto', window_seconds=None, seed=0, until=None):
+    def export_trajectories(self, destination, *, purpose, mode='auto', window_seconds=None, seed=0, until=None, scope='own',
+                            describe=False):
         """E134: your own consented work in this project, as a folder of work episodes at `destination` (a new folder);
         `auto` gives values where the rights allow, `shape` never values; `until` repeats an earlier export's boundary
-        (s3). With pyarrow installed the folder also holds episodes.parquet. Returns {episodes, values, destination, parquet}."""
-        return export(self, destination, purpose=purpose, mode=mode, window_seconds=window_seconds, seed=seed, until=until)
+        (s3). `scope='members'` (s4, the project's administrators only): every consenting member's work in this project,
+        as you read it. With pyarrow installed the folder also holds episodes.parquet. `describe=True` (E160) is not
+        available yet and is refused before anything is sent. Returns {episodes, values, destination, parquet}."""
+        return export(self, destination, purpose=purpose, mode=mode, window_seconds=window_seconds, seed=seed, until=until, scope=scope,
+                      describe=describe)

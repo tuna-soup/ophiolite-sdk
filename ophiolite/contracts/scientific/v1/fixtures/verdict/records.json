@@ -35,5 +35,19 @@
   "against-check-63-hex": {"patch": {"against": {"kind": "check", "key": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}}, "field": "against"},
   "verdict-not-compared": {"patch": {"verdict": "not_compared"}, "field": "verdict"},
   "unknown-key": {"patch": {"colour": "green"}, "field": "colour"}
+ },
+ "because": {
+  "subject": "E159 s0 (1.1.0): records with the optional reason category, kept apart so that valid and invalid above stay E132's frozen 1.0.0 cases; each case is the base with its patch merged at the top level",
+  "valid": {
+   "wrong-unit-rejected": {"because": "wrong-unit"},
+   "matches-accepted": {"verdict": "accepted", "reason": null, "because": "matches"},
+   "agent-reference-mismatch": {"actor": {"kind": "agent", "id": "agent-7", "name_at_time": "the planning agent"},
+                                "on_behalf_of": {"kind": "person", "id": "u-anna", "name_at_time": "Anna"}, "because": "reference-mismatch"}
+  },
+  "invalid": {
+   "because-bogus": {"patch": {"because": "bogus"}, "field": "because"},
+   "because-null": {"patch": {"because": null}, "field": "because"},
+   "because-a-number": {"patch": {"because": 3}, "field": "because"}
+  }
  }
 }

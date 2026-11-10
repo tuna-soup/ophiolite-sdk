@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ophiolite.agent-choice/1",
+  "title": "CHOICE_REQUIRED: a step needs a decision only a person can make (E150)",
+  "description": "The gateway's error envelope with code `choice-required` (status 409) and five fields: the question in words, two to eight literal choices, why a person must decide (the class and the rule), who answers (always the person the agent acts for) and the token an answer names. A choice's `fragment` is the literal part of the request that choosing it sends. The rules a schema cannot state without new keywords (ids c1..cN in order, a fragment's canonical size) are choice.py's `choice_problems`, which every reader runs beside this schema. The token's derivation, the answer route and the record of an answer are E151's.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["error", "code", "message", "remedy", "docs", "question", "choices", "why", "answered_by", "choice_token"],
+  "properties": {
+    "error": {"type": "string", "minLength": 1, "maxLength": 500},
+    "code": {"const": "choice-required"},
+    "message": {"type": "string", "minLength": 1, "maxLength": 500},
+    "remedy": {"type": "string", "minLength": 1, "maxLength": 500},
+    "docs": {"const": "/docs/reference/errors/#choice-required"},
+    "request_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "question": {"type": "string", "minLength": 1, "maxLength": 300},
+    "choices": {"type": "array", "minItems": 2, "maxItems": 8, "items": {"$ref": "#/$defs/choice"}},
+    "why": {"$ref": "#/$defs/why"},
+    "answered_by": {"const": "person"},
+    "choice_token": {"type": "string", "pattern": "^ct1\\.[A-Za-z0-9_-]{43}$"}
+  },
+  "$defs": {
+    "choice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "fragment"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^c[1-8]$"},
+        "fragment": {"type": "object", "maxProperties": 16}
+      }
+    },
+    "why": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["class", "rule"],
+      "properties": {
+        "class": {"type": "string", "pattern": "^[a-z][a-z0-9-]{0,63}$"},
+        "rule": {"type": "string", "pattern": "^[a-z][a-z0-9-]{0,63}$"}
+      }
+    }
+  }
+}

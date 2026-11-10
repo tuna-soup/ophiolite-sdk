@@ -31,5 +31,7 @@
   },
   "table_target": {
     "none": "not-a-table"
-  }
+  },
+  "osdu_kind": null,
+  "osdu_kind_reason": "no OSDU kind holds a rock-index grid of P-wave velocity and density on 2D section axes"
 }

@@ -164,6 +164,29 @@
       }
     },
     {
+      "profile": "segy/2",
+      "data": "8-bit seismic volume",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "None: each 1-byte code is kept as its own value; the upload declares whether code -128 means no value"
+      ],
+      "unsupported": [
+        "SEG-Y formats other than 1-byte two's complement (format 8)",
+        "a cube whose upload does not declare what code -128 means",
+        "little-endian or variable-length traces",
+        "irregular grids",
+        "volume export"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    },
+    {
       "profile": "segy-line/1",
       "data": "2D seismic line",
       "direction": "read",

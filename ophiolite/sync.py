@@ -24,6 +24,7 @@ import tempfile
 from pathlib import Path
 from urllib.parse import quote
 import httpx
+from . import _deprecation  # E148
 from .errors import AuthenticationRequired, PermissionRefused, Refused, ResyncRequired, Unavailable
 from .sync_cache import Cache
 
@@ -87,6 +88,7 @@ class Sync:
             response = self.client.http.post(self._path(area, operation), json={'project_id': self.client.project, **(body or {})},
                                              headers={**self.client._headers(), **(headers or {})}, follow_redirects=False)
         except httpx.HTTPError: raise Unavailable('Cannot reach the service. Check its address and network connection.', code='unreachable') from None
+        _deprecation.note(_deprecation.of(self.client), 'POST', self._path(area, operation), response)  # E148: the client's once-set
         return self._answer(response)
 
     @staticmethod
@@ -131,6 +133,7 @@ class Sync:
         while True:
             with self.client.http.stream('POST', self._path('changes', 'stream'), json={'project_id': self.client.project, 'seconds': seconds},
                                          headers={**self.client._headers(), 'Last-Event-ID': last, 'Accept': 'text/event-stream'}, follow_redirects=False) as response:
+                _deprecation.note(_deprecation.of(self.client), 'POST', self._path('changes', 'stream'), response)
                 if response.status_code != 200: self._answer(response)  # E31: the envelope is read with a bound
                 frame = {}
                 for line in response.iter_lines():

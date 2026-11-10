@@ -8,7 +8,7 @@
 1. the client bound by `use(client)` (a test harness or your own code chose it);
 2. a client of the packaged synthetic server when `OPHIOLITE_URL` is not set, or `OPHIOLITE_TEMPLATE_FIXTURE=1`:
    one synthetic gamma-ray log, publications with versions and their read-back, on a loopback port, nothing real;
-3. a client of `OPHIOLITE_URL` and `OPHIOLITE_PROJECT` with the credential `ophiolite login` saved for them (or the
+3. a client of `OPHIOLITE_URL` and `OPHIOLITE_PROJECT` with the credential `ophiolite account login` saved for them (or the
    file `OPHIOLITE_CREDENTIAL` names), else `OPHIOLITE_ACCESS_KEY`, as the templates read them.
 
 When none applies it raises `Refused` with the sentence that says what to set. Importing this module contacts nothing.
@@ -73,7 +73,7 @@ def connect():
     if 'OPHIOLITE_ACCESS_KEY' in os.environ:
         return Client(url, project, Credential.bearer(os.environ['OPHIOLITE_ACCESS_KEY'], source='environment'))
     raise Refused(f'No saved sign-in for {project} at {url}.',
-                  'Put the configuration.json from Connect → Use Python in this folder and run: ophiolite login (or ophiolite login --key-stdin), '
+                  'Put the configuration.json from Connect → Use Python in this folder and run: ophiolite account login (or ophiolite account login --key-stdin), '
                   'or set OPHIOLITE_ACCESS_KEY; unset OPHIOLITE_URL to use the synthetic server.')
 
 

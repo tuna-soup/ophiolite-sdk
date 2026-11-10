@@ -350,7 +350,7 @@ def test_a_check_run_reads_project_versions_so_its_card_says_why_there_is_no_lin
     result = procedures.run(tmp_path / 'check', tmp_path / 'out', {'data': [paths[0]], 'reference': [paths[1]]})
     raw, text = result._repr_html_(), visible(result._repr_html_())
     assert again(result) is None and NO_LINE['project'] in text and 'version 1, on this computer: passed. Nothing was published.' in text
-    assert 'ophiolite checks publish out' not in text and 'ophiolite checks publish out' in raw  # the command: Technical details only
+    assert 'ophiolite tools checks publish out' not in text and 'ophiolite tools checks publish out' in raw  # the command: Technical details only
 
 
 @pytest.mark.parametrize('change, why', [(lambda call: call.update(declared={'tops': object()}), 'plain'),

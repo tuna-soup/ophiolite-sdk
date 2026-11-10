@@ -1,0 +1,29 @@
+{
+  "schema": "ophiolite.mapper-recipe/1",
+  "created": {"tool": "ophiolite-mapper 0.3.0", "rules_version": "1.5.0", "at": "2026-11-03T12:00:00Z"},
+  "source": {
+    "kind": "folder",
+    "locator": {"path": "four-wells"},
+    "reader": "las2/1",
+    "digest": {"algorithm": "sha256", "over": "members", "value": "5555555555555555555555555555555555555555555555555555555555555555"},
+    "bytes": 52000
+  },
+  "target": {"kind": "reader-profile", "id": "las2/1"},
+  "layout": null,
+  "identity": {"basis": "provisional", "column": null, "decision": {"by": "A. Reviewer", "at": "2026-11-03T12:05:00Z", "action": "accept"}},
+  "fields": [],
+  "columns": {},
+  "declarations": [],
+  "missing": [],
+  "wells": [
+    {"spelling": "HON-GT-01", "match": "exact", "canonical": "HON-GT-01", "entity": {"kind": "wellbore", "key": "HON-GT-01", "basis": "provisional", "well": {"key": "HON-GT-01", "basis": "provisional"}}, "decision": {"by": "A. Reviewer", "at": "2026-11-03T12:06:00Z", "action": "new-entity"}},
+    {"spelling": "HON GT 01", "match": "normalised", "canonical": "HON-GT-01", "entity": null, "decision": {"by": "A. Reviewer", "at": "2026-11-03T12:06:00Z", "action": "accept-alias"}},
+    {"spelling": "SYN-W2", "match": "exact", "canonical": "SYN-W2", "entity": {"kind": "wellbore", "key": "SYN-W2", "basis": "provisional", "well": {"key": "SYN-W2", "basis": "provisional"}}, "decision": {"by": "A. Reviewer", "at": "2026-11-03T12:06:00Z", "action": "new-entity"}},
+    {"spelling": "syn w2", "match": "normalised", "canonical": "SYN-W2", "entity": null, "decision": {"by": "A. Reviewer", "at": "2026-11-03T12:06:00Z", "action": "accept-alias"}},
+    {"spelling": "SYN-W3", "match": "exact", "canonical": "SYN-W3", "entity": {"kind": "wellbore", "key": "SYN-W3", "basis": "provisional", "well": {"key": "SYN-W3", "basis": "provisional"}}, "decision": {"by": "A. Reviewer", "at": "2026-11-03T12:06:00Z", "action": "new-entity"}},
+    {"spelling": "SYN-W4", "match": "exact", "canonical": "SYN-W4", "entity": {"kind": "wellbore", "key": "SYN-W4", "basis": "provisional", "well": {"key": "SYN-W4", "basis": "provisional"}}, "decision": {"by": "A. Reviewer", "at": "2026-11-03T12:06:00Z", "action": "new-entity"}},
+    {"spelling": "SYN_W4", "match": "normalised", "canonical": "SYN-W4", "entity": null, "decision": {"by": "A. Reviewer", "at": "2026-11-03T12:06:00Z", "action": "reject-alias"}}
+  ],
+  "findings": [],
+  "osdu": {"namespace": "synthetic", "legal_tag": "synthetic-legal-tag", "owners": ["owners@synthetic"], "viewers": ["viewers@synthetic"]}
+}

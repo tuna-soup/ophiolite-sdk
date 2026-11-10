@@ -1,7 +1,7 @@
 # Ophiolite SDK guidance
 
 This repository owns the supported 0.x public client over preview contracts.
-Use the six packaged guides under `ophiolite/skills/`; `ophiolite skills path`
+Use the six packaged guides under `ophiolite/skills/`; `ophiolite tools skills path`
 locates them after installation. A guide explains an authorized workflow; it does
 not grant new permission to publish, share, send messages or inspect credentials.
 Authorization already given in the user's task persists; do not ask repeatedly.

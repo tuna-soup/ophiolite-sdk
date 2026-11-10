@@ -1,0 +1,46 @@
+{
+  "prefix": {
+    "ophiolite": "https://ophiolite.dev/ns/"
+  },
+  "entity": {
+    "ophiolite:sha256-d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b": {
+      "prov:label": "assets/0/original.las",
+      "prov:type": "ophiolite:original"
+    },
+    "ophiolite:sha256-81992992a1a15daac792bebf5979c51e0f8c3c1869a75a125999e6466e38bfba": {
+      "prov:label": "assets/0/curve-GR.json",
+      "prov:type": "ophiolite:normalized"
+    }
+  },
+  "activity": {
+    "ophiolite:read-d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b": {
+      "prov:startTime": "2026-11-05T12:00:00Z",
+      "prov:endTime": "2026-11-05T12:00:00Z",
+      "prov:type": "ophiolite:read"
+    }
+  },
+  "agent": {
+    "ophiolite:asset-connectors-las-reader-1": {
+      "prov:type": "prov:SoftwareAgent",
+      "prov:label": "asset_connectors.las_reader/1"
+    }
+  },
+  "used": {
+    "_:used-1": {
+      "prov:activity": "ophiolite:read-d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
+      "prov:entity": "ophiolite:sha256-d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b"
+    }
+  },
+  "wasGeneratedBy": {
+    "_:generated-1": {
+      "prov:entity": "ophiolite:sha256-81992992a1a15daac792bebf5979c51e0f8c3c1869a75a125999e6466e38bfba",
+      "prov:activity": "ophiolite:read-d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b"
+    }
+  },
+  "wasAssociatedWith": {
+    "_:associated-1": {
+      "prov:activity": "ophiolite:read-d899416c42214983308a6feec77a5f94e6d391665dd228d91957393b37caf56b",
+      "prov:agent": "ophiolite:asset-connectors-las-reader-1"
+    }
+  }
+}

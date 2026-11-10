@@ -1,0 +1,12 @@
+{
+  "schema": "ophiolite.project-folder/1",
+  "mapper": "ophiolite-mapper 0.2.0",
+  "recipe": {"path": "recipe.json", "sha256": "f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1"},
+  "osdu": {"tag": "v0.30.1", "commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6", "namespace": "{{NAMESPACE}}"},
+  "files": [
+    {"path": "recipe.json", "role": "recipe", "media_type": "application/json", "asset": null, "sha256": "f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1", "bytes": 3100},
+    {"path": "originals/wells.csv", "role": "original", "media_type": "text/csv", "asset": null, "sha256": "f2f2f2f2f2f2f2f2f2f2f2f2f2f2f2f2f2f2f2f2f2f2f2f2f2f2f2f2f2f2f2f2", "bytes": 214},
+    {"path": "items/wells.parquet", "role": "item", "media_type": "application/vnd.apache.parquet", "asset": null, "sha256": "f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3", "bytes": 2400},
+    {"path": "lineage/prov.json", "role": "lineage-prov", "media_type": "application/json", "asset": null, "sha256": "f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4", "bytes": 900}
+  ]
+}

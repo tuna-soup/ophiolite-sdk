@@ -31,5 +31,7 @@
   },
   "table_target": {
     "none": "not-a-table"
-  }
+  },
+  "osdu_kind": "osdu:wks:work-product-component--SeismicHorizon:2.1.0",
+  "osdu_kind_reason": null
 }

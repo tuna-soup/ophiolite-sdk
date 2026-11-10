@@ -116,7 +116,7 @@ SENTENCES = {
     'got': lambda f: _got(f),
     'already-latest': lambda f: 'You already hold the latest version of %s, saved in %s.' % (f['name'], f['folder']),
     'not-visible': lambda f: 'You can no longer see %s. It may have been removed or no longer shared with you.' % f['name'],
-    'cannot-read-here': lambda f: 'This kind of item cannot be received by this script yet: %s.' % f['reason'],
+    'cannot-read-here': lambda f: f.get('sentence') or 'This kind of item cannot be received by this script yet: %s.' % f['reason'],  # E141 s2: a window's own sentence
     'damaged': lambda f: 'The data did not match its fingerprint. Nothing was kept.',
     'map-unavailable': lambda f: 'That version of the map is not available (it may be withdrawn or not the one you hold).',
     'sent-new': lambda f: 'Sent %s as a new item; it is private until you share it.' % f['name'],
@@ -500,8 +500,11 @@ class Exchange:
             raise
         return got
 
-    def get(self, item_id, *, output=None, **how):
-        """Fetch, persist into `output` (when given), then advance the record."""
+    def get(self, item_id, *, output=None, window=None, **how):
+        """Fetch, persist into `output` (when given), then advance the record. E141 s2: `window` (the CLI form
+        `inline=100:104,by=label` or a mapping of read_window's keywords) writes part of a seismic volume as SEG-Y; the
+        held record's selection records it."""
+        if window is not None: how['window'] = window
         got = self.fetch(item_id, output=output, **how)
         return got if isinstance(got, Outcome) else got.confirm(applied_to=output)
 
@@ -662,6 +665,7 @@ class ClientTransport:
         kind, asset = item.get('kind'), item['asset_id']
         if kind == 'external-scalar-map': return self._map(asset, revision, output)
         if kind not in ('derived', 'uploaded'): raise CannotReadHere('', {'reason': 'this kind of item is not one this script can receive'})
+        if how.get('window') is not None: return self.window(item, revision, output, how['window'])
         curves = how.get('curves')
         if curves:
             data = self.client.read(asset, revision, list(curves))
@@ -675,12 +679,57 @@ class ClientTransport:
                 raise CannotReadHere('', {'reason': 'name the curves to receive a well log'}) from None
             raise
         descriptor = data._wire_descriptor
-        if data.type == 'seismic-volume': raise CannotReadHere('', {'reason': 'a seismic volume is described here, not received; read its slices in Python'})
+        if data.type == 'seismic-volume':  # E141 s2 (D-S): a volume is received as a window
+            sentence = 'Give a window, for example --window inline=100:104,by=label, or call Client.download_original for the whole file.'
+            raise CannotReadHere(sentence, {'sentence': sentence, 'reason': sentence.rstrip('.')}, {'reason': 'volume-needs-window'})
         if output is not None:
             output.mkdir(mode=0o700)
-            (output / 'original').write_bytes(data.original); (output / 'data.json').write_bytes(data._wire_data_bytes)
+            normalized = next((r for r in descriptor.get('representations') or [] if r.get('kind') == 'normalized'), {})
+            named = 'data.ophpts' if normalized.get('profile') == 'ophiolite.point-columns/1' else 'data.json'  # E139 s3 (O2): by its codec, as typed.data_file_of (inline: the plug-in carries no typed.py)
+            (output / 'original').write_bytes(data.original); (output / named).write_bytes(data._wire_data_bytes)
             (output / 'descriptor.json').write_text(json.dumps(descriptor, indent=2) + '\n')
         return {'content': data, 'number': self._number(kind, descriptor)}
+
+    def window(self, item, revision, output, window):
+        """E141 s2 (D-S, D-X, D-W): part of a seismic volume written into `output` (the staging folder) as window.sgy,
+        window.json (the document, the window digest and the headers digest) and descriptor.json. Asked in order: the
+        descriptor, the window document (both checked; an inexact crop refuses here), the file header (revision and
+        header positions checked), then headers answers and sample pieces as the writer needs them. The original is
+        never asked for; refusals are CannotReadHere with `technical.reason` (volume_windows.WINDOW_CODES)."""
+        from .volume_windows import (LINE_WINDOW, NEEDS_OUTPUT, OTHER_WINDOW, SegyWindowWriter, Window, WindowRefused, as_exchange, asked, cannot,
+                                     check_document, check_file_header, describe_volume, exact_crop, once_more, parse_spec, parse_window, window_path)
+        from urllib.parse import urlencode
+        asset, client = item['asset_id'], self.client
+        try:
+            query = parse_spec(window) if isinstance(window, str) else parse_window(**dict(window))
+            if any(name == 'trace' for name, _ in query): raise cannot('window-volume-only', LINE_WINDOW)
+            if output is None: raise cannot('window-needs-output', NEEDS_OUTPUT)
+            descriptor = client._window_descriptor(asset, revision)
+            kind = (descriptor.get('scientific') or {}).get('type')
+            if kind != 'seismic-volume': raise cannot('window-volume-only', LINE_WINDOW if kind == 'seismic-line' else OTHER_WINDOW)
+            description = describe_volume(asset, revision, descriptor)
+            base = window_path(client.prefix, asset, revision)
+            request = asked(query, description)  # E140 s3: windows=2 for a native cube only (R5)
+            document = check_document(client._window_json(base + ('?' + urlencode(request) if request else '')), asset=asset, revision=revision,
+                                      query=query, description=description)
+            delay = exact_crop(document, description.context['samples'])
+            file_header, answer = once_more(lambda: client._window_file_header(base, request, document))
+            positions = check_file_header(document, file_header, answer)
+            reading = Window(document, query, description, base)
+            writer = SegyWindowWriter(output, document, file_header, positions, delay)
+
+            def piece(n):
+                path, length = reading.piece(n); answer = {}
+                return client._window_get(path, length, answer), answer
+            def headers(n):
+                first, last = n * writer.per_headers, min((n + 1) * writer.per_headers, writer.traces)
+                return client._window_headers(base, request, document, n, (last - first) * 240)
+            written = writer.write(lambda n: once_more(lambda: headers(n)), lambda n: once_more(lambda: piece(n)))
+        except WindowRefused as refused: raise as_exchange(refused) from None
+        record = {'document': document, 'window_digest': written['window_digest'], 'headers_digest': written['headers_digest']}
+        (output / 'window.json').write_text(json.dumps(record, indent=2, sort_keys=True) + '\n')
+        (output / 'descriptor.json').write_text(json.dumps(descriptor, indent=2) + '\n')
+        return {'content': record, 'number': self._number(item.get('kind'), descriptor)}
 
     def _map(self, asset, revision, output):
         """E70a C4: a map through the existing export route: a GeoTIFF generated from the stored map (not the imported

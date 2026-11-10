@@ -1,0 +1,398 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/assets/v1/volume-window-2-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.volume-window/2",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "TypedInterpretation": {
+      "additionalProperties": false,
+      "description": "The executable identity of the typed reader (Connectors typed_reader; E56: feature_files for feature sets).",
+      "properties": {
+        "reader": {
+          "enum": [
+            "asset_connectors.typed_reader/1",
+            "asset_connectors.feature_files/1"
+          ],
+          "title": "Reader",
+          "type": "string"
+        },
+        "mapping": {
+          "enum": [
+            "well-tops/1",
+            "trajectory/1",
+            "regular-grid-surface/1",
+            "triangulated-surface/1",
+            "point-set/1",
+            "polyline-set/1",
+            "seismic-volume/1",
+            "well-location/1",
+            "wavelet/1",
+            "model-section/1",
+            "seismic-section/1",
+            "time-depth/1",
+            "feature-set/1",
+            "well-path/1",
+            "well-set/1",
+            "well-residual/1",
+            "seismic-line/1",
+            "seismic-volume/2"
+          ],
+          "title": "Mapping",
+          "type": "string"
+        },
+        "parsing_policy": {
+          "const": "typed-strict/1",
+          "title": "Parsing Policy",
+          "type": "string"
+        },
+        "null_policy": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Null Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reader",
+        "mapping",
+        "parsing_policy",
+        "null_policy"
+      ],
+      "title": "TypedInterpretation",
+      "type": "object"
+    },
+    "WindowPieces": {
+      "additionalProperties": false,
+      "description": "How the window is cut: `traces_per_piece = floor(bytes_max / (sample count \u00d7 4))`, piece n holds window traces\n[n\u00b7t, min((n+1)\u00b7t, T) \u2212 1] in C order of the trace axes, `count = ceil(T / t)`. A piece is\napplication/octet-stream with the headers X-Ophiolite-Window (the window_id), X-Ophiolite-Revision,\nX-Ophiolite-Piece (n/count) and X-Content-SHA256 (of the piece body). The window digest is the sha256 of the piece\nbodies concatenated in index order; the client computes it, the server does not state it.",
+      "properties": {
+        "count": {
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        },
+        "traces_per_piece": {
+          "minimum": 1,
+          "title": "Traces Per Piece",
+          "type": "integer"
+        },
+        "bytes_max": {
+          "minimum": 1,
+          "title": "Bytes Max",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "count",
+        "traces_per_piece",
+        "bytes_max"
+      ],
+      "title": "WindowPieces",
+      "type": "object"
+    },
+    "WindowSampleAxis": {
+      "additionalProperties": false,
+      "description": "The sample axis: zero-based positions `first..last`, both included; `start` is the physical position of\nsample `first` (the stored first sample plus `first \u00d7 interval`).",
+      "properties": {
+        "name": {
+          "const": "sample",
+          "title": "Name",
+          "type": "string"
+        },
+        "first": {
+          "minimum": 0,
+          "title": "First",
+          "type": "integer"
+        },
+        "last": {
+          "minimum": 0,
+          "title": "Last",
+          "type": "integer"
+        },
+        "count": {
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        },
+        "start": {
+          "title": "Start",
+          "type": "number"
+        },
+        "interval": {
+          "exclusiveMinimum": 0,
+          "title": "Interval",
+          "type": "number"
+        },
+        "unit": {
+          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+          "title": "Unit",
+          "type": "string"
+        },
+        "domain": {
+          "enum": [
+            "time",
+            "depth",
+            "unknown"
+          ],
+          "title": "Domain",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "first",
+        "last",
+        "count",
+        "start",
+        "interval",
+        "unit",
+        "domain"
+      ],
+      "title": "WindowSampleAxis",
+      "type": "object"
+    },
+    "WindowSamples2": {
+      "additionalProperties": false,
+      "description": "The stored one-byte codes, verbatim, in C order of the axes (SEG-Y data format 8). A code's value is the code;\nwhen `undefined_code` is -128, code -128 means no value, and when null every code is a value. It equals the stored\ndescription's.",
+      "properties": {
+        "format": {
+          "const": "int8-code",
+          "title": "Format",
+          "type": "string"
+        },
+        "format_code": {
+          "const": 8,
+          "title": "Format Code",
+          "type": "integer"
+        },
+        "byte_order": {
+          "const": "big",
+          "title": "Byte Order",
+          "type": "string"
+        },
+        "width": {
+          "const": 1,
+          "title": "Width",
+          "type": "integer"
+        },
+        "undefined_code": {
+          "anyOf": [
+            {
+              "const": -128,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Undefined Code"
+        }
+      },
+      "required": [
+        "format",
+        "format_code",
+        "byte_order",
+        "width",
+        "undefined_code"
+      ],
+      "title": "WindowSamples2",
+      "type": "object"
+    },
+    "WindowTraceAxis": {
+      "additionalProperties": false,
+      "description": "A trace axis of the window: zero-based ordinals `first..last` on the stored axis, both included, and the label\nof each (inline or crossline number; for a 2D line the trace number of each ordinal, in file order).",
+      "properties": {
+        "name": {
+          "enum": [
+            "inline",
+            "crossline",
+            "trace"
+          ],
+          "title": "Name",
+          "type": "string"
+        },
+        "first": {
+          "minimum": 0,
+          "title": "First",
+          "type": "integer"
+        },
+        "last": {
+          "minimum": 0,
+          "title": "Last",
+          "type": "integer"
+        },
+        "count": {
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        },
+        "labels": {
+          "items": {
+            "type": "integer"
+          },
+          "maxItems": 1000000,
+          "minItems": 1,
+          "title": "Labels",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "first",
+        "last",
+        "count",
+        "labels"
+      ],
+      "title": "WindowTraceAxis",
+      "type": "object"
+    },
+    "WindowVerification": {
+      "additionalProperties": false,
+      "description": "What a client checks (identity: window_id, revision and asset; axes: against the stored description; shape;\npiece-identity: each piece's window, revision and index headers; piece-digest: each body against its\nX-Content-SHA256; completeness: every piece once, total bytes as stated) and what stays trusted server behaviour\n(chunk-digests-at-read: stored chunks verified against their ingest digests; trace-positions: from the stored index).",
+      "properties": {
+        "client": {
+          "items": {
+            "enum": [
+              "identity",
+              "axes",
+              "shape",
+              "piece-identity",
+              "piece-digest",
+              "completeness"
+            ],
+            "type": "string"
+          },
+          "maxItems": 6,
+          "minItems": 1,
+          "title": "Client",
+          "type": "array"
+        },
+        "trusted": {
+          "items": {
+            "enum": [
+              "chunk-digests-at-read",
+              "trace-positions"
+            ],
+            "type": "string"
+          },
+          "maxItems": 2,
+          "minItems": 1,
+          "title": "Trusted",
+          "type": "array"
+        }
+      },
+      "required": [
+        "client",
+        "trusted"
+      ],
+      "title": "WindowVerification",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Part of an 8-bit seismic cube (mapping seismic-volume/2) at an exact revision, at native size: one byte per\nsample. As `/1` but for the samples, the mapping, the geometry (a volume only) and the byte bound; pieces hold\n`traces_per_piece = floor(bytes_max / sample count)` traces, and `window_id` digests `/1`'s canonical form with\n`schema` set to `/2`. The document holds no sample; the pieces do.",
+  "properties": {
+    "schema": {
+      "const": "ophiolite.volume-window/2",
+      "title": "Schema",
+      "type": "string"
+    },
+    "asset_id": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "revision": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Revision",
+      "type": "string"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "interpretation": {
+      "$ref": "#/$defs/TypedInterpretation"
+    },
+    "window_id": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Window Id",
+      "type": "string"
+    },
+    "geometry": {
+      "const": "volume",
+      "title": "Geometry",
+      "type": "string"
+    },
+    "selection": {
+      "enum": [
+        "label",
+        "ordinal"
+      ],
+      "title": "Selection",
+      "type": "string"
+    },
+    "axes": {
+      "items": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/WindowTraceAxis"
+          },
+          {
+            "$ref": "#/$defs/WindowSampleAxis"
+          }
+        ]
+      },
+      "maxItems": 3,
+      "minItems": 3,
+      "title": "Axes",
+      "type": "array"
+    },
+    "shape": {
+      "items": {
+        "type": "integer"
+      },
+      "maxItems": 3,
+      "minItems": 3,
+      "title": "Shape",
+      "type": "array"
+    },
+    "samples": {
+      "$ref": "#/$defs/WindowSamples2"
+    },
+    "bytes": {
+      "minimum": 1,
+      "title": "Bytes",
+      "type": "integer"
+    },
+    "pieces": {
+      "$ref": "#/$defs/WindowPieces"
+    },
+    "verification": {
+      "$ref": "#/$defs/WindowVerification"
+    }
+  },
+  "required": [
+    "schema",
+    "asset_id",
+    "revision",
+    "source_sha256",
+    "interpretation",
+    "window_id",
+    "geometry",
+    "selection",
+    "axes",
+    "shape",
+    "samples",
+    "bytes",
+    "pieces",
+    "verification"
+  ],
+  "title": "VolumeWindow2",
+  "type": "object"
+}

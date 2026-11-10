@@ -1,0 +1,205 @@
+{
+  "@context": [
+    "https://w3id.org/ro/crate/1.1/context",
+    {
+      "sha256": "https://schema.org/sha256"
+    }
+  ],
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.1"
+      },
+      "about": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": "Dataset",
+      "name": "Synthetic well tops, time-depth table and points",
+      "description": "Two well tops tables, one time-depth table and one point set of made-up wells, each with the CSV it was read from. Synthetic data for the descriptor contract; no observed well.",
+      "datePublished": "2026-11-06",
+      "version": "1.0.0",
+      "license": {
+        "@id": "https://spdx.org/licenses/CC-BY-4.0"
+      },
+      "author": [
+        {
+          "@id": "https://orcid.org/0000-0002-1825-0097"
+        },
+        {
+          "@id": "#creator-2"
+        }
+      ],
+      "publisher": {
+        "@id": "https://ror.org/0abcdef12"
+      },
+      "hasPart": [
+        {
+          "@id": "assets/0/original.csv"
+        },
+        {
+          "@id": "assets/0/descriptor.json"
+        },
+        {
+          "@id": "assets/0/data.json"
+        },
+        {
+          "@id": "assets/1/original.csv"
+        },
+        {
+          "@id": "assets/1/descriptor.json"
+        },
+        {
+          "@id": "assets/1/data.json"
+        },
+        {
+          "@id": "assets/2/original.csv"
+        },
+        {
+          "@id": "assets/2/descriptor.json"
+        },
+        {
+          "@id": "assets/2/data.json"
+        },
+        {
+          "@id": "assets/3/original.csv"
+        },
+        {
+          "@id": "assets/3/descriptor.json"
+        },
+        {
+          "@id": "assets/3/data.json"
+        },
+        {
+          "@id": "manifest.json"
+        }
+      ]
+    },
+    {
+      "@id": "https://orcid.org/0000-0002-1825-0097",
+      "@type": "Person",
+      "name": "Josiah Carberry"
+    },
+    {
+      "@id": "#creator-2",
+      "@type": "Person",
+      "name": "Ada Synthetic"
+    },
+    {
+      "@id": "https://ror.org/0abcdef12",
+      "@type": "Organization",
+      "name": "Synthetic Survey Organisation"
+    },
+    {
+      "@id": "https://spdx.org/licenses/CC-BY-4.0",
+      "@type": "CreativeWork",
+      "name": "Creative Commons Attribution 4.0 International"
+    },
+    {
+      "@id": "manifest.json",
+      "@type": "File",
+      "name": "The bundle manifest",
+      "encodingFormat": "application/json"
+    },
+    {
+      "@id": "assets/0/original.csv",
+      "@type": "File",
+      "name": "original.csv",
+      "sha256": "7bca6c523913b58113d3fa23aa97424ce907af3b27915c18ada91b845b71a594",
+      "contentSize": "65",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "assets/0/descriptor.json",
+      "@type": "File",
+      "name": "descriptor.json",
+      "sha256": "2dd7494de3d35cba7f7194759daefea7ad5692e618d0d93e4173f56b5e0917c1",
+      "contentSize": "2736",
+      "encodingFormat": "application/json"
+    },
+    {
+      "@id": "assets/0/data.json",
+      "@type": "File",
+      "name": "data.json",
+      "sha256": "eae5778eca7ced6e1010cbe7ef342efb23298da1de5a634e9a4c9f3bb70e305b",
+      "contentSize": "1419",
+      "encodingFormat": "application/json"
+    },
+    {
+      "@id": "assets/1/original.csv",
+      "@type": "File",
+      "name": "original.csv",
+      "sha256": "c46110d68b37bb4d7a4f1d4ae3b462d3396b9f108a2fd3a62844c1a976953df8",
+      "contentSize": "71",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "assets/1/descriptor.json",
+      "@type": "File",
+      "name": "descriptor.json",
+      "sha256": "e057c22b2085c69a078b06cc0c61f89af2e0d9c6d8e18f08f7f6d89bd6263efa",
+      "contentSize": "2741",
+      "encodingFormat": "application/json"
+    },
+    {
+      "@id": "assets/1/data.json",
+      "@type": "File",
+      "name": "data.json",
+      "sha256": "bac6250c06c695b9bfc3d68ff192453b3c6fe273dc8888214f70f46bcfc67556",
+      "contentSize": "1426",
+      "encodingFormat": "application/json"
+    },
+    {
+      "@id": "assets/2/original.csv",
+      "@type": "File",
+      "name": "original.csv",
+      "sha256": "462055b9f278d99c849b9f5a5b50db9e18ea81ce672ab7f05d4a22a4183be472",
+      "contentSize": "56",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "assets/2/descriptor.json",
+      "@type": "File",
+      "name": "descriptor.json",
+      "sha256": "438832f0496d8db2c142887ab008c606f55c5190a90bf1bb20b61b7bbdaa6c44",
+      "contentSize": "2883",
+      "encodingFormat": "application/json"
+    },
+    {
+      "@id": "assets/2/data.json",
+      "@type": "File",
+      "name": "data.json",
+      "sha256": "8904989233b10af3698f02a794caaa456ac1cbe8f58f0752ecbee8d396b26b37",
+      "contentSize": "1482",
+      "encodingFormat": "application/json"
+    },
+    {
+      "@id": "assets/3/original.csv",
+      "@type": "File",
+      "name": "original.csv",
+      "sha256": "9f0095c2dfdc7fd26ad36f47c5c924bd6ea091848557168c9e6a31d0b50f753b",
+      "contentSize": "33",
+      "encodingFormat": "text/csv"
+    },
+    {
+      "@id": "assets/3/descriptor.json",
+      "@type": "File",
+      "name": "descriptor.json",
+      "sha256": "5c4d540d62d4216dfa351e5db991a574ff9c0672887b9a23b5aff096e7a02c5f",
+      "contentSize": "3045",
+      "encodingFormat": "application/json"
+    },
+    {
+      "@id": "assets/3/data.json",
+      "@type": "File",
+      "name": "data.json",
+      "sha256": "90acd93fb33b361e86d6d35a00fe54656f5e7efafe2f4c9acdff547f340b04ee",
+      "contentSize": "1734",
+      "encodingFormat": "application/json"
+    }
+  ]
+}

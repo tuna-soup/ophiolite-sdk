@@ -11,9 +11,9 @@ only the selections they bound themselves (another member's are not listed). An
 access key with read scope is enough.
 
 ```sh
-ophiolite sources list --json
-ophiolite sources describe SOURCE_ID --json
-ophiolite sources read SOURCE_ID --expect-revision REVISION --out rows.csv
+ophiolite exchange sources list --json
+ophiolite exchange sources describe SOURCE_ID --json
+ophiolite exchange sources read SOURCE_ID --expect-revision REVISION --out rows.csv
 ```
 
 ```python
@@ -50,7 +50,7 @@ print(frame[["name", "source_state", "source_reason", "source.operator"]])
 ```
 
 ```sh
-ophiolite wells list --with-source --column operator --json
+ophiolite data wells list --with-source --column operator --json
 ```
 
 Rules to keep:

@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/scientific/v1/derivation-2.json",
   "x-ophiolite": {
     "id": "ophiolite.derivation/2",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -133,6 +133,48 @@
       "title": "DerivationInput",
       "type": "object"
     },
+    "DerivationNotVerified": {
+      "additionalProperties": false,
+      "description": "E165 s2: nobody had verified the tool version when this result was published.",
+      "properties": {
+        "state": {
+          "const": "none",
+          "title": "State",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "null"
+        },
+        "by": {
+          "title": "By",
+          "type": "null"
+        },
+        "at": {
+          "title": "At",
+          "type": "null"
+        },
+        "reference_label": {
+          "title": "Reference Label",
+          "type": "null"
+        },
+        "line": {
+          "const": "Not verified",
+          "title": "Line",
+          "type": "string"
+        }
+      },
+      "required": [
+        "state",
+        "id",
+        "by",
+        "at",
+        "reference_label",
+        "line"
+      ],
+      "title": "DerivationNotVerified",
+      "type": "object"
+    },
     "DerivationOutput": {
       "additionalProperties": false,
       "properties": {
@@ -222,6 +264,28 @@
               "type": "null"
             }
           ]
+        },
+        "verification": {
+          "discriminator": {
+            "mapping": {
+              "none": "#/$defs/DerivationNotVerified",
+              "verified": "#/$defs/DerivationVerified",
+              "withdrawn": "#/$defs/DerivationWithdrawn"
+            },
+            "propertyName": "state"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/DerivationVerified"
+            },
+            {
+              "$ref": "#/$defs/DerivationWithdrawn"
+            },
+            {
+              "$ref": "#/$defs/DerivationNotVerified"
+            }
+          ],
+          "title": "Verification"
         }
       },
       "required": [
@@ -236,6 +300,94 @@
         "again_of"
       ],
       "title": "DerivationProcedure",
+      "type": "object"
+    },
+    "DerivationVerified": {
+      "additionalProperties": false,
+      "description": "E165 s2: the tool version was verified when this result was published (`tool_verifications.state` then), with\n`line`, the sentence the catalogue showed at that moment, stored verbatim and never re-rendered.",
+      "properties": {
+        "state": {
+          "const": "verified",
+          "title": "State",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^verification-[0-9a-f]{32}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "by": {
+          "$ref": "#/$defs/VerifierPerson"
+        },
+        "at": {
+          "title": "At",
+          "type": "number"
+        },
+        "reference_label": {
+          "maxLength": 400,
+          "minLength": 1,
+          "title": "Reference Label",
+          "type": "string"
+        },
+        "line": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Line",
+          "type": "string"
+        }
+      },
+      "required": [
+        "state",
+        "id",
+        "by",
+        "at",
+        "reference_label",
+        "line"
+      ],
+      "title": "DerivationVerified",
+      "type": "object"
+    },
+    "DerivationWithdrawn": {
+      "additionalProperties": false,
+      "description": "E165 s2: every verification of the tool version was withdrawn when this result was published; `id`, `by` and\n`at` are the newest withdrawal's.",
+      "properties": {
+        "state": {
+          "const": "withdrawn",
+          "title": "State",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^verification-[0-9a-f]{32}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "by": {
+          "$ref": "#/$defs/VerifierPerson"
+        },
+        "at": {
+          "title": "At",
+          "type": "number"
+        },
+        "reference_label": {
+          "title": "Reference Label",
+          "type": "null"
+        },
+        "line": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Line",
+          "type": "string"
+        }
+      },
+      "required": [
+        "state",
+        "id",
+        "by",
+        "at",
+        "reference_label",
+        "line"
+      ],
+      "title": "DerivationWithdrawn",
       "type": "object"
     },
     "ImplementationV2": {
@@ -671,6 +823,42 @@
         "value"
       ],
       "title": "StringLeaf",
+      "type": "object"
+    },
+    "VerifierPerson": {
+      "additionalProperties": false,
+      "description": "E93's actor shape, persons only: an assistant never authors a verification (slice 1's `reach: person` is the\nfirst layer, this is the second). Named apart from the assets contract's `Person`: the SDK generates one model per\nname across every contract.",
+      "properties": {
+        "kind": {
+          "const": "person",
+          "title": "Kind",
+          "type": "string"
+        },
+        "id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "name_at_time": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name At Time"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "name_at_time"
+      ],
+      "title": "VerifierPerson",
       "type": "object"
     }
   },

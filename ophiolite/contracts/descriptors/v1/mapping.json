@@ -1,0 +1,35 @@
+{
+  "schema": "ophiolite.release-descriptors-mapping/1",
+  "description": "E147 s0 (D2): where each value of a manifest's citation, its files and its tables goes in the three standard descriptors a release carries beside its manifest. This is the documented table (the README renders it row for row); what a reader compares is the three projections of descriptors.py, which hold the same places. A value outside a row is free: a writer may add keywords, names or anything else the standard allows.",
+  "descriptors": {
+    "ro-crate-metadata.json": "RO-Crate 1.1",
+    "croissant.json": "Croissant 1.0",
+    "datacite.json": "DataCite kernel-4.3 JSON (without identifiers until a DOI is registered)"
+  },
+  "field_kinds": {
+    "identifier": "sc:Text",
+    "name": "sc:Text",
+    "text": "sc:Text",
+    "reference": "sc:Text",
+    "number": "sc:Float",
+    "coordinate": "sc:Float"
+  },
+  "rows": [
+    {"source": "constants", "ro_crate": "`@context` [`https://w3id.org/ro/crate/1.1/context`, {`sha256`: `https://schema.org/sha256`}]; node `ro-crate-metadata.json`: `conformsTo` `https://w3id.org/ro/crate/1.1`, `about` `./`", "croissant": "`@context` the Croissant 1.0 context; `conformsTo` `http://mlcommons.org/croissant/1.0`; `@type` `sc:Dataset`", "datacite": "`schemaVersion` `http://datacite.org/schema/kernel-4`; `types.resourceTypeGeneral` `Dataset`"},
+    {"source": "node identity", "ro_crate": "root `./`; a File's `@id` is its manifest path; a creator's is its identifier or `#creator-<n>` (from 1); the publisher's its identifier or `#publisher`", "croissant": "a FileObject's `@id` is its manifest path; a recordSet's the table's name; a field's `<table>/<field>`; creators and publisher as in RO-Crate", "datacite": "-"},
+    {"source": "`title`", "ro_crate": "root `name`", "croissant": "`name`", "datacite": "`titles[0].title`"},
+    {"source": "`description`", "ro_crate": "root `description`", "croissant": "`description`", "datacite": "`descriptions[descriptionType=Abstract].description`"},
+    {"source": "`creators[]` (order kept)", "ro_crate": "root `author`: the creators' `@id`s in order; each node `@type` `Person` or `Organization`, `name`", "croissant": "`creator[i]`: `@type`, `name`, `@id`", "datacite": "`creators[i]`: `name`, `nameType` `Personal` or `Organizational`, `nameIdentifiers[0]` `nameIdentifier` and `nameIdentifierScheme` (`ORCID`, `ROR`)"},
+    {"source": "`publisher`", "ro_crate": "root `publisher`: a node `@type` `Organization`, `name`", "croissant": "`publisher`: `@type` `Organization`, `name`, `@id`", "datacite": "`publisher` (its name; a string in 4.3)"},
+    {"source": "`published`", "ro_crate": "root `datePublished`", "croissant": "`datePublished`", "datacite": "`publicationYear` (its year), `dates[dateType=Issued].date`"},
+    {"source": "`version`", "ro_crate": "root `version`", "croissant": "`version`", "datacite": "`version`"},
+    {"source": "`licence.spdx`", "ro_crate": "root `license` `https://spdx.org/licenses/<id>` (the exact string)", "croissant": "`license` (the same string)", "datacite": "`rightsList`: exactly one entry, `rightsIdentifier` `<id>`, `rightsIdentifierScheme` `SPDX`"},
+    {"source": "`licence` null", "ro_crate": "root `license` `#licence`: a `CreativeWork` named `No open licence` whose `description` is the notice", "croissant": "no `license`", "datacite": "no `rightsList`"},
+    {"source": "`notice`", "ro_crate": "root `conditionsOfAccess`", "croissant": "`conditionsOfAccess`", "datacite": "`descriptions[descriptionType=Other].description`"},
+    {"source": "`doi` null", "ro_crate": "no root `identifier`", "croissant": "no `identifier`, no `citeAs`", "datacite": "no `identifiers`"},
+    {"source": "files (asset and folder rows)", "ro_crate": "root `hasPart`: the set of their paths with `manifest.json` and `prov.json`; each a File with `sha256`, `contentSize` (the bytes as a string), `encodingFormat` (the row's `media_type`); no other File", "croissant": "`distribution`: one FileObject each, `contentUrl` (the path), `sha256`, `contentSize` `<bytes> B`, `encodingFormat`; no other", "datacite": "`sizes` [`<total> bytes`], `formats` the sorted distinct media types; no file digest"},
+    {"source": "tables (a /2 folder's table-target items; from 2.16 a bundle's typed tables)", "ro_crate": "-", "croissant": "one `recordSet` per table, its `field` the field `@id`s in target order; each field `name`, `dataType` (field kinds), `source.fileObject` (the item's path, or the asset's `data.json`), `source.extract.column` (folder: the field's name) or `source.extract.jsonPath` (bundle: the path of the bundle tables table, and no `column`)", "datacite": "-"},
+    {"source": "`prov` (a bundle's PROV-JSON)", "ro_crate": "File `prov.json`: `sha256`, `contentSize`, `encodingFormat` `application/json`, `conformsTo` `https://www.w3.org/submissions/prov-json/`; a /2 folder's PROV is its `lineage/prov.json` row", "croissant": "-", "datacite": "-"},
+    {"source": "`manifest.json`", "ro_crate": "a File: `encodingFormat` `application/json`, no `sha256`", "croissant": "-", "datacite": "-"}
+  ]
+}

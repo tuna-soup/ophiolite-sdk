@@ -1,0 +1,24 @@
+~Version
+VERS.  2.0 : CWLS LOG ASCII STANDARD - VERSION 2.0
+WRAP.  NO : One line per depth step
+~Well
+STRT.M  1100.0 : Start
+STOP.M  1095.5 : Stop
+STEP.M  0 : Step
+NULL.  -999.25 : Null value
+WELL.  SYNTHETIC-E144 : Well
+~Curve
+DEPT.M : Depth
+GR.gAPI : Gamma ray
+RHOB.G/C3 : Bulk density
+~ASCII
+1100.0 -999.25 2.50
+1099.5 -999.25 2.50
+1099.0 -999.25 2.50
+1098.5 -999.25 2.50
+1098.0 -999.25 -999
+1097.5 -999.25 2.50
+1097.0 -999.25 2.50
+1096.5 -999.25 2.50
+1096.0 -999.25 2.50
+1095.5 -999.25 2.50

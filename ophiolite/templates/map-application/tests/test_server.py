@@ -76,7 +76,7 @@ def test_wells_and_extent_for_the_map_and_no_credentials_in_responses(server):
     assert features[0]['geometry']=={'type':'Point','coordinates':[5.1,52.1]} and features[2]['geometry'] is None
     assert features[0]['properties']['source_row']=='1'  # for the popup's Technical details
     fixture.template_faults['expired']=True
-    assert 'ophiolite login' in post('wells',status=401)['message']
+    assert 'ophiolite account login' in post('wells',status=401)['message']
     assert fixture.template_mutations=={}  # a map only reads
 
 

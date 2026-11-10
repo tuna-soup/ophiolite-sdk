@@ -100,6 +100,90 @@ def test_the_wrong_collection_an_invalid_layer_or_no_start_fails_every_head(bad,
     assert {(r['state'], r['evidence']['class']) for r in rows} == {('failed', cls)} and len(rows) == 3
 
 
+# E138 s3 D4, D5: two fault sets on the `lines` collection, as qgis_read_inside.py writes another collection's features
+STICKS = {'F-1': [(0, [(500010.0, 20.0, 0.1), (500011.0, 21.0, 0.2)]), (1, [(500035.0, 20.0, 0.1), (500036.0, 21.0, 0.2), (500037.0, 22.0, 0.3)])],
+          'F-2': [(0, [(500100.0, 40.0, 0.1), (500101.0, 41.0, 0.2)])]}
+LANDED = {'F-1': ('a-1', 'r-1'), 'F-2': ('a-2', 'r-2')}
+
+
+def lines(placement=None, points=True):
+    return [{'properties': {'name': 'fault-sticks ' + n, 'stick': i, 'source_asset_id': LANDED[n][0], 'source_revision': LANDED[n][1],
+                            **({'placement': placement} if placement else {})}, 'points': [list(p[:2]) for p in ps] if points else None}
+            for n, sticks in STICKS.items() for i, ps in sticks]
+
+
+def test_fault_sets_are_judged_per_source_on_the_lines_collection():
+    rows = by_object(qg.judge_lines(TABLE, seen(lines(), 'lines'), STICKS, LANDED, tool=TOOL, synthetic=True, crs='EPSG:32631'))
+    assert {n: r['state'] for n, r in rows.items()} == {'F-1': 'within', 'F-2': 'within'}
+    assert [(x['name'], x['expected'], x['observed']) for x in rows['F-1']['quantities'] if x['mode'] == 'count'] == [('features', 2, 2), ('placed', 2, 2), ('points', 5, 5)]
+    moved = lines()
+    moved[0]['properties']['source_asset_id'] = 'a-2'  # F-1's stick 0 as F-2's: F-2 holds stick 0 twice, the first compared
+    rows = by_object(qg.judge_lines(TABLE, seen(moved, 'lines'), STICKS, LANDED, tool=TOOL, synthetic=True, crs='EPSG:32631'))
+    assert sorted(x['name'] for x in rows['F-2']['quantities'] if x['state'] != 'agree') == ['features', 'identities', 'placed', 'x', 'y']  # two points either way
+
+
+def test_a_fault_source_without_a_crs_records_no_coordinates_and_a_placed_feature_disagrees():
+    rows = by_object(qg.judge_lines(TABLE, seen(lines(qg.NOT_STATED, points=False), 'lines'), STICKS, LANDED, tool=TOOL, synthetic=True, crs='unknown'))
+    r = rows['F-1']
+    assert (r['state'], r['not_recorded'], r['evidence']) == ('equal', ['points', 'points per stick', 'x', 'y'], {'crs': 'unknown', 'placement': qg.NOT_STATED})
+    placed = lines(qg.NOT_STATED, points=False)
+    placed[0]['points'] = [[1.0, 2.0], [3.0, 4.0]]
+    r = by_object(qg.judge_lines(TABLE, seen(placed, 'lines'), STICKS, LANDED, tool=TOOL, synthetic=True, crs='unknown'))['F-1']
+    assert r['state'] == 'disagree' and [x['name'] for x in r['quantities'] if x['state'] == 'disagree'] == ['placed']
+
+
+@pytest.mark.parametrize('bad, cls', [({'collection': 'wells'}, 'other'), ({'valid': False, 'features': []}, 'tool diagnostics'),
+                                      ({'stopped': qg.NOT_STARTED % 125}, 'tool did not start')])
+def test_a_lines_read_that_gives_nothing_to_judge_fails_every_fault_set(bad, cls):
+    rows = qg.judge_lines(TABLE, {**seen(lines(), 'lines'), **bad}, STICKS, LANDED, tool=TOOL, synthetic=True, crs='EPSG:32631')
+    assert {(r['kind'], r['state'], r['evidence']['class']) for r in rows} == {('fault-sticks', 'failed', cls)} and len(rows) == 2
+
+
+# E138 s3 C1b: a horizon's nodes on the `point-sets` collection (feature_index k = the k-th node, inline-major)
+NODES = {'H-1': {(1, 1): (500000.125, 6000000.375, 1500.0), (1, 2): (500002.625, 6000025.375, None), (2, 1): (500012.5, 6000003.75, 1502.0)}}
+LANDED_H = {'H-1': ('a-h', 'r-h')}
+
+
+def points(placement=None, xy=True, quantise=True):
+    out = []
+    for k, (i, c) in enumerate(sorted(NODES['H-1'])):
+        x, y, z = NODES['H-1'][(i, c)]
+        props = {'name': 'horizon-3d H-1', 'feature_index': k, 'source_asset_id': 'a-h', 'source_revision': 'r-h', **({'z': z} if z is not None else {}),
+                 **({'placement': placement} if placement else {})}
+        out.append({'properties': props, 'x': (qg.hundredths(x) if quantise else x) if xy else None, 'y': (qg.hundredths(y) if quantise else y) if xy else None})
+    return out
+
+
+def test_a_horizon_s_points_are_judged_per_source_against_hundredths():
+    assert (qg.hundredths(500000.125), qg.hundredths(6000000.375), qg.hundredths(500002.625), qg.hundredths(12.5)) == (500000.12, 6000000.38, 500002.62, 12.5)
+    (r,) = qg.judge_points(TABLE, seen(points(), 'point-sets'), NODES, LANDED_H, tool=TOOL, synthetic=True, crs='EPSG:32631')
+    assert (r['kind'], r['object'], r['state'], r['not_recorded'], r['evidence']) == ('horizon-3d', 'H-1', 'within', [], {})
+    assert [(x['name'], x['expected'], x['observed']) for x in r['quantities'] if x['mode'] == 'count'] == [('features', 3, 3), ('placed', 3, 3)]
+    assert all(x['state'] == 'agree' for x in r['quantities'])
+    # R2-5: the expected side alone is quantised; an observation served unquantised is half a hundredth off
+    (r,) = qg.judge_points(TABLE, seen(points(quantise=False), 'point-sets'), NODES, LANDED_H, tool=TOOL, synthetic=True, crs='EPSG:32631')
+    assert sorted(x['name'] for x in r['quantities'] if x['state'] != 'agree') == ['x', 'y']
+    assert [(x['name'], x['over_budget']) for x in r['quantities'] if x['name'] in 'xy'] == [('x', 2), ('y', 2)]  # .125, .625; .375, .375
+
+
+def test_a_horizon_without_a_crs_records_no_coordinates_and_a_placed_point_disagrees():
+    (r,) = qg.judge_points(TABLE, seen(points(qg.NOT_STATED, xy=False), 'point-sets'), NODES, LANDED_H, tool=TOOL, synthetic=True, crs='unknown')
+    assert (r['not_recorded'], r['evidence']) == (['x', 'y'], {'crs': 'unknown', 'placement': qg.NOT_STATED})
+    assert [(x['name'], x['state']) for x in r['quantities']] == [('features', 'agree'), ('placed', 'agree'), ('identities', 'agree'), ('z', 'agree'),
+                                                                  ('x', 'unsupported'), ('y', 'unsupported')]
+    placed = points(qg.NOT_STATED, xy=False)
+    placed[0].update(x=1.0, y=2.0)
+    (r,) = qg.judge_points(TABLE, seen(placed, 'point-sets'), NODES, LANDED_H, tool=TOOL, synthetic=True, crs='unknown')
+    assert r['state'] == 'disagree' and [x['name'] for x in r['quantities'] if x['state'] == 'disagree'] == ['placed']
+
+
+@pytest.mark.parametrize('bad, cls', [({'collection': 'lines'}, 'other'), ({'valid': False, 'features': []}, 'tool diagnostics'),
+                                      ({'stopped': qg.NOT_STARTED % 125}, 'tool did not start')])
+def test_a_point_sets_read_that_gives_nothing_to_judge_fails_every_horizon(bad, cls):
+    rows = qg.judge_points(TABLE, {**seen(points(), 'point-sets'), **bad}, NODES, LANDED_H, tool=TOOL, synthetic=True, crs='EPSG:32631')
+    assert [(r['kind'], r['state'], r['evidence']['class']) for r in rows] == [('horizon-3d', 'failed', cls)]
+
+
 def test_failure_sentences_carry_no_name_or_identity():
     feats = features() + [dict(features()[2])]
     rows = qg.judge(TABLE, seen(feats), HEADS, CREATED, tool=TOOL, synthetic=False)
@@ -112,24 +196,54 @@ def test_the_paging_proof_holds_for_two_followed_pages():
     assert qg.paging(good_log(), PAGES, CREATED.values()) == []
 
 
-@pytest.mark.parametrize('case', ['one-request', 'cursor-not-followed', 'short-union', 'other-identity', 'page-size'])
+@pytest.mark.parametrize('case', ['one-request-of-two-pages', 'cursor-not-followed', 'short-union', 'other-identity', 'page-size'])
 def test_the_paging_proof_fails(case):
     log = good_log()
-    if case == 'one-request': log = [{**log[0], 'ids': ['ent-1', 'ent-2', 'ent-3'], 'query': 'limit=2'}]
+    if case == 'one-request-of-two-pages': log = [{**log[0], 'ids': ['ent-1', 'ent-2', 'ent-3'], 'query': 'limit=2'}]
     if case == 'cursor-not-followed': log[1]['query'] = 'limit=2&cursor=elsewhere'
     if case == 'short-union': log[1]['ids'] = []
     if case == 'other-identity': log[1]['ids'] = ['ent-3', 'ent-9']
     if case == 'page-size': log = [{**e, 'query': e['query'].replace('limit=2', 'limit=10')} for e in log]
     problems = qg.paging(log, PAGES, CREATED.values())
-    expected = {'one-request': qg.FEW_REQUESTS % 1, 'cursor-not-followed': qg.NOT_FOLLOWED % (1, 1), 'short-union': qg.UNION % (2, 3, 0),
-                'other-identity': qg.UNION % (3, 3, 1), 'page-size': qg.PAGE_SIZES % ('10', 2)}[case]
-    assert expected in problems
+    expected = {'one-request-of-two-pages': [qg.NOT_FOLLOWED % (1, 1)], 'cursor-not-followed': [qg.NOT_FOLLOWED % (1, 1)],
+                'short-union': [qg.UNION % (2, 3, 0)], 'other-identity': [qg.UNION % (3, 3, 1)],
+                'page-size': [qg.PAGE_SIZES % ('10', 2), qg.NOT_FOLLOWED % (1, 1), qg.UNION % (0, 3, 0)]}[case]
+    assert problems == expected
+
+
+# E138 s3 H4 (O2): the proof at the provider's page size of 100, on the point-sets collection; the two-request rule is gone
+POINTS_ITEMS = '/api/v1/projects/p/features/collections/point-sets/items'
+IDS = ['point-sets:a-1:%d' % k for k in range(101)]
+
+
+def points_log(pages, cursors=None):
+    return [{'method': 'GET', 'path': POINTS_ITEMS, 'status': 200, 'ids': ids, 'query': 'limit=100' + ('&cursor=' + c if c else '')}
+            for (_, ids), c in zip(pages, cursors or [c for c, _ in pages])]
+
+
+def test_h4_a_one_page_collection_is_proven_by_its_union_alone():
+    pages = [('', IDS[:16])]
+    assert qg.page_size('point-sets') == qg.page_size('lines') == 100 and qg.page_size('wells') == 2
+    assert qg.paging(points_log(pages), pages, IDS[:16], collection='point-sets') == []
+    assert qg.paging([], [('', [])], [], collection='point-sets') == []  # zero pages: the union of nothing is nothing
+    assert qg.paging(points_log(pages)[:0], pages, IDS[:16], collection='point-sets') == [qg.UNION % (0, 16, 0)]
+
+
+def test_h4_a_101_feature_collection_at_page_size_100_is_proven_with_its_cursor_followed():
+    pages = [('', IDS[:100]), ('k100', IDS[100:])]
+    assert qg.paging(points_log(pages), pages, IDS, collection='point-sets') == []
+
+
+def test_h4_the_101_feature_collection_with_its_cursor_not_followed_is_not_proven():
+    pages = [('', IDS[:100]), ('k100', IDS[100:])]
+    assert qg.paging(points_log(pages)[:1], pages, IDS, collection='point-sets') == [qg.NOT_FOLLOWED % (1, 1), qg.UNION % (100, 101, 0)]
+    assert qg.paging(points_log(pages, ['', 'elsewhere']), pages, IDS, collection='point-sets') == [qg.NOT_FOLLOWED % (1, 1)]
 
 
 def test_a_fabricated_page_count_with_one_logged_request_fails_every_head():
     log = [{'method': 'GET', 'path': ITEMS, 'query': 'limit=2', 'status': 200, 'ids': ['ent-1', 'ent-2', 'ent-3']}]
     rows, problems = qg.rows(TABLE, {**seen(), 'page_count': 2}, log, PAGES, HEADS, CREATED, tool=TOOL, synthetic=True)
-    assert problems and {(r['state'], r['evidence']['error']) for r in rows} == {('failed', qg.NOT_PAGED)}
+    assert problems and {(r['state'], r['evidence']['error']) for r in rows} == {('failed', qg.NOT_PAGED % 'wells')}
     rows, problems = qg.rows(TABLE, seen(), good_log(), PAGES, HEADS, CREATED, tool=TOOL, synthetic=True)
     assert problems == [] and {r['state'] for r in rows} == {'within'}
 
@@ -138,14 +252,14 @@ def test_qgis_s_first_probe_of_ten_neither_proves_nor_spoils_the_paging():
     """QGIS 4.2.2 asks for one page of 10 without a cursor before it pages (the real image, 1 Nov 2026)."""
     probe = {'method': 'GET', 'path': ITEMS, 'query': 'limit=10&crs=x', 'status': 200, 'ids': ['ent-1', 'ent-2', 'ent-3']}
     assert qg.paging([probe] + good_log(), PAGES, CREATED.values()) == []
-    assert qg.paging([probe, good_log()[0]], PAGES, CREATED.values()) == [qg.FEW_REQUESTS % 1, qg.NOT_FOLLOWED % (1, 1), qg.UNION % (2, 3, 0)]
+    assert qg.paging([probe, good_log()[0]], PAGES, CREATED.values()) == [qg.NOT_FOLLOWED % (1, 1), qg.UNION % (2, 3, 0)]
 
 
 def test_requests_to_other_paths_or_refused_pages_do_not_count():
     log = good_log() + [{'method': 'GET', 'path': ITEMS.replace('wells', 'points'), 'query': 'limit=2&cursor=c9', 'status': 200, 'ids': ['ent-9']}]
     assert qg.paging(log, PAGES, CREATED.values()) == []
     log = [good_log()[0], {**good_log()[1], 'status': 401}]
-    assert qg.FEW_REQUESTS % 1 in qg.paging(log, PAGES, CREATED.values())
+    assert qg.paging(log, PAGES, CREATED.values()) == [qg.NOT_FOLLOWED % (1, 1), qg.UNION % (2, 3, 0)]
 
 
 def test_the_gateway_pages_follow_next_and_refuse_a_loop():
@@ -162,7 +276,7 @@ def test_the_gateway_pages_follow_next_and_refuse_a_loop():
 STUB = r'''#!%(python)s
 """A stub engine: `run` plays the QGIS container, `ps`, `stop` and `rm` answer from a state file."""
 import http.client, json, os, socket, sys, time
-from urllib.parse import urlsplit
+from urllib.parse import quote, urlsplit
 state, argv = %(state)r, sys.argv[1:]
 with open(state + '.calls', 'a') as calls: calls.write(json.dumps(argv) + '\n')
 if argv[0] == 'run': open(state + '.env', 'w').write(json.dumps({k: os.environ.get(k) for k in ('HOME', 'XDG_DATA_HOME', 'OPHIOLITE_E138_RUN')}))
@@ -172,20 +286,29 @@ if argv[0] == 'ps':
 if argv[0] in ('stop', 'rm'):
     if os.path.exists(state): os.unlink(state)
     sys.exit(0)
+if argv[0] == 'image': sys.exit(1)  # no image digest: the tool's version says unknown
 name = argv[argv.index('--name') + 1]
 mounts = dict(reversed(v.split(':')[:2]) for v in (argv[i + 1] for i, a in enumerate(argv) if a == '-v'))
 open(state, 'w').write(name + '\n')
-if mode == 'hang': time.sleep(600)
 if mode == 'no-start': os.unlink(state); sys.exit(125)
 spec = json.load(open(mounts['/work'] + '/in.json'))
+if mode in ('hang', 'hang:' + spec['collection']): time.sleep(600)  # E138 s3 H6: `hang:<collection>` hangs that read only
 class Unix(http.client.HTTPConnection):
     def connect(self):
         self.sock = socket.socket(socket.AF_UNIX); self.sock.connect(mounts['/run/e46'] + '/proxy.sock')
-url, feats = spec['landing'] + '/collections/' + spec['collection'] + '/items?limit=%%d' %% spec['page_size'], []
+srs = ''  # the requested CRS, as qgis_leg.crs_uri writes it (QGIS's srsname)
+if spec['crs']:
+    authority, number = spec['crs'].split(':')
+    srs = '&crs=' + quote('http://www.opengis.net/def/crs/%%s/0/%%s' %% (authority, number), safe='')
+url, feats = spec['landing'] + '/collections/' + spec['collection'] + '/items?limit=%%d' %% spec['page_size'] + srs, []
 while url:
     c = Unix('127.0.0.1'); part = urlsplit(url); c.request('GET', part.path + '?' + part.query, headers={'Host': part.netloc})
     doc = json.loads(c.getresponse().read()); c.close()
-    feats += [{'id': f['properties']['entity_id'], 'x': f['geometry']['coordinates'][0], 'y': f['geometry']['coordinates'][1]} for f in doc['features']]
+    for f in doc['features']:  # qgis_read_inside.py's shapes per collection
+        g = f['geometry'] and f['geometry']['coordinates']
+        if spec['collection'] == 'wells': feats.append({'id': f['properties']['entity_id'], 'x': g and g[0], 'y': g and g[1]})
+        elif spec['collection'] == 'point-sets': feats.append({'properties': f['properties'], 'x': g and g[0], 'y': g and g[1]})
+        else: feats.append({'properties': f['properties'], 'points': g and [list(p) for p in g]})
     url = next((l['href'] for l in doc['links'] if l['rel'] == 'next'), None)
     if mode == 'one-page': url = None
 json.dump({'collection': spec['collection'], 'valid': True, 'features': feats, 'page_count': 2, 'qgis_version': '4.2.2-stub'},
@@ -273,7 +396,7 @@ def test_a_read_that_stops_after_one_page_fails_the_paging_whatever_it_prints(st
     got, log = stub_read(stub)
     assert got['page_count'] == 2 and len(log) == 1
     rows, problems = qg.rows(TABLE, got, log, [('', ['ent-1', 'ent-2']), ('2', ['ent-3'])], HEADS, CREATED, tool=TOOL, synthetic=True)
-    assert qg.FEW_REQUESTS % 1 in problems and {r['state'] for r in rows} == {'failed'}
+    assert problems == [qg.NOT_FOLLOWED % (1, 1), qg.UNION % (2, 3, 0)] and {r['state'] for r in rows} == {'failed'}
 
 
 def test_a_container_that_does_not_start_fails_with_its_class(stub):
@@ -400,3 +523,22 @@ def test_a_child_that_leaves_its_group_is_found_by_its_mark_and_stopped(ri):
     other = wf.WorkFolder.create(ri.tmp / 'volume', forbidden=[ri.tmp / 'forbidden'])
     assert other.marker != ri.work.marker and other.survivors() == []
     other.close()
+
+
+# --- E138 s3 C2: the uploads a project takes (live_target.py, live_run.py) -------------------------------------------
+
+def test_the_live_target_takes_the_upload_count_within_limits_py_s_bounds_and_the_live_run_sets_it():
+    import ast
+    from project_gateway import limits
+    lt = _module('live_target')
+    name = 'OPHIOLITE_MAX_UPLOADS_PER_PROJECT'
+    assert lt.checked({name: 100_000}) == {name: 100_000}
+    with pytest.raises(ValueError, match=name):
+        lt.checked({name: 100_001})
+    table = {variable: (low, high) for variable, _, low, high in limits.TABLE.values()}
+    assert {n: table[n] for n in lt.LIMITS} == lt.LIMITS  # every bound the live target enforces is limits.py's own
+    tree = ast.parse((ROOT / 'conformance/roundtrip/live_run.py').read_text())
+    (assigned,) = [node.value for node in ast.walk(tree) if isinstance(node, ast.Assign) and any(getattr(t, 'id', None) == 'LIMITS' for t in node.targets)]
+    assert all(isinstance(n, (ast.Dict, ast.Constant, ast.BinOp, ast.operator)) for n in ast.walk(assigned))  # numbers and `2 ** n` only
+    run_limits = eval(compile(ast.Expression(assigned), 'live_run.py', 'eval'), {'__builtins__': {}})
+    assert run_limits[name] == 100_000 and lt.checked(run_limits) == run_limits

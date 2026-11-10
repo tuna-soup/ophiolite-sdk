@@ -89,6 +89,7 @@ def made(folder, edit=None, raw=None):
     (folder / 'definition.json').write_text(json.dumps(defn))
     (folder / 'records.json').write_text(json.dumps({'catalog': {'source_commit': None, 'verification_commit': None, 'built_at': '2026-10-29T00:00:00Z', 'records_digest': 'd' * 64},
                                                      'records': [{'id': RID, 'title': 'A synthetic survey', 'licence': dict(APACHE),
+                                                                  'publisher': {'name': 'Synthetic Survey Organisation', 'url': 'https://example.org/synthetic'},  # E147 s3: OSD record/5 requires it
                                                                   'inputs': [{'name': 'survey-archive', 'url': URL}]}]}))
     (folder / 'verification').mkdir(exist_ok=True)
     (folder / 'verification' / 'ophiolite-synthetic__survey.json').write_text(json.dumps(

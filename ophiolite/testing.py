@@ -1,10 +1,11 @@
 """Explicit fixture transport; never installed as a production fallback."""
 import base64
 from contextlib import contextmanager
+import hashlib
 from importlib.resources import files
 import json
-from pathlib import Path
-from urllib.parse import parse_qs, unquote, urlsplit
+from pathlib import Path, PurePosixPath
+from urllib.parse import parse_qs, quote, unquote, urlsplit
 import httpx
 
 class FixtureTransport(httpx.MockTransport):
@@ -29,11 +30,12 @@ class FixtureServer:
     A supplied handler can drive an actual in-process gateway. The default fixture
     is a bounded synthetic application journal, never a production fallback.
     """
-    def __init__(self,handler=None,*,drop_response_after=None,drop_count=3):
+    def __init__(self,handler=None,*,drop_response_after=None,drop_count=3,record=True):
         import threading
         from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
         self.handler=handler or _MemoryApplications()
         self.requests=[];self._lock=threading.Lock();self._drops={drop_response_after:drop_count} if drop_response_after else {}
+        self.record=record  # E162 s1: the long-running demo server keeps no request log
         owner=self
         class Handler(BaseHTTPRequestHandler):
             def log_message(self,*args):pass
@@ -45,7 +47,7 @@ class FixtureServer:
                 if length>8*1024*1024:self.send_error(413);return
                 raw=self.rfile.read(length)
                 with owner._lock:
-                    owner.requests.append({'method':self.command,'path':self.path,'body_base64':base64.b64encode(raw).decode()})
+                    if owner.record:owner.requests.append({'method':self.command,'path':self.path,'body_base64':base64.b64encode(raw).decode()})
                 status,value=owner.handler(self.command,self.path,raw,dict(self.headers))
                 with owner._lock:
                     operation=self.path.split('?',1)[0].rsplit('/',1)[-1]
@@ -72,9 +74,9 @@ def fixture_server(handler=None,**options):return FixtureServer(handler,**option
 
 
 class _MemoryApplications:
-    def __init__(self):
+    def __init__(self,project='p'):
         import importlib.resources,threading
-        self._journal_lock=threading.RLock()
+        self._journal_lock=threading.RLock();self.project=project  # E162 s1: the demo serves a bundle's own project
         root=importlib.resources.files('ophiolite').joinpath('contracts/assets/v1/fixtures')
         self.original=root.joinpath('original.las').read_bytes()
         self.view=json.loads(root.joinpath('curve.json').read_bytes())
@@ -95,7 +97,7 @@ class _MemoryApplications:
         owner=token.removeprefix('Bearer ').removeprefix('oph_api_').removeprefix('provider-').split(':')[0]
         if not owner or owner=='expired':return 401,{'error':'authorization required'}
         operation=urlsplit(path).path.rsplit('/',1)[-1]
-        if path=='/api/v1/application-access/status':return 200,{'state':'approved','project_id':'p','user_id':owner}
+        if path=='/api/v1/application-access/status':return 200,{'state':'approved','project_id':self.project,'user_id':owner}
         try:
             if '/publications/' in path:return self._publication(operation,path,raw,headers,owner)  # E31: derived publications
             if operation=='result-history' and json.loads(raw).get('asset_id') in getattr(self,'publications',{}):return self.history(json.loads(raw)['asset_id'],owner)  # E52
@@ -107,7 +109,7 @@ class _MemoryApplications:
                 if operation=='inspect':return 200,{'curves':[{'mnemonic':'DEPT','unit':'M'},{'mnemonic':'GR','unit':'gAPI'}]}
             else:body=json.loads(raw)
             project=body['project_id']
-            if project!='p':return 403,{'error':'project unavailable'}
+            if project!=self.project:return 403,{'error':'project unavailable'}
             if operation in ('configure','start','upload'):
                 key=(operation,owner,project,body['command_id']);fingerprint=hashlib.sha256(json.dumps(body,sort_keys=True,separators=(',',':'),allow_nan=False).encode()+(raw if upload else b'')).hexdigest()
                 if key in self.commands:
@@ -186,14 +188,14 @@ class _MemoryApplications:
         if operation=='derive':
             extra=next(v for k,v in headers.items() if k.lower()=='x-ophiolite-upload')
             body=json.loads(base64.b64decode(extra,validate=True))
-            if body['project_id']!='p':return 403,{'error':'project unavailable'}
+            if body['project_id']!=self.project:return 403,{'error':'project unavailable'}
             if hashlib.sha256(raw).hexdigest()!=body['output_sha256'] or len(raw)!=body['output_bytes']:return 400,{'error':'The file differs from its declared digest or length'}
             key=('derive',owner,body['command_id']);fingerprint=hashlib.sha256(extra.encode()+raw).hexdigest()
             if key in self.commands:
                 prior,answer=self.commands[key]
                 return (200,copy.deepcopy(answer)) if prior==fingerprint else (409,{'error':'This command id was already used for a different publication','code':'command-owned'})
             self.publications=getattr(self,'publications',{})
-            parents=[{'authority':'ophiolite:derived','key':p['asset_id'],'revision':p['revision'],'profile':'las2/1'} for p in body['derived_from']]
+            parents=[self._parent(p) for p in body['derived_from']]
             method={'script_sha256':None,**body['method']}
             head=None
             if body.get('new_version_of') is not None:  # E52: the server's append rules, in its order and words
@@ -280,7 +282,11 @@ class _MemoryApplications:
         normalized=_normalized(ident,version,las,curve)
         if len(parts)==5 and parts[3]=='representations' and parts[4]=='curve:'+curve:return 200,normalized
         if len(parts)!=3:return 404,_envelope('No such representation.','not-found')
-        return 200,_descriptor(ident,item,version,las,curve,normalized,owner)
+        return 200,_descriptor(ident,item,version,las,curve,normalized,owner,self.project)
+
+    def _parent(self,named):
+        """The parent reference of a derived publication; the synthetic journal labels every parent derived (E31)."""
+        return {'authority':'ophiolite:derived','key':named['asset_id'],'revision':named['revision'],'profile':'las2/1'}
 
     def summary(self,ident):
         if ident in self.uploads:
@@ -326,7 +332,7 @@ def _normalized(ident,version,las,curve):
     return json.dumps(value,sort_keys=True,separators=(',',':'),allow_nan=False).encode()
 
 
-def _descriptor(ident,item,version,las,curve,normalized,owner):
+def _descriptor(ident,item,version,las,curve,normalized,owner,project='p'):
     """The server's descriptor of one revision of a derived publication, without its revision manifest and display words."""
     import hashlib,time
     axis=las['columns'][las['index']];values=las['columns'][curve]
@@ -337,7 +343,7 @@ def _descriptor(ident,item,version,las,curve,normalized,owner):
     output=((version['method'].get('parameters') or {}).get('outputs') or {}).get(curve)
     if output and output.get('quantity') in _quantities():scientific.update(quantity=output['quantity'],quantity_status='declared')
     allowed=['read','export','use-as-input']
-    return {'schema':'ophiolite.scientific-asset/1','asset_id':ident,'revision':version['revision'],'project_id':'p','authority':'ophiolite:derived',
+    return {'schema':'ophiolite.scientific-asset/1','asset_id':ident,'revision':version['revision'],'project_id':project,'authority':'ophiolite:derived',
             'origin':'managed-derived','custodian':'ophiolite:managed','source_reference':None,'profile':'las2/1','scientific':scientific,
             'interpretation':dict(INTERPRETATION),'interpretation_evidence':'recorded','recorded_interpretation':dict(INTERPRETATION),
             'representations':[{'id':'artifact','kind':'derived-artifact','media_type':'application/x-las','profile':'las2/1','bytes':len(version['bytes']),
@@ -476,6 +482,162 @@ def synthetic_server():
     server.template_descriptor = descriptor
     with server:
         yield server
+
+
+# --- E162 s1: a demo-compatible portable bundle served as its project, with publications kept for the session --------
+
+def _gateway_error(message, code, remedy, anchor):
+    return {'error': message, 'code': code, 'message': message, 'remedy': remedy, 'docs': '/docs/reference/errors/#' + anchor}
+
+
+_DENIED = _gateway_error('Automation scope denied', 'PERMISSION_DENIED',
+                         'Use a credential whose scope, kind and project reach this operation, or ask a project administrator for access.', 'permission_denied')
+# D8: the gateway's answer to a member with read access only, on each route the frozen refusal list reaches (and the
+# reads on the way to it); tests/gateway/test_demo_refusals.py compares every row with the in-process gateway.
+# A `project_id` member is this project's; `observed_at` and the error's `request_id` are stamped per answer.
+DEMO_ANSWERS = {
+    ('POST', 'capabilities/describe'): (200, {
+        'schema': 'ophiolite.capabilities/1', 'project_id': None, 'principal': {'kind': 'delegate', 'scopes': ['read'], 'agent': None},
+        'note': "Allowed means this credential may ask; the project's own permissions still decide, and an agent's change needs an approved plan for that exact request.",
+        'operations': [], 'profiles': [],  # the demo reads no upload: it serves its bundle and the session's publications
+        'limits': {'upload_bytes': 8388608, 'result_bytes': 33554432, 'agent_response_bytes': 65536, 'file_bytes': 8388608, 'upload_total_bytes': 134217728,
+                   'retained_bytes': 536870912, 'uploads_per_project': 100, 'concurrent_uploads': 2, 'finish_jobs': 1, 'session_seconds': 604800,
+                   'grid_cells': 3000000, 'max_traces': 1000000, 'max_samples': 20000, 'max_inline_bytes': 33554432, 'package_companion_bytes': 16777216,
+                   'las_rows': 1000000, 'horizon_nodes': 1000000},
+        'readers': [], 'mcp': None, 'upload_runs': {'reads': ['procedures']}}),
+    ('POST', 'upload-runs/list'): (200, {'runs': []}),
+    ('POST', 'upload-runs/start'): (403, _DENIED),  # exchange upload
+    ('POST', 'table-imports/read'): (403, _DENIED),  # exchange import table
+    ('POST', 'catalog/inventory'): (200, {'assets': [], 'next_cursor': None}),  # results withdraw: a bundle asset is no project item
+    ('POST', 'well-names/propose'): (404, _gateway_error(  # data wells from-run: the demo has no folder upload
+        'This folder upload is not known to this deployment, or it is not yours.', 'unknown-run',
+        'Start the folder upload again; this deployment does not know that upload, or it is not yours.', 'unknown-run')),
+}
+# every other route the demo does not serve: the gateway's answer for an unknown operation
+UNKNOWN_OPERATION = (404, _gateway_error('Unknown operation', 'NOT_FOUND',
+                                         'Check the project, operation and identifiers; list them again to find current ones.', 'not_found'))
+
+
+def _stamped(answer, project):
+    import secrets, time
+    status, body = answer; body = json.loads(json.dumps(body))
+    if 'project_id' in body: body.update(project_id=project, observed_at=time.time())
+    if status >= 400: body['request_id'] = 'req_' + secrets.token_hex(12)
+    return status, body
+
+
+class BundleApplications(_MemoryApplications):
+    """E162 s1: a checked portable bundle served as a gateway serves its project, from memory: the catalogue in manifest
+    order, each stored descriptor and representation byte for byte (nothing recomputed, no windows), one well per log
+    named by its source path's stem and without a location, and derived publications kept for the session (parents
+    resolved to the served descriptors). Only a demo-compatible bundle: version 2, every asset in one project, a first
+    asset that is a LAS log with GR, and the path every log was read from. Loopback only; never a production fallback."""
+    def __init__(self, path):
+        from . import bundle as bundles
+        from .errors import Refused
+        opened = bundles.open_bundle(path)  # the check `ophiolite bundle check` runs; its refusal passes through
+        if getattr(opened, 'close', None): opened.close()  # nothing stays extracted: the members are read again below
+        manifest = opened.manifest
+        if manifest['schema'] != bundles.SCHEMA_2: raise Refused('The demo serves a version 2 bundle only.')
+        raw = _bundle_members(path, manifest)
+        self.served = []
+        for entry, chosen in zip(manifest['assets'], manifest['selection']):
+            files = {f['sha256']: raw[f['path']] for f in entry['files']}
+            descriptors = {f.get('curve'): raw[f['path']] for f in entry['files'] if f['role'] == 'descriptor'}
+            source = (((entry.get('source_record') or {}).get('record') or {}).get('identity') or {}).get('source_object_id') or {}
+            self.served.append({'entry': entry, 'curves': list(chosen.get('curves') or []), 'files': files, 'descriptors': descriptors,
+                                'parsed': {curve: json.loads(value) for curve, value in descriptors.items()}, 'source_path': source.get('path')})
+        projects = {d['project_id'] for a in self.served for d in a['parsed'].values()}
+        if len(projects) != 1: raise Refused('The demo serves a bundle whose assets are all in one project.')
+        first = self.served[0]
+        if first['entry'].get('profile') != 'las2/1' or 'GR' not in first['curves']:
+            raise Refused('The demo needs a bundle whose first asset is a LAS log with a GR curve.')
+        logs = [a for a in self.served if a['entry'].get('profile') == 'las2/1']
+        if any(not isinstance(a['source_path'], str) or not a['source_path'] for a in logs):
+            raise Refused('The demo needs the path every log in the bundle was read from.')
+        super().__init__(project=projects.pop())
+        self.reached = []
+        self.index = {(a['entry']['asset_id'], a['entry']['revision']): a for a in self.served}
+        self.prefix = '/api/v1/projects/' + quote(self.project, safe='') + '/scientific-assets'
+        self.entities = '/api/v1/projects/' + quote(self.project, safe='') + '/entities/'
+        self.wells = sorted(({'entity_id': 'well-' + hashlib.sha256(a['entry']['asset_id'].encode()).hexdigest()[:16], 'kind': 'well',
+                              'name': PurePosixPath(a['source_path']).stem, 'generation': 1, 'location': None} for a in logs),
+                            key=lambda w: (w['name'], w['entity_id']))  # one per log, never merged by name (ADR 0012 §2)
+
+    def __call__(self, method, path, raw, headers):
+        token = next((v for k, v in headers.items() if k.lower() == 'authorization'), '')
+        parsed = urlsplit(path); route = unquote(parsed.path); query = parse_qs(parsed.query)
+        served = method == 'GET' and (route == self.prefix or route.startswith(self.prefix + '/')) or method == 'POST' and route in (self.entities + 'list', self.entities + 'extent')
+        base = '/api/v1/projects/' + self.project + '/'
+        answer = DEMO_ANSWERS.get((method, route[len(base):])) if route.startswith(base) else None
+        if not served and answer is None:  # the session's publications (and the status a sign-in asks); nothing else
+            kept = route == '/api/v1/application-access/status' or route.startswith(base + 'publications/') or route == base + 'applications/result-history'
+            if not kept: return _stamped(UNKNOWN_OPERATION, self.project)
+            status, body = super().__call__(method, path, raw, headers)
+            return _stamped(UNKNOWN_OPERATION, self.project) if isinstance(body, dict) and body.get('error') == 'Fixture operation unavailable' else (status, body)
+        owner = _owner(token)
+        if not owner or owner == 'expired': return 401, {'error': 'authorization required'}
+        if answer is not None:
+            self.reached.append((method, route))  # the route a frozen refusal reaches (K9)
+            return _stamped(answer, self.project)
+        try:
+            if method == 'POST': return self._wells(route.rsplit('/', 1)[-1], json.loads(raw or b'{}'), owner)
+            return self._read(route[len(self.prefix):], query, owner)
+        except (ValueError, TypeError, AttributeError): return 400, _envelope('Invalid request', 'invalid-request')
+
+    def _read(self, rest, query, owner):
+        if rest in ('', '/'):  # the catalogue, in manifest order
+            items = [self._summary(a) for a in self.served]
+            return 200, _page('items', items, query.get('limit', ['100'])[0], query.get('cursor', [''])[0])
+        parts = rest[1:].split('/'); found = self.index.get((parts[0], parts[2])) if len(parts) in (3, 5) and parts[1] == 'revisions' else None
+        if found is None:
+            published = self.scientific(rest[1:], query, owner)  # a publication of this session
+            return published if published is not None else (404, _envelope('No such revision.', 'not-found'))
+        curve = (query.get('curve') or [None])[0] if found['curves'] else None
+        if curve not in found['descriptors']: return 404, _envelope('Select the available curve.', 'not-found')
+        if len(parts) == 3: return 200, found['descriptors'][curve]  # the stored bytes, as exported
+        representation = next((r for r in found['parsed'][curve]['representations'] if r['id'] == parts[4]), None) if parts[3] == 'representations' else None
+        if representation is None or representation['sha256'] not in found['files']: return 404, _envelope('No such representation.', 'not-found')
+        return 200, found['files'][representation['sha256']]
+
+    def _summary(self, served):
+        entry = served['entry']; first = next(iter(served['parsed'].values()))
+        return {'asset_id': entry['asset_id'], 'revision': entry['revision'], 'name': entry.get('name'), 'origin': first['origin'],
+                'authority': first['authority'], 'profile': first['profile'], 'custodian': first['custodian'], 'curves': served['curves'],
+                'sample_count': first['scientific'].get('sample_count') if served['curves'] else None,
+                'allowed_operations': list(first['supported_operations'])}
+
+    def _wells(self, operation, request, owner):
+        if operation == 'extent':  # only located wells count, as the gateway counts them; none is located here
+            return 200, {'crs': request.get('crs', 'OGC:CRS84'), 'bbox': None, 'count': 0, 'untransformed': 0}
+        wells = [] if request.get('kind', 'well') != 'well' or 'bbox' in request else [dict(w, owner=owner) for w in self.wells]
+        return 200, {**_page('entities', wells, request.get('limit', 100), request.get('cursor') or ''), 'untransformed': 0}
+
+    def _parent(self, named):
+        """A bundle asset's parent reference is its served descriptor's; a publication of this session's is derived."""
+        found = self.index.get((named['asset_id'], named['revision']))
+        if found is None: return super()._parent(named)
+        first = next(iter(found['parsed'].values()))
+        return {'authority': first['authority'], 'key': named['asset_id'], 'revision': named['revision'], 'profile': first['profile']}
+
+
+def _bundle_members(path, manifest):
+    """The listed members of a checked bundle (a `.zip` or a folder), each again compared with its checked digest."""
+    import zipfile
+    from .errors import VerificationFailed
+    listed = {f['path']: f['sha256'] for entry in manifest['assets'] for f in entry['files']}
+    if Path(path).is_file():
+        with zipfile.ZipFile(path) as archive: raw = {name: archive.read(name) for name in listed}
+    else: raw = {name: (Path(path) / name).read_bytes() for name in listed}
+    if any(hashlib.sha256(raw[name]).hexdigest() != digest for name, digest in listed.items()):
+        raise VerificationFailed('A bundle file changed after its check.')
+    return raw
+
+
+def _page(key, items, limit, cursor):
+    limit, start = min(max(int(limit), 1), 100), max(int(cursor or 0), 0)
+    end = start + limit
+    return {key: items[start:end], 'next_cursor': str(end) if end < len(items) else None}
 
 
 # --- E94: results/story, what-changed, dependents and remake-run on the synthetic server -----------------------------

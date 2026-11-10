@@ -23,7 +23,8 @@ def test_full_values_axis_and_metadata(name,method):
     np.testing.assert_array_equal(actual,expected,strict=True)
     assert actual.shape==(5,2)
     expected_meta=oracle['expected_descriptor']
-    expected_meta={**expected_meta,'contracts':{**expected_meta['contracts'],'registry_version':json.loads((Path(__file__).parents[1]/'ophiolite/contracts/registry.json').read_text())['version']}}  # the bundled registry
+    expected_meta={**expected_meta,'contracts':{**expected_meta['contracts'],'registry_version':json.loads((Path(__file__).parents[1]/'ophiolite/contracts/registry.json').read_text())['version']},
+                   'osdu_kind':None,'osdu_kind_reason':None}  # E168 s1 (D1): these served descriptors predate the pair; the bundled registry
     assert meta.model_dump()==expected_meta
     assert np.isnan(actual).sum(axis=0).tolist()==[1,1]
     if method=='to_frame':

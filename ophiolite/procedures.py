@@ -363,7 +363,7 @@ def _setting_values(manifest, given):
 NEUTRAL_SYSTEM = "a team's system"  # B6 rev 4 (6): a system label that does not read as a name
 NEUTRAL_FOLDER = 'Team system'
 THIS_PROCEDURE = 'this tool'  # E131 s2: tool
-KEPT = 'The files the tool made are kept in {path}. To add them by hand: ophiolite upload {path}'
+KEPT = 'The files the tool made are kept in {path}. To add them by hand: ophiolite exchange upload {path}'
 
 
 def _binding(name, system, role):
@@ -579,7 +579,7 @@ def _child_check(function, inputs, request, exchange):
 
 
 def _report_of(manifest, digest, values, bound, input_record, comparison):
-    """E110 (D9, M5): check.json, the `procedure-report` that `ophiolite checks publish` sends: the exact subject
+    """E110 (D9, M5): check.json, the `procedure-report` that `ophiolite tools checks publish` sends: the exact subject
     version, the procedure's digest, the reference (a project version, or a file by name and digest), the settings and
     the returned outcome and counts. Refused here as the server would refuse it."""
     from .checks import report_refusal
@@ -709,7 +709,7 @@ def run(folder, destination, inputs=None, *, kinds=None, declared=None, systems=
             os.rename(partial, target)
             outcome = {'passed': 'passed', 'differed': 'differed', 'not_compared': 'not compared'}[report['outcome']]
             sentence = (f"Ran {manifest['label']}, version {manifest['version']}, on this computer: {outcome}. Nothing was published; "
-                        f"to report it to the project, run: ophiolite checks publish {destination.name}")
+                        f"to report it to the project, run: ophiolite tools checks publish {destination.name}")
             return _presented({'sentence': sentence, 'destination': str(target), 'run': record, 'report': report}, call, manifest['label'])
         if child.returncode != 0 or not (exchange / 'outputs.json').exists(): raise NotRun('stopped', '', technical)
         made = json.loads((exchange / 'outputs.json').read_text())
@@ -1130,6 +1130,24 @@ class ProcedureClient:
 
     def procedure_trust(self, digest, *, command_id=None):
         return self._procedure_change('trust', digest, command_id)
+
+    def procedure_verify(self, digest, *, check=None, publication=None, withdraw=None, statement=None, command_id=None):
+        """E165 s1: verify a version against a passed check of a result it produced (`check`, the check record's id), or
+        a published method (`publication`: title, authors, year, link {kind: doi or url, value}), or withdraw a
+        verification (`withdraw`, its id); exactly one. Each call is a new command id, resent only by this call's own
+        retry; give `command_id` to resend a call whose answer was lost. The answer is `{record, verification}`, with the
+        server's line in `verification['line']`."""
+        given = [(kind, value) for kind, value in (('check', check), ('publication', publication), ('withdrawn', withdraw)) if value is not None]
+        if len(given) != 1: raise ValueError('Give exactly one of check, publication or withdraw.')
+        kind, value = given[0]
+        reference = {'check_id': value} if kind == 'check' else {'withdraws': value} if kind == 'withdrawn' else value
+        body = {'command_id': command_id or 'verify-' + uuid.uuid4().hex, 'digest': digest, 'kind': kind, 'reference': reference}
+        if statement is not None: body['statement'] = statement
+        return self._post('procedures', 'verify', body, retry=True)
+
+    def procedure_verifications(self, digest):
+        """E165 s1: every verification and withdrawal of a version, oldest first, each with its line, and its state."""
+        return self._post('procedures', 'verifications', {'digest': digest}, retry=True)
 
     def procedure_version(self, name, version=None, *, readable=False):
         """Without `version`: the highest enabled version of `name`. With it: that version, among those you can see

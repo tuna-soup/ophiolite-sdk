@@ -8,6 +8,10 @@ The test cubes in `tests/fixtures/zgy/` (`small-*.zgy` and their `small-*.sgy` t
 equinor/pyzgy (Equinor ASA) at 03b9f7bd7b, Apache-2.0, copied unmodified with that licence as `LICENSE-pyzgy.txt`
 (Integration `docs/release/rights/e123sz-pyzgy-test-cubes-2026-10.json`); they are test fixtures only and are not in
 the wheel.
+The test-only `descriptors-test` extra (E147) installs mlcroissant 1.1.1 (Apache-2.0) and roc-validator 0.13.1
+(Apache-2.0) into a venv the validator tests make; it is never a runtime dependency nor in the server image. Those tests
+fetch the DataCite kernel-4.3 JSON schema (datacite/schema, no licence file) and the W3C PROV-JSON Member Submission
+schema by URL and SHA-256 at run time; neither is copied into this tree.
 An installed dependency inventory and licence review is required before release.
 No assertion about that complete transitive inventory is made here.
 

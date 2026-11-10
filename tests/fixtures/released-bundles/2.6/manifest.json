@@ -1,0 +1,67 @@
+{
+  "schema": "ophiolite.portable-bundle/2",
+  "bundle_version": "2.6.0",
+  "created_at": "2026-11-02T18:16:42+00:00",
+  "exporter": {
+    "name": "ophiolite-sdk",
+    "version": "2026.11.4"
+  },
+  "scope": "selection",
+  "selection": [
+    {
+      "asset_id": "synthetic-time-depth",
+      "revision": "a30abdd45ee6439775469cb92e020fe6a1731003959f44c7c0fbef3cfcc6583b",
+      "curves": []
+    }
+  ],
+  "assets": [
+    {
+      "asset_id": "synthetic-time-depth",
+      "revision": "a30abdd45ee6439775469cb92e020fe6a1731003959f44c7c0fbef3cfcc6583b",
+      "origin": "retained-capture",
+      "profile": "time-depth-csv/1",
+      "type": "time-depth",
+      "name": null,
+      "files": [
+        {
+          "path": "assets/0/original.csv",
+          "role": "original",
+          "sha256": "a30abdd45ee6439775469cb92e020fe6a1731003959f44c7c0fbef3cfcc6583b",
+          "bytes": 60
+        },
+        {
+          "path": "assets/0/descriptor.json",
+          "role": "descriptor",
+          "sha256": "72a6340977c22d20c80687db26ca9578b30a306f85cb3caaee7408e196bf01bb",
+          "bytes": 2883
+        },
+        {
+          "path": "assets/0/data.json",
+          "role": "normalized",
+          "sha256": "979d58a4364d3e6d976bb725ec179c50496ee74c4be94cbd7b3a1cc097bd9564",
+          "bytes": 1482
+        }
+      ],
+      "history": null,
+      "parents": [],
+      "parent_visibility": "complete",
+      "relationships": {
+        "well_log": null
+      },
+      "omissions": [
+        "Synthetic offline fixture, not a server publication"
+      ],
+      "losses": [
+        "Text formatting (whitespace, quoting, line endings, number spelling) is kept only in the exact original"
+      ]
+    }
+  ],
+  "groups": null,
+  "recommendations": null,
+  "limits": {
+    "max_assets": 128,
+    "max_file_bytes": 33554432,
+    "max_total_bytes": 536870912
+  },
+  "notice": "Checksums show the integrity of this copy, not authorship or scientific correctness. Exported copies cannot be recalled; holding one grants no new upstream, sharing or AI-training rights."
+}

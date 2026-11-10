@@ -15,5 +15,11 @@ result and publication, the bound input versions, the verdict (`accepted`, `reje
 vocabulary's `checks`) and the rows. A record is never changed; one acceptance key gives one record. A result's
 states are derived from its records and the outcome's state for readers of the result. Nothing is gated yet.
 
+From E144 slice 4 a declaration may name data rules (`rule.data_rules`, sorted, once each, at most eight): the ones
+its kind lists in `rules.json` `data_rules`, released in the current data-rule snapshot (`../../rules/v1/registry.json`)
+and reading one of its inputs (refused `data_rules` otherwise). A declaration that names none is the one it was before,
+byte for byte. They are run on the bound input versions after the validity and inputs checks and before the built-in
+rule; a record of such a version carries them in `data_rules`.
+
 `fixtures/valid/` holds declarations the server accepts; each file in `fixtures/invalid/` differs from
 `valid/tops-within-5m.json` in one field and names the reason it is refused (`fixtures/expected.json`).

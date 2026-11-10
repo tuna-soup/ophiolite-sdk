@@ -60,6 +60,17 @@ class KeptCopies:
         return self.tables[(asset_id, revision)]
 
     def _read(self, asset_id, revision):
+        got = self.kept(asset_id, revision, with_row=False)
+        if isinstance(got, str): return got
+        try: data = json.loads(got[0])
+        except ValueError: raise VerificationFailed('The kept copy is not the documented table.') from None
+        schema, original, rows, _ = verified_table(data)
+        return {r['well_id']: o for r, o in zip(rows, original)}, [c['name'] for c in schema]
+
+    def kept(self, asset_id, revision, with_row=True):
+        """(the kept bytes, the package's manifest row for them as served, or None without `with_row`) of one kept copy,
+        its sha256 checked against `revision`; or the reason it cannot be read now. E162 s2a: Client.export carries both
+        in a bundle (2.17)."""
         found = self.captures().get(asset_id)
         if found is None: return 'The kept copy is not in a package you can open.'
         item, ordinal = found
@@ -76,12 +87,10 @@ class KeptCopies:
         try:
             with zipfile.ZipFile(io.BytesIO(base64.b64decode(answer['payload_base64'], validate=True))) as bundle:
                 payload = bundle.read('assets/%02d.json' % ordinal)
-        except (binascii.Error, ValueError, KeyError, zipfile.BadZipFile): raise _mismatch('The kept copy could not be decoded.') from None
+                listed = json.loads(bundle.read('manifest.json'))['assets'][ordinal] if with_row else None
+        except (binascii.Error, ValueError, KeyError, IndexError, TypeError, zipfile.BadZipFile): raise _mismatch('The kept copy could not be decoded.') from None
         if hashlib.sha256(payload).hexdigest() != revision: raise _mismatch('The kept copy does not match the revision its wells name.')
-        try: data = json.loads(payload)
-        except ValueError: raise VerificationFailed('The kept copy is not the documented table.') from None
-        schema, original, rows, _ = verified_table(data)
-        return {r['well_id']: o for r, o in zip(rows, original)}, [c['name'] for c in schema]
+        return payload, listed
 
 
 def with_source(wells, client, columns=None):

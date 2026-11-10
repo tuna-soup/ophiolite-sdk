@@ -2,9 +2,71 @@
 
 ## 0.1.0 — unreleased
 
-Supported 0.x client over preview contracts, installable from reviewed source.
-No PyPI/npm publication, stable 1.0 or production-support promise is claimed.
+Supported 0.x client over preview contracts, published on PyPI as `ophiolite` since 29 October 2026 and numbered by
+release date (ADR 0015). No stable 1.0 or production-support promise is claimed.
 
+- A reported derivation record (`ophiolite.derivation/2` 1.1.0) may carry an optional procedure `verification` block
+  (E165 s2): verified, withdrawn or not verified, with who, when, the reference and its line. Records without the
+  block keep their revision manifest digest: an absent block is not digested, as the server does not serve it.
+- `ophiolite.restore` states each restored item's well association as "Restored from the portable bundle."
+  (E162 s2d), without the manifest's SHA-256: a well page showed the 64-character digest to every reader. The digest
+  stays where it is checked, in `expected_manifest_sha256` and the restoration record's `manifest_sha256`.
+  Associations made by an earlier restoration keep their old sentence.
+
+- An agent may ask for an organization database for its person (E154 s0): `CHANGES` names
+  `org-connections/request` and `org-connections/request-withdraw`. The request names a kind, a host and the
+  destination only; the gateway refuses any sign-in field before anything is stored, and deciding stays a person's.
+- `ophiolite.restore.restore(client, bundle, audience=, attribution=, rights_confirmed=, expected_manifest_sha256=None)`
+  restores a bundle that carries a wells table (E162 s2a), wells first: the kept rows through the production table
+  import with the kept mapping, then logs and grids, then tops and surveys bound to the restored logs, then each
+  well's associations again. It refuses before any write a bundle outside that shape or with another manifest
+  digest, returns one row per item, and raises `RestoreIncomplete` (an `ImportIncomplete`) when an item is not
+  restored; a repeat continues without duplicating anything.
+- A bundle carries a wells table (E162 s2a, bundle 2.17): `Client.export` of the rows a wells import kept (a
+  `sql-wells/1` copy, read through the package routes as `Wells.with_source` reads it) writes one `well-table` entry,
+  the rows exactly as kept (`original.json`, their sha256 the revision) beside the copy's source manifest as served
+  (`descriptor.json`). `open_bundle` checks the table with the table checks of `source.read()`, allows at most one, and
+  requires every association of it to name one of its rows and every well the bundle lists to be located by exactly
+  one row (`bundle.WellTable` is the asset's `data`). `import_plan` refuses it: "A wells table is restored with its
+  wells (`ophiolite.restore`), not uploaded". Released readers refuse the newer type; bundles without one are
+  unchanged.
+- An agent imports a database table its person approved (E153 s1b): `AgentClient.CHANGES` adds `well-imports/preview`,
+  `well-imports/start`, `well-imports/step`, `sources/mapping-save`, `layouts/save` and `layouts/keep`. Each runs as a
+  job step; the preview asks the person, and a save keeps only the picks the person settled.
+- The derive-and-publish template takes `--configuration PATH` and `--credentials PATH` (E162 s1), the files the
+  `ophiolite` command takes. When given, they win over `OPHIOLITE_URL`, `OPHIOLITE_PROJECT` and the credential
+  order; without them the template answers as before (the template version stays 0.1.0).
+- A job reads a file (E153 s1): `propose_job`, `run_job` and `resume` take `files={step: bytes}` for each file step
+  (`ophiolite.agents.FILE_STEPS`, today `table-imports/read`). The step's body names the file by `bytes` and `sha256`;
+  `send_file_step` posts the bytes to the step's own route under `X-Ophiolite-Plan` and `X-Ophiolite-Job-Step`, and a
+  completed file step replays through `jobs/step`. A missing file, or a body naming other bytes, raises `Refused` before
+  any request. `AgentClient.CHANGES` adds `table-imports/preview`, `table-imports/start`, `table-imports/step` and
+  `well-names/accept`; `table-imports/read` is proposed only inside a job, with its bytes.
+- An agent runs a job under one approval (E151 s2): `AgentClient.propose_job(steps, *, evidence=None)`,
+  `job_status(plan)`, `step(plan, step, *, evidence_id=None, command_id=None)`, `run_job(steps, *, evidence=None,
+  **wait)` and `resume(plan, **wait)`. A job is 1 to 8 steps `{operation, body}`; each body is copied and names this
+  client's project (`project_id` added when absent), and a malformed list or another project is refused locally
+  (`Refused`) before any request. `job_status` is checked against `ophiolite.agent-job/1` without the `validation`
+  extra. A step's command id is `uuid5(ophiolite.agents.NAMESPACE, f'{plan}:{step}')`, so `resume` replays completed
+  steps by those ids and runs the rest, in this process or a restarted one; a step needing the person's decision
+  raises `ChoiceRequired` with `plan` and `step` set. The person's `Client.proposals()` lists what waits for them
+  (checked against `ophiolite.agent-proposals/1`) and `Client.answer(choice_token, choice)` answers a question; the
+  gateway refuses an agent credential on both (`agent-refused`), and a used, foreign, stale or another person's token
+  raises `ChoiceRefused` with `details['reason']`. `job(job_id)` (the runner job) and `CHANGES` are unchanged.
+- A deprecated route says so (E148 s1): when the server answers with a `Deprecation` header, the client warns
+  `ophiolite.OphioliteDeprecationWarning` (a `UserWarning`) once per route per client: "<METHOD> <route> is deprecated
+  (since <date>); sunset <date>; successor <route>". Every client warns (`Client`, `AsyncClient`, `Account`,
+  `AgentClient` with its `reads`, `OAuthApp`, sync, the access history and `doctor --online`); nothing is installed
+  on an `httpx` client you pass in, and the answer is never changed. The command line writes the notice as
+  `warning: <message>` on standard error, never on standard output. The dates and the policy are in the API
+  versioning document (`ophiolite.policy/deprecations/1`).
+- A project's administrator exports the members' work (E134 s4): `export_trajectories(destination, ...,
+  scope='members')` and `ophiolite trajectories export --scope members:ID` write every consenting member's work in the
+  project, each person and each agent under its own pseudonym, as the administrator may read it; anyone else is
+  refused (`not-administrator`, exit code 3). The manifest's `scope` is `{kind: members, project}` and names no
+  person. `scope` is keyword-only and `own` by default; an `own` export sends the same request as before and its line
+  still says "your own work", a members export says "the consenting members' work". The export refuses a manifest of
+  the other scope. `work-episodes.json` is 1.1.0.
 - An agent records a verdict through an approved plan (E132 s3): `AgentClient` proposes and executes
   `verdicts/record` like any other change (`agent.run('verdicts/record', {...}, evidence=...)`); without an approved
   plan the server refuses it (`plan-required`). The verdict reads "by <agent> for <person>" in `verdicts` and the
@@ -463,5 +525,5 @@ sharing is a separate action and is never retried automatically.
 Python and TypeScript share 0.MINOR.PATCH and one tag. PATCH: fixes and additive
 APIs. MINOR: breaking changes documented here, with a one-minor shim where feasible.
 A new schema suffix requires a new model and MINOR. 1.0 requires supported registry
-entries for all SDK reads and stable versioned OpenAPI. See README.md for scope,
+entries for all SDK reads and stable versioned OpenAPI. See CONTRACTS.md for scope,
 licensing and separate publication/service release gates.

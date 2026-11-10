@@ -1,0 +1,20 @@
+{
+  "schema": "ophiolite.mapper-recipe/1",
+  "created": {"tool": "ophiolite-mapper 0.6.0", "rules_version": "1.5.0", "at": "2026-11-07T20:00:00Z"},
+  "source": {
+    "kind": "bundle",
+    "locator": {"path": "exported-own-app.zip"},
+    "reader": "portable-bundle/2",
+    "digest": {"algorithm": "sha256", "over": "bytes", "value": "6666666666666666666666666666666666666666666666666666666666666666"},
+    "bytes": 41000
+  },
+  "target": {"kind": "osdu-records", "id": "export-matrix"},
+  "layout": null,
+  "fields": [],
+  "columns": {},
+  "declarations": [],
+  "missing": [],
+  "wells": [],
+  "findings": [],
+  "osdu": {"namespace": "{{NAMESPACE}}", "legal_tag": "{{LEGAL_TAG}}", "owners": ["{{DATA_OWNERS_GROUP}}"], "viewers": ["{{DATA_VIEWERS_GROUP}}"]}
+}

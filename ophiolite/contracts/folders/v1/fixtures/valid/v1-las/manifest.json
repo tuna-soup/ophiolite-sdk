@@ -1,0 +1,131 @@
+{
+  "schema": "ophiolite.portable-bundle/2",
+  "bundle_version": "2.12.0",
+  "created_at": "2026-11-04T08:10:41Z",
+  "exporter": {
+    "name": "ophiolite-mapper",
+    "version": "0.4.0"
+  },
+  "scope": "selection",
+  "selection": [],
+  "assets": [],
+  "groups": null,
+  "recommendations": null,
+  "limits": {
+    "max_assets": 128,
+    "max_file_bytes": 33554432,
+    "max_total_bytes": 536870912
+  },
+  "notice": "Checksums show the integrity of this copy, not authorship or scientific correctness. Exported copies cannot be recalled; holding one grants no new upstream, sharing or AI-training rights.",
+  "folder": {
+    "schema": "ophiolite.project-folder/1",
+    "mapper": "ophiolite-mapper 0.4.0",
+    "recipe": {
+      "path": "recipe.json",
+      "sha256": "c0a671d199159fb79e4a656e4b52f1675e58acd79afc5fd98f6ff8f9b5e8b1b9"
+    },
+    "osdu": {
+      "tag": "v0.30.1",
+      "commit": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6",
+      "namespace": "synthetic"
+    },
+    "files": [
+      {
+        "path": "recipe.json",
+        "role": "recipe",
+        "media_type": "application/json",
+        "asset": null,
+        "sha256": "c0a671d199159fb79e4a656e4b52f1675e58acd79afc5fd98f6ff8f9b5e8b1b9",
+        "bytes": 2793
+      },
+      {
+        "path": "originals/syn-w2.las",
+        "role": "original",
+        "media_type": "text/plain",
+        "asset": null,
+        "sha256": "667d1d5a356f5fe78033d191fc380a9efc21892afa5e3c844f0cba37adde87d8",
+        "bytes": 360
+      },
+      {
+        "path": "originals/syn-w2b.las",
+        "role": "original",
+        "media_type": "text/plain",
+        "asset": null,
+        "sha256": "b18ba0177eaeb34d77680503bb9de0a6c696a1ca88ded164211790f3b495f03d",
+        "bytes": 321
+      },
+      {
+        "path": "originals/syn-w3.las",
+        "role": "original",
+        "media_type": "text/plain",
+        "asset": null,
+        "sha256": "e09474862ae51b2f9363b20d4e50159e0cd7613c7cda40ffb8569a69d509d73a",
+        "bytes": 384
+      },
+      {
+        "path": "originals/syn-w4.las",
+        "role": "original",
+        "media_type": "text/plain",
+        "asset": null,
+        "sha256": "40adc57baf9165156f3bfe0d8f94545ecac6d335efd850ca3984343b4565f554",
+        "bytes": 307
+      },
+      {
+        "path": "originals/syn-w4b.las",
+        "role": "original",
+        "media_type": "text/plain",
+        "asset": null,
+        "sha256": "4ca54d0dfbed437290ecf12b58d682686ec4e02140cd791924f58127fde3da8b",
+        "bytes": 316
+      },
+      {
+        "path": "items/well-log.parquet",
+        "role": "item",
+        "media_type": "application/vnd.apache.parquet",
+        "asset": null,
+        "sha256": "0d73ddad42fcf750fb3b7217c9d952509b8dce28451295c293a719911648efcd",
+        "bytes": 3554
+      },
+      {
+        "path": "identity/entities.parquet",
+        "role": "identity-entities",
+        "media_type": "application/vnd.apache.parquet",
+        "asset": null,
+        "sha256": "7cd5b210c6693c31279da3eb26488d1460510ed3df96ae620be52c404af2ae22",
+        "bytes": 2471
+      },
+      {
+        "path": "identity/aliases.parquet",
+        "role": "identity-aliases",
+        "media_type": "application/vnd.apache.parquet",
+        "asset": null,
+        "sha256": "ccd648899fdce598ca2f5d95351de3de40ba27feb951adf8a89a3c043cdcc072",
+        "bytes": 1885
+      },
+      {
+        "path": "identity/relationships.parquet",
+        "role": "identity-relationships",
+        "media_type": "application/vnd.apache.parquet",
+        "asset": null,
+        "sha256": "82810f6523e1c653d591b8cd22bcb34f55671cb2057bd6796b2779c60e45b12c",
+        "bytes": 2270
+      },
+      {
+        "path": "lineage/prov.json",
+        "role": "lineage-prov",
+        "media_type": "application/json",
+        "asset": null,
+        "sha256": "ffe528bfba382070178c174c28247cf4c75ed543361508f7f82c6322aeefbfc4",
+        "bytes": 4790
+      },
+      {
+        "path": "osdu/manifest.json",
+        "role": "osdu-manifest",
+        "media_type": "application/json",
+        "asset": null,
+        "sha256": "886c67d575fb7240883d8c242fc3ef092f224c946cbc91caa03d99bb154c9487",
+        "bytes": 14127
+      }
+    ]
+  }
+}

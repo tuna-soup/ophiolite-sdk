@@ -183,7 +183,7 @@ def test_case_6_refuses_keeps_the_outputs_and_the_printed_fallback_adds_them_onc
     printed = capsys.readouterr().out
     assert stopped.value.code == cli.EXIT['conflict'] and '  Well tops: Not supported - ' + SHARED in printed, printed
     [line] = [l for l in printed.splitlines() if l.startswith('The files the tool made are kept in ')]
-    kept = Path(line.split(' To add them by hand: ophiolite upload ')[1])
+    kept = Path(line.split(' To add them by hand: ophiolite exchange upload ')[1])
     assert sorted(p.name for p in kept.iterdir()) == ['tops.csv'] and (tmp_path / 'share/runs.txt').read_text() == 'ran\n' * 2  # bob's run, alice's
     clients['bob'].share(target, read=[], expected_generation=clients['bob'].grants(target).generation)  # bob stops sharing
     upload = cli.parser().parse_args(['upload', str(kept), '--attribution', 'Synthetic test', '--audience', 'me', '--rights-confirmed',

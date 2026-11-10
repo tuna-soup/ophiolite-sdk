@@ -1,0 +1,29 @@
+{
+  "description": "Single-defect export reports (E169 s0): each case applies its edits to a valid report (valid/<base>.json; set replaces or adds the value at the path, delete removes it) and names the code and JSON path of mapper.check_export_report. by: schema means export-report-schema.json refuses it too (JSON Schema Draft 2020-12); by: validator means only mapper.py does, and the schema admits it.",
+  "cases": [
+    {"name": "source-system-absent", "base": "written", "delete": [["records", 0, "source_system"]], "code": "schema-required", "path": "$.records[0].source_system", "by": "schema"},
+    {"name": "reason-outside-the-rules", "base": "written", "set": [[["unwritten", 0, "reason"], "profile-unknown"]], "code": "schema-enum", "path": "$.unwritten[0].reason", "by": "schema"},
+    {"name": "payload-outside-originals", "base": "written", "set": [[["records", 0, "payload", "path"], "osdu/asset-vsh-a1.las"]], "code": "schema-pattern", "path": "$.records[0].payload.path", "by": "schema"},
+    {"name": "revision-of-sixty-three-hex", "base": "written", "set": [[["records", 0, "revision"], "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"]], "code": "schema-pattern", "path": "$.records[0].revision", "by": "schema"},
+    {"name": "sample-values-in-a-record", "base": "written", "set": [[["records", 0, "payload", "samples"], [0.25, 0.5]]], "code": "schema-additionalProperties", "path": "$.records[0].payload.samples", "by": "schema"},
+    {"name": "detail-as-a-number", "base": "written", "set": [[["unwritten", 0, "detail"], 1]], "code": "schema-anyOf", "path": "$.unwritten[0].detail", "by": "schema"},
+    {"name": "kind-not-emitted", "base": "written", "set": [[["manifest", "kinds", "osdu:wks:work-product-component--WellboreMarkerSet:1.5.1"], 1]], "code": "schema-additionalProperties", "path": "$.manifest.kinds.osdu:wks:work-product-component--WellboreMarkerSet:1.5.1", "by": "schema"},
+    {"name": "written-record-not-a-log", "base": "written", "set": [[["records", 0, "kind"], "osdu:wks:dataset--File.Generic:1.1.0"]], "code": "schema-const", "path": "$.records[0].kind", "by": "schema"},
+    {"name": "bundle-version-without-patch", "base": "written", "set": [[["bundle", "bundle_version"], "2.16"]], "code": "schema-pattern", "path": "$.bundle.bundle_version", "by": "schema"},
+    {"name": "other-rules-version", "base": "written", "set": [[["mapper", "rules_version"], "1.3.0"]], "code": "rules-version", "path": "$.mapper.rules_version", "by": "validator"},
+    {"name": "master-of-the-other-kind", "base": "written", "set": [[["masters", 0, "kind"], "wellbore"]], "code": "record-kind", "path": "$.masters[0].record_id", "by": "validator"},
+    {"name": "log-on-a-well", "base": "written", "set": [[["records", 0, "wellbore_record_id"], "{{NAMESPACE}}:master-data--Well:exported-0123456789abcdef0123456789abcdef"]], "code": "wellbore-unknown", "path": "$.records[0].wellbore_record_id", "by": "validator"},
+    {"name": "namespaces-mixed", "base": "written", "set": [[["records", 0, "record_id"], "synthetic:work-product-component--WellLog:welllog-00112233445566778899aabbccddeeff"]], "code": "namespace-mixed", "path": "$", "by": "validator"},
+    {"name": "pair-written-and-unwritten", "base": "written", "set": [[["unwritten", 0, "asset_id"], "asset-vsh-a1"], [["unwritten", 0, "revision"], "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"]], "code": "pair-repeated", "path": "$.unwritten[0]", "by": "validator"},
+    {"name": "assets-not-adding-up", "base": "written", "set": [[["bundle", "assets"], 4]], "code": "assets-count", "path": "$.bundle.assets", "by": "validator"},
+    {"name": "sentence-holding-the-detail", "base": "written", "set": [[["unwritten", 0, "sentence"], "This version cannot export this data as OSDU records: work-product-component--GenericRepresentation is not a kind the box vendors at v0.30.1"]], "code": "sentence-mismatch", "path": "$.unwritten[0].sentence", "by": "validator"},
+    {"name": "sentence-of-another-reason", "base": "written", "set": [[["unwritten", 1, "sentence"], "This version cannot export this data as OSDU records."]], "code": "sentence-mismatch", "path": "$.unwritten[1].sentence", "by": "validator"},
+    {"name": "loss-of-an-unlisted-asset", "base": "written", "set": [[["losses", 0, "asset_id"], "asset-other"]], "code": "loss-unknown", "path": "$.losses[0]", "by": "validator"},
+    {"name": "loss-twice", "base": "written", "set": [[["losses"], [
+      {"asset_id": "asset-vsh-a1", "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "profile": "las2/1", "origin": "bundle", "text": "The curve's parameters are not carried into the LAS file."},
+      {"asset_id": "asset-vsh-a1", "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "profile": "las2/1", "origin": "bundle", "text": "The curve's parameters are not carried into the LAS file."}]]], "code": "loss-repeated", "path": "$.losses[1]", "by": "validator"},
+    {"name": "empty-unwritten-with-a-row", "base": "written", "set": [[["empty", "unwritten"], true]], "code": "empty-mismatch", "path": "$.empty.unwritten", "by": "validator"},
+    {"name": "empty-losses-not-stated", "base": "empty", "set": [[["empty", "losses"], false]], "code": "empty-mismatch", "path": "$.empty.losses", "by": "validator"},
+    {"name": "kinds-not-the-records", "base": "written", "set": [[["manifest", "kinds", "osdu:wks:work-product-component--WellLog:1.5.0"], 2]], "code": "kinds-count", "path": "$.manifest.kinds", "by": "validator"}
+  ]
+}

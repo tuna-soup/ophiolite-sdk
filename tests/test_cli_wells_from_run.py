@@ -78,7 +78,7 @@ def test_list_and_extent_take_no_runs():
 def test_the_upload_report_ends_with_the_wells_its_files_name():
     fake = Fake(propose=[A['propose']])
     line = cli._named_wells(SimpleNamespace(well_names=WellNames(fake)), A['runs'][0])
-    assert line == '1 file and 1 table name 1 well that is not in this project. Run: ophiolite wells from-run %s' % ' '.join(A['propose']['runs'])
+    assert line == '1 file and 1 table name 1 well that is not in this project. Run: ophiolite data wells from-run %s' % ' '.join(A['propose']['runs'])
     assert fake.sent == [('propose', {'runs': [A['runs'][0]]})]
 
 
@@ -96,4 +96,4 @@ def test_ophiolite_upload_prints_the_line_after_its_report(tmp_path, capsys):
     args = cli.parser().parse_args(['upload', str(tmp_path), '--attribution', 'Synthetic', '--rights-confirmed'])
     cli._upload(args, SimpleNamespace(upload_runs=runs, well_names=WellNames(Fake(propose=[A['propose']]))))
     assert capsys.readouterr().out.splitlines() == ['F-MIX - 1 files - Finished. 1 Added',
-                                                    '1 file and 1 table name 1 well that is not in this project. Run: ophiolite wells from-run %s' % ' '.join(A['propose']['runs'])]
+                                                    '1 file and 1 table name 1 well that is not in this project. Run: ophiolite data wells from-run %s' % ' '.join(A['propose']['runs'])]

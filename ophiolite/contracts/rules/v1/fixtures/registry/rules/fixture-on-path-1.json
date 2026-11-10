@@ -1,0 +1,16 @@
+{
+ "schema": "ophiolite.data-rule/1",
+ "id": "fixture-on-path/1",
+ "title": "Fixture top on its path",
+ "description": "Synthetic fixture rule: each top lies within the depth range of the wellbore's path and location. Not a released rule.",
+ "class": "project-context",
+ "kinds": ["well-tops-csv/1"],
+ "context_kinds": ["deviation-csv/1", "well-location/1"],
+ "severity": "warn",
+ "parameters": [
+  {"name": "margin", "type": "quantity", "unit": "m", "default": 0, "minimum": 0, "maximum": 100, "compare": "inclusive", "choices": null, "source": "Synthetic fixture value."},
+  {"name": "mode", "type": "choice", "unit": null, "default": "measured", "minimum": null, "maximum": null, "compare": null, "choices": ["measured", "vertical"], "source": "Synthetic fixture value."}
+ ],
+ "words": {"template": "{count} tops lie more than {margin} outside the path; the first is on {first}.", "examples": "rows"},
+ "since": "1.1.0"
+}

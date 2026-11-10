@@ -1,0 +1,317 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/mapper/v1/recipe-schema.json",
+  "title": "Mapper recipe",
+  "description": "The structure of recipe.json (ophiolite.mapper-recipe/1, E116): what ophiolite-mapper inspect saw and the decisions a person made, read by write. The decisions are authority; findings and evidence are a snapshot that write recomputes. Structure only: the rules (one row per field, where each decision is allowed, the effective recipe, refusal order, credential-free endpoints, timestamps) are mapper/v1/mapper.py's with rules.json, which is the validator of record. 1.4 (E116 s4, rules 1.3.0): reading rows say how a workbook is read; a previously reviewed field says whether it is the same table's pick or a similar table's, and whether it is prefilled or only offered; a bucket prefix names its region, ends in a slash, and may use plain http to 127.0.0.1 only. 1.5 (E169 s0, rules 1.4.0): an exported bundle (portable-bundle/2) as the source, digested over its bytes for a .zip and over its members for a folder, with OSDU records (the export matrix) as its only target; a bundle recipe has no layout, identity, fields, columns, declarations, missing markers, wells or findings, since the bundle carries identity, units and nulls as exported.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "created", "source", "target", "layout", "fields", "columns", "declarations", "missing", "wells", "findings", "osdu"],
+  "properties": {
+    "schema": {"const": "ophiolite.mapper-recipe/1"},
+    "created": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tool", "rules_version", "at"],
+      "properties": {
+        "tool": {"type": "string", "minLength": 1, "maxLength": 80},
+        "rules_version": {"type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"},
+        "at": {"$ref": "#/$defs/at"}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "locator", "reader", "digest", "bytes"],
+      "properties": {
+        "kind": {"enum": ["file", "sql-table", "bucket-prefix", "folder", "bundle"]},
+        "locator": {"type": "object"},
+        "reader": {"type": "string", "minLength": 1, "maxLength": 80},
+        "digest": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["algorithm", "over", "value"],
+          "properties": {
+            "algorithm": {"const": "sha256"},
+            "over": {"enum": ["bytes", "members", "rows"]},
+            "value": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+          }
+        },
+        "bytes": {"type": ["integer", "null"], "minimum": 0}
+      },
+      "allOf": [
+        {"if": {"properties": {"kind": {"const": "file"}}}, "then": {"properties": {"locator": {"$ref": "#/$defs/locator-file"}, "digest": {"properties": {"over": {"const": "bytes"}}}}}},
+        {"if": {"properties": {"kind": {"const": "sql-table"}}}, "then": {"properties": {"locator": {"$ref": "#/$defs/locator-sql-table"}, "digest": {"properties": {"over": {"const": "rows"}}}}}},
+        {"if": {"properties": {"kind": {"const": "bucket-prefix"}}}, "then": {"properties": {"locator": {"$ref": "#/$defs/locator-bucket-prefix"}, "digest": {"properties": {"over": {"const": "members"}}}}}},
+        {"if": {"properties": {"kind": {"const": "folder"}}}, "then": {"properties": {"locator": {"$ref": "#/$defs/locator-folder"}, "digest": {"properties": {"over": {"const": "members"}}}}}},
+        {"if": {"properties": {"kind": {"const": "bundle"}}}, "then": {"properties": {"locator": {"$ref": "#/$defs/locator-bundle"}, "reader": {"const": "portable-bundle/2"}}}},
+        {
+          "if": {"properties": {"kind": {"const": "bundle"}, "locator": {"properties": {"path": {"pattern": "\\.[Zz][Ii][Pp]$"}}}}, "required": ["kind"]},
+          "then": {"properties": {"digest": {"properties": {"over": {"const": "bytes"}}}}}
+        },
+        {
+          "if": {"properties": {"kind": {"const": "bundle"}, "locator": {"properties": {"path": {"not": {"pattern": "\\.[Zz][Ii][Pp]$"}}}}}, "required": ["kind"]},
+          "then": {"properties": {"digest": {"properties": {"over": {"const": "members"}}}}}
+        }
+      ]
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id"],
+      "properties": {
+        "kind": {"enum": ["table-target", "reader-profile", "osdu-records"]},
+        "id": {"type": "string", "minLength": 1, "maxLength": 120}
+      }
+    },
+    "layout": {
+      "anyOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "evidence", "decision"],
+          "properties": {
+            "id": {"type": "string", "minLength": 1, "maxLength": 120},
+            "evidence": {"$ref": "#/$defs/evidence"},
+            "decision": {"$ref": "#/$defs/decision-or-null"}
+          }
+        }
+      ]
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["basis", "column", "decision"],
+      "properties": {
+        "basis": {"enum": ["external", "provisional"]},
+        "column": {"anyOf": [{"type": "null"}, {"$ref": "#/$defs/label"}]},
+        "decision": {"$ref": "#/$defs/decision-or-null"}
+      }
+    },
+    "reading": {"type": "array", "maxItems": 5, "items": {"$ref": "#/$defs/reading"}},
+    "fields": {"type": "array", "maxItems": 64, "items": {"$ref": "#/$defs/field"}},
+    "columns": {"type": "object", "maxProperties": 256, "additionalProperties": {"$ref": "#/$defs/column"}},
+    "declarations": {"type": "array", "maxItems": 32, "items": {"$ref": "#/$defs/declaration"}},
+    "missing": {"$ref": "#/$defs/markers"},
+    "wells": {"type": "array", "maxItems": 10000, "items": {"$ref": "#/$defs/well"}},
+    "findings": {"type": "array", "maxItems": 64, "items": {"$ref": "#/$defs/finding"}},
+    "osdu": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["namespace", "legal_tag", "owners", "viewers"],
+      "properties": {
+        "namespace": {"type": "string", "pattern": "^([A-Za-z0-9][A-Za-z0-9-]{0,63}|\\{\\{NAMESPACE\\}\\})$"},
+        "legal_tag": {"type": "string", "minLength": 1, "maxLength": 200},
+        "owners": {"type": "array", "minItems": 1, "maxItems": 8, "items": {"type": "string", "minLength": 1, "maxLength": 200}},
+        "viewers": {"type": "array", "minItems": 1, "maxItems": 8, "items": {"type": "string", "minLength": 1, "maxLength": 200}}
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"source": {"properties": {"kind": {"const": "bundle"}}, "required": ["kind"]}}, "required": ["source"]},
+      "then": {
+        "not": {"required": ["identity"]},
+        "properties": {
+          "target": {"properties": {"kind": {"const": "osdu-records"}, "id": {"const": "export-matrix"}}},
+          "layout": {"type": "null"},
+          "fields": {"maxItems": 0},
+          "columns": {"maxProperties": 0},
+          "declarations": {"maxItems": 0},
+          "missing": {"maxItems": 0},
+          "wells": {"maxItems": 0},
+          "findings": {"maxItems": 0}
+        }
+      },
+      "else": {"properties": {"target": {"properties": {"kind": {"not": {"const": "osdu-records"}}}}}}
+    }
+  ],
+  "$defs": {
+    "at": {"type": "string", "minLength": 1, "maxLength": 40, "format": "date-time"},
+    "label": {"type": "string", "minLength": 1, "maxLength": 256},
+    "evidence": {"enum": ["declared", "previously-reviewed", "project-default", "inferred", "none"]},
+    "markers": {"type": "array", "maxItems": 16, "items": {"type": "string", "minLength": 1, "maxLength": 64}},
+    "column-choice": {
+      "anyOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/label"},
+        {"type": "array", "minItems": 1, "maxItems": 16, "items": {"$ref": "#/$defs/label"}}
+      ]
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["by", "at", "action"],
+      "properties": {
+        "by": {"type": "string", "minLength": 1, "maxLength": 200},
+        "at": {"$ref": "#/$defs/at"},
+        "action": {"enum": ["accept", "choose", "leave-unmapped", "accept-alias", "reject-alias", "new-entity", "reject"]},
+        "column": {"$ref": "#/$defs/column-choice"}
+      },
+      "if": {"properties": {"action": {"const": "choose"}}},
+      "then": {"required": ["column"]},
+      "else": {"not": {"required": ["column"]}}
+    },
+    "decision-or-null": {"anyOf": [{"type": "null"}, {"$ref": "#/$defs/decision"}]},
+    "field": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["field", "required", "multiple", "column", "evidence", "decision"],
+      "properties": {
+        "field": {"type": "string", "minLength": 1, "maxLength": 64},
+        "required": {"type": "boolean"},
+        "multiple": {"type": "boolean"},
+        "column": {"$ref": "#/$defs/column-choice"},
+        "evidence": {"$ref": "#/$defs/evidence"},
+        "reuse": {"enum": ["same-table", "similar"]},
+        "apply": {"enum": ["prefilled", "offered"]},
+        "decision": {"$ref": "#/$defs/decision-or-null"}
+      },
+      "if": {"properties": {"multiple": {"const": false}}},
+      "then": {"properties": {"column": {"not": {"type": "array"}}, "decision": {"anyOf": [{"type": "null"}, {"properties": {"column": {"not": {"type": "array"}}}}]}}},
+      "allOf": [
+        {
+          "if": {"properties": {"evidence": {"const": "previously-reviewed"}}, "required": ["evidence"]},
+          "then": {"required": ["reuse", "apply"]},
+          "else": {"not": {"anyOf": [{"required": ["reuse"]}, {"required": ["apply"]}]}}
+        },
+        {"if": {"properties": {"reuse": {"const": "similar"}}, "required": ["reuse"]}, "then": {"properties": {"apply": {"const": "offered"}}}}
+      ]
+    },
+    "reading": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "value", "evidence", "sentence", "decision"],
+      "properties": {
+        "name": {"enum": ["sheet", "delimiter", "encoding", "decimal_mark", "header_row"]},
+        "value": {"anyOf": [{"type": "null"}, {"type": "integer", "minimum": 1}, {"type": "string", "minLength": 1, "maxLength": 40}]},
+        "evidence": {"$ref": "#/$defs/evidence"},
+        "sentence": {"type": "string", "minLength": 1, "maxLength": 400},
+        "decision": {"$ref": "#/$defs/decision-or-null"}
+      }
+    },
+    "column": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unit", "quantity", "missing"],
+      "properties": {
+        "unit": {"type": ["string", "null"], "minLength": 1, "maxLength": 64},
+        "quantity": {"type": ["string", "null"], "minLength": 1, "maxLength": 64},
+        "missing": {"$ref": "#/$defs/markers"}
+      }
+    },
+    "declaration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "value", "evidence", "decision"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1, "maxLength": 64},
+        "value": {"anyOf": [{"type": "null"}, {"type": "number"}, {"type": "string", "minLength": 1, "maxLength": 200}]},
+        "evidence": {"$ref": "#/$defs/evidence"},
+        "decision": {"$ref": "#/$defs/decision-or-null"}
+      }
+    },
+    "well": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["spelling", "match", "canonical", "entity", "decision"],
+      "properties": {
+        "spelling": {"type": "string", "minLength": 1, "maxLength": 160},
+        "match": {"enum": ["exact", "alias", "normalised", "none"]},
+        "canonical": {"type": ["string", "null"], "minLength": 1, "maxLength": 160},
+        "entity": {
+          "anyOf": [
+            {"type": "null"},
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["kind", "key", "basis"],
+              "properties": {
+                "kind": {"enum": ["well", "wellbore"]},
+                "key": {"type": "string", "minLength": 1, "maxLength": 160},
+                "basis": {"enum": ["external", "provisional"]},
+                "well": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["key", "basis"],
+                  "properties": {
+                    "key": {"type": "string", "minLength": 1, "maxLength": 160},
+                    "basis": {"enum": ["external", "provisional"]}
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "decision": {"$ref": "#/$defs/decision-or-null"}
+      },
+      "if": {"properties": {"match": {"enum": ["exact", "alias", "normalised"]}}},
+      "then": {"properties": {"canonical": {"type": "string"}}}
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["field", "code", "rows", "examples", "acknowledged"],
+      "properties": {
+        "field": {"type": ["string", "null"], "minLength": 1, "maxLength": 64},
+        "code": {"type": "string", "pattern": "^[a-z][a-z-]{1,40}$"},
+        "rows": {"type": ["integer", "null"], "minimum": 1},
+        "examples": {"type": "array", "maxItems": 5, "items": {"type": "string", "maxLength": 200}},
+        "acknowledged": {
+          "anyOf": [
+            {"type": "null"},
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["by", "at", "note"],
+              "properties": {
+                "by": {"type": "string", "minLength": 1, "maxLength": 200},
+                "at": {"$ref": "#/$defs/at"},
+                "note": {"type": "string", "maxLength": 2000}
+              }
+            }
+          ]
+        }
+      }
+    },
+    "locator-file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path"],
+      "properties": {"path": {"type": "string", "minLength": 1, "maxLength": 4096, "pattern": "^[^\\u0000]+$"}}
+    },
+    "locator-bundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path"],
+      "properties": {"path": {"type": "string", "minLength": 1, "maxLength": 4096, "pattern": "^[^\\u0000]+$"}}
+    },
+    "locator-folder": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path"],
+      "properties": {"path": {"type": "string", "minLength": 1, "maxLength": 4096, "pattern": "^[^\\u0000]+$"}}
+    },
+    "locator-sql-table": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "schema", "table"],
+      "properties": {
+        "source": {"type": "string", "minLength": 1, "maxLength": 64},
+        "schema": {"type": ["string", "null"], "minLength": 1, "maxLength": 128},
+        "table": {"type": "string", "minLength": 1, "maxLength": 128}
+      }
+    },
+    "locator-bucket-prefix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["endpoint", "region", "bucket", "prefix"],
+      "properties": {
+        "endpoint": {"type": "string", "minLength": 9, "maxLength": 2048, "pattern": "^(https://|http://127\\.0\\.0\\.1:[0-9])"},
+        "region": {"type": "string", "pattern": "^[a-z0-9-]{1,32}$"},
+        "bucket": {"type": "string", "minLength": 3, "maxLength": 63},
+        "prefix": {"type": "string", "maxLength": 1024, "pattern": "^(.*/)?$"}
+      }
+    }
+  }
+}

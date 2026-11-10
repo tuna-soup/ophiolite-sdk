@@ -155,6 +155,18 @@ for want in expected.get('time_depth', []):
     read_models.append({'well': want['well'], 'path': want['path'], 'pairs': pairs})
     print('Time-depth model %s: %d pairs, depth %g to %g' % (want['well'], len(pairs), pairs[0][0], pairs[-1][0]))
 # %% [markdown]
+# ## The well tops
+# A pack may hold a well's tops: `wells/<well>-tops.csv`, a `name,md` header and one top per row, its depth along hole
+# from the depth reference its pack says. The csv module reads each top.
+# %%
+read_tops = []
+for want in expected.get('tops', []):
+    with open(files / want['path'], newline='', encoding='utf-8') as handle:
+        rows = list(csv.reader(handle))
+    tops = [[name, float(md)] for name, md in rows[1:]]
+    read_tops.append({'well': want['well'], 'path': want['path'], 'tops': tops})
+    print('Tops %s: %d tops, md %g to %g' % (want['well'], len(tops), min(md for _, md in tops), max(md for _, md in tops)))
+# %% [markdown]
 # ## Check against the pack
 # `expected.json` holds what the pack's build read from the same files. What this notebook read and what it drew (read
 # back from the plot itself) must agree with it; `open-a-starter-pack.json` keeps both.
@@ -199,11 +211,17 @@ for got, want in zip(read_models, expected.get('time_depth', [])):
     for n, (pair, wanted) in enumerate(zip(got['pairs'], want['pairs']), 1):
         if pair != wanted: differences.append('pair %d of the time-depth model of %s' % (n, want['well']))
 if len(read_models) != len(expected.get('time_depth', [])): differences.append('the number of time-depth models')
+for got, want in zip(read_tops, expected.get('tops', [])):
+    if len(got['tops']) != len(want['tops']): differences.append('the number of tops of %s' % want['well'])
+    for n, (top, wanted) in enumerate(zip(got['tops'], want['tops']), 1):
+        if top != wanted: differences.append('top %d (%s) of %s' % (n, wanted[0], want['well']))
+if len(read_tops) != len(expected.get('tops', [])): differences.append('the number of wells with tops')
 result = {'inline': inline, 'samples': samples, 'inline_sum': inline_sum,
           'wells': [dict(w, inline=round(w['inline'], 2) + 0.0, crossline=round(w['crossline'], 2) + 0.0) if w['inline'] is not None else w for w in wells],
           'without_logs': without_logs, 'plotted': plotted, 'differences': differences,
           **({'lines': [{k: v for k, v in got.items() if k != 'section'} for got in read_lines]} if 'lines' in expected else {}),
-          **({'time_depth': [{'well': got['well'], 'path': got['path'], 'pairs': len(got['pairs'])} for got in read_models]} if 'time_depth' in expected else {})}
+          **({'time_depth': [{'well': got['well'], 'path': got['path'], 'pairs': len(got['pairs'])} for got in read_models]} if 'time_depth' in expected else {}),
+          **({'tops': [{'well': got['well'], 'path': got['path'], 'tops': len(got['tops'])} for got in read_tops]} if 'tops' in expected else {})}
 with open('open-a-starter-pack.json', 'w') as handle:
     json.dump(result, handle, indent=2, sort_keys=True)
     handle.write('\n')
@@ -214,3 +232,5 @@ else:
     print('Agrees with expected.json:', 'inline %d, %d samples, the inline sum,' % (inline, len(samples)) if expected['cube'] else 'no cube,', '%d wells and %d 2D lines' % (len(wells), len(read_lines)))
 if read_models:
     print('Agrees with expected.json: every pair of %d time-depth models' % len(read_models))
+if read_tops:
+    print('Agrees with expected.json: every name and md of the tops of %d wells' % len(read_tops))

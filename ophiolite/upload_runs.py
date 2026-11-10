@@ -357,7 +357,7 @@ class Report:
             if r['result'] not in ('Added', 'Already here'):
                 lines.append('  %s: %s%s' % (name, r['result'], ' - ' + r['reason'] if r['reason'] else ''))
                 if item['state'] == 'needs-procedure' and item['role'] == 'primary':  # E107a: the exact command that reads it here
-                    lines.append('    To read it on this computer: ophiolite intake read %s %s' % (self.run_id, shlex.quote(PurePosixPath(item['path']).name)))
+                    lines.append('    To read it on this computer: ophiolite exchange intake read %s %s' % (self.run_id, shlex.quote(PurePosixPath(item['path']).name)))
             for listed in self.listed(item):
                 if listed['result'] in ('Added', 'Already here'): continue
                 lines.append('  %s%s: %s%s' % (name, listed['path'][len(item['path']):], listed['result'], ' - ' + listed['reason'] if listed['reason'] else ''))

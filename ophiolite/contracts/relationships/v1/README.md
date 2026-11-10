@@ -10,6 +10,10 @@ many objects of one kind a subject may have, whether it binds exact revisions, w
   revision (the revision itself, or a header or report that states it) and may add a statement.
 - `member-of`: result-group membership, a read-only projection of result groups; never asserted.
 - `derived-from`, `supersedes`: recorded by Ophiolite with the run or command that made them.
+- 1.2.0 (E142 s0) adds the `survey` kind and six read-only projections of surveys (`../../surveys/v1/`), never
+  asserted on this route: `in-survey` (an exact revision is a member of a survey; the membership itself) and the
+  relations between two members of one survey, `horizon-of`, `fault-in`, `well-in`, `line-of` and `time-depth-of`.
+  Only survey commands write them; the roles each joins are in `surveys/v1/roles.json`.
 
 Associations point from data to entities. No asset payload or metadata carries an entity, with one exception: a
 corrected well position (E74b). A derived `well-location/1` item whose first version names a well and derives from a

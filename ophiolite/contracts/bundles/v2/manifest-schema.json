@@ -3,11 +3,11 @@
   "$id": "https://ophiolite.dev/contracts/bundles/v2/manifest-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.portable-bundle/2",
-    "version": "2.11.0",
+    "version": "2.16.0",
     "lifecycle": "preview"
   },
   "title": "PortableBundleManifestV2",
-  "description": "The entry point of a portable bundle directory: an exact selection of scientific revisions with their files, digests, served context, permitted lineage, omissions and losses. Bundle 2 adds typed assets (well tops, trajectories, regular-grid surfaces) beside curves. Readers accept the majors they know and refuse others; 1.x readers refuse 2.0. Checksums show integrity, not authorship or scientific correctness. Unknown fields are extensions and are kept. 2.9 (E107a): a file read on a computer may carry the original it was read from (one provenance file) beside the recorded reading (read_by).",
+  "description": "The entry point of a portable bundle directory: an exact selection of scientific revisions with their files, digests, served context, permitted lineage, omissions and losses. Bundle 2 adds typed assets (well tops, trajectories, regular-grid surfaces) beside curves. Readers accept the majors they know and refuse others; 1.x readers refuse 2.0. Checksums show integrity, not authorship or scientific correctness. Unknown fields are extensions and are kept. 2.9 (E107a): a file read on a computer may carry the original it was read from (one provenance file) beside the recorded reading (read_by). 2.12 (E116 s1): a project folder block (folder); with it, assets and selection may be empty. 2.13 (E142 s0): surveys, their members and relations (surveys). 2.14 (E117 s1): the folder block may be ophiolite.project-folder/2, which any program may write. 2.15 (E147 s0): a citation block (citation) the standard descriptors beside the manifest are derived from, and a media type on asset files (media_type). 2.16 (E147 s2b): with a citation, the Croissant descriptor holds a record set per typed table (well tops, deviation survey, time-depth, point set) read from the asset's data.json.",
   "type": "object",
   "required": [
     "schema",
@@ -58,7 +58,7 @@
     },
     "selection": {
       "type": "array",
-      "minItems": 1,
+      "minItems": 0,
       "maxItems": 128,
       "items": {
         "$ref": "#/$defs/BundleSelectedV2"
@@ -66,7 +66,7 @@
     },
     "assets": {
       "type": "array",
-      "minItems": 1,
+      "minItems": 0,
       "maxItems": 128,
       "items": {
         "$ref": "#/$defs/BundleAssetV2"
@@ -293,9 +293,121 @@
           }
         }
       }
+    },
+    "folder": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "2.12 (E116 s1): the project folder block, ophiolite.project-folder/1 (contracts/mapper/v1/folder-schema.json), checked by mapper/v1/mapper.py validate_folder with this manifest: the files ophiolite-mapper write adds beside the assets. A folder the box writes alone lists no assets and no selection; its sources and typed tables travel as the block's originals and items. 2.14 (E117 s1): or ophiolite.project-folder/2 (contracts/folders/v1/folder-schema.json), checked by folders/v1/folder.py validate, which any program may write; a /2 block needs bundle 2.14 or later."
+    },
+    "surveys": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "description": "2.13 (E142 s0): surveys as the exporter could read them at export (ophiolite.survey-revision/1, contracts/surveys/v1): every member it could read with its role and exact revision, and the relations whose both ends it could read. A member's bytes travel only when its revision is one of the bundle's assets; membership and relations always travel. Readers that do not know the block keep it as an extension.",
+      "items": {
+        "$ref": "#/$defs/BundleSurveyV2"
+      }
+    },
+    "citation": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "2.15 (E147 s0): what the release is, ophiolite.citation/1 (contracts/descriptors/v1/citation-schema.json), checked by descriptors/v1/descriptors.py validate_citation with this manifest: title, creators, publisher, date, licence or notice, and the standard descriptors at the bundle's root (RO-Crate, Croissant, DataCite) derived from it, which a reader compares with this manifest. A manifest with a citation needs bundle 2.15 or later and a media_type on every asset file."
+    }
+  },
+  "if": {
+    "description": "2.12 (E116 s1): assets and selection may be empty only together with a folder block.",
+    "not": {
+      "required": [
+        "folder"
+      ]
+    }
+  },
+  "then": {
+    "properties": {
+      "selection": {
+        "minItems": 1
+      },
+      "assets": {
+        "minItems": 1
+      }
     }
   },
   "$defs": {
+    "BundleSurveyV2": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["survey_id", "name", "identity", "source", "context", "revision", "meaning", "complete", "members", "relations"],
+      "properties": {
+        "survey_id": {"type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"},
+        "name": {"type": "string", "minLength": 1, "maxLength": 160},
+        "identity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["authority", "key", "provisional"],
+          "properties": {"authority": {"type": ["string", "null"]}, "key": {"type": ["string", "null"]}, "provisional": {"type": "boolean"}}
+        },
+        "source": {
+          "anyOf": [
+            {"type": "null"},
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["system", "instance", "container"],
+              "properties": {
+                "system": {"type": "string", "minLength": 1, "maxLength": 160},
+                "instance": {"type": "string", "minLength": 1, "maxLength": 160},
+                "container": {"type": "string", "minLength": 1, "maxLength": 160}
+              }
+            }
+          ]
+        },
+        "context": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Defaults only: each member keeps its own domain, units and datum.",
+          "properties": {
+            "crs": {"type": ["string", "null"]},
+            "z_domain": {"enum": ["time", "depth", null]},
+            "z_unit": {"type": ["string", "null"]},
+            "xy_unit": {"type": ["string", "null"]},
+            "depth_unit": {"type": ["string", "null"]}
+          }
+        },
+        "revision": {"type": "integer", "minimum": 1, "description": "The survey revision exported, or the base revision of a live view."},
+        "meaning": {"enum": ["survey-at-export", "survey-latest-at-export"]},
+        "complete": {"type": "boolean", "description": "True only when every member of the revision is listed; a partial survey never replaces members on import."},
+        "members": {"type": "array", "minItems": 1, "maxItems": 10000, "items": {"$ref": "#/$defs/BundleSurveyMemberV2"}},
+        "relations": {"type": "array", "maxItems": 20000, "items": {"$ref": "#/$defs/BundleSurveyRelationV2"}}
+      }
+    },
+    "BundleSurveyMemberV2": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "asset_id", "revision", "entity_ref", "asset"],
+      "properties": {
+        "role": {"enum": ["cube", "line", "horizon", "fault-set", "well", "time-depth", "pickset", "other"]},
+        "asset_id": {"type": "string", "minLength": 1, "maxLength": 160},
+        "revision": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "entity_ref": {"type": ["string", "null"], "minLength": 1, "maxLength": 160, "description": "An entity_id of the manifest's entities: the well or wellbore a well member belongs to."},
+        "asset": {"type": ["integer", "null"], "minimum": 0, "maximum": 127, "description": "The position in assets holding this exact revision, or null when its bytes do not travel."}
+      }
+    },
+    "BundleSurveyRelationV2": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["predicate", "subject", "object"],
+      "properties": {
+        "predicate": {"enum": ["horizon-of", "fault-in", "well-in", "line-of", "time-depth-of"]},
+        "subject": {"$ref": "#/$defs/BundleSurveyKey"},
+        "object": {"$ref": "#/$defs/BundleSurveyKey"}
+      }
+    },
+    "BundleSurveyKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["asset_id", "revision"],
+      "properties": {"asset_id": {"type": "string", "minLength": 1, "maxLength": 160}, "revision": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+    },
     "BundleSelectedV2": {
       "type": "object",
       "required": [
@@ -365,6 +477,18 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 80
+        },
+        "media_type": {
+          "enum": [
+            "application/json",
+            "application/vnd.apache.parquet",
+            "text/csv",
+            "text/plain",
+            "image/tiff",
+            "application/octet-stream",
+            "application/ld+json"
+          ],
+          "description": "2.15 (E147 s0): the file's media type, which the descriptors' encodingFormat repeats; required on every asset file of a manifest with a citation (descriptors/v1/descriptors.py)."
         },
         "sha256": {
           "type": "string",

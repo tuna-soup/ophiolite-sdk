@@ -34,12 +34,12 @@ TYPED_ORIGINALS = {'well-tops-csv/1': 'original.csv', 'deviation-csv/1': 'origin
                    'petrel-scattered-data/1': 'original.txt',  # E123 s1c: a grid or a point set, by its content
                    'petrel-faultsticks/1': 'original.txt'}  # E123 S1f-c: a packaged polyline set (bundle 2.11)
 NEWER_TYPES = {'triangulated-surface': 2, 'point-set': 2, 'polyline-set': 3, 'seismic-slice': 3, 'wavelet': 5, 'model-section': 5, 'seismic-section': 5, 'time-depth': 6,
-               'feature-set': 7}  # the 2.x minor that introduced them
+               'feature-set': 7, 'well-table': 17}  # the 2.x minor that introduced them
 # E56: grids of the new formats are a known type with an original an older reader cannot send back; they need 2.7 too
 NEWER_PROFILES = {'zmap-plus-grid/1': 7, 'cps3-ascii-grid/1': 7, 'irap-ascii-grid/1': 7,
                   'petrel-faultsticks/1': 11}  # E123 S1f-c: a packaged polyline set needs 2.11; other polyline sets keep their minor
 TYPES_2 = ('well-log', 'well-tops', 'trajectory', 'regular-grid-surface', 'triangulated-surface', 'point-set', 'polyline-set', 'seismic-slice',
-           'wavelet', 'model-section', 'seismic-section', 'time-depth', 'feature-set')  # 2.5 (E53); 2.6 (E57); 2.7 (E56)
+           'wavelet', 'model-section', 'seismic-section', 'time-depth', 'feature-set', 'well-table')  # 2.5 (E53); 2.6 (E57); 2.7 (E56); 2.17 (E162 s2a)
 NOT_IMPORTED_PACKAGE = 'Importing a file that comes with companion files is not available yet.'
 PACKAGE_TYPES, PACKAGE_ROLES, PACKAGE_MINOR = ('point-set', 'feature-set', 'polyline-set'), ('package', 'companion', 'interpretation'), 8  # E23c (bundle 2.8); polyline-set 2.11 (E123 S1f-c)
 PROVENANCE_MINOR = 9  # E107a C6b (bundle 2.9): the original a file read on a computer was read from, beside its recorded reading
@@ -53,6 +53,68 @@ SOURCE_OTHER = 'A source record belongs to another exact revision.'
 SOURCE_SHAPE = 'A source record is not an ophiolite.source-provenance/1 record.'
 SOURCE_MINOR = 'A source record needs bundle version 1.10 or 2.10.'
 SOURCE_TOO_LARGE = "The selection's records exceed the supported bundle manifest size."
+# E116 s1 (bundle 2.12): a project folder block (ophiolite.project-folder/1) lists the files ophiolite-mapper write adds
+# beside the assets; with it, and only with it, assets and selection may be empty, since a folder the box writes alone
+# holds no exact server revision. The block is checked by the contract's own validator, mapper/v1/mapper.py.
+FOLDER_MINOR = 12
+FOLDER_NEEDS_MINOR = 'A project folder needs bundle version 2.12.'
+FOLDER_CONTRACT = Path(__file__).resolve().parent / 'contracts' / 'mapper' / 'v1' / 'mapper.py'
+MAX_FOLDER_FILES = 1006  # folder-schema.json files.maxItems
+_folder_module = None
+# E117 s1 (bundle 2.14): a block may be ophiolite.project-folder/2, checked by contracts/folders/v1/folder.py, whose MINOR
+# is the one answer to the least bundle minor of each folder schema. Its files are verified by folder_verdicts, the one
+# traversal open_bundle and ophiolite.folder.check share.
+FOLDER_2 = 'ophiolite.project-folder/2'
+FOLDER_2_NEEDS_MINOR = 'A project folder of format /2 needs bundle version 2.%d.'
+FOLDER_2_BESIDE_ASSETS = 'A /2 folder beside server assets is not read yet.'
+FOLDERS_CONTRACT = Path(__file__).resolve().parent / 'contracts' / 'folders' / 'v1' / 'folder.py'
+_folders_module = None
+FOLDER_SENTENCES = {'file-link': 'The folder file %s is a link or lies under one.',
+                    'file-too-large': 'The folder file %s exceeds the supported size.',
+                    'total-too-large': 'The bundle exceeds the supported total size.',
+                    'file-missing': 'The folder file %s is missing or has the wrong size.',
+                    'file-size': 'The folder file %s is missing or has the wrong size.',
+                    'file-digest': 'The folder file %s does not match its checksum.'}
+# E147 s0 (bundle 2.15): a manifest's citation lists the standard descriptors beside it at the root (RO-Crate, Croissant,
+# DataCite) and a bundle's standalone prov.json, digested in the citation. The descriptors are not digested: each is
+# compared, by contracts/descriptors/v1/descriptors.py, with what the manifest says. A refusal names its code, its file
+# and the JSON path in it.
+DESCRIPTORS_CONTRACT = Path(__file__).resolve().parent / 'contracts' / 'descriptors' / 'v1' / 'descriptors.py'
+_descriptors_module = None
+CITATION_DESCRIPTOR, CITATION_PROV = 'citation-descriptor', 'citation-prov'  # their roles in ophiolite.folder.check's report
+CITATION_SENTENCES = {'citation-minor': 'the citation needs bundle version 2.15',
+                      'citation-schema': 'the citation in the manifest is not valid',
+                      'citation-media-type': 'a file of the manifest has no media type, which a citation needs',
+                      'notice-without-null-licence': 'the manifest gives an access notice beside an open licence',
+                      'descriptor-repeated': 'the citation lists a descriptor twice'}
+# E162 s2a (bundle 2.17): at most one well-table entry, the accepted rows a wells import kept (sql-wells/1), exactly as
+# kept, beside the kept copy's source manifest as served. Checked by sources.verified_table; each well the bundle lists
+# is located by exactly one of its rows. It is restored with its wells (ophiolite.restore), never uploaded.
+WELL_TABLE, WELL_TABLE_PROFILE, WELL_TABLE_MINOR = 'well-table', 'sql-wells/1', NEWER_TYPES['well-table']
+WELL_TABLE_RESTORED = 'A wells table is restored with its wells (`ophiolite.restore`), not uploaded'
+WELL_TABLE_SHAPE = 'A wells table carries exactly its kept rows (original.json) and their source manifest (descriptor.json), and no curves.'
+WELL_TABLE_RECORD = 'The source manifest of a wells table is not the record of its kept rows.'
+WELL_TABLE_ONE = 'A bundle carries at most one wells table.'
+WELL_TABLE_ROWS = 'An association of the wells table names a row it does not hold.'
+WELL_TABLE_WELLS = 'Each well in a bundle with a wells table is located by exactly one of its rows.'
+CITATION_FILE_SENTENCES = {'file-missing': '%s is missing or has the wrong size', 'file-size': '%s is missing or has the wrong size',
+                           'file-digest': '%s does not match its checksum', 'file-link': '%s is a link or lies under one',
+                           'file-too-large': '%s exceeds the supported size', 'total-too-large': 'the bundle exceeds the supported total size'}
+
+
+class DescriptorRefused(VerificationFailed):
+    """E147 s0 (D3): a citation or a descriptor the reader refuses. `code` is the contract's or the reader's code, `file`
+    the file it is in, `json_path` the place in it (None for the file as a whole); `path` is ophiolite.folder.check's
+    place (a manifest JSON path, a file name, or `file:json path`), `where` what --details prints, `sentence` the words."""
+
+    def __init__(self, code, file, json_path=None, sentence=None):
+        self.file, self.json_path = file, json_path
+        self.where = file if json_path is None else '%s:%s' % (file, json_path)
+        self.path = json_path if file == 'manifest.json' else self.where
+        self.sentence = sentence or code
+        super().__init__(self.sentence[0].upper() + self.sentence[1:] + '.', code=code)
+
+
 NOT_IMPORTED_SYNTHETIC = ('A synthetic section is not imported: its model and wavelet are not part of the project it would join. '
                           'Import them and compute it again.')
 SLICE_NAME = re.compile(r'^slice-(inline|crossline|sample)-(-?[0-9]{1,9})\.json$')
@@ -63,6 +125,17 @@ MAX_MANIFEST_BYTES = 1024 * 1024
 PATH = re.compile(r'^assets/[0-9]{1,3}/[A-Za-z0-9._-]{1,120}$')
 NOTICE = ('Checksums show the integrity of this copy, not authorship or scientific correctness. '
           'Exported copies cannot be recalled; holding one grants no new upstream, sharing or AI-training rights.')
+# E147 s2 (D5): a cited export states each file's media type by its suffix; a suffix not listed is bytes (octet-stream).
+MEDIA_TYPES = {'.las': 'text/plain', '.txt': 'text/plain', '.asc': 'text/plain', '.zmap': 'text/plain', '.cps3': 'text/plain',
+               '.irap': 'text/plain', '.csv': 'text/csv', '.json': 'application/json', '.geojson': 'application/json',
+               '.parquet': 'application/vnd.apache.parquet', '.tif': 'image/tiff', '.tiff': 'image/tiff'}
+OCTET_STREAM = 'application/octet-stream'
+CITED_RESOURCE_TYPES = ('Well log bundle', 'Dataset bundle')  # DataCite's resourceType: every asset a well log, or not
+
+
+def media_type(path):
+    """The media type a cited bundle states for the file at PATH (by its lower-case suffix)."""
+    return MEDIA_TYPES.get(PurePosixPath(path).suffix.lower(), OCTET_STREAM)
 
 
 def recorded_reading(descriptor):
@@ -165,12 +238,33 @@ class BundleAsset:
         self.source_record = None  # 1.10/2.10 (E122 s5b): the version's source-provenance/1 record as served, or None
 
 
+class WellTable:
+    """E162 s2a (2.17): a wells import's kept rows, verified: `original` the kept bytes (their sha256 is the revision),
+    `source_schema` and `source_rows` the table as read, `wells` one mapped row per source row (by `well_id`),
+    `mapping` the reviewed mapping, `descriptor` the kept copy's source manifest as served. The writer's read and the
+    reader's `BundleAsset.data` alike."""
+    type = WELL_TABLE
+
+    def __init__(self, original, descriptor, name=None):
+        from .sources import verified_table
+        revision = hashlib.sha256(original).hexdigest()
+        reference = descriptor.get('reference') if isinstance(descriptor, dict) else None
+        if (not isinstance(reference, dict) or descriptor.get('schema') != 'ophiolite.source-snapshot/1'
+                or (reference.get('profile'), reference.get('revision'), descriptor.get('sha256'), descriptor.get('bytes')) != (WELL_TABLE_PROFILE, revision, revision, len(original))):
+            raise VerificationFailed(WELL_TABLE_RECORD)
+        self.original, self.descriptor, self._wire_descriptor, self.revision, self.name = original, descriptor, descriptor, revision, name
+        self.source_schema, self.source_rows, self.wells, self.mapping = verified_table(_finite_json(original, 'A wells table'))
+
+
 class Bundle:
     def __init__(self, path, manifest, assets, unlisted):
         self.path, self.manifest, self.assets, self.unlisted = path, manifest, assets, unlisted
         # 1.1/2.1: result groups as observed at export time (members by position; not scientific truth).
         self.groups = (manifest.get('observations') or {}).get('groups') or []
         self.entities, self.relationships = [], []  # 2.4 (E20), set by open_bundle after checking
+        self.folder = []  # 2.12 (E116 s1): the verified rows of the project folder block, set by open_bundle
+        self.items = []  # 2.14 (E117 s1): the folder's items, the /2 block's own or translate_1's reading of a /1 block
+        self.citation = []  # 2.15 (E147 s0): the verified files the citation lists at the root, [{path, role}]
 
     def entity(self, entity_id):
         found = next((e for e in self.entities if e.entity_id == entity_id), None)
@@ -193,7 +287,8 @@ class Bundle:
                 **({'entities_omitted': (self.manifest.get('observations') or {})['entities_omitted']} if (self.manifest.get('observations') or {}).get('entities_omitted') else {}),
                 **({'source_records': sum(a.source_record is not None for a in self.assets)} if any(a.source_record is not None for a in self.assets) else {}),
                 **({'source_records_omitted': (self.manifest.get('observations') or {})['source_records_omitted']}
-                   if (self.manifest.get('observations') or {}).get('source_records_omitted') else {})}  # E122 s5b: only when there is something to say
+                   if (self.manifest.get('observations') or {}).get('source_records_omitted') else {}),  # E122 s5b: only when there is something to say
+                **({'folder_files': len(self.folder)} if self.folder else {})}  # E116 s1: the project folder's files, verified
 
 
 def _check_manifest(manifest):
@@ -206,13 +301,180 @@ def _check_manifest(manifest):
     if manifest.get('groups', 0) is not None or manifest.get('recommendations', 0) is not None: raise VerificationFailed('Groups and recommendations travel as observations; the manifest fields must be null.')
     observations = manifest.get('observations')
     if observations is not None and (not isinstance(observations, dict) or not isinstance(observations.get('groups', []), list)): raise VerificationFailed('Observations are not readable.')
+    folder = 'folder' in manifest
+    folder_2 = folder and isinstance(manifest['folder'], dict) and manifest['folder'].get('schema') == FOLDER_2
+    if folder and (manifest['schema'] != SCHEMA_2 or int(version.split('.')[1]) < FOLDER_MINOR): raise VerificationFailed(FOLDER_NEEDS_MINOR)
+    if folder_2 and int(version.split('.')[1]) < _folders_contract().MINOR[FOLDER_2]:  # E117 s1: the contract's minor
+        raise VerificationFailed(FOLDER_2_NEEDS_MINOR % _folders_contract().MINOR[FOLDER_2])
     assets = manifest.get('assets')
-    if not isinstance(assets, list) or not 0 < len(assets) <= MAX_ASSETS: raise VerificationFailed('The bundle lists no assets or too many.')
+    if not isinstance(assets, list) or not (0 if folder else 1) <= len(assets) <= MAX_ASSETS: raise VerificationFailed('The bundle lists no assets or too many.')
+    if folder: _folder_valid(manifest)
+    if folder_2 and assets: raise VerificationFailed(FOLDER_2_BESIDE_ASSETS)
     return assets
 
 
+def _folder_contract():
+    """The packaged mapper validator (contracts/mapper/v1/mapper.py), loaded once from its source text."""
+    global _folder_module
+    if _folder_module is None:
+        import types
+        module = types.ModuleType('ophiolite_mapper_contract')
+        module.__file__ = str(FOLDER_CONTRACT)
+        exec(compile(FOLDER_CONTRACT.read_text(encoding='utf-8'), str(FOLDER_CONTRACT), 'exec'), module.__dict__)
+        _folder_module = module
+    return _folder_module
+
+
+def _folders_contract():
+    """The packaged project folder validator (contracts/folders/v1/folder.py, /2 and the /1 dispatch), loaded once."""
+    global _folders_module
+    if _folders_module is None:
+        import types
+        module = types.ModuleType('ophiolite_folder_contract')
+        module.__file__ = str(FOLDERS_CONTRACT)
+        exec(compile(FOLDERS_CONTRACT.read_text(encoding='utf-8'), str(FOLDERS_CONTRACT), 'exec'), module.__dict__)
+        _folders_module = module
+    return _folders_module
+
+
+def _descriptors_contract():
+    """The packaged descriptors contract (contracts/descriptors/v1/descriptors.py), loaded once from its source text."""
+    global _descriptors_module
+    if _descriptors_module is None:
+        import types
+        module = types.ModuleType('ophiolite_descriptors_contract')
+        module.__file__ = str(DESCRIPTORS_CONTRACT)
+        exec(compile(DESCRIPTORS_CONTRACT.read_text(encoding='utf-8'), str(DESCRIPTORS_CONTRACT), 'exec'), module.__dict__)
+        _descriptors_module = module
+    return _descriptors_module
+
+
+def _refused(error):
+    """A contract DescriptorError as the reader's DescriptorRefused, with its words."""
+    contract = _descriptors_contract()
+    words = CITATION_SENTENCES.get(error.code) or contract.sentence(error)
+    return DescriptorRefused(error.code, error.file, error.path, words)
+
+
+def citation_valid(manifest):
+    """E147 s0: raise DescriptorRefused for the first problem of a manifest's citation block (its minor, the block, a
+    media type on every asset row); return the files it lists at the root, prov.json first, then the descriptors in
+    their order. [] for a manifest without a citation."""
+    if not isinstance(manifest, dict) or 'citation' not in manifest: return []
+    contract = _descriptors_contract()
+    try: citation = contract.validate_citation(manifest)
+    except contract.DescriptorError as error: raise _refused(error) from None
+    return ([citation['prov']['path']] if 'prov' in citation else []) + list(citation['descriptors'])
+
+
+def citation_names(manifest):
+    """The root files a manifest's citation names, read without validating it (what is listed, for the unlisted
+    report beside a refused citation): known descriptor names and a prov path given as text."""
+    citation = manifest.get('citation') if isinstance(manifest, dict) else None
+    if not isinstance(citation, dict): return []
+    contract = _descriptors_contract()
+    prov = citation.get('prov')
+    names = [prov['path']] if isinstance(prov, dict) and prov.get('path') == contract.PROV_PATH else []
+    return names + [n for n in citation.get('descriptors') or [] if isinstance(n, str) and n in contract.NAMES]
+
+
+def citation_verdicts(root, manifest, total):
+    """E147 s0 (D3): the citation's own files, checked after the asset and folder files. Returns ([{path, role,
+    verdict}], first DescriptorRefused or None, total). The block is validated first (a refusal there names the
+    manifest and lists no row). prov.json is a digested file (folder_verdicts' codes); each descriptor goes through the
+    same guards (no link, a regular file, MAX_FILE_BYTES and the running total; a fault is descriptor-unreadable, an
+    absent file file-missing), then is parsed and compared with the manifest by the contract."""
+    try: names = citation_valid(manifest)
+    except DescriptorRefused as error: return [], error, total
+    if not names: return [], None, total
+    contract = _descriptors_contract()
+    citation, files, tables = contract.inputs(manifest)
+    rows, first = [], None
+    if 'prov' in citation:
+        prov = citation['prov']
+        (verdict,), total = folder_verdicts(root, [prov], total)
+        rows.append({'path': prov['path'], 'role': CITATION_PROV, 'verdict': verdict})
+        if verdict != 'ok': first = DescriptorRefused(verdict, prov['path'], None, CITATION_FILE_SENTENCES[verdict].replace('%s', prov['path']))
+    for name in citation['descriptors']:
+        target, error = root / name, None
+        if target.is_symlink(): error = contract.DescriptorError('descriptor-unreadable', name)
+        elif not target.exists(): error = DescriptorRefused('file-missing', name, None, CITATION_FILE_SENTENCES['file-missing'] % name)
+        elif not target.is_file() or target.stat().st_size > MAX_FILE_BYTES or total + target.stat().st_size > MAX_TOTAL_BYTES:
+            error = contract.DescriptorError('descriptor-unreadable', name)
+        else:
+            raw = target.read_bytes(); total += len(raw)
+            try: error = contract._disagreement(name, contract.parse(name, raw), citation, files, tables)
+            except contract.DescriptorError as refused: error = refused
+        if isinstance(error, contract.DescriptorError): error = _refused(error)
+        rows.append({'path': name, 'role': CITATION_DESCRIPTOR, 'verdict': 'ok' if error is None else error.code})
+        if error is not None and first is None: first = error
+    return rows, first, total
+
+
+def _folder_valid(manifest, recipe=None):
+    """2.12 (E116 s1): refuse a folder block the contract's validator refuses, naming its rule and place. 2.14 (E117 s1):
+    a /2 block goes to the folders contract's validator (its recipe digest is its rule), any other to the mapper's."""
+    block = manifest['folder']
+    if isinstance(block, dict) and block.get('schema') == FOLDER_2:
+        contract = _folders_contract()
+        check, error_type = (lambda: contract.validate(block, manifest)), contract.FolderError
+    else:
+        contract = _folder_contract()
+        check, error_type = (lambda: contract.validate_folder(block, manifest, recipe)), contract.MapperError
+    try: check()
+    except error_type as error: raise VerificationFailed('The project folder block is not valid (%s at %s).' % (error.code, error.path)) from None
+
+
+def folder_verdicts(root, rows, total):
+    """E117 s1 (D1): the one traversal of a folder block's files, shared by open_bundle and ophiolite.folder.check. Each
+    row is verified as an asset file is (no link on the way, the file and total limits, size, SHA-256). Returns
+    ([verdict per row], total): 'ok' or the code of that file's first fault."""
+    verdicts = []
+    for row in rows:
+        parts = PurePosixPath(row['path']).parts
+        target = root / row['path']
+        if any(root.joinpath(*parts[:depth]).is_symlink() for depth in range(1, len(parts) + 1)): verdict = 'file-link'
+        elif row['bytes'] > MAX_FILE_BYTES: verdict = 'file-too-large'
+        elif total + row['bytes'] > MAX_TOTAL_BYTES: verdict, total = 'total-too-large', total + row['bytes']
+        else:
+            total += row['bytes']
+            if not target.is_file(): verdict = 'file-missing'
+            elif target.stat().st_size != row['bytes']: verdict = 'file-size'
+            elif hashlib.sha256(target.read_bytes()).hexdigest() != row['sha256']: verdict = 'file-digest'
+            else: verdict = 'ok'
+        verdicts.append(verdict)
+    return verdicts, total
+
+
+def _folder_files(root, manifest, total):
+    """2.12 (E116 s1): verify every file of the folder block (folder_verdicts), the first fault refused with its sentence
+    naming the path; then bind a /1 block's items to the verified recipe (a /2 block's recipe is bound by its digest)."""
+    block = manifest['folder']
+    rows = block['files']
+    verdicts, _ = folder_verdicts(root, rows, total)
+    for row, verdict in zip(rows, verdicts):
+        if verdict != 'ok': raise VerificationFailed(FOLDER_SENTENCES[verdict].replace('%s', row['path']))
+    if block['schema'] != FOLDER_2: _folder_valid(manifest, _finite_json((root / 'recipe.json').read_bytes(), 'The folder recipe'))
+    return [dict(row) for row in rows]
+
+
+def _folder_items(root, block, rows):
+    """2.14 (E117 s1): the items of a verified folder block: a /2 block's own, or translate_1's reading of a /1 block
+    from its verified recipe and lineage (never guessed); none when a /1 block lists no item file."""
+    if block['schema'] == FOLDER_2: return [dict(item) for item in block['items']]
+    if not any(row['role'] == 'item' for row in rows): return []
+    activity = {}  # the lineage is a verified file the /1 validator does not read: a row count only where it states one
+    if any(r['role'] == 'lineage-prov' for r in rows):
+        try: prov = _finite_json((root / 'lineage' / 'prov.json').read_bytes(), 'The folder lineage')
+        except VerificationFailed: prov = {}
+        found = prov.get('activity') if isinstance(prov, dict) else None
+        activity = {k: v for k, v in found.items() if isinstance(v, dict)} if isinstance(found, dict) else {}
+    recipe = _finite_json((root / 'recipe.json').read_bytes(), 'The folder recipe')
+    return _folders_contract().translate_1(block, recipe, {'activity': activity})['items']
+
+
 ZIP_RATIO = 100  # largest accepted uncompressed/compressed ratio per entry
-MAX_ENTRIES = 1 + MAX_ASSETS * 131
+MAX_ENTRIES = 1 + MAX_ASSETS * 131 + MAX_FOLDER_FILES + 4  # E147 s0: prov.json and three descriptors
 FIXED_TIME = (1980, 1, 1, 0, 0, 0)
 
 
@@ -223,7 +485,8 @@ def pack(folder, destination):
     import zipfile, zlib
     opened = open_bundle(folder)
     if opened.unlisted: raise Refused('The bundle folder holds files it does not list (%s); remove them before packing.' % ', '.join(opened.unlisted[:3]))
-    names = sorted(item['path'] for entry in opened.manifest['assets'] for item in entry['files'])
+    names = sorted([item['path'] for entry in opened.manifest['assets'] for item in entry['files']] + [row['path'] for row in opened.folder]
+                   + [row['path'] for row in opened.citation])  # E147 s0: prov.json and the descriptors
     if len({n.lower() for n in names + ['manifest.json']}) != len(names) + 1: raise Refused('Two bundle paths differ only in letter case; a zip would not keep both.')
     destination = Path(destination)
     if destination.exists(): raise Refused('The destination already exists; choose a new file.')
@@ -253,9 +516,12 @@ def _open_zip(path):
         infos = archive.infolist()
         if not 0 < len(infos) <= MAX_ENTRIES: raise VerificationFailed('The archive holds no entries or too many.')
         seen, total = set(), 0
+        folder_path = re.compile(_folder_contract().FOLDER_SCHEMA['$defs']['file']['properties']['path']['pattern'])  # 2.12 (E116 s1)
+        folder_2_path = re.compile(_folders_contract().SCHEMA['$defs']['file']['properties']['path']['pattern'])  # 2.14 (E117 s1): items/<name>.tif
+        cited = set(_descriptors_contract().NAMES) | {_descriptors_contract().PROV_PATH}  # 2.15 (E147 s0): at the root, if listed
         for info in infos:
             name = info.filename
-            if name != 'manifest.json' and (not PATH.fullmatch(name) or set(PurePosixPath(name).parts) & {'.', '..'} or name.split('/')[-1] in ('.', '..')):
+            if name != 'manifest.json' and name not in cited and (not (PATH.fullmatch(name) or folder_path.fullmatch(name) or folder_2_path.fullmatch(name)) or set(PurePosixPath(name).parts) & {'.', '..'} or name.split('/')[-1] in ('.', '..')):
                 raise VerificationFailed('An archive entry name is unsafe or outside the bundle layout.')
             if name.lower() in seen: raise VerificationFailed('Two archive entries have the same name (ignoring letter case).')
             seen.add(name.lower())
@@ -280,6 +546,8 @@ def _open_zip(path):
             manifest = _finite_json(read(archive.getinfo('manifest.json')), 'The bundle manifest')
             entries = _check_manifest(manifest)
             listed = {item.get('path') for entry in entries for item in (entry.get('files') or []) if isinstance(item, dict)}
+            listed |= {row['path'] for row in manifest['folder']['files']} if 'folder' in manifest else set()  # validated by _check_manifest
+            listed |= set(citation_valid(manifest))  # E147 s0: the citation block validated before extraction
             if {i.filename for i in infos} != listed | {'manifest.json'}: raise VerificationFailed('The archive holds entries its manifest does not list, or lacks listed ones.')
             staging = Path(tempfile.mkdtemp(prefix='ophiolite-bundle-')); os.chmod(staging, 0o700)
             try:
@@ -309,6 +577,7 @@ def open_bundle(path):
     if manifest_path.stat().st_size > MAX_MANIFEST_BYTES: raise VerificationFailed('The bundle manifest is too large.')
     manifest = _finite_json(manifest_path.read_bytes(), 'The bundle manifest')
     entries = _check_manifest(manifest)
+    citation_valid(manifest)  # E147 s0: the citation block before any content is used
     selection = manifest.get('selection')
     if not isinstance(selection, list) or len(selection) != len(entries): raise VerificationFailed('The selection and the assets disagree.')
     records = [_source_record_of(manifest, entry) for entry in entries]  # E122 s5b (D4): before any content is used
@@ -344,6 +613,8 @@ def open_bundle(path):
             raise VerificationFailed('Only seismic slices omit their original.')
         if kind == 'seismic-slice':  # 2.3: slices of a volume; the original is named by digest, not carried
             loaded.append(_slice_asset(entry, chosen, content, files)); continue
+        if kind == WELL_TABLE:  # 2.17 (E162 s2a): the kept rows and their source manifest; the rows are checked with the graph
+            loaded.append(_well_table_asset(manifest, entry, chosen, content, files)); continue
         known = {'original', 'descriptor', 'normalized'} | (set(PACKAGE_ROLES) if kind in PACKAGE_TYPES else set())  # 2.8 (E23c)
         if manifest['schema'] == SCHEMA_2 and 'read_by' in entry: known.add('provenance')  # 2.9 (E107a): only beside a reading
         if roles.count('original') != 1 or set(roles) - known:
@@ -375,11 +646,18 @@ def open_bundle(path):
         loaded.append(las)
     _check_groups(manifest, entries)
     entities, relationships = _check_graph(manifest, entries)
-    listed = seen | {'manifest.json'}
+    _check_well_table(loaded, entities, relationships)  # 2.17 (E162 s2a)
+    folder = _folder_files(root, manifest, total) if 'folder' in manifest else []  # 2.12 (E116 s1)
+    cited, refused, _ = citation_verdicts(root, manifest, total + sum(row['bytes'] for row in folder))  # E147 s0 (D3)
+    if refused is not None: raise refused
+    listed = seen | {'manifest.json'} | {row['path'] for row in folder} | {row['path'] for row in cited}
     unlisted = sorted(p.relative_to(root).as_posix() for p in root.rglob('*') if p.is_file() and p.relative_to(root).as_posix() not in listed)
     for asset, record in zip(loaded, records): asset.source_record = record  # one loaded asset per entry, in order
     bundle = Bundle(root, manifest, loaded, unlisted)
     bundle.entities, bundle.relationships = entities, relationships
+    bundle.folder = folder
+    bundle.citation = [{'path': row['path'], 'role': row['role']} for row in cited]  # 2.15 (E147 s0): prov.json and the descriptors, verified
+    bundle.items =_folder_items(root, manifest['folder'], folder) if folder else []  # 2.14 (E117 s1)
     return bundle
 
 
@@ -549,18 +827,78 @@ def _slice_asset(entry, chosen, content, files):
     return BundleAsset(entry, None, {}, volume, slices)
 
 
+def _well_table_asset(manifest, entry, chosen, content, files):
+    """E162 s2a (2.17): a wells table: the kept rows as kept, their sha256 the revision, beside the kept copy's source
+    manifest; the table passes sources.verified_table (WellTable). Its associations are checked by _check_well_table."""
+    if int(manifest['bundle_version'].split('.')[1]) < WELL_TABLE_MINOR: raise VerificationFailed('A wells table needs bundle version 2.%d.' % WELL_TABLE_MINOR)
+    named = sorted((item.get('role'), PurePosixPath(item['path']).name) for item in files)
+    if chosen.get('curves') != [] or named != [('descriptor', 'descriptor.json'), ('original', 'original.json')] or any(item.get('curve') is not None for item in files) \
+            or entry.get('profile') != WELL_TABLE_PROFILE or any(key in entry for key in ('read_by', 'package')):
+        raise VerificationFailed(WELL_TABLE_SHAPE)
+    raw = content['original'][None]
+    if hashlib.sha256(raw).hexdigest() != entry.get('revision'): raise VerificationFailed('A wells table is not the exact revision it names.')
+    if entry.get('origin') != 'retained-capture' or entry.get('parents') != [] or entry.get('parent_visibility') != 'complete':
+        raise VerificationFailed('The manifest disagrees with a wells table (origin).')
+    table = WellTable(raw, _finite_json(content['descriptor'][None], 'A descriptor'), entry.get('name'))
+    return BundleAsset(entry, raw, {}, table)
+
+
+def _check_well_table(loaded, entities, relationships):
+    """E162 s2a (2.17): at most one wells table; every association of it is of-entity and names one of its rows, each row
+    at most once; every listed well is located by exactly one of its rows. Nothing for a bundle without one."""
+    tables = [a for a in loaded if a.type == WELL_TABLE]
+    if not tables: return
+    if len(tables) > 1: raise VerificationFailed(WELL_TABLE_ONE)
+    table = tables[0]; rows = {w['well_id'] for w in table.data.wells}
+    edges = [r for r in relationships if r['subject'].get('kind') == 'revision' and (r['subject'].get('asset_id'), r['subject'].get('revision')) == (table.asset_id, table.revision)]
+    named = [r['subject'].get('row') for r in edges]
+    if any(r['predicate'] != 'of-entity' for r in edges) or not set(named) <= rows or len(set(named)) != len(named): raise VerificationFailed(WELL_TABLE_ROWS)
+    located = [r['object']['entity_id'] for r in edges]
+    if any(located.count(e.entity_id) != 1 for e in entities if e.kind == 'well'): raise VerificationFailed(WELL_TABLE_WELLS)
+
+
 def roles_of(files):
     return sorted(item.get('role') for item in files)
 
 
-def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=None, graph=None, entities_omitted=None, source_records_omitted=None):
-    """Write verified exact reads [(selection, CurveSet-like)] atomically. Internal to export."""
+def horizon_too_large(read):
+    """E139 s3 (O1, K4): the sentence refusing a typed point set whose original file or point data is above the bundle's
+    per-file cap (original first, as it is written first); None when both fit or READ is not a typed point set. For a
+    columns body the sentence adds a columns-only estimate of the nodes a bundle file holds: the cap less this body's
+    own header, over 8 bytes for each of its columns."""
+    if getattr(read, 'type', None) != 'point-set' or not hasattr(read, '_wire_data_bytes'): return None
+    limit = 'a bundle file holds at most {:,} bytes'.format(MAX_FILE_BYTES)
+    original, data = read.original or b'', read._wire_data_bytes
+    if len(original) > MAX_FILE_BYTES:
+        return "This horizon's original file is {:,} bytes; {}. Export the original file on its own. Nothing was written.".format(len(original), limit)
+    if len(data) <= MAX_FILE_BYTES: return None
+    from .point_columns import MAGIC
+    if data[:len(MAGIC)] == MAGIC:
+        start = len(MAGIC) + 4
+        size = int.from_bytes(data[len(MAGIC):start], 'little')
+        columns = len(json.loads(data[start:start + size])['columns'])
+        limit += ' (about {:,} nodes with its {} columns)'.format((MAX_FILE_BYTES - start - size) // (8 * columns), columns)
+    return "This horizon's point data is {:,} bytes; {}. Export the original file on its own. Nothing was written.".format(len(data), limit)
+
+
+def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=None, graph=None, entities_omitted=None, source_records_omitted=None,
+                 citation=None):
+    """Write verified exact reads [(selection, CurveSet-like)] atomically. Internal to export.
+
+    E147 s2 (D5): with CITATION (a complete `ophiolite.citation/1` block) the bundle is schema 2 at 2.15 or above, every
+    file row states its media type, and the descriptors the citation lists are written beside the manifest before the
+    bundle checks itself; without one the bytes are as before. E147 s2b: a cited bundle with a typed table (well tops, a
+    deviation survey, a time-depth table or a point set in data.json) is 2.16 or above, its Croissant file holding a
+    record set per table."""
     from .typed import data_file_of
     destination = Path(destination)
     if destination.exists(): raise Refused('The destination already exists; choose a new folder.')
     if not 0 < len(items) <= MAX_ASSETS: raise Refused('Export between 1 and %d exact revisions.' % MAX_ASSETS)
     if any(getattr(read, 'type', None) == 'well-path' for _, read in items):  # E125 s3a: refused before anything is written
         raise Refused('A well path given as positions is not exported in a bundle yet; export it on its own as the original file.')
+    for _, read in items:  # E139 s3 (O1): a horizon a bundle file cannot hold is refused by number before anything is written
+        too_large = horizon_too_large(read)
+        if too_large: raise Refused(too_large)
     parent = destination.parent; parent.mkdir(parents=True, exist_ok=True)
     for stale in parent.glob('.' + destination.name + '.staging-*'):  # abandoned interrupted exports only
         try: owner = int((stale / '.owner').read_text())
@@ -579,11 +917,14 @@ def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=
             target = staging / relative; target.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
             fd = os.open(target, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
             with os.fdopen(fd, 'wb') as out: out.write(raw)
-            entry = {'path': relative, 'role': role, 'sha256': hashlib.sha256(raw).hexdigest(), 'bytes': len(raw)}
+            entry = {'path': relative, 'role': role, **({'media_type': media_type(relative)} if citation is not None else {}),
+                     'sha256': hashlib.sha256(raw).hexdigest(), 'bytes': len(raw)}
             if curve is not None: entry['curve'] = curve
             return entry
         typed_bundle = any(hasattr(read, '_wire_data_bytes') or isinstance(read, tuple) for _, read in items) or bool(graph)  # entities need 2.4
         typed_bundle = typed_bundle or any(getattr(read, 'provenance', None) is not None for _, read in items)  # B3: a kept original needs schema 2 (2.9)
+        typed_bundle = typed_bundle or citation is not None  # E147 s2: a citation needs schema 2 (2.15)
+        typed_bundle = typed_bundle or any(isinstance(read, WellTable) for _, read in items)  # E162 s2a: a wells table needs schema 2 (2.17)
         for index, (chosen, read) in enumerate(items):
             folder = 'assets/%d/' % index
             if isinstance(read, tuple):  # E16: (volume description, [slices]) — the original is named, not carried
@@ -601,6 +942,13 @@ def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=
                                'losses': sorted({loss for r in first.get('representations', []) for loss in r.get('losses', [])})})
                 selection.append(chosen); continue
             if getattr(read, 'type', None) == 'seismic-volume': raise Refused('A seismic volume is exported as chosen slices; the complete volume is not exported.')
+            if isinstance(read, WellTable):  # E162 s2a (2.17): the kept rows exactly as kept, and the source manifest as served
+                files = [put(folder + 'original.json', read.original, 'original'),
+                         put(folder + 'descriptor.json', (json.dumps(read.descriptor, indent=2, allow_nan=False) + '\n').encode(), 'descriptor')]
+                assets.append({'asset_id': chosen['asset_id'], 'revision': read.revision, 'origin': 'retained-capture', 'profile': WELL_TABLE_PROFILE,
+                               'type': WELL_TABLE, 'name': read.name, 'files': files, 'history': None, 'parents': [], 'parent_visibility': 'complete',
+                               'omissions': [], 'losses': list(read.descriptor.get('losses') or [])})
+                selection.append({**chosen, 'curves': []}); continue
             if hasattr(read, '_wire_data_bytes'):  # E11 typed data: exact original, descriptor and data as served
                 first = read._wire_descriptor
                 files = [put(folder + TYPED_ORIGINALS[first['profile']], read.original, 'original'),
@@ -647,12 +995,22 @@ def write_bundle(destination, items, *, grace=3600, groups=None, groups_omitted=
                     + [PACKAGE_MINOR for a in assets if 'package' in a]  # E23c: 2.8 only for an asset with a package
                     + [PROVENANCE_MINOR for a in assets if 'read_by' in a]  # E107a: 2.9 only for an asset with a kept original
                     + [SOURCE_RECORD_MINOR for a in assets if 'source_record' in a])  # E122 s5b: 1.10/2.10 only when a record travels
+        if citation is not None: minor = max(minor, _descriptors_contract().MINOR)  # E147 s2: 2.15, or the content's own minor above it
+        if citation is not None and _descriptors_contract().bundle_tables(assets):  # E147 s2b: 2.16 when a typed table gets a record set
+            minor = max(minor, _descriptors_contract().TABLES_MINOR)
         version = ('2' if typed_bundle else '1') + f'.{minor}.0'
         manifest = {'schema': SCHEMA_2 if typed_bundle else SCHEMA, 'bundle_version': version, 'created_at': datetime.now(timezone.utc).isoformat(timespec='seconds'),
                     'exporter': {'name': 'ophiolite-sdk', 'version': __version__}, 'scope': 'selection', 'selection': selection, 'assets': assets,
                     'groups': None, 'recommendations': None, **({'observations': observations} if observations else {}),
                     **({'entities': graph['entities'], 'relationships': graph['relationships']} if graph else {}),
                     'limits': {'max_assets': MAX_ASSETS, 'max_file_bytes': MAX_FILE_BYTES, 'max_total_bytes': MAX_TOTAL_BYTES}, 'notice': NOTICE}
+        if citation is not None:  # E147 s2 (D5): the descriptors are written from the manifest before it is, inside the staging
+            manifest['citation'] = citation
+            contract = _descriptors_contract()
+            kind = CITED_RESOURCE_TYPES[0] if all(a.get('type') == 'well-log' for a in assets) else CITED_RESOURCE_TYPES[1]
+            for name, document in contract.documents(*contract.inputs(manifest), kind).items():
+                fd = os.open(staging / name, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+                with os.fdopen(fd, 'wb') as out: out.write(contract.serialize(document))
         raw = (json.dumps(manifest, indent=2, allow_nan=False) + '\n').encode()
         if len(raw) > MAX_MANIFEST_BYTES and any('source_record' in a for a in assets): raise Refused(SOURCE_TOO_LARGE)  # E122 s5b: before anything is visible
         fd = os.open(staging / 'manifest.json', os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
@@ -732,6 +1090,8 @@ def import_plan(bundle, well_logs):
                 'command_id': hashlib.sha256(('%s:%d' % (digest, position)).encode()).hexdigest()[:32],
                 'origin': {'kind': 'portable-bundle', 'manifest_sha256': digest, 'asset_id': asset.asset_id, 'revision': asset.revision, 'exporter': exporter.strip()[:80]}}
         def refuse(reason): steps.append({**step, 'state': 'refused', 'reason': reason})
+        if asset.type == WELL_TABLE:
+            refuse(WELL_TABLE_RESTORED); continue  # E162 s2a: its wells are rebuilt from its rows, not from an upload
         if asset.original is None:
             refuse('This bundle carries no original for it (a seismic slice is not the volume)'); continue
         if asset.package is not None:  # E23c: re-import of a package follows E23b2's upload flow (C7)

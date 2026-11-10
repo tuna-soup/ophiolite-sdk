@@ -1,0 +1,157 @@
+[
+ {
+  "name": "las-gr",
+  "kind": "las2/1",
+  "file": "las-gr.las",
+  "declared": null,
+  "planted": {
+   "depth-increasing/1": {
+    "count": 0,
+    "rows": []
+   },
+   "gr-range/1": {
+    "count": 4,
+    "rows": [
+     6,
+     11,
+     15,
+     17
+    ]
+   },
+   "null-sentinel/1": {
+    "count": 1,
+    "rows": [
+     8
+    ]
+   },
+   "unit-known/1": {
+    "count": 0,
+    "rows": []
+   }
+  }
+ },
+ {
+  "name": "las-descending",
+  "kind": "las2/1",
+  "file": "las-descending.las",
+  "declared": null,
+  "planted": {
+   "depth-increasing/1": {
+    "count": 0,
+    "rows": []
+   },
+   "gr-range/1": {
+    "count": 0,
+    "rows": []
+   },
+   "null-sentinel/1": {
+    "count": 1,
+    "rows": [
+     5
+    ]
+   },
+   "unit-known/1": {
+    "count": 0,
+    "rows": []
+   }
+  }
+ },
+ {
+  "name": "las-other-null",
+  "kind": "las2/1",
+  "file": "las-other-null.las",
+  "declared": null,
+  "planted": {
+   "depth-increasing/1": {
+    "count": 5,
+    "rows": [
+     1,
+     5,
+     8,
+     10,
+     11
+    ]
+   },
+   "gr-range/1": null,
+   "null-sentinel/1": {
+    "count": 6,
+    "rows": [
+     2,
+     3,
+     4,
+     6,
+     7
+    ]
+   },
+   "unit-known/1": {
+    "count": 2,
+    "rows": [
+     2,
+     3
+    ]
+   }
+  }
+ },
+ {
+  "name": "tops",
+  "kind": "well-tops-csv/1",
+  "file": "tops.csv",
+  "declared": {
+   "depth_unit": "m"
+  },
+  "planted": {
+   "tops-unique-name/1": {
+    "count": 3,
+    "rows": [
+     3,
+     4,
+     6
+    ]
+   }
+  }
+ },
+ {
+  "name": "survey-m",
+  "kind": "deviation-csv/1",
+  "file": "survey-m.csv",
+  "declared": {
+   "depth_unit": "m"
+  },
+  "planted": {
+   "station-step/1": {
+    "count": 2,
+    "rows": [
+     4,
+     6
+    ]
+   }
+  }
+ },
+ {
+  "name": "survey-ft",
+  "kind": "deviation-csv/1",
+  "file": "survey-ft.csv",
+  "declared": {
+   "depth_unit": "ft"
+  },
+  "planted": {
+   "station-step/1": {
+    "count": 1,
+    "rows": [
+     3
+    ]
+   }
+  }
+ },
+ {
+  "name": "survey-unknown-unit",
+  "kind": "deviation-csv/1",
+  "file": "survey-ft.csv",
+  "declared": {
+   "depth_unit": "unknown"
+  },
+  "planted": {
+   "station-step/1": null
+  }
+ }
+]

@@ -26,6 +26,10 @@ try:
     from project_gateway.tests.test_one_api_matrix import Caller
     from project_gateway.tests.test_calculations import las, publish
     from project_gateway.tests.test_publications import uploaded
+    from project_gateway.tests.test_principals import ORIGIN
+    from project_gateway.tests.test_application_compare import share
+    from project_gateway.app import create_app
+    from fastapi.testclient import TestClient
 except ImportError:
     if os.environ.get('OPHIOLITE_REQUIRE_GATEWAY') == '1': raise
     pytest.skip('Platform test runtime is needed for the gateway lane', allow_module_level=True)
@@ -67,15 +71,32 @@ def native_keys(a, service):
     a.sources.platform = lambda method, body, token: platform(method, body, owner(token))
 
 
+class Own:
+    """E157 s0 (D7, disposition 8): a self-managed gateway that captures by consent: no demonstration, bob enabled, and
+    nothing injected, so the deployment's own text (version 1, approved) is served."""
+    def __init__(self, shared, service, monkeypatch):
+        a, _, _, permissions, _ = shared
+        self.a = a
+        prior = a.sources.platform  # the members a share may name (test_work_episodes_route's `members`)
+        a.sources.platform = lambda m, body, t: ({'members': [{'user_id': u} for u in permissions]} if m == 'ListProjectMembers' else prior(m, body, t))
+        for name in [n for n in os.environ if n.startswith('OPHIOLITE_DEMONSTRATION')]: monkeypatch.delenv(name)
+        monkeypatch.setenv('OPHIOLITE_CAPTURE', 'by-consent')
+        monkeypatch.setenv('OPHIOLITE_DEPLOYMENT_TIER', 'self-managed')
+        with service.connect() as db: db.execute("UPDATE ab_users SET enabled=true WHERE id='bob'")
+        self.app = create_app(a.sources.platform, ORIGIN, organizations=service, sources=a.sources)
+
+    def client(self): return TestClient(self.app, base_url=ORIGIN)
+
+
 @pytest.fixture
 def journey(world, shared, service, tmp_path, monkeypatch, request):
     """test_capture_startup's by-consent public demonstration (no identity provider, bob disabled), E133's approved test
     text injected; alice allows training through the consent route and makes an access key the way a person does.
-    Parametrized `off`: the same gateway with capture off (no consent to give)."""
+    Parametrized `off`: the same gateway with capture off (no consent to give); `own`: E157's self-managed gateway."""
     native_keys(shared[0], service)
-    off = getattr(request, 'param', None) == 'off'
-    w = world(**({} if off else BY_CONSENT))
-    w.app.state.consent.texts = TEST_TEXTS
+    off, own = (getattr(request, 'param', None) == p for p in ('off', 'own'))
+    w = Own(shared, service, monkeypatch) if own else world(**({} if off else BY_CONSENT))
+    if not own: w.app.state.consent.texts = TEST_TEXTS
     monkeypatch.setattr(record, 'datetime', Clock)
     monkeypatch.setattr(Clock, 'shift', timedelta(0))
     with w.client() as c:
@@ -332,3 +353,82 @@ def test_s3_q_until_zero_is_sent_and_exports_nothing(journey, tmp_path):
     found = export_to(journey, tmp_path / 'exports' / 'zero', '--until', '0')
     assert (journey.pages.bodies[0].get('until'), found['until'], found['counts']['episodes']) == (0, 0, 0)
     assert (tmp_path / 'exports' / 'zero' / 'episodes.jsonl').read_bytes() == b''
+
+
+# --- s4: the members scope over HTTP (S10, S11) -----------------------------------------------------------------------------
+
+MEMBERS_LINE = "Exported %d episodes of the consenting members' work to %s (%d with values)."
+
+
+def test_s4_an_administrator_exports_the_members_work(journey, tmp_path):
+    """S10, S11 as an external client: alice administers p, so `--scope members:p` with her key sends `scope: members` on
+    every page, writes a folder `load` reads whose manifest names the project and no person, holds her two consenting
+    runs (the only member who acted; bob is disabled) and says "the consenting members' work": under her own export's
+    `until`, the same lines. A non-administrator's refusal is the route's (Platform S3, S13: no second member here).
+    Mutation: the scope not passed through (CLI to method, or method to body) -> no `scope` in the bodies, an own folder -> red."""
+    made(journey.w)
+    journey.pages.limit = 1
+    here = tmp_path / 'exports'
+    own = export_to(journey, here / 'own')
+    out = here / 'members'
+    assert journey(journey.key, '--scope', 'members:p', '--purpose', 'training', '--destination', str(out), '--until', str(own['until'])) == (
+        0, MEMBERS_LINE % (2, out, 0), '')
+    assert [b.get('scope') for b in journey.pages.bodies[-2:]] == ['members', 'members']
+    manifest, episodes = trajectories.load(out)
+    assert (manifest.scope.model_dump(), manifest.counts.episodes) == ({'kind': 'members', 'project': own['scope']['project']}, 2)
+    assert (out / 'episodes.jsonl').read_bytes() == (here / 'own' / 'episodes.jsonl').read_bytes()
+    assert sorted(p.name for p in here.iterdir()) == ['members', 'own']
+
+
+# --- E157 s0 C6: on your own instance (D7, dispositions 7-10) ------------------------------------------------------------
+
+def members_export(journey, out):
+    out.parent.mkdir(exist_ok=True)
+    code, line, err = journey(journey.key, '--scope', 'members:p', '--purpose', 'training', '--mode', 'shape', '--destination', str(out))
+    assert (code, err) == (0, ''), (code, line, err)
+    manifest, episodes = trajectories.load(out)
+    return line, manifest, episodes
+
+
+def clean_picks(episodes):
+    return sorted(p.value for e in episodes for r in e.rows if r.operation == 'calculations/shale-volume' for p in r.parameters if p.key == 'picks.clean')
+
+
+@pytest.mark.parametrize('journey', ['own'], indirect=True)
+def test_s5_on_a_self_managed_instance_the_export_holds_consenting_work_only(journey, tmp_path, monkeypatch):
+    """A self-managed gateway capturing by consent serves text v1 (nothing injected) and alice's grant against it was
+    written (the fixture). Alice runs twice and accepts her second result; bob, a member, runs once on his own upload
+    shared with her, with a typed clean pick of 77 gAPI, without consenting. Alice's `members:p` export (an administrator)
+    holds her two episodes, her verdict word, and nothing of bob's. Positive control: bob allows training and runs again;
+    the next export holds exactly one more episode, carrying 77. Mutations (logs/mut-c6.txt): the export's consent check
+    bypassed -> 77 in the first folder -> red; the verdicts left out of a shape row -> no `accepted` -> red."""
+    import time
+    from project_gateway import consent_service
+    w = journey.w
+    served = post(w, w.c, '/api/v1/deployment/capture', {})
+    w.c.cookies.clear()
+    assert (served.json()['tier'], served.json()['consent_text']['version'], served.json()['consent_text']['state']) == ('self-managed', 1, 'approved')
+    _, _, second = made(w)
+    Caller(w, 'session', 'alice').ok('verdicts', 'record', {'asset_id': second['asset_id'], 'revision': second['revision'], 'verdict': 'accepted',
+                                                            'reason': 'The picks agree with the core', 'command_id': 'v-1'})
+    bob = Caller(w, 'session', 'bob')
+    source = uploaded(w, who='bob', audience=('alice',), reuse=(), command='src-bob', raw=las([(100, 25), (101, 95), (102, 165)]))
+    BOB = {'how': 'typed', 'clean': 77, 'shale': 150}
+    share(w, publish(bob, source, 'vsh-bob-1', picks=BOB), 'bob', ['alice'])
+    here = tmp_path / 'exports'
+    line, manifest, episodes = members_export(journey, here / 'before')
+    assert line == MEMBERS_LINE % (2, here / 'before', 0)
+    assert (clean_picks(episodes), manifest.counts.episodes, manifest.counts.no_consent) == ([35.0, 35.0], 2, 4)
+    assert [v.verdict for e in episodes for r in e.rows for v in r.verdicts] == ['accepted']
+    # the positive control: bob allows training after his first run (forward only), then runs again
+    monkeypatch.setattr(consent_service, 'now', lambda: time.time() + HOURS.total_seconds() + 60)
+    allowed = post(w, w.c, '/api/v1/consent/grant', {'purpose': 'training', 'text_version': 1, 'extras': [], 'command_id': 'g-bob'}, 'bob')
+    assert allowed.status_code == 200, allowed.text
+    w.c.cookies.clear()
+    Clock.shift = HOURS * 2
+    share(w, publish(bob, source, 'vsh-bob-2', picks=BOB, name='Shale volume of bob'), 'bob', ['alice'])
+    line, manifest, after = members_export(journey, here / 'after')
+    assert line == MEMBERS_LINE % (3, here / 'after', 0)
+    assert (clean_picks(after), manifest.counts.episodes, manifest.counts.no_consent) == ([35.0, 35.0, 77.0], 3, 4)
+    folder = b''.join(p.read_bytes() for d in ('before', 'after') for p in sorted((here / d).iterdir()))
+    assert [i for i in (b'alice', b'bob', b'"p"') if i in folder] == []

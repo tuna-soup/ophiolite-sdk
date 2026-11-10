@@ -1,0 +1,13 @@
+{
+ "schema": "ophiolite.data-rule/1",
+ "id": "unit-known/1",
+ "title": "Curve units known to their quantity",
+ "description": "A curve whose upper-cased mnemonic is in a quantity's suggest_from mnemonics (quantities.json) has a unit, as written, in that quantity's units. A curve fails once; its example row is the curve's 1-based position in ~Curve and its value the mnemonic.",
+ "class": "file-local",
+ "kinds": ["las2/1"],
+ "context_kinds": null,
+ "severity": "warn",
+ "parameters": [],
+ "words": {"template": "{count} curves have a unit their quantity does not list.", "examples": "none"},
+ "since": "1.1.0"
+}

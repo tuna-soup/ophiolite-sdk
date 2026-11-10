@@ -26,6 +26,7 @@ import threading
 import time
 from urllib.parse import urlencode, urlsplit
 import httpx
+from . import _deprecation  # E148
 from ._core import origin
 from .auth import _lock, request, same_origin
 from .errors import AuthenticationRequired, Refused
@@ -112,6 +113,7 @@ class OAuthApp:
         self.redirect_uri, self.consent_redirect_uri = redirect_uri, consent_redirect_uri or redirect_uri
         self.store, self.http = store, http or httpx.Client(timeout=30, follow_redirects=False, trust_env=False)
         self._metadata, self._locks, self._guard = None, {}, threading.Lock()
+        self._notifier = _deprecation.Notifier()  # E148: Ophiolite's answers only; the provider's token endpoint is not noted
 
     def __repr__(self): return 'OAuthApp(<private>)'
 
@@ -119,7 +121,7 @@ class OAuthApp:
     def metadata(self):
         """The provider's endpoints, from Ophiolite's RFC 8414 document (C5), each on the provider's own origin."""
         if self._metadata is None:
-            value = request(self.url + '/.well-known/oauth-authorization-server', http=self.http)
+            value = request(self.url + '/.well-known/oauth-authorization-server', http=self.http, notifier=_deprecation.of(self))
             issuer = value.get('issuer')
             for key in ('authorization_endpoint', 'token_endpoint'):
                 if not isinstance(value.get(key), str): raise Refused('This Workspace does not describe its identity provider.')
@@ -224,6 +226,7 @@ class OAuthApp:
                                       headers={'Accept': 'application/json'}, follow_redirects=False)
         except httpx.HTTPError:
             raise AuthenticationRequired('Ophiolite did not answer the exchange; retry.') from None
+        _deprecation.note(_deprecation.of(self), 'POST', self.url + '/api/v1/applications/exchange', response)
         if response.status_code in (401, 403, 404):
             record.pop('handle', None); record.pop('credential', None)
             self.store.put(person, record)

@@ -1,0 +1,14 @@
+{
+  "description": "Single-defect folder blocks: edits to valid/all-roles.json (set/delete as recipe/invalid.json; manifest_set edits the enclosing manifest, contracts/bundles/v2/fixtures/manifest.json) and the code and path mapper.validate_folder names. by as recipe/invalid.json.",
+  "cases": [
+    {"name": "recipe-digest-differs", "set": [[["recipe", "sha256"], "0000000000000000000000000000000000000000000000000000000000000000"]], "code": "recipe-digest", "path": "$.folder.recipe.sha256", "by": "validator"},
+    {"name": "representation-outside-its-asset", "set": [[["files", 1, "path"], "assets/1/data.parquet"]], "code": "role-path", "path": "$.folder.files[1].path", "by": "validator"},
+    {"name": "asset-beyond-the-manifest", "set": [[["files", 1, "path"], "assets/1/data.parquet"], [["files", 1, "asset"], 1]], "code": "asset-unknown", "path": "$.folder.files[1].asset", "by": "validator"},
+    {"name": "role-twice", "set": [[["files", 6, "role"], "lineage-prov"]], "code": "role-repeated", "path": "$.folder.files[6]", "by": "validator"},
+    {"name": "two-of-three-identity-tables", "delete": [["files", 4]], "code": "identity-partial", "path": "$.folder.files", "by": "validator"},
+    {"name": "path-listed-by-an-asset", "manifest_set": [[["assets", 0, "files", 0, "path"], "assets/0/data.parquet"]], "code": "path-in-asset", "path": "$.folder.files[1].path", "by": "validator"},
+    {"name": "parquet-type-on-lineage", "set": [[["files", 5, "media_type"], "application/vnd.apache.parquet"]], "code": "media-type", "path": "$.folder.files[5].media_type", "by": "validator"},
+    {"name": "no-recipe-file", "delete": [["files", 0]], "code": "role-count", "path": "$.folder.files:recipe", "by": "validator"},
+    {"name": "tag-v0.30.0", "set": [[["osdu", "tag"], "v0.30.0"]], "code": "schema-const", "path": "$.folder.osdu.tag", "by": "schema"}
+  ]
+}

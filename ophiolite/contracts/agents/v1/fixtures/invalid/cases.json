@@ -1,0 +1,21 @@
+{
+  "description": "E149 s0: one change to one row's declaration of valid/declarations.json per case; validation fails at `path`. `row` is the row's index, `set` puts keys, `delete` removes them. One case per structural rule of declarations-schema.json.",
+  "cases": [
+    {"name": "call-without-reason", "row": 4, "delete": ["reason"], "path": "$.rows[4].agent"},
+    {"name": "person-without-reason", "row": 9, "delete": ["reason"], "path": "$.rows[9].agent"},
+    {"name": "tool-with-reason", "row": 0, "set": {"reason": "frozen-out"}, "path": "$.rows[0].agent"},
+    {"name": "a-person-reason-on-call", "row": 6, "set": {"reason": "person-only"}, "path": "$.rows[6].agent.reason"},
+    {"name": "a-call-reason-on-person", "row": 8, "set": {"reason": "file-body"}, "path": "$.rows[8].agent.reason"},
+    {"name": "person-admitted", "row": 10, "set": {"admitted": "proposable"}, "path": "$.rows[10].agent.admitted"},
+    {"name": "covered-without-parent", "row": 4, "delete": ["parent"], "path": "$.rows[4].agent"},
+    {"name": "both-without-parent", "row": 3, "delete": ["parent"], "path": "$.rows[3].agent"},
+    {"name": "a-parent-on-proposable", "row": 2, "set": {"parent": "upload-runs/start"}, "path": "$.rows[2].agent"},
+    {"name": "policy-on-covered", "row": 4, "set": {"policy": true}, "path": "$.rows[4].agent.admitted"},
+    {"name": "an-unknown-reach", "row": 0, "set": {"reach": "maybe"}, "path": "$.rows[0].agent.reach"},
+    {"name": "an-unknown-admission", "row": 0, "set": {"admitted": "sometimes"}, "path": "$.rows[0].agent.admitted"},
+    {"name": "an-unknown-key", "row": 0, "set": {"word": "read"}, "path": "$.rows[0].agent"},
+    {"name": "no-policy", "row": 0, "delete": ["policy"], "path": "$.rows[0].agent"},
+    {"name": "destructive-false", "row": 2, "set": {"destructive": false}, "path": "$.rows[2].agent.destructive"},
+    {"name": "destructive-on-call", "row": 4, "set": {"destructive": true}, "path": "$.rows[4].agent.reach"}
+  ]
+}

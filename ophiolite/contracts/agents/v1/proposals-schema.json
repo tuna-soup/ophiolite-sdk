@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ophiolite.agent-proposals/1",
+  "title": "What an agent waits for its person on in one project: the answer of agents/proposals (E151)",
+  "description": "For the caller as delegator, newest first: every pending plan that has not expired and every job waiting at a step for the person's choice. Each entry names the plan, its operation and the server's summary, the newest evidence record (as agents/approve names it), the agent's budgets, the expiry and `review_url`, the page where the person reviews it; a waiting job also shows its question, the offered choices and the `choice_token` jobs/answer names. Another member's plans are never listed, and an agent credential cannot read this answer.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["proposals"],
+  "properties": {
+    "proposals": {"type": "array", "maxItems": 200, "items": {"$ref": "#/$defs/proposal"}}
+  },
+  "$defs": {
+    "proposal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["plan", "operation", "summary", "evidence", "budget", "expires_at", "review_url"],
+      "properties": {
+        "plan": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "operation": {"type": "string", "pattern": "^[a-z][a-z0-9-]*/[a-z][a-z0-9-]*$"},
+        "summary": {"type": "string", "maxLength": 2000},
+        "evidence": {
+          "anyOf": [
+            {"type": "object", "additionalProperties": false, "required": ["id", "generation", "digest"],
+             "properties": {"id": {"type": "string", "minLength": 1, "maxLength": 128}, "generation": {"type": "integer", "minimum": 1},
+                            "digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}},
+            {"type": "null"}
+          ]
+        },
+        "dry_run": {
+          "description": "E150 s1b: the dry run the newest evidence record names, as the gateway ran it again when the proposal arrived: its digest and `would` (ophiolite.agent-dry-run/1 $defs/would). Absent when that record names none.",
+          "type": "object", "additionalProperties": false, "required": ["digest", "would"],
+          "properties": {"digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                         "would": {"type": "object", "required": ["outcome", "effects"],
+                                   "properties": {"outcome": {"enum": ["proceeds", "refused"]}, "effects": {"type": "array", "maxItems": 64}}}}
+        },
+        "budget": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}},
+        "expires_at": {"type": "number"},
+        "review_url": {"type": "string", "minLength": 1, "maxLength": 2048},
+        "question": {"type": "string", "minLength": 1, "maxLength": 300},
+        "choices": {"type": "array", "minItems": 2, "maxItems": 8, "items": {"$ref": "#/$defs/choice"}},
+        "choice_token": {"type": "string", "pattern": "^ct1\\.[A-Za-z0-9_-]{43}$"}
+      }
+    },
+    "choice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "fragment"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^c[1-8]$"},
+        "fragment": {"type": "object", "maxProperties": 16}
+      }
+    }
+  }
+}

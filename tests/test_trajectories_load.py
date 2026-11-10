@@ -428,3 +428,65 @@ def test_s3_o_a_failed_parquet_write_leaves_nothing(tmp_path, monkeypatch):
     monkeypatch.setattr(pq, 'write_table', broken)
     with pytest.raises(OSError): trajectories.export(conformance_pages(), tmp_path / 'out', purpose='training')
     assert leftovers(tmp_path) == []
+
+
+# --- s4: the members scope (E134 s4 C3, S10; logs/s4-mutations.txt) ------------------------------------------------------------
+
+MEMBERS = {**FROZEN, 'scope': {'kind': 'members', 'project': FROZEN['scope']['project']}}  # MembersScope: the project, no person
+
+
+def members_pages(manifest=MEMBERS):
+    """Two pages (one episode each) under one `until`, the last holding `manifest`."""
+    first, second = (json.loads(line) for line in LINES)
+    return Transport({'schema': 'ophiolite.work-episodes-page/1', 'manifest': None, 'episodes': [first], 'next': 1, 'until': 20, 'reconstruction': 'a' * 64},
+                     {'schema': 'ophiolite.work-episodes-page/1', 'manifest': manifest, 'episodes': [second], 'next': None, 'until': 20, 'reconstruction': 'a' * 64})
+
+
+def test_s4_s10_the_method_without_scope_sends_the_body_before_s4(tmp_path):
+    """R1-7: `export_trajectories(dest, purpose=...)`, positional destination and no scope, sends no `scope` key (the
+    request of s1-s3, bytes unchanged) and returns the same shape. Mutation: `own` sent explicitly -> red."""
+    from ophiolite.client import Client
+    client = conformance_pages()
+    found = Client.export_trajectories(client, tmp_path / 'out', purpose='training')
+    assert (client.bodies, sorted(found)) == ([{'purpose': 'training', 'mode': 'auto', 'seed': 0, 'after': 0, 'limit': 1000}],
+                                              ['destination', 'episodes', 'parquet', 'values'])
+    assert trajectories.load(tmp_path / 'out')[0].scope.kind == 'own'
+
+
+@pytest.mark.parametrize('block', [False, True], ids=['pyarrow', 'blocked'])
+def test_s4_s10_members_sends_its_scope_on_every_page_and_writes_the_folder(tmp_path, block, request):
+    """S10: `scope='members'` reaches both bodies; the folder holds the three files (two without pyarrow), `load` reads
+    them and the manifest is `MembersScope` (no person). Mutation: the scope keyword not passed through to the body ->
+    the server would answer own -> red."""
+    from ophiolite.client import Client
+    if block: request.getfixturevalue('blocked')
+    client = members_pages()
+    found = Client.export_trajectories(client, tmp_path / 'out', purpose='training', scope='members')
+    assert [(b['after'], b.get('until'), b.get('scope')) for b in client.bodies] == [(0, None, 'members'), (1, 20, 'members')]
+    assert (found, leftovers(tmp_path)) == ({'episodes': 2, 'values': 1, 'destination': str(tmp_path / 'out'), 'parquet': not block}, ['out'])
+    names = ['episodes.jsonl', 'trajectories.json'] + ([] if block else ['episodes.parquet'])
+    assert sorted(p.name for p in (tmp_path / 'out').iterdir()) == sorted(names)
+    manifest, episodes = trajectories.load(tmp_path / 'out')
+    assert (manifest.scope.kind, 'person' in manifest.scope.model_dump(), [e.mode for e in episodes]) == ('members', False, ['shape', 'values'])
+
+
+@pytest.mark.parametrize('scope,manifest', [('members', FROZEN), ('own', MEMBERS)], ids=['asked-members-answered-own', 'asked-own-answered-members'])
+def test_s4_s10_a_manifest_of_another_scope_is_refused_and_leaves_nothing(tmp_path, scope, manifest):
+    """The folder is the scope asked for: a server that answers the other scope's manifest is refused, nothing written."""
+    from ophiolite.client import Client
+    with pytest.raises(VerificationFailed) as caught:
+        Client.export_trajectories(members_pages(manifest), tmp_path / 'out', purpose='training', scope=scope)
+    assert (str(caught.value), leftovers(tmp_path)) == ('The server answered another scope than the one asked; export again.', [])
+
+
+def test_s4_s10_another_scope_is_refused_before_any_call(tmp_path):
+    from ophiolite.client import Client
+    client = Transport()
+    with pytest.raises(Refused) as caught: Client.export_trajectories(client, tmp_path / 'out', purpose='training', scope='organisation')
+    assert (str(caught.value), client.bodies, leftovers(tmp_path)) == ('The scope is own or members.', [], [])
+
+
+def test_s4_s10_the_cli_parses_members(tmp_path):
+    from ophiolite import cli
+    args = cli.parser().parse_args(['trajectories', 'export', '--scope', 'members:p', '--purpose', 'training', '--destination', str(tmp_path / 'x')])
+    assert args.trajectory_scope == 'members:p'

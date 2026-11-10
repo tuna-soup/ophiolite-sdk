@@ -1,0 +1,31 @@
+{
+  "schema": "ophiolite.mapper-recipe/1",
+  "created": {"tool": "ophiolite-mapper 0.1.0", "rules_version": "1.5.0", "at": "2026-11-02T12:00:00Z"},
+  "source": {
+    "kind": "file",
+    "locator": {"path": "points/synthetic-points.csv"},
+    "reader": "points-csv/1",
+    "digest": {"algorithm": "sha256", "over": "bytes", "value": "2222222222222222222222222222222222222222222222222222222222222222"},
+    "bytes": 4096
+  },
+  "target": {"kind": "table-target", "id": "point-set"},
+  "layout": null,
+  "fields": [
+    {"field": "x", "required": true, "multiple": false, "column": "X", "evidence": "declared", "decision": null},
+    {"field": "y", "required": true, "multiple": false, "column": "Y", "evidence": "declared", "decision": null},
+    {"field": "z", "required": false, "multiple": false, "column": "Z", "evidence": "project-default", "decision": null},
+    {"field": "attributes", "required": false, "multiple": true, "column": ["POROSITY", "NTG"], "evidence": "inferred", "decision": {"by": "A. Reviewer", "at": "2026-11-02T12:05:00Z", "action": "accept"}}
+  ],
+  "columns": {
+    "POROSITY": {"unit": "v/v", "quantity": null, "missing": ["-1"]},
+    "NTG": {"unit": null, "quantity": null, "missing": ["-999", "NaN"]}
+  },
+  "declarations": [
+    {"name": "crs", "value": "EPSG:28992", "evidence": "declared", "decision": null},
+    {"name": "z_unit", "value": null, "evidence": "none", "decision": null}
+  ],
+  "missing": [],
+  "wells": [],
+  "findings": [],
+  "osdu": {"namespace": "synthetic", "legal_tag": "synthetic-legal-tag", "owners": ["owners@synthetic"], "viewers": ["viewers@synthetic"]}
+}

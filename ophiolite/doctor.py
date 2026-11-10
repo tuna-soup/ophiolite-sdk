@@ -1,4 +1,4 @@
-"""E51a: `ophiolite doctor --online` — six stages, stopping at the first failure.
+"""E51a: `ophiolite account doctor --online` — six stages, stopping at the first failure.
 
 address             the name resolves
 tls                 the server answers its public contracts index over this address (https: a trusted certificate)
@@ -18,7 +18,7 @@ from urllib.parse import quote, urlsplit
 
 import httpx
 
-from . import auth
+from . import _deprecation, auth  # E148: one notifier per run
 from ._core import origin
 from .errors import OphioliteError
 
@@ -63,19 +63,20 @@ def run(url, project, credential, *, notes=(), http=None):
     def passed(stage, detail, **extra): report['stages'].append({'stage': stage, 'ok': True, 'detail': detail, **extra})
     injected = http is not None; owns = not injected
     http = http or httpx.Client(timeout=TIMEOUT, follow_redirects=False, trust_env=False)
+    notifier = _deprecation.Notifier()
     try:
         try: socket.getaddrinfo(host, parts.port or (443 if parts.scheme == 'https' else 80))
         except OSError: raise Stop('address', 'The address %s does not resolve' % host + ('; ' + TAILSCALE if private(host) else '')) from None
         passed('address', '%s resolves' % host)
-        try: remote = auth.request(url + '/api/v1/contracts', http=http) if injected else auth.request(url + '/api/v1/contracts')
-        except OphioliteError: raise Stop('tls', diagnose(url, host)) from None
+        try: remote = auth.request(url + '/api/v1/contracts', http=http, notifier=notifier) if injected else auth.request(url + '/api/v1/contracts', notifier=notifier)
+        except OphioliteError: raise Stop('tls', diagnose(url, host, notifier)) from None
         report['server_contracts'] = remote.get('version', 'unreported')
         passed('tls', 'https with a trusted certificate' if parts.scheme == 'https' else 'http (not encrypted): use only on this computer or a private network')
         if credential is None:
             raise Stop('credential-arrived', 'No credential was given: use --key-file FILE, --key-stdin, --key or OPHIOLITE_ACCESS_KEY')
-        reach(report, url, project, credential, http if injected else None)
-        readable(report, url, project, credential, http)
-        features(report, url, project, credential, http)
+        reach(report, url, project, credential, http if injected else None)  # discovery warns through the Account's own notifier
+        readable(report, url, project, credential, http, notifier=notifier)
+        features(report, url, project, credential, http, notifier=notifier)
     except Stop as stop:
         report['stages'].append({'stage': stop.stage, 'ok': False, 'detail': stop.detail, **stop.extra})
         report.exit_code = EXIT[stop.stage]
@@ -85,10 +86,11 @@ def run(url, project, credential, *, notes=(), http=None):
     return report
 
 
-def diagnose(url, host):
+def diagnose(url, host, notifier=None):
     """Why the contracts index did not answer: a certificate, an unreachable server, or an answer that is not the index."""
     try:
         with httpx.Client(timeout=TIMEOUT, follow_redirects=False, trust_env=False) as probe: answer = probe.get(url + '/api/v1/contracts')
+        _deprecation.note(notifier, 'GET', url + '/api/v1/contracts', answer)
     except httpx.ConnectError as error:
         if 'CERTIFICATE' in str(error).upper() or 'SSL' in str(error).upper():
             return "The server's certificate is not trusted by this computer (TLS)"
@@ -105,7 +107,8 @@ def reach(report, url, project, credential, http):
     from . import account as accounts
     from .errors import AuthenticationRequired, PermissionRefused
     try:
-        with accounts.Account(url, credential, http) as account: ids = [p['id'] for p in account.projects()]
+        with accounts.Account(url, credential, http) as account:
+            ids = [p['id'] for p in account.projects()]
     except (AuthenticationRequired, PermissionRefused) as error:
         report.update(reach='no - ' + str(error), reach_ok=False)
         extra = {k: v for k, v in (('server_stage', error.stage), ('code', error.code), ('remedy', error.remedy), ('docs', error.docs)) if v}
@@ -125,10 +128,11 @@ def reach(report, url, project, credential, http):
     if not reached: raise Stop('project-readable', 'This credential does not reach %s; it reaches %s' % (project, ', '.join(ids) or 'no project'))
 
 
-def get(stage, http, url, headers, what):
+def get(stage, http, url, headers, what, notifier=None):
     try: response = http.get(url, headers=headers, follow_redirects=False)
     except httpx.TimeoutException: raise Stop(stage, 'The server did not answer %s in time' % what) from None
     except httpx.HTTPError: raise Stop(stage, 'The connection failed while reading %s' % what) from None
+    _deprecation.note(notifier, 'GET', url, response)
     if 300 <= response.status_code < 400:
         raise Stop(stage, 'The server redirected %s to another address; the redirect was not followed and the credential was not sent there' % what)
     return response
@@ -142,25 +146,26 @@ def body(stage, response, what):
     return value
 
 
-def readable(report, url, project, credential, http):
+def readable(report, url, project, credential, http, *, notifier=None):
     base = url + '/api/v1/projects/' + quote(project, safe='')
     headers = credential.headers(url, project)
-    body('project-readable', get('project-readable', http, base + '/features', headers, 'the project'), 'the project')
+    body('project-readable', get('project-readable', http, base + '/features', headers, 'the project', notifier), 'the project')
     try:  # the credential's scope (best effort; a refusal here does not fail the stage)
         answer = http.post(base + '/capabilities/describe', json={}, headers=headers, follow_redirects=False)
+        _deprecation.note(notifier, 'POST', base + '/capabilities/describe', answer)
         scopes = answer.json().get('scopes') if answer.status_code == 200 else None
     except (httpx.HTTPError, ValueError, AttributeError): scopes = None
     report['scope'] = scopes if isinstance(scopes, list) else None
     report['stages'].append({'stage': 'project-readable', 'ok': True, 'detail': 'the project %s is readable' % project + (' (scope: %s)' % ', '.join(scopes) if isinstance(scopes, list) else '')})
 
 
-def features(report, url, project, credential, http):
+def features(report, url, project, credential, http, *, notifier=None):
     base = url + '/api/v1/projects/' + quote(project, safe='') + '/features'
     headers = credential.headers(url, project)
-    collections = body('features', get('features', http, base + '/collections', headers, 'the collections'), 'the collections').get('collections')
+    collections = body('features', get('features', http, base + '/collections', headers, 'the collections', notifier), 'the collections').get('collections')
     ids = [c.get('id') for c in collections or [] if isinstance(c, dict)]
     if 'wells' not in ids: raise Stop('features', 'The project offers no wells collection')
-    page = body('features', get('features', http, base + '/collections/wells/items?limit=100', headers, 'the first page of wells'), 'the first page of wells')
+    page = body('features', get('features', http, base + '/collections/wells/items?limit=100', headers, 'the first page of wells', notifier), 'the first page of wells')
     returned = page.get('numberReturned') if isinstance(page.get('numberReturned'), int) else len(page.get('features') or [])
     matched = page.get('numberMatched')
     detail = '%d wells' % matched if isinstance(matched, int) else 'at least %d wells' % returned

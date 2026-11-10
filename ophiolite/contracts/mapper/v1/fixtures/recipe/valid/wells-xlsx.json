@@ -1,0 +1,32 @@
+{
+  "schema": "ophiolite.mapper-recipe/1",
+  "created": {"tool": "ophiolite-mapper 0.5.0", "rules_version": "1.5.0", "at": "2026-11-04T12:00:00Z"},
+  "source": {
+    "kind": "file",
+    "locator": {"path": "wells.xlsx"},
+    "reader": "well-location/1",
+    "digest": {"algorithm": "sha256", "over": "bytes", "value": "6666666666666666666666666666666666666666666666666666666666666666"},
+    "bytes": 6200
+  },
+  "target": {"kind": "table-target", "id": "wells"},
+  "layout": null,
+  "identity": {"basis": "external", "column": "WELL", "decision": {"by": "A. Reviewer", "at": "2026-11-04T12:05:00Z", "action": "accept"}},
+  "reading": [
+    {"name": "sheet", "value": "Wells", "evidence": "none", "sentence": "The workbook has the sheets Wells and Tops; the reviewer named Wells.", "decision": {"by": "A. Reviewer", "at": "2026-11-04T12:05:00Z", "action": "accept"}},
+    {"name": "header_row", "value": 3, "evidence": "inferred", "sentence": "The column names were found on row three of the sheet.", "decision": {"by": "A. Reviewer", "at": "2026-11-04T12:05:00Z", "action": "accept"}}
+  ],
+  "fields": [
+    {"field": "id", "required": true, "multiple": false, "column": "WELL", "evidence": "previously-reviewed", "reuse": "same-table", "apply": "prefilled", "decision": null},
+    {"field": "name", "required": true, "multiple": false, "column": "WELL", "evidence": "previously-reviewed", "reuse": "same-table", "apply": "offered", "decision": {"by": "A. Reviewer", "at": "2026-11-04T12:05:00Z", "action": "accept"}},
+    {"field": "x", "required": true, "multiple": false, "column": "EASTING", "evidence": "previously-reviewed", "reuse": "similar", "apply": "offered", "decision": {"by": "A. Reviewer", "at": "2026-11-04T12:05:00Z", "action": "accept"}},
+    {"field": "y", "required": true, "multiple": false, "column": "NORTHING", "evidence": "declared", "decision": null}
+  ],
+  "columns": {},
+  "declarations": [
+    {"name": "crs", "value": "EPSG:28992", "evidence": "declared", "decision": null}
+  ],
+  "missing": [],
+  "wells": [],
+  "findings": [],
+  "osdu": {"namespace": "{{NAMESPACE}}", "legal_tag": "{{LEGAL_TAG}}", "owners": ["{{DATA_OWNERS_GROUP}}"], "viewers": ["{{DATA_VIEWERS_GROUP}}"]}
+}

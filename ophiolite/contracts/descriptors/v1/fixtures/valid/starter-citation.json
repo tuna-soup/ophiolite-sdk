@@ -1,0 +1,28 @@
+{
+  "description": "E147 s0 (D1): a citation as a starter pack's will be built in s3, from starter.json and the OSD catalogue records of its inputs: title <- starter.json title, description <- summary, published <- the built_at date, licence <- licence.spdx, publisher <- Open Subsurface Data (the pack's builder, an organisation), creators <- the publisher named by the pack's OSD catalogue record, as one organisation (E147 s3 R-1, ruled by e8 6 Nov 2026 until OSD carries an originator field; the derivation is descriptors.py starter_citation, the pack fixture is starter-pack/). Synthetic values; validated by citation-schema.json and descriptors.py validate_block.",
+  "citation": {
+    "schema": "ophiolite.citation/1",
+    "title": "Synthetic starter pack: wells and tops",
+    "description": "A made-up starter pack of four wells and their tops, built for the descriptor contract.",
+    "published": "2026-11-05",
+    "creators": [
+      {
+        "name": "Synthetic Survey Organisation",
+        "kind": "organisation",
+        "identifier": "https://ror.org/0abcdef12"
+      }
+    ],
+    "publisher": {
+      "name": "Open Subsurface Data"
+    },
+    "licence": {
+      "spdx": "CC0-1.0"
+    },
+    "doi": null,
+    "descriptors": [
+      "ro-crate-metadata.json",
+      "croissant.json",
+      "datacite.json"
+    ]
+  }
+}
