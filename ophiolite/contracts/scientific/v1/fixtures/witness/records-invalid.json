@@ -1,0 +1,21 @@
+{
+  "about": "E113 s0: blocks no record may carry, applied to records.json's base block (`set`) or to the reported record's procedure (`procedure`). `structural` cases are refused by the model and, separately, by the published schema; `semantic` cases by the model and, separately, by the SDK invariants (the schema cannot state them).",
+  "structural": [
+    {"name": "network to the host", "set": {"network": "host"}},
+    {"name": "a missing limit", "set": {"limits": {"memory_mb": 256, "seconds": 60}}},
+    {"name": "fractional seconds", "set": {"limits": {"memory_mb": 256, "seconds": 60.5, "cpus": 1.0}}},
+    {"name": "an image without its algorithm", "set": {"image": "5d1e0c6a9b8f7e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d"}},
+    {"name": "a job id of another shape", "set": {"job": "job-1"}},
+    {"name": "another witness kind", "set": {"kind": "laptop"}},
+    {"name": "an unknown key", "set": {"host": "ci-01"}},
+    {"name": "null", "witness": null},
+    {"name": "the sandbox as a runner kind", "procedure": {"runner": {"kind": "sandbox", "principal": "bob", "on_behalf_of": null}}}
+  ],
+  "semantic": [
+    {"name": "a read step", "procedure": {"step": "read"}},
+    {"name": "finished before it started", "set": {"finished_at": 1793879999.0}},
+    {"name": "a NaN start", "set": {"started_at": "NaN"}, "floats": ["started_at"]},
+    {"name": "an infinite finish", "set": {"finished_at": "Infinity"}, "floats": ["finished_at"]},
+    {"name": "a negative infinite start", "set": {"started_at": "-Infinity"}, "floats": ["started_at"]}
+  ]
+}

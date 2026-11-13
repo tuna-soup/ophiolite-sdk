@@ -623,6 +623,7 @@ class DerivationProcedure(Contract):
     runner: ProcedureRunner = Field(...)
     again_of: MadeAgain | None = Field(...)
     verification: Annotated[DerivationVerified | DerivationWithdrawn | DerivationNotVerified, Field(discriminator='state')] = Field(None)
+    witness: DerivationWitness = Field(None)
 
 class DerivationRecord(Contract):
     schema_: Literal['ophiolite.derivation/1'] = Field(..., alias='schema')
@@ -668,6 +669,16 @@ class DerivationWithdrawn(Contract):
     at: float = Field(...)
     reference_label: None = Field(...)
     line: Annotated[str, Field(min_length=1, max_length=1000)] = Field(...)
+
+class DerivationWitness(Contract):
+    kind: Literal['sandbox'] = Field(...)
+    job: Annotated[str, Field(pattern='^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$')] = Field(...)
+    image: Annotated[str, Field(pattern='^sha256:[0-9a-f]{64}$')] = Field(...)
+    runtime: Annotated[str, Field(pattern='^[a-z][a-z0-9.+-]*$', min_length=1, max_length=40)] = Field(...)
+    limits: WitnessLimits = Field(...)
+    network: Literal['none'] = Field(...)
+    started_at: float = Field(...)
+    finished_at: float = Field(...)
 
 class Display(Contract):
     type: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(None)
@@ -1238,6 +1249,11 @@ class WellSetContext(Contract):
     with_trajectory: Annotated[int, Field(ge=0, le=29)] = Field(...)
     without_trajectory: Annotated[int, Field(ge=0, le=29)] = Field(...)
     fidelity: Fidelity = Field(...)
+
+class WitnessLimits(Contract):
+    memory_mb: Annotated[int, Field(ge=1, le=65536)] = Field(...)
+    seconds: Annotated[int, Field(ge=1, le=86400)] = Field(...)
+    cpus: Annotated[float, Field(le=64, gt=0)] = Field(...)
 
 class XY(Contract):
     x: float = Field(...)
@@ -1967,6 +1983,55 @@ class IdentityChange(Contract):
     before: Identity = Field(...)
     after: Identity = Field(...)
 
+class HeldCopies(Contract):
+    project: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    item: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(...)
+    as_of: Annotated[str, Field(pattern='^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$')] = Field(...)
+    complete_since: Annotated[str, Field(pattern='^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$')] = Field(...)
+    rows: Annotated[list[HeldCopy], Field(max_length=500)] = Field(...)
+    next: Annotated[str, Field(min_length=1, max_length=1024)] | None = Field(...)
+
+class HeldCopy(Contract):
+    copy_: Annotated[str, Field(pattern='^[0-9a-f]{16}$')] = Field(..., alias='copy')
+    item: HeldCopyItem = Field(...)
+    application: Annotated[str, Field(pattern='^(application:[a-z0-9._-]{1,128}|script)$')] | None = Field(...)
+    person: HeldCopyPerson = Field(...)
+    key: Annotated[str, Field(min_length=1, max_length=512)] = Field(None)
+    version: HeldCopyVersion = Field(...)
+    mode: Literal['stays', 'follows'] | None = Field(...)
+    state: Literal['current', 'behind', 'no-longer-readable'] = Field(...)
+    behind: HeldCopyBehind = Field(None)
+
+class HeldCopyBehind(Contract):
+    count: Annotated[int, Field(ge=1)] = Field(...)
+    newest: HeldCopyNewest = Field(...)
+
+class HeldCopyItem(Contract):
+    asset_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    name: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    kind: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+
+class HeldCopyNewest(Contract):
+    revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    author: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    at: Annotated[str, Field(pattern='^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$')] = Field(...)
+
+class HeldCopyPerson(Contract):
+    shown: Literal['you', 'named', 'a-member'] = Field(...)
+    name: Annotated[str, Field(min_length=1, max_length=512)] = Field(None)
+
+class HeldCopyVersion(Contract):
+    revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    how: Literal['got', 'sent'] = Field(...)
+    confirmed_at: Annotated[str, Field(pattern='^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$')] = Field(...)
+    since: Annotated[str, Field(pattern='^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$')] = Field(...)
+
+class HoldersRequest(Contract):
+    project_id: Annotated[str, Field(min_length=1, max_length=200)] = Field(...)
+    item: Annotated[str, Field(min_length=1, max_length=512)] = Field(None)
+    limit: Annotated[int, Field(ge=1, le=500)] = Field(200)
+    cursor: Annotated[str, Field(min_length=1, max_length=1024)] = Field(None)
+
 class OutcomeCheck(Contract):
     schema_: Literal['ophiolite.outcome-check/1'] = Field(..., alias='schema')
     outcome: CheckedOutcome = Field(...)
@@ -2124,6 +2189,19 @@ class PublicationVerification(Contract):
     kind: Literal['publication'] = Field(...)
     reference: PublicationReference = Field(...)
 
+class WitnessedVerification(Contract):
+    schema_: Literal['ophiolite.tool-verification/1'] = Field(..., alias='schema')
+    id: Annotated[str, Field(pattern='^verification-[0-9a-f]{32}$')] = Field(...)
+    project: Annotated[str, Field(min_length=1, max_length=200)] = Field(...)
+    digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    by: VerifierPerson = Field(...)
+    at: float = Field(...)
+    statement: Annotated[str, Field(pattern='^[^\\x00]*$', max_length=2000)] | None = Field(...)
+    command_id: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+    request_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    kind: Literal['witnessed'] = Field(...)
+    reference: WitnessedReference = Field(...)
+
 class Withdrawal(Contract):
     schema_: Literal['ophiolite.tool-verification/1'] = Field(..., alias='schema')
     id: Annotated[str, Field(pattern='^verification-[0-9a-f]{32}$')] = Field(...)
@@ -2153,6 +2231,10 @@ class VerifiedCheckReference(Contract):
 
 class WithdrawnReference(Contract):
     withdraws: Annotated[str, Field(pattern='^verification-[0-9a-f]{32}$')] = Field(...)
+
+class WitnessedReference(Contract):
+    run_id: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    job: Annotated[str, Field(pattern='^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$')] = Field(...)
 
 class ContractProfile(Contract):
     schema_: Literal['ophiolite.contract-profile/1'] = Field(..., alias='schema')
@@ -3633,7 +3715,7 @@ class PortableBundleManifestV2RelationshipsItemEvidence1Source(Contract):
     asset_id: str = Field(...)
     revision: str = Field(...)
 
-ToolVerification = Annotated[CheckVerification | PublicationVerification | Withdrawal, Field(discriminator='kind')]
+ToolVerification = Annotated[CheckVerification | PublicationVerification | WitnessedVerification | Withdrawal, Field(discriminator='kind')]
 
 WorkEpisode = Annotated[ShapeEpisode | ValuesEpisode, Field(discriminator='mode')]
 
@@ -3711,6 +3793,7 @@ DerivationRecord.model_rebuild()
 DerivationRecordV2.model_rebuild()
 DerivationVerified.model_rebuild()
 DerivationWithdrawn.model_rebuild()
+DerivationWitness.model_rebuild()
 Display.model_rebuild()
 Evaluated.model_rebuild()
 History.model_rebuild()
@@ -3786,6 +3869,7 @@ WellLogLink.model_rebuild()
 WellPathContext.model_rebuild()
 WellResidualContext.model_rebuild()
 WellSetContext.model_rebuild()
+WitnessLimits.model_rebuild()
 XY.model_rebuild()
 SeismicLine.model_rebuild()
 LineChunk.model_rebuild()
@@ -3880,6 +3964,14 @@ SourceRevision.model_rebuild()
 Entity.model_rebuild()
 Identity.model_rebuild()
 IdentityChange.model_rebuild()
+HeldCopies.model_rebuild()
+HeldCopy.model_rebuild()
+HeldCopyBehind.model_rebuild()
+HeldCopyItem.model_rebuild()
+HeldCopyNewest.model_rebuild()
+HeldCopyPerson.model_rebuild()
+HeldCopyVersion.model_rebuild()
+HoldersRequest.model_rebuild()
 OutcomeCheck.model_rebuild()
 CheckEvaluator.model_rebuild()
 CheckRows.model_rebuild()
@@ -3904,11 +3996,13 @@ OutcomeDestination.model_rebuild()
 OutcomeRule.model_rebuild()
 CheckVerification.model_rebuild()
 PublicationVerification.model_rebuild()
+WitnessedVerification.model_rebuild()
 Withdrawal.model_rebuild()
 Link.model_rebuild()
 PublicationReference.model_rebuild()
 VerifiedCheckReference.model_rebuild()
 WithdrawnReference.model_rebuild()
+WitnessedReference.model_rebuild()
 ContractProfile.model_rebuild()
 ConnectorSemantics.model_rebuild()
 RepresentationRules.model_rebuild()

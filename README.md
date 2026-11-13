@@ -17,14 +17,14 @@ This installs the SDK from PyPI once a release is published; Python 3.10 or late
 ophiolite demo --bundle f3-block.zip
 ```
 
-This serves the F3-block bundle (public NLOG wells, logs, surveys, tops and horizons of the Dutch F3 block) on this computer and prints three commands to run on it.
+This serves the F3-block bundle (public NLOG wells, logs, surveys and tops of the Dutch F3 block, and TNO DGM-deep horizons via NLOG) on this computer and prints three commands to run on it.
 The bundle is not yet downloadable; it will be once it is published.
 For the F3-block bundle the three commands list the wells, fetch one well's whole gamma-ray curve into a new folder, and double a gamma-ray curve and publish the result with the derive-and-publish template:
 
 <!-- not-run: these are the F3 bundle's lines (its asset and revision); hosted CI runs the lines the demo prints, and the lane-host run runs this block verbatim -->
 ```sh
 ophiolite data wells list --configuration ophiolite-demo/configuration.json --credentials ophiolite-demo/credential.json
-ophiolite data fetch --asset ae8bb142a42756c9466fb8d6b7a38713583574659db9fdcf94fa9fe3eb60e90c --revision 7d0d2c08d1c270d131cb4e0989953328fdbd5a3bd9f61c114dca5bb421bbe906 --curve GR --output ophiolite-demo/F02-01-GR --configuration ophiolite-demo/configuration.json --credentials ophiolite-demo/credential.json
+ophiolite data fetch --asset e466c261fde739e51375ec32ec319a04ba3662eec0074bae0bf6d9745ae2d480 --revision 7d0d2c08d1c270d131cb4e0989953328fdbd5a3bd9f61c114dca5bb421bbe906 --curve GR --output ophiolite-demo/F02-01-GR --configuration ophiolite-demo/configuration.json --credentials ophiolite-demo/credential.json
 python ophiolite-demo/derive-and-publish/app --configuration ophiolite-demo/configuration.json --credentials ophiolite-demo/credential.json --work ophiolite-demo/work
 ```
 

@@ -148,3 +148,35 @@ def test_configuration_and_credentials_flags_win_over_the_environment(tmp_path, 
         credentials = tmp_path / 'credential.json'; auth.key_login(server.url, 'p', 'oph_key_' + 'a' * 40, path=credentials)
         assert _template_answer(['--configuration', str(configuration), '--credentials', str(credentials)], capsys, tmp_path / 'w') == FROZEN_ANSWER
         assert any(r['path'].endswith('/publications/derive') for r in server.requests)  # published on the configured server
+
+
+class _Catalogue:
+    """A client whose catalogue is `items`; `read` records what it is asked and stops the template there."""
+    def __init__(self, items):
+        self.items, self.asked = items, []
+
+    def assets(self):
+        return iter(self.items)
+
+    def read(self, asset, revision, curves):
+        self.asked.append((asset, revision, list(curves)))
+        raise LookupError('read')
+
+
+def test_the_template_reads_the_catalogues_first_item_that_carries_the_curve():
+    """E162 s1b: a survey first, then two GR logs (b before a, unlike their names). Mutations: the catalogue's first
+    item → the survey is read; the item chosen by name → a; an explicit asset ignored → b."""
+    sys.path.insert(0, str(ROOT / 'ophiolite/templates'))
+    import support
+    from ophiolite.errors import Refused
+    items = [{'asset_id': 'survey', 'revision': '1', 'curves': None}, {'asset_id': 'b', 'revision': '2', 'curves': ['GR']},
+             {'asset_id': 'a', 'revision': '3', 'curves': ['GR', 'RHOB']}]
+    for call, expected in ((lambda c: support.stage(c, 'w'), ('b', '2', ['GR'])),
+                           (lambda c: support.stage(c, 'w', curve='RHOB'), ('a', '3', ['RHOB'])),
+                           (lambda c: support.stage(c, 'w', asset=items[2]), ('a', '3', ['GR'])),
+                           (lambda c: support.interval_offset(c, 'w'), ('b', '2', ['GR']))):
+        client = _Catalogue(items)
+        with pytest.raises(LookupError): call(client)
+        assert client.asked == [expected]
+    for call in (lambda c: support.stage(c, 'w'), lambda c: support.interval_offset(c, 'w')):
+        with pytest.raises(Refused, match='No permitted curve is available'): call(_Catalogue(items[:1]))

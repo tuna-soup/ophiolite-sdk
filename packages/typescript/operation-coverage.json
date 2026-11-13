@@ -1200,6 +1200,18 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/exchange/holders",
+    "function": "postProjectsProjectExchangeHolders",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/exchange/release",
+    "function": "postProjectsProjectExchangeRelease",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "GET /api/v1/projects/{project}/features",
     "function": "getProjectsProjectFeatures",
     "request": "explicitly-untyped",
@@ -2640,6 +2652,12 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/surveys/link",
+    "function": "postProjectsProjectSurveysLink",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/surveys/list",
     "function": "postProjectsProjectSurveysList",
     "request": "schema",
@@ -2666,6 +2684,12 @@
   {
     "operation": "POST /api/v1/projects/{project}/surveys/replace",
     "function": "postProjectsProjectSurveysReplace",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/surveys/restate",
+    "function": "postProjectsProjectSurveysRestate",
     "request": "schema",
     "response": "schema"
   },

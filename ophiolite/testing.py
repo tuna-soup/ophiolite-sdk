@@ -508,7 +508,7 @@ DEMO_ANSWERS = {
     ('POST', 'upload-runs/list'): (200, {'runs': []}),
     ('POST', 'upload-runs/start'): (403, _DENIED),  # exchange upload
     ('POST', 'table-imports/read'): (403, _DENIED),  # exchange import table
-    ('POST', 'catalog/inventory'): (200, {'assets': [], 'next_cursor': None}),  # results withdraw: a bundle asset is no project item
+    ('POST', 'catalog/inventory'): (200, {'assets': [], 'next_cursor': None, 'display': {'member_names': {}}}),  # results withdraw: a bundle asset is no project item (E173 s0b: the page's labels)
     ('POST', 'well-names/propose'): (404, _gateway_error(  # data wells from-run: the demo has no folder upload
         'This folder upload is not known to this deployment, or it is not yours.', 'unknown-run',
         'Start the folder upload again; this deployment does not know that upload, or it is not yours.', 'unknown-run')),
@@ -530,8 +530,10 @@ class BundleApplications(_MemoryApplications):
     """E162 s1: a checked portable bundle served as a gateway serves its project, from memory: the catalogue in manifest
     order, each stored descriptor and representation byte for byte (nothing recomputed, no windows), one well per log
     named by its source path's stem and without a location, and derived publications kept for the session (parents
-    resolved to the served descriptors). Only a demo-compatible bundle: version 2, every asset in one project, a first
-    asset that is a LAS log with GR, and the path every log was read from. Loopback only; never a production fallback."""
+    resolved to the served descriptors). Only a demo-compatible bundle: version 2, every asset in one project, a LAS log
+    with GR, and the path every log was read from. A wells table (E162 s2a: a `sql-wells/1` source snapshot) is held,
+    never served: a restored project holds it as wells, not as a catalogue item (E162 s1b). Loopback only; never a
+    production fallback."""
     def __init__(self, path):
         from . import bundle as bundles
         from .errors import Refused
@@ -540,19 +542,19 @@ class BundleApplications(_MemoryApplications):
         manifest = opened.manifest
         if manifest['schema'] != bundles.SCHEMA_2: raise Refused('The demo serves a version 2 bundle only.')
         raw = _bundle_members(path, manifest)
-        self.served = []
+        self.served, self.held = [], []
         for entry, chosen in zip(manifest['assets'], manifest['selection']):
             files = {f['sha256']: raw[f['path']] for f in entry['files']}
             descriptors = {f.get('curve'): raw[f['path']] for f in entry['files'] if f['role'] == 'descriptor'}
             source = (((entry.get('source_record') or {}).get('record') or {}).get('identity') or {}).get('source_object_id') or {}
-            self.served.append({'entry': entry, 'curves': list(chosen.get('curves') or []), 'files': files, 'descriptors': descriptors,
-                                'parsed': {curve: json.loads(value) for curve, value in descriptors.items()}, 'source_path': source.get('path')})
-        projects = {d['project_id'] for a in self.served for d in a['parsed'].values()}
-        if len(projects) != 1: raise Refused('The demo serves a bundle whose assets are all in one project.')
-        first = self.served[0]
-        if first['entry'].get('profile') != 'las2/1' or 'GR' not in first['curves']:
-            raise Refused('The demo needs a bundle whose first asset is a LAS log with a GR curve.')
+            parsed = {curve: json.loads(value) for curve, value in descriptors.items()}
+            table = entry.get('profile') == 'sql-wells/1' and all(d.get('schema') == 'ophiolite.source-snapshot/1' for d in parsed.values())
+            (self.held if table else self.served).append({'entry': entry, 'curves': list(chosen.get('curves') or []), 'files': files,
+                                                          'descriptors': descriptors, 'parsed': parsed, 'source_path': source.get('path')})
+        projects = {d.get('project_id') for a in self.served for d in a['parsed'].values()}
+        if len(projects) != 1 or None in projects: raise Refused('The demo serves a bundle whose assets are all in one project.')
         logs = [a for a in self.served if a['entry'].get('profile') == 'las2/1']
+        if not any('GR' in a['curves'] for a in logs): raise Refused('The demo needs a bundle with a LAS log that carries a GR curve.')
         if any(not isinstance(a['source_path'], str) or not a['source_path'] for a in logs):
             raise Refused('The demo needs the path every log in the bundle was read from.')
         super().__init__(project=projects.pop())

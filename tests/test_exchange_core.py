@@ -516,7 +516,8 @@ def test_a_host_sentence_table_replaces_every_sentence(project, tmp_path):
 def test_outcomes_are_the_closed_list():
     assert set(exchange.OUTCOMES) == {'nothing-new', 'updates', 'access-changed', 'got', 'already-latest', 'not-visible', 'cannot-read-here', 'damaged',
                                       'map-unavailable', 'sent-new', 'sent-version', 'newer-version-exists', 'nothing-changed', 'earlier-version', 'access-refused', 'not-valid',
-                                      'not-held', 'too-large', 'outcome-unknown', 'abandoned', 'folder-busy', 'rate-limited', 'sign-in-needed', 'could-not-reach'}
+                                      'not-held', 'too-large', 'outcome-unknown', 'abandoned', 'folder-busy', 'rate-limited', 'sign-in-needed', 'could-not-reach',
+                                      'stays', 'name-unclear', 'name-not-found'}
     assert isinstance(Outcome('got', 's'), Outcome)
 
 

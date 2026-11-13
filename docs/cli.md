@@ -71,8 +71,17 @@ The same three actions as `Client.exchange()` in Python (guide: Exchange data be
 ```sh
 ophiolite data check
 ophiolite data get --item ID --output surface       # a well log: add --curve GR (repeat)
+ophiolite data get --name "Top Rotliegend" --type horizon --output top --stay
+ophiolite data check --name "Top Rotliegend"
 ophiolite exchange send porosity.csv --profile points-csv/1 --name "Porosity points" --how kriging --based-on ID [--declare crs=EPSG:28992] [--of ID]
 ```
+
+`get` takes an item by `--item ID` or by `--name` (exactly one; both or neither exit 2), and `check --name` answers for that
+one item. `--type` (a type word such as `horizon`, `point set` or `well log`) picks between items with the same name. The
+folder remembers the name it was given, so a renamed item is still found. `--stay` keeps the version the folder holds
+from then on (the first time it gets the latest; later runs fetch nothing and say when a newer version exists);
+`--latest` gets the latest version, now and on every later get. Without either, the folder does what it last recorded.
+The SDK's `stays` sentence says `stay=False`; on the command line it says `--latest`. Staying needs `--output`.
 
 `send` builds only on items you hold (`--based-on`, and `--of` for the next version of an item you wrote); the version it
 replaces is the one you hold, so a newer version added by someone else is never overwritten. Running the same send again
@@ -82,6 +91,9 @@ after an interrupted one never publishes twice.
 |---|---|---|
 | `nothing-new`, `updates`, `access-changed` | 0 | "Nothing is newer than what you hold." / "1 newer: …" / "You can no longer see …" |
 | `got`, `already-latest` | 0 | "Got {name}, version {k}. You now hold it; saved in …" (an upload: "…, version {k} by {who}, {when}. …") / "You already hold the latest version of …" |
+| `stays` | 0 | "You stay on version {k} of {name}. Version {m} is newer; get it with --latest to take it." / "You stay on version {k} of {name}, the latest." |
+| `name-unclear` | 1 | "More than one item you can see is called {name}: a horizon by {who} (version {k}) and a point set by {who} (version {j}). Name the type as well." |
+| `name-not-found` | 4 | "No item you can see is called {name}. Nothing was changed." |
 | `sent-new`, `sent-version` | 0 | "Sent {name} as a new item; it is private until you share it." / "Sent {name} as version {k}. Version {k-1} is kept." |
 | `cannot-read-here`, `damaged`, `not-valid`, `not-held`, `too-large` | 1 | "This kind of item cannot be received by this script yet: …" / "The data did not match its fingerprint. Nothing was kept." / "The project refused this: …" / "You can only build on items you hold. …" / "The file is larger than this project accepts. …" |
 | `access-refused`, `sign-in-needed` | 3 | "The project did not allow this with this access key, so nothing was sent. …" / "Your access key is not accepted any more. Ask for a new one." |

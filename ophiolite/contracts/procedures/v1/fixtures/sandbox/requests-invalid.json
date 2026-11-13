@@ -1,0 +1,29 @@
+{
+  "note": "E113 s0: sandbox run requests, written by hand. `base` is a valid request for the depth-shift bundle (procedures/v1/fixtures/bundles/depth-shift); each case makes one change: `set` replaces top-level keys, `drop` removes them. `code` is a closed refusal (sandbox.REASONS) with its field, or `type` is the model's error type at `loc`. Asset ids and revisions are synthetic.",
+  "base": {"project_id": "p", "command_id": "sandbox-1",
+           "procedure": {"digest": "edf8668204255edd264cccb9f91d941c4c28d34312f9e264de10d4df31c5dda7"},
+           "settings": {"shift": 2.5},
+           "inputs": {"tops": [{"asset_id": "asset-tops-a", "revision": "0000000000000000000000000000000000000000000000000000000000000001"}]}},
+  "valid": [
+    {"name": "no limits", "set": {}},
+    {"name": "lower limits", "set": {"limits": {"memory_mb": 128, "seconds": 30, "cpus": 0.5}}},
+    {"name": "settings left out", "drop": ["settings"]}
+  ],
+  "cases": [
+    {"name": "a witness, sent by the client", "set": {"witness": {"kind": "sandbox"}}, "code": "server-owned", "field": "witness"},
+    {"name": "a runner, sent by the client", "set": {"runner": {"kind": "person", "principal": "u-anna", "on_behalf_of": null}}, "code": "server-owned", "field": "runner"},
+    {"name": "an image, sent by the client", "set": {"image": "sha256:5d1e0c6a9b8f7e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d"}, "code": "server-owned", "field": "image"},
+    {"name": "a network, sent by the client", "set": {"network": "host"}, "code": "server-owned", "field": "network"},
+    {"name": "a job, sent by the client", "set": {"job": "3f0c2b1e-8d4a-4c6f-9b2e-1a7d5e9c0b44"}, "code": "server-owned", "field": "job"},
+    {"name": "outputs, sent by the client", "set": {"outputs": []}, "code": "server-owned", "field": "outputs"},
+    {"name": "an unknown key", "set": {"sandbox": true}, "type": "extra_forbidden", "loc": ["sandbox"]},
+    {"name": "no inputs", "drop": ["inputs"], "type": "missing", "loc": ["inputs"]},
+    {"name": "a digest that is not 64 hex", "set": {"procedure": {"digest": "edf86682"}}, "type": "string_pattern_mismatch", "loc": ["procedure", "digest"]},
+    {"name": "an input version without its revision", "set": {"inputs": {"tops": [{"asset_id": "asset-tops-a"}]}}, "type": "missing", "loc": ["inputs", "tops", 0, "revision"]},
+    {"name": "a limit null", "set": {"limits": {"memory_mb": null}}, "type": "int_type", "loc": ["limits", "memory_mb"]},
+    {"name": "seconds not whole", "set": {"limits": {"seconds": 60.5}}, "type": "int_type", "loc": ["limits", "seconds"]},
+    {"name": "memory zero", "set": {"limits": {"memory_mb": 0}}, "type": "greater_than_equal", "loc": ["limits", "memory_mb"]},
+    {"name": "cpus negative", "set": {"limits": {"cpus": -1.0}}, "type": "greater_than", "loc": ["limits", "cpus"]},
+    {"name": "an unknown limit", "set": {"limits": {"pids": 8}}, "type": "extra_forbidden", "loc": ["limits", "pids"]}
+  ]
+}

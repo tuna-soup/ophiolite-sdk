@@ -994,14 +994,17 @@ def archived(definition_path, out, catalogue, verification, custody):
            'licence': {**lic, 'sources': sources}, 'fidelity': 'fidelity/%s.json' % stem(defn['id']), 'built_at': defn['built_at']}
     bound_export = {'report': sha256(report_raw), 'definition': report['definition'], 'derived': [[d['path'], d['sha256']] for d in derived]}
     return {'defn': defn, 'raw_definition': raw_definition, 'evidence': evidence, 'read': read, 'files': files, 'doc': doc, 'landings': landings,
-            'export': bound_export, 'copies': [(d['path'], d['local'], d['sha256'], d['bytes']) for d in derived]}
+            'export': bound_export, 'copies': [(d['path'], d['local'], d['sha256'], d['bytes']) for d in derived],
+            'survey': report['survey'], 'objects': {d['path']: (d['kind'], d['object'], d['local']) for d in derived}}  # E142 s2a: what placement reads
 
 
-def build(client, definition_path, out, *, catalogue, verification, custody, export=None):
+def build(client, definition_path, out, *, catalogue, verification, custody, export=None, place=False, restate=False):
     """`ophiolite starter build`: land the inputs, then write OUT/starter.json (unpublished, no keys), its fidelity document
     and the python target under OUT/files/. A rerun with the same OUT continues from landing.json (D7). E129 sc: with
     EXPORT (the folder `ophiolite starter export` wrote) the definition is an archive's, and its derived files are landed
-    instead, with the OpendTect target. Returns the pack document."""
+    instead, with the OpendTect target. E142 s2a (D-P, D-W): with PLACE (the command line's build of an export), once
+    every file is landed the export's survey is placed in the project (`place_survey`); RESTATE is `--restate-survey`.
+    Returns the pack document."""
     from . import fidelity
     from .upload_runs import UploadRuns
     p = prepared(definition_path, catalogue, verification, custody) if export is None else archived(definition_path, export, catalogue, verification, custody)
@@ -1057,6 +1060,7 @@ def build(client, definition_path, out, *, catalogue, verification, custody, exp
                 content, output, values = fidelity.landed(client, name, row['asset_id'], row['revision'], i['sha256'], compare=compare)
                 if recovered: current(client, name, row['asset_id'], row['revision'])
                 entry = {'state': 'landed', 'run_id': report.run_id, 'asset_id': row['asset_id'], 'revision': row['revision'], 'profile': prof,
+                         'landed_as': row['state'],  # E142 s2a (§0a F2): added, or already-here (then never a member by this build alone)
                          'output': {**output, 'kind': i['kind']}, **({'from': i['from']} if 'from' in i else {}), **({'representative': values} if values else {})}
                 journal['inputs'][name] = entry; save()
         except PermissionRefused:
@@ -1064,11 +1068,178 @@ def build(client, definition_path, out, *, catalogue, verification, custody, exp
         shown = (entry.get('representative') or []) + ([i['lines']] if 'lines' in i else [])  # E137 s1 D-4: a line's "N of M" last
         entries.append({'sha256': i['sha256'], 'name': name, 'result': 'converted', 'output': entry['output'],
                         **({'representative': shown} if shown else {})})
+    if place and export is not None: place_survey(client, p, journal, save, out, restate=restate)  # E142 s2a: after every landing, before the pack
     replaced(out / doc['fidelity'], dumped(fidelity.written(p['evidence']['catalog'], defn['record_id'], entries)))
     for rel, raw in p['files'].items(): replaced(out / 'files' / rel, raw)
     for rel, local, digest, size in p.get('copies', ()): copied(local, out / 'files' / rel, digest, size)  # E129 sc C3b: the artefact at its one path
     replaced(out / 'starter.json', dumped(doc))
     return doc
+
+
+# --- E142 s2a C3: the export's survey placed in the project (strategy D-P, D-W; §0a F2, O1, O5) ------------------------
+
+ROLE_OF_KIND = {'seismic-3d': 'cube', 'seismic-2d': 'line', 'horizons': 'horizon', 'faults': 'fault-set', 'wellbore-paths': 'well',
+                'wellbore-logs': 'well', 'tops': 'well', 'time-depth': 'time-depth'}  # by kind, never by profile (D-P 1)
+WELL_KINDS = ('wellbore-paths', 'wellbore-logs', 'tops')
+WHOLE_LIST, MEMBERSHIP = ('create', 'restate'), ('add', 'remove', 'replace', 'relate', 'unrelate', 'link')
+LOOSE = 'already in the project before this build; link it to the survey to include it'
+NO_WELL = 'no well identity; associate it and replace the member'
+OLDER_CONNECTOR = 'the connector predates survey identity; identify the survey to make a later build restate it'
+EDITED = 'survey %s was edited after it was last placed (revision %d); rerun with `--restate-survey` to replace its members with this export\'s.'
+WITHDRAWN = 'a withdrawn survey holds this identity; ask its owner, or build with `--instance`.'
+OTHER_PROJECT = 'this folder\'s survey command for project %s is unfinished; build it again into that project first.'
+WELLS_FAILED = 'The wells of the export were not made: the wells import ended %s. The landed files are kept; build again to place the survey.'
+ASSOCIATED = 'ophiolite starter build: a file the OpendTect export wrote for this well'
+
+
+def landed_as(runs, entry, i):
+    """§0a F2: how ENTRY's file landed: its journalled `landed_as`, else (an entry written before s2) its upload row
+    re-read by its run id; unreadable → already-here (loose, never acquired)."""
+    if entry.get('landed_as') in LANDED_STATES: return entry['landed_as']
+    try: row = outcome(runs.status(entry['run_id']), i, refuse_open=False)
+    except Exception: row = None
+    return row['state'] if row and row.get('state') in LANDED_STATES else 'already-here'
+
+
+def survey_context(facts):
+    """The survey's defaults from the export's facts (its CRS and units); what it does not state is left out."""
+    domain = {'twt': 'time', 'depth': 'depth'}.get(facts.get('zdomain'))
+    pairs = (('crs', facts.get('crs')), ('z_domain', domain), ('z_unit', facts.get('zunit')), ('xy_unit', facts.get('xyunit')),
+             ('depth_unit', facts.get('depth_unit')))
+    return {k: v for k, v in pairs if isinstance(v, str) and v and v != 'unknown'}
+
+
+def survey_wells(client, p, facts, landed, authority, digest):
+    """D-W: {well: entity id} of every well the export's files name, made by one wells-table import under AUTHORITY
+    (keys <container>/<well>, reused when present), and each landed well file associated with its well once."""
+    names = sorted({p['objects'][n][1] for n in landed if p['objects'][n][0] in WELL_KINDS})
+    heads = {p['objects'][n][1]: first_station(p['objects'][n][2], n) for n in landed if p['objects'][n][0] == 'wellbore-paths'}
+    names = [w for w in names if w in heads]  # a well with no positions file has no head to make it from
+    if not names: return {}
+    container = facts['container']
+    def existing():
+        return {((w.document.get('identity') or {}).get('authority'), (w.document.get('identity') or {}).get('key')): w.entity_id for w in client.wells()}
+    # only the wells not yet made: a build stopped after its import (before the survey command was journalled) makes
+    # none again, and the command id names exactly the rows sent
+    missing = [w for w in names if (authority, '%s/%s' % (container, w)) not in existing()]
+    if missing:
+        rows = ''.join('%s/%s,%s,%r,%r\r\n' % (container, w, w, heads[w][0], heads[w][1]) for w in missing)
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'wells.csv'
+            path.write_bytes(('id,name,x,y\r\n' + rows).encode('utf-8'))
+            done = client.imports.from_table(path, 'wells', {'id': 'id', 'name': 'name', 'x': 'x', 'y': 'y'}, authority=authority,
+                                             declarations={'crs': facts.get('crs') or 'unknown', 'depth_unit': facts.get('depth_unit') or 'unknown',
+                                                           'depth_kind': 'MD', 'depth_reference': OPENDTECT_MD_REFERENCE},
+                                             command_id=hashlib.sha256(('%s:%s:wells:%s' % (client.project, digest, sha256(rows.encode()))).encode()).hexdigest()[:32])
+        if (done.get('run') or {}).get('state') != 'complete': refuse(WELLS_FAILED % (done.get('run') or {}).get('state'))
+    made = existing()
+    wells = {w: made[(authority, '%s/%s' % (container, w))] for w in names if (authority, '%s/%s' % (container, w)) in made}
+    for n, e in landed.items():
+        kind, well, _ = p['objects'][n]
+        if kind not in WELL_KINDS or well not in wells: continue
+        if (e['asset_id'], e['revision']) in {(i.get('asset_id'), i.get('revision')) for i in client.data(wells[well])}: continue
+        client.of_entity(e['asset_id'], e['revision'], wells[well], statement=ASSOCIATED,
+                         command_id=hashlib.sha256(('%s:%s:%s:%s' % (client.project, digest, e['revision'], wells[well])).encode()).hexdigest()[:32])
+    return wells
+
+
+def associated_wells(client, landed):
+    """A provisional build's wells (D-W): {(asset, revision): entity id} of the landed files an of-entity edge already
+    ties to a well; nothing new is made under a provisional authority."""
+    keys, found = {(e['asset_id'], e['revision']) for e in landed.values()}, {}
+    for w in client.wells():
+        for i in client.data(w.entity_id):
+            if (i.get('asset_id'), i.get('revision')) in keys: found[(i['asset_id'], i['revision'])] = w.entity_id
+    return found
+
+
+def survey_relations(members, objects):
+    """D-P 2: only what the export states. well-in: each well member → the cube, when the survey has exactly one;
+    time-depth-of: each model → every member of the well it names. The export names no horizon's cube (horizon-of none)
+    and OpendTect's 2D lines are not of a cube (line-of none)."""
+    key = lambda m: {'asset_id': m['asset_id'], 'revision': m['revision']}
+    cubes = [m for m, _ in members if m['role'] == 'cube']
+    out = [{'predicate': 'well-in', 'subject': key(m), 'object': key(cubes[0])} for m, _ in members if m['role'] == 'well'] if len(cubes) == 1 else []
+    for m, name in members:
+        if m['role'] == 'time-depth':
+            out += [{'predicate': 'time-depth-of', 'subject': key(m), 'object': key(w)} for w, n in members
+                    if w['role'] == 'well' and objects[n][1] == objects[name][1]]
+    return out
+
+
+def place_survey(client, p, journal, save, out, *, restate=False):
+    """D-P: the export's survey placed once in the project, after its files landed; the outcome is journalled in
+    landing.json `survey` ({pending, placed, loose, said}). A journalled pending command is sent again unchanged first
+    (a lost answer replays its receipt); else the project's survey of this identity is restated with the complete lists
+    (refused when anyone edited its membership after its last whole-list event, unless RESTATE), or a new one created.
+    Files landed `already-here` are left loose unless already members. Returns the journal's `survey`."""
+    from .upload_runs import UploadRuns
+    facts, digest = p['survey'], p['export']['report']
+    state = journal.setdefault('survey', {'pending': None, 'placed': None, 'loose': [], 'said': []})
+    if state.get('project', client.project) != client.project:  # another project's record is never this one's
+        if state.get('pending'): refuse(OTHER_PROJECT % state['project'])
+        state.clear(); state.update({'pending': None, 'placed': None, 'loose': [], 'said': []})
+    state['project'] = client.project
+    if state.get('placed') and state['placed'].get('export_sha256') == digest and not state.get('pending'): return state
+    identified = all(isinstance(facts.get(k), str) and facts[k] for k in ('instance', 'container'))
+    authority = 'opendtect:' + facts['instance'] if identified else None
+    runs = UploadRuns(client)
+    landed = {n: e for n, e in journal['inputs'].items() if e.get('state') == 'landed' and n in p['objects']}
+    how = {n: landed_as(runs, e, {'name': n, 'sha256': None}) for n, e in landed.items()}
+
+    def send(kind, body, command_id):
+        state['pending'] = {'kind': kind, 'body': body, 'command_id': command_id}; save()  # §0a O1: before the call
+        try: receipt = client._survey_command(kind, body, command_id)
+        except OphioliteError as e:
+            if e.code in ('survey-changed', 'survey-identity-taken'):
+                state['pending'] = None; save()
+                refuse(EDITED % (facts.get('container') or facts.get('name'), body.get('expected_revision') or 0) if e.code == 'survey-changed' else WITHDRAWN)
+            raise
+        state['placed'] = {'survey_id': receipt['survey_id'], 'revision': receipt['revision'], 'command_id': command_id,
+                           'identity': body.get('identity') if kind == 'create' else {'authority': authority, 'key': facts['container']},
+                           'export_sha256': digest}
+        state['pending'] = None; save()
+        return state
+
+    if state.get('pending'):  # §0a O1: the exact request again, never rebuilt from a fresh read
+        return send(state['pending']['kind'], state['pending']['body'], state['pending']['command_id'])
+    found = next((s for s in client.surveys() if (s.get('identity') or {}).get('authority') == authority
+                  and (s.get('identity') or {}).get('key') == facts['container']), None) if identified else None
+    if found and not restate:  # §0a O5, before anything is written: a membership edit after the last whole-list event (newest first)
+        for event in client.survey_history(found['survey_id']):
+            if event.get('kind') in WHOLE_LIST: break
+            if event.get('kind') in MEMBERSHIP: refuse(EDITED % (found['name'], found['revision']))
+    current = {(m.asset_id, m.revision) for m in client.survey(found['survey_id']).members} if found else set()
+    wells = survey_wells(client, p, facts, {n: e for n, e in landed.items() if how[n] == 'added' or (e['asset_id'], e['revision']) in current},
+                         authority, digest) if identified else {}
+    tied = associated_wells(client, landed) if not identified and any(p['objects'][n][0] in WELL_KINDS for n in landed) else {}
+    members, loose, said = [], [], []
+    for n, e in landed.items():
+        if how[n] != 'added' and (e['asset_id'], e['revision']) not in current:
+            loose.append({'name': n, 'asset_id': e['asset_id'], 'revision': e['revision'], 'sentence': LOOSE}); continue
+        kind, obj, _ = p['objects'][n]
+        role, entity = ROLE_OF_KIND[kind], None
+        if role == 'well':
+            entity = wells.get(obj) if identified else tied.get((e['asset_id'], e['revision']))
+            if entity is None: role = 'other'; said.append('%s: %s' % (n, NO_WELL))
+        members.append(({'role': role, 'asset_id': e['asset_id'], 'revision': e['revision'], **({'entity': {'id': entity, 'kind': 'well'}} if entity else {})}, n))
+    relations = survey_relations(members, p['objects'])
+    if not identified: said.append(OLDER_CONNECTOR)
+    state['loose'], state['said'] = loose, said
+    listed = [m for m, _ in members]
+    if found:
+        kind, body = 'restate', {'survey_id': found['survey_id'], 'expected_revision': found['revision'], 'members': listed, 'relations': relations}
+        seed = '%s:%s:restate:%d' % (client.project, digest, found['revision'])
+    else:
+        identity = {'authority': authority, 'key': facts['container']} if identified else {'provisional': True}
+        kind, body = 'create', {'name': facts.get('container') or facts.get('name') or 'survey', 'identity': identity, 'context': survey_context(facts),
+                                'members': listed, 'relations': relations,
+                                **({'source': {'system': 'opendtect', 'instance': facts['instance'], 'container': facts['container']}} if identified else {})}
+        # a provisional survey has no identity to find it again: each build folder is its own request (stated, not hidden)
+        seed = '%s:%s:create:%s' % (client.project, digest, '' if identified else str(Path(out).resolve()))
+    # the same request is the same id, and any other body (another build's loose items) a new one, never command-reused
+    seed += ':' + sha256(json.dumps(body, sort_keys=True, separators=(',', ':')).encode())
+    return send(kind, body, hashlib.sha256(seed.encode()).hexdigest()[:32])
 
 
 def statement(doc):

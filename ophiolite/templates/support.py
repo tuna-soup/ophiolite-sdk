@@ -34,13 +34,18 @@ def client_for(url, project='p', *, fixture=False, credentials=None):
     return Client(url,project,credential)
 
 
+def first_with(client, curve):
+    """The catalogue's first item that carries `curve`, in catalogue order; None when no item does."""
+    return next((item for item in client.assets() if curve in (item.get('curves') or [])), None)
+
+
 def derive(values, factor=2):
     return [None if value is None else value * factor for value in values]
 
 
 def stage(client, folder, *, mnemonic='CALC', factor=2, asset=None, curve='GR'):
     """Read one exact permitted curve and compute the derived curve locally. Nothing is published yet."""
-    asset = asset or next(iter(client.assets()), None)
+    asset = asset or first_with(client, curve)
     if asset is None: raise Refused('No permitted curve is available. Ask the owner to grant access.')
     selected = client.read(asset['asset_id'],asset['revision'],[curve])
     # Explicit local model validation preserves the scientific fields; the SDK read
@@ -138,7 +143,8 @@ def command(argv=None):
 
 
 def interval_offset(client, folder, *, offset=1):
-    asset=next(iter(client.assets()))
+    asset=first_with(client,'GR')
+    if asset is None: raise Refused('No permitted curve is available. Ask the owner to grant access.')
     data=client.read(asset['asset_id'],asset['revision'],['GR'])
     work=client.work_folder(folder)
     binding=work.configure(asset['asset_id'],asset['revision'],curve='GR',name='Bounded interval correction',publication_profile='curve-edits/1')

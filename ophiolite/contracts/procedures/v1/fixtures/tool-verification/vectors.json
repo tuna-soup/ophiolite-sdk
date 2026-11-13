@@ -40,6 +40,17 @@
        "expect": {"state": "verified", "id": "verification-000000000000000000000000000000d2", "line": "Verified by Anna against Not recorded on 6 November 2026"}},
       {"add": {"id": "verification-000000000000000000000000000000d3", "kind": "check", "by": "ghost", "name_at_time": "home/u-ghost/profile", "at": 1794009600, "label": "Second reference well"},
        "expect": {"state": "verified", "id": "verification-000000000000000000000000000000d3", "line": "Verified by Not recorded against Second reference well on 7 November 2026"}}]},
+    {"name": "E113 s0: a witnessed verification alone names a run Ophiolite made",
+     "steps": [
+      {"add": {"id": "verification-000000000000000000000000000000e1", "kind": "witnessed", "by": "anna", "at": 1793923200},
+       "expect": {"state": "verified", "id": "verification-000000000000000000000000000000e1", "line": "Verified by Anna against a run Ophiolite made on 6 November 2026"}}]},
+    {"name": "E113 s0: a witnessed verification withdrawn falls back to an older check",
+     "steps": [
+      {"add": {"id": "verification-000000000000000000000000000000a1", "kind": "check", "by": "anna", "at": 1793836800, "label": "Depth shift against hand-picked tops"}},
+      {"add": {"id": "verification-000000000000000000000000000000e1", "kind": "witnessed", "by": "ben", "at": 1793923200},
+       "expect": {"state": "verified", "id": "verification-000000000000000000000000000000e1", "line": "Verified by Ben against a run Ophiolite made on 6 November 2026"}},
+      {"add": {"id": "verification-000000000000000000000000000000e2", "kind": "withdrawn", "by": "ben", "at": 1794009600, "withdraws": "verification-000000000000000000000000000000e1"},
+       "expect": {"state": "verified", "id": "verification-000000000000000000000000000000a1", "line": "Verified by Anna against Depth shift against hand-picked tops on 5 November 2026"}}]},
     {"name": "R-V3: another digest has none", "digest": "O",
      "steps": [{"expect": {"state": "none", "id": null, "line": "Not verified"}}]}
   ]

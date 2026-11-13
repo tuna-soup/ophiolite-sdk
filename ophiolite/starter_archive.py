@@ -385,10 +385,12 @@ def converted(work, stage, specs):
 
 # --- the connector (a separate process) -----------------------------------------------------------------------------
 
-def exported(python, root, survey, stage, objects, step, timeout):
-    """Run the OpendTect connector's exporter; its export.json, of its form."""
+def exported(python, root, survey, stage, objects, step, timeout, instance=None):
+    """Run the OpendTect connector's exporter; its export.json, of its form. E142 s2a (D-I): INSTANCE, when given, is
+    passed as `--instance` (this run's producer id); the survey facts' `instance` and `container` are read when present."""
     argv = [python, '-m', 'ophiolite_opendtect.export', str(root), survey, str(stage), '--objects', json.dumps(objects), '--log-step', repr(float(step)),
-            '--forms', 'int8']  # E140 s3 C5 (D-S): a cube of 8-bit codes is written as format 8; any other value restarts it as format 5
+            '--forms', 'int8',  # E140 s3 C5 (D-S): a cube of 8-bit codes is written as format 8; any other value restarts it as format 5
+            *(['--instance', instance] if instance is not None else [])]
     try: done = subprocess.run(argv, capture_output=True, text=True, timeout=timeout)
     except OSError: refuse('The OpendTect connector interpreter %s cannot be started.' % python + NOTHING)
     except subprocess.TimeoutExpired: refuse('The export did not finish within %d seconds.' % timeout + NOTHING)
@@ -922,11 +924,12 @@ def fresh(out, now):
 
 
 def export(definition_path, out, *, catalogue, verification, custody, python=None, timeout=TIMEOUT, now=time.time,
-           readers=None, export_profile=None, how=None, agreements=None, max_uncompressed=UNCOMPRESSED):
+           readers=None, export_profile=None, how=None, agreements=None, max_uncompressed=UNCOMPRESSED, instance=None):
     """`ophiolite starter export`: the derived files of the definition's archive in a fresh OUT/exports/<name>/,
     published by OUT/derived.json. Returns (report, folder). E137 s0 (R2-3): READERS, EXPORT_PROFILE, HOW and
     AGREEMENTS are the module tables unless a test passes its own. E140 s2 C4 (Q3): MAX_UNCOMPRESSED is the extraction
-    total (`--max-uncompressed-bytes`), else the 8 GiB default."""
+    total (`--max-uncompressed-bytes`), else the 8 GiB default. E142 s2a (D-I): INSTANCE (`--instance`) is the
+    connector's producer id for this export, else the installation's own."""
     defn = definition(definition_path, readers=readers, export_profile=export_profile, agreements=agreements)
     _, licence = evidence(defn, catalogue, verification, custody)
     path = checked_file(defn)
@@ -944,7 +947,7 @@ def export(definition_path, out, *, catalogue, verification, custody, python=Non
             specs = time_depth_checked(archive['archive'], defn['contents'], defn['values'], members(path))  # E137 s3 D-1: before extraction
             extracted(path, work, archive['archive']['survey'], max_uncompressed=max_uncompressed)
             objects = {c['kind']: c['ids'] for c in defn['contents']}
-            doc = exported(python, work, archive['archive']['survey'], stage, objects, archive['archive']['log_step'], timeout)
+            doc = exported(python, work, archive['archive']['survey'], stage, objects, archive['archive']['log_step'], timeout, instance)
             doc['files'] += converted(work, stage, specs)  # D-4: inside work/, before it is removed
         finally:
             shutil.rmtree(work, ignore_errors=True)

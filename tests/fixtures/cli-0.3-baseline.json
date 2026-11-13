@@ -728,6 +728,32 @@
      ],
      "required": false,
      "type": "Path"
+    },
+    {
+     "action": "_StoreAction",
+     "choices": null,
+     "default": "None",
+     "dest": "name",
+     "exclusive": null,
+     "nargs": null,
+     "options": [
+      "--name"
+     ],
+     "required": false,
+     "type": null
+    },
+    {
+     "action": "_StoreAction",
+     "choices": null,
+     "default": "None",
+     "dest": "type",
+     "exclusive": null,
+     "nargs": null,
+     "options": [
+      "--type"
+     ],
+     "required": false,
+     "type": null
     }
    ],
    "argv": [],
@@ -736,6 +762,8 @@
     "configuration": "configuration.json",
     "credentials": null,
     "json": false,
+    "name": null,
+    "type": null,
     "work": ".ophiolite-held"
    },
    "served": {
@@ -2761,12 +2789,38 @@
      "choices": null,
      "default": "None",
      "dest": "item",
-     "exclusive": null,
+     "exclusive": 0,
      "nargs": null,
      "options": [
       "--item"
      ],
-     "required": true,
+     "required": false,
+     "type": null
+    },
+    {
+     "action": "_StoreAction",
+     "choices": null,
+     "default": "None",
+     "dest": "name",
+     "exclusive": 0,
+     "nargs": null,
+     "options": [
+      "--name"
+     ],
+     "required": false,
+     "type": null
+    },
+    {
+     "action": "_StoreAction",
+     "choices": null,
+     "default": "None",
+     "dest": "type",
+     "exclusive": null,
+     "nargs": null,
+     "options": [
+      "--type"
+     ],
+     "required": false,
      "type": null
     },
     {
@@ -2781,6 +2835,32 @@
      ],
      "required": true,
      "type": "Path"
+    },
+    {
+     "action": "_StoreConstAction",
+     "choices": null,
+     "default": "None",
+     "dest": "stay",
+     "exclusive": 1,
+     "nargs": "0",
+     "options": [
+      "--stay"
+     ],
+     "required": false,
+     "type": null
+    },
+    {
+     "action": "_StoreConstAction",
+     "choices": null,
+     "default": "None",
+     "dest": "stay",
+     "exclusive": 1,
+     "nargs": "0",
+     "options": [
+      "--latest"
+     ],
+     "required": false,
+     "type": null
     },
     {
      "action": "_AppendAction",
@@ -2822,7 +2902,10 @@
     "curve": null,
     "item": "x",
     "json": false,
+    "name": null,
     "output": "x",
+    "stay": null,
+    "type": null,
     "window": null,
     "work": ".ophiolite-held"
    },
@@ -8337,6 +8420,19 @@
      ],
      "required": false,
      "type": null
+    },
+    {
+     "action": "_StoreTrueAction",
+     "choices": null,
+     "default": "False",
+     "dest": "rights_confirmed",
+     "exclusive": null,
+     "nargs": "0",
+     "options": [
+      "--rights-confirmed"
+     ],
+     "required": false,
+     "type": null
     }
    ],
    "argv": [
@@ -8364,6 +8460,7 @@
     "name": "x",
     "of": null,
     "profile": "las2/1",
+    "rights_confirmed": false,
     "work": ".ophiolite-held"
    },
    "served": {
@@ -9166,6 +9263,19 @@
      ],
      "required": false,
      "type": "Path"
+    },
+    {
+     "action": "_StoreTrueAction",
+     "choices": null,
+     "default": "False",
+     "dest": "restate_survey",
+     "exclusive": null,
+     "nargs": "0",
+     "options": [
+      "--restate-survey"
+     ],
+     "required": false,
+     "type": null
     }
    ],
    "argv": [
@@ -9190,6 +9300,7 @@
     "export": null,
     "json": false,
     "out": "x",
+    "restate_survey": false,
     "verification": "x"
    },
    "served": {
@@ -9315,6 +9426,19 @@
      ],
      "required": false,
      "type": "int"
+    },
+    {
+     "action": "_StoreAction",
+     "choices": null,
+     "default": "None",
+     "dest": "instance",
+     "exclusive": null,
+     "nargs": null,
+     "options": [
+      "--instance"
+     ],
+     "required": false,
+     "type": null
     }
    ],
    "argv": [
@@ -9334,6 +9458,7 @@
     "command": "starter",
     "custody": "x",
     "definition": "x",
+    "instance": null,
     "json": false,
     "max_uncompressed_bytes": null,
     "opendtect_python": null,

@@ -74,6 +74,7 @@ def schemas():
     from project_gateway.org_search import SearchRequest, SearchAnswer, SearchAnswerByMeaning  # E145 (s2b: by meaning)
     from project_gateway.profile_migration import ProfileMigration  # E148 s3
     from project_gateway.survey_contract import SurveyRevision, SurveyPage  # E142 s0
+    from project_gateway.held_copies import HeldCopies  # E171 s0
     from project_gateway.work_turns import WorkTurn; write(CONTRACTS / WorkTurn.CONTRACT['path'], WorkTurn.model_json_schema())  # E160 s0: one line, apart from the shared tuple
     from project_gateway.tool_verifications import ToolVerification  # E165 s0
     for model in (CheckRecord, DerivationRecord, DerivationRecordV2, Parameters, Asset, Curve, ScientificContext, AssetSummary, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface, PointSet, PolylineSet, SeismicVolume, SeismicSlice,
@@ -81,7 +82,7 @@ def schemas():
                   Wavelet, ModelSection, SeismicSection, TimeDepth, FeatureSet, ImportRecipe2, CurveColumnsHeader, TableFile, SourceProvenance, WellPath, BasisGrouping, WellSet,
                   WellResidual, SeismicLine, OutcomeDeclaration, OutcomeCheck, OutcomeClaim, ResqmlRead, LocalFrame, ResqmlObject, Verdict, BehaviourConsent, WorkEpisodes, WorkEpisode,
                   PointColumnsHeader, DataRule, RuleResults, VolumeWindow, SeismicVolumeNative, SearchRequest, SearchAnswer, ProfileMigration,
-                  SurveyRevision, SurveyPage, SearchAnswerByMeaning, VolumeWindow2, ToolVerification):  # E53; E57; E56; E23b; E100b; E58b; E122; E125 s3a; E123; E119a; E119b; E120 (s3: the claim); E124 (s1: the object); E132; E133; E134; E137 s0; E139; E144; E141 s0; E140 s0; E145; E148 s3; E142 s0; E145 s2b; E140 s3; E165 s0
+                  SurveyRevision, SurveyPage, HeldCopies, SearchAnswerByMeaning, VolumeWindow2, ToolVerification):  # E53; E57; E56; E23b; E100b; E58b; E122; E125 s3a; E123; E119a; E119b; E120 (s3: the claim); E124 (s1: the object); E132; E133; E134; E137 s0; E139; E144; E141 s0; E140 s0; E145; E148 s3; E142 s0; E171 s0; E145 s2b; E140 s3; E165 s0
         write(CONTRACTS / model.CONTRACT['path'], model.model_json_schema())
 
 

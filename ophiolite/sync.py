@@ -158,14 +158,18 @@ class Sync:
         return (self.client.url, self.client.project, principal_id(self.client.credential), capabilities, epoch)
 
     def inventory(self):
-        """E70a: every item this credential may read, at its current version (catalog/inventory, every page)."""
+        """E70a: every item this credential may read, at its current version (catalog/inventory, every page). E173 s0b:
+        an item whose first author the page labels carries that name as `by_name`; without a label it has none."""
         return list(self._inventory().values())
 
     def _inventory(self):
         items, cursor = {}, None
         while True:
             page = self._call('catalog', 'inventory', {'limit': 500, **({'cursor': cursor} if cursor else {})})
-            for item in page['assets']: items[('asset', item['asset_id'])] = item
+            names = (page.get('display') or {}).get('member_names') or {}  # E173 s0b: the page's labels, kept on each item
+            for item in page['assets']:
+                if item.get('by') in names: item = {**item, 'by_name': names[item['by']]}
+                items[('asset', item['asset_id'])] = item
             cursor = page.get('next_cursor')
             if not cursor: return items
 

@@ -150,13 +150,13 @@ def test_requests_without_a_key_are_refused(served):
 
 @pytest.mark.parametrize('case, sentence', [
     ('version-1', 'version 2 bundle only'),
-    ('typed-first', 'first asset is a LAS log with a GR curve'),
+    ('no-log', 'a LAS log that carries a GR curve'),
     ('two-projects', 'all in one project'),
     ('no-source-path', 'path every log in the bundle was read from'),
 ])
 def test_only_a_demo_compatible_bundle_is_served(tmp_path, case, sentence):
     """Each mutation keeps a valid bundle (it opens), so only the demo's own rule can refuse it."""
-    reads = {'typed-first': [typed('tops'), Log('log-b', 'SYN-B', DESCENDING)],
+    reads = {'no-log': [typed('tops'), typed('trajectory')],
              'two-projects': [Log('log-b', 'SYN-B', DESCENDING), typed('tops', project='other')],
              'no-source-path': [Log('log-b', 'SYN-B', DESCENDING), Log('log-a', 'SYN-A', ASCENDING, path=False), typed('tops')]}.get(case)
     if case == 'version-1':  # a curve-only export stays 1.x
@@ -165,6 +165,31 @@ def test_only_a_demo_compatible_bundle_is_served(tmp_path, case, sentence):
     else: path = demo_bundle(tmp_path, reads)
     bundle.open_bundle(path)
     with pytest.raises(Refused, match=sentence): BundleApplications(path)
+
+
+def test_a_restorable_bundle_is_served_and_its_wells_table_is_held(tmp_path):
+    """E162 s1b: the restorable shape (a typed asset first, a wells table whose source manifest names no project) opens
+    and is served; the table is no catalogue item and none of its members is read. Mutations: the first-asset rule back
+    → refused; the table served → refused (it names no project), or its descriptor answers 200 when only the catalogue
+    leaves it out."""
+    from test_bundle_well_table import items_and_graph
+    items, graph = items_and_graph()
+    reads = [typed('trajectory'), Log('log-b', 'SYN-B', DESCENDING), Log('log-a', 'SYN-A', ASCENDING)]
+    root = bundle.write_bundle(tmp_path / 'restorable', [(chosen(reads[0]), reads[0]), items[0], *[(chosen(r), r) for r in reads[1:]]], graph=graph).path
+    path = bundle.pack(root, tmp_path / 'restorable.zip')
+    entries = bundle.open_bundle(path).manifest['assets']
+    assert [e['type'] for e in entries] == ['trajectory', 'well-table', 'well-log', 'well-log']
+    applications = BundleApplications(path)
+    [held] = applications.held
+    assert (applications.project, held['entry']['type']) == ('q', 'well-table')
+    with FixtureServer(applications) as server, Client(server.url, 'q', Credential.bearer('oph_api_demo')) as client:
+        assert [a['asset_id'] for a in client.assets()] == [entries[0]['asset_id'], 'log-b', 'log-a']
+        assert [w.name for w in client.wells()] == ['SYN-A', 'SYN-B']
+    table, auth = held['entry'], {'Authorization': 'Bearer oph_api_demo'}
+    revision = applications.prefix + '/%s/revisions/%s' % (table['asset_id'], table['revision'])
+    representation = next(iter(held['parsed'].values()))['sha256']
+    assert applications('GET', revision, b'', auth)[0] == 404
+    assert applications('GET', revision + '/representations/' + representation, b'', auth)[0] == 404
 
 
 def test_a_flipped_byte_stops_before_anything_is_served(tmp_path):

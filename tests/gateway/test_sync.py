@@ -109,3 +109,18 @@ def test_follow_streams_the_events_after_a_cursor(web):
     events = list(Sync(alice).follow(epoch=head['epoch'], after=head['cursor'], seconds=0.3, reconnect=False))
     assert ('entity-created', created.entity_id) in [(e['kind'], e['subject_id']) for e in events]
     assert all(set(e) == {'project', 'cursor', 'epoch', 'kind', 'subject_kind', 'subject_id', 'generation', 'revision', 'actor_kind', 'actor', 'at'} for e in events)
+
+
+def test_an_inventory_item_carries_its_first_authors_name_only_when_the_page_labels_them(web, service):
+    """E173 s0b C3. Mutation: the labels read after the pages are flattened (no `by_name`)."""
+    alice = client(web)
+    sent = alice.upload_data(b'x,y,z\n1,2,3\n', profile='points-csv/1', name='Labelled', attribution='Synthetic', audience=[], rights_confirmed=True,
+                             command_id='by-name')
+    def named(name):
+        with service.connect() as db:
+            db.execute('INSERT INTO ab_users(id,name) VALUES(%s,%s) ON CONFLICT (id) DO UPDATE SET name=EXCLUDED.name', ('alice', name))
+        return next(i for i in Sync(alice).inventory() if i['asset_id'] == sent.asset_id)
+    item = named('Ada Lovelace')
+    assert (item['by'], item['by_name']) == ('alice', 'Ada Lovelace')
+    item = named('alice')  # a name equal to the id is no label
+    assert item['by'] == 'alice' and 'by_name' not in item

@@ -9,7 +9,7 @@ import re
 import pytest
 from ophiolite import errors
 ROOT=Path(__file__).resolve().parents[1]
-NAMES={'authenticate','read-exact-data','validate-locally','publish-derived-curves','share-result','recover-publication','sync-a-project','derive-and-publish','wells-on-a-map','read-a-source'}
+NAMES={'authenticate','read-exact-data','validate-locally','publish-derived-curves','share-result','recover-publication','sync-a-project','derive-and-publish','wells-on-a-map','read-a-source','exchange-with-a-notebook','exchange-with-opendtect'}
 
 
 def resolve(symbol):
@@ -40,7 +40,8 @@ def test_guides_use_only_existing_routes_symbols_and_errors():
         for block in re.findall(r'```python\n(.*?)```',text,re.S):
             tree=ast.parse(block)
             for node in ast.walk(tree):
-                if isinstance(node,ast.ImportFrom) and node.module and node.module.startswith('ophiolite'):
+                # E155 s1 (F2): the SDK's own modules only; a connector a skill names (ophiolite_opendtect) is not the SDK's
+                if isinstance(node,ast.ImportFrom) and node.module and (node.module=='ophiolite' or node.module.startswith('ophiolite.')):
                     for imported in node.names:assert resolve(node.module+'.'+imported.name) is not None
         from ophiolite.cli import parser
         for block in re.findall(r'```sh\n(.*?)```',text,re.S):

@@ -232,6 +232,8 @@ class UploadRequest(Contract):
     provenance: dict | None = None
     # E122 s6: the application object this file was sent from (s4a's source block; sent only when used).
     source: dict | None = None
+    # E173 s0b: a point set the sender marks as a horizon (sent only when used; later versions keep it).
+    represents: Literal['horizon'] | None = None
 
     @model_validator(mode='after')
     def appended(self):

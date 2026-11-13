@@ -2,10 +2,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ophiolite.dev/contracts/osdu/v1/compatibility-schema.json",
   "title": "OSDU compatibility summary",
-  "description": "The structure of osdu/v1/compatibility.json (ophiolite.osdu-compatibility/1, E167 s1): what one dated load record under docs/osdu-roundtrip/ showed, or nothing yet. Either no kinds and every other value null with the summary \"not yet verified\", or the record's date, edition, producer version, manifest digest, kinds and path with the sentence they form. Structure only: the sentence equal to the fields, the record path's date equal to the date and the service versions equal to the edition version are osdu/v1/compatibility.py's problems().",
+  "description": "The structure of osdu/v1/compatibility.json (ophiolite.osdu-compatibility/1, E167 s1): what one dated load record under docs/osdu-roundtrip/ showed, or nothing yet. Either no kinds and every other value null with the summary \"not yet verified\", or the record's date, edition, producer version, manifest digest, kinds, path and denied read (shown, or not provable with its reason, E167 s1b) and operator steps (the schemas the operator registered and the fields the load supplied beyond the manifest's placeholders, E167 s1b ruling) with the sentence they form. Structure only: the sentence equal to the fields, the record path's date equal to the date and the service versions equal to the edition version are osdu/v1/compatibility.py's problems().",
   "type": "object",
   "unevaluatedProperties": false,
-  "required": ["schema", "lifecycle", "date", "edition", "mapper", "manifest", "kinds", "record", "summary"],
+  "required": ["schema", "lifecycle", "date", "edition", "mapper", "manifest", "kinds", "record", "denied_read", "operator_steps", "summary"],
   "properties": {
     "schema": {"const": "ophiolite.osdu-compatibility/1"},
     "lifecycle": {"const": "preview"}
@@ -20,6 +20,8 @@
         "manifest": {"const": null},
         "kinds": {"type": "array", "maxItems": 0},
         "record": {"const": null},
+        "denied_read": {"const": null},
+        "operator_steps": {"const": null},
         "summary": {"const": "not yet verified"}
       }
     },
@@ -48,14 +50,35 @@
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
-          "items": {"type": "string", "pattern": "^[a-z0-9]+:wks:(master-data|work-product-component|dataset)--[A-Za-z][A-Za-z0-9.]*:[0-9]+\\.[0-9]+\\.[0-9]+$"}
+          "items": {"$ref": "#/$defs/kind"}
         },
         "record": {"type": "string", "pattern": "^docs/osdu-roundtrip/[0-9]{4}-[0-9]{2}-[0-9]{2}/record\\.json$"},
+        "denied_read": {
+          "oneOf": [
+            {"type": "object", "additionalProperties": false, "required": ["outcome"], "properties": {"outcome": {"const": "shown"}}},
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["outcome", "reason"],
+              "properties": {"outcome": {"const": "not-provable"}, "reason": {"enum": ["outsider-in-viewers"]}}
+            }
+          ]
+        },
+        "operator_steps": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["registered", "supplied"],
+          "properties": {
+            "registered": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/kind"}},
+            "supplied": {"type": "array", "uniqueItems": true, "items": {"enum": ["data_countries"]}}
+          }
+        },
         "summary": {"type": "string", "pattern": "^compatibility shown on (?!.*verified)"}
       }
     }
   ],
   "$defs": {
-    "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([-+][0-9A-Za-z.-]+)?$"}
+    "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([-+][0-9A-Za-z.-]+)?$"},
+    "kind": {"type": "string", "pattern": "^[a-z0-9]+:wks:(master-data|work-product-component|dataset)--[A-Za-z][A-Za-z0-9.]*:[0-9]+\\.[0-9]+\\.[0-9]+$"}
   }
 }

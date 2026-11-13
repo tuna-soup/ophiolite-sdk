@@ -67,7 +67,8 @@ CHANGES = ('applications/configure', 'applications/start', 'applications/publish
            'table-imports/preview', 'table-imports/start', 'table-imports/step', 'well-names/accept',  # E153 s1: a table import's steps
            'well-imports/preview', 'well-imports/start', 'well-imports/step',  # E153 s1b: a database table's import
            'sources/mapping-save', 'layouts/save', 'layouts/keep',  # E153 s1b: the saves of picks the person settled
-           'org-connections/request', 'org-connections/request-withdraw')  # E154 s0: a secret-free request for its person; withdraw its own
+           'org-connections/request', 'org-connections/request-withdraw',  # E154 s0: a secret-free request for its person; withdraw its own
+           'sources/bind')  # E154 s1: a link job's last step; the person confirms the link, the source is kept at the reviewed version
 # E153 s1: table-imports/read is proposable, but its bytes go with a job (propose_job / run_job files=), never a single proposal.
 
 # E166 s0 (D3): the gateway's tool-run-refused sentences (reason -> sentence, in its order), the SDK's one copy; E155 and
@@ -201,6 +202,13 @@ class AgentClient:
     def read_data(self, asset, revision):
         """E111 s4a: an exact version, as `Client.read_data` reads it."""
         return self.reads.read_data(asset, revision)
+
+    def exchange(self, work, *, sentences=None, lock_timeout=3.0):
+        """E155 s0: check for updates and get latest in the work folder `work` with this agent's credential
+        (`ophiolite.agent_exchange.AgentExchange`). Its `send` asks for a tool run: an assistant publishes a result only as
+        a step of a run it reported."""
+        from .agent_exchange import AgentExchange, AgentTransport
+        return AgentExchange(AgentTransport(self), work, sentences=sentences, lock_timeout=lock_timeout)
 
     def _entities(self, operation, body):
         return self.reads._entities(operation, body)

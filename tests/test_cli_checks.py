@@ -94,7 +94,9 @@ def test_the_check_help_is_unchanged(monkeypatch):
     assert text[text.index('options:'):] == ('options:\n  -h, --help            show this help message and exit\n'
                                              '  --json                Print the documented JSON result (errors as {"error": {...}})\n'
                                              '  --configuration CONFIGURATION\n  --credentials CREDENTIALS\n'
-                                             '  --work WORK           The folder that remembers what you hold (default .ophiolite-held)\n')
+                                             '  --work WORK           The folder that remembers what you hold (default .ophiolite-held)\n'
+                                             '  --name NAME           The item by the name it is called (only this item)\n'
+                                             "  --type TYPE           With --name: the item's type, such as horizon or 'well log'\n")  # E173 s1 C3
 
 
 def test_checks_help_lists_its_verbs_and_the_publishers_three():

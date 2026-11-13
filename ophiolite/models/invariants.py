@@ -211,8 +211,9 @@ def manifest(value, raw, normalized):
         derivation_record(m)
         require(_sha_utf8({**body, 'schema': 'ophiolite.revision-manifest/2'}) == m['digest_v2'], 'The revision manifest /2 view digest does not match its contents')
         record = m['derivation_record']; procedure = record.get('procedure')
-        if procedure is not None and procedure.get('verification', 0) is None:  # E165 s2: an absent block is not served, so not digested
-            record = {**record, 'procedure': {k: v for k, v in procedure.items() if k != 'verification'}}
+        absent = {k for k in ('verification', 'witness') if procedure is not None and procedure.get(k, 0) is None}
+        if absent:  # E165 s2, E113 s0: an absent block is not served, so not digested
+            record = {**record, 'procedure': {k: v for k, v in procedure.items() if k not in absent}}
         body['derivation_record'] = record  # E94 /3: the record of how it was made is digested too
         require(_sha_utf8(body) == m['digest'], 'The revision manifest digest does not match its contents')
         return
@@ -233,6 +234,18 @@ def derivation_digest(record):
                       'outputs': sorted(o['role'] for o in record['outputs'])})
 
 
+def witness_block(procedure):
+    """E113 s0: a sandbox witness only on a process step, finished no earlier than started, at finite moments (the
+    rules the published schema cannot state)."""
+    witness = procedure.get('witness')
+    if witness is None: return
+    require(procedure.get('step') == 'process', 'Only a process step runs in the sandbox')
+    started, finished = witness.get('started_at'), witness.get('finished_at')
+    require(all(isinstance(t, (int, float)) and not isinstance(t, bool) and math.isfinite(t) for t in (started, finished)),
+            'A sandbox run names finite start and finish moments')
+    require(finished >= started, 'A sandbox run finishes after it starts')
+
+
 def derivation_record(m):
     """E94: a /3 manifest's derivation record names only lineage commitments of this revision, each input and output
     once, and its digest is the digest of the making it states."""
@@ -246,6 +259,7 @@ def derivation_record(m):
                 'A reported record names its procedure version as its code, with no release or execution')
         again = procedure.get('again_of')
         require(again is None or again['commitment'] in {e['commitment'] for e in m['lineage']}, 'The earlier result is not a lineage commitment of this revision')
+        witness_block(procedure)
     require({i['commitment'] for i in record['inputs']} <= {e['commitment'] for e in m['lineage']}, 'A derivation input is not a lineage commitment of this revision')
     require(len({(i['slot'], i['commitment']) for i in record['inputs']}) == len(record['inputs']), 'A derivation names each input once')
     require(len({o['role'] for o in record['outputs']}) == len(record['outputs']), 'A derivation names each output role once')

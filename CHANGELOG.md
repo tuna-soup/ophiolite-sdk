@@ -5,6 +5,57 @@
 Supported 0.x client over preview contracts, published on PyPI as `ophiolite` since 29 October 2026 and numbered by
 release date (ADR 0015). No stable 1.0 or production-support promise is claimed.
 
+- An application that applies a version itself can stay on the version it holds (E172 s3, G-7): `Exchange.fetch`
+  takes `stay=` as `get` does. `stay=True` returns a receipt over the held version, never the newest, whose content
+  is that exact version even without `output` (the application keeps its own copy); its `confirm()` answers `stays`
+  with get's sentence and records that the folder stays. The first time it takes the latest. `stay=False` takes the
+  latest and records that the folder follows. Without `stay`, `fetch` is unchanged.
+- An OpendTect survey arrives as one survey (E142 s2a). `ophiolite starter export` passes `--instance NAME` to the
+  connector, which otherwise names its installation by an id it keeps under `XDG_CONFIG_HOME`; `ophiolite starter
+  build --export` then places the export's survey after every file has landed: one survey per installation and survey
+  folder, a member per landed file by kind, the wells made by identity with their files associated, and each well file
+  related to the survey's one cube. Building a newer export restates that survey with only the change; the same
+  export again makes no revision. A file that was already in the project and is no member stays loose and is said so,
+  until a person links it (`Client.link_survey_members`); `Client.restate_survey` sends complete lists. A survey a
+  person changed since the last placement is not restated unless the build says `--restate-survey`; a withdrawn survey
+  holding the identity refuses. An export from an older connector gives a provisional survey with no wells. A lost
+  answer is replayed from the journalled request in `landing.json`.
+- An item can be named the way people see it (E173 s1): `Exchange.get`, `fetch` and `check` take `name=` and
+  `type=` (`horizon`, `well log`, ...) instead of the id, and `ophiolite get` and `check` take `--name` and `--type`
+  (`--item` and `--name` are one of the two). The folder remembers the words, so the same call still finds the item
+  after a rename. Two items with the same name refuse with `name-unclear` (exit 1) and list them; no item with that
+  name is `name-not-found` (exit 4). `get(..., stay=True)` (`--stay`) keeps the version the folder holds, getting the
+  latest only the first time, and answers `stays`; `stay=False` (`--latest`) takes the latest from then on. Staying
+  needs an output folder. `held.json` records the words and the mode (`ophiolite.held/2`); an older reader keeps
+  them. A send still takes held ids (`of=`, `based_on=`), from what the get returned.
+- The project records which work folder holds which version (E171 s1). A confirmed get reports the folder's
+  application (`Exchange(application=...)`, `script` by default; connectors pass `qgis-plugin` or `opendtect`) and,
+  when the folder declares it, whether it stays or follows; a send names the folder as the holder of the version it
+  added, on the derive and the upload route (`Client.publish_derived` and `Client.upload_data` take `holder=` and
+  `application=`). `Exchange.release_copy(item)` tells the project a folder no longer holds an item and
+  `Exchange.report_earlier(item, revision)` records a deliberate get of an earlier version; neither writes
+  `held.json`. `Client.holders(item=None)` and `ophiolite data holders [--item ID]` read who holds which version, in
+  plain words or as `ophiolite.held-copies/1` with `--json`. A gateway older than this refuses the new report fields;
+  the report is then sent once more as before. A send saved unfinished by an older SDK is resent unchanged and names
+  no holder. An assistant naming a holder is refused.
+- A send that succeeded says who holds the sent item (E171 design 6): one `exchange/holders` read for that item adds
+  `held_by`, `on_an_older_version` and `held_line` to the answer's facts, the line in the Workspace's words ("Held by
+  2 connected applications, 1 of them on an older version." or "Held by 1 connected application."); the sentence is
+  unchanged. `ophiolite send` prints the line for people on standard error, after the sentence (standard output
+  stays the sentence; `--json` carries it as a fact). No one holding it gives the counts and no line; a transport
+  without `holders` (a host's own) or a read that fails gives neither, and never fails the send. Nothing-changed, refusals and an unfinished send's retry are as before; an
+  assistant's `send_run` answer is unchanged. `Exchange.holder_id()` answers the work folder's holder id for a host
+  that sends by a route of its own, saving the folder's record first when nothing was kept there yet.
+- `upload_data(..., represents='horizon')` marks a point set (`points-csv/1`, `petrel-points-attributes/1`) as a
+  horizon (E173 s0b), in one request or in parts; a later version keeps the mark without naming it, and the deployment
+  refuses the mark on any other type before anything is stored. An upload without it sends the request it sent before. `Sync.inventory()`
+  items carry `profile`, `by` (who made version 1) and `represents`, and `by_name` when the deployment labels that
+  person; without a label there is no `by_name`, never the id in its place.
+- `ophiolite demo` accepts a bundle that holds a wells table (E162 s1b): the table is held, not served, and the demo
+  needs a LAS log with GR anywhere in the bundle rather than first. The derive-and-publish template's `stage()` and
+  `interval_offset()` read the catalogue's first item that carries their curve (an explicit `asset=` still wins), and
+  the demo's third line names that log. A demo folder's unchanged `support.py` from an earlier demo is replaced; an
+  edited one is kept, and the demo says so. The wells line reads "the demo serves them without locations".
 - A reported derivation record (`ophiolite.derivation/2` 1.1.0) may carry an optional procedure `verification` block
   (E165 s2): verified, withdrawn or not verified, with who, when, the reference and its line. Records without the
   block keep their revision manifest digest: an absent block is not digested, as the server does not serve it.
@@ -12,7 +63,24 @@ release date (ADR 0015). No stable 1.0 or production-support promise is claimed.
   (E162 s2d), without the manifest's SHA-256: a well page showed the 64-character digest to every reader. The digest
   stays where it is checked, in `expected_manifest_sha256` and the restoration record's `manifest_sha256`.
   Associations made by an earlier restoration keep their old sentence.
+- An assistant checks and gets with its own key (E155 s0): `AgentClient.exchange(work)` answers an
+  `ophiolite.agent_exchange.AgentExchange`, the work folder's `check`, `get`, `fetch`, `read_exact` and
+  `abandon_pending` read through `AgentClient.reads`. A pending send is bound to the agent's id from
+  `capabilities/describe`, so a refreshed assistant sign-in continues its own send; no delivery report is sent (a
+  receipt's `reported` is `None`). `send` is refused before anything is locked or sent (`run-needed`, E166's words): an
+  assistant publishes only a tool run's outputs. `exchange.py` is unchanged.
+- `AgentExchange.send_run(folder, name=, of=None, expected=None, summary='', evidence=None, dry_run=False, wait=True)`
+  sends a local run's outputs (a `run.json` folder) as one `procedure-runs/report` the person approves (E155 s0). Every
+  input must be held at the version the run read and a new version is based on the version held; the request is
+  saved in `held.json` before the proposal and each output's receipt as soon as it lands, so a repeat continues the
+  same plan and never publishes an output twice. It answers `proposed` (waiting for approval) or `sent-run`, and
+  refuses `upload-needed`, `declined`, `expired`, `sent-part` (what was sent, what was not and why) and
+  `tool-run-refused` (the gateway's sentence) besides the exchange's own refusals; after a decline or expiry the next
+  send is a fresh attempt with a new command id.
 
+- An agent links a database table as a source in one job its person approves (E154 s1): `CHANGES` names
+  `sources/bind`, the job's last step. The person picks the table, settles the columns and confirms the link; the
+  source is kept at the reviewed version, and no sign-in passes through the agent.
 - An agent may ask for an organization database for its person (E154 s0): `CHANGES` names
   `org-connections/request` and `org-connections/request-withdraw`. The request names a kind, a host and the
   destination only; the gateway refuses any sign-in field before anything is stored, and deciding stays a person's.

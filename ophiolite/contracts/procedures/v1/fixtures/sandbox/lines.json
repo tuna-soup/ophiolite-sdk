@@ -1,0 +1,11 @@
+{
+  "note": "E113 s0: witness_lines over a procedure block, written by hand. The witness is the base block of scientific/v1/fixtures/witness/records.json; a block without one (or with verification only) has no lines.",
+  "witnessed": [
+    "Ophiolite ran this calculation in the project's sandbox",
+    "Image: sha256:5d1e0c6a9b8f7e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d",
+    "Runtime: python-3.12",
+    "Limits: 256 MB, 60 seconds, 1 CPU",
+    "No network"
+  ],
+  "lowered": {"limits": {"memory_mb": 64, "seconds": 10, "cpus": 0.5}, "line": "Limits: 64 MB, 10 seconds, 0.5 CPU"}
+}

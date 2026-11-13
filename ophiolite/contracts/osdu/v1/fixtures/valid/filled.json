@@ -19,5 +19,12 @@
     "osdu:wks:work-product-component--WellLog:9.0.0"
   ],
   "record": "docs/osdu-roundtrip/2026-01-02/record.json",
+  "denied_read": {
+    "outcome": "shown"
+  },
+  "operator_steps": {
+    "registered": [],
+    "supplied": []
+  },
   "summary": "compatibility shown on 2026-01-02 against OSDU community implementation 9.9.9, mapper 0.4.0, manifest b3cc0475bb78a5026098858e9889acf666d31062d513d303314eca31d36e72f2, kinds Well, Wellbore, WellLog, File.Generic"
 }

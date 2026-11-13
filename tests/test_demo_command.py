@@ -95,10 +95,48 @@ def test_a_flipped_byte_answers_as_bundle_check_and_starts_nothing(place, tmp_pa
 
 def test_a_bundle_the_demo_cannot_serve_is_refused_by_name(place, tmp_path):
     """K15 through the command (each rule is tested in test_demo_bundle_server). Mutation: drop the subset check → starts."""
-    path = demo_bundle(tmp_path, [typed('tops'), Log('log-b', 'SYN-A', DESCENDING)])
+    path = demo_bundle(tmp_path, [typed('tops'), typed('trajectory')])
     refused = ophiolite(['demo', '--bundle', str(path)], place)
-    assert refused.returncode == 1 and 'first asset is a LAS log with a GR curve' in refused.stderr
+    assert refused.returncode == 1 and 'The demo needs a bundle with a LAS log that carries a GR curve.' in refused.stderr
     assert not (place / 'ophiolite-demo' / 'state.json').exists()
+
+
+def test_with_a_typed_asset_first_line_3_doubles_the_catalogues_first_gr_log(place, tmp_path):
+    """E162 s1b: a typed asset first, then two GR logs whose catalogue order is unlike their name order. Line 2 fetches
+    the first by name; line 3 doubles the catalogue's first. Mutations: template_well from served[0] → no start; the
+    template back on the catalogue's first item → refused on the survey; the template's log chosen by name → its parent
+    is log-a and the values differ."""
+    path = demo_bundle(tmp_path, [typed('trajectory'), Log('log-b', 'SYN-B', DESCENDING), Log('log-a', 'SYN-A', ASCENDING)])
+    done, _ = started(place, path)
+    assert '  2. The whole GR curve of SYN-A, into a new folder:' in done.stdout.splitlines()
+    assert '  3. Double the GR curve of SYN-B and publish it with the derive-and-publish template:' in done.stdout.splitlines()
+    assert '  1. The wells (the demo serves them without locations):' in done.stdout.splitlines()
+    derive = commands(done.stdout)[2]
+    ran = subprocess.run(derive, cwd=place, env=environment(place), capture_output=True, text=True, timeout=120)
+    assert ran.returncode == 0, ran.stderr
+    receipt = json.loads(ran.stdout)['receipt']
+    with Client('http://127.0.0.1:%d' % state(place)['port'], 'q', Credential.from_file(place / 'ophiolite-demo' / 'credential.json')) as client:
+        [back] = client.read(receipt['asset_id'], receipt['revision'], ['CALC']).curves
+    assert back.values == [83.0, None, 44.5, 20.0, 0.0] and [p['key'] for p in receipt['derived_from']] == ['log-b']
+
+
+def test_a_support_module_an_earlier_demo_wrote_is_replaced_and_an_edited_one_kept(place, tmp_path, monkeypatch):
+    """E162 s1b: a demo folder keeps derive-and-publish, but an unchanged support.py of an earlier demo (it read the
+    catalogue's first item) is replaced; an edited one is kept and the demo says how to get the current one. Mutations:
+    never replace → the earlier bytes stay; replace any → the edited bytes are lost and no sentence is printed."""
+    from importlib.resources import files
+    current = files('ophiolite').joinpath('templates/support.py').read_bytes()
+    folder = tmp_path / 'ophiolite-demo'; demo.claim(folder)
+    earlier = b'# the support module an earlier demo wrote\n'
+    monkeypatch.setattr(demo, 'SHIPPED_SUPPORT', frozenset({hashlib.sha256(earlier).hexdigest()}))
+    (folder / 'support.py').write_bytes(earlier)
+    assert demo.template(folder) is False and (folder / 'support.py').read_bytes() == current
+    assert demo.template(folder) is False and (folder / 'support.py').read_bytes() == current
+    edited = place / 'ophiolite-demo'; demo.claim(edited)
+    (edited / 'support.py').write_bytes(current + b'# mine\n')
+    done, _ = started(place, bundle_for(tmp_path))
+    assert done.stdout.splitlines()[-1] == demo.EDITED_SUPPORT
+    assert (edited / 'support.py').read_bytes() == current + b'# mine\n'
 
 
 def test_which_bundle_is_named_by_its_digest(tmp_path, monkeypatch):
@@ -162,6 +200,39 @@ def test_two_starts_at_once_make_one_server(place, tmp_path):
     assert [p.returncode for p in both] == [0, 0], [a[1] for a in answers]
     urls = {json.loads(out)['url'] for out, _ in answers}
     assert len(urls) == 1 and sorted(json.loads(out)['state'] for out, _ in answers) == ['running', 'started']
+
+
+def test_a_second_start_never_removes_the_credential_the_first_is_reading(place, tmp_path, monkeypatch):
+    """The [0, 3] of 11 Nov: each start replaces credential.json, and one start's removal fell between the other's write
+    and its read-back (AuthenticationRequired, exit 3). Forced here: A pauses after writing its credential while B runs.
+    Mutation: drop the demo's setup lock → A's read-back finds no file."""
+    import threading
+    from types import SimpleNamespace
+    from ophiolite import auth
+    from ophiolite.errors import AuthenticationRequired
+    bundle = bundle_for(tmp_path); started(place, bundle)
+    monkeypatch.chdir(place)
+    written, removed = threading.Event(), threading.Event()
+    real_write, real_login = auth._write, auth.key_login
+
+    def write(path, envelope):
+        real_write(path, envelope)
+        if threading.current_thread().name == 'A': written.set(); removed.wait(3)
+
+    def login(*args, **kwargs):
+        if threading.current_thread().name == 'B': removed.set()  # B has removed A's credential and goes on to write its own
+        return real_login(*args, **kwargs)
+    monkeypatch.setattr(auth, '_write', write); monkeypatch.setattr(auth, 'key_login', login)
+    outcome = {}
+
+    def run(name):
+        try: outcome[name] = demo.command(SimpleNamespace(bundle=str(bundle), demo_action=None))[1]['state']
+        except AuthenticationRequired as error: outcome[name] = str(error)
+    a = threading.Thread(target=run, args=('A',), name='A'); a.start()
+    assert written.wait(30)
+    b = threading.Thread(target=run, args=('B',), name='B'); b.start()
+    a.join(60); b.join(60)
+    assert outcome == {'A': 'running', 'B': 'running'}
 
 
 def test_the_server_ends_itself_when_idle(place, tmp_path):

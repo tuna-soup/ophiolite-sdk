@@ -98,3 +98,60 @@ def test_the_async_client_answers_what_the_client_answers():
     found, listed, events, made = anyio.run(read)
     assert found == client(Gateway()).survey(SID)
     assert listed == list(client(Gateway()).surveys()) and events == list(client(Gateway()).survey_history(SID)) and made['kind'] == 'create'
+
+
+def test_restate_and_link_send_their_complete_bodies_and_keep_one_command_id_across_the_retry():
+    """E142 s2a: `restate_survey` sends the complete lists (and a name only when given) and `link_survey_members` the
+    members, each to its own route, with one command id across a lost answer; `AsyncClient` has both.
+    Mutation: link sent as `add` (the route would record a producer's add, not a person's link); a name sent when none
+    was given (a restate would rename)."""
+    g = Gateway(lose=1)
+    c = client(g)
+    assert c.restate_survey(SID, 3, MEMBERS[:2], RELATIONS)['kind'] == 'restate'
+    sent = [b for op, b in g.bodies if op == 'restate']
+    assert len(sent) == 2 and sent[0] == sent[1] and len(sent[0]['command_id']) == 32
+    c.restate_survey(SID, 4, MEMBERS[:1], name='Renamed', command_id='r2')
+    c.link_survey_members(SID, 5, [MEMBERS[2]], command_id='l1')
+    assert [(op, {k: v for k, v in b.items() if k != 'project_id'}) for op, b in g.bodies[-2:]] == [
+        ('restate', {'survey_id': SID, 'expected_revision': 4, 'members': MEMBERS[:1], 'relations': [], 'name': 'Renamed', 'command_id': 'r2'}),
+        ('link', {'survey_id': SID, 'expected_revision': 5, 'members': [MEMBERS[2]], 'command_id': 'l1'})]
+    assert 'name' not in sent[0] and sent[0]['relations'] == RELATIONS
+
+    async def call():
+        async with httpx.AsyncClient(transport=httpx.MockTransport(Gateway())) as http:
+            async with AsyncClient('https://gateway.example', 'p', None, http) as a:
+                return await a.restate_survey(SID, 3, MEMBERS[:1], command_id='x'), await a.link_survey_members(SID, 3, MEMBERS[:1], command_id='y')
+    assert [r['kind'] for r in anyio.run(call)] == ['restate', 'link']
+
+
+class Project:
+    """One project of a gateway the starter's placement talks to: its surveys and the survey commands it was sent."""
+    def __init__(self, project, sent):
+        self.project, self.sent, self.made = project, sent, []
+
+    def surveys(self):
+        return list(self.made)
+
+    def _survey_command(self, kind, body, command_id):
+        self.sent.append((self.project, kind, command_id))
+        self.made.append({'survey_id': '%s-survey' % self.project, 'identity': body['identity'], 'revision': 1})
+        return {'survey_id': '%s-survey' % self.project, 'revision': 1}
+
+
+def test_one_export_placed_into_two_projects_is_two_commands_and_two_records():
+    """E142 s2a (supervisor ruling on the two-project case): the same export placed from one build folder into project
+    p1, then p2: two creates with two command ids, neither refused, and p2's placement does not answer from p1's record.
+    Mutations: the project dropped from the command id's seed (one id for both); the placement record not keyed by
+    project (p2 returns p1's record and sends nothing)."""
+    from ophiolite import starter
+    p = {'survey': {'instance': 'lab-7', 'container': 'Syn_Survey', 'name': 'Syn'}, 'export': {'report': 'd' * 64},
+         'objects': {'seismic/Syn.sgy': ('seismic-3d', 'Syn', 'Syn.sgy')}}
+    journal = {'inputs': {'seismic/Syn.sgy': {'state': 'landed', 'asset_id': 'a1', 'revision': 'r1', 'landed_as': 'added'}}}
+    sent = []
+    one, two = Project('p1', sent), Project('p2', sent)
+    starter.place_survey(one, p, journal, lambda: None, '/out')
+    assert journal['survey']['placed']['survey_id'] == 'p1-survey'
+    starter.place_survey(two, p, journal, lambda: None, '/out')
+    assert [(project, kind) for project, kind, _ in sent] == [('p1', 'create'), ('p2', 'create')] and sent[0][2] != sent[1][2]
+    assert journal['survey']['project'] == 'p2' and journal['survey']['placed']['survey_id'] == 'p2-survey'
+    assert journal['survey']['placed']['command_id'] == sent[1][2] and len(one.made) == len(two.made) == 1

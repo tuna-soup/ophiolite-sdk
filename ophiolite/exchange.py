@@ -3,7 +3,9 @@
 The shared core: the standard library and `.errors` only, so a host application's Python (QGIS) can carry it
 (family rule X4). A *transport* reaches the project; this module never does. The record of what this program
 holds (`held.json`, schema `ophiolite.held/1`) lives in a work folder that one program at a time may change
-(`held.lock`); `check` reads it without the lock.
+(`held.lock`); `check` reads it without the lock. E173: once an item records the words it was named by (`words`) or
+whether it stays on the version it holds (`mode`), the record is `ophiolite.held/2` and stays so, which an older SDK
+refuses instead of dropping those fields.
 
     ex = Exchange(transport, 'work')
     ex.check()                                   # changes nothing
@@ -22,15 +24,21 @@ The transport's methods (frozen here; the SDK's is `ClientTransport`, QGIS suppl
   inventory()                        [{asset_id, kind, authority, revision, name}] every item the reader may see, at its head
   history(item)                      [{number, revision, by, at}] oldest first; `by` a display name or None
   fetch(item, revision, output, **how) -> {content, number?, facts?}; creates `output` (a new folder) and writes its files there when given
-  publish(data, request, resolved, command_id) -> {asset_id, revision, number}
+  publish(data, request, resolved, command_id, attribution=None) -> {asset_id, revision, number}
+                                     E171 s1: `attribution` ({holder, application}, saved with the pending send) names
+                                     this folder as the sender's copy; it is passed only when the pending send has one
   same_content(held_entry, request)  whether a send would add nothing
-  report(reference, holder_id, event_id)   optional (E70b): tell the project this holder received that exact version;
-                                     called once by Receipt.confirm, after the record advanced; a failure changes nothing
+  report(reference, holder_id, event_id, **held)   optional (E70b): tell the project this holder received that exact
+                                     version; called once by Receipt.confirm, after the record advanced; a failure changes
+                                     nothing. E171 s1: `held` is application, holds and earlier, each only when set; a
+                                     transport that refuses them (an older gateway) is asked once more without them
+  release(holder_id, item) -> bool   optional (E171 s1): this folder no longer holds `item` (exchange/release)
 Errors a transport raises carry `status`, `code` and `stage` attributes (the SDK's errors do); the core classifies
 by code, then credential stage, then status, never by message text.
 """
 import contextlib
 import hashlib
+import inspect
 import json
 import os
 import re
@@ -42,6 +50,7 @@ from pathlib import Path
 from .errors import AuthenticationRequired, Busy, IntegrityConflict, OphioliteError, PermissionRefused, Refused, Unavailable, VerificationFailed
 
 SCHEMA = 'ophiolite.held/1'
+SCHEMA_WORDS = 'ophiolite.held/2'  # E173 s0 (D1): written once an entry carries `words` or `mode`; never back to /1
 MAX_SEND = 32 * 1024 * 1024
 CREDENTIAL_STAGES = ('no-credential', 'malformed-credential', 'credential-refused')
 REPORT_TIMEOUT = 10.0  # seconds; E70b: a delivery report never holds a confirmation for longer
@@ -108,6 +117,28 @@ def _newer(f):
     return 'Version %d was added%s. Your change was not sent. Either get version %d and look at it, or send yours as a new item.' % (f['number'], who, f['number'])
 
 
+def _stays(f):
+    """E173 s0 (D2): "latest" comes from comparing revisions (`newer`), never from a missing number."""
+    held = 'version %d of %s' % (f['number'], f['name']) if f.get('number') else 'the version of %s you hold' % f['name']
+    if not f.get('newer'): return 'You stay on %s, the latest.' % held
+    if f.get('newer_number'): return 'You stay on %s. Version %d is newer; get it with stay=False to take it.' % (held, f['newer_number'])
+    return 'You stay on %s. A newer version exists; get it with stay=False to take it.' % held
+
+
+def _candidate(c):
+    """"a horizon by Ada (version 2)" from what is known of one item; a part that is unknown is left out, never guessed."""
+    word = c.get('type')
+    text = ('an %s' if word[:1].lower() in 'aeiou' else 'a %s') % word if word else 'an item'
+    text += ' by %s' % c['who'] if c.get('who') else ''
+    return text + (' (version %d)' % c['number'] if c.get('number') else '')
+
+
+def _unclear(f):
+    said = [_candidate(c) for c in f.get('candidates') or ()]
+    listed = ', '.join(said[:-1]) + ' and ' + said[-1] if len(said) > 1 else ''.join(said)
+    return 'More than one item you can see is called %s%s. Name the type as well.' % (f['name'], ': ' + listed if listed else '')
+
+
 SENTENCES = {
     'nothing-new': lambda f: ('Nothing is newer than what you hold.' if f.get('holding') else 'You hold nothing yet.') + _first(f),
     'updates': lambda f: _updates(f) + _first(f),
@@ -120,7 +151,7 @@ SENTENCES = {
     'damaged': lambda f: 'The data did not match its fingerprint. Nothing was kept.',
     'map-unavailable': lambda f: 'That version of the map is not available (it may be withdrawn or not the one you hold).',
     'sent-new': lambda f: 'Sent %s as a new item; it is private until you share it.' % f['name'],
-    'sent-version': lambda f: 'Sent %s as version %d. Version %d is kept.' % (f['name'], f['number'], f['number'] - 1) if f.get('number', 0) > 1 else
+    'sent-version': lambda f: 'Sent %s as version %d. Version %d is kept.' % (f['name'], f['number'], f['number'] - 1) if (f.get('number') or 0) > 1 else
                               'Sent %s as a new version. The earlier version is kept.' % f['name'],
     'newer-version-exists': lambda f: _newer(f),
     'nothing-changed': lambda f: 'This is the same as version %d; nothing was sent.' % f['number'] if f.get('number') else 'This is the same as the version you hold; nothing was sent.',
@@ -138,8 +169,17 @@ SENTENCES = {
     'rate-limited': lambda f: 'The project is busy. Wait a moment and run this again.',
     'sign-in-needed': lambda f: 'Your access key is not accepted any more. Ask for a new one.',
     'could-not-reach': lambda f: 'Could not reach the project. Nothing was changed; for send, run the same command again: it will not publish twice.',
+    'stays': _stays,  # E173 s0 (D2): a folder that stays on the version it holds
+    'name-unclear': _unclear,
+    'name-not-found': lambda f: 'No item you can see is called %s%s. Nothing was changed.' % (f['name'], ' (%s)' % f['type'] if f.get('type') else ''),
 }
 OUTCOMES = tuple(SENTENCES)
+
+
+def held_line(held_by, on_an_older_version):
+    """E171 design 6: the line a successful send adds, in the Workspace's words (HeldCopies.tsx `heldSendLine`)."""
+    said = 'Held by %d connected application%s' % (held_by, '' if held_by == 1 else 's')
+    return said + (', %d of them on an older version.' % on_an_older_version if on_an_older_version else '.')
 
 
 class Outcome:
@@ -186,8 +226,55 @@ FolderBusy = _refusal('folder-busy', Busy)
 RateLimited = _refusal('rate-limited', Busy)
 SignInNeeded = _refusal('sign-in-needed', AuthenticationRequired)
 CouldNotReach = _refusal('could-not-reach', Busy)
+NameUnclear = _refusal('name-unclear', Refused)  # E173 s0 (D2): ids only in technical['candidates']
+NameNotFound = _refusal('name-not-found', Unavailable)  # its own code, not the category's, as not-visible
 REFUSALS = {c.outcome: c for c in (NotVisible, CannotReadHere, Damaged, MapUnavailable, NewerVersionExists, NothingChanged, EarlierVersion, AccessRefused, NotValid,
-                                   NotHeld, TooLarge, OutcomeUnknown, FolderBusy, RateLimited, SignInNeeded, CouldNotReach)}
+                                   NotHeld, TooLarge, OutcomeUnknown, FolderBusy, RateLimited, SignInNeeded, CouldNotReach, NameUnclear, NameNotFound)}
+
+# E173 s0 (D3): the closed list of type words, one per source profile of the registry (checked by
+# tests/test_exchange_type_words.py); a literal table, since the core reads no files and the plug-in carries no contracts.
+TYPE_WORDS = {
+    'well log': ('las2/1', 'osdu-welllog-parquet/1'),
+    'horizon': ('esri-ascii-grid/1', 'zmap-plus-grid/1', 'cps3-ascii-grid/1', 'irap-ascii-grid/1', 'opendtect-horizon-ascii/1', 'petrel-horizon-ilxl/1'),
+    'point set': ('points-csv/1', 'petrel-points-attributes/1'),
+    'map': ('geotiff/1', 'petrel-scattered-data/1'),
+    'map features': ('esri-shapefile/1', 'ogc-geopackage/1', 'geojson/1'),
+    'well tops': ('well-tops-csv/1', 'petrel-well-tops/1'),
+    'wells': ('sql-wells/1', 'edited-wells/1', 'well-location/1', 'well-set/1'),
+    'deviation survey': ('deviation-csv/1',),
+    'well path': ('well-path-positions-csv/1',),
+    'time-depth table': ('time-depth-csv/1',),
+    'surface': ('mesh-text/1',),
+    'fault sticks': ('petrel-faultsticks/1', 'opendtect-faultsticks/1'),
+    'seismic volume': ('segy/1', 'segy/2'),
+    'seismic line': ('segy-line/1',),
+    'seismic section': ('seismic-section-text/1',),
+    'wavelet': ('wavelet-text/1',),
+    'rock model section': ('model-section-text/1',),
+    'residual result': ('well-residual/1',),
+    'table': ('table/1', 'table-csv/1', 'table-excel/1', 'table-parquet/1'),
+    'RESQML package': ('resqml-epc/1',),
+    'OSDU record': ('osdu-record/1',),
+}
+NO_WORD = ('native-external/1',)  # named by name only
+
+
+def type_profiles(word):
+    """The profiles a type word names; an unknown word is refused (not-valid), never matched loosely."""
+    if isinstance(word, str) and word in TYPE_WORDS: return TYPE_WORDS[word]
+    raise NotValid(SENTENCES['not-valid']({'reasons': '%s is not a type this version knows' % display(word, 'that')}))
+
+
+def type_word(profile):
+    """The type word of a profile, or None (a native kind, or a profile named by name only)."""
+    return next((word for word, profiles in TYPE_WORDS.items() if profile in profiles), None)
+
+
+def _item_type(item):
+    """E173 s1 (D2, s0b): the type word of an inventory item. A point set its sender said represents a horizon is a
+    horizon (the two point profiles named literally, F4); otherwise its profile's word; no profile, no word."""
+    if item.get('profile') in ('points-csv/1', 'petrel-points-attributes/1') and item.get('represents') == 'horizon': return 'horizon'
+    return type_word(item.get('profile'))
 
 
 # Display values only: an identifier handed in where a person's name belongs is never rendered.
@@ -213,6 +300,17 @@ def failure(error):
     return 'could-not-reach'
 
 
+NOT_VERSIONED = 'This type of file does not take a new version by upload.'  # E70d (D7): the upload route's sentence, relayed
+STALE_HEAD = 'The result has a newer version; review it before adding another'  # E70d (D4): the server's stale-head sentence
+STAY_NEEDS = 'staying needs a folder to keep the version in'  # E173 s1 (F6): get(stay=...) keeps no content of its own
+
+
+def _server_said(error):
+    """The server's own message of a transport error, stripped; '' when it gave none."""
+    said = getattr(error, 'server_message', None) or str(error)
+    return said.strip() if isinstance(said, str) else ''
+
+
 # -- the held record and its lock ------------------------------------------------------------------
 
 def _atomic(path, value):
@@ -221,6 +319,13 @@ def _atomic(path, value):
     fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
     with os.fdopen(fd, 'w') as out: json.dump(value, out, indent=1, sort_keys=True); out.flush(); os.fsync(out.fileno())
     os.replace(tmp, path)  # a reader sees the old record or the new one, never half of one
+
+
+def _kept(previous):
+    """What a replaced item entry keeps from the one before it: its note and (E173 s0) the words it was named by and
+    whether it stays. The last two only when present, so a folder used by id is written as before."""
+    previous = previous or {}
+    return dict({k: previous[k] for k in ('words', 'mode') if k in previous}, note=previous.get('note'))
 
 
 def folder_digest(path):
@@ -265,10 +370,49 @@ def folder_lock(path, timeout=3.0):
 
 # -- the core ---------------------------------------------------------------------------------------
 
-def delivery_event(holder_id, asset_id, revision):
+def delivery_event(holder_id, asset_id, revision, holds=None, nonce=None):
     """E70b: the id of "this holder received this exact version": the same in every process, so a repeated or retried
-    report is one event at the project."""
-    return 'got-' + hashlib.sha256(('%s\n%s\n%s' % (holder_id, asset_id, revision)).encode()).hexdigest()[:48]
+    report is one event at the project. E171 s1 (D4): only when the entry declares whether it stays or follows
+    (`holds`), the id also hashes that word and a nonce drawn once per confirmation, so a new confirmation of the same
+    version with a declared mode is a new event; without `holds` the id is E70b's, byte for byte."""
+    if holds is None: return 'got-' + hashlib.sha256(('%s\n%s\n%s' % (holder_id, asset_id, revision)).encode()).hexdigest()[:48]
+    return 'got-' + hashlib.sha256(('%s\n%s\n%s\n%s\n%s' % (holder_id, asset_id, revision, holds, nonce)).encode()).hexdigest()[:48]
+
+
+def earlier_event(holder_id, asset_id, revision, nonce):
+    """E171 s1 (D6): the id of one deliberate get of an earlier version; a fresh nonce per go-back, kept for its retry."""
+    return 'earlier-' + hashlib.sha256(('%s\n%s\n%s\n%s' % (holder_id, asset_id, revision, nonce)).encode()).hexdigest()[:48]
+
+
+APPLICATION_WORD = re.compile(r'[a-z0-9._-]{1,128}')
+
+
+def application_wire(word):
+    """E171 s1: the SDK takes the bare word E122's application source uses (`qgis-plugin`, `opendtect`, `script`); the
+    wire carries `application:<word>`, and `script` as itself. None sends none."""
+    if word is None or word == 'script': return word
+    if not isinstance(word, str) or not APPLICATION_WORD.fullmatch(word):
+        raise ValueError("Name the application by its word (letters, digits, '.', '_' or '-'), such as 'qgis-plugin'.")
+    return 'application:' + word
+
+
+def _takes(function, name):
+    """Whether a transport's method takes the keyword `name`: a transport written before E171 s1 (four arguments to
+    `publish`) is called as before, and its sends name no holder."""
+    try: parameters = inspect.signature(function).parameters.values()
+    except (TypeError, ValueError): return False
+    return any(p.name == name or p.kind is p.VAR_KEYWORD for p in parameters)
+
+
+def _report_held(report, reference, holder_id, event_id, held):
+    """One report with the held-copy fields; when the project refuses it as a request (an older gateway knows no such
+    fields), once more in E70b's shape with the same id, so the confirmed get is still recorded there."""
+    held = {k: v for k, v in held.items() if v is not None and _takes(report, k)}
+    if not held: return report(reference, holder_id, event_id)
+    try: return report(reference, holder_id, event_id, **held)
+    except Exception as error:
+        if failure(error) != 'invalid': raise
+    return report(reference, holder_id, event_id)
 
 
 class Receipt:
@@ -278,10 +422,12 @@ class Receipt:
     E70b: once the record has advanced, the receipt is reported to the project (when the transport can report).
     `reported` is True after the project accepted it, False when the report failed (the confirmation stands; a later
     confirm of the same version sends the same event id), None when nothing was reported."""
-    def __init__(self, exchange, lock, entry, content, facts):
+    def __init__(self, exchange, lock, entry, content, facts, outcome='got'):
         self._exchange, self._lock, self.entry, self.content, self.facts = exchange, lock, entry, content, facts
+        self.outcome = outcome  # G-7: 'stays' for the held version kept by stay=True; confirm() answers it
         self.confirmed = False
         self.reported = None
+        self._words = self._mode = None  # E173 s1 (D3): set by a call by name, or with stay; confirm writes them
 
     def confirm(self, applied_to=None):
         if self._lock is None: raise NotValid(self._exchange._say('not-valid', {'reasons': 'this version was already confirmed or released'}))
@@ -289,20 +435,23 @@ class Receipt:
             record = self._exchange._load()
             entry = dict(self.entry, got_at=self._exchange.clock())
             if applied_to is not None: entry['applied_to'] = str(applied_to)
-            entry['note'] = (record['items'].get(entry['asset_id']) or {}).get('note')
+            entry.update(_kept(record['items'].get(entry['asset_id'])))
+            entry.update({k: v for k, v in (('words', self._words), ('mode', self._mode)) if v is not None})
             record['items'][entry['asset_id']] = entry
             self._exchange._save(record)
             self.confirmed = True
         finally: self.release()
         self.reported = self._report(record.get('holder_id'), entry)
-        return Outcome('got', self._exchange._say('got', self.facts), self.facts,
+        return Outcome(self.outcome, self._exchange._say(self.outcome, self.facts), self.facts,
                        {'asset_id': entry['asset_id'], 'revision': entry['revision'], 'reported': self.reported})
 
     def _report(self, holder_id, entry):
         report = getattr(self._exchange.transport, 'report', None)
         if report is None or not holder_id: return None
         reference = {'project_id': self._exchange.transport.project, 'asset_id': entry['asset_id'], 'revision': str(entry['revision'])}
-        try: report(reference, holder_id, delivery_event(holder_id, entry['asset_id'], entry['revision']))
+        holds = entry.get('mode')  # E171 s1 (D4): held/2's declaration, sent as the copy's mode
+        event = delivery_event(holder_id, entry['asset_id'], entry['revision'], holds, uuid.uuid4().hex if holds is not None else None)
+        try: _report_held(report, reference, holder_id, event, {'application': self._exchange.application, 'holds': holds})
         except Exception: return False  # never fails the confirmation: the version is applied and recorded
         return True
 
@@ -315,10 +464,14 @@ class Receipt:
 
 
 class Exchange:
-    def __init__(self, transport, work, *, sentences=None, lock_timeout=3.0, clock=time.time):
+    def __init__(self, transport, work, *, sentences=None, lock_timeout=3.0, clock=time.time, application='script'):
+        """E171 s1: `application` is the word of the program holding this folder's copies (`application_wire`):
+        `script` for the SDK, `qgis-plugin` or `opendtect` for a connector; it is reported with each confirmed get and
+        sent with each send, and the project shows it beside the copy."""
         if sentences is not None:
             missing = [code for code in OUTCOMES if not callable(sentences.get(code))]
             if missing: raise ValueError('The sentence table has no sentence for: ' + ', '.join(missing))
+        self.application = application_wire(application)
         self.transport, self.work = transport, Path(work).expanduser().absolute()
         self.sentences, self.lock_timeout, self.clock = sentences or SENTENCES, lock_timeout, clock
         self.path, self.lock_path = self.work / 'held.json', self.work / 'held.lock'
@@ -330,13 +483,15 @@ class Exchange:
         except FileNotFoundError: return {'schema': SCHEMA, 'url': self.transport.url, 'project': self.transport.project, 'holder_id': uuid.uuid4().hex,
                                           'items': {}, 'seen': None, 'pending': None}
         except (OSError, ValueError): raise NotValid(self._say('not-valid', {'reasons': 'the record of what you hold in this folder cannot be read'})) from None
-        if not isinstance(record, dict) or record.get('schema') != SCHEMA or not isinstance(record.get('items'), dict):
+        if not isinstance(record, dict) or record.get('schema') not in (SCHEMA, SCHEMA_WORDS) or not isinstance(record.get('items'), dict):
             raise NotValid(self._say('not-valid', {'reasons': 'this folder holds a record this version cannot read'}))
         if (record.get('url'), record.get('project')) != (self.transport.url, self.transport.project):
             raise NotValid(self._say('not-valid', {'reasons': 'this folder holds items of another project; use another folder'}))
         return record
 
     def _save(self, record):
+        if record.get('schema') == SCHEMA_WORDS or any('words' in e or 'mode' in e for e in record['items'].values() if isinstance(e, dict)):
+            record['schema'] = SCHEMA_WORDS  # E173 s0 (D1): an older SDK refuses the folder rather than drop these fields
         _atomic(self.path, record)
 
     def held(self):
@@ -401,28 +556,72 @@ class Exchange:
     def _name(item, fallback='an item'):
         return display((item or {}).get('name'), fallback)
 
+    # names (E173 s1)
+
+    def _named(self, item_id, name, type):
+        """D1: the words of a call by name ({name, type?}), None for a call by id. Exactly one of the two; a type only
+        beside a name, and one of TYPE_WORDS."""
+        if name is None and type is not None: self._raise('not-valid', {'reasons': 'a type is given only together with a name'})
+        if (item_id is None) == (name is None): self._raise('not-valid', {'reasons': 'name the item by its id or by its name, one of the two'})
+        if name is None: return None
+        if not isinstance(name, str) or not name: self._raise('not-valid', {'reasons': 'a name is the text an item is called'})
+        if type is not None: type_profiles(type)
+        return dict({'name': name}, **({'type': type} if type is not None else {}))
+
+    def _resolve(self, words, record, inventory):
+        """D2: the id a call by name means. The entry this folder recorded with these words first, so a rename, or another
+        item called the same since, changes nothing here (one that has gone is refused or reported as by id); else the one
+        visible item called exactly this, of this type when one is named. Matching uses the raw name; display() only
+        shapes the sentence. History is asked on the refusal path only."""
+        held = sorted(i for i, e in record['items'].items() if isinstance(e, dict) and e.get('words') == words)
+        if held: return held[0]
+        name, type = words['name'], words.get('type')
+        called = [i for i in inventory.values() if i.get('name') == name and (type is None or _item_type(i) == type)]
+        shown = display(name, 'that name')
+        if not called: self._raise('name-not-found', dict({'name': shown}, **({'type': type} if type else {})))
+        if len(called) > 1:
+            candidates = [{'type': _item_type(i), 'who': display(i.get('by_name'), None), 'number': len(self._history(i) or ()) or None} for i in called]
+            self._raise('name-unclear', {'name': shown, 'candidates': candidates}, {'candidates': [i['asset_id'] for i in called]})
+        return called[0]['asset_id']
+
+    def _remember_entry(self, item_id, words, mode):
+        """F5: an answer given without fetching still records the words the item was named by and the mode asked for;
+        the caller holds the folder lock. A call by id with no stay changes nothing."""
+        if words is None and mode is None: return
+        record = self._load(); entry = record['items'].get(item_id)
+        if entry is None: return
+        entry.update({k: v for k, v in (('words', words), ('mode', mode)) if v is not None})
+        self._save(record)
+
     # check for updates
 
-    def check(self):
+    def check(self, *, name=None, type=None):
         """What is newer than what this folder holds, what is new and what can no longer be seen. Changes nothing
-        but the list of items seen (for "new since your last check")."""
+        but the list of items seen (for "new since your last check"). E173 s1 (D5, F7): with `name` (and `type`), the
+        same answer for the one item that name resolves to, as get resolves it; a held item that has gone is
+        access-changed, never a refusal; and the list of items seen stays as it was."""
+        words = None if name is None and type is None else self._named(None, name, type)
         record, inventory = self._load(), self._inventory()
+        held, listed = record['items'], inventory
+        if words is not None:
+            only = self._resolve(words, record, inventory)
+            held, listed = {k: v for k, v in held.items() if k == only}, {k: v for k, v in inventory.items() if k == only}
         newer, lost, new = [], [], []
-        for ident, entry in sorted(record['items'].items(), key=lambda kv: (kv[1].get('name') or '', kv[0])):
-            item = inventory.get(ident)
+        for ident, entry in sorted(held.items(), key=lambda kv: (kv[1].get('name') or '', kv[0])):
+            item = listed.get(ident)
             if item is None: lost.append({'asset_id': ident, 'name': self._name(entry)}); continue
             if item.get('revision') != entry.get('revision'):
                 newer.append({'asset_id': ident, 'name': self._name(item), 'revision': item.get('revision'), **self._at(item, item.get('revision'))})
         seen = record.get('seen')
-        baseline = seen is None
-        if not baseline:
-            for ident, item in sorted(inventory.items(), key=lambda kv: (kv[1].get('name') or '', kv[0])):
+        baseline = seen is None and words is None  # a check by name notes nothing, so it is never the first check
+        if seen is not None:
+            for ident, item in sorted(listed.items(), key=lambda kv: (kv[1].get('name') or '', kv[0])):
                 if ident not in seen and not any(n['asset_id'] == ident for n in newer):
                     new.append({'asset_id': ident, 'name': self._name(item)})
-        facts = {'newer': newer, 'new': new, 'lost': lost, 'holding': bool(record['items']), 'baseline': baseline, 'visible': len(inventory)}
+        facts = {'newer': newer, 'new': new, 'lost': lost, 'holding': bool(held), 'baseline': baseline, 'visible': len(listed)}
         code = 'updates' if newer or new else 'access-changed' if lost else 'nothing-new'
-        self._remember(sorted(inventory))
-        return Outcome(code, self._say(code, facts), facts, {'inventory': len(inventory)})
+        if words is None: self._remember(sorted(inventory))
+        return Outcome(code, self._say(code, facts), facts, {'inventory': len(listed)})
 
     def _remember(self, seen):
         """The ids seen, written only when no other program holds the folder (check never waits)."""
@@ -435,40 +634,46 @@ class Exchange:
 
     # get latest
 
-    def fetch(self, item_id, *, output=None, **how):
+    def fetch(self, item_id=None, *, name=None, type=None, stay=None, output=None, **how):
         """Fetch the latest version of an item. Returns a Receipt to confirm once applied, or an Outcome when this
-        folder already holds that version in `output`. The folder is locked until the receipt is confirmed or released."""
+        folder already holds that version in `output`. The folder is locked until the receipt is confirmed or released.
+        E173 s1: the item by its id, or by `name` (and `type`, a word of TYPE_WORDS), resolved once (`_resolve`); a
+        call by name records the words, also when it answers without fetching.
+        G-7 (R-M7): `stay` is get's rule for a host that applies the version itself. `stay=True` returns a receipt over
+        the version this folder holds, never the head, whose content is that exact version (read again when there is no
+        `output`: the host keeps its own copy); its facts are the `stays` sentence's and confirm() answers `stays` and
+        records that the folder stays. The first time (nothing held) it takes the latest. `stay=False` takes the latest
+        and records that the folder follows. Without `stay`, as before: the latest, whatever the folder recorded."""
+        if stay is not None and not isinstance(stay, bool): self._raise('not-valid', {'reasons': 'stay is True or False'})
+        return self._fetch(item_id, self._named(item_id, name, type), output, how, stay)
+
+    def _fetch(self, item_id, words, output, how, stay=None, honour=False):
+        """The one step of get and fetch. `stay` is the caller's; `honour` (the folder's recorded mode decides when
+        `stay` is None) is get's only (D4), so fetch without `stay` is as it was. Staying answers `_stay`'s receipt;
+        get, which persists into `output`, refuses staying without one (F6)."""
         lock = self._lock()
         try:
             record, inventory = self._load(), self._inventory()
+            if words is not None: item_id = self._resolve(words, record, inventory)
             entry, item = record['items'].get(item_id), inventory.get(item_id)
             if item is None: self._raise('not-visible', {'name': self._name(entry, 'this item')}, {'asset_id': item_id})
             name, head = self._name(item), item.get('revision')
             selection = json.loads(json.dumps(how, sort_keys=True, default=list))
             output = Path(output).expanduser().absolute() if output is not None else None
+            mode = None if stay is None else 'stays' if stay else 'follows'
+            staying = stay if stay is not None else honour and (entry or {}).get('mode') == 'stays'
+            if staying and output is None and honour: self._raise('not-valid', {'reasons': STAY_NEEDS})
+            if staying and entry:
+                receipt = self._stay(lock, item, entry, output, selection, how, words); lock = None
+                return receipt
             out = (entry or {}).get('output') or {}
             if (output is not None and entry and entry.get('revision') == head and out.get('path') == str(output) and out.get('selection') == selection
                     and output.is_dir() and folder_digest(output) == out.get('sha256')):
                 facts = {'name': name, 'folder': str(output)}
+                self._remember_entry(item_id, words, mode)
                 lock.__exit__(None, None, None); lock = None
                 return Outcome('already-latest', self._say('already-latest', facts), facts, {'asset_id': item_id, 'revision': head})
-            if output is not None: output.parent.mkdir(parents=True, exist_ok=True)  # E91: the card's `data/<item name>` in a new folder
-            staging = output.with_name('.%s.partial-%s' % (output.name, uuid.uuid4().hex[:8])) if output is not None else None
-            try:
-                try: got = self.transport.fetch(item, head, staging, **how)
-                except ExchangeRefused as refusal: self._raise(refusal.outcome, {**refusal.facts, 'name': name}, refusal.technical)
-                except Exception as error: self._transport_error(error, refused='not-visible', invalid='could-not-reach', facts={'name': name})
-                digest = None
-                if staging is not None:
-                    staging.mkdir(mode=0o700, exist_ok=True)  # the transport creates it when it writes files
-                    digest = folder_digest(staging)
-                    if output.exists():
-                        aside = output.with_name('.%s.old-%s' % (output.name, uuid.uuid4().hex[:8]))
-                        os.replace(output, aside); os.replace(staging, output); shutil.rmtree(aside, ignore_errors=True)
-                    else: os.replace(staging, output)
-            except BaseException:
-                if staging is not None: shutil.rmtree(staging, ignore_errors=True)
-                raise
+            got, digest = self._pull(item, head, output, how)
             facts = {'name': name, **({'folder': str(output)} if output is not None else {}), **(got.get('facts') or {})}
             number = got.get('number')
             known = self._at(item, head) if item.get('kind') != 'external-scalar-map' else {}
@@ -477,9 +682,55 @@ class Exchange:
             entry = {'asset_id': item_id, 'name': item.get('name'), 'kind': item.get('kind'), 'revision': head, 'number': facts.get('number'),
                      'output': {'path': str(output), 'sha256': digest, 'selection': selection} if output is not None else None}
             receipt = Receipt(self, lock, entry, got.get('content'), facts); lock = None
+            receipt._words, receipt._mode = words, mode
             return receipt
         finally:
             if lock is not None: lock.__exit__(None, None, None)
+
+    def _pull(self, item, revision, output, how):
+        """One version of `item` from the transport, written into `output` when given (the folder replaced only once the
+        new one is complete). Returns the transport's answer and the written folder's digest."""
+        name = self._name(item)
+        if output is not None: output.parent.mkdir(parents=True, exist_ok=True)  # E91: the card's `data/<item name>` in a new folder
+        staging = output.with_name('.%s.partial-%s' % (output.name, uuid.uuid4().hex[:8])) if output is not None else None
+        try:
+            try: got = self.transport.fetch(item, revision, staging, **how)
+            except ExchangeRefused as refusal: self._raise(refusal.outcome, {**refusal.facts, 'name': name}, refusal.technical)
+            except Exception as error: self._transport_error(error, refused='not-visible', invalid='could-not-reach', facts={'name': name})
+            digest = None
+            if staging is not None:
+                staging.mkdir(mode=0o700, exist_ok=True)  # the transport creates it when it writes files
+                digest = folder_digest(staging)
+                if output.exists():
+                    aside = output.with_name('.%s.old-%s' % (output.name, uuid.uuid4().hex[:8]))
+                    os.replace(output, aside); os.replace(staging, output); shutil.rmtree(aside, ignore_errors=True)
+                else: os.replace(staging, output)
+        except BaseException:
+            if staging is not None: shutil.rmtree(staging, ignore_errors=True)
+            raise
+        return got, digest
+
+    def _stay(self, lock, item, entry, output, selection, how, words):
+        """D4: a folder that stays keeps the version it holds. Intact (already-latest's test, at the held version): no
+        fetch, and that version is confirmed again, so the project learns the folder stays. Changed or missing: that
+        exact version is fetched again, never the head. Returns the receipt over the held version (it takes the lock);
+        its facts are the `stays` sentence's: the newer version, when there is one, from the inventory's head.
+        G-7: without `output` the host keeps the copy (fetch only): the held version is read again and is the receipt's
+        content, and the entry records no folder."""
+        held, head = entry.get('revision'), item.get('revision')
+        out = entry.get('output') or {}
+        again, content = dict(entry, name=item.get('name')), None
+        if output is None:
+            got, _ = self._pull(item, held, None, how)
+            again['output'], content = None, got.get('content')
+        elif not (out.get('path') == str(output) and out.get('selection') == selection and output.is_dir() and folder_digest(output) == out.get('sha256')):
+            got, digest = self._pull(item, held, output, how)
+            again['output'], content = {'path': str(output), 'sha256': digest, 'selection': selection}, got.get('content')
+        facts = {'name': self._name(item), 'number': entry.get('number'), 'newer': head != held}
+        if head != held: facts['newer_number'] = self._at(item, head).get('number')
+        receipt = Receipt(self, lock, again, content, facts, 'stays')
+        receipt._words, receipt._mode = words, 'stays'
+        return receipt
 
     def read_exact(self, item, revision, output):
         """E109 D6: read one exact version of `item` (an inventory entry) into `output`, a new folder, for a delivery.
@@ -500,17 +751,24 @@ class Exchange:
             raise
         return got
 
-    def get(self, item_id, *, output=None, window=None, **how):
+    def get(self, item_id=None, *, name=None, type=None, stay=None, output=None, window=None, **how):
         """Fetch, persist into `output` (when given), then advance the record. E141 s2: `window` (the CLI form
         `inline=100:104,by=label` or a mapping of read_window's keywords) writes part of a seismic volume as SEG-Y; the
-        held record's selection records it."""
+        held record's selection records it. E173 s1: the item by its id or by `name` and `type`, as `fetch`.
+        `stay=True` keeps the version this folder holds (`stays`; nothing is fetched while the folder is intact) and
+        records that it stays; the first time, it takes the latest. `stay=False` takes the latest and records that the
+        folder follows. Without `stay`, a folder that recorded it stays, stays. Staying needs `output`."""
+        if stay is not None and not isinstance(stay, bool): self._raise('not-valid', {'reasons': 'stay is True or False'})
+        words = self._named(item_id, name, type)
+        if stay and output is None: self._raise('not-valid', {'reasons': STAY_NEEDS})
         if window is not None: how['window'] = window
-        got = self.fetch(item_id, output=output, **how)
-        return got if isinstance(got, Outcome) else got.confirm(applied_to=output)
+        got = self._fetch(item_id, words, output, how, stay, True)
+        return got if isinstance(got, Outcome) else got.confirm(applied_to=output)  # a `stays` receipt answers `stays`
 
     # send to project
 
-    def send(self, data, *, name, profile, how, based_on=(), of=None, declare=None, extra=None, expected=None, source=None):
+    def send(self, data, *, name, profile, how, based_on=(), of=None, declare=None, extra=None, expected=None, source=None,
+             rights_confirmed=False):
         """Publish `data` as a new item, or (with `of`, a held item) as its next version. The parent is the version
         this folder holds, never the project's head; `based_on` are held items. The complete request is saved before
         it is sent, so running the same send again after a crash never publishes twice. `expected` (with `of`) is the
@@ -518,7 +776,9 @@ class Exchange:
         not part of the saved request, and a retry of an unfinished send never reads it. E122 s4a: `source` names the
         application object the data came from ({system: 'application:<client id>', instance, container, id, as_new}); it
         is saved in the request only when given. Without `of` or `as_new` the project decides: a new item, the next
-        version of the item this object sent before, or nothing changed (the folder then holds that item)."""
+        version of the item this object sent before, or nothing changed (the folder then holds that item).
+        E70d: with `of` naming a held upload, the next version is an upload (`based_on` names only that item, and
+        `rights_confirmed=True` confirms that you may share this version); a transport without that route refuses."""
         if isinstance(data, (str, Path)): data = Path(data).read_bytes()
         if not isinstance(data, (bytes, bytearray)) or not data: self._raise('not-valid', {'reasons': 'the file is empty'})
         data = bytes(data)
@@ -530,11 +790,13 @@ class Exchange:
                                    (declare is None or isinstance(declare, dict), 'give declarations as names and values'),
                                    (extra is None or isinstance(extra, dict), 'give extra details as names and values')) if not ok]
         if source is not None and not isinstance(source, dict): reasons.append('give the source as names and values')
+        if not isinstance(rights_confirmed, bool): reasons.append('confirm that you may share this version, or leave it out')
         if reasons: self._raise('not-valid', {'reasons': '; '.join(reasons)})
         if len(data) > MAX_SEND: self._raise('too-large', {})
         request = {'name': name, 'profile': profile, 'how': how, 'based_on': list(based_on), 'of': of, 'declare': dict(declare or {}),
                    'extra': json.loads(json.dumps(extra or {}, sort_keys=True)), 'sha256': hashlib.sha256(data).hexdigest(), 'bytes': len(data)}
         if source is not None: request['source'] = json.loads(json.dumps(source, sort_keys=True))  # E122 s4a: only when given (R13)
+        if rights_confirmed: request['rights_confirmed'] = True  # E70d (D2): only when given, so a derived request is as before
         with self._locked():
             record = self._load()
             pending, first = record.get('pending'), False
@@ -548,9 +810,18 @@ class Exchange:
                 missing = [i for i in ([of] if of is not None else []) + list(based_on) if i not in record['items']]
                 if missing:
                     self._raise('not-held', {'name': self._name(record['items'].get(missing[0]), 'that item')}, {'asset_id': missing[0]})
-                if of is not None and record['items'][of].get('kind') == 'uploaded':  # E121 B7: an upload's next version is an upload
+                upload = of is not None and record['items'][of].get('kind') == 'uploaded'  # E121 B7: an upload's next version is an upload
+                if upload and not getattr(self.transport, 'appends_uploads', False):
                     self._raise('not-valid', {'reasons': '%s is an upload, which does not take a sent version; send this as a new item based on it'
                                               % self._name(record['items'][of])})
+                if upload and list(based_on) != [of]:  # E70d (D3): the upload route records only the version it builds on
+                    self._raise('not-valid', {'reasons': "an upload's next version records only the version it builds on; name only %s as based on"
+                                              % self._name(record['items'][of])})
+                if upload and not rights_confirmed:  # E70d (D2): rights belong to uploads (ADR 0021)
+                    self._raise('not-valid', {'reasons': 'confirm that you may share this version'}, {'argument': 'rights_confirmed'})
+                if rights_confirmed and not upload:
+                    self._raise('not-valid', {'reasons': 'only the next version of an upload asks you to confirm that you may share it'},
+                                {'argument': 'rights_confirmed'})
                 if expected is not None and of is None:
                     self._raise('not-valid', {'reasons': 'name the item this is a new version of, together with the version it builds on'})
                 if expected is not None and expected != record['items'][of]['revision']:  # before same_content: identical bytes are still refused
@@ -560,26 +831,41 @@ class Exchange:
                     self._raise('nothing-changed', {'name': self._name(held), 'number': held.get('number')})
                 resolved = {'parents': [{'asset_id': i, 'revision': record['items'][i]['revision']} for i in based_on],
                             'expected_parent': record['items'][of]['revision'] if of is not None else None}
-                pending = {'command_id': uuid.uuid4().hex, 'request': request, 'resolved': resolved, 'owner': identity, 'started': self.clock()}
+                if upload: resolved = {'parents': [], 'expected_parent': record['items'][of]['revision'], 'route': 'upload'}  # E70d (D1)
+                pending ={'command_id': uuid.uuid4().hex, 'request': request, 'resolved': resolved, 'owner': identity, 'started': self.clock()}
+                # E171 s1 (Codex D4): who holds the sent version, saved with the send and sent from here, outside `request`
+                # (compared whole) and `resolved`; a send saved before the upgrade has none and is resent as it was.
+                pending['attribution'] = {k: v for k, v in (('holder', record['holder_id']), ('application', self.application)) if v is not None}
                 record['pending'] = pending; self._save(record); first = True  # saved BEFORE anything is sent
             facts = {'name': display(name, 'the item')}
+            attribution = {'attribution': pending['attribution']} if pending.get('attribution') and _takes(self.transport.publish, 'attribution') else {}
             try:
-                receipt = self.transport.publish(data, pending['request'], pending['resolved'], pending['command_id'])
+                receipt = self.transport.publish(data, pending['request'], pending['resolved'], pending['command_id'], **attribution)
             except ExchangeRefused as refusal:
                 if first: self._clear()
                 self._raise(refusal.outcome, {**facts, **refusal.facts}, refusal.technical)
             except Exception as error:
                 kind = failure(error)
+                by_upload = pending['resolved'].get('route') == 'upload'
                 if kind == 'stale':
-                    self._clear(); self._stale(error, of, data, facts)  # stale is checked after replay: the command was not recorded
+                    self._clear()
+                    if by_upload: self._recurrence(error, of, facts)  # E70d (D4): the server's own words name an upload's recurrence
+                    self._stale(error, of, data, facts)  # stale is checked after replay: the command was not recorded
+                if by_upload and kind == 'invalid' and _server_said(error) == NOT_VERSIONED:
+                    if first: self._clear()
+                    self._raise('not-valid', {**facts, 'reasons': 'this type of file does not take a new version by upload'}, error=error)
                 if kind == 'could-not-reach': self._raise('outcome-unknown', facts, {'command_id': pending['command_id']}, error=error)
                 if first and kind != 'rate-limited': self._clear()  # refused before anything was kept; a retry's earlier attempt stays unknown
                 self._transport_error(error, refused='access-refused', facts=facts)
-            record = self._load()
+            by_upload = pending['resolved'].get('route') == 'upload'
             number = receipt.get('number')
-            record['items'][receipt['asset_id']] = {'asset_id': receipt['asset_id'], 'name': name, 'kind': 'derived', 'revision': receipt['revision'],
+            if by_upload and number is None:  # E70d (D5): an upload answers no number; history may (never fails the send)
+                number = self._at({'asset_id': receipt['asset_id'], 'kind': 'uploaded'}, receipt['revision']).get('number')
+            record = self._load()
+            record['items'][receipt['asset_id']] = {'asset_id': receipt['asset_id'], 'name': name, 'kind': 'uploaded' if by_upload else 'derived',
+                                                    'revision': receipt['revision'],
                                                     'number': number, 'got_at': self.clock(), 'sent': True, 'output': None,
-                                                    'note': (record['items'].get(receipt['asset_id']) or {}).get('note')}
+                                                    **_kept(record['items'].get(receipt['asset_id']))}  # a send keeps the mode
             record['pending'] = None
             self._save(record)
             change = receipt.get('source_change')  # E122 s4a: what the project decided for a send naming its source
@@ -587,10 +873,41 @@ class Exchange:
             facts = {**facts, 'number': number}
             if change == 'unchanged':
                 self._raise('nothing-changed', facts, {'asset_id': receipt['asset_id'], 'revision': receipt['revision'], 'command_id': pending['command_id']})
-            return Outcome(code, self._say(code, facts), facts, {'asset_id': receipt['asset_id'], 'revision': receipt['revision'], 'command_id': pending['command_id']})
+            sentence = self._say(code, facts)
+        held = self._held_by(receipt['asset_id'])  # E171 design 6: after the folder's lock is let go; never fails the send
+        if held:  # the sentence stays as it was (qualification compares it); the CLI prints `held_line` after it
+            facts = {**facts, 'held_by': held[0], 'on_an_older_version': held[1], **({'held_line': held_line(*held)} if held[0] else {})}
+        return Outcome(code, sentence, facts, {'asset_id': receipt['asset_id'], 'revision': receipt['revision'], 'command_id': pending['command_id']})
+
+    def _held_by(self, item):
+        """E171 design 6 (amended 11 November): one holders read for the item just sent, when the transport has one;
+        (held by, on an older version), or None when there is no read or it failed or answered rows it cannot count."""
+        holders = getattr(self.transport, 'holders', None)
+        if holders is None: return None
+        try:
+            rows = holders(item)
+            if not isinstance(rows, list) or not all(isinstance(r, dict) for r in rows): return None
+            return len(rows), sum(1 for r in rows if r.get('state') == 'behind')
+        except Exception:
+            return None
 
     def _clear(self):
         record = self._load(); record['pending'] = None; self._save(record)
+
+    def _recurrence(self, error, of, facts):
+        """E70d (D4): an upload's recurrence is the server's call (bytes and declarations, the head first); its own
+        sentence names the version. A stale head is said as for a derived item, with the head's number, author and time
+        from history, never by comparing digests (the head may have these bytes under other declarations). Any other
+        message falls through to `_stale`."""
+        said = _server_said(error)
+        same = re.fullmatch(r'Nothing changed: this is version (\d+)\.', said)
+        if same: self._raise('nothing-changed', {**facts, 'number': int(same.group(1))}, error=error)
+        earlier = re.fullmatch(r'This content was version (\d+) on (.+)\.', said)
+        if earlier: self._raise('earlier-version', {**facts, 'number': int(earlier.group(1)), 'day': earlier.group(2)}, error=error)
+        if said == STALE_HEAD:
+            versions = self._history({'asset_id': of, 'kind': 'uploaded'})
+            who = self._who(versions[-1]) if versions else {}
+            self._raise('newer-version-exists', {**facts, **{k: v for k, v in who.items() if v is not None}}, error=error)
 
     def _stale(self, error, of, data, facts):
         """A stale-parent or duplicate-content refusal: history (read after it) says which."""
@@ -616,6 +933,44 @@ class Exchange:
             record['pending'] = None; self._save(record)
             facts = {'name': display(pending['request'].get('name'), 'an item')}
             return Outcome('abandoned', self._say('abandoned', facts), facts, {'command_id': pending['command_id']})
+
+    # E171 s1: the project's record of this folder's copies
+
+    def _holder(self):
+        """This folder's holder id, or None when nothing was ever kept here (no copy to name)."""
+        return self._load().get('holder_id') if self.path.exists() else None
+
+    def holder_id(self):
+        """This folder's holder id, for a host that sends by a route of its own (OpendTect's horizon upload) and names
+        the folder as the core's send does. A folder that never kept anything (no `held.json`) gets one minted and the
+        record saved first, under the folder's lock, so a first send names it and a retry after a crash names the same
+        one. Refuses as reading the record does (`NotValid`, `FolderBusy`). `_holder()` still answers None for such a
+        folder (release_copy, report_earlier)."""
+        with self._locked():
+            record = self._load()
+            if not self.path.exists(): self._save(record)
+        return record.get('holder_id')
+
+    def release_copy(self, item):
+        """E171 s1 (D7): tell the project this folder no longer holds `item` (exchange/release). `held.json` is left as
+        it is, so a later confirmed get of the item brings the copy back. True when a copy was released, False when the
+        project had none for this folder, None when the transport cannot release (an assistant's) or nothing was kept."""
+        release, holder = getattr(self.transport, 'release', None), self._holder()
+        if release is None or not holder: return None
+        try: return release(holder, item) is True
+        except Exception as error: self._transport_error(error, refused='access-refused', facts={'reasons': 'the project did not release the copy'})
+
+    def report_earlier(self, item, revision):
+        """E171 s1 (D6): a deliberate get of an earlier version (OpendTect "Go back"), which a plain late report never
+        records: one report with `earlier`, its id fresh per go-back and kept for its own retry. `held.json` is never
+        written. True, False or None as a confirmation's `reported`."""
+        report, holder = getattr(self.transport, 'report', None), self._holder()
+        if report is None or not holder: return None
+        reference = {'project_id': self.transport.project, 'asset_id': item, 'revision': str(revision)}
+        event = earlier_event(holder, item, revision, uuid.uuid4().hex)
+        try: _report_held(report, reference, holder, event, {'application': self.application, 'earlier': True})
+        except Exception: return False
+        return True
 
 
 # -- the SDK's transport (E70a C3) ------------------------------------------------------------------------
@@ -762,23 +1117,44 @@ class ClientTransport:
         number = (descriptor.get('history') or {}).get('number')
         return number if number is not None or kind != 'uploaded' else 1
 
-    def publish(self, data, request, resolved, command_id):
+    appends_uploads = True  # E70d (D1): an upload's next version goes through the upload-version route
+
+    def publish(self, data, request, resolved, command_id, attribution=None):
+        held = {k: v for k, v in (attribution or {}).items() if k in ('holder', 'application') and v is not None}  # E171 s1
+        if resolved.get('route') == 'upload':  # E70d: the author's own upload, at the version this folder holds
+            got = self.client.upload_data(data, profile=request['profile'], name=request['name'], attribution=request['how'], audience=[],
+                                          rights_confirmed=request.get('rights_confirmed') is True, declared=request.get('declare') or None,
+                                          filename=request['name'], command_id=command_id, append_to=request['of'],
+                                          expected_parent=resolved['expected_parent'], application_source=request.get('source'), **held)
+            return {'asset_id': got.asset_id, 'revision': got.revision, 'number': None}
         from .writers import WrittenOriginal
         written = WrittenOriginal(data, request['profile'], dict(request.get('declare') or {}), 'derived')
         receipt = self.client.publish_derived(written, name=request['name'], from_=[(p['asset_id'], p['revision']) for p in resolved['parents']],
                                               method={'name': request['how'], 'declared': False}, command_id=command_id,
                                               new_version_of=request.get('of'), expected_parent=resolved.get('expected_parent'),
-                                              **({'source': request['source']} if request.get('source') is not None else {}))
+                                              **({'source': request['source']} if request.get('source') is not None else {}), **held)
         answer = {'asset_id': receipt.asset_id, 'revision': receipt.revision, 'number': receipt.revision_number}
         if receipt.source_change is not None: answer['source_change'] = receipt.source_change
         return answer
 
     def same_content(self, held, request):
-        return request['sha256'] == held.get('revision')
+        """E70d (D4): an upload's sameness is the server's (bytes and declarations), so it is never decided here."""
+        return held.get('kind') != 'uploaded' and request['sha256'] == held.get('revision')
 
-    def report(self, reference, holder_id, event_id):
+    def report(self, reference, holder_id, event_id, *, application=None, holds=None, earlier=None):
         """E70b: one delivery observation on the project route (`exchange-consumer/1`); the reference names the
-        project. One attempt, a short timeout: a confirmation never waits long for it."""
+        project. One attempt, a short timeout: a confirmation never waits long for it. E171 s1: the held copy's
+        application word, its declared mode and `earlier`, each only when given (so E70b's body is unchanged without)."""
         from .publish import json_bytes
         body = {'reference': reference, 'binding_id': holder_id, 'event_id': event_id, 'profile': 'exchange-consumer/1', 'mode': 'get'}
+        body.update({k: v for k, v in (('application', application), ('holds', holds), ('earlier', earlier)) if v is not None})
         return self.client._post_bytes('activity', 'report', json_bytes(body), timeout=REPORT_TIMEOUT)
+
+    def release(self, holder_id, item):
+        """E171 s1 (D7): exchange/release of this folder's copy of `item`; the project's answer `released`."""
+        answer = self.client._post('exchange', 'release', {'project_id': self.project, 'binding_id': holder_id, 'item': item})
+        return (answer or {}).get('released') is True
+
+    def holders(self, item):
+        """E171 design 6: the rows of exchange/holders for `item` (Client.holders, read whole), read once after a send."""
+        return self.client.holders(item)['rows']

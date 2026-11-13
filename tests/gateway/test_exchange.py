@@ -72,6 +72,16 @@ def uploads(web):
     return seen
 
 
+def both_routes(web):
+    """E70d: (route, header) of every send request, on the derive route and on the upload route alike."""
+    seen = []
+    def hook(request):
+        for route in ('/publications/derive', '/las-uploads/upload'):
+            if request.url.path.endswith(route): seen.append((route.rsplit('/', 1)[-1], json.loads(base64.b64decode(request.headers['X-Ophiolite-Upload']))))
+    web.c.event_hooks['request'].append(hook)
+    return seen
+
+
 def test_the_identity_is_the_key_itself_because_no_route_names_its_person(two_keys):
     """Stop rule 8: no route tells an access key whose it is, so a pending send is bound to the key (two keys of the
     same person are two identities); recovery under a rotated key is refused and recorded as an owner decision."""

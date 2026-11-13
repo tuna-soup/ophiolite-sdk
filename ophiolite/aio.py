@@ -329,6 +329,10 @@ class AsyncClient(Client):
         """E142 s1: the surveys you may see, as a list; see Client.surveys()."""
         return await self._listed('surveys')
 
+    async def holder_pages(self,item=None,*,limit=None):
+        """E171 s1: every page of exchange/holders, as a list; see Client.holder_pages()."""
+        return await self._listed('holder_pages',item,limit=limit)
+
     async def survey_pages(self,survey_id,revision=None,*,view='revision',limit=None):
         """E142 s1: every page of one survey revision, as a list; see Client.survey_pages()."""
         return await self._listed('survey_pages',survey_id,revision,view=view,limit=limit)
@@ -414,7 +418,9 @@ for _name in ('configure','start','run_input','publish','download','results','hi
               'upload_las','inspect_las','upload_info','members','result_preview','result_download','recover',
               'upload_data','served_limits','download_original',  # E54: files sent in parts, originals read by ranges
               'survey','create_survey','add_survey_members','remove_survey_members','replace_survey_member','relate_survey_members',
-              'unrelate_survey_members','rename_survey','identify_survey','withdraw_survey'):  # E142 s1
+              'unrelate_survey_members','rename_survey','identify_survey','withdraw_survey',  # E142 s1
+              'restate_survey','link_survey_members',  # E142 s2a
+              'holders'):  # E171 s1
     setattr(AsyncClient,_name,_async_application(_name))
 for _name in ('configure','start','input','publish','download','upload_las','recover'):
     setattr(AsyncWorkFolder,_name,_async_work(_name))

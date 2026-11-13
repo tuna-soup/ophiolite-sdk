@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.104.0",
+  "version": "1.111.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -525,11 +525,11 @@
     },
     {
       "id": "ophiolite.derivation/2",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "lifecycle": "preview",
       "path": "scientific/v1/derivation-2.json",
       "title": "DerivationRecordV2",
-      "description": "derivation/1 plus kind reported: a result a person or an agent made by running a catalogue procedure version, with the procedure block (version, run, envelope digest, runner, made-again-from), every input occurrence as slot[n] and the choice labels of its settings (E106). 1.1.0: the procedure block's optional verification, the tool version's verification as it stood when the result was published, with its sentence (E165 s2)."
+      "description": "derivation/1 plus kind reported: a result a person or an agent made by running a catalogue procedure version, with the procedure block (version, run, envelope digest, runner, made-again-from), every input occurrence as slot[n] and the choice labels of its settings (E106). 1.1.0: the procedure block's optional verification, the tool version's verification as it stood when the result was published, with its sentence (E165 s2). 1.2.0: the procedure block's optional witness, written only when Ophiolite ran the run in the project's sandbox: the job, the image digest, the runtime, the limits, no network, the start and finish (E113 s0)."
     },
     {
       "id": "ophiolite.parameters/1",
@@ -589,11 +589,19 @@
     },
     {
       "id": "ophiolite.tool-verification/1",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "lifecycle": "preview",
       "path": "procedures/v1/tool-verification.json",
       "title": "ToolVerification",
-      "description": "A person's verification of one procedure digest in one project, against a check of a result that version reported or against a publication with a DOI or a URL, or the withdrawal of one by its author or an administrator: who and when set by the server, a statement of at most 2000 characters, never changed or deleted; a claim, never a witness, and never inherited by another digest (E165)."
+      "description": "A person's verification of one procedure digest in one project, against a check of a result that version reported or against a publication with a DOI or a URL, or the withdrawal of one by its author or an administrator: who and when set by the server, a statement of at most 2000 characters, never changed or deleted; a claim, never a witness, and never inherited by another digest (E165). 1.1.0: kind witnessed, against a run Ophiolite made in the project's sandbox, named by its run id and the job the server read (E113 s0)."
+    },
+    {
+      "id": "ophiolite.held-copies/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "exchange/v1/held-copies-schema.json",
+      "title": "HeldCopies",
+      "description": "Who holds which version of an item, as one reader may see it: one row per connected copy and item with the client-declared application, the person as the reader may see them, the version last confirmed and since when, stays, follows or not said, and current, behind (by how many, and the head) or no longer readable, computed at read time; in $defs the request of exchange/holders, paged (E171 s0)."
     }
   ],
   "profiles": [
@@ -2416,6 +2424,40 @@
       "kind": "fixture",
       "path": "agents/v1/fixtures/invalid/precedents-cases.json",
       "title": "Precedents requests, answers and evidence the schema refuses, with the paths it names (E158 s0)"
+    },
+    {
+      "id": "ophiolite.fixture/exchange/held-copies-admin.json/1",
+      "kind": "fixture",
+      "path": "exchange/v1/fixtures/valid/held-copies-admin.json",
+      "title": "Who holds what in project p-held as its administrator reads it: five rows over two items, two behind, a tie on the confirmation time, one holder id under two people, one mode and one application not said (E171 s0)",
+      "schema": "ophiolite.held-copies/1"
+    },
+    {
+      "id": "ophiolite.fixture/exchange/held-copies-member.json/1",
+      "kind": "fixture",
+      "path": "exchange/v1/fixtures/valid/held-copies-member.json",
+      "title": "The same item as a member reads it: the other person's rows as a member, without name or key (E171 s0)",
+      "schema": "ophiolite.held-copies/1"
+    },
+    {
+      "id": "ophiolite.fixture/exchange/held-copies-not-readable.json/1",
+      "kind": "fixture",
+      "path": "exchange/v1/fixtures/valid/held-copies-not-readable.json",
+      "title": "The administrator's answer after a member lost read on the head: that member's copy no longer readable (E171 s0)",
+      "schema": "ophiolite.held-copies/1"
+    },
+    {
+      "id": "ophiolite.fixture/exchange/held-copies-empty.json/1",
+      "kind": "fixture",
+      "path": "exchange/v1/fixtures/valid/held-copies-empty.json",
+      "title": "The answer to a reader who cannot read the item: no rows, the same shape (E171 s0)",
+      "schema": "ophiolite.held-copies/1"
+    },
+    {
+      "id": "ophiolite.fixture/exchange/held-copies-cases.json/1",
+      "kind": "fixture",
+      "path": "exchange/v1/fixtures/invalid/held-copies-cases.json",
+      "title": "Held-copies answers and requests the schema refuses at their paths, and schema-valid answers the structural rules refuse with their reasons (E171 s0)"
     }
   ]
 }

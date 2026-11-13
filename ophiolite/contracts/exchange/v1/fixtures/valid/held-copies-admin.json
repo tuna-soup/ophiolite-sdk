@@ -1,0 +1,58 @@
+{
+  "project": "p-held",
+  "item": null,
+  "as_of": "2026-11-10T09:30:00Z",
+  "complete_since": "2026-11-10T08:00:00Z",
+  "rows": [
+    {
+      "copy": "7dd1510b9be8581e",
+      "item": {"asset_id": "horizon-top", "name": "Top horizon", "kind": "horizons"},
+      "application": "application:qgis-plugin",
+      "person": {"shown": "you", "name": "Ana"},
+      "key": "qgis-ana",
+      "version": {"revision": "r1", "how": "got", "confirmed_at": "2026-11-10T09:12:00Z", "since": "2026-11-10T09:05:00Z"},
+      "mode": "stays",
+      "state": "behind",
+      "behind": {"count": 2, "newest": {"revision": "r3", "author": "Ana", "at": "2026-11-10T09:20:00Z"}}
+    },
+    {
+      "copy": "136d32bc9e3c4e68",
+      "item": {"asset_id": "horizon-top", "name": "Top horizon", "kind": "horizons"},
+      "application": "script",
+      "person": {"shown": "named", "name": "Ben"},
+      "version": {"revision": "r2", "how": "got", "confirmed_at": "2026-11-10T09:15:00Z", "since": "2026-11-10T09:15:00Z"},
+      "mode": "follows",
+      "state": "behind",
+      "behind": {"count": 1, "newest": {"revision": "r3", "author": "Ana", "at": "2026-11-10T09:20:00Z"}}
+    },
+    {
+      "copy": "cdb697e1bb2a9601",
+      "item": {"asset_id": "horizon-top", "name": "Top horizon", "kind": "horizons"},
+      "application": "application:opendtect",
+      "person": {"shown": "you", "name": "Ana"},
+      "version": {"revision": "r3", "how": "sent", "confirmed_at": "2026-11-10T09:20:00Z", "since": "2026-11-10T09:20:00Z"},
+      "mode": "stays",
+      "state": "current"
+    },
+    {
+      "copy": "7dd1510b9be8581e",
+      "item": {"asset_id": "wells-north", "name": "Wells north", "kind": "wells"},
+      "application": "application:qgis-plugin",
+      "person": {"shown": "you", "name": "Ana"},
+      "key": "qgis-ana",
+      "version": {"revision": "w1", "how": "got", "confirmed_at": "2026-11-10T09:25:00Z", "since": "2026-11-10T09:25:00Z"},
+      "mode": "stays",
+      "state": "current"
+    },
+    {
+      "copy": "94ca0787245c51aa",
+      "item": {"asset_id": "wells-north", "name": "Wells north", "kind": "wells"},
+      "application": null,
+      "person": {"shown": "named", "name": "Ben"},
+      "version": {"revision": "w1", "how": "got", "confirmed_at": "2026-11-10T09:25:00Z", "since": "2026-11-10T09:25:00Z"},
+      "mode": null,
+      "state": "current"
+    }
+  ],
+  "next": null
+}

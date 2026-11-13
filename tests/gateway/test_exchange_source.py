@@ -43,7 +43,7 @@ def test_a_send_without_a_source_keeps_its_request_and_header(two_keys):
     web, ka, kb, a, b, parent, item, v1 = two_keys
     seen = uploads(web)
     sent = send(a, points(9), parent)
-    assert sent.outcome == 'sent-new' and set(seen[-1]) == HEADER
+    assert sent.outcome == 'sent-new' and set(seen[-1]) == HEADER | {'holder', 'application'}  # E171 s1: a fresh send names its holder
     saved = {}
     real = a.transport.publish
     a.transport.publish = lambda data, request, resolved, command: saved.setdefault('r', request) and real(data, request, resolved, command)

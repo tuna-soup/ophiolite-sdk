@@ -14,6 +14,20 @@ def fixture():
                 (root/('derived.las' if origin=='derived' else 'original.las')).read_bytes())
     return load
 
+@pytest.fixture(scope='session', autouse=True)
+def session_config_home(tmp_path_factory):
+    """E142 s2a C3: the session's own XDG_CONFIG_HOME, set before any module or session fixture runs the real export."""
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setenv('XDG_CONFIG_HOME', str(tmp_path_factory.mktemp('config')))
+        yield
+
+@pytest.fixture(autouse=True)
+def config_home(tmp_path, monkeypatch):
+    """E142 s2a C3: every test keeps the OpendTect connector's installation id (ophiolite/opendtect-instance) under its
+    own XDG_CONFIG_HOME, so no test that runs the real export writes the runner's ~/.config; subprocesses inherit it."""
+    monkeypatch.setenv('XDG_CONFIG_HOME', str(tmp_path / 'config'))
+    return tmp_path / 'config'
+
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item,call):
     import os

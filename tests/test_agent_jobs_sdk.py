@@ -277,4 +277,4 @@ def test_the_runner_reader_and_changes_are_unchanged():
     assert client(handler).job('j') == {'id': 'j', 'state': 'queued'}
     assert seen == [('/api/v1/projects/p/runners/job', {'project_id': 'p', 'id': 'j'})]
     assert list(inspect.signature(AgentClient.job).parameters) == ['self', 'job_id']
-    assert len(agents.CHANGES) == 26 and not any(c.startswith('jobs/') for c in agents.CHANGES)
+    assert len(agents.CHANGES) == 27 and not any(c.startswith('jobs/') for c in agents.CHANGES)

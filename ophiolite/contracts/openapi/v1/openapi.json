@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "description": "One public API for every project operation. Four credential kinds reach it: the browser session (opaque HttpOnly cookie plus the X-CSRF-Token proof and, on non-GET requests, the exact Origin), a project-scoped delegate lasting at most five minutes (Bearer oph_api_..., parent session and current native permissions remain mandatory), a project access key or a service account's key (Bearer oph_key_..., one project, read or read and write, never compute; every request re-checks the key and its owner's current access, so it needs no browser session and nothing to refresh), and a browser-approved provider grant (Bearer provider token plus X-Ophiolite-Application-Grant; capability 1: the scientific read resources and the applications route within its read/write scopes; capability 3 adds reading wells, wellbores and lineage and the LAS upload routes). A request that carries an Authorization header is a machine request and is refused with MACHINE_AUTH_REQUIRED when a cookie or Origin travels with it. Scope and capability are ceilings; every operation runs the same native permission checks whoever calls it. Each operation states its stability in x-ophiolite-stability: a supported operation changes only additively or by a transition with a deprecation and a sunset (/api/v1/contracts/docs/api-versioning.md); a pilot operation is tested and documented but is not yet a supported, unattended service contract.",
     "x-ophiolite-contracts": {
-      "registry_version": "1.104.0",
+      "registry_version": "1.111.0",
       "index": "/api/v1/contracts",
       "served_profiles": [
         "las2/1",
@@ -3994,6 +3994,45 @@
                     "pattern": "^get$",
                     "title": "Mode",
                     "type": "string"
+                  },
+                  "application": {
+                    "anyOf": [
+                      {
+                        "pattern": "^(application:[a-z0-9._-]{1,128}|script)$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Application"
+                  },
+                  "holds": {
+                    "anyOf": [
+                      {
+                        "pattern": "^(stays|follows)$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Holds"
+                  },
+                  "earlier": {
+                    "anyOf": [
+                      {
+                        "const": true,
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Earlier"
                   }
                 },
                 "required": [
@@ -16792,6 +16831,9 @@
                         }
                       ],
                       "title": "Next Cursor"
+                    },
+                    "display": {
+                      "$ref": "#/components/schemas/InventoryDisplay"
                     }
                   },
                   "required": [
@@ -26314,6 +26356,353 @@
         "x-ophiolite-stability": "pilot"
       }
     },
+    "/api/v1/projects/{project}/exchange/holders": {
+      "post": {
+        "summary": "E171: who holds which version of this project or one item in it, one row per connected copy (ophiolite.held-copies/1; follow `next` as `cursor`)",
+        "description": "Scope read; accepted principals: session, delegate, agent; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "read",
+        "x-ophiolite-principals": [
+          "agent",
+          "delegate",
+          "session"
+        ],
+        "x-ophiolite-agent": {
+          "reach": "tool",
+          "admitted": "never",
+          "policy": false
+        },
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "x-ophiolite": {
+                    "id": "ophiolite.held-copies/1",
+                    "version": "1.0.0",
+                    "lifecycle": "preview"
+                  },
+                  "additionalProperties": false,
+                  "properties": {
+                    "project": {
+                      "maxLength": 512,
+                      "minLength": 1,
+                      "title": "Project",
+                      "type": "string"
+                    },
+                    "item": {
+                      "anyOf": [
+                        {
+                          "maxLength": 512,
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Item"
+                    },
+                    "as_of": {
+                      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$",
+                      "title": "As Of",
+                      "type": "string"
+                    },
+                    "complete_since": {
+                      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$",
+                      "title": "Complete Since",
+                      "type": "string"
+                    },
+                    "rows": {
+                      "items": {
+                        "$ref": "#/components/schemas/HeldCopy"
+                      },
+                      "maxItems": 500,
+                      "title": "Rows",
+                      "type": "array"
+                    },
+                    "next": {
+                      "anyOf": [
+                        {
+                          "maxLength": 1024,
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Next"
+                    }
+                  },
+                  "required": [
+                    "project",
+                    "item",
+                    "as_of",
+                    "complete_since",
+                    "rows",
+                    "next"
+                  ],
+                  "title": "HeldCopies",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "description": "The body of `exchange/holders`: the project (equal to the path's), an item or the whole project, and a page.",
+                "properties": {
+                  "project_id": {
+                    "maxLength": 200,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "item": {
+                    "default": null,
+                    "maxLength": 512,
+                    "minLength": 1,
+                    "title": "Item",
+                    "type": "string"
+                  },
+                  "limit": {
+                    "default": 200,
+                    "maximum": 500,
+                    "minimum": 1,
+                    "title": "Limit",
+                    "type": "integer"
+                  },
+                  "cursor": {
+                    "default": null,
+                    "maxLength": 1024,
+                    "minLength": 1,
+                    "title": "Cursor",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id"
+                ],
+                "title": "HoldersRequest",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "x-ophiolite-stability": "pilot"
+      }
+    },
+    "/api/v1/projects/{project}/exchange/release": {
+      "post": {
+        "summary": "E171: your connected copy of this item under this holder id no longer holds it (its history is kept; a later get shows it again)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "x-ophiolite-agent": {
+          "reach": "person",
+          "reason": "person-only",
+          "admitted": "never",
+          "policy": false
+        },
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "released": {
+                      "title": "Released",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "released"
+                  ],
+                  "title": "Released",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "description": "The body of `exchange/release` (E171 s1 D7): the caller's own copy of one item under one holder id.",
+                "properties": {
+                  "project_id": {
+                    "maxLength": 200,
+                    "minLength": 1,
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "binding_id": {
+                    "pattern": "^[a-zA-Z0-9-]{16,80}$",
+                    "title": "Binding Id",
+                    "type": "string"
+                  },
+                  "item": {
+                    "maxLength": 512,
+                    "minLength": 1,
+                    "title": "Item",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "binding_id",
+                  "item"
+                ],
+                "title": "ReleaseRequest",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "x-ophiolite-stability": "pilot"
+      }
+    },
     "/api/v1/projects/{project}/imports/original-chunk": {
       "post": {
         "summary": "PutOriginalChunk (the external-snapshot contract, answered by the managed snapshots module)",
@@ -29129,6 +29518,20 @@
                     "pattern": "^[0-9a-f]{64}$",
                     "title": "Sha256",
                     "type": "string"
+                  },
+                  "represents": {
+                    "anyOf": [
+                      {
+                        "const": "horizon",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E173 s0b: a point set (points-csv/1, petrel-points-attributes/1) the sender marks as a horizon; later versions keep the mark",
+                    "title": "Represents"
                   }
                 },
                 "required": [
@@ -33466,6 +33869,45 @@
                       }
                     ],
                     "default": null
+                  },
+                  "represents": {
+                    "anyOf": [
+                      {
+                        "const": "horizon",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Represents"
+                  },
+                  "holder": {
+                    "anyOf": [
+                      {
+                        "pattern": "^[a-zA-Z0-9-]{16,80}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Holder"
+                  },
+                  "application": {
+                    "anyOf": [
+                      {
+                        "pattern": "^(application:[a-z0-9._-]{1,128}|script)$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Application"
                   }
                 },
                 "required": [
@@ -58451,6 +58893,34 @@
                     ],
                     "default": null,
                     "description": "E122 s4a: the application, workspace and object this file was sent from"
+                  },
+                  "holder": {
+                    "anyOf": [
+                      {
+                        "pattern": "^[a-zA-Z0-9-]{16,80}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E171 s1: the holder id of the copy this send was made from; the accepted version is recorded as held by it",
+                    "title": "Holder"
+                  },
+                  "application": {
+                    "anyOf": [
+                      {
+                        "pattern": "^(application:[a-z0-9._-]{1,128}|script)$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "E171 s1: the sending holder's application word, 'application:<name>' or 'script'",
+                    "title": "Application"
                   }
                 },
                 "required": [
@@ -72667,9 +73137,8 @@
           "session"
         ],
         "x-ophiolite-agent": {
-          "reach": "person",
-          "reason": "write-not-admitted",
-          "admitted": "never",
+          "reach": "tool",
+          "admitted": "proposable",
           "policy": false
         },
         "responses": {
@@ -92367,7 +92836,9 @@
                         "unrelate",
                         "rename",
                         "identify",
-                        "withdraw"
+                        "withdraw",
+                        "restate",
+                        "link"
                       ],
                       "title": "Kind",
                       "type": "string"
@@ -92386,6 +92857,19 @@
                       },
                       "title": "Relations",
                       "type": "array"
+                    },
+                    "changed": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "restate only: false when the lists and name were already the current revision (no new revision)",
+                      "title": "Changed"
                     }
                   },
                   "required": [
@@ -92558,7 +93042,9 @@
                         "unrelate",
                         "rename",
                         "identify",
-                        "withdraw"
+                        "withdraw",
+                        "restate",
+                        "link"
                       ],
                       "title": "Kind",
                       "type": "string"
@@ -92577,6 +93063,19 @@
                       },
                       "title": "Relations",
                       "type": "array"
+                    },
+                    "changed": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "restate only: false when the lists and name were already the current revision (no new revision)",
+                      "title": "Changed"
                     }
                   },
                   "required": [
@@ -93220,7 +93719,9 @@
                         "unrelate",
                         "rename",
                         "identify",
-                        "withdraw"
+                        "withdraw",
+                        "restate",
+                        "link"
                       ],
                       "title": "Kind",
                       "type": "string"
@@ -93239,6 +93740,19 @@
                       },
                       "title": "Relations",
                       "type": "array"
+                    },
+                    "changed": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "restate only: false when the lists and name were already the current revision (no new revision)",
+                      "title": "Changed"
                     }
                   },
                   "required": [
@@ -93343,6 +93857,212 @@
                   "identity"
                 ],
                 "title": "SurveyIdentify",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "x-ophiolite-stability": "pilot"
+      }
+    },
+    "/api/v1/projects/{project}/surveys/link": {
+      "post": {
+        "summary": "Link exact versions you may read to a survey as members, recorded as a link",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "x-ophiolite-agent": {
+          "reach": "person",
+          "reason": "write-not-admitted",
+          "admitted": "never",
+          "policy": false
+        },
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "survey_id": {
+                      "title": "Survey Id",
+                      "type": "string"
+                    },
+                    "revision": {
+                      "title": "Revision",
+                      "type": "integer"
+                    },
+                    "kind": {
+                      "enum": [
+                        "create",
+                        "add",
+                        "remove",
+                        "replace",
+                        "relate",
+                        "unrelate",
+                        "rename",
+                        "identify",
+                        "withdraw",
+                        "restate",
+                        "link"
+                      ],
+                      "title": "Kind",
+                      "type": "string"
+                    },
+                    "members": {
+                      "description": "The versions this command opened or closed",
+                      "items": {
+                        "$ref": "#/components/schemas/SurveyMemberKey"
+                      },
+                      "title": "Members",
+                      "type": "array"
+                    },
+                    "relations": {
+                      "items": {
+                        "$ref": "#/components/schemas/SurveyRelation"
+                      },
+                      "title": "Relations",
+                      "type": "array"
+                    },
+                    "changed": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "restate only: false when the lists and name were already the current revision (no new revision)",
+                      "title": "Changed"
+                    }
+                  },
+                  "required": [
+                    "survey_id",
+                    "revision",
+                    "kind",
+                    "members",
+                    "relations"
+                  ],
+                  "title": "SurveyReceipt",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "Your id for this command; repeating it with the same body answers its receipt",
+                    "maxLength": 512,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "survey_id": {
+                    "title": "Survey Id",
+                    "type": "string"
+                  },
+                  "expected_revision": {
+                    "description": "The revision you read; another current revision refuses survey-changed",
+                    "minimum": 1,
+                    "title": "Expected Revision",
+                    "type": "integer"
+                  },
+                  "members": {
+                    "items": {
+                      "$ref": "#/components/schemas/SurveyMember"
+                    },
+                    "maxItems": 10000,
+                    "minItems": 1,
+                    "title": "Members",
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "command_id",
+                  "survey_id",
+                  "expected_revision",
+                  "members"
+                ],
+                "title": "SurveyMembers",
                 "type": "object"
               }
             }
@@ -93572,7 +94292,9 @@
                         "unrelate",
                         "rename",
                         "identify",
-                        "withdraw"
+                        "withdraw",
+                        "restate",
+                        "link"
                       ],
                       "title": "Kind",
                       "type": "string"
@@ -93591,6 +94313,19 @@
                       },
                       "title": "Relations",
                       "type": "array"
+                    },
+                    "changed": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "restate only: false when the lists and name were already the current revision (no new revision)",
+                      "title": "Changed"
                     }
                   },
                   "required": [
@@ -93763,7 +94498,9 @@
                         "unrelate",
                         "rename",
                         "identify",
-                        "withdraw"
+                        "withdraw",
+                        "restate",
+                        "link"
                       ],
                       "title": "Kind",
                       "type": "string"
@@ -93782,6 +94519,19 @@
                       },
                       "title": "Relations",
                       "type": "array"
+                    },
+                    "changed": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "restate only: false when the lists and name were already the current revision (no new revision)",
+                      "title": "Changed"
                     }
                   },
                   "required": [
@@ -93954,7 +94704,9 @@
                         "unrelate",
                         "rename",
                         "identify",
-                        "withdraw"
+                        "withdraw",
+                        "restate",
+                        "link"
                       ],
                       "title": "Kind",
                       "type": "string"
@@ -93973,6 +94725,19 @@
                       },
                       "title": "Relations",
                       "type": "array"
+                    },
+                    "changed": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "restate only: false when the lists and name were already the current revision (no new revision)",
+                      "title": "Changed"
                     }
                   },
                   "required": [
@@ -94142,7 +94907,9 @@
                         "unrelate",
                         "rename",
                         "identify",
-                        "withdraw"
+                        "withdraw",
+                        "restate",
+                        "link"
                       ],
                       "title": "Kind",
                       "type": "string"
@@ -94161,6 +94928,19 @@
                       },
                       "title": "Relations",
                       "type": "array"
+                    },
+                    "changed": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "restate only: false when the lists and name were already the current revision (no new revision)",
+                      "title": "Changed"
                     }
                   },
                   "required": [
@@ -94274,6 +95054,238 @@
         "x-ophiolite-stability": "pilot"
       }
     },
+    "/api/v1/projects/{project}/surveys/restate": {
+      "post": {
+        "summary": "Restate a survey from complete member and relation lists, one revision; members you cannot read are kept",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "x-ophiolite-agent": {
+          "reach": "person",
+          "reason": "write-not-admitted",
+          "admitted": "never",
+          "policy": false
+        },
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "survey_id": {
+                      "title": "Survey Id",
+                      "type": "string"
+                    },
+                    "revision": {
+                      "title": "Revision",
+                      "type": "integer"
+                    },
+                    "kind": {
+                      "enum": [
+                        "create",
+                        "add",
+                        "remove",
+                        "replace",
+                        "relate",
+                        "unrelate",
+                        "rename",
+                        "identify",
+                        "withdraw",
+                        "restate",
+                        "link"
+                      ],
+                      "title": "Kind",
+                      "type": "string"
+                    },
+                    "members": {
+                      "description": "The versions this command opened or closed",
+                      "items": {
+                        "$ref": "#/components/schemas/SurveyMemberKey"
+                      },
+                      "title": "Members",
+                      "type": "array"
+                    },
+                    "relations": {
+                      "items": {
+                        "$ref": "#/components/schemas/SurveyRelation"
+                      },
+                      "title": "Relations",
+                      "type": "array"
+                    },
+                    "changed": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "restate only: false when the lists and name were already the current revision (no new revision)",
+                      "title": "Changed"
+                    }
+                  },
+                  "required": [
+                    "survey_id",
+                    "revision",
+                    "kind",
+                    "members",
+                    "relations"
+                  ],
+                  "title": "SurveyReceipt",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "E142 s2a (D-RS): the complete new member and relation lists, one revision; members you may not read are kept.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "Your id for this command; repeating it with the same body answers its receipt",
+                    "maxLength": 512,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "survey_id": {
+                    "title": "Survey Id",
+                    "type": "string"
+                  },
+                  "expected_revision": {
+                    "description": "The revision you read; another current revision refuses survey-changed",
+                    "minimum": 1,
+                    "title": "Expected Revision",
+                    "type": "integer"
+                  },
+                  "members": {
+                    "description": "Every member you may read, as it should be",
+                    "items": {
+                      "$ref": "#/components/schemas/SurveyMember"
+                    },
+                    "maxItems": 10000,
+                    "title": "Members",
+                    "type": "array"
+                  },
+                  "relations": {
+                    "description": "Every relation between members you may read, as it should be",
+                    "items": {
+                      "$ref": "#/components/schemas/SurveyRelation"
+                    },
+                    "maxItems": 20000,
+                    "title": "Relations",
+                    "type": "array"
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "maxLength": 160,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Absent: the name stays",
+                    "title": "Name"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "command_id",
+                  "survey_id",
+                  "expected_revision",
+                  "members",
+                  "relations"
+                ],
+                "title": "SurveyRestate",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "x-ophiolite-stability": "pilot"
+      }
+    },
     "/api/v1/projects/{project}/surveys/unrelate": {
       "post": {
         "summary": "Remove relations between members",
@@ -94331,7 +95343,9 @@
                         "unrelate",
                         "rename",
                         "identify",
-                        "withdraw"
+                        "withdraw",
+                        "restate",
+                        "link"
                       ],
                       "title": "Kind",
                       "type": "string"
@@ -94350,6 +95364,19 @@
                       },
                       "title": "Relations",
                       "type": "array"
+                    },
+                    "changed": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "restate only: false when the lists and name were already the current revision (no new revision)",
+                      "title": "Changed"
                     }
                   },
                   "required": [
@@ -94522,7 +95549,9 @@
                         "unrelate",
                         "rename",
                         "identify",
-                        "withdraw"
+                        "withdraw",
+                        "restate",
+                        "link"
                       ],
                       "title": "Kind",
                       "type": "string"
@@ -94541,6 +95570,19 @@
                       },
                       "title": "Relations",
                       "type": "array"
+                    },
+                    "changed": {
+                      "anyOf": [
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "restate only: false when the lists and name were already the current revision (no new revision)",
+                      "title": "Changed"
                     }
                   },
                   "required": [
@@ -110811,6 +111853,90 @@
                                                 }
                                               ],
                                               "title": "Verification"
+                                            },
+                                            "witness": {
+                                              "additionalProperties": false,
+                                              "description": "E113 s0: Ophiolite ran this run in the project's sandbox. Written by the server's runner only (slice 1); the\nrunner of the run stays the person who started it, or the assistant on behalf of that person.",
+                                              "properties": {
+                                                "kind": {
+                                                  "const": "sandbox",
+                                                  "title": "Kind",
+                                                  "type": "string"
+                                                },
+                                                "job": {
+                                                  "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+                                                  "title": "Job",
+                                                  "type": "string"
+                                                },
+                                                "image": {
+                                                  "pattern": "^sha256:[0-9a-f]{64}$",
+                                                  "title": "Image",
+                                                  "type": "string"
+                                                },
+                                                "runtime": {
+                                                  "maxLength": 40,
+                                                  "minLength": 1,
+                                                  "pattern": "^[a-z][a-z0-9.+-]*$",
+                                                  "title": "Runtime",
+                                                  "type": "string"
+                                                },
+                                                "limits": {
+                                                  "additionalProperties": false,
+                                                  "description": "E113 s0: the limits the box ran with, all three, as the runner applied them (never above the deployment's).",
+                                                  "properties": {
+                                                    "memory_mb": {
+                                                      "maximum": 65536,
+                                                      "minimum": 1,
+                                                      "title": "Memory Mb",
+                                                      "type": "integer"
+                                                    },
+                                                    "seconds": {
+                                                      "maximum": 86400,
+                                                      "minimum": 1,
+                                                      "title": "Seconds",
+                                                      "type": "integer"
+                                                    },
+                                                    "cpus": {
+                                                      "exclusiveMinimum": 0,
+                                                      "maximum": 64,
+                                                      "title": "Cpus",
+                                                      "type": "number"
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "memory_mb",
+                                                    "seconds",
+                                                    "cpus"
+                                                  ],
+                                                  "title": "WitnessLimits",
+                                                  "type": "object"
+                                                },
+                                                "network": {
+                                                  "const": "none",
+                                                  "title": "Network",
+                                                  "type": "string"
+                                                },
+                                                "started_at": {
+                                                  "title": "Started At",
+                                                  "type": "number"
+                                                },
+                                                "finished_at": {
+                                                  "title": "Finished At",
+                                                  "type": "number"
+                                                }
+                                              },
+                                              "required": [
+                                                "kind",
+                                                "job",
+                                                "image",
+                                                "runtime",
+                                                "limits",
+                                                "network",
+                                                "started_at",
+                                                "finished_at"
+                                              ],
+                                              "title": "DerivationWitness",
+                                              "type": "object"
                                             }
                                           },
                                           "required": [
@@ -134127,6 +135253,9 @@
               "server-owned",
               "withdraw-unknown",
               "already-withdrawn",
+              "witnessed-unknown",
+              "witnessed-other-version",
+              "witnessed-no-result",
               "unknown-procedure",
               "step",
               "slots",
@@ -135133,6 +136262,227 @@
         "title": "HeadRef",
         "type": "object"
       },
+      "HeldCopy": {
+        "additionalProperties": false,
+        "properties": {
+          "copy": {
+            "pattern": "^[0-9a-f]{16}$",
+            "title": "Copy",
+            "type": "string"
+          },
+          "item": {
+            "$ref": "#/components/schemas/HeldCopyItem"
+          },
+          "application": {
+            "anyOf": [
+              {
+                "pattern": "^(application:[a-z0-9._-]{1,128}|script)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Application"
+          },
+          "person": {
+            "$ref": "#/components/schemas/HeldCopyPerson"
+          },
+          "key": {
+            "default": null,
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Key",
+            "type": "string"
+          },
+          "version": {
+            "$ref": "#/components/schemas/HeldCopyVersion"
+          },
+          "mode": {
+            "anyOf": [
+              {
+                "enum": [
+                  "stays",
+                  "follows"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mode"
+          },
+          "state": {
+            "enum": [
+              "current",
+              "behind",
+              "no-longer-readable"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "behind": {
+            "$ref": "#/components/schemas/HeldCopyBehind",
+            "default": null
+          }
+        },
+        "required": [
+          "copy",
+          "item",
+          "application",
+          "person",
+          "version",
+          "mode",
+          "state"
+        ],
+        "title": "HeldCopy",
+        "type": "object"
+      },
+      "HeldCopyBehind": {
+        "additionalProperties": false,
+        "description": "The item's versions newer than the held one that the reader may read, and the head.",
+        "properties": {
+          "count": {
+            "minimum": 1,
+            "title": "Count",
+            "type": "integer"
+          },
+          "newest": {
+            "$ref": "#/components/schemas/HeldCopyNewest"
+          }
+        },
+        "required": [
+          "count",
+          "newest"
+        ],
+        "title": "HeldCopyBehind",
+        "type": "object"
+      },
+      "HeldCopyItem": {
+        "additionalProperties": false,
+        "properties": {
+          "asset_id": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "kind": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "asset_id",
+          "name",
+          "kind"
+        ],
+        "title": "HeldCopyItem",
+        "type": "object"
+      },
+      "HeldCopyNewest": {
+        "additionalProperties": false,
+        "properties": {
+          "revision": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Revision",
+            "type": "string"
+          },
+          "author": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Author",
+            "type": "string"
+          },
+          "at": {
+            "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$",
+            "title": "At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "revision",
+          "author",
+          "at"
+        ],
+        "title": "HeldCopyNewest",
+        "type": "object"
+      },
+      "HeldCopyPerson": {
+        "additionalProperties": false,
+        "description": "Who the copy belongs to, as this reader may see it; a name only beside `you` or `named`.",
+        "properties": {
+          "shown": {
+            "enum": [
+              "you",
+              "named",
+              "a-member"
+            ],
+            "title": "Shown",
+            "type": "string"
+          },
+          "name": {
+            "default": null,
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "shown"
+        ],
+        "title": "HeldCopyPerson",
+        "type": "object"
+      },
+      "HeldCopyVersion": {
+        "additionalProperties": false,
+        "description": "The version the copy last confirmed: `since` its first confirmation after its last different revision,\n`confirmed_at` the latest.",
+        "properties": {
+          "revision": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Revision",
+            "type": "string"
+          },
+          "how": {
+            "enum": [
+              "got",
+              "sent"
+            ],
+            "title": "How",
+            "type": "string"
+          },
+          "confirmed_at": {
+            "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$",
+            "title": "Confirmed At",
+            "type": "string"
+          },
+          "since": {
+            "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$",
+            "title": "Since",
+            "type": "string"
+          }
+        },
+        "required": [
+          "revision",
+          "how",
+          "confirmed_at",
+          "since"
+        ],
+        "title": "HeldCopyVersion",
+        "type": "object"
+      },
       "HistoryNamed": {
         "additionalProperties": false,
         "properties": {
@@ -135196,6 +136546,44 @@
           "name_at_time"
         ],
         "title": "HistoryParty",
+        "type": "object"
+      },
+      "HoldersRequest": {
+        "additionalProperties": false,
+        "description": "The body of `exchange/holders`: the project (equal to the path's), an item or the whole project, and a page.",
+        "properties": {
+          "project_id": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Project Id",
+            "type": "string"
+          },
+          "item": {
+            "default": null,
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Item",
+            "type": "string"
+          },
+          "limit": {
+            "default": 200,
+            "maximum": 500,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "cursor": {
+            "default": null,
+            "maxLength": 1024,
+            "minLength": 1,
+            "title": "Cursor",
+            "type": "string"
+          }
+        },
+        "required": [
+          "project_id"
+        ],
+        "title": "HoldersRequest",
         "type": "object"
       },
       "Identity": {
@@ -135333,6 +136721,20 @@
         "title": "ImportWarning",
         "type": "object"
       },
+      "InventoryDisplay": {
+        "properties": {
+          "member_names": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "E173 s0b: the name of each person a listed item names in `by` (absent when the person has no name)",
+            "title": "Member Names",
+            "type": "object"
+          }
+        },
+        "title": "InventoryDisplay",
+        "type": "object"
+      },
       "InventoryItem": {
         "description": "E28: one logical asset at its current head; `authority` says where it lives (managed, native, retained).",
         "properties": {
@@ -135380,6 +136782,46 @@
               }
             ],
             "title": "Can Reuse"
+          },
+          "profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The head version's profile (an upload keeps its profile across versions); null for a native row",
+            "title": "Profile"
+          },
+          "by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Who made version 1, as the item's history names them (a person id; display.member_names labels it); null for a native row",
+            "title": "By"
+          },
+          "represents": {
+            "anyOf": [
+              {
+                "const": "horizon",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "What the sender said this point set represents; kept by every later version",
+            "title": "Represents"
           }
         },
         "required": [
@@ -151966,7 +153408,9 @@
               "unrelate",
               "rename",
               "identify",
-              "withdraw"
+              "withdraw",
+              "restate",
+              "link"
             ],
             "title": "Kind",
             "type": "string"
@@ -152693,7 +154137,9 @@
               "unrelate",
               "rename",
               "identify",
-              "withdraw"
+              "withdraw",
+              "restate",
+              "link"
             ],
             "title": "Kind",
             "type": "string"
@@ -153812,6 +155258,19 @@
         "additionalProperties": false,
         "description": "A SQL table: its inspected columns and sample, the suggested mapping, and the saved mappings.",
         "properties": {
+          "key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E154 s1: the table read, present only in an assistant's job step: the one the step named, or the one its person picked.",
+            "title": "Key"
+          },
           "columns": {
             "items": {
               "additionalProperties": true,
@@ -157073,6 +158532,18 @@
             ],
             "default": null
           },
+          "wellbore": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UploadRunRepositoryWellbore"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E60w: the borehole's wellbore, part of the well, once the row ended"
+          },
           "count": {
             "anyOf": [
               {
@@ -157233,6 +158704,56 @@
           "outcome"
         ],
         "title": "UploadRunRepositoryWell",
+        "type": "object"
+      },
+      "UploadRunRepositoryWellbore": {
+        "additionalProperties": false,
+        "description": "E60w: the borehole's wellbore, part of the row's well; `elsewhere` when a wellbore carries the borehole's identity\nbut is not part of that well (nothing is linked to it).",
+        "properties": {
+          "entity_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Entity Id"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Name"
+          },
+          "outcome": {
+            "enum": [
+              "created",
+              "already-here",
+              "elsewhere"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "linked": {
+            "description": "False when the file was not linked to this wellbore (linked to another, or the link was removed by a person)",
+            "title": "Linked",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "outcome",
+          "linked"
+        ],
+        "title": "UploadRunRepositoryWellbore",
         "type": "object"
       },
       "UploadRunSample": {

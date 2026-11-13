@@ -126,6 +126,16 @@ def _warn_source_records_omitted(omitted):
         warnings.warn('Source records were left out of this bundle: '+omitted+'.',UserWarning,stacklevel=3)
 
 
+def _environment_credential(url,project):
+    """The credential gallery.connect would take for URL and PROJECT, in its order: the file OPHIOLITE_CREDENTIAL names
+    or the sign-in `ophiolite account login` saved for them, else OPHIOLITE_ACCESS_KEY; None when there is none."""
+    from .auth import default_path
+    path=os.environ.get('OPHIOLITE_CREDENTIAL') or default_path(url,project)
+    if os.environ.get('OPHIOLITE_CREDENTIAL') or os.path.exists(path) or os.path.islink(path):return Credential.from_file(path)
+    if 'OPHIOLITE_ACCESS_KEY' in os.environ:return Credential.bearer(os.environ['OPHIOLITE_ACCESS_KEY'],source='environment')
+    return None
+
+
 from .locations import LocationClient  # noqa: E402
 from .sources import SourceClient  # noqa: E402
 from .checks import CheckClient  # noqa: E402
@@ -157,7 +167,9 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         if ('asset' in value)!=('revision' in value):raise Refused('An exact selection needs both asset and revision.')
         for key in ('asset','revision','curve'):
             if key in value and (not isinstance(value[key],str) or not value[key]):raise Refused('Invalid exact-read selection.')
-        return cls(value.get('url'),value.get('project'),credential,http)
+        client=cls(value.get('url'),value.get('project'),credential,http)
+        if credential is None:client.credential=_environment_credential(client.url,client.project)  # first-run defect 9
+        return client
 
     def sync(self,checkpoint=None):
         """E28: a local copy of this project kept current from its event log (ophiolite.sync.Sync)."""
@@ -933,6 +945,33 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         name, identity, revision and count (the members you may read)."""
         for page in self._pages('list',{},'surveys'):yield from page['surveys']
 
+    def holder_pages(self,item=None,*,limit=None):
+        """E171 s1: the pages of exchange/holders (ophiolite.held-copies/1), first page first, each validated: which
+        member's application holds which version of the items you may read (of `item` alone when named)."""
+        from . import publish as planning
+        from .models.generated import HeldCopies
+        body={**({'item':item} if item is not None else {}),**({'limit':limit} if limit else {})}
+        cursor,seen=None,set()
+        for _ in range(_surveys.MAX_PAGES):
+            raw=self._post('exchange','holders',{**body,**({'cursor':cursor} if cursor else {})},retry=True)
+            page=planning.parse(HeldCopies,raw)
+            if page.project!=self.project or page.item!=item:raise VerificationFailed('The holders page names another project or item.')
+            yield raw;cursor=page.next
+            if cursor is None:return
+            if cursor in seen:raise VerificationFailed('Invalid or repeated holders cursor.')
+            seen.add(cursor)
+        raise VerificationFailed('The holders read did not end.')
+
+    def holders(self,item=None):
+        """E171 s1: who holds which version, read whole: the first page's document with every page's rows and no
+        `next`. Plain words (who, which application, how far behind) are the CLI's `ophiolite data holders`."""
+        whole=None
+        for page in self.holder_pages(item):
+            if whole is None:whole=dict(page,rows=list(page['rows']))
+            else:whole['rows']+=page['rows']
+        whole['next']=None
+        return whole
+
     def survey_pages(self,survey_id,revision=None,*,view='revision',limit=None):
         """The pages of one survey revision (ophiolite.survey/1), first page first; see survey()."""
         from . import publish as planning
@@ -981,6 +1020,17 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
     def identify_survey(self,survey_id,expected_revision,identity,*,command_id=None):
         """Gives a provisional survey its identity {authority, key}; once per project and identity."""
         return self._survey_command('identify',{'survey_id':survey_id,'expected_revision':expected_revision,'identity':identity},command_id)
+
+    def restate_survey(self,survey_id,expected_revision,members,relations=(),*,name=None,command_id=None):
+        """E142 s2a: the survey's complete new lists in one revision: what is absent closes, what is new opens, unchanged
+        members stay; members you cannot read are kept. The same lists and name answer changed: False, no revision."""
+        body={'survey_id':survey_id,'expected_revision':expected_revision,'members':list(members),'relations':list(relations),
+              **({'name':name} if name is not None else {})}
+        return self._survey_command('restate',body,command_id)
+
+    def link_survey_members(self,survey_id,expected_revision,members,*,command_id=None):
+        """E142 s2a: items already in the project made members, as add does, recorded as a person's linking (kind link)."""
+        return self._survey_command('link',{'survey_id':survey_id,'expected_revision':expected_revision,'members':list(members)},command_id)
 
     def withdraw_survey(self,survey_id,expected_revision,*,command_id=None):
         """Withdraws the survey: no longer listed or read; nothing it names is changed."""
@@ -1109,19 +1159,24 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         return self._send(source,body,extra)
 
     def upload_data(self,source,*,profile,name,attribution,audience,rights_confirmed,declared=None,filename=None,well_log=None,well_notes='',command_id=None,origin=None,
-                    append_to=None,expected_parent=None,provenance=None,application_source=None):
+                    append_to=None,expected_parent=None,provenance=None,application_source=None,represents=None,holder=None,application=None):
         """E11/E18: upload an original of any supported type with the context you declare (units, CRS,
         meanings; nothing is inferred). Starts private. A repeated command id returns the same asset.
         E53: `append_to` (your uploaded wavelet, model or section) with `expected_parent` (its current revision)
         adds the file as that result's next version; its audience stays the result's.
         E122 s6: `application_source` ({system: 'application:<client id>', instance, container, id}) records the
-        application object the file came from, as a send's `source` does; `source` stays the file."""
+        application object the file came from, as a send's `source` does; `source` stays the file.
+        E173 s0b: `represents='horizon'` marks a point set (points-csv/1, petrel-points-attributes/1) as a horizon, in one
+        request or in parts; a later version keeps the mark without naming it.
+        E171 s1: `holder` (a work folder's holder id) and `application` ('application:<word>' or 'script') record that
+        the folder holds the version this upload adds; neither changes what a retry with the same command id matches."""
         import uuid
         from . import publish as planning
         filename=filename or (Path(source).name if not isinstance(source,bytes) else 'upload')
         body,extra=planning.upload_metadata(self.project,command_id or uuid.uuid4().hex,filename=filename,name=name,attribution=attribution,audience=audience,
                                             rights_confirmed=rights_confirmed,well_notes=well_notes,profile=profile,declared=declared,well_log=well_log,origin=origin,
-                                            append_to=append_to,expected_parent=expected_parent,provenance=provenance,application_source=application_source)
+                                            append_to=append_to,expected_parent=expected_parent,provenance=provenance,application_source=application_source,
+                                            represents=represents,holder=holder,application=application)
         return self._send(source,body,extra)
 
     def _described(self):
@@ -1165,7 +1220,7 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
     def _upload_parts(self,file,digest,body):
         """begin (the same command continues), the parts not yet received, finish, the check (polled), publish."""
         begin={'command_id':body['command_id'],'filename':body['filename'],'profile':body.get('profile','las2/1'),'declared':body.get('declared',{}),
-               'bytes':file.size,'sha256':digest,**{k:body[k] for k in ('append_to','expected_parent') if k in body}}
+               'bytes':file.size,'sha256':digest,**{k:body[k] for k in ('append_to','expected_parent','represents') if k in body}}  # E173 s0b: the mark goes with begin
         view=self._transfer_parts(file,self._post('las-uploads','begin',begin,retry=True))
         if view['state'] not in ('checked','published'):raise session_refusal(view)
         fields={k:body[k] for k in ('name','attribution','audience','rights_confirmed','well_notes','well_log','source') if k in body}  # E122 s6: the item's source
@@ -1205,7 +1260,8 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
             return parts.digest(),parts.expected
         return save_verified(destination,fill,mismatch='The downloaded original does not match the file the deployment holds; nothing was saved.')
 
-    def publish_derived(self,written,*,name,from_,method,command_id,of_entity=None,new_version_of=None,expected_parent=None,procedure=None,source=None):
+    def publish_derived(self,written,*,name,from_,method,command_id,of_entity=None,new_version_of=None,expected_parent=None,procedure=None,source=None,
+                        holder=None,application=None):
         """E30b: publish a file you derived (a `WrittenOriginal` from ophiolite.writers) from exact revisions you
         may reuse, with the method you declare. `command_id` is required: a network retry with the same id is
         safe (the same receipt comes back); a fresh id on retry can create a second asset. Use
@@ -1218,11 +1274,14 @@ class Client(Navigation, EntityClient, LocationClient, SourceClient, CheckClient
         is published again for that outcome: the receipt is the earlier result with `republished`. E122 s4a: `source`
         ({system: 'application:<client id>', instance, container, id, as_new}) names the application object the file came
         from; the version keeps it, and without `new_version_of` or `as_new` the server compares the send with what that
-        object sent before (receipt `source_change`: new, changed, or unchanged with nothing published)."""
+        object sent before (receipt `source_change`: new, changed, or unchanged with nothing published). E171 s1: `holder`
+        and `application` record that a work folder holds the version published (a person's send only: an assistant
+        naming a holder is refused)."""
         from . import publish as planning
         from .models.api import PublicationReceipt
         body,extra=planning.derive_request(self.project,written,name=name,from_=from_,method=method,command_id=command_id,of_entity=of_entity,
-                                           new_version_of=new_version_of,expected_parent=expected_parent,procedure=procedure,source=source)
+                                           new_version_of=new_version_of,expected_parent=expected_parent,procedure=procedure,source=source,
+                                           holder=holder,application=application)
         from .presentation import PresentedReceipt,publication_recipe
         recipe=publication_recipe(name=name,from_=from_,method=method,of_entity=of_entity)  # E104: "Send again", at call time
         verify=planning.verify_derived if procedure is None else planning.verify_run_output

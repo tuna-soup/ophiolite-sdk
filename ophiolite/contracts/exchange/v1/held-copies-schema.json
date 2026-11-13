@@ -1,0 +1,333 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/exchange/v1/held-copies-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.held-copies/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "HeldCopy": {
+      "additionalProperties": false,
+      "properties": {
+        "copy": {
+          "pattern": "^[0-9a-f]{16}$",
+          "title": "Copy",
+          "type": "string"
+        },
+        "item": {
+          "$ref": "#/$defs/HeldCopyItem"
+        },
+        "application": {
+          "anyOf": [
+            {
+              "pattern": "^(application:[a-z0-9._-]{1,128}|script)$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Application"
+        },
+        "person": {
+          "$ref": "#/$defs/HeldCopyPerson"
+        },
+        "key": {
+          "default": null,
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "version": {
+          "$ref": "#/$defs/HeldCopyVersion"
+        },
+        "mode": {
+          "anyOf": [
+            {
+              "enum": [
+                "stays",
+                "follows"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Mode"
+        },
+        "state": {
+          "enum": [
+            "current",
+            "behind",
+            "no-longer-readable"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "behind": {
+          "$ref": "#/$defs/HeldCopyBehind",
+          "default": null
+        }
+      },
+      "required": [
+        "copy",
+        "item",
+        "application",
+        "person",
+        "version",
+        "mode",
+        "state"
+      ],
+      "title": "HeldCopy",
+      "type": "object"
+    },
+    "HeldCopyBehind": {
+      "additionalProperties": false,
+      "description": "The item's versions newer than the held one that the reader may read, and the head.",
+      "properties": {
+        "count": {
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        },
+        "newest": {
+          "$ref": "#/$defs/HeldCopyNewest"
+        }
+      },
+      "required": [
+        "count",
+        "newest"
+      ],
+      "title": "HeldCopyBehind",
+      "type": "object"
+    },
+    "HeldCopyItem": {
+      "additionalProperties": false,
+      "properties": {
+        "asset_id": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "kind": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "asset_id",
+        "name",
+        "kind"
+      ],
+      "title": "HeldCopyItem",
+      "type": "object"
+    },
+    "HeldCopyNewest": {
+      "additionalProperties": false,
+      "properties": {
+        "revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "author": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Author",
+          "type": "string"
+        },
+        "at": {
+          "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$",
+          "title": "At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "revision",
+        "author",
+        "at"
+      ],
+      "title": "HeldCopyNewest",
+      "type": "object"
+    },
+    "HeldCopyPerson": {
+      "additionalProperties": false,
+      "description": "Who the copy belongs to, as this reader may see it; a name only beside `you` or `named`.",
+      "properties": {
+        "shown": {
+          "enum": [
+            "you",
+            "named",
+            "a-member"
+          ],
+          "title": "Shown",
+          "type": "string"
+        },
+        "name": {
+          "default": null,
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "shown"
+      ],
+      "title": "HeldCopyPerson",
+      "type": "object"
+    },
+    "HeldCopyVersion": {
+      "additionalProperties": false,
+      "description": "The version the copy last confirmed: `since` its first confirmation after its last different revision,\n`confirmed_at` the latest.",
+      "properties": {
+        "revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "how": {
+          "enum": [
+            "got",
+            "sent"
+          ],
+          "title": "How",
+          "type": "string"
+        },
+        "confirmed_at": {
+          "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$",
+          "title": "Confirmed At",
+          "type": "string"
+        },
+        "since": {
+          "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$",
+          "title": "Since",
+          "type": "string"
+        }
+      },
+      "required": [
+        "revision",
+        "how",
+        "confirmed_at",
+        "since"
+      ],
+      "title": "HeldCopyVersion",
+      "type": "object"
+    },
+    "HoldersRequest": {
+      "additionalProperties": false,
+      "description": "The body of `exchange/holders`: the project (equal to the path's), an item or the whole project, and a page.",
+      "properties": {
+        "project_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "item": {
+          "default": null,
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Item",
+          "type": "string"
+        },
+        "limit": {
+          "default": 200,
+          "maximum": 500,
+          "minimum": 1,
+          "title": "Limit",
+          "type": "integer"
+        },
+        "cursor": {
+          "default": null,
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Cursor",
+          "type": "string"
+        }
+      },
+      "required": [
+        "project_id"
+      ],
+      "title": "HoldersRequest",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "project": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Project",
+      "type": "string"
+    },
+    "item": {
+      "anyOf": [
+        {
+          "maxLength": 512,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Item"
+    },
+    "as_of": {
+      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$",
+      "title": "As Of",
+      "type": "string"
+    },
+    "complete_since": {
+      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d{1,6})?Z$",
+      "title": "Complete Since",
+      "type": "string"
+    },
+    "rows": {
+      "items": {
+        "$ref": "#/$defs/HeldCopy"
+      },
+      "maxItems": 500,
+      "title": "Rows",
+      "type": "array"
+    },
+    "next": {
+      "anyOf": [
+        {
+          "maxLength": 1024,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Next"
+    }
+  },
+  "required": [
+    "project",
+    "item",
+    "as_of",
+    "complete_since",
+    "rows",
+    "next"
+  ],
+  "title": "HeldCopies",
+  "type": "object"
+}

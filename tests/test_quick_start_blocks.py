@@ -202,9 +202,11 @@ def test_the_f3_bundle_runs_every_block_verbatim(tmp_path):
     python, which = wheel_python()
     print('F3 run with %s: %s' % (which, python))
     oracle = json.loads(Path(record).read_text())
-    with zipfile.ZipFile(bundle) as archive:  # the first log's GR as stored in the bundle, read without the SDK
-        first = json.loads(archive.read('manifest.json'))['assets'][0]
-        [member] = [f['path'] for f in first['files'] if f['path'].endswith('/curve-GR.json')]
+    with zipfile.ZipFile(bundle) as archive:  # the first log's GR as stored in the bundle, read without the SDK: the first
+        # LAS entry that carries GR, in catalogue (bundle) order, as the README's Python block picks it
+        gr = [[f['path'] for f in a['files'] if f['path'].endswith('/curve-GR.json')]
+              for a in json.loads(archive.read('manifest.json'))['assets'] if a.get('profile') == 'las2/1']
+        [member] = next(paths for paths in gr if paths)
         curve = json.loads(archive.read(member))
     wells = sorted(oracle['wells'])
 

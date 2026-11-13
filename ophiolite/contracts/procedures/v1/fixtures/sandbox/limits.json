@@ -1,0 +1,20 @@
+{
+  "note": "E113 s0: effective_limits(requested, ceiling) against the ceiling of decision 3 (256 MB, 60 s, 1 CPU), written by hand. `requested` is a SandboxLimitsRequest body (null: no limits object); `expect` is the complete WitnessLimits, or `refused` the closed code with its sentence.",
+  "ceiling": {"memory_mb": 256, "seconds": 60, "cpus": 1.0},
+  "above": "The sandbox allows at most 256 MB, 60 seconds and 1 CPU here.",
+  "cases": [
+    {"name": "no limits object", "requested": null, "expect": {"memory_mb": 256, "seconds": 60, "cpus": 1.0}},
+    {"name": "an empty limits object", "requested": {}, "expect": {"memory_mb": 256, "seconds": 60, "cpus": 1.0}},
+    {"name": "memory alone lowered", "requested": {"memory_mb": 128}, "expect": {"memory_mb": 128, "seconds": 60, "cpus": 1.0}},
+    {"name": "memory alone equal", "requested": {"memory_mb": 256}, "expect": {"memory_mb": 256, "seconds": 60, "cpus": 1.0}},
+    {"name": "memory alone above", "requested": {"memory_mb": 257}, "refused": "limits-above"},
+    {"name": "seconds alone lowered", "requested": {"seconds": 1}, "expect": {"memory_mb": 256, "seconds": 1, "cpus": 1.0}},
+    {"name": "seconds alone equal", "requested": {"seconds": 60}, "expect": {"memory_mb": 256, "seconds": 60, "cpus": 1.0}},
+    {"name": "seconds alone above", "requested": {"seconds": 61}, "refused": "limits-above"},
+    {"name": "cpus alone lowered", "requested": {"cpus": 0.25}, "expect": {"memory_mb": 256, "seconds": 60, "cpus": 0.25}},
+    {"name": "cpus alone equal, as a whole number", "requested": {"cpus": 1}, "expect": {"memory_mb": 256, "seconds": 60, "cpus": 1.0}},
+    {"name": "cpus alone above", "requested": {"cpus": 1.5}, "refused": "limits-above"},
+    {"name": "all three lowered", "requested": {"memory_mb": 64, "seconds": 10, "cpus": 0.5}, "expect": {"memory_mb": 64, "seconds": 10, "cpus": 0.5}},
+    {"name": "two lowered, one above", "requested": {"memory_mb": 64, "seconds": 120, "cpus": 0.5}, "refused": "limits-above"}
+  ]
+}

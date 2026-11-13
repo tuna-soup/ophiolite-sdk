@@ -31,5 +31,15 @@
     {"name": "a withdrawal named as the target", "target": "verification-000000000000000000000000000000a2", "person": "u-anna", "admin": false, "expect": "withdraw-unknown"},
     {"name": "an already withdrawn verification", "target": "verification-000000000000000000000000000000a1", "person": "u-anna", "admin": false, "expect": "already-withdrawn"},
     {"name": "already withdrawn, asked by an administrator", "target": "verification-000000000000000000000000000000a1", "person": "u-dora", "admin": true, "expect": "already-withdrawn"}
+  ],
+  "runs_note": "E113 s0: witnessed_refusal(run, D). `run` is the stored run as slice 1 reads it ({digest, witness, published}; null: no such run in this project); `witness` is true for a run Ophiolite made (the block's content is not read by the rule) and null for a reported run.",
+  "runs": [
+    {"name": "a published sandbox run of D", "run": {"digest": "D", "witness": true, "published": true}, "expect": null},
+    {"name": "no run with this id in this project", "run": null, "expect": "witnessed-unknown"},
+    {"name": "a reported run of D (no witness)", "run": {"digest": "D", "witness": null, "published": true}, "expect": "witnessed-unknown"},
+    {"name": "a published sandbox run of O", "run": {"digest": "O", "witness": true, "published": true}, "expect": "witnessed-other-version"},
+    {"name": "a sandbox run of D that published nothing", "run": {"digest": "D", "witness": true, "published": false}, "expect": "witnessed-no-result"},
+    {"name": "order: a sandbox run of O that published nothing", "run": {"digest": "O", "witness": true, "published": false}, "expect": "witnessed-other-version"},
+    {"name": "order: a reported run of O that published nothing", "run": {"digest": "O", "witness": null, "published": false}, "expect": "witnessed-unknown"}
   ]
 }

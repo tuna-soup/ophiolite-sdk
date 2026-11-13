@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/scientific/v1/derivation-2.json",
   "x-ophiolite": {
     "id": "ophiolite.derivation/2",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -286,6 +286,9 @@
             }
           ],
           "title": "Verification"
+        },
+        "witness": {
+          "$ref": "#/$defs/DerivationWitness"
         }
       },
       "required": [
@@ -388,6 +391,62 @@
         "line"
       ],
       "title": "DerivationWithdrawn",
+      "type": "object"
+    },
+    "DerivationWitness": {
+      "additionalProperties": false,
+      "description": "E113 s0: Ophiolite ran this run in the project's sandbox. Written by the server's runner only (slice 1); the\nrunner of the run stays the person who started it, or the assistant on behalf of that person.",
+      "properties": {
+        "kind": {
+          "const": "sandbox",
+          "title": "Kind",
+          "type": "string"
+        },
+        "job": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+          "title": "Job",
+          "type": "string"
+        },
+        "image": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Image",
+          "type": "string"
+        },
+        "runtime": {
+          "maxLength": 40,
+          "minLength": 1,
+          "pattern": "^[a-z][a-z0-9.+-]*$",
+          "title": "Runtime",
+          "type": "string"
+        },
+        "limits": {
+          "$ref": "#/$defs/WitnessLimits"
+        },
+        "network": {
+          "const": "none",
+          "title": "Network",
+          "type": "string"
+        },
+        "started_at": {
+          "title": "Started At",
+          "type": "number"
+        },
+        "finished_at": {
+          "title": "Finished At",
+          "type": "number"
+        }
+      },
+      "required": [
+        "kind",
+        "job",
+        "image",
+        "runtime",
+        "limits",
+        "network",
+        "started_at",
+        "finished_at"
+      ],
+      "title": "DerivationWitness",
       "type": "object"
     },
     "ImplementationV2": {
@@ -859,6 +918,37 @@
         "name_at_time"
       ],
       "title": "VerifierPerson",
+      "type": "object"
+    },
+    "WitnessLimits": {
+      "additionalProperties": false,
+      "description": "E113 s0: the limits the box ran with, all three, as the runner applied them (never above the deployment's).",
+      "properties": {
+        "memory_mb": {
+          "maximum": 65536,
+          "minimum": 1,
+          "title": "Memory Mb",
+          "type": "integer"
+        },
+        "seconds": {
+          "maximum": 86400,
+          "minimum": 1,
+          "title": "Seconds",
+          "type": "integer"
+        },
+        "cpus": {
+          "exclusiveMinimum": 0,
+          "maximum": 64,
+          "title": "Cpus",
+          "type": "number"
+        }
+      },
+      "required": [
+        "memory_mb",
+        "seconds",
+        "cpus"
+      ],
+      "title": "WitnessLimits",
       "type": "object"
     }
   },

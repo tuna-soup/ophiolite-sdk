@@ -146,7 +146,9 @@ KEPT_OPERATIONS={'las-uploads':{'provenance-stage',  # E107a C6b: an import stag
 NEW_DATA_OPERATIONS={'context':{'new-data','new-data-save'},'las-uploads':{'audience','audience-preview','audience-save'},
                      'templates':{'list','csv','xlsx'}}  # E90: New data settings; the one control on an original. E91: table templates
 JOB_OPERATIONS={'agents':{'proposals'},'jobs':{'answer'}}  # E151 s2: the person's side of an agent's job (what waits for them; their answer)
-SURVEY_OPERATIONS={'surveys':{'get','list','history','create','add','remove','replace','relate','unrelate','rename','identify','withdraw'}}  # E142 s1
+SURVEY_OPERATIONS={'surveys':{'get','list','history','create','add','remove','replace','relate','unrelate','rename','identify','withdraw',
+                                'restate','link'}}  # E142 s1; E142 s2a: the complete lists in one revision, existing items linked
+EXCHANGE_OPERATIONS={'exchange':{'holders','release'}}  # E171 s1: who holds which version of an item; a folder's copy released
 
 
 # E39: an organisation's connections are not a project's; their routes carry no project (/api/v1/<area>/<op>).
@@ -159,7 +161,7 @@ def operation_path(project,area,operation):
         return '/api/v1/'+area+'/'+operation
     allowed=(GROUP_OPERATIONS if area=='result-groups' else READ_OPERATIONS|WRITE_OPERATIONS if area in ('applications','las-uploads')
              else ENTITY_OPERATIONS.get(area) or SOURCE_OPERATIONS.get(area) or MAP_OPERATIONS.get(area) or REPORT_OPERATIONS.get(area) or RESULT_OPERATIONS.get(area) or CHECK_OPERATIONS.get(area) or PROCEDURE_OPERATIONS.get(area) or OUTCOME_OPERATIONS.get(area) or IMPORT_OPERATIONS.get(area) or RELEASE_OPERATIONS.get(area) or JOB_OPERATIONS.get(area) or AI_OPERATIONS.get(area,set()))
-    allowed=allowed|SESSION_OPERATIONS.get(area,set())|NEW_DATA_OPERATIONS.get(area,set())|KEPT_OPERATIONS.get(area,set())|SURVEY_OPERATIONS.get(area,set())
+    allowed=allowed|SESSION_OPERATIONS.get(area,set())|NEW_DATA_OPERATIONS.get(area,set())|KEPT_OPERATIONS.get(area,set())|SURVEY_OPERATIONS.get(area,set())|EXCHANGE_OPERATIONS.get(area,set())
     if operation not in allowed:
         raise Refused('Unsupported application operation.')
     return '/api/v1/projects/'+quote(project,safe='')+'/'+area+'/'+operation
@@ -689,7 +691,7 @@ def upload_bytes(source):
 
 
 def upload_metadata(project,command_id,*,filename,name,attribution,audience,rights_confirmed,well_notes='',profile=None,declared=None,well_log=None,origin=None,
-                    append_to=None,expected_parent=None,provenance=None,application_source=None):
+                    append_to=None,expected_parent=None,provenance=None,application_source=None,represents=None,holder=None,application=None):
     value={'project_id':project,'command_id':command_id,'filename':filename,'name':name,'attribution':attribution,
            'audience':audience,'rights_confirmed':rights_confirmed,'well_notes':well_notes}
     # Fields are sent only when used, so existing LAS uploads keep their exact request (and retry fingerprint).
@@ -701,8 +703,11 @@ def upload_metadata(project,command_id,*,filename,name,attribution,audience,righ
     if append_to is not None:value.update(append_to=append_to,expected_parent=expected_parent)  # E53: a new version of your own upload
     if provenance is not None:value['provenance']=provenance  # E107a C6b: the staged original kept beside this file
     if application_source is not None:value['source']=source_block(application_source)  # E122 s6: where the file was sent from
+    if represents is not None:value['represents']=represents  # E173 s0b: a point set the sender marks as a horizon
+    held=held_fields(holder,application)  # E171 s1: the sender's copy, only when named; checked by its own grammar
     try:api.UploadRequest.model_validate(value)
     except ValidationError:raise ValidationFailed(['Confirm rights, project, name, attribution and bounded upload details.']) from None
+    value.update(held)  # after the model check: the hand-kept UploadRequest model predates these two fields
     validate_recipients(audience,[])
     if not name.strip() or not attribution.strip() or any(len(recipient)>160 for recipient in audience):
         raise ValidationFailed(['Supply a name, attribution and supported recipient names.'])
@@ -765,9 +770,23 @@ def compares(body):
     return 'source' in body and not body['source'].get('as_new') and body.get('new_version_of') is None
 
 
-def derive_request(project,written,*,name,from_,method,command_id,of_entity=None,new_version_of=None,expected_parent=None,procedure=None,source=None):
+HOLDER=re.compile(r'[a-zA-Z0-9-]{16,80}')
+HELD_APPLICATION=re.compile(r'application:[a-z0-9._-]{1,128}|script')
+
+
+def held_fields(holder,application):
+    """E171 s1 (D5): the sender's holder id (a work folder's) and its application word on the wire, each only when given,
+    so a send that names neither is the request it was."""
+    if holder is not None and not (isinstance(holder,str) and HOLDER.fullmatch(holder)):raise ValidationFailed(['Name the holder by its id (16-80 letters, digits or hyphens).'])
+    if application is not None and not (isinstance(application,str) and HELD_APPLICATION.fullmatch(application)):
+        raise ValidationFailed(["Name the application as 'application:<word>' or 'script'."])
+    return {k:v for k,v in (('holder',holder),('application',application)) if v is not None}
+
+
+def derive_request(project,written,*,name,from_,method,command_id,of_entity=None,new_version_of=None,expected_parent=None,procedure=None,source=None,
+                   holder=None,application=None):
     """The X-Ophiolite-Upload header of publications/derive, validated before anything is sent. E122 s4a: `source` (see
-    `source_block`) is added only when given."""
+    `source_block`) is added only when given. E171 s1: `holder` and `application` (`held_fields`) likewise."""
     import hashlib
     from .writers import WrittenOriginal
     if not isinstance(written,WrittenOriginal):raise ValidationFailed(['Publish a file made by ophiolite.writers (a WrittenOriginal).'])
@@ -788,6 +807,7 @@ def derive_request(project,written,*,name,from_,method,command_id,of_entity=None
     if (procedure or {}).get('for_outcome') is not None:  # E120: "Publish for" an outcome, for an output of a run made again
         if not isinstance(procedure['for_outcome'],str) or not 0<len(procedure['for_outcome'])<=64:raise ValidationFailed(['Name the outcome to publish for by its id.'])
         body['for_outcome']=procedure['for_outcome']
+    body.update(held_fields(holder,application))
     if not 1<=len(parents)<=32 or len({(p['asset_id'],p['revision']) for p in parents})!=len(parents):raise ValidationFailed(['Name 1-32 distinct parents.'])
     if not isinstance(name,str) or not name.strip() or len(name)>160:raise ValidationFailed(['Give the result a name (up to 160 characters).'])
     try:api.MethodRecord.model_validate(method)

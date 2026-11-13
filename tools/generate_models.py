@@ -24,7 +24,8 @@ def name(value):
 
 def python_field(field):
     python_name = re.sub('[^A-Za-z0-9_]', '_', field)
-    return python_name + '_' if keyword.iskeyword(python_name) or python_name in ('schema','model_config') else python_name
+    # E171 s0: `copy` (held copies) shadows BaseModel.copy, and the import warning broke clean CLI output
+    return python_name + '_' if keyword.iskeyword(python_name) or python_name in ('schema','model_config','copy') else python_name
 
 class Generator:
     def __init__(self):

@@ -78,6 +78,12 @@ SHA-256, so the same bytes never sit at two paths of a pack: a derived file with
 with the bytes of a derived file at another path, is refused. The export is bound by its content, so a rerun with
 another export is refused.
 
+After every file has landed, the build places the export's survey in the project: each file it added becomes a
+member, and each well file is related to the survey's cube when there is exactly one cube. Horizons and 2D lines in
+the export become members with no relation to the cube or to each other, because the export does not state one.
+Record one with `relate` (`Client.relate_survey_members`) when you know it. Use `link`
+(`Client.link_survey_members`) to add files that the build left out.
+
 ## Resuming
 
 `landing.json` records each input before any of its content is sent. If a build stops, run the same command with

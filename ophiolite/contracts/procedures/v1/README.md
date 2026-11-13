@@ -9,7 +9,8 @@ A procedure is a team's own code described to Ophiolite: a folder holding `proce
 | `rules.json` | `ophiolite.procedure-rules/1`: the steps, what each step may read and make (literal kind lists), units, limits and every sentence, under one `rules_version` |
 | `procedure.py` | the validator of record: `validate(folder)`, `digest(folder)`, `pack(folder)`, `unpack_check(archive, destination)`; standard library only (Python 3.10) |
 | `delivery.py` | `ophiolite.delivery/1` (E109): the check of the delivery a send procedure reports, `{delivery_id, state, items}` and nothing else; states `confirmed`, `not-sent`, `unknown`; standard library only |
-| `tool-verification.json` | `ophiolite.tool-verification/1` (E165, preview): who verified one procedure digest against a check or a publication, or withdrew a verification; generated from `project_gateway/tool_verifications.py`, its vectors in `fixtures/tool-verification/` |
+| `tool-verification.json` | `ophiolite.tool-verification/1` (E165, preview): who verified one procedure digest against a check, a publication or (1.1.0, E113 s0) a run Ophiolite made in the project's sandbox, or withdrew a verification; generated from `project_gateway/tool_verifications.py`, its vectors in `fixtures/tool-verification/` |
+| `fixtures/sandbox/` | E113 s0: sandbox run requests, the limits a run gets under the ceiling and the words a witnessed result says, for `project_gateway/sandbox.py` (no published schema: the ceiling is deployment configuration) |
 | `fixtures/` | valid manifests per step, single-defect invalid manifests with their expected code, field and sentence (`expected.json`), and two sample bundles |
 
 **One validator.** The Platform and the SDK run this same `procedure.py` (the SDK's copy is byte-identical through

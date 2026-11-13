@@ -90,7 +90,8 @@ def test_check_get_and_send_from_the_command_line(run, tmp_path):
 
 
 EXITS = {'not-visible': 4, 'cannot-read-here': 1, 'damaged': 1, 'map-unavailable': 4, 'newer-version-exists': 4, 'nothing-changed': 4, 'earlier-version': 4, 'access-refused': 3,
-         'not-valid': 1, 'not-held': 1, 'too-large': 1, 'outcome-unknown': 5, 'folder-busy': 5, 'rate-limited': 5, 'sign-in-needed': 3, 'could-not-reach': 5}
+         'not-valid': 1, 'not-held': 1, 'too-large': 1, 'outcome-unknown': 5, 'folder-busy': 5, 'rate-limited': 5, 'sign-in-needed': 3, 'could-not-reach': 5,
+         'name-unclear': 1, 'name-not-found': 4}
 
 
 def test_get_names_a_columns_body_data_ophpts(web, served, tmp_path):
@@ -130,6 +131,57 @@ def test_the_default_layer_says_none_of_the_internal_words():
         texts.append(sub.choices[verb].format_help().split('options:')[0].split('\n', 1)[1])  # the verb's description and arguments
         texts += [a.help or '' for a in sub.choices[verb]._actions] + [c.help for c in sub._choices_actions if c.dest == verb]
     assert [t for t in texts if BANNED.search(t)] == []
+
+
+def test_send_of_an_upload_names_the_flag_that_confirms_the_rights(run, tmp_path):
+    """E70d C2. Mutation: the flag not passed to send -> the refusal stays -> red; the flag's words dropped -> red."""
+    web = run.web
+    ka = key(web, 'alice')
+    alice = Client(ORIGIN, 'p', Credential.bearer(ka['key']), web.c)
+    base = points(1)
+    pid = alice.upload_data(base.bytes, profile=base.profile, declared=base.declared, name='Picked points', attribution='Synthetic',
+                            audience=[], rights_confirmed=True, command_id='e70d-cli').asset_id
+    assert run(ka, 'a', 'get', '--item', pid, '--output', str(tmp_path / 'pa'))[0] == 0
+    v2 = tmp_path / 'v2.csv'; v2.write_bytes(points(3).bytes)
+    send = ['send', str(v2), '--profile', 'points-csv/1', '--name', 'Picked points', '--how', 'picked again', '--based-on', pid, '--of', pid,
+            *[a for k, v in base.declared.items() for a in ('--declare', '%s=%s' % (k, v))]]
+    assert run(ka, 'a', *send) == (1, '', 'The project refused this: confirm that you may share this version with --rights-confirmed. Nothing was sent.')
+    assert run(ka, 'a', *send, '--rights-confirmed') == (0, 'Sent Picked points as version 2. Version 1 is kept.', '')
+
+
+ROWS = b'x,y,z\n' + b''.join(b'%d,%d,%d.5\n' % (i, i * 2, 1000 + i) for i in range(40))
+SEND = dict(profile='points-csv/1', attribution='Synthetic', audience=[], rights_confirmed=True)
+
+
+def test_get_and_check_by_name_and_type_with_stay_and_latest_from_the_command_line(run, tmp_path):
+    """E173 s1 C3 (D7, F12, R-M7 both ways). Mutation: the CLI's own `stays` sentence dropped -> the re-run says
+    stay=False, which nobody can type here."""
+    web = run.web
+    ka = key(web, 'alice')
+    alice = Client(ORIGIN, 'p', Credential.bearer(ka['key']), web.c)
+    top = alice.upload_data(ROWS, name='Top Rotliegend', represents='horizon', command_id='e173-cli-top', **SEND)
+    for n in (1, 2): alice.upload_data(ROWS + b'%d,0,0\n' % n, name='Shared name', command_id='e173-cli-shared-%d' % n, **SEND)
+    out = tmp_path / 'top'
+    get = ('get', '--name', 'Top Rotliegend', '--type', 'horizon', '--output', str(out))
+    code, said, err = run(ka, 'a', *get, '--stay')
+    assert (code, err) == (0, '') and said.startswith('Got Top Rotliegend, version 1 by Alice') and (out / 'original').read_bytes() == ROWS
+    assert run(ka, 'a', *get, '--stay') == (0, 'You stay on version 1 of Top Rotliegend, the latest.', '')
+    alice.upload_data(ROWS + b'9,9,9\n', name='Top Rotliegend', represents='horizon', command_id='e173-cli-top-2', append_to=top.asset_id,
+                      expected_parent=top.revision, **SEND)
+    stays = 'You stay on version 1 of Top Rotliegend. Version 2 is newer; get it with --latest to take it.'
+    assert run(ka, 'a', *get) == (0, stays, '')  # no flag: the folder recorded that it stays
+    assert run(ka, 'a', 'check', '--name', 'Top Rotliegend')[1].startswith('1 newer: Top Rotliegend, version 2')
+    code, said, err = run(ka, 'a', *get, '--latest')
+    assert (code, err) == (0, '') and said.startswith('Got Top Rotliegend, version 2') and (out / 'original').read_bytes() == ROWS + b'9,9,9\n'
+    assert run(ka, 'a', *get, '--stay') == (0, 'You stay on version 2 of Top Rotliegend, the latest.', '')
+    held = json.loads((tmp_path / 'a/held.json').read_text())['items'][top.asset_id]
+    assert (held['words'], held['mode']) == ({'name': 'Top Rotliegend', 'type': 'horizon'}, 'stays')
+    code, said, err = run(ka, 'a', 'get', '--name', 'Shared name', '--output', str(tmp_path / 's'))
+    assert (code, said) == (1, '') and err.startswith('More than one item you can see is called Shared name: a point set by Alice (version 1) and')
+    assert run(ka, 'a', 'get', '--name', 'Nowhere', '--output', str(tmp_path / 'n')) == (4, '', 'No item you can see is called Nowhere. Nothing was changed.')
+    for argv in (('get', '--item', top.asset_id, '--name', 'Top Rotliegend', '--output', str(out)), ('get', '--output', str(out)),
+                 ('get', '--name', 'Top Rotliegend', '--output', str(out), '--stay', '--latest')):
+        assert run(ka, 'a', *argv)[0] == 2, argv
 
 
 def test_the_held_folder_defaults_to_one_beside_the_script():

@@ -13,7 +13,7 @@ import sys
 import time
 from .errors import Refused
 
-BUNDLE_SHA256 = '800c43629b433cc9c1bcf3c01af830738391e38106922185068762d1bd6b97f3'  # the F3-block demo bundle (E162 slice 0)
+BUNDLE_SHA256 = '7f8f1078b6ca7b40cad2e8afdb5f7bbe0e73aa10a26e32d61595d0e62c47c5f3'  # the restorable F3-block bundle (E162 s2a; item 241)
 BUNDLE_URL = None  # set once the owner publishes the bundle for download (item 241); until then --bundle PATH
 BUNDLE_NAME = 'f3-block.zip'
 FOLDER = 'ophiolite-demo'
@@ -25,6 +25,9 @@ DEPLOYMENT = 'https://ophiolite.dev/docs/operate/install/'  # web/docs/src/conte
 NOT_PUBLISHED = 'The demo bundle is not yet published for download; use --bundle PATH.'
 FOREIGN = 'An ophiolite-demo folder or link that the demo did not make is here; move it, or run ophiolite demo in another folder.'
 TOKEN_HEADER = 'X-Ophiolite-Demo-Token'
+# the support.py an earlier demo wrote (E162 s1), replaced when unchanged: it read the catalogue's first item (E162 s1b)
+SHIPPED_SUPPORT = frozenset({'d185d8386c8bf8ab6accb0320521b467bad51410c07662ba36953c5e5f2f27f9'})
+EDITED_SUPPORT = "This folder's support.py was changed; run ophiolite demo in a new folder to use the current template."
 
 
 def command(args):
@@ -41,13 +44,14 @@ def command(args):
     if state is None: state, started = start(folder, path)
     url = 'http://127.0.0.1:%d' % state['port']
     configuration, credential = folder / 'configuration.json', folder / 'credential.json'
-    write_private(configuration, (json.dumps({'schema': 'ophiolite.local-configuration/1', 'url': url, 'project': facts['project']}, indent=2) + '\n').encode())
     from . import auth
-    if credential.exists() or credential.is_symlink(): credential.unlink()  # a key of an earlier server: replaced, never read
-    auth.key_login(url, facts['project'], state['key'], path=credential)
-    template(folder)
+    with auth._lock(folder / 'setup'):  # two starts at once: neither removes the files the other is writing or reading back
+        write_private(configuration, (json.dumps({'schema': 'ophiolite.local-configuration/1', 'url': url, 'project': facts['project']}, indent=2) + '\n').encode())
+        if credential.exists() or credential.is_symlink(): credential.unlink()  # a key of an earlier server: replaced, never read
+        auth.key_login(url, facts['project'], state['key'], path=credential)
+        edited = template(folder)
     commands = lines(folder, facts)
-    return said(facts, commands, started), {'state': 'started' if started else 'running', 'digest': facts['digest'], 'bundle': facts['which'],
+    return said(facts, commands, started) + ('\n' + EDITED_SUPPORT if edited else ''), {'state': 'started' if started else 'running', 'digest': facts['digest'], 'bundle': facts['which'],
                                              'url': url, 'project': facts['project'], 'attribution': facts['attribution'], 'commands': commands}
 
 
@@ -94,10 +98,9 @@ def examine(path):
         for descriptor in served['parsed'].values():
             words = (descriptor.get('acquisition') or {}).get('attribution')
             if isinstance(words, str) and words and words not in attribution: attribution.append(words)  # as recorded, an import record too
-    logs = sorted(((Path(a['source_path']).stem, a['entry']['asset_id'], a['entry']['revision']) for a in applications.served
-                   if a['entry'].get('profile') == 'las2/1' and 'GR' in a['curves']))
-    well, asset, revision = logs[0]  # a demo-compatible bundle's first asset is such a log
-    first = Path(applications.served[0]['source_path']).stem  # the log the template reads: the catalogue's first
+    gr = [a for a in applications.served if a['entry'].get('profile') == 'las2/1' and 'GR' in a['curves']]
+    well, asset, revision = sorted((Path(a['source_path']).stem, a['entry']['asset_id'], a['entry']['revision']) for a in gr)[0]
+    first = Path(gr[0]['source_path']).stem  # the log the template reads: the catalogue's first that carries GR (E162 s1b)
     return {'digest': digest, 'which': 'f3-block' if digest == BUNDLE_SHA256 else 'yours', 'project': applications.project,
             'attribution': attribution, 'well': well, 'asset': asset, 'revision': revision, 'template_well': first}
 
@@ -121,7 +124,7 @@ def said(facts, commands, started):
     text = ['%s %s on this computer (sha256 %s).' % ('Serving' if started else 'Still serving', which, facts['digest']), *facts['attribution'],
             'This is a demo on this computer, not a deployment: publications last until the demo stops. Deployment options: ' + DEPLOYMENT,
             '', 'Run these from this folder:',
-            '  1. The wells (this bundle carries no wellhead positions, so none is located):', '     ' + shown(commands[0]),
+            '  1. The wells (the demo serves them without locations):', '     ' + shown(commands[0]),
             '  2. The whole GR curve of %s, into a new folder:' % facts['well'], '     ' + shown(commands[1]),
             '  3. Double the GR curve of %s and publish it with the derive-and-publish template:' % facts['template_well'], '     ' + shown(commands[2]),
             '', 'Stop the demo with: ophiolite demo stop']
@@ -129,12 +132,20 @@ def said(facts, commands, started):
 
 
 def template(folder):
-    """derive-and-publish and the support module beside it, as `ophiolite tools init` copies them; kept when present."""
+    """derive-and-publish and the support module beside it, as `ophiolite tools init` copies them; kept when present,
+    except a support module an earlier demo wrote unchanged, which is replaced (E162 s1b). True when an edited one is kept."""
     from importlib.resources import files
     from .cli import _copy
     root = files('ophiolite').joinpath('templates')
     if not (folder / 'derive-and-publish').exists(): _copy(root.joinpath('derive-and-publish'), folder / 'derive-and-publish')
-    if not (folder / 'support.py').exists(): (folder / 'support.py').write_bytes(root.joinpath('support.py').read_bytes())
+    support, current = folder / 'support.py', root.joinpath('support.py').read_bytes()
+    if support.is_file() and not support.is_symlink():
+        held = support.read_bytes()
+        if held == current: return False
+        if hashlib.sha256(held).hexdigest() not in SHIPPED_SUPPORT: return True
+    elif support.exists() or support.is_symlink(): return True
+    support.write_bytes(current)
+    return False
 
 
 def write_private(path, raw):

@@ -53,7 +53,7 @@ def test_include_tops_brings_in_tops_only(nlog):
     assert report.ok and report.not_read == [] and report.state == 'closed', report.text()
     assert [(r['kind'], r['result']) for r in report.rows()] == [('Well tops (CSV)', 'Added')]
     assert [i['path'].split('/')[0] for i in report.items] == ['HON-GT-02']
-    assert [e.name for e in alice.entities()] == ['HON-GT-02']  # the well is named by NLOG's own code
+    assert sorted((e.kind, e.name) for e in alice.entities()) == [('well', 'HON-GT-02'), ('wellbore', 'HON-GT-02')]  # named by NLOG's own code (E60w: and its wellbore)
     assert alice.public_repositories.search('nlog', name='HON-GT-02')[0]['in_project'] is True
     check = alice.public_repositories.check('nlog')
     assert check['sentence'] == 'Nothing has changed at NLOG.' and [f['state'] for f in check['files']] == ['unchanged']

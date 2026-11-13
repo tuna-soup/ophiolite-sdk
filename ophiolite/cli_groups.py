@@ -15,7 +15,8 @@ GROUPS = (
     ('account', 'Sign in, check this computer, and who can see what',
      ('login', 'logout', 'status', 'doctor', 'projects', 'orgs', 'teams', 'access-history', 'ai-use', 'share', 'audience', 'rights')),
     ('data', 'Read what you may see: curves, wells, lists and exact revisions',
-     ('curves', 'wells', 'list', 'fetch', 'read-data', 'entities', 'changes', 'check', 'get', 'find', 'kinds', 'surveys', 'survey')),  # find: E145 s3; kinds: E168 s1; surveys: E142 s1
+     ('curves', 'wells', 'list', 'fetch', 'read-data', 'entities', 'changes', 'check', 'get', 'find', 'kinds', 'surveys', 'survey',
+      'holders')),  # find: E145 s3; kinds: E168 s1; surveys: E142 s1; holders: E171 s1
     ('exchange', 'Bring files in and take bundles out',
      ('import', 'upload', 'export', 'bundle', 'send', 'deliver', 'intake', 'source', 'sources', 'repositories', 'well-imports',
       'sample', 'new-data', 'templates', 'template', 'targets', 'layouts', 'org-connections')),

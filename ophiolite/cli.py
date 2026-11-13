@@ -268,6 +268,9 @@ def parser():
     trying.add_argument('operation',metavar='OPERATION',help='area/name, for example applications/configure')
     trying.add_argument('--body',type=Path,required=True,help='A file holding the request as one JSON object, without dry_run')
     project(sub.add_parser('surveys',help='List the surveys you may see, with the members you may read'))  # E142 s1
+    holders=project(sub.add_parser('holders',help='Which applications hold which version of the items you may read'))  # E171 s1
+    holders.add_argument('--item',metavar='ID',help='Only this item (default: every item you may read)')
+    holders.add_argument('--project',dest='holders_project',help='The project (default: the configuration\'s)')
     survey=project(sub.add_parser('survey',help='One survey: its members and relations you may read, at a revision or as of now'))
     survey.add_argument('survey_id',metavar='ID')
     survey_when=survey.add_mutually_exclusive_group()
@@ -498,9 +501,18 @@ def parser():
     def held(p):
         project(p).add_argument('--work',type=Path,default=Path('.ophiolite-held'),help='The folder that remembers what you hold (default .ophiolite-held)')
         return p
-    held(sub.add_parser('check',help='Say what is newer than what you hold, what is new and what you can no longer see'))
-    get=held(sub.add_parser('get',help='Get the latest version of an item into a new or held folder; you then hold it'))
-    get.add_argument('--item',required=True,help='The item id from ophiolite data list');get.add_argument('--output',type=Path,required=True,help='Where to save it')
+    def named(p,item=None):  # E173 s1 (D7): an item by its name and type word; exactly one of --item and --name (else exit 2)
+        which=p.add_mutually_exclusive_group(required=True) if item else p
+        if item:which.add_argument('--item',help=item)
+        which.add_argument('--name',help='The item by the name it is called'+(' (only this item)' if not item else ''))
+        p.add_argument('--type',help="With --name: the item's type, such as horizon or 'well log'")
+        return p
+    named(held(sub.add_parser('check',help='Say what is newer than what you hold, what is new and what you can no longer see')))
+    get=named(held(sub.add_parser('get',help='Get the latest version of an item into a new or held folder; you then hold it')),item='The item id from ophiolite data list')
+    get.add_argument('--output',type=Path,required=True,help='Where to save it')
+    stay=get.add_mutually_exclusive_group()
+    stay.add_argument('--stay',dest='stay',action='store_const',const=True,default=None,help='Keep the version this folder holds from now on (the first time, get the latest)')
+    stay.add_argument('--latest',dest='stay',action='store_const',const=False,default=None,help='Get the latest version, now and on every later get')
     get.add_argument('--curve',action='append',help='A well log: a curve to receive (repeat)')
     get.add_argument('--window',help='A seismic volume: part of it, written as SEG-Y (window.sgy), e.g. inline=100:104,crossline=300:310,sample=0:5,by=label')
     send=held(sub.add_parser('send',help='Send a file as a new item, or as the next version of one you hold; it is private until you share it'))
@@ -510,6 +522,7 @@ def parser():
     send.add_argument('--based-on',dest='based_on',action='append',required=True,metavar='ID',help='An item you hold that it is based on (repeat, 1-32)')
     send.add_argument('--of',help='An item you hold and wrote: send this as its next version')
     send.add_argument('--declare',action='append',default=[],metavar='KEY=VALUE',help='A declaration such as crs=EPSG:28992 (repeat)')
+    send.add_argument('--rights-confirmed',dest='rights_confirmed',action='store_true',help='With --of an upload: I may share this version')  # E70d
     # E96: checks against a reference (`check` above is E70a's exchange command and stays)
     checks=sub.add_parser('checks',help='Checks against a reference: publish, list, compare a result with a file, and who may publish')
     verbs=checks.add_subparsers(dest='action',required=True)
@@ -638,6 +651,7 @@ def parser():
     sbuild.add_argument('--verification',type=Path,required=True,help='The folder of verification results (<record id with / as __>.json)')
     sbuild.add_argument('--custody',type=Path,required=True,help='The folder of custody documents (<sha256>.json)')
     sbuild.add_argument('--export',type=Path,help='For a definition with an archive input: the folder ophiolite starter export wrote; its derived files are landed and the pack gets the OpendTect target')
+    sbuild.add_argument('--restate-survey',action='store_true',help="With --export: replace the members of the export's survey in the project with this export's, even when someone edited it after it was last placed")  # E142 s2a (D-P)
     # E129 sc C3: the OpendTect target's qualification (maintainer only)
     sopen=project(sverbs.add_parser('opendtect',parents=[common],help="Run the pack's import.py into an existing OpendTect survey, read each placed object back and compare it with the landed item at its pinned version; writes files/targets/opendtect/result.json, then starter.json's oracle"))
     sopen.add_argument('out',type=Path,help='The pack folder starter build wrote (an archive pack)')
@@ -671,6 +685,7 @@ def parser():
     sexport.add_argument('--timeout',type=int,default=7200,help='Seconds the export may run (default 7200)')
     # E140 s2 C4 (Q3): a local extraction policy, not a deployment limit; the starter export holds no client
     sexport.add_argument('--max-uncompressed-bytes',type=int,default=None,help='The most bytes the archive may hold uncompressed, all members together (default 8 GiB)')
+    sexport.add_argument('--instance',help="The OpendTect installation's id for this export, instead of the one the connector keeps (1 to 64 letters, digits, dots, hyphens or underscores)")  # E142 s2a (D-I)
     skills=sub.add_parser('skills',help='Locate packaged SDK guidance')
     skills.add_subparsers(dest='action',required=True).add_parser('path')
     parser.add_argument('--version',action='version',version=__version__)  # E163 s1: the release, no configuration read
@@ -908,13 +923,18 @@ def _starter(args,client=None):
     if args.action=='export':  # E129 sb
         from . import starter_archive
         report,folder=starter_archive.export(args.definition,args.out,catalogue=args.catalogue,verification=args.verification,custody=args.custody,python=args.opendtect_python,timeout=args.timeout,
-                                             **({} if args.max_uncompressed_bytes is None else {'max_uncompressed':args.max_uncompressed_bytes}))
+                                             instance=args.instance,**({} if args.max_uncompressed_bytes is None else {'max_uncompressed':args.max_uncompressed_bytes}))
         return done(args,'Exported %s in %s: %d derived files, %d objects not read; derived.json points to it.' % (report['record_id'],folder,len(report['derived']),len(report['not_read'])),
                     {'exported':True,'record_id':report['record_id'],'derived':str(folder/'derived.json')})
-    doc=starter.build(client,args.definition,args.out,catalogue=args.catalogue,verification=args.verification,custody=args.custody,export=args.export)
+    if args.restate_survey and args.export is None:raise Refused('--restate-survey places the survey of an export; give --export.')
+    doc=starter.build(client,args.definition,args.out,catalogue=args.catalogue,verification=args.verification,custody=args.custody,export=args.export,
+                      place=args.export is not None,restate=args.restate_survey)  # E142 s2a (D-P): an export's build places its survey
     if args.export is not None:  # E129 sc: an archive pack, from its export's derived files
-        return done(args,'Built %s in %s from the export: %d derived files, %d artefacts in files/ (unpublished, no keys yet).' % (doc['id'],args.out,len(doc['derived']),paths(doc)),
-                    {'built':True,'id':doc['id'],'starter':str(args.out/'starter.json')})
+        placed=(json.loads((args.out/'landing.json').read_text()).get('survey') or {})
+        told=''.join(' %s: %s.' % (x['name'],x['sentence']) for x in placed.get('loose') or [])+''.join(' %s.' % s.rstrip('.') for s in placed.get('said') or [])
+        return done(args,'Built %s in %s from the export: %d derived files, %d artefacts in files/ (unpublished, no keys yet); survey %s at revision %d.%s'
+                    % (doc['id'],args.out,len(doc['derived']),paths(doc),placed['placed']['survey_id'],placed['placed']['revision'],told),
+                    {'built':True,'id':doc['id'],'starter':str(args.out/'starter.json'),'survey':placed['placed'],'loose':placed.get('loose') or [],'said':placed.get('said') or []})
     return done(args,'Built %s in %s: %d inputs landed, %d artefacts in files/ (unpublished, no keys yet).' % (doc['id'],args.out,len(doc['inputs']),len(doc['targets'][0]['artefacts'])),
                 {'built':True,'id':doc['id'],'starter':str(args.out/'starter.json')})
 
@@ -1148,6 +1168,32 @@ def _surveys(args,client):
     words+=['  %s %s %s' % (names.get((r['subject']['asset_id'],r['subject']['revision'])),r['predicate'],names.get((r['object']['asset_id'],r['object']['revision']))) for r in relations]
     return done(args,'\n'.join(words),{'survey_id':found.survey_id,'name':found.name,'revision':found.revision,'view':found.view,'count':found.count,
                                        'members':members,'relations':relations})
+
+
+HELD_APPLICATIONS={'application:qgis-plugin':'QGIS','application:opendtect':'OpendTect','script':'a script'}  # E171 s1 (Codex V1)
+HELD_MODES={'stays':'stays on its version','follows':'follows the newest'}
+
+
+def _held_words(row):
+    """E171 s1 (Codex V1): one held copy in plain words: who, in which application, and how far behind; the application
+    word, revisions and copy ids only in --json."""
+    person=row['person']
+    who={'you':'you','named':person.get('name') or 'a member','a-member':'a member'}[person['shown']]
+    application=row.get('application')
+    used=HELD_APPLICATIONS.get(application) or (application.partition(':')[2] if application else 'an application')
+    state={'current':'current','no-longer-readable':'can no longer read the version it holds'}.get(row['state'])
+    if state is None:
+        count=row['behind']['count'];state='%d version%s behind' % (count,'' if count==1 else 's')
+    mode=' (%s)' % HELD_MODES[row['mode']] if row.get('mode') else ''
+    return '%s: %s in %s, %s%s' % (row['item'].get('name') or 'an item',who,used,state,mode)
+
+
+def _holders(args,client):
+    """E171 s1: `data holders [--item ID] [--project ID]`, who holds which version, read whole; --json is the served
+    document (ophiolite.held-copies/1) with every page's rows."""
+    found=client.holders(args.item)
+    words='\n'.join(_held_words(r) for r in found['rows'])
+    return done(args,words or 'Nobody you may see holds a copy.',found)
 
 
 def _journey(args,client):
@@ -1760,14 +1806,25 @@ def _exchange(args,client):
     if window is not None:  # E141 s0: the syntax is checked before the exchange opens; s2: a valid window is read
         from .volume_windows import parse_spec
         parse_spec(window)
-    exchange=client.exchange(args.work)
-    if args.command=='check':result=exchange.check()
-    elif args.command=='get':result=exchange.get(args.item,output=args.output,**({'curves':args.curve} if args.curve else {}),**({'window':window} if window is not None else {}))
+    from .exchange import SENTENCES
+    exchange=client.exchange(args.work,sentences=dict(SENTENCES,stays=lambda f:SENTENCES['stays'](f).replace('stay=False','--latest')))  # E173 s1 (F12)
+    if args.command=='check':result=exchange.check(name=args.name,type=args.type)
+    elif args.command=='get':result=exchange.get(args.item,name=args.name,type=args.type,stay=args.stay,output=args.output,
+                                                 **({'curves':args.curve} if args.curve else {}),**({'window':window} if window is not None else {}))
     else:
         declared=dict(d.split('=',1) for d in args.declare if '=' in d)
         if len(declared)!=len(args.declare):exchange._raise('not-valid',{'reasons':'give each declaration as KEY=VALUE'})
-        result=exchange.send(args.file,name=args.name,profile=args.profile,how=args.how,based_on=args.based_on,of=args.of,declare=declared or None)
+        from .exchange import NotValid
+        try:result=exchange.send(args.file,name=args.name,profile=args.profile,how=args.how,based_on=args.based_on,of=args.of,declare=declared or None,
+                                 rights_confirmed=args.rights_confirmed)
+        except NotValid as refusal:  # E70d (D2): the command line names its flag
+            if refusal.facts.get('reasons')!='confirm that you may share this version':raise
+            exchange._raise('not-valid',{**refusal.facts,'reasons':refusal.facts['reasons']+' with --rights-confirmed'},refusal.technical)
     done(args,result.sentence,result.to_dict())
+    if args.command=='send' and result.facts.get('held_line') and not getattr(args,'json',False):
+        # E171 design 6: who holds the sent item, for people on its own line, on stderr: stdout stays the sentence alone
+        # because tools/package/qualify_exchange.py compares a send's stdout exactly (--json carries it as a fact)
+        print(result.facts['held_line'],file=sys.stderr)
     return result
 
 
@@ -2187,6 +2244,7 @@ def _main(argv=None):
         raise Refused(DESCRIBE_LATER)
     config=configuration(args.configuration)
     if getattr(args,'upload_project',None):config={**config,'project':args.upload_project}  # E55: ophiolite upload --project
+    if getattr(args,'holders_project',None):config={**config,'project':args.holders_project}  # E171 s1: ophiolite data holders --project
     if getattr(args,'trajectory_scope',None):  # E134: --scope project:ID (your own work); s4: members:ID (the consenting members' work)
         kind,_,project_id=args.trajectory_scope.partition(':')
         if kind not in TRAJECTORY_SCOPES or not project_id:raise Refused('--scope takes project:ID or members:ID.')
@@ -2247,6 +2305,7 @@ def _main(argv=None):
         if args.command in ('access-history','teams'):return _access(args,client)  # E67b
         if args.command=='find':return _find(args,client)  # E145 s3
         if args.command in ('surveys','survey'):return _surveys(args,client)  # E142 s1
+        if args.command=='holders':return _holders(args,client)  # E171 s1
         if args.command=='try':return _try(args,client)  # E150 s1b
         if args.command=='procedures':return _catalogue(args,client)  # E105b: the project's catalogue
         if args.command in ('check','get','send'):return _exchange(args,client)

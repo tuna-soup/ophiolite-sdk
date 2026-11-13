@@ -53,8 +53,8 @@ else:
 # %% [markdown]
 # ## Bring the positions in
 # Only the positions come in here (`include=["location"]`); the wells are created and named by NLOG's own code, never
-# matched by name. Nobody else can read them until you share them. Ophiolite creates wells, not wellbores, from NLOG,
-# so NLOG tops and well paths appear in QGIS only for a well that already has a wellbore.
+# matched by name. Nobody else can read them until you share them. Ophiolite makes each NLOG borehole a well with one
+# wellbore, so NLOG tops appear in QGIS where their wellbore has a location you can read.
 # %%
 if here:
     print(f'Synthetic mode: in your project the {len(codes)} wells would be added at these positions, each with the line "Source: NLOG.NL".')

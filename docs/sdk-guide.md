@@ -39,6 +39,9 @@ with Client(os.environ['OPHIOLITE_URL'], os.environ['OPHIOLITE_PROJECT'], creden
 Choose the asset and exact revision from your permitted catalogue or a downloaded
 configuration. `Client.from_configuration(path, credential=credential)` accepts
 read/local configuration files. No curve or replacement revision is inferred.
+Without `credential` it uses the file `OPHIOLITE_CREDENTIAL` names or the sign-in
+`ophiolite account login` saved for that address and project, else
+`OPHIOLITE_ACCESS_KEY`, as `ophiolite.gallery.connect()` does.
 
 `save` creates a private new directory and refuses an existing one. A single-curve
 read writes `artifact.las`, `curve.json` and `descriptor.json`. Multiple curves get

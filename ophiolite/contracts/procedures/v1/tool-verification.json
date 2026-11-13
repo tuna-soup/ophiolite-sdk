@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/procedures/v1/tool-verification.json",
   "x-ophiolite": {
     "id": "ophiolite.tool-verification/1",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "lifecycle": "preview"
   },
   "title": "ToolVerification",
@@ -389,6 +389,108 @@
       ],
       "title": "WithdrawnReference",
       "type": "object"
+    },
+    "WitnessedReference": {
+      "additionalProperties": false,
+      "description": "E113 s0: the run, and its sandbox job as the server read it at verification (as a check's label).",
+      "properties": {
+        "run_id": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "job": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+          "title": "Job",
+          "type": "string"
+        }
+      },
+      "required": [
+        "run_id",
+        "job"
+      ],
+      "title": "WitnessedReference",
+      "type": "object"
+    },
+    "WitnessedVerification": {
+      "additionalProperties": false,
+      "properties": {
+        "schema": {
+          "const": "ophiolite.tool-verification/1",
+          "title": "Schema",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^verification-[0-9a-f]{32}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "project": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Project",
+          "type": "string"
+        },
+        "digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        },
+        "by": {
+          "$ref": "#/$defs/VerifierPerson"
+        },
+        "at": {
+          "title": "At",
+          "type": "number"
+        },
+        "statement": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "pattern": "^[^\\x00]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Statement"
+        },
+        "command_id": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Command Id",
+          "type": "string"
+        },
+        "request_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Request Sha256",
+          "type": "string"
+        },
+        "kind": {
+          "const": "witnessed",
+          "title": "Kind",
+          "type": "string"
+        },
+        "reference": {
+          "$ref": "#/$defs/WitnessedReference"
+        }
+      },
+      "required": [
+        "schema",
+        "id",
+        "project",
+        "digest",
+        "by",
+        "at",
+        "statement",
+        "command_id",
+        "request_sha256",
+        "kind",
+        "reference"
+      ],
+      "title": "WitnessedVerification",
+      "type": "object"
     }
   },
   "description": "One verification record (or a withdrawal of one); never changed, never deleted.",
@@ -396,7 +498,8 @@
     "mapping": {
       "check": "#/$defs/CheckVerification",
       "publication": "#/$defs/PublicationVerification",
-      "withdrawn": "#/$defs/Withdrawal"
+      "withdrawn": "#/$defs/Withdrawal",
+      "witnessed": "#/$defs/WitnessedVerification"
     },
     "propertyName": "kind"
   },
@@ -406,6 +509,9 @@
     },
     {
       "$ref": "#/$defs/PublicationVerification"
+    },
+    {
+      "$ref": "#/$defs/WitnessedVerification"
     },
     {
       "$ref": "#/$defs/Withdrawal"

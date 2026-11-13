@@ -1,11 +1,35 @@
 {
   "schema": "ophiolite.osdu-compatibility/1",
   "lifecycle": "preview",
-  "date": null,
-  "edition": null,
-  "mapper": null,
-  "manifest": null,
-  "kinds": [],
-  "record": null,
-  "summary": "not yet verified"
+  "date": "2026-11-10",
+  "edition": {
+    "name": "OSDU community implementation",
+    "version": "0.27.1",
+    "services": {
+      "storage": "0.27.1",
+      "schema-service": "0.27.1"
+    }
+  },
+  "mapper": "0.4.0",
+  "manifest": "886c67d575fb7240883d8c242fc3ef092f224c946cbc91caa03d99bb154c9487",
+  "kinds": [
+    "osdu:wks:dataset--File.Generic:1.1.0",
+    "osdu:wks:master-data--Well:1.5.0",
+    "osdu:wks:master-data--Wellbore:1.5.1",
+    "osdu:wks:work-product-component--WellLog:1.5.0"
+  ],
+  "record": "docs/osdu-roundtrip/2026-11-10/record.json",
+  "denied_read": {
+    "outcome": "not-provable",
+    "reason": "outsider-in-viewers"
+  },
+  "operator_steps": {
+    "registered": [
+      "osdu:wks:master-data--Well:1.5.0"
+    ],
+    "supplied": [
+      "data_countries"
+    ]
+  },
+  "summary": "compatibility shown on 2026-11-10 against OSDU community implementation 0.27.1, mapper 0.4.0, manifest 886c67d575fb7240883d8c242fc3ef092f224c946cbc91caa03d99bb154c9487, kinds Well, Wellbore, WellLog, File.Generic; the load registered the Well 1.5.0 schema and supplied the data countries the manifest leaves empty; the denied read was not provable on that edition because its outside test account belonged to the default viewers group"
 }
