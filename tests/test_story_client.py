@@ -254,6 +254,34 @@ def test_remake_without_save_saves_nothing_and_says_how_to(capsys):
     assert payload['saves'] == []
 
 
+def following(states, monkeypatch):
+    """E113 s2b: a sandbox remake whose status answers each of `states` in turn (then `completed`); no real sleep."""
+    monkeypatch.setattr(cli.time, 'sleep', lambda seconds: None)
+    answers = iter(states)
+    def run_step(body):
+        if body['step'] == 'preview': return PREVIEW
+        if body['step'] == 'run': return {**status('different'), 'state': 'running', 'held': None}
+        state = next(answers, 'completed')
+        return {**status('different'), 'state': state, **({'held': None, 'outcomes': []} if state in ('pending', 'running') else {})}
+    return Recorded({'remake-run': run_step})
+
+
+def test_remake_follows_a_sandbox_run_that_is_still_pending(capsys, monkeypatch):
+    c = following(['pending', 'running'], monkeypatch)
+    _, out = run(['remake', 'a-shale', R, '--command-id', 'k1'], c, capsys)
+    assert [body.get('step') for _, _, body, _ in c.calls] == ['preview', 'run', 'status', 'status', 'status']
+    assert out.splitlines()[0] == 'Shale volume: different'
+
+
+def test_remake_still_running_says_how_to_see_it(capsys, monkeypatch):
+    monkeypatch.setattr(cli, 'REMAKE_FOLLOW', 3)
+    c = following(['running'] * 9, monkeypatch)
+    payload, out = run(['remake', 'a-shale', R, '--command-id', 'k1', '--save', '--target', 'new-result'], c, capsys)
+    assert out.splitlines() == ['Still running in the sandbox. Run the same command again with --command-id k1 to see it.']
+    assert [body.get('step') for _, _, body, _ in c.calls] == ['preview', 'run', 'status', 'status', 'status', 'status']
+    assert payload['saves'] == [] and payload['status']['state'] == 'running'
+
+
 def test_remake_with_nothing_different_saves_nothing_even_with_save(capsys):
     c = remaking('equal')
     _, out = run(['remake', 'a-shale', R, '--command-id', 'k1', '--save', '--target', 'new-result'], c, capsys)
@@ -293,3 +321,25 @@ def test_python_sends_the_shared_exchanges_and_returns_their_answers():
     for (area, op, body, _), e, answer in zip(c.calls, exchanges, got):
         assert operation_path('p', area, op) == e['path'] and {'project_id': 'p', **body} == e['request'] and answer == e['response']
     assert len(c.calls) == len(exchanges)
+
+
+# E113 s2 C2: a result a sandbox job made, as the server words it (Platform test_story_reported's witnessed node).
+WITNESSED = {'kind': 'reported', 'name': 'Shifted tops', 'method': {'display': 'Shift tops by a fixed depth', 'version_label': 'version 3 (First release)',
+                                                                    'release': 'Not recorded'},
+             'made': {'at': '2026-11-13T17:00:00Z', 'by': 'bob', 'by_kind': 'person', 'by_name': None, 'on_behalf_of': None, 'through': None, 'reported_by': 'bob'},
+             'verification_line': 'Not verified', 'witness_line': "Ophiolite ran this calculation in the project's sandbox.",
+             'technical': {'sandbox_image': 'Image: sha256:' + '5' * 64, 'sandbox_runtime': 'Runtime: crun', 'sandbox_limits': 'Limits: 256 MB, 60 seconds, 1 CPU',
+                           'sandbox_network': 'No network'}}
+
+
+def test_a_result_a_sandbox_job_made_says_ophiolite_ran_it_started_by_the_person():
+    out = story.details(copy.deepcopy(WITNESSED), {'bob': 'Bob Jansen'})
+    assert out[:2] == ['Made with Shift tops by a fixed depth version 3 (First release), started by Bob Jansen.',
+                       "Ophiolite ran this calculation in the project's sandbox."]
+    assert not any('did not run' in line or '5555' in line or 'crun' in line for line in out)
+
+
+def test_without_the_sandbox_line_a_reported_result_still_says_whose_computer():
+    node = {k: v for k, v in copy.deepcopy(WITNESSED).items() if k != 'witness_line'}
+    assert story.details(node, {'bob': 'Bob Jansen'})[0] == ("Made with Shift tops by a fixed depth version 3 (First release) on Bob Jansen's computer; "
+                                                             'Ophiolite did not run this calculation.')

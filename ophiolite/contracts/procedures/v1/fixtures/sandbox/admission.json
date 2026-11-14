@@ -1,0 +1,27 @@
+{
+  "note": "E113 s1 C1: admit(manifest, packages), written by hand. `manifest` names a fixture under fixtures/ (`valid/process.json`, `bundles/<name>/procedure.json`); `set` replaces top-level fields of it; `packages` is what the image's label lists ({distribution: version}); `expect` is null (admitted) or the closed code with its complete sentence.",
+  "cases": [
+    {"name": "numpy 1.26.4 meets numpy>=1.24", "manifest": "valid/process.json", "packages": {"numpy": "1.26.4", "ophiolite": "2026.11.15"}, "expect": null},
+    {"name": "numpy 1.24 meets numpy>=1.24 (equal)", "manifest": "valid/process.json", "packages": {"numpy": "1.24"}, "expect": null},
+    {"name": "the label's name spelled otherwise (PEP 503)", "manifest": "valid/process.json", "packages": {"NumPy": "1.26.4"}, "expect": null},
+    {"name": "numpy 1.23.5 does not meet numpy>=1.24", "manifest": "valid/process.json", "packages": {"numpy": "1.23.5"},
+     "expect": {"code": "sandbox-requires", "sentence": "Not run: Shift tops by a fixed depth needs numpy>=1.24, which the sandbox does not have."}},
+    {"name": "no numpy in the image", "manifest": "valid/process.json", "packages": {"ophiolite": "2026.11.15"},
+     "expect": {"code": "sandbox-requires", "sentence": "Not run: Shift tops by a fixed depth needs numpy>=1.24, which the sandbox does not have."}},
+    {"name": "an image version that does not parse", "manifest": "valid/process.json", "packages": {"numpy": "not-a-version"},
+     "expect": {"code": "sandbox-requires", "sentence": "Not run: Shift tops by a fixed depth needs numpy>=1.24, which the sandbox does not have."}},
+    {"name": "two unmet, named in order", "manifest": "valid/process.json", "set": {"requires": ["numpy>=1.24", "scipy~=1.11", "pandas"]}, "packages": {"numpy": "1.20", "pandas": "2.2.1"},
+     "expect": {"code": "sandbox-requires", "sentence": "Not run: Shift tops by a fixed depth needs numpy>=1.24 and scipy~=1.11, which the sandbox does not have."}},
+    {"name": "a malformed requires text", "manifest": "valid/process.json", "set": {"requires": ["numpy>=1.24", "numpy; python_version<\"3\""]}, "packages": {"numpy": "1.26.4"},
+     "expect": {"code": "sandbox-requires", "sentence": "Not run: Shift tops by a fixed depth needs numpy; python_version<\"3\", which the sandbox does not have."}},
+    {"name": "the depth-shift bundle needs nothing", "manifest": "bundles/depth-shift/procedure.json", "packages": {}, "expect": null},
+    {"name": "a read tool (team-las)", "manifest": "bundles/team-las/procedure.json", "packages": {"numpy": "1.26.4"},
+     "expect": {"code": "sandbox-step", "sentence": "A tool that reads a file does not run in the sandbox yet."}},
+    {"name": "the step is judged before requires", "manifest": "valid/process.json", "set": {"step": "send"}, "packages": {},
+     "expect": {"code": "sandbox-step", "sentence": "A tool that sends data elsewhere does not run in the sandbox yet."}},
+    {"name": "a package-profile output", "manifest": "valid/process.json", "set": {"outputs": [{"role": "map", "kind": "esri-shapefile/1", "label": "Map"}]}, "packages": {"numpy": "1.26.4"},
+     "expect": {"code": "sandbox-output", "sentence": "A tool that makes esri-shapefile/1 does not run in the sandbox yet."}},
+    {"name": "outputs are judged before requires", "manifest": "valid/process.json", "set": {"outputs": [{"role": "a", "kind": "well-tops-csv/1", "label": "A"}, {"role": "b", "kind": "resqml-epc/1", "label": "B"}]}, "packages": {},
+     "expect": {"code": "sandbox-output", "sentence": "A tool that makes resqml-epc/1 does not run in the sandbox yet."}}
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "ophiolite.seismic-volume/3",
+  "kind": "normalized",
+  "lifecycle": "preview",
+  "display_name": "Seismic cube as published, description",
+  "description": "The volume grid, its positions without a trace, the sample format at its own width, every header decision and the digests of its per-inline chunks of present traces.",
+  "payload_schema": "ophiolite.seismic-volume/3",
+  "role": "normalized",
+  "media_types": [
+    "application/json"
+  ],
+  "interpretation": {
+    "reader": "asset_connectors.typed_reader/1",
+    "parsing_policy": "typed-strict/1",
+    "mapping": "seismic-volume/3"
+  },
+  "mappings": [
+    "ophiolite.mapping/typed-standards/1"
+  ],
+  "table_target": {
+    "none": "not-a-table"
+  }
+}

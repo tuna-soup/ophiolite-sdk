@@ -171,7 +171,7 @@ class PackageInterpretation(Contract):
 
 class TypedInterpretation(Contract):
     reader: Literal['asset_connectors.typed_reader/1', 'asset_connectors.feature_files/1'] = Field(...)
-    mapping: Literal['well-tops/1', 'trajectory/1', 'regular-grid-surface/1', 'triangulated-surface/1', 'point-set/1', 'polyline-set/1', 'seismic-volume/1', 'well-location/1', 'wavelet/1', 'model-section/1', 'seismic-section/1', 'time-depth/1', 'feature-set/1', 'well-path/1', 'well-set/1', 'well-residual/1', 'seismic-line/1', 'seismic-volume/2'] = Field(...)
+    mapping: Literal['well-tops/1', 'trajectory/1', 'regular-grid-surface/1', 'triangulated-surface/1', 'point-set/1', 'polyline-set/1', 'seismic-volume/1', 'well-location/1', 'wavelet/1', 'model-section/1', 'seismic-section/1', 'time-depth/1', 'feature-set/1', 'well-path/1', 'well-set/1', 'well-residual/1', 'seismic-line/1', 'seismic-volume/2', 'seismic-volume/3'] = Field(...)
     parsing_policy: Literal['typed-strict/1'] = Field(...)
     null_policy: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
 
@@ -549,7 +549,7 @@ class ScientificAsset(Contract):
     custodian: Annotated[str, Field(min_length=1, max_length=512)] | None = Field(...)
     source_reference: Reference | None = Field(...)
     profile: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$', max_length=128)] = Field(...)
-    scientific: ScientificContext | TopsContext | TrajectoryContext | GridContext | MeshContext | PointColumnsContext | PolylineContext | SeismicContext | RecipePointContext | WellLocationContext | WaveletContext | ModelSectionContext | SeismicSectionContext | TimeDepthContext | FeatureContext | TableFileContext | WellPathContext | WellSetContext | WellResidualContext | SeismicLineContext | NativeSeismicContext = Field(...)
+    scientific: ScientificContext | TopsContext | TrajectoryContext | GridContext | MeshContext | PointColumnsContext | PolylineContext | SeismicContext | RecipePointContext | WellLocationContext | WaveletContext | ModelSectionContext | SeismicSectionContext | TimeDepthContext | FeatureContext | TableFileContext | WellPathContext | WellSetContext | WellResidualContext | SeismicLineContext | NativeSeismicContext | PublishedSeismicContext = Field(...)
     interpretation: Interpretation | TypedInterpretation | RecipeInterpretation | PackageInterpretation | TableInterpretation | PetrelPackageInterpretation = Field(...)
     interpretation_evidence: Literal['live', 'recorded', 'recorded-differs', 'not-recorded'] = Field('live')
     recorded_interpretation: RecordedInterpretation | None = Field(None)
@@ -929,6 +929,28 @@ class PublicSourceRecord(Contract):
 class PublicSources(Contract):
     records: Annotated[list[PublicSourceRecord], Field(min_length=1, max_length=64)] = Field(...)
     lines: Annotated[list[PublicSourceLine], Field(min_length=1, max_length=64)] = Field(...)
+
+class PublishedSeismicContext(Contract):
+    type: Literal['seismic-volume'] = Field(...)
+    format: Literal['IBM 4-byte floating point', "4-byte two's complement integer", "2-byte two's complement integer", 'IEEE 4-byte floating point'] = Field(...)
+    format_code: Literal[1, 2, 3, 5] = Field(...)
+    segy_revision: Annotated[str, Field(pattern='^[0-9]{1,3}\\.[0-9]{1,3}$')] = Field(...)
+    traces: Annotated[int, Field(ge=1, le=50000000)] = Field(...)
+    cells: Annotated[int, Field(ge=1, le=50000000)] = Field(...)
+    absent: Annotated[int, Field(ge=0)] = Field(...)
+    samples: Annotated[int, Field(ge=1, le=20000)] = Field(...)
+    trace_bytes: Annotated[int, Field(ge=242)] = Field(...)
+    inline: LineRange = Field(...)
+    crossline: LineRange = Field(...)
+    sample_interval: Annotated[float, Field(gt=0)] = Field(...)
+    sample_unit: Annotated[str, Field(pattern='^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$')] = Field(...)
+    first_sample: float = Field(...)
+    z_domain: Literal['time', 'depth', 'unknown'] = Field(...)
+    crs: Annotated[str, Field(pattern='^(EPSG:[0-9]{4,6}|unknown)$')] = Field(...)
+    datum: Annotated[str, Field(min_length=1, max_length=128)] = Field(...)
+    first_cdp: XY = Field(...)
+    last_cdp: XY = Field(...)
+    fidelity: Fidelity = Field(...)
 
 class ReadBy(Contract):
     digest: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
@@ -1343,6 +1365,23 @@ class NativeChunk(Contract):
     sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
     bytes: Annotated[int, Field(ge=1)] = Field(...)
 
+class SeismicVolumePublished(Contract):
+    representation: Literal['normalized'] = Field(...)
+    source: Reference = Field(...)
+    source_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    interpretation: TypedInterpretation = Field(...)
+    schema_: Literal['ophiolite.seismic-volume/3'] = Field(..., alias='schema')
+    context: PublishedSeismicContext = Field(...)
+    decisions: Annotated[list[Annotated[str, Field(min_length=1, max_length=512)]], Field(min_length=1, max_length=64)] = Field(...)
+    positions: HeaderPositions = Field(...)
+    chunks: Annotated[list[PublishedChunk], Field(min_length=1, max_length=100000)] = Field(...)
+
+class PublishedChunk(Contract):
+    inline: int = Field(...)
+    traces: Annotated[int, Field(ge=1)] = Field(...)
+    sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    bytes: Annotated[int, Field(ge=2)] = Field(...)
+
 class SeismicVolume(Contract):
     representation: Literal['normalized'] = Field(...)
     source: Reference = Field(...)
@@ -1482,7 +1521,7 @@ class TriangulatedSurface(Contract):
     attributes: Annotated[list[Attribute], Field(max_length=16)] = Field(...)
 
 class TypedContext(Contract):
-    context: Annotated[TopsContext | TrajectoryContext | GridContext | MeshContext | PointColumnsContext | PolylineContext | Annotated[SeismicContext | NativeSeismicContext, Field(discriminator='format_code')] | WellLocationContext | WaveletContext | ModelSectionContext | SeismicSectionContext | TimeDepthContext | FeatureContext | WellPathContext | WellSetContext | WellResidualContext | SeismicLineContext, Field(discriminator='type')] = Field(...)
+    context: Annotated[TopsContext | TrajectoryContext | GridContext | MeshContext | PointColumnsContext | PolylineContext | Annotated[SeismicContext | NativeSeismicContext, Field(discriminator='format_code')] | WellLocationContext | WaveletContext | ModelSectionContext | SeismicSectionContext | TimeDepthContext | FeatureContext | WellPathContext | WellSetContext | WellResidualContext | SeismicLineContext, Field(discriminator='type')] | PublishedSeismicContext = Field(...)
 
 class VolumeWindow2(Contract):
     schema_: Literal['ophiolite.volume-window/2'] = Field(..., alias='schema')
@@ -1531,6 +1570,43 @@ class WindowTraceAxis(Contract):
 
 class WindowVerification(Contract):
     client: Annotated[list[Literal['identity', 'axes', 'shape', 'piece-identity', 'piece-digest', 'completeness']], Field(min_length=1, max_length=6)] = Field(...)
+    trusted: Annotated[list[Literal['chunk-digests-at-read', 'trace-positions']], Field(min_length=1, max_length=2)] = Field(...)
+
+class VolumeWindow3(Contract):
+    schema_: Literal['ophiolite.volume-window/3'] = Field(..., alias='schema')
+    asset_id: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    revision: Annotated[str, Field(min_length=1, max_length=512)] = Field(...)
+    source_sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    interpretation: TypedInterpretation = Field(...)
+    window_id: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+    geometry: Literal['volume'] = Field(...)
+    selection: Literal['label', 'ordinal'] = Field(...)
+    axes: Annotated[list[WindowTraceAxis | WindowSampleAxis], Field(min_length=3, max_length=3)] = Field(...)
+    shape: Annotated[list[int], Field(min_length=3, max_length=3)] = Field(...)
+    samples: WindowSamples3 = Field(...)
+    bytes: Annotated[int, Field(ge=1)] = Field(...)
+    pieces: WindowPieces = Field(...)
+    verification: WindowVerification3 = Field(...)
+    absent: WindowAbsent = Field(...)
+    headers: WindowHeaders3 = Field(...)
+
+class WindowAbsent(Contract):
+    count: Annotated[int, Field(ge=0)] = Field(...)
+    encoding: Literal['bitmap-msb'] = Field(...)
+    sha256: Annotated[str, Field(pattern='^[0-9a-f]{64}$')] = Field(...)
+
+class WindowHeaders3(Contract):
+    count: Annotated[int, Field(ge=1)] = Field(...)
+    traces_per_answer: Annotated[int, Field(ge=1)] = Field(...)
+
+class WindowSamples3(Contract):
+    format: Literal['ibm-float32', 'int32', 'int16', 'ieee-float32'] = Field(...)
+    format_code: Literal[1, 2, 3, 5] = Field(...)
+    byte_order: Literal['big'] = Field(...)
+    width: Literal[2, 4] = Field(...)
+
+class WindowVerification3(Contract):
+    client: Annotated[list[Literal['identity', 'axes', 'shape', 'piece-identity', 'piece-digest', 'completeness', 'mask']], Field(min_length=1, max_length=7)] = Field(...)
     trusted: Annotated[list[Literal['chunk-digests-at-read', 'trace-positions']], Field(min_length=1, max_length=2)] = Field(...)
 
 class VolumeWindow(Contract):
@@ -2162,6 +2238,18 @@ class OutcomeRule(Contract):
     name: Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*/[0-9]+$', max_length=80)] = Field(...)
     settings: dict[str, Any] = Field(...)
     data_rules: Annotated[list[Annotated[str, Field(pattern='^[a-z0-9][a-z0-9.-]*/[0-9]+$', max_length=64)]], Field(min_length=1, max_length=8)] | None = Field(None)
+
+class ProcedureBox(Contract):
+    entry: Annotated[str, Field(pattern='^[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)*:[A-Za-z_][A-Za-z0-9_]*$')] = Field(...)
+    settings: dict[str, Any] = Field(None)
+    inputs: dict[str, list[BoxInput]] = Field(...)
+
+class BoxInput(Contract):
+    path: Annotated[str, Field(pattern='^/box/inputs/[a-z][a-z0-9_]{0,31}-[0-9]{1,4}(\\.[A-Za-z0-9]{1,16})?$')] = Field(...)
+    kind: Annotated[str, Field(min_length=1, max_length=64)] = Field(...)
+    declared: dict[str, Any] = Field(None)
+    asset_id: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
+    revision: Annotated[str, Field(min_length=1, max_length=160)] = Field(...)
 
 class CheckVerification(Contract):
     schema_: Literal['ophiolite.tool-verification/1'] = Field(..., alias='schema')
@@ -3832,6 +3920,7 @@ PublicSourceDocument.model_rebuild()
 PublicSourceLine.model_rebuild()
 PublicSourceRecord.model_rebuild()
 PublicSources.model_rebuild()
+PublishedSeismicContext.model_rebuild()
 ReadBy.model_rebuild()
 ReadOriginal.model_rebuild()
 RecipePin.model_rebuild()
@@ -3881,6 +3970,8 @@ SliceAxis.model_rebuild()
 SeismicVolumeNative.model_rebuild()
 HeaderPositions.model_rebuild()
 NativeChunk.model_rebuild()
+SeismicVolumePublished.model_rebuild()
+PublishedChunk.model_rebuild()
 SeismicVolume.model_rebuild()
 Chunk.model_rebuild()
 AssetSummary.model_rebuild()
@@ -3905,6 +3996,11 @@ WindowSampleAxis.model_rebuild()
 WindowSamples2.model_rebuild()
 WindowTraceAxis.model_rebuild()
 WindowVerification.model_rebuild()
+VolumeWindow3.model_rebuild()
+WindowAbsent.model_rebuild()
+WindowHeaders3.model_rebuild()
+WindowSamples3.model_rebuild()
+WindowVerification3.model_rebuild()
 VolumeWindow.model_rebuild()
 WindowSamples.model_rebuild()
 Wavelet.model_rebuild()
@@ -3994,6 +4090,8 @@ ClaimedResult.model_rebuild()
 OutcomeDeclaration.model_rebuild()
 OutcomeDestination.model_rebuild()
 OutcomeRule.model_rebuild()
+ProcedureBox.model_rebuild()
+BoxInput.model_rebuild()
 CheckVerification.model_rebuild()
 PublicationVerification.model_rebuild()
 WitnessedVerification.model_rebuild()

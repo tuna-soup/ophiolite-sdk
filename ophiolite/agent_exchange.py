@@ -35,6 +35,7 @@ DERIVE_PROFILES = ('points-csv/1', 'mesh-text/1', 'esri-ascii-grid/1', 'well-top
                    'ogc-geopackage/1', 'well-residual/1')
 REPORT = 'procedure-runs/report'
 UNFINISHED = 'an earlier send from this folder is unfinished: run it again unchanged, or set it aside'
+ENTITY_MISSING = 'name a well or wellbore you can read in this project'  # E155 s2: of_entity names one that is missing or not yours to read
 
 
 def _sent(f):
@@ -110,11 +111,13 @@ class AgentExchange(Exchange):
 
     # -- send a tool run ---------------------------------------------------------------------------------------------
 
-    def send_run(self, folder, *, name, of=None, expected=None, summary='', evidence=None, dry_run=False, wait=True, **wait_kw):
+    def send_run(self, folder, *, name, of=None, expected=None, of_entity=None, summary='', evidence=None, dry_run=False, wait=True, **wait_kw):
         """Send the outputs of the local run in `folder` (run.json) as one procedure-runs/report the person approves.
         `name` names the results: a string (several outputs read "<name>: <output label>") or {role: name}. `of` is the
         held result an output is a new version of (with several outputs, {role: held id}); `expected` the revision it
-        builds on (or {role: revision}), only with `of`. Every input of the run must be held at the version it read.
+        builds on (or {role: revision}), only with `of`. `of_entity` (E155 s2) is the well or wellbore an output is
+        about (an entity id, or {role: entity id}; a role left out is about none): read once with entities/get and kept
+        with the send, so continuing it reads nothing again. Every input of the run must be held at the version it read.
         Answers `proposed` while the person has not decided (run it again to continue), `sent-run` once every output
         is published, or with `dry_run=True` the report's dry run (nothing saved). Refusals: see AGENT_SENTENCES."""
         from .procedures import AgentRun, NotRun
@@ -129,11 +132,13 @@ class AgentExchange(Exchange):
                 self._raise('upload-needed', {'name': display(local['outputs'][role].get('file'), 'This file')},
                             {'role': role, 'profile': local['outputs'][role].get('profile')})
         of_map, expected_map = self._per_role(of, roles), self._per_role(expected, roles)
+        entity_map = self._per_role(of_entity, roles, 'give the well or wellbore by output when the run made several')
         if set(expected_map) - set(of_map):
             self._raise('not-valid', {'reasons': 'name the item this is a new version of, together with the version it builds on'})
         if not (set(name) == set(roles) and all(_named(v) for v in name.values()) if isinstance(name, dict) else _named(name)):
             self._raise('not-valid', {'reasons': 'give the results a name of up to 160 characters, or one name per output'})
-        asked = json.loads(json.dumps({'name': name, 'folder': str(folder), 'run_sha256': hashlib.sha256(run_bytes).hexdigest(), 'of': of, 'expected': expected}))
+        asked = json.loads(json.dumps({'name': name, 'folder': str(folder), 'run_sha256': hashlib.sha256(run_bytes).hexdigest(), 'of': of, 'expected': expected,
+                                       **({'of_entity': of_entity} if of_entity is not None else {})}))  # absent when unused: older pending sends continue
         with self._locked():
             record = self._load()
             pending, first = record.get('pending'), False
@@ -144,12 +149,14 @@ class AgentExchange(Exchange):
                 if pending.get('kind') != 'run' or {k: v for k, v in pending['request'].items() if k != 'names'} != asked:
                     self._raise('not-valid', {'reasons': UNFINISHED})
             else:  # (c) a new send: bound to the versions this folder holds
-                pending = self._new(record, local, roles, of_map, expected_map, asked, name)
+                pending = self._new(record, local, roles, of_map, expected_map, asked, name, entity_map)
                 first = True
             names = pending['request']['names']
             title = display(name, None) if isinstance(name, str) else None
             facts = {'name': title or ', '.join(display(names[r], 'a result') for r in roles)}
-            publish = {r: {'name': names[r], 'new_version_of': of_map.get(r), 'expected_parent': pending['resolved']['expected_parent'][r]} for r in roles}
+            about = pending['resolved'].get('of_entity') or {}  # E155 s2: as frozen when the send began
+            publish = {r: {'name': names[r], 'new_version_of': of_map.get(r), 'expected_parent': pending['resolved']['expected_parent'][r],
+                           'of_entity': about.get(r)} for r in roles}
             run = AgentRun(agent, folder, name=name if isinstance(name, str) else names[roles[0]], publish=publish)
             if dry_run:
                 request = run.request()
@@ -167,13 +174,27 @@ class AgentExchange(Exchange):
             if isinstance(reported, Outcome): return reported
             return self._publish(agent, run, request, reported, pending, roles, of_map, facts)
 
-    def _per_role(self, value, roles):
+    def _per_role(self, value, roles, reasons='give the held item and its version by output when the run made several'):
         if value is None: return {}
         if len(roles) == 1 and isinstance(value, str) and value: return {roles[0]: value}
         if isinstance(value, dict) and set(value) <= set(roles) and all(isinstance(v, str) and v for v in value.values()): return dict(value)
-        self._raise('not-valid', {'reasons': 'give the held item and its version by output when the run made several'})
+        self._raise('not-valid', {'reasons': reasons})
 
-    def _new(self, record, local, roles, of_map, expected_map, asked, name):
+    def _entities(self, entity_map, name):
+        """E155 s2: {role: {kind, entity_id}}, each entity read once with entities/get; one that is missing or not the
+        person's to read is refused here, before anything is proposed."""
+        found = {}
+        for ident in dict.fromkeys(entity_map.values()):
+            try: doc = self.transport.agent.read('entities/get', {'entity_id': ident})
+            except ExchangeRefused: raise
+            except Exception as error:
+                if getattr(error, 'status', None) in (404, 410): self._raise('not-valid', {'reasons': ENTITY_MISSING}, {'entity_id': ident}, error=error)
+                self._transport_error(error, refused='access-refused', facts={'name': display(name, 'the results')})
+            if doc.get('kind') not in ('well', 'wellbore'): self._raise('not-valid', {'reasons': ENTITY_MISSING}, {'entity_id': ident})
+            found[ident] = {'kind': doc['kind'], 'entity_id': ident}
+        return {role: found[ident] for role, ident in entity_map.items()}
+
+    def _new(self, record, local, roles, of_map, expected_map, asked, name, entity_map=None):
         """Steps (c) and the pending record (not saved yet): every check here refuses before any request."""
         held = record['items']
         inputs = [{'asset_id': v['asset_id'], 'revision': v['revision']} for versions in local['inputs'].values() for v in versions]
@@ -192,6 +213,7 @@ class AgentExchange(Exchange):
         identity = self.transport.identity()
         names = self._names(name, roles, local)
         resolved = {'inputs': inputs, 'expected_parent': {r: held[of_map[r]]['revision'] if r in of_map else None for r in roles}}
+        if entity_map: resolved['of_entity'] = self._entities(entity_map, name)  # frozen: a resumed send never reads it again
         return {'kind': 'run', 'command_id': None, 'request': {**asked, 'names': names}, 'resolved': resolved, 'owner': identity, 'started': self.clock(),
                 'plan': None, 'evidence': None, 'receipts': {}, 'refused': None}
 

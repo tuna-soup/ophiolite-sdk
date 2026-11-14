@@ -227,6 +227,7 @@ SENTENCES = {  # E131 s2: person-read sentences say tool; `withdrawn` is kept (t
                            'Settings → Tools or with ophiolite tools enable.'),
     'no-such-version': 'Not run: there is no version {version} of {name} in this project that you can see.',
     'withdrawn': 'Not run: this procedure was withdrawn on {date}.',
+    'not-enabled': 'This tool version is not enabled in this project yet.',  # E155 s2: AgentClient.procedure_fetch, the gate's private version
     'trust-needed': 'Not run: this tool runs code someone else wrote on this computer. Answer the question in a terminal, or add --yes to trust it.',
     'declined': 'Not run: you did not trust this tool. Nothing ran and nothing was recorded.',
     'bundle-differs': 'Not run: the tool the project sent does not match its digest; nothing was kept.',
@@ -780,6 +781,7 @@ def _process_start(folder, label):
 # ---------------------------------------------------------------- reported runs (E106)
 
 PROJECT_INPUT = re.compile(r'^@([^:@\s]+):([^:@\s]+)$')
+SANDBOX_FINAL = ('published', 'failed', 'killed', 'cancelled')  # E113 s1: a sandbox job's last states (runners.FINAL)
 EXTENSIONS = {'las2/1': '.las', 'esri-ascii-grid/1': '.asc', 'well-location/1': '.json', 'wavelet-text/1': '.txt'}
 OUTCOME_WORDS = {'same': 'Same result', 'same-newer': 'Same result, newer procedure version', 'same-earlier': 'Same result, earlier procedure version',
                  'different': 'Different result', 'not-compared': 'Not compared', 'no-earlier': 'No earlier result you can read to compare with'}
@@ -1131,16 +1133,19 @@ class ProcedureClient:
     def procedure_trust(self, digest, *, command_id=None):
         return self._procedure_change('trust', digest, command_id)
 
-    def procedure_verify(self, digest, *, check=None, publication=None, withdraw=None, statement=None, command_id=None):
+    def procedure_verify(self, digest, *, check=None, publication=None, withdraw=None, witnessed=None, statement=None, command_id=None):
         """E165 s1: verify a version against a passed check of a result it produced (`check`, the check record's id), or
-        a published method (`publication`: title, authors, year, link {kind: doi or url, value}), or withdraw a
-        verification (`withdraw`, its id); exactly one. Each call is a new command id, resent only by this call's own
+        a published method (`publication`: title, authors, year, link {kind: doi or url, value}), or a run Ophiolite
+        made of it in the project's sandbox (`witnessed`, the run's id; E113 s1), or withdraw a verification
+        (`withdraw`, its id); exactly one. Each call is a new command id, resent only by this call's own
         retry; give `command_id` to resend a call whose answer was lost. The answer is `{record, verification}`, with the
         server's line in `verification['line']`."""
-        given = [(kind, value) for kind, value in (('check', check), ('publication', publication), ('withdrawn', withdraw)) if value is not None]
-        if len(given) != 1: raise ValueError('Give exactly one of check, publication or withdraw.')
+        given = [(kind, value) for kind, value in (('check', check), ('publication', publication), ('withdrawn', withdraw), ('witnessed', witnessed))
+                 if value is not None]
+        if len(given) != 1: raise ValueError('Give exactly one of check, publication, witnessed or withdraw.')
         kind, value = given[0]
-        reference = {'check_id': value} if kind == 'check' else {'withdraws': value} if kind == 'withdrawn' else value
+        reference = ({'check_id': value} if kind == 'check' else {'withdraws': value} if kind == 'withdrawn' else {'run_id': value} if kind == 'witnessed'
+                     else value)
         body = {'command_id': command_id or 'verify-' + uuid.uuid4().hex, 'digest': digest, 'kind': kind, 'reference': reference}
         if statement is not None: body['statement'] = statement
         return self._post('procedures', 'verify', body, retry=True)
@@ -1148,6 +1153,38 @@ class ProcedureClient:
     def procedure_verifications(self, digest):
         """E165 s1: every verification and withdrawal of a version, oldest first, each with its line, and its state."""
         return self._post('procedures', 'verifications', {'digest': digest}, retry=True)
+
+    def procedure_sandbox_enable(self, digest, enabled=True, *, command_id=None):
+        """E113 s1: turn sandbox runs of an enabled version on (or, with `enabled=False`, off) in this project; project
+        administrators only. Each change is kept and the newest decides. The answer is the version, with `sandbox`."""
+        body = {'command_id': command_id or 'sandbox-' + uuid.uuid4().hex, 'digest': digest, 'enabled': bool(enabled)}
+        return self._post('procedures', 'sandbox-enable', body, retry=True)
+
+    def procedure_sandbox_run(self, digest, inputs, *, settings=None, limits=None, command_id=None, wait=0, interval=2.0,
+                              clock=time.monotonic, sleep=time.sleep):
+        """E113 s1: start a run of an enabled version in the project's sandbox, on exact input versions: `inputs` is
+        `{slot: [(asset_id, revision), ...]}` (or `{asset_id, revision}` items), `settings` the typed values by key (a
+        setting left out takes its default), `limits` lower limits (`memory_mb`, `seconds`, `cpus`). The server runs it,
+        keeps the run and publishes each output. The answer is the job (`runners/job`): its `run_id` names the run.
+        With `wait` (seconds) the job is followed until it is published, failed, killed or cancelled, or the wait ends;
+        the answer is then the job as last seen. Each call is a new command id; give `command_id` to resend a call whose
+        answer was lost (the same id and body answer the same job)."""
+        body = {'command_id': command_id or 'sandbox-' + uuid.uuid4().hex, 'procedure': {'digest': digest}, 'settings': dict(settings or {}),
+                'inputs': {slot: [dict(v) if isinstance(v, dict) else {'asset_id': v[0], 'revision': v[1]} for v in versions]
+                           for slot, versions in inputs.items()}}
+        if limits: body['limits'] = dict(limits)
+        job = self._post('procedures', 'sandbox-run', body, retry=True)
+        return self.procedure_sandbox_job(job['id'], wait=wait, interval=interval, clock=clock, sleep=sleep, seen=job) if wait else job
+
+    def procedure_sandbox_job(self, job_id, *, wait=0, interval=2.0, clock=time.monotonic, sleep=time.sleep, seen=None):
+        """E113 s1: a sandbox run's job, as `runners/job` answers it (state, reason, limits, run_id and the published
+        result); with `wait` (seconds), followed until it ends or the wait does."""
+        deadline = clock() + max(0.0, float(wait or 0))
+        job = seen or self._post('runners', 'job', {'id': job_id}, retry=True)
+        while job['state'] not in SANDBOX_FINAL and clock() < deadline:
+            sleep(interval)
+            job = self._post('runners', 'job', {'id': job_id}, retry=True)
+        return job
 
     def procedure_version(self, name, version=None, *, readable=False):
         """Without `version`: the highest enabled version of `name`. With it: that version, among those you can see

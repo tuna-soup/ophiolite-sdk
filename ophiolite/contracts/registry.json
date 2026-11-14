@@ -1,6 +1,6 @@
 {
   "schema": "ophiolite.contracts-registry/1",
-  "version": "1.111.0",
+  "version": "1.117.0",
   "title": "Ophiolite contracts registry",
   "description": "Every schema, profile and document Ophiolite publishes under contracts/, with its id, version, lifecycle and registry-relative path. The directory references nothing outside itself.",
   "id_grammar": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
@@ -37,7 +37,7 @@
     },
     {
       "id": "ophiolite.scientific-asset/1",
-      "version": "1.36.0",
+      "version": "1.37.0",
       "lifecycle": "preview",
       "path": "assets/v1/schema.json",
       "title": "ScientificAsset",
@@ -93,7 +93,7 @@
     },
     {
       "id": "ophiolite.typed-context/1",
-      "version": "1.13.0",
+      "version": "1.14.0",
       "lifecycle": "preview",
       "path": "assets/v1/typed-context-schema.json",
       "title": "TypedContext",
@@ -324,6 +324,14 @@
       "description": "An 8-bit seismic cube description: grid, sample meaning, the code for no value (-128 or none), header decisions and per-inline digests of one-byte samples (E140 s0). Samples stay in the exact original."
     },
     {
+      "id": "ophiolite.seismic-volume/3",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/seismic-volume-3-schema.json",
+      "title": "SeismicVolumePublished",
+      "description": "A seismic cube description as published: grid of sorted distinct observed labels, its cells and the positions without a trace, SEG-Y data format 1, 2, 3 or 5 at its own width (an integer code is its own value), header decisions and per-inline digests of the present traces' samples (E175 s0). Samples stay in the exact original."
+    },
+    {
       "id": "ophiolite.seismic-slice/1",
       "version": "1.0.0",
       "lifecycle": "preview",
@@ -346,6 +354,14 @@
       "path": "assets/v1/volume-window-2-schema.json",
       "title": "VolumeWindow2",
       "description": "Part of an 8-bit seismic cube (mapping seismic-volume/2) at an exact revision, at native size: inclusive ranges of inlines and crosslines (by label or by ordinal, never mixed) and of zero-based samples; the stored one-byte codes it holds (SEG-Y data format 8, the code for no value stated as in the stored description), their physical sample start and how they are cut into pieces of at most 32 MiB, with what a client checks (E140 s3). The document holds no sample."
+    },
+    {
+      "id": "ophiolite.volume-window/3",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "assets/v1/volume-window-3-schema.json",
+      "title": "VolumeWindow3",
+      "description": "Part of a seismic cube as published (mapping seismic-volume/3) at an exact revision: inclusive ranges of inlines and crosslines (by label or by ordinal, never mixed) and of zero-based samples; the stored words at their own width (SEG-Y data format 1, 2, 3 or 5), which positions have no trace (one bit each, a mask at the head of every piece and headers answer, digested once for the window), and how they are cut into pieces of at most 32 MiB, with what a client checks (E175 s0). The document holds no sample."
     },
     {
       "id": "ophiolite.relationship-registry/1",
@@ -594,6 +610,14 @@
       "path": "procedures/v1/tool-verification.json",
       "title": "ToolVerification",
       "description": "A person's verification of one procedure digest in one project, against a check of a result that version reported or against a publication with a DOI or a URL, or the withdrawal of one by its author or an administrator: who and when set by the server, a statement of at most 2000 characters, never changed or deleted; a claim, never a witness, and never inherited by another digest (E165). 1.1.0: kind witnessed, against a run Ophiolite made in the project's sandbox, named by its run id and the job the server read (E113 s0)."
+    },
+    {
+      "id": "ophiolite.procedure-box/1",
+      "version": "1.0.0",
+      "lifecycle": "preview",
+      "path": "procedures/v1/procedure-box.json",
+      "title": "ProcedureBox",
+      "description": "What the server hands a tool version run in the project's sandbox, read by the SDK's ophiolite.box inside the operator's sandbox image: the entry, the settings and each exact input version at a path under /box/inputs, with its type, declarations, asset id and revision; the bundle is always /box/bundle and nothing names a host path (E113 s1)."
     },
     {
       "id": "ophiolite.held-copies/1",
@@ -924,6 +948,22 @@
       "description": "The volume grid, sample meaning, the code for no value, every header decision and the digests of its per-inline chunks of one-byte samples.",
       "lifecycle": "preview",
       "path": "profiles/v1/seismic-volume-2.json"
+    },
+    {
+      "id": "segy/3",
+      "kind": "source",
+      "display_name": "Seismic cube as published (SEG-Y)",
+      "description": "A SEG-Y volume (revision 1 or 2, IBM or IEEE 4-byte floating point, or 4-byte or 2-byte two's complement integer samples, big-endian, fixed-length traces) kept byte for byte as it was published; an integer code is its own value with no scale, and the grid may have positions without a trace, which are stated and never filled.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/segy-3.json"
+    },
+    {
+      "id": "ophiolite.seismic-volume/3",
+      "kind": "normalized",
+      "display_name": "Seismic cube as published, description",
+      "description": "The volume grid, its positions without a trace, the sample format at its own width, every header decision and the digests of its per-inline chunks of present traces.",
+      "lifecycle": "preview",
+      "path": "profiles/v1/seismic-volume-3.json"
     },
     {
       "id": "well-location/1",

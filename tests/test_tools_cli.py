@@ -136,7 +136,7 @@ def test_tools_help_says_tools(columns):
     sub = next(a for a in cli.parser()._actions if isinstance(a, argparse._SubParsersAction))
     verbs = list(sub.choices['tools']._subparsers._group_actions[0].choices)
     assert verbs == ['new', 'validate', 'run', 'register', 'list', 'show', 'enable', 'withdraw', 'trust', 'verify', 'verifications', 'publish', 'again',
-                     'init', 'skills', 'checks', 'rules', 'residuals', 'recipes']  # E163 s1: the tools group's other verbs
+                     'sandbox', 'init', 'skills', 'checks', 'rules', 'residuals', 'recipes']  # E163 s1: the tools group's other verbs
     for argv in [['tools', '--help']] + [['tools', verb, '--help'] for verb in verbs]:
         code, text, err = call(*argv)
         assert (code, err) == (0, '') and text.startswith('usage: ophiolite tools'), argv

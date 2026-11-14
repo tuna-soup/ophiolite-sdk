@@ -1,0 +1,37 @@
+{
+  "schema": "ophiolite.contract-profile/1",
+  "id": "segy/3",
+  "kind": "source",
+  "lifecycle": "preview",
+  "display_name": "Seismic cube as published (SEG-Y)",
+  "description": "A SEG-Y volume (revision 1 or 2, IBM or IEEE 4-byte floating point, or 4-byte or 2-byte two's complement integer samples, big-endian, fixed-length traces) kept byte for byte as it was published; an integer code is its own value with no scale, and the grid may have positions without a trace, which are stated and never filled.",
+  "serves": [
+    "ophiolite.scientific-asset/1"
+  ],
+  "connector": {
+    "scientific_profile": "seismic-volume-source/1",
+    "source_schema": "SEG-Y/rev1-2,formats-1-2-3-5,big-endian,fixed",
+    "mapping_version": "seismic-volume/3",
+    "history": "retained-exact-read"
+  },
+  "role": "artifact",
+  "media_types": [
+    "application/octet-stream"
+  ],
+  "normalized_profile": "ophiolite.seismic-volume/3",
+  "context_schema": "ophiolite.typed-context/1",
+  "representation_rules": {
+    "artifact_kind_by_origin": {
+      "source-reference": "original",
+      "retained-capture": "original",
+      "managed-derived": "derived-artifact"
+    },
+    "normalized": 1,
+    "total": 2
+  },
+  "table_target": {
+    "none": "not-a-table"
+  },
+  "osdu_kind": null,
+  "osdu_kind_reason": "work-product-component--SeismicTraceData is not a kind the box vendors at v0.30.1"
+}

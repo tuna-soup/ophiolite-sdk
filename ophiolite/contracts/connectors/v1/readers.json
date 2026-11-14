@@ -574,7 +574,7 @@
     "names": [
      "file_bytes"
     ],
-    "template": "SEG-Y rev 1 or 2, big-endian, IBM or IEEE 4-byte samples, one trace length, a full inline × crossline grid · up to {file_bytes}. The file is kept byte for byte; sections are read one at a time."
+    "template": "SEG-Y rev 1 or 2, big-endian, IBM or IEEE 4-byte samples (integer samples: send the file as a seismic cube as published), one trace length, a full inline × crossline grid (a grid with positions without a trace: send the file as a seismic cube as published) · up to {file_bytes}. The file is kept byte for byte; sections are read one at a time."
    },
    "declared": [
     {
@@ -2486,6 +2486,83 @@
    "report": "{traces:,} traces, {samples:,} samples per trace",
    "type": "seismic-volume",
    "mapping": "seismic-volume/2",
+   "states": {
+    "function": "segy",
+    "items": [
+     {
+      "key": "sample_interval",
+      "label": "Sample interval",
+      "from": "head"
+     },
+     {
+      "key": "samples_per_trace",
+      "label": "Samples per trace",
+      "from": "head"
+     },
+     {
+      "key": "sample_format",
+      "label": "Sample format",
+      "from": "head"
+     }
+    ]
+   },
+   "landing": "retained"
+  },
+  {
+   "profile": "segy/3",
+   "label": "Seismic cube as published (SEG-Y)",
+   "extensions": [],
+   "detect": "segy_published_header",
+   "limits": {
+    "names": [
+     "file_bytes"
+    ],
+    "template": "SEG-Y rev 1 or 2, big-endian, IBM or IEEE 4-byte floats or 2- or 4-byte two's complement integers (formats 1, 2, 3, 5), one trace length, an inline × crossline grid of evenly spaced lines, where positions without a trace are kept as such, at most 50,000,000 positions of at most 20,000 samples · up to {file_bytes}. The file is kept byte for byte; each integer code is its own value."
+   },
+   "declared": [
+    {
+     "key": "z_domain",
+     "label": "Samples are",
+     "kind": "choice",
+     "choices": {
+      "time": "Time",
+      "depth": "Depth",
+      "unknown": "Not stated"
+     }
+    },
+    {
+     "key": "crs",
+     "label": "Coordinate system",
+     "kind": "crs",
+     "hint": "EPSG code such as EPSG:23031"
+    },
+    {
+     "key": "datum",
+     "label": "Datum",
+     "kind": "text",
+     "hint": "For example mean sea level"
+    }
+   ],
+   "companions": [],
+   "recipe": false,
+   "osdu": {
+    "kind": "work-product-component--SeismicTraceData",
+    "revision": "ff89d87caa43d05d1341dcaa6d258e1186ec8aa6"
+   },
+   "route": {
+    "document": "typed-upload",
+    "direction": "read"
+   },
+   "fixture": {
+    "class": "synthetic",
+    "path": "tests/fixtures/readers/published-int16.sgy",
+    "sha256": "5255624ca4a9ee7d48776f66d15c5ad4be1e538b9a0d8427c78d340919de2847",
+    "bytes": 6552,
+    "exception": "D117"
+   },
+   "report": "{traces:,} traces, {samples:,} samples per trace",
+   "type": "seismic-volume",
+   "mapping": "seismic-volume/3",
    "states": {
     "function": "segy",
     "items": [

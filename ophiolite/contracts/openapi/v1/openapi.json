@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "description": "One public API for every project operation. Four credential kinds reach it: the browser session (opaque HttpOnly cookie plus the X-CSRF-Token proof and, on non-GET requests, the exact Origin), a project-scoped delegate lasting at most five minutes (Bearer oph_api_..., parent session and current native permissions remain mandatory), a project access key or a service account's key (Bearer oph_key_..., one project, read or read and write, never compute; every request re-checks the key and its owner's current access, so it needs no browser session and nothing to refresh), and a browser-approved provider grant (Bearer provider token plus X-Ophiolite-Application-Grant; capability 1: the scientific read resources and the applications route within its read/write scopes; capability 3 adds reading wells, wellbores and lineage and the LAS upload routes). A request that carries an Authorization header is a machine request and is refused with MACHINE_AUTH_REQUIRED when a cookie or Origin travels with it. Scope and capability are ceilings; every operation runs the same native permission checks whoever calls it. Each operation states its stability in x-ophiolite-stability: a supported operation changes only additively or by a transition with a deprecation and a sunset (/api/v1/contracts/docs/api-versioning.md); a pilot operation is tested and documented but is not yet a supported, unattended service contract.",
     "x-ophiolite-contracts": {
-      "registry_version": "1.111.0",
+      "registry_version": "1.117.0",
       "index": "/api/v1/contracts",
       "served_profiles": [
         "las2/1",
@@ -25,6 +25,7 @@
         "segy/1",
         "segy-line/1",
         "segy/2",
+        "segy/3",
         "well-location/1",
         "wavelet-text/1",
         "model-section-text/1",
@@ -30553,7 +30554,8 @@
                       "petrel-faultsticks/1",
                       "petrel-well-tops/1",
                       "segy-line/1",
-                      "segy/2"
+                      "segy/2",
+                      "segy/3"
                     ],
                     "title": "Profile",
                     "type": "string"
@@ -33758,7 +33760,8 @@
                       "petrel-faultsticks/1",
                       "petrel-well-tops/1",
                       "segy-line/1",
-                      "segy/2"
+                      "segy/2",
+                      "segy/3"
                     ],
                     "title": "Profile",
                     "type": "string"
@@ -54812,6 +54815,11 @@
                     "verification": {
                       "$ref": "#/components/schemas/ProcedureVerificationState",
                       "description": "E165: this version's verification state and the line a client shows for it"
+                    },
+                    "sandbox": {
+                      "description": "E113: sandbox runs of this version are on in this project (an administrator turns them on or off)",
+                      "title": "Sandbox",
+                      "type": "boolean"
                     }
                   },
                   "required": [
@@ -54832,7 +54840,8 @@
                     "words",
                     "trusted",
                     "mine",
-                    "verification"
+                    "verification",
+                    "sandbox"
                   ],
                   "title": "ProcedureVersion",
                   "type": "object"
@@ -55095,6 +55104,11 @@
                       "$ref": "#/components/schemas/ProcedureVerificationState",
                       "description": "E165: this version's verification state and the line a client shows for it"
                     },
+                    "sandbox": {
+                      "description": "E113: sandbox runs of this version are on in this project (an administrator turns them on or off)",
+                      "title": "Sandbox",
+                      "type": "boolean"
+                    },
                     "manifest": {
                       "additionalProperties": true,
                       "description": "The version's procedure.json (ophiolite.procedure/1), for Technical details",
@@ -55121,6 +55135,7 @@
                     "trusted",
                     "mine",
                     "verification",
+                    "sandbox",
                     "manifest"
                   ],
                   "title": "ProcedureDetail",
@@ -55515,6 +55530,11 @@
                       "$ref": "#/components/schemas/ProcedureVerificationState",
                       "description": "E165: this version's verification state and the line a client shows for it"
                     },
+                    "sandbox": {
+                      "description": "E113: sandbox runs of this version are on in this project (an administrator turns them on or off)",
+                      "title": "Sandbox",
+                      "type": "boolean"
+                    },
                     "already": {
                       "description": "This digest was already registered in this project: the answer is that version",
                       "title": "Already",
@@ -55540,6 +55560,7 @@
                     "trusted",
                     "mine",
                     "verification",
+                    "sandbox",
                     "already"
                   ],
                   "title": "RegisteredProcedure",
@@ -55641,6 +55662,620 @@
                   "archive"
                 ],
                 "title": "ProcedureRegisterRequest",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "x-ophiolite-stability": "pilot"
+      }
+    },
+    "/api/v1/projects/{project}/procedures/sandbox-enable": {
+      "post": {
+        "summary": "Turn sandbox runs of an enabled tool version on or off in this project (project administrators)",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "x-ophiolite-agent": {
+          "reach": "person",
+          "reason": "write-not-admitted",
+          "admitted": "never",
+          "policy": false
+        },
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "digest": {
+                      "title": "Digest",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name",
+                      "type": "string"
+                    },
+                    "version": {
+                      "title": "Version",
+                      "type": "integer"
+                    },
+                    "version_label": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Version Label"
+                    },
+                    "label": {
+                      "title": "Label",
+                      "type": "string"
+                    },
+                    "state": {
+                      "description": "private: its registrant and administrators see it; enabled: every member; withdrawn: never served again",
+                      "enum": [
+                        "private",
+                        "enabled",
+                        "withdrawn"
+                      ],
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "added_by": {
+                      "title": "Added By",
+                      "type": "string"
+                    },
+                    "added_kind": {
+                      "enum": [
+                        "person",
+                        "agent"
+                      ],
+                      "title": "Added Kind",
+                      "type": "string"
+                    },
+                    "on_behalf_of": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "An agent's registration: the person it acts for",
+                      "title": "On Behalf Of"
+                    },
+                    "added_at": {
+                      "title": "Added At",
+                      "type": "number"
+                    },
+                    "enabled_by": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Enabled By"
+                    },
+                    "enabled_at": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Enabled At"
+                    },
+                    "withdrawn_by": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Withdrawn By"
+                    },
+                    "withdrawn_at": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Withdrawn At"
+                    },
+                    "words": {
+                      "$ref": "#/components/schemas/ProcedureWords"
+                    },
+                    "trusted": {
+                      "description": "You (this credential's principal) trust this version's code in this project",
+                      "title": "Trusted",
+                      "type": "boolean"
+                    },
+                    "mine": {
+                      "description": "You registered this version, or your agent registered it for you; a client asks no trust question for it",
+                      "title": "Mine",
+                      "type": "boolean"
+                    },
+                    "verification": {
+                      "$ref": "#/components/schemas/ProcedureVerificationState",
+                      "description": "E165: this version's verification state and the line a client shows for it"
+                    },
+                    "sandbox": {
+                      "description": "E113: sandbox runs of this version are on in this project (an administrator turns them on or off)",
+                      "title": "Sandbox",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "digest",
+                    "name",
+                    "version",
+                    "version_label",
+                    "label",
+                    "state",
+                    "added_by",
+                    "added_kind",
+                    "on_behalf_of",
+                    "added_at",
+                    "enabled_by",
+                    "enabled_at",
+                    "withdrawn_by",
+                    "withdrawn_at",
+                    "words",
+                    "trusted",
+                    "mine",
+                    "verification",
+                    "sandbox"
+                  ],
+                  "title": "ProcedureVersion",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "E113 s1: the newest change decides; each is kept.",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "digest": {
+                    "description": "The version's digest (digest_of over its members, as `ophiolite procedures validate` prints it)",
+                    "maxLength": 64,
+                    "minLength": 64,
+                    "pattern": "^[0-9a-f]{64}$",
+                    "title": "Digest",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "The same command id and body answer the same result; another body is refused (request)",
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "enabled": {
+                    "description": "true: members may run this version in the project's sandbox; false: they may not",
+                    "title": "Enabled",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "digest",
+                  "command_id",
+                  "enabled"
+                ],
+                "title": "ProcedureSandboxRequest",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "x-ophiolite-stability": "pilot"
+      }
+    },
+    "/api/v1/projects/{project}/procedures/sandbox-run": {
+      "post": {
+        "summary": "Run an enabled tool version in the project's sandbox on exact input versions; the server keeps the run and publishes each output",
+        "description": "Scope write; accepted principals: session, delegate; project extractor top.",
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "x-ophiolite-scope": "write",
+        "x-ophiolite-principals": [
+          "delegate",
+          "session"
+        ],
+        "x-ophiolite-agent": {
+          "reach": "person",
+          "reason": "write-not-admitted",
+          "admitted": "never",
+          "policy": false
+        },
+        "responses": {
+          "200": {
+            "description": "Operation result",
+            "headers": {
+              "X-Request-Id": {
+                "description": "This request's id; every response carries it, and an error body repeats it as request_id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "project": {
+                      "title": "Project",
+                      "type": "string"
+                    },
+                    "submitter": {
+                      "title": "Submitter",
+                      "type": "string"
+                    },
+                    "agent": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Agent"
+                    },
+                    "plan": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Plan"
+                    },
+                    "run_id": {
+                      "title": "Run Id",
+                      "type": "string"
+                    },
+                    "state": {
+                      "title": "State",
+                      "type": "string"
+                    },
+                    "reason": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Reason"
+                    },
+                    "exit_code": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Exit Code"
+                    },
+                    "logs": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Logs"
+                    },
+                    "attempts": {
+                      "title": "Attempts",
+                      "type": "integer"
+                    },
+                    "result": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": true,
+                          "type": "object"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "The published revision: asset_id and revision.",
+                      "title": "Result"
+                    },
+                    "created_at": {
+                      "title": "Created At",
+                      "type": "number"
+                    },
+                    "started_at": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Started At"
+                    },
+                    "finished_at": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "title": "Finished At"
+                    },
+                    "command_id": {
+                      "title": "Command Id",
+                      "type": "string"
+                    },
+                    "script_sha256": {
+                      "title": "Script Sha256",
+                      "type": "string"
+                    },
+                    "limits": {
+                      "additionalProperties": {
+                        "type": "number"
+                      },
+                      "title": "Limits",
+                      "type": "object"
+                    },
+                    "kind": {
+                      "default": "script",
+                      "description": "E113: script, a curve script; procedure, a tool version run in the sandbox (procedures/sandbox-run: run_id names its run, script_sha256 the version, result its published outputs)",
+                      "enum": [
+                        "script",
+                        "procedure"
+                      ],
+                      "title": "Kind",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "project",
+                    "submitter",
+                    "agent",
+                    "plan",
+                    "run_id",
+                    "state",
+                    "reason",
+                    "exit_code",
+                    "logs",
+                    "attempts",
+                    "created_at",
+                    "started_at",
+                    "finished_at",
+                    "command_id",
+                    "script_sha256",
+                    "limits"
+                  ],
+                  "title": "Job",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Refusal400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Refusal401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Refusal403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Refusal404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Refusal409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Refusal410"
+          },
+          "413": {
+            "$ref": "#/components/responses/Refusal413"
+          },
+          "422": {
+            "$ref": "#/components/responses/Refusal422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Refusal428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Refusal429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Refusal500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Refusal503"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "E113 s1: a person starts a run of an enabled tool version in the project's sandbox; the server runs it, keeps the\nrun and publishes each output. What the box ran with is the server's (witness, runner, image, network, job and\noutputs are refused server-owned).",
+                "properties": {
+                  "project_id": {
+                    "title": "Project Id",
+                    "type": "string"
+                  },
+                  "command_id": {
+                    "description": "Save it before sending: the same command id and body answer the same job; another body is refused (request)",
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "title": "Command Id",
+                    "type": "string"
+                  },
+                  "procedure": {
+                    "$ref": "#/components/schemas/RunProcedure"
+                  },
+                  "settings": {
+                    "additionalProperties": true,
+                    "description": "Setting values by key, typed as the manifest says; a setting left out takes its default",
+                    "title": "Settings",
+                    "type": "object"
+                  },
+                  "inputs": {
+                    "additionalProperties": {
+                      "items": {
+                        "$ref": "#/components/schemas/RunVersion"
+                      },
+                      "type": "array"
+                    },
+                    "description": "The exact versions each input slot reads, in order",
+                    "title": "Inputs",
+                    "type": "object"
+                  },
+                  "limits": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/SandboxLimitsRequest"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "description": "Lower limits for this run; an omitted limit is the deployment's ceiling, one above it is refused (limits-above)"
+                  }
+                },
+                "required": [
+                  "project_id",
+                  "command_id",
+                  "procedure",
+                  "inputs"
+                ],
+                "title": "SandboxRunStart",
                 "type": "object"
               }
             }
@@ -56080,18 +56715,19 @@
                     "type": "string"
                   },
                   "kind": {
-                    "description": "check: a passed check of a result this version produced; publication: a published method; withdrawn: withdraw a verification",
+                    "description": "check: a passed check of a result this version produced; publication: a published method; withdrawn: withdraw a verification; witnessed: a run Ophiolite made of this version in the project's sandbox that published a result",
                     "enum": [
                       "check",
                       "publication",
-                      "withdrawn"
+                      "withdrawn",
+                      "witnessed"
                     ],
                     "title": "Kind",
                     "type": "string"
                   },
                   "reference": {
                     "additionalProperties": true,
-                    "description": "check: {check_id}; publication: {title, authors, year, link: {kind: doi or url, value}}; withdrawn: {withdraws: the verification id}",
+                    "description": "check: {check_id}; publication: {title, authors, year, link: {kind: doi or url, value}}; withdrawn: {withdraws: the verification id}; witnessed: {run_id}",
                     "title": "Reference",
                     "type": "object"
                   },
@@ -56290,6 +56926,11 @@
                     "verification": {
                       "$ref": "#/components/schemas/ProcedureVerificationState",
                       "description": "E165: this version's verification state and the line a client shows for it"
+                    },
+                    "sandbox": {
+                      "description": "E113: sandbox runs of this version are on in this project (an administrator turns them on or off)",
+                      "title": "Sandbox",
+                      "type": "boolean"
                     }
                   },
                   "required": [
@@ -56310,7 +56951,8 @@
                     "words",
                     "trusted",
                     "mine",
-                    "verification"
+                    "verification",
+                    "sandbox"
                   ],
                   "title": "ProcedureVersion",
                   "type": "object"
@@ -70463,6 +71105,16 @@
                       },
                       "title": "Limits",
                       "type": "object"
+                    },
+                    "kind": {
+                      "default": "script",
+                      "description": "E113: script, a curve script; procedure, a tool version run in the sandbox (procedures/sandbox-run: run_id names its run, script_sha256 the version, result its published outputs)",
+                      "enum": [
+                        "script",
+                        "procedure"
+                      ],
+                      "title": "Kind",
+                      "type": "string"
                     }
                   },
                   "required": [
@@ -70740,6 +71392,16 @@
                       },
                       "title": "Limits",
                       "type": "object"
+                    },
+                    "kind": {
+                      "default": "script",
+                      "description": "E113: script, a curve script; procedure, a tool version run in the sandbox (procedures/sandbox-run: run_id names its run, script_sha256 the version, result its published outputs)",
+                      "enum": [
+                        "script",
+                        "procedure"
+                      ],
+                      "title": "Kind",
+                      "type": "string"
                     }
                   },
                   "required": [
@@ -71146,6 +71808,16 @@
                       },
                       "title": "Limits",
                       "type": "object"
+                    },
+                    "kind": {
+                      "default": "script",
+                      "description": "E113: script, a curve script; procedure, a tool version run in the sandbox (procedures/sandbox-run: run_id names its run, script_sha256 the version, result its published outputs)",
+                      "enum": [
+                        "script",
+                        "procedure"
+                      ],
+                      "title": "Kind",
+                      "type": "string"
                     }
                   },
                   "required": [
@@ -109329,7 +110001,7 @@
                 "schema": {
                   "x-ophiolite": {
                     "id": "ophiolite.scientific-asset/1",
-                    "version": "1.36.0",
+                    "version": "1.37.0",
                     "lifecycle": "preview"
                   },
                   "additionalProperties": false,
@@ -118258,6 +118930,296 @@
                           ],
                           "title": "NativeSeismicContext",
                           "type": "object"
+                        },
+                        {
+                          "additionalProperties": false,
+                          "description": "E175 s0: a cube read as it was published, SEG-Y data format 1, 2, 3 or 5. A code of format 2 or 3 is its own\nvalue; no scale is stated or applied. Its axes are the sorted distinct labels the file holds, evenly spaced; `cells`\npositions of which `absent` have no trace. Reached only through profile segy/3 and mapping seismic-volume/3.",
+                          "properties": {
+                            "type": {
+                              "const": "seismic-volume",
+                              "title": "Type",
+                              "type": "string"
+                            },
+                            "format": {
+                              "enum": [
+                                "IBM 4-byte floating point",
+                                "4-byte two's complement integer",
+                                "2-byte two's complement integer",
+                                "IEEE 4-byte floating point"
+                              ],
+                              "title": "Format",
+                              "type": "string"
+                            },
+                            "format_code": {
+                              "enum": [
+                                1,
+                                2,
+                                3,
+                                5
+                              ],
+                              "title": "Format Code",
+                              "type": "integer"
+                            },
+                            "segy_revision": {
+                              "pattern": "^[0-9]{1,3}\\.[0-9]{1,3}$",
+                              "title": "Segy Revision",
+                              "type": "string"
+                            },
+                            "traces": {
+                              "maximum": 50000000,
+                              "minimum": 1,
+                              "title": "Traces",
+                              "type": "integer"
+                            },
+                            "cells": {
+                              "maximum": 50000000,
+                              "minimum": 1,
+                              "title": "Cells",
+                              "type": "integer"
+                            },
+                            "absent": {
+                              "minimum": 0,
+                              "title": "Absent",
+                              "type": "integer"
+                            },
+                            "samples": {
+                              "maximum": 20000,
+                              "minimum": 1,
+                              "title": "Samples",
+                              "type": "integer"
+                            },
+                            "trace_bytes": {
+                              "minimum": 242,
+                              "title": "Trace Bytes",
+                              "type": "integer"
+                            },
+                            "inline": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "first": {
+                                  "title": "First",
+                                  "type": "integer"
+                                },
+                                "last": {
+                                  "title": "Last",
+                                  "type": "integer"
+                                },
+                                "step": {
+                                  "minimum": 1,
+                                  "title": "Step",
+                                  "type": "integer"
+                                },
+                                "count": {
+                                  "maximum": 100000,
+                                  "minimum": 1,
+                                  "title": "Count",
+                                  "type": "integer"
+                                }
+                              },
+                              "required": [
+                                "first",
+                                "last",
+                                "step",
+                                "count"
+                              ],
+                              "title": "LineRange",
+                              "type": "object"
+                            },
+                            "crossline": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "first": {
+                                  "title": "First",
+                                  "type": "integer"
+                                },
+                                "last": {
+                                  "title": "Last",
+                                  "type": "integer"
+                                },
+                                "step": {
+                                  "minimum": 1,
+                                  "title": "Step",
+                                  "type": "integer"
+                                },
+                                "count": {
+                                  "maximum": 100000,
+                                  "minimum": 1,
+                                  "title": "Count",
+                                  "type": "integer"
+                                }
+                              },
+                              "required": [
+                                "first",
+                                "last",
+                                "step",
+                                "count"
+                              ],
+                              "title": "LineRange",
+                              "type": "object"
+                            },
+                            "sample_interval": {
+                              "exclusiveMinimum": 0,
+                              "title": "Sample Interval",
+                              "type": "number"
+                            },
+                            "sample_unit": {
+                              "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+                              "title": "Sample Unit",
+                              "type": "string"
+                            },
+                            "first_sample": {
+                              "title": "First Sample",
+                              "type": "number"
+                            },
+                            "z_domain": {
+                              "enum": [
+                                "time",
+                                "depth",
+                                "unknown"
+                              ],
+                              "title": "Z Domain",
+                              "type": "string"
+                            },
+                            "crs": {
+                              "pattern": "^(EPSG:[0-9]{4,6}|unknown)$",
+                              "title": "Crs",
+                              "type": "string"
+                            },
+                            "datum": {
+                              "maxLength": 128,
+                              "minLength": 1,
+                              "title": "Datum",
+                              "type": "string"
+                            },
+                            "first_cdp": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "x": {
+                                  "title": "X",
+                                  "type": "number"
+                                },
+                                "y": {
+                                  "title": "Y",
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "x",
+                                "y"
+                              ],
+                              "title": "XY",
+                              "type": "object"
+                            },
+                            "last_cdp": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "x": {
+                                  "title": "X",
+                                  "type": "number"
+                                },
+                                "y": {
+                                  "title": "Y",
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "x",
+                                "y"
+                              ],
+                              "title": "XY",
+                              "type": "object"
+                            },
+                            "fidelity": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "status": {
+                                  "const": "assessed",
+                                  "title": "Status",
+                                  "type": "string"
+                                },
+                                "preserved": {
+                                  "items": {
+                                    "maxLength": 512,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Preserved",
+                                  "type": "array"
+                                },
+                                "losses": {
+                                  "items": {
+                                    "maxLength": 512,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Losses",
+                                  "type": "array"
+                                },
+                                "unknown_context": {
+                                  "items": {
+                                    "maxLength": 128,
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "maxItems": 16,
+                                  "title": "Unknown Context",
+                                  "type": "array"
+                                },
+                                "decisions": {
+                                  "anyOf": [
+                                    {
+                                      "items": {
+                                        "maxLength": 512,
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      "maxItems": 64,
+                                      "type": "array"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ],
+                                  "default": null,
+                                  "title": "Decisions"
+                                }
+                              },
+                              "required": [
+                                "status",
+                                "preserved",
+                                "losses",
+                                "unknown_context"
+                              ],
+                              "title": "Fidelity",
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "format",
+                            "format_code",
+                            "segy_revision",
+                            "traces",
+                            "cells",
+                            "absent",
+                            "samples",
+                            "trace_bytes",
+                            "inline",
+                            "crossline",
+                            "sample_interval",
+                            "sample_unit",
+                            "first_sample",
+                            "z_domain",
+                            "crs",
+                            "datum",
+                            "first_cdp",
+                            "last_cdp",
+                            "fidelity"
+                          ],
+                          "title": "PublishedSeismicContext",
+                          "type": "object"
                         }
                       ],
                       "title": "Scientific"
@@ -118337,7 +119299,8 @@
                                 "well-set/1",
                                 "well-residual/1",
                                 "seismic-line/1",
-                                "seismic-volume/2"
+                                "seismic-volume/2",
+                                "seismic-volume/3"
                               ],
                               "title": "Mapping",
                               "type": "string"
@@ -119512,7 +120475,8 @@
                             "well-set/1",
                             "well-residual/1",
                             "seismic-line/1",
-                            "seismic-volume/2"
+                            "seismic-volume/2",
+                            "seismic-volume/3"
                           ],
                           "title": "Mapping",
                           "type": "string"
@@ -120912,10 +121876,11 @@
             "schema": {
               "type": "string",
               "enum": [
-                "2"
+                "2",
+                "3"
               ]
             },
-            "description": "2 asks for an 8-bit cube's window at native size (ophiolite.volume-window/2, one byte per sample). Without it an 8-bit cube is refused with native-form and nothing is read; a float volume or 2D line answers ophiolite.volume-window/1 with or without it."
+            "description": "2 asks for an 8-bit cube's window at native size (ophiolite.volume-window/2, one byte per sample); 3 asks for a cube as published at its own sample size (ophiolite.volume-window/3: 2- or 4-byte words, each piece led by its positions' mask). Without the value its cube needs, an 8-bit cube or a cube as published is refused with native-form and nothing is read; a float volume or 2D line answers ophiolite.volume-window/1 with or without it."
           }
         ],
         "security": [
@@ -120993,7 +121958,8 @@
                             "well-set/1",
                             "well-residual/1",
                             "seismic-line/1",
-                            "seismic-volume/2"
+                            "seismic-volume/2",
+                            "seismic-volume/3"
                           ],
                           "title": "Mapping",
                           "type": "string"
@@ -121525,10 +122491,11 @@
             "schema": {
               "type": "string",
               "enum": [
-                "2"
+                "2",
+                "3"
               ]
             },
-            "description": "2 asks for an 8-bit cube's window at native size (ophiolite.volume-window/2, one byte per sample). Without it an 8-bit cube is refused with native-form and nothing is read; a float volume or 2D line answers ophiolite.volume-window/1 with or without it."
+            "description": "2 asks for an 8-bit cube's window at native size (ophiolite.volume-window/2, one byte per sample); 3 asks for a cube as published at its own sample size (ophiolite.volume-window/3: 2- or 4-byte words, each piece led by its positions' mask). Without the value its cube needs, an 8-bit cube or a cube as published is refused with native-form and nothing is read; a float volume or 2D line answers ophiolite.volume-window/1 with or without it."
           },
           {
             "name": "window",
@@ -121787,10 +122754,11 @@
             "schema": {
               "type": "string",
               "enum": [
-                "2"
+                "2",
+                "3"
               ]
             },
-            "description": "2 asks for an 8-bit cube's window at native size (ophiolite.volume-window/2, one byte per sample). Without it an 8-bit cube is refused with native-form and nothing is read; a float volume or 2D line answers ophiolite.volume-window/1 with or without it."
+            "description": "2 asks for an 8-bit cube's window at native size (ophiolite.volume-window/2, one byte per sample); 3 asks for a cube as published at its own sample size (ophiolite.volume-window/3: 2- or 4-byte words, each piece led by its positions' mask). Without the value its cube needs, an 8-bit cube or a cube as published is refused with native-form and nothing is read; a float volume or 2D line answers ophiolite.volume-window/1 with or without it."
           },
           {
             "name": "window",
@@ -122059,10 +123027,11 @@
             "schema": {
               "type": "string",
               "enum": [
-                "2"
+                "2",
+                "3"
               ]
             },
-            "description": "2 asks for an 8-bit cube's window at native size (ophiolite.volume-window/2, one byte per sample). Without it an 8-bit cube is refused with native-form and nothing is read; a float volume or 2D line answers ophiolite.volume-window/1 with or without it."
+            "description": "2 asks for an 8-bit cube's window at native size (ophiolite.volume-window/2, one byte per sample); 3 asks for a cube as published at its own sample size (ophiolite.volume-window/3: 2- or 4-byte words, each piece led by its positions' mask). Without the value its cube needs, an 8-bit cube or a cube as published is refused with native-form and nothing is read; a float volume or 2D line answers ophiolite.volume-window/1 with or without it."
           },
           {
             "name": "window",
@@ -137154,6 +138123,16 @@
             },
             "title": "Limits",
             "type": "object"
+          },
+          "kind": {
+            "default": "script",
+            "description": "E113: script, a curve script; procedure, a tool version run in the sandbox (procedures/sandbox-run: run_id names its run, script_sha256 the version, result its published outputs)",
+            "enum": [
+              "script",
+              "procedure"
+            ],
+            "title": "Kind",
+            "type": "string"
           }
         },
         "required": [
@@ -145315,6 +146294,11 @@
           "verification": {
             "$ref": "#/components/schemas/ProcedureVerificationState",
             "description": "E165: this version's verification state and the line a client shows for it"
+          },
+          "sandbox": {
+            "description": "E113: sandbox runs of this version are on in this project (an administrator turns them on or off)",
+            "title": "Sandbox",
+            "type": "boolean"
           }
         },
         "required": [
@@ -145335,7 +146319,8 @@
           "words",
           "trusted",
           "mine",
-          "verification"
+          "verification",
+          "sandbox"
         ],
         "title": "ProcedureVersion",
         "type": "object"
@@ -149641,6 +150626,32 @@
         "title": "Sample",
         "type": "object"
       },
+      "SandboxLimitsRequest": {
+        "additionalProperties": false,
+        "description": "What a request may lower; an omitted field is the ceiling (None here), a sent null is refused (unlike the\nnullable `RunnerLimits`), and memory and seconds are whole numbers.",
+        "properties": {
+          "memory_mb": {
+            "maximum": 65536,
+            "minimum": 1,
+            "title": "Memory Mb",
+            "type": "integer"
+          },
+          "seconds": {
+            "maximum": 86400,
+            "minimum": 1,
+            "title": "Seconds",
+            "type": "integer"
+          },
+          "cpus": {
+            "exclusiveMinimum": 0,
+            "maximum": 64,
+            "title": "Cpus",
+            "type": "number"
+          }
+        },
+        "title": "SandboxLimitsRequest",
+        "type": "object"
+      },
       "SearchAnswer": {
         "additionalProperties": false,
         "description": "The answer to one question: a page of current versions in one order, the count and facets of every readable match,\nand the cursor of the next page (E145).",
@@ -152917,6 +153928,19 @@
             "description": "E165 s2: on a reported version only, the tool version's verification as it stood when this version was published (\"Verified by ...\", \"Verification withdrawn by ...\", \"Not verified\"), or \"Not recorded\" for a version published before verifications travelled with results; absent on every other kind",
             "title": "Verification Line"
           },
+          "witness_line": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E113 s2: on a reported version a sandbox job made, \"Ophiolite ran this calculation in the project's sandbox.\"; the image, runtime, limits and network are under Technical details; absent on every other version",
+            "title": "Witness Line"
+          },
           "outcomes": {
             "anyOf": [
               {
@@ -153781,6 +154805,58 @@
             "default": null,
             "description": "E107a: the original file's digest",
             "title": "Original Sha256"
+          },
+          "sandbox_image": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E113 s2: the image a sandbox job ran in (\"Image: sha256:...\")",
+            "title": "Sandbox Image"
+          },
+          "sandbox_runtime": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E113 s2: the container runtime of that job (\"Runtime: ...\")",
+            "title": "Sandbox Runtime"
+          },
+          "sandbox_limits": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E113 s2: the limits the job ran under (\"Limits: 256 MB, 60 seconds, 1 CPU\")",
+            "title": "Sandbox Limits"
+          },
+          "sandbox_network": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "E113 s2: the job's network (\"No network\")",
+            "title": "Sandbox Network"
           }
         },
         "title": "StoryTechnical",

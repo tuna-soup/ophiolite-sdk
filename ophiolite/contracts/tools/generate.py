@@ -77,6 +77,9 @@ def schemas():
     from project_gateway.held_copies import HeldCopies  # E171 s0
     from project_gateway.work_turns import WorkTurn; write(CONTRACTS / WorkTurn.CONTRACT['path'], WorkTurn.model_json_schema())  # E160 s0: one line, apart from the shared tuple
     from project_gateway.tool_verifications import ToolVerification  # E165 s0
+    from project_gateway.sandbox import ProcedureBox; write(CONTRACTS / ProcedureBox.CONTRACT['path'], ProcedureBox.model_json_schema())  # E113 s1: one line, apart from the shared tuple
+    from project_gateway.scientific_assets import SeismicVolumePublished; from project_gateway.volume_windows import VolumeWindow3  # E175 s0
+    for model in (SeismicVolumePublished, VolumeWindow3): write(CONTRACTS / model.CONTRACT['path'], model.model_json_schema())  # E175 s0: apart from the shared tuple
     for model in (CheckRecord, DerivationRecord, DerivationRecordV2, Parameters, Asset, Curve, ScientificContext, AssetSummary, TypedContext, WellTops, Trajectory, GridSurface, TriangulatedSurface, PointSet, PolylineSet, SeismicVolume, SeismicSlice,
                   RelationshipRegistry, Entity, EntityAssets, Lineage, ImportRecipe, PointSet2, WellLocationUpload, WellLocation,
                   Wavelet, ModelSection, SeismicSection, TimeDepth, FeatureSet, ImportRecipe2, CurveColumnsHeader, TableFile, SourceProvenance, WellPath, BasisGrouping, WellSet,

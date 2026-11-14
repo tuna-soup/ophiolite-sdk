@@ -34,7 +34,7 @@
               ],
               "layer": "Wells",
               "slice": "E29",
-              "evidence": "integration:docs/verification/E46-qgis-4.2.2-2026-09-30.md (QGIS 4.2.2 headless on Linux: 205 located wells as the layer Wells)",
+              "evidence": "integration:docs/verification/E172-s4-whole-journey-2026-11-13.json (J-mvp step (k), QGIS 4.2.2)",
               "client": {
                 "name": "QGIS",
                 "versions": [
@@ -240,7 +240,7 @@
               ],
               "layer": "Point sets",
               "slice": "E65",
-              "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)",
+              "evidence": "integration:docs/verification/E172-s4-whole-journey-2026-11-13.json (J-mvp steps (e) and (h), QGIS 4.2.2)",
               "client": {
                 "name": "QGIS",
                 "versions": [
@@ -738,6 +738,22 @@
         {
           "profile": "segy/2",
           "noun": "8-bit seismic volumes",
+          "asset_kind": "seismic-volume",
+          "routes": [
+            {
+              "route": "features",
+              "state": "not-yet",
+              "transport": null,
+              "asset_kinds": [
+                "seismic-volume"
+              ],
+              "slice": null
+            }
+          ]
+        },
+        {
+          "profile": "segy/3",
+          "noun": "seismic cubes as published",
           "asset_kind": "seismic-volume",
           "routes": [
             {

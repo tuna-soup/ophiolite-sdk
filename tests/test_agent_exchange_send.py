@@ -41,6 +41,7 @@ class Gateway:
         self.plans, self.runs, self.receipts = {}, {}, {}
         self.history = {'a-prev': [(1, OLD), (2, PREV)], 'a-tops': [(1, TOPS)]}
         self.refuse, self.lose = {}, set()
+        self.entities = {}  # E155 s2: entity id -> kind, as entities/get answers it
 
     def __call__(self, request):
         op = request.url.path.split('/projects/p/', 1)[1]
@@ -63,6 +64,9 @@ class Gateway:
         if op == 'procedures/get':
             return httpx.Response(200, json={'manifest': {'step': 'process', 'inputs': [{'slot': 'tops', 'kind': 'well-tops-csv/1'}],
                                                           'outputs': [{'role': r, 'label': LABELS[r], 'kind': 'well-tops-csv/1'} for r in RAW]}})
+        if op == 'entities/get':
+            if body['entity_id'] not in self.entities: return httpx.Response(404, json={'code': 'not-found', 'message': 'Entity unavailable', 'request_id': 'r-4'})
+            return httpx.Response(200, json={'entity_id': body['entity_id'], 'kind': self.entities[body['entity_id']], 'name': 'Delft 1'})
         if op == 'agents/propose':
             if 'report' in self.refuse: return self.refused(self.refuse['report'])
             plan = sha(canonical(body['request']).encode())
@@ -415,3 +419,83 @@ def test_a_dry_run_answers_the_reports_dry_run_and_saves_nothing(tmp_path):
     assert record(folder)['pending'] is None and 'agents/propose' not in gateway.ops()
     [asked] = [s['body'] for s in gateway.seen if s['op'] == 'procedure-runs/report']
     assert asked == {**report_request(command(run), {'shifted': {'name': 'Shifted tops'}}), 'dry_run': True}
+
+
+# -- E155 s2 C2: of_entity, read once and frozen ----------------------------------------------------------------------------
+
+WELLBORE = {'kind': 'wellbore', 'entity_id': 'wb-1'}
+
+
+def test_of_entity_is_read_once_and_sent_with_the_report_and_its_derive(tmp_path):
+    """The kind is the one entities/get answers. Mutation: no entities/get (a kind assumed) → the literal call list and
+    the well's kind differ."""
+    gateway, run, folder = Gateway(), run_folder(tmp_path), work(tmp_path)
+    gateway.entities = {'wb-1': 'well'}
+    done = agent(gateway).exchange(folder).send_run(run, name='Shifted tops', of_entity='wb-1')
+    assert done.outcome == 'sent-run'
+    assert gateway.ops() == ['capabilities/describe', 'entities/get', 'agents/propose', 'agents/status', 'procedure-runs/report', 'procedures/get', 'publications/derive']
+    [proposed] = gateway.proposed()
+    assert proposed['request'] == report_request(command(run), {'shifted': {'name': 'Shifted tops', 'of_entity': {'kind': 'well', 'entity_id': 'wb-1'}}})
+    assert gateway.derived()[0]['body']['of_entity'] == {'kind': 'well', 'entity_id': 'wb-1'}
+
+
+def test_a_resumed_send_reads_no_entity_again_and_sends_what_it_froze(tmp_path):
+    """M6: the entity answers another kind after the proposal. Mutation: read again on resume → a second entities/get
+    and the derive names a well."""
+    gateway, run, folder = Gateway(), run_folder(tmp_path), work(tmp_path)
+    gateway.answer, gateway.entities = 'pending', {'wb-1': 'wellbore'}
+    ex = agent(gateway).exchange(folder)
+    assert ex.send_run(run, name='Shifted tops', of_entity='wb-1', wait=False).outcome == 'proposed'
+    assert record(folder)['pending']['resolved']['of_entity'] == {'shifted': WELLBORE}
+    gateway.entities['wb-1'] = 'well'
+    [plan] = gateway.plans; gateway.plans[plan]['state'] = 'approved'
+    assert ex.send_run(run, name='Shifted tops', of_entity='wb-1').outcome == 'sent-run'
+    assert gateway.ops().count('entities/get') == 1 and len(gateway.proposed()) == 1
+    assert gateway.proposed()[0]['request']['publish']['shifted']['of_entity'] == WELLBORE == gateway.derived()[0]['body']['of_entity']
+
+
+def test_a_mapping_by_output_an_omitted_role_and_one_entity_for_two_roles(tmp_path):
+    """Mutation: entities read per role, not per id → two entities/get for one well."""
+    gateway, run, folder = Gateway(), run_folder(tmp_path, roles=('shifted', 'moved')), work(tmp_path)
+    gateway.entities = {'wb-1': 'wellbore'}
+    agent(gateway).exchange(folder).send_run(run, name='Chalk tops', of_entity={'shifted': 'wb-1', 'moved': 'wb-1'})
+    assert gateway.ops().count('entities/get') == 1
+    assert {r: e['of_entity'] for r, e in gateway.proposed()[0]['request']['publish'].items()} == {'shifted': WELLBORE, 'moved': WELLBORE}
+    (tmp_path / 'o').mkdir()
+    gateway, run, folder = Gateway(), run_folder(tmp_path / 'o', roles=('shifted', 'moved')), work(tmp_path / 'o')
+    gateway.entities = {'wb-1': 'wellbore'}
+    agent(gateway).exchange(folder).send_run(run, name='Chalk tops', of_entity={'shifted': 'wb-1'})
+    publish = gateway.proposed()[0]['request']['publish']
+    assert publish['shifted']['of_entity'] == WELLBORE and 'of_entity' not in publish['moved']
+    assert {d['body']['run']['role']: d['body'].get('of_entity') for d in gateway.derived()} == {'shifted': WELLBORE, 'moved': None}
+    (tmp_path / 'p').mkdir()
+    ex = agent(Gateway()).exchange(work(tmp_path / 'p'))
+    error = refused('not-valid', lambda: ex.send_run(run, name='Chalk tops', of_entity='wb-1'))  # several outputs: an id per output
+    assert error.facts == {'reasons': 'give the well or wellbore by output when the run made several'}
+
+
+def test_another_entity_on_a_pending_send_is_unfinished(tmp_path):
+    """Mutation: of_entity left out of `asked` → the pending send continues with the first entity."""
+    gateway, run, folder = Gateway(), run_folder(tmp_path), work(tmp_path)
+    gateway.answer, gateway.entities = 'pending', {'wb-1': 'wellbore', 'wb-2': 'wellbore'}
+    ex = agent(gateway).exchange(folder)
+    ex.send_run(run, name='Shifted tops', of_entity='wb-1', wait=False)
+    for other in ('wb-2', None):
+        error = refused('not-valid', lambda: ex.send_run(run, name='Shifted tops', of_entity=other, wait=False))
+        assert error.facts == {'reasons': 'an earlier send from this folder is unfinished: run it again unchanged, or set it aside'}
+
+
+def test_a_missing_entity_is_refused_before_anything_is_proposed(tmp_path):
+    """Mutation: the entity read after the proposal → the spy sees agents/propose."""
+    gateway, run, folder = Gateway(), run_folder(tmp_path), work(tmp_path)
+    error = refused('not-valid', lambda: agent(gateway).exchange(folder).send_run(run, name='Shifted tops', of_entity='wb-gone'))
+    assert error.facts == {'reasons': 'name a well or wellbore you can read in this project'} and error.technical['entity_id'] == 'wb-gone'
+    assert 'agents/propose' not in gateway.ops() and record(folder)['pending'] is None
+
+
+def test_a_dry_run_carries_the_entity(tmp_path):
+    gateway, run, folder = Gateway(), run_folder(tmp_path), work(tmp_path)
+    gateway.entities = {'wb-1': 'wellbore'}
+    agent(gateway).exchange(folder).send_run(run, name='Shifted tops', of_entity='wb-1', dry_run=True)
+    [asked] = [s['body'] for s in gateway.seen if s['op'] == 'procedure-runs/report']
+    assert asked == {**report_request(command(run), {'shifted': {'name': 'Shifted tops', 'of_entity': WELLBORE}}), 'dry_run': True}

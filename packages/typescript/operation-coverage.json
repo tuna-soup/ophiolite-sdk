@@ -1758,6 +1758,18 @@
     "response": "schema"
   },
   {
+    "operation": "POST /api/v1/projects/{project}/procedures/sandbox-enable",
+    "function": "postProjectsProjectProceduresSandboxEnable",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
+    "operation": "POST /api/v1/projects/{project}/procedures/sandbox-run",
+    "function": "postProjectsProjectProceduresSandboxRun",
+    "request": "schema",
+    "response": "schema"
+  },
+  {
     "operation": "POST /api/v1/projects/{project}/procedures/trust",
     "function": "postProjectsProjectProceduresTrust",
     "request": "schema",

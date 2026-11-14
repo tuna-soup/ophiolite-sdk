@@ -126,8 +126,9 @@ SOURCE_OPERATIONS={'sources':{'list','export','discover','export-file'}}  # E50a
 MAP_OPERATIONS={'maps':{'export'},'catalog':{'history'}}  # E70a C4: `get` of a scalar map and its version numbers (existing read routes)
 RESULT_OPERATIONS={'results':{'story','what-changed','dependents','remake-run','remake-save'}}  # E94: how a result was made, and making it again
 CHECK_OPERATIONS={'checks':{'publish','list','compare','publishers'}}  # E96: checks against a reference
-PROCEDURE_OPERATIONS={'procedures':{'register','list','get','bundle','enable','withdraw','trust','verify','verifications'},  # E105b: the project catalogue; E165 s1: verifications
-                      'procedure-runs':{'report','get','prepare-again'}}  # E106: a reported run and running a result again
+PROCEDURE_OPERATIONS={'procedures':{'register','list','get','bundle','enable','withdraw','trust','verify','verifications','sandbox-enable','sandbox-run'},  # E105b: the project catalogue; E165 s1: verifications; E113 s1: sandbox runs
+                      'procedure-runs':{'report','get','prepare-again'},  # E106: a reported run and running a result again
+                      'runners':{'job'}}  # E113 s1: following a sandbox run's job
 OUTCOME_OPERATIONS={'outcomes':{'declare','revise','enable','disable','withdraw','list','get','states','evaluate','deliver-as','claims'},  # E120: what a project accepts and where it delivers; s1: a result's states; s3: Deliver as and its claims
                     'verdicts':{'record','list'},  # E132: a person's accepted or rejected on one result version, with a reason
                     'stages':{'get','transition'},  # E132 s2: withdrawing a result version (which records the withdrawer's rejection)

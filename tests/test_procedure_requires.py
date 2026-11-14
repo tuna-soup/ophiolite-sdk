@@ -4,10 +4,12 @@ trust question, a pending record or a report. Register warns on a text this SDK 
 Expected values are literals; installed versions are controlled through `_requires.installed`."""
 import importlib.metadata
 import json
+import re
 import shlex
 import subprocess
 import sys
 import warnings
+from pathlib import Path
 
 import pytest
 
@@ -96,6 +98,16 @@ def test_each_operator_accepts_and_refuses_at_its_boundary(specifier, accepted, 
     for found in refused_:
         assert _requires.unmet(['pkg' + specifier], version=lambda name: found) == [
             {'requirement': 'pkg' + specifier, 'name': 'pkg', 'found': found, 'readable': True}], (specifier, found)
+
+
+def test_the_grammar_is_the_contract_file_the_platform_runs_not_a_private_copy():
+    """E113 s1 C1 (M1): an identical copy inside _requires.py would pass every vector above; the code objects must come
+    from the contract snapshot's requires.py, the file the Platform judges a sandbox image with."""
+    contract = Path(_requires.__file__).resolve().parent / 'contracts/procedures/v1/requires.py'
+    for function in (_requires.parse, _requires.version_key, _requires.satisfies, _requires.contract.unmet):
+        assert function.__code__.co_filename == str(contract), function.__name__
+    assert _requires.Malformed is _requires.contract.Malformed
+    assert not re.search(r'^def (parse|version_key|satisfies|_final|_prefix)\b', Path(_requires.__file__).read_text(), re.M)
 
 
 def test_an_installed_version_that_does_not_parse_is_refused_with_its_text(tmp_path, monkeypatch):

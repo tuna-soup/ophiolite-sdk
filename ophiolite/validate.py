@@ -54,7 +54,8 @@ def typed_pair(descriptor, raw):
                'ophiolite.well-location-upload/1':generated.WellLocationUpload,'ophiolite.time-depth/1':generated.TimeDepth,
                'ophiolite.feature-set/1':generated.FeatureSet,'ophiolite.table-file/1':generated.TableFile,
                'ophiolite.well-path/1':generated.WellPath,'ophiolite.well-set/1':generated.WellSet,
-               'ophiolite.well-residual/1':generated.WellResidual,'ophiolite.seismic-line/1':generated.SeismicLine}  # E53; E74b; E57; E56; E58b; E125 s3a; E119a; E119b; E137 s1
+               'ophiolite.well-residual/1':generated.WellResidual,'ophiolite.seismic-line/1':generated.SeismicLine,
+               'ophiolite.seismic-volume/3':generated.SeismicVolumePublished}  # E53; E74b; E57; E56; E58b; E125 s3a; E119a; E119b; E137 s1; E175 s1 (a cube as published)
     if rep['profile'] not in kinds:raise VerificationFailed('This kind of data is not supported by this SDK; update it.')
     rules.require(isinstance(value,dict) and value.get('schema')==rep['profile'], 'The normalized data is not the profile the descriptor names')
     payload=model(kinds[rep['profile']],value).model_dump(by_alias=True)

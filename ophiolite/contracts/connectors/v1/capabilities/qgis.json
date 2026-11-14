@@ -156,8 +156,8 @@
         "platforms": [
           "linux"
         ],
-        "date": "2026-09-30",
-        "evidence": "integration:docs/verification/E46-qgis-4.2.2-2026-09-30.md (QGIS 4.2.2 headless on Linux: 205 located wells as the layer Wells)"
+        "date": "2026-11-13",
+        "evidence": "integration:docs/verification/E172-s4-whole-journey-2026-11-13.json (J-mvp step (k), QGIS 4.2.2)"
       },
       "reach": {
         "route": "features",
@@ -311,8 +311,8 @@
         "platforms": [
           "linux"
         ],
-        "date": "2026-10-10",
-        "evidence": "integration:docs/program-2026-09-25/E65-gis-layers-COMMIT-STRATEGY.md (Validation Record: QGIS 4.2.2 on Linux reads every OGC API - Features collection)"
+        "date": "2026-11-13",
+        "evidence": "integration:docs/verification/E172-s4-whole-journey-2026-11-13.json (J-mvp steps (e) and (h), QGIS 4.2.2)"
       },
       "reach": {
         "route": "features",

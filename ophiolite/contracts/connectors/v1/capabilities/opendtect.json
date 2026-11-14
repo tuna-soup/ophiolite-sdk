@@ -3,7 +3,7 @@
   "id": "opendtect",
   "display_name": "OpendTect",
   "kind": "application",
-  "summary": "Write a bounded GR log patch into an explicitly selected OpendTect well and read it back.",
+  "summary": "Write a bounded GR log patch into an explicitly selected OpendTect well and read it back; send a survey horizon to the project and get a version of it into a survey.",
   "host": {
     "name": "OpendTect Free",
     "versions": [
@@ -38,6 +38,56 @@
         ],
         "date": "2026-09-24",
         "evidence": "integration:docs/verification/stage3b-opendtect.md"
+      }
+    },
+    {
+      "profile": "points-csv/1",
+      "data": "Horizon",
+      "direction": "publish",
+      "exact_old_revisions": "retained",
+      "change_detection": "explicit",
+      "losses": [
+        "Sent as one point per node of the horizon's grid (x, y, z, inline, crossline), Z in milliseconds of two-way time as OpendTect stores it (float32)",
+        "A node without a value is sent with an empty z"
+      ],
+      "unsupported": [
+        "2D horizons",
+        "a survey not in time, or one that states no coordinate system",
+        "a send by an assistant: a person sends with their own key",
+        "Windows/macOS"
+      ],
+      "qualification": {
+        "status": "qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-11-13",
+        "evidence": "integration:docs/verification/E172-s4-whole-journey-2026-11-13.json (J-mvp steps (d) and (f), OpendTect Free 7.0.10)"
+      }
+    },
+    {
+      "profile": "points-csv/1",
+      "data": "Horizon",
+      "direction": "write",
+      "exact_old_revisions": "retained",
+      "change_detection": "explicit",
+      "losses": [
+        "Written as a new horizon beside yours on the survey's grid; your horizon is never overwritten",
+        "OpendTect keeps each inline's Z in steps of that inline's range: a value off those steps moves by up to half a step, and the get reports each moved value"
+      ],
+      "unsupported": [
+        "a horizon off the survey's grid, in another coordinate system or not in time",
+        "2D horizons",
+        "following the newest version automatically",
+        "Windows/macOS"
+      ],
+      "qualification": {
+        "status": "qualified",
+        "platforms": [
+          "linux"
+        ],
+        "date": "2026-11-13",
+        "evidence": "integration:docs/verification/E172-s4-whole-journey-2026-11-13.json (J-mvp step (h), OpendTect Free 7.0.10)"
       }
     }
   ],

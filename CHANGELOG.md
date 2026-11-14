@@ -5,6 +5,16 @@
 Supported 0.x client over preview contracts, published on PyPI as `ophiolite` since 29 October 2026 and numbered by
 release date (ADR 0015). No stable 1.0 or production-support promise is claimed.
 
+- An assistant can say which well or wellbore a tool run's result is about (E155 s2): `AgentExchange.send_run` takes
+  `of_entity=` (an entity id, or `{role: id}`; a role left out is about none). It is read once with `entities/get`
+  and kept with the send, so continuing it reads nothing again; a missing one, or one of another kind, is refused
+  (`not-valid`) before anything is proposed. `AgentClient.procedure_fetch(digest, cache=None)` fetches a tool version
+  by digest and refuses before any bundle what a run of it would be refused for (`ToolRunRefused`: `import-as-run`,
+  `withdrawn`, `not-verified`; `NotRun('not-enabled')` for a version not enabled yet). `HistoryEntry` gains
+  `made_with`, `parents` and `parent_visibility`.
+- `ophiolite send` prints who holds the item ("Held by 2 connected applications, 1 of them on an older version.") on
+  standard output, on its own line after the sentence; it was on standard error. `--json` is unchanged: the line is
+  the `held_line` fact.
 - An application that applies a version itself can stay on the version it holds (E172 s3, G-7): `Exchange.fetch`
   takes `stay=` as `get` does. `stay=True` returns a receipt over the held version, never the newest, whose content
   is that exact version even without `output` (the application keeps its own copy); its `confirm()` answers `stays`

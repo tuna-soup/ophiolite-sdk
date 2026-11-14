@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/procedures/v1/procedure-box.json",
+  "x-ophiolite": {
+    "id": "ophiolite.procedure-box/1",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "BoxInput": {
+      "additionalProperties": false,
+      "description": "One exact version the box reads, at a path the gateway wrote under `/box`.",
+      "properties": {
+        "path": {
+          "pattern": "^/box/inputs/[a-z][a-z0-9_]{0,31}-[0-9]{1,4}(\\.[A-Za-z0-9]{1,16})?$",
+          "title": "Path",
+          "type": "string"
+        },
+        "kind": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        },
+        "declared": {
+          "additionalProperties": true,
+          "title": "Declared",
+          "type": "object"
+        },
+        "asset_id": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "kind",
+        "asset_id",
+        "revision"
+      ],
+      "title": "BoxInput",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "`ophiolite.procedure-box/1` (E113 s1): what the gateway hands `python -m ophiolite.box` in `/box/request.json`.\nThe bundle is always `/box/bundle`; every input path is under `/box/inputs`; nothing names a host path.",
+  "properties": {
+    "entry": {
+      "pattern": "^[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)*:[A-Za-z_][A-Za-z0-9_]*$",
+      "title": "Entry",
+      "type": "string"
+    },
+    "settings": {
+      "additionalProperties": true,
+      "title": "Settings",
+      "type": "object"
+    },
+    "inputs": {
+      "additionalProperties": {
+        "items": {
+          "$ref": "#/$defs/BoxInput"
+        },
+        "type": "array"
+      },
+      "title": "Inputs",
+      "type": "object"
+    }
+  },
+  "required": [
+    "entry",
+    "inputs"
+  ],
+  "title": "ProcedureBox",
+  "type": "object"
+}

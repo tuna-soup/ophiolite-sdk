@@ -9,6 +9,7 @@ import json
 import os
 import shutil
 from pathlib import Path
+from types import SimpleNamespace
 
 import httpx
 import pytest
@@ -19,10 +20,15 @@ try:
     from project_gateway.tests.test_procedure_publish import DECLARED
     from project_gateway.tests.test_retained_applications import shared, app  # noqa: F401 (fixture)
     from project_gateway.tests.test_organizations import service  # noqa: F401 (fixture)
+    from project_gateway.tests.procedure_world import archive, b64, files
+    from project_gateway.tests.test_agents_covered import DOI
+    from project_gateway.tests.test_procedure_publish import TWO_ROLES
+    from project_gateway.tests.test_upload_runs_procedures import seed as catalogue
 except ImportError:
     if os.environ.get('OPHIOLITE_REQUIRE_GATEWAY') == '1': raise
     pytest.skip('Platform test runtime is needed for the gateway lane', allow_module_level=True)
 import ophiolite
+from ophiolite.agent_exchange import ToolRunRefused
 from ophiolite.agents import AgentClient, PlanExpired
 from ophiolite.errors import Unavailable
 from ophiolite.procedures import LOCAL_RUN, AgentRun, NotRun, agent_register
@@ -145,3 +151,69 @@ def test_register_goes_through_a_plan(two, tmp_path):
     registered = agent_register(helper, bundle, 'Register depth-shift 7', sleep=approve(two))
     assert registered['digest']
     assert two.helper.post('agents', 'status', {'hash': plan['hash']}).json()['state'] == 'consumed'
+
+
+# E155 s2 C4: `AgentClient.procedure_fetch`. The refusal versions are written into the catalogue directly (as
+# test_tool_run_gate does); no bundle exists for them, and none is asked for.
+
+def catalogued(w, case):
+    """The digest of a version seeded as CASE says: who registered it, its state and its step."""
+    d = hashlib.sha256(('e155s2-' + case).encode()).hexdigest()
+    who, state, step = {'read': ('alice', 'enabled', 'read'), 'withdrawn': ('alice', 'withdrawn', 'process'),
+                        'private-mine': ('bob', 'private', 'process'), 'unverified': ('alice', 'enabled', 'process'),
+                        'read-withdrawn': ('alice', 'withdrawn', 'read'), 'invisible': ('alice', 'private', 'process')}[case]
+    catalogue(w.web.a, d, 'shift-' + case, 'Shift ' + case, who=who, state=state, step=step)
+    return d
+
+
+def test_procedure_fetch_gives_the_checked_folder_of_an_enabled_verified_version(two, tmp_path):
+    """Read first, then the bundle; a second fetch is the cached folder. Mutation: skip the `procedures/get` checks →
+    the call list differs."""
+    seen = Seen(two.web.c)
+    found = agent(two, seen).procedure_fetch(two.d, cache=tmp_path / 'tools')
+    assert found == tmp_path / 'tools' / two.d and json.loads((found / 'procedure.json').read_text())['version'] == 2
+    assert agent(two, seen).procedure_fetch(two.d, cache=tmp_path / 'tools') == found
+    assert seen.paths == ['procedures/get', 'procedures/bundle', 'procedures/get']
+
+
+@pytest.mark.parametrize('case, refusal, code', [
+    ('read', ToolRunRefused, 'import-as-run'),
+    ('withdrawn', ToolRunRefused, 'withdrawn'),  # withdrawn and never verified: withdrawn first (M8)
+    ('private-mine', NotRun, 'not-enabled'),
+    ('unverified', ToolRunRefused, 'not-verified'),
+    ('read-withdrawn', ToolRunRefused, 'import-as-run'),  # M8: the step first
+    ('invisible', Unavailable, None)])  # M8: a version the assistant cannot see answers as the server does
+def test_procedure_fetch_refuses_in_the_gate_order_before_any_bundle(two, tmp_path, case, refusal, code):
+    """Each refusal's class and code, and no `procedures/bundle` call. Mutations: fetch the bundle first; drop a check;
+    test verification before the state; map a 404 to `not-enabled` → that case."""
+    seen = Seen(two.web.c)
+    with pytest.raises(refusal) as raised:
+        agent(two, seen).procedure_fetch(catalogued(two, case), cache=tmp_path / 'tools')
+    if refusal is ToolRunRefused: assert raised.value.facts['reason'] == code
+    if refusal is NotRun: assert (raised.value.code, str(raised.value)) == (code, 'This tool version is not enabled in this project yet.')
+    if refusal is Unavailable: assert raised.value.status == 404
+    assert seen.paths == ['procedures/get'] and not (tmp_path / 'tools').exists()
+
+
+def test_a_changed_cache_is_refused_and_removed(two, tmp_path):
+    """Mutation: answer the cached folder without its digest check → no refusal."""
+    helper = agent(two, two.web.c)
+    found = helper.procedure_fetch(two.d, cache=tmp_path / 'tools')
+    (found / 'procedure.json').write_text('{}')
+    with pytest.raises(NotRun) as raised:
+        helper.procedure_fetch(two.d, cache=tmp_path / 'tools')
+    assert raised.value.code == 'cache-changed' and not found.exists()
+
+
+def test_a_version_bob_does_not_trust_is_fetched_and_its_send_refused_at_proposal(two, tmp_path):
+    """O1, frozen: trust is the person's and is asked at the send, never by the fetch. Mutation: refuse an untrusted
+    version in `procedure_fetch` → the fetch fails."""
+    from test_exchange_agent_report import holding  # that module imports this one's helpers
+    d =two.alice.ok('procedures', 'register', {'command_id': 'e155s2-alice-3', 'archive': b64(archive(files(outputs=TWO_ROLES, version=3)))})['digest']
+    two.alice.ok('procedures', 'enable', {'command_id': 'e155s2-alice-4', 'digest': d})
+    two.alice.ok('procedures', 'verify', {'command_id': 'e155s2-alice-5', 'digest': d, 'kind': 'publication', 'reference': DOI})
+    helper = agent(two, two.web.c)
+    assert helper.procedure_fetch(d, cache=tmp_path / 'tools') == tmp_path / 'tools' / d
+    with pytest.raises(ToolRunRefused) as raised:
+        helper.exchange(holding(tmp_path, two)).send_run(folder(tmp_path, SimpleNamespace(d=d, a=two.a)), name='Shifted Chalk tops', sleep=approve(two))
+    assert raised.value.facts['reason'] == 'not-trusted' and two.bob.ok('agents', 'plans', {})['plans'] == []

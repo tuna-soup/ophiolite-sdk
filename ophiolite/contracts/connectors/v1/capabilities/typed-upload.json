@@ -187,6 +187,30 @@
       }
     },
     {
+      "profile": "segy/3",
+      "data": "seismic cube as published",
+      "direction": "read",
+      "exact_old_revisions": "retained",
+      "change_detection": "none",
+      "losses": [
+        "None: the file is kept byte for byte; each integer code is kept as its own value, with no scale applied"
+      ],
+      "unsupported": [
+        "SEG-Y formats other than 1, 2, 3 and 5",
+        "positions of the grid without a trace",
+        "little-endian or variable-length traces",
+        "irregular grids",
+        "slices of the cube",
+        "volume export"
+      ],
+      "qualification": {
+        "status": "unverified",
+        "platforms": [],
+        "date": null,
+        "evidence": null
+      }
+    },
+    {
       "profile": "segy-line/1",
       "data": "2D seismic line",
       "direction": "read",

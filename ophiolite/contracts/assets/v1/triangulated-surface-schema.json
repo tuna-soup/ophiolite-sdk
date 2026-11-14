@@ -343,7 +343,8 @@
             "well-set/1",
             "well-residual/1",
             "seismic-line/1",
-            "seismic-volume/2"
+            "seismic-volume/2",
+            "seismic-volume/3"
           ],
           "title": "Mapping",
           "type": "string"

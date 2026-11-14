@@ -3,7 +3,7 @@
   "$id": "https://ophiolite.dev/contracts/assets/v1/typed-context-schema.json",
   "x-ophiolite": {
     "id": "ophiolite.typed-context/1",
-    "version": "1.13.0",
+    "version": "1.14.0",
     "lifecycle": "preview"
   },
   "$defs": {
@@ -1121,6 +1121,143 @@
       "title": "PolylineContext",
       "type": "object"
     },
+    "PublishedSeismicContext": {
+      "additionalProperties": false,
+      "description": "E175 s0: a cube read as it was published, SEG-Y data format 1, 2, 3 or 5. A code of format 2 or 3 is its own\nvalue; no scale is stated or applied. Its axes are the sorted distinct labels the file holds, evenly spaced; `cells`\npositions of which `absent` have no trace. Reached only through profile segy/3 and mapping seismic-volume/3.",
+      "properties": {
+        "type": {
+          "const": "seismic-volume",
+          "title": "Type",
+          "type": "string"
+        },
+        "format": {
+          "enum": [
+            "IBM 4-byte floating point",
+            "4-byte two's complement integer",
+            "2-byte two's complement integer",
+            "IEEE 4-byte floating point"
+          ],
+          "title": "Format",
+          "type": "string"
+        },
+        "format_code": {
+          "enum": [
+            1,
+            2,
+            3,
+            5
+          ],
+          "title": "Format Code",
+          "type": "integer"
+        },
+        "segy_revision": {
+          "pattern": "^[0-9]{1,3}\\.[0-9]{1,3}$",
+          "title": "Segy Revision",
+          "type": "string"
+        },
+        "traces": {
+          "maximum": 50000000,
+          "minimum": 1,
+          "title": "Traces",
+          "type": "integer"
+        },
+        "cells": {
+          "maximum": 50000000,
+          "minimum": 1,
+          "title": "Cells",
+          "type": "integer"
+        },
+        "absent": {
+          "minimum": 0,
+          "title": "Absent",
+          "type": "integer"
+        },
+        "samples": {
+          "maximum": 20000,
+          "minimum": 1,
+          "title": "Samples",
+          "type": "integer"
+        },
+        "trace_bytes": {
+          "minimum": 242,
+          "title": "Trace Bytes",
+          "type": "integer"
+        },
+        "inline": {
+          "$ref": "#/$defs/LineRange"
+        },
+        "crossline": {
+          "$ref": "#/$defs/LineRange"
+        },
+        "sample_interval": {
+          "exclusiveMinimum": 0,
+          "title": "Sample Interval",
+          "type": "number"
+        },
+        "sample_unit": {
+          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+          "title": "Sample Unit",
+          "type": "string"
+        },
+        "first_sample": {
+          "title": "First Sample",
+          "type": "number"
+        },
+        "z_domain": {
+          "enum": [
+            "time",
+            "depth",
+            "unknown"
+          ],
+          "title": "Z Domain",
+          "type": "string"
+        },
+        "crs": {
+          "pattern": "^(EPSG:[0-9]{4,6}|unknown)$",
+          "title": "Crs",
+          "type": "string"
+        },
+        "datum": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Datum",
+          "type": "string"
+        },
+        "first_cdp": {
+          "$ref": "#/$defs/XY"
+        },
+        "last_cdp": {
+          "$ref": "#/$defs/XY"
+        },
+        "fidelity": {
+          "$ref": "#/$defs/Fidelity"
+        }
+      },
+      "required": [
+        "type",
+        "format",
+        "format_code",
+        "segy_revision",
+        "traces",
+        "cells",
+        "absent",
+        "samples",
+        "trace_bytes",
+        "inline",
+        "crossline",
+        "sample_interval",
+        "sample_unit",
+        "first_sample",
+        "z_domain",
+        "crs",
+        "datum",
+        "first_cdp",
+        "last_cdp",
+        "fidelity"
+      ],
+      "title": "PublishedSeismicContext",
+      "type": "object"
+    },
     "SeismicContext": {
       "additionalProperties": false,
       "properties": {
@@ -2140,111 +2277,118 @@
   "description": "The context schema shared by the typed profiles.",
   "properties": {
     "context": {
-      "discriminator": {
-        "mapping": {
-          "feature-set": "#/$defs/FeatureContext",
-          "model-section": "#/$defs/ModelSectionContext",
-          "point-set": "#/$defs/PointColumnsContext",
-          "polyline-set": "#/$defs/PolylineContext",
-          "regular-grid-surface": "#/$defs/GridContext",
-          "seismic-line": "#/$defs/SeismicLineContext",
-          "seismic-section": "#/$defs/SeismicSectionContext",
-          "seismic-volume": {
-            "discriminator": {
-              "mapping": {
-                "1": "#/$defs/SeismicContext",
-                "5": "#/$defs/SeismicContext",
-                "8": "#/$defs/NativeSeismicContext"
-              },
-              "propertyName": "format_code"
-            },
-            "oneOf": [
-              {
-                "$ref": "#/$defs/SeismicContext"
-              },
-              {
-                "$ref": "#/$defs/NativeSeismicContext"
-              }
-            ]
-          },
-          "time-depth": "#/$defs/TimeDepthContext",
-          "trajectory": "#/$defs/TrajectoryContext",
-          "triangulated-surface": "#/$defs/MeshContext",
-          "wavelet": "#/$defs/WaveletContext",
-          "well-location": "#/$defs/WellLocationContext",
-          "well-path": "#/$defs/WellPathContext",
-          "well-residual": "#/$defs/WellResidualContext",
-          "well-set": "#/$defs/WellSetContext",
-          "well-tops": "#/$defs/TopsContext"
-        },
-        "propertyName": "type"
-      },
-      "oneOf": [
-        {
-          "$ref": "#/$defs/TopsContext"
-        },
-        {
-          "$ref": "#/$defs/TrajectoryContext"
-        },
-        {
-          "$ref": "#/$defs/GridContext"
-        },
-        {
-          "$ref": "#/$defs/MeshContext"
-        },
-        {
-          "$ref": "#/$defs/PointColumnsContext"
-        },
-        {
-          "$ref": "#/$defs/PolylineContext"
-        },
+      "anyOf": [
         {
           "discriminator": {
             "mapping": {
-              "1": "#/$defs/SeismicContext",
-              "5": "#/$defs/SeismicContext",
-              "8": "#/$defs/NativeSeismicContext"
+              "feature-set": "#/$defs/FeatureContext",
+              "model-section": "#/$defs/ModelSectionContext",
+              "point-set": "#/$defs/PointColumnsContext",
+              "polyline-set": "#/$defs/PolylineContext",
+              "regular-grid-surface": "#/$defs/GridContext",
+              "seismic-line": "#/$defs/SeismicLineContext",
+              "seismic-section": "#/$defs/SeismicSectionContext",
+              "seismic-volume": {
+                "discriminator": {
+                  "mapping": {
+                    "1": "#/$defs/SeismicContext",
+                    "5": "#/$defs/SeismicContext",
+                    "8": "#/$defs/NativeSeismicContext"
+                  },
+                  "propertyName": "format_code"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/SeismicContext"
+                  },
+                  {
+                    "$ref": "#/$defs/NativeSeismicContext"
+                  }
+                ]
+              },
+              "time-depth": "#/$defs/TimeDepthContext",
+              "trajectory": "#/$defs/TrajectoryContext",
+              "triangulated-surface": "#/$defs/MeshContext",
+              "wavelet": "#/$defs/WaveletContext",
+              "well-location": "#/$defs/WellLocationContext",
+              "well-path": "#/$defs/WellPathContext",
+              "well-residual": "#/$defs/WellResidualContext",
+              "well-set": "#/$defs/WellSetContext",
+              "well-tops": "#/$defs/TopsContext"
             },
-            "propertyName": "format_code"
+            "propertyName": "type"
           },
           "oneOf": [
             {
-              "$ref": "#/$defs/SeismicContext"
+              "$ref": "#/$defs/TopsContext"
             },
             {
-              "$ref": "#/$defs/NativeSeismicContext"
+              "$ref": "#/$defs/TrajectoryContext"
+            },
+            {
+              "$ref": "#/$defs/GridContext"
+            },
+            {
+              "$ref": "#/$defs/MeshContext"
+            },
+            {
+              "$ref": "#/$defs/PointColumnsContext"
+            },
+            {
+              "$ref": "#/$defs/PolylineContext"
+            },
+            {
+              "discriminator": {
+                "mapping": {
+                  "1": "#/$defs/SeismicContext",
+                  "5": "#/$defs/SeismicContext",
+                  "8": "#/$defs/NativeSeismicContext"
+                },
+                "propertyName": "format_code"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/SeismicContext"
+                },
+                {
+                  "$ref": "#/$defs/NativeSeismicContext"
+                }
+              ]
+            },
+            {
+              "$ref": "#/$defs/WellLocationContext"
+            },
+            {
+              "$ref": "#/$defs/WaveletContext"
+            },
+            {
+              "$ref": "#/$defs/ModelSectionContext"
+            },
+            {
+              "$ref": "#/$defs/SeismicSectionContext"
+            },
+            {
+              "$ref": "#/$defs/TimeDepthContext"
+            },
+            {
+              "$ref": "#/$defs/FeatureContext"
+            },
+            {
+              "$ref": "#/$defs/WellPathContext"
+            },
+            {
+              "$ref": "#/$defs/WellSetContext"
+            },
+            {
+              "$ref": "#/$defs/WellResidualContext"
+            },
+            {
+              "$ref": "#/$defs/SeismicLineContext"
             }
           ]
         },
         {
-          "$ref": "#/$defs/WellLocationContext"
-        },
-        {
-          "$ref": "#/$defs/WaveletContext"
-        },
-        {
-          "$ref": "#/$defs/ModelSectionContext"
-        },
-        {
-          "$ref": "#/$defs/SeismicSectionContext"
-        },
-        {
-          "$ref": "#/$defs/TimeDepthContext"
-        },
-        {
-          "$ref": "#/$defs/FeatureContext"
-        },
-        {
-          "$ref": "#/$defs/WellPathContext"
-        },
-        {
-          "$ref": "#/$defs/WellSetContext"
-        },
-        {
-          "$ref": "#/$defs/WellResidualContext"
-        },
-        {
-          "$ref": "#/$defs/SeismicLineContext"
+          "$ref": "#/$defs/PublishedSeismicContext"
         }
       ],
       "title": "Context"

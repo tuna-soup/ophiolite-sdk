@@ -1,5 +1,5 @@
 {
-  "note": "E165 s0 (R13): request bodies `procedures/verify` refuses, one defect each on `base`. `code` is a closed refusal (tool_verifications.REASONS) with its field, or `type` is the model's error type at `loc`. E113 s0: kind witnessed stays refused until slice 1 adds WitnessedRequest to the request union with the run table.",
+  "note": "E165 s0 (R13): request bodies `procedures/verify` refuses, one defect each on `base`. `code` is a closed refusal (tool_verifications.REASONS) with its field, or `type` is the model's error type at `loc`. E113 s0: kind witnessed stayed refused until slice 1 added WitnessedRequest to the request union with the run table (E113 s1 C6: a witnessed run is a valid request; naming a check under it is refused).",
   "witnessed": {"valid": {"kind": "witnessed", "digest": "edf8668204255edd264cccb9f91d941c4c28d34312f9e264de10d4df31c5dda7",
                           "reference": {"run_id": "6b1f0d7e3c2a49588e7d6c5b4a39281706f5e4d3c2b1a09f8e7d6c5b4a392817"},
                           "statement": null, "command_id": "verify-4"},
@@ -13,7 +13,9 @@
     {"name": "a publication with a URL", "set": {"kind": "publication",
       "reference": {"title": "A method note", "authors": ["C. Example"], "year": 2024, "link": {"kind": "url", "value": "https://example.org/method-note"}}}},
     {"name": "a withdrawal without a statement", "drop": ["statement"], "set": {"kind": "withdrawn",
-      "reference": {"withdraws": "verification-000000000000000000000000000000a1"}}}
+      "reference": {"withdraws": "verification-000000000000000000000000000000a1"}}},
+    {"name": "a witnessed run (E113 slice 1)", "set": {"kind": "witnessed",
+      "reference": {"run_id": "6b1f0d7e3c2a49588e7d6c5b4a39281706f5e4d3c2b1a09f8e7d6c5b4a392817"}}}
   ],
   "cases": [
     {"name": "who verified, sent by the client", "set": {"by": {"kind": "person", "id": "u-anna", "name_at_time": "Anna"}}, "code": "server-owned", "field": "by"},
@@ -22,9 +24,9 @@
       "reference": {"title": "A method note", "authors": ["C. Example"], "year": 2024}}, "code": "publication-link", "field": "reference.link"},
     {"name": "an id, sent by the client", "set": {"id": "verification-000000000000000000000000000000a1"}, "type": "extra_forbidden", "loc": ["check", "id"]},
     {"name": "an unknown key", "set": {"verified": true}, "type": "extra_forbidden", "loc": ["check", "verified"]},
-    {"name": "kind witnessed (E113 slice 1)", "set": {"kind": "witnessed"}, "type": "union_tag_invalid", "loc": []},
-    {"name": "kind witnessed with a run reference (E113 slice 1)", "set": {"kind": "witnessed",
-      "reference": {"run_id": "6b1f0d7e3c2a49588e7d6c5b4a39281706f5e4d3c2b1a09f8e7d6c5b4a392817"}}, "type": "union_tag_invalid", "loc": []},
+    {"name": "a witnessed run naming a check too (E113 slice 1)", "set": {"kind": "witnessed",
+      "reference": {"run_id": "6b1f0d7e3c2a49588e7d6c5b4a39281706f5e4d3c2b1a09f8e7d6c5b4a392817", "check_id": "check-0001"}},
+      "type": "extra_forbidden", "loc": ["witnessed", "reference", "check_id"]},
     {"name": "the check's label, sent by the client", "set": {"reference": {"check_id": "check-0001", "label": "Mine"}}, "type": "extra_forbidden", "loc": ["check", "reference", "label"]},
     {"name": "a statement over 2000 characters", "set": {"statement": "REPEAT:2001"}, "type": "string_too_long", "loc": ["check", "statement"]},
     {"name": "a NUL in the statement", "set": {"statement": "before\u0000after"}, "type": "string_pattern_mismatch", "loc": ["check", "statement"]}

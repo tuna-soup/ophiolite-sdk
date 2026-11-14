@@ -1,0 +1,495 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ophiolite.dev/contracts/assets/v1/seismic-volume-3-schema.json",
+  "x-ophiolite": {
+    "id": "ophiolite.seismic-volume/3",
+    "version": "1.0.0",
+    "lifecycle": "preview"
+  },
+  "$defs": {
+    "Fidelity": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "const": "assessed",
+          "title": "Status",
+          "type": "string"
+        },
+        "preserved": {
+          "items": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Preserved",
+          "type": "array"
+        },
+        "losses": {
+          "items": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Losses",
+          "type": "array"
+        },
+        "unknown_context": {
+          "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Unknown Context",
+          "type": "array"
+        },
+        "decisions": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 512,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 64,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decisions"
+        }
+      },
+      "required": [
+        "status",
+        "preserved",
+        "losses",
+        "unknown_context"
+      ],
+      "title": "Fidelity",
+      "type": "object"
+    },
+    "HeaderPositions": {
+      "additionalProperties": false,
+      "description": "1-based trace-header byte positions the reader used (defaults or the uploader's declaration).",
+      "properties": {
+        "inline_byte": {
+          "maximum": 237,
+          "minimum": 1,
+          "title": "Inline Byte",
+          "type": "integer"
+        },
+        "crossline_byte": {
+          "maximum": 237,
+          "minimum": 1,
+          "title": "Crossline Byte",
+          "type": "integer"
+        },
+        "cdp_x_byte": {
+          "maximum": 237,
+          "minimum": 1,
+          "title": "Cdp X Byte",
+          "type": "integer"
+        },
+        "cdp_y_byte": {
+          "maximum": 237,
+          "minimum": 1,
+          "title": "Cdp Y Byte",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "inline_byte",
+        "crossline_byte",
+        "cdp_x_byte",
+        "cdp_y_byte"
+      ],
+      "title": "HeaderPositions",
+      "type": "object"
+    },
+    "LineRange": {
+      "additionalProperties": false,
+      "properties": {
+        "first": {
+          "title": "First",
+          "type": "integer"
+        },
+        "last": {
+          "title": "Last",
+          "type": "integer"
+        },
+        "step": {
+          "minimum": 1,
+          "title": "Step",
+          "type": "integer"
+        },
+        "count": {
+          "maximum": 100000,
+          "minimum": 1,
+          "title": "Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "first",
+        "last",
+        "step",
+        "count"
+      ],
+      "title": "LineRange",
+      "type": "object"
+    },
+    "PublishedChunk": {
+      "additionalProperties": false,
+      "description": "E175 s0 (D-D): one inline of a cube as published; the digest of its present traces' sample bytes in ascending\ncrossline order, at the format's width. Every inline label holds at least one trace (D-G).",
+      "properties": {
+        "inline": {
+          "title": "Inline",
+          "type": "integer"
+        },
+        "traces": {
+          "minimum": 1,
+          "title": "Traces",
+          "type": "integer"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "bytes": {
+          "minimum": 2,
+          "title": "Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "inline",
+        "traces",
+        "sha256",
+        "bytes"
+      ],
+      "title": "PublishedChunk",
+      "type": "object"
+    },
+    "PublishedSeismicContext": {
+      "additionalProperties": false,
+      "description": "E175 s0: a cube read as it was published, SEG-Y data format 1, 2, 3 or 5. A code of format 2 or 3 is its own\nvalue; no scale is stated or applied. Its axes are the sorted distinct labels the file holds, evenly spaced; `cells`\npositions of which `absent` have no trace. Reached only through profile segy/3 and mapping seismic-volume/3.",
+      "properties": {
+        "type": {
+          "const": "seismic-volume",
+          "title": "Type",
+          "type": "string"
+        },
+        "format": {
+          "enum": [
+            "IBM 4-byte floating point",
+            "4-byte two's complement integer",
+            "2-byte two's complement integer",
+            "IEEE 4-byte floating point"
+          ],
+          "title": "Format",
+          "type": "string"
+        },
+        "format_code": {
+          "enum": [
+            1,
+            2,
+            3,
+            5
+          ],
+          "title": "Format Code",
+          "type": "integer"
+        },
+        "segy_revision": {
+          "pattern": "^[0-9]{1,3}\\.[0-9]{1,3}$",
+          "title": "Segy Revision",
+          "type": "string"
+        },
+        "traces": {
+          "maximum": 50000000,
+          "minimum": 1,
+          "title": "Traces",
+          "type": "integer"
+        },
+        "cells": {
+          "maximum": 50000000,
+          "minimum": 1,
+          "title": "Cells",
+          "type": "integer"
+        },
+        "absent": {
+          "minimum": 0,
+          "title": "Absent",
+          "type": "integer"
+        },
+        "samples": {
+          "maximum": 20000,
+          "minimum": 1,
+          "title": "Samples",
+          "type": "integer"
+        },
+        "trace_bytes": {
+          "minimum": 242,
+          "title": "Trace Bytes",
+          "type": "integer"
+        },
+        "inline": {
+          "$ref": "#/$defs/LineRange"
+        },
+        "crossline": {
+          "$ref": "#/$defs/LineRange"
+        },
+        "sample_interval": {
+          "exclusiveMinimum": 0,
+          "title": "Sample Interval",
+          "type": "number"
+        },
+        "sample_unit": {
+          "pattern": "^([A-Za-z0-9 ./^()\\-]{1,32}|unknown)$",
+          "title": "Sample Unit",
+          "type": "string"
+        },
+        "first_sample": {
+          "title": "First Sample",
+          "type": "number"
+        },
+        "z_domain": {
+          "enum": [
+            "time",
+            "depth",
+            "unknown"
+          ],
+          "title": "Z Domain",
+          "type": "string"
+        },
+        "crs": {
+          "pattern": "^(EPSG:[0-9]{4,6}|unknown)$",
+          "title": "Crs",
+          "type": "string"
+        },
+        "datum": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Datum",
+          "type": "string"
+        },
+        "first_cdp": {
+          "$ref": "#/$defs/XY"
+        },
+        "last_cdp": {
+          "$ref": "#/$defs/XY"
+        },
+        "fidelity": {
+          "$ref": "#/$defs/Fidelity"
+        }
+      },
+      "required": [
+        "type",
+        "format",
+        "format_code",
+        "segy_revision",
+        "traces",
+        "cells",
+        "absent",
+        "samples",
+        "trace_bytes",
+        "inline",
+        "crossline",
+        "sample_interval",
+        "sample_unit",
+        "first_sample",
+        "z_domain",
+        "crs",
+        "datum",
+        "first_cdp",
+        "last_cdp",
+        "fidelity"
+      ],
+      "title": "PublishedSeismicContext",
+      "type": "object"
+    },
+    "Reference": {
+      "additionalProperties": false,
+      "properties": {
+        "authority": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Authority",
+          "type": "string"
+        },
+        "key": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "revision": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "profile": {
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9.-]*(/[a-z0-9.-]+)*/[0-9]+$",
+          "title": "Profile",
+          "type": "string"
+        }
+      },
+      "required": [
+        "authority",
+        "key",
+        "revision",
+        "profile"
+      ],
+      "title": "Reference",
+      "type": "object"
+    },
+    "TypedInterpretation": {
+      "additionalProperties": false,
+      "description": "The executable identity of the typed reader (Connectors typed_reader; E56: feature_files for feature sets).",
+      "properties": {
+        "reader": {
+          "enum": [
+            "asset_connectors.typed_reader/1",
+            "asset_connectors.feature_files/1"
+          ],
+          "title": "Reader",
+          "type": "string"
+        },
+        "mapping": {
+          "enum": [
+            "well-tops/1",
+            "trajectory/1",
+            "regular-grid-surface/1",
+            "triangulated-surface/1",
+            "point-set/1",
+            "polyline-set/1",
+            "seismic-volume/1",
+            "well-location/1",
+            "wavelet/1",
+            "model-section/1",
+            "seismic-section/1",
+            "time-depth/1",
+            "feature-set/1",
+            "well-path/1",
+            "well-set/1",
+            "well-residual/1",
+            "seismic-line/1",
+            "seismic-volume/2",
+            "seismic-volume/3"
+          ],
+          "title": "Mapping",
+          "type": "string"
+        },
+        "parsing_policy": {
+          "const": "typed-strict/1",
+          "title": "Parsing Policy",
+          "type": "string"
+        },
+        "null_policy": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Null Policy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reader",
+        "mapping",
+        "parsing_policy",
+        "null_policy"
+      ],
+      "title": "TypedInterpretation",
+      "type": "object"
+    },
+    "XY": {
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "title": "Y",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "title": "XY",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "E175 s0: a cube's description as published: samples of SEG-Y format 1, 2, 3 or 5 at their own width, and the\npositions of its grid that have no trace. The exact original and its trace index are the stored representation.",
+  "properties": {
+    "representation": {
+      "const": "normalized",
+      "title": "Representation",
+      "type": "string"
+    },
+    "source": {
+      "$ref": "#/$defs/Reference"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "interpretation": {
+      "$ref": "#/$defs/TypedInterpretation"
+    },
+    "schema": {
+      "const": "ophiolite.seismic-volume/3",
+      "title": "Schema",
+      "type": "string"
+    },
+    "context": {
+      "$ref": "#/$defs/PublishedSeismicContext"
+    },
+    "decisions": {
+      "items": {
+        "maxLength": 512,
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 64,
+      "minItems": 1,
+      "title": "Decisions",
+      "type": "array"
+    },
+    "positions": {
+      "$ref": "#/$defs/HeaderPositions"
+    },
+    "chunks": {
+      "items": {
+        "$ref": "#/$defs/PublishedChunk"
+      },
+      "maxItems": 100000,
+      "minItems": 1,
+      "title": "Chunks",
+      "type": "array"
+    }
+  },
+  "required": [
+    "representation",
+    "source",
+    "source_sha256",
+    "interpretation",
+    "schema",
+    "context",
+    "decisions",
+    "positions",
+    "chunks"
+  ],
+  "title": "SeismicVolumePublished",
+  "type": "object"
+}

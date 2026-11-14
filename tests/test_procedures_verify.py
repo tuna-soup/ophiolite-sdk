@@ -66,12 +66,15 @@ def test_verify_sends_exactly_the_request_with_a_new_command_id_per_call():
     publication = {'title': 'T', 'authors': ['A'], 'year': 2024, 'link': {'kind': 'url', 'value': 'https://example.org/t'}}
     c.procedure_verify(DIGEST, publication=publication)
     assert (c.calls[-1][2]['kind'], c.calls[-1][2]['reference']) == ('publication', publication)
+    c.procedure_verify(DIGEST, witnessed='6b' * 32)  # E113 s1: a run Ophiolite made, by its id
+    assert (c.calls[-1][2]['kind'], c.calls[-1][2]['reference']) == ('witnessed', {'run_id': '6b' * 32})
 
 
-@pytest.mark.parametrize('given', [{}, {'check': 'check-1', 'withdraw': 'verification-1'}, {'check': 'c', 'publication': {}, 'withdraw': 'w'}])
+@pytest.mark.parametrize('given', [{}, {'check': 'check-1', 'withdraw': 'verification-1'}, {'check': 'c', 'publication': {}, 'withdraw': 'w'},
+                                   {'check': 'c', 'witnessed': 'r'}])
 def test_verify_takes_exactly_one_kind_of_evidence_before_any_request(given):
     c = client()
-    with pytest.raises(ValueError, match='Give exactly one of check, publication or withdraw.'): c.procedure_verify(DIGEST, **given)
+    with pytest.raises(ValueError, match='Give exactly one of check, publication, witnessed or withdraw.'): c.procedure_verify(DIGEST, **given)
     assert c.calls == []
 
 

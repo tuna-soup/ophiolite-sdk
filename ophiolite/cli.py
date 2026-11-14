@@ -10,6 +10,7 @@ import shlex
 import subprocess
 import uuid
 import sys
+import time
 import warnings
 from importlib.resources import files
 from .errors import OphioliteError,Refused,ChoiceRequired
@@ -193,6 +194,7 @@ def parser():
         evidence=verified.add_mutually_exclusive_group(required=True)
         evidence.add_argument('--check',metavar='ID',help='A passed check of a result this version made')
         evidence.add_argument('--title',help='The title of a published method (with --author, --year and --doi or --url)')
+        evidence.add_argument('--run',metavar='RUN_ID',help='A run Ophiolite made of this version in the project\'s sandbox')  # E113 s1
         evidence.add_argument('--withdraw',metavar='ID',help='Withdraw this verification (your own, or any as an administrator)')
         verified.add_argument('--author',action='append',default=[],help='With --title: an author; repeat for each')
         verified.add_argument('--year',type=int,help='With --title: the year it was published')
@@ -211,7 +213,23 @@ def parser():
         again.add_argument('--output',type=Path,required=True,help='A new folder for the outputs');again.add_argument('--name')
         again.add_argument('--for',dest='for_',metavar='OUTCOME',help='Publish the same result again for this outcome, so its current version checks it')  # E120
         again.add_argument('--yes',action='store_true',help='Trust the version without asking (recorded as your trust)')
-        for p in (reg,shown,one,published,again,verified,listed)+tuple(steps.choices[n] for n in ('enable','withdraw','trust')):
+        boxed=steps.add_parser('sandbox',help='Run an enabled version in the project\'s sandbox: the server runs it and publishes each output')  # E113 s1
+        boxes=boxed.add_subparsers(dest='sandbox_action',required=True)
+        box=lambda name,help:boxes.add_parser(name,parents=[common],help=help)
+        for name,help in (('on','Turn sandbox runs of a version on in this project (administrators)'),('off','Turn sandbox runs of a version off in this project (administrators)')):
+            c=box(name,help);c.add_argument('name');c.add_argument('--version',type=int,required=True)
+        started=box('run','Start a sandbox run on exact project versions; with --wait, follow it until it ends')
+        started.add_argument('name');started.add_argument('--version',type=int,help='This version number (default: the highest enabled one)')
+        started.add_argument('--item',action='append',default=[],metavar='SLOT=@ASSET:REVISION',help='An input version, exactly; repeat for each')
+        started.add_argument('--setting',action='append',default=[],help='NAME=VALUE; once per setting')
+        started.add_argument('--memory-mb',type=int,help='A lower memory limit for this run');started.add_argument('--seconds',type=int,help='A lower time limit for this run')
+        started.add_argument('--cpus',type=float,help='A lower processor limit for this run')
+        started.add_argument('--wait',type=float,default=0,metavar='SECONDS',help='Follow the run for up to this long')
+        started.add_argument('--command-id',metavar='ID',help='Resend a start whose answer was lost, under the id it was first sent with')
+        status=box('status','Whether sandbox runs of a version are on, or with --job where a sandbox run is')
+        status.add_argument('name',nargs='?');status.add_argument('--version',type=int,help='This version number (default: the highest enabled one)')
+        status.add_argument('--job',metavar='ID',help='A sandbox run\'s job, as run answered it');status.add_argument('--wait',type=float,default=0,metavar='SECONDS',help='With --job: follow it for up to this long')
+        for p in (reg,shown,one,published,again,verified,listed)+tuple(steps.choices[n] for n in ('enable','withdraw','trust'))+tuple(boxes.choices.values()):
             p.add_argument('--configuration',type=Path,default=Path('configuration.json'));p.add_argument('--credentials',type=Path)
     tool_group('tools',help='Write, check and run your own tools on this computer (offline; nothing is published)')  # E105a; E131 s1: tools is the word
     tool_group('procedures',prog=sub._prog_prefix+' tools')  # the old spelling; main prints the notice before parsing
@@ -800,6 +818,9 @@ def changed_lines(c,pad=''):
     return out
 
 
+REMAKE_FOLLOW=600  # E113 s2b: status asks (one a second) before the CLI says the sandbox run is still running
+
+
 def _remake(args,client):
     """E94: preview the exact inputs, run once, show what differs; save only with --save, --target and --command-id."""
     if args.save and not (args.command_id and args.target):raise Refused('--save needs --command-id and --target (new-result or new-version).')
@@ -810,6 +831,12 @@ def _remake(args,client):
     command=args.command_id or 'cli-'+uuid.uuid4().hex[:24]
     receipt=client.remake(args.asset,args.revision,step='run',inputs=inputs,command_id=command)
     status=client.remake(args.asset,args.revision,step='status',execution_id=receipt['execution_id'])
+    for _ in range(REMAKE_FOLLOW):  # E113 s2b: a sandbox run may still be running when the run step answers
+        if status.get('state') not in ('pending','running'):break
+        time.sleep(1)
+        status=client.remake(args.asset,args.revision,step='status',execution_id=receipt['execution_id'])
+    if status.get('state') in ('pending','running'):
+        return done(args,'Still running in the sandbox. Run the same command again with --command-id %s to see it.' % command,{'preview':preview,'status':status,'saves':[]})
     out=['%s: %s' % (o['label'],{'equal':'the same','different':'different','saved':'saved','discarded':'discarded','expired':'no longer kept'}[o['outcome']]) for o in status['outcomes']]
     for held in status.get('held') or []:
         if held.get('summary'):out.append('  %s: %s' % (held['label'],held['summary']['reason']))
@@ -1822,9 +1849,8 @@ def _exchange(args,client):
             exchange._raise('not-valid',{**refusal.facts,'reasons':refusal.facts['reasons']+' with --rights-confirmed'},refusal.technical)
     done(args,result.sentence,result.to_dict())
     if args.command=='send' and result.facts.get('held_line') and not getattr(args,'json',False):
-        # E171 design 6: who holds the sent item, for people on its own line, on stderr: stdout stays the sentence alone
-        # because tools/package/qualify_exchange.py compares a send's stdout exactly (--json carries it as a fact)
-        print(result.facts['held_line'],file=sys.stderr)
+        # E171 design 6: who holds the sent item, for people, on its own line after the sentence (--json carries it as a fact)
+        print(result.facts['held_line'])
     return result
 
 
@@ -2039,7 +2065,42 @@ def _slots(texts,flag,many=False):
     return found
 
 
-CATALOGUE_VERBS=('register','list','show','enable','withdraw','trust','verify','verifications','publish','again')
+CATALOGUE_VERBS=('register','list','show','enable','withdraw','trust','verify','verifications','publish','again','sandbox')
+SANDBOX_JOB={'queued':'Sandbox run %s is waiting for a runner.','running':'Sandbox run %s is running.','published':'Sandbox run %s published its outputs.',
+             'failed':'Sandbox run %s failed: %s.','killed':'Sandbox run %s was stopped at its limit: %s.','cancelled':'Sandbox run %s was cancelled.'}  # E113 s1
+
+
+def _sandbox_words(job):
+    """E113 s1: one sandbox job in words, named by its run id (the id `tools verify --run` takes)."""
+    text=SANDBOX_JOB[job['state']]
+    return text % ((job['run_id'],job['reason'] or 'no reason was recorded') if text.count('%s')==2 else (job['run_id'],))
+
+
+def _sandbox(args,client):
+    """E113 s1: `tools sandbox on|off|run|status`. A run that ends unpublished exits 1 with its words."""
+    if args.sandbox_action=='status' and args.job:
+        job=client.procedure_sandbox_job(args.job,wait=args.wait)
+    elif args.sandbox_action=='status' and not args.name:raise SystemExit('Name a tool, or give --job.')
+    else:
+        chosen=client.procedure_version(args.name,args.version)
+        if args.sandbox_action in ('on','off'):
+            v=client.procedure_sandbox_enable(chosen['digest'],args.sandbox_action=='on')
+            return done(args,'Sandbox runs of %s, version %d, are %s in this project.' % (v['label'],v['version'],args.sandbox_action),v)
+        if args.sandbox_action=='status':
+            v=client.procedure_get(chosen['digest'])
+            return done(args,'Sandbox runs of %s, version %d, are %s in this project.' % (v['label'],v['version'],'on' if v['sandbox'] else 'off'),v)
+        from . import procedures
+        inputs={}
+        for text in args.item:
+            slot,_,exact=text.partition('=');found=procedures.PROJECT_INPUT.match(exact)
+            if not slot or not found:raise SystemExit('Give each input as --item SLOT=@ASSET:REVISION.')
+            inputs.setdefault(slot,[]).append(found.groups())
+        settings=procedures._setting_values(client.procedure_get(chosen['digest'])['manifest'],args.setting)
+        limits={k:v for k,v in (('memory_mb',args.memory_mb),('seconds',args.seconds),('cpus',args.cpus)) if v is not None}
+        job=client.procedure_sandbox_run(chosen['digest'],inputs,settings=settings,limits=limits,command_id=args.command_id,wait=args.wait)
+    done(args,_sandbox_words(job),job)
+    if job['state'] in ('failed','killed','cancelled'):raise SystemExit(EXIT['refused'])
+    return job
 
 
 def _catalogue_verb(args):
@@ -2084,6 +2145,7 @@ def _catalogue(args,client):
             result=client.procedure_again(args.result,args.revision,args.output,version=args.version,folder=args.folder,yes=args.yes,
                                           prompt=ask if sys.stdin.isatty() else None,name=args.name,for_=args.for_)
             return done(args,result['ran']+'\n'+result['sentence'],result)
+        if args.procedure_action=='sandbox':return _sandbox(args,client)  # E113 s1
         chosen=client.procedure_version(args.name,args.version)
         if args.procedure_action=='show':
             v=client.procedure_get(chosen['digest']);w=v['words']
@@ -2096,7 +2158,8 @@ def _catalogue(args,client):
                 if not args.author or args.year is None:raise SystemExit('Give --author and --year with --title.')
                 publication={'title':args.title,'authors':args.author,'year':args.year}
                 if args.doi or args.url:publication['link']={'kind':'doi','value':args.doi} if args.doi else {'kind':'url','value':args.url}
-            v=client.procedure_verify(chosen['digest'],check=args.check,publication=publication,withdraw=args.withdraw,statement=args.statement,command_id=args.command_id)
+            v=client.procedure_verify(chosen['digest'],check=args.check,publication=publication,withdraw=args.withdraw,witnessed=args.run,statement=args.statement,
+                                      command_id=args.command_id)
             return done(args,v['verification']['line'],v)
         if args.procedure_action=='verifications':
             v=client.procedure_verifications(chosen['digest'])

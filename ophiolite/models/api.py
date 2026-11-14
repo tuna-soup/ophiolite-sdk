@@ -126,6 +126,9 @@ class HistoryEntry(Contract):
     run_id: str | None = None
     stage: str
     via: Via | None = None  # B1(a): the project access key this version was published through, as named then
+    made_with: str | None = None  # E155 s2: "<tool label>, version <n>" when a catalogue tool version made it
+    parents: list[Reference] | None = None  # E155 s2: this revision's own parents the caller may read
+    parent_visibility: Literal['complete', 'restricted'] | None = None
 
 class History(Contract):
     asset_id: str

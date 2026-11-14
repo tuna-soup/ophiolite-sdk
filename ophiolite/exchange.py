@@ -246,7 +246,7 @@ TYPE_WORDS = {
     'time-depth table': ('time-depth-csv/1',),
     'surface': ('mesh-text/1',),
     'fault sticks': ('petrel-faultsticks/1', 'opendtect-faultsticks/1'),
-    'seismic volume': ('segy/1', 'segy/2'),
+    'seismic volume': ('segy/1', 'segy/2', 'segy/3'),
     'seismic line': ('segy-line/1',),
     'seismic section': ('seismic-section-text/1',),
     'wavelet': ('wavelet-text/1',),
@@ -1076,9 +1076,8 @@ class ClientTransport:
             def piece(n):
                 path, length = reading.piece(n); answer = {}
                 return client._window_get(path, length, answer), answer
-            def headers(n):
-                first, last = n * writer.per_headers, min((n + 1) * writer.per_headers, writer.traces)
-                return client._window_headers(base, request, document, n, (last - first) * 240)
+            def headers(n):  # E175 s1 (R1-4): the document's partition, a `/3` answer's mask included in its bound
+                return client._window_headers(base, request, document, n, writer.headers_length(n))
             written = writer.write(lambda n: once_more(lambda: headers(n)), lambda n: once_more(lambda: piece(n)))
         except WindowRefused as refused: raise as_exchange(refused) from None
         record = {'document': document, 'window_digest': written['window_digest'], 'headers_digest': written['headers_digest']}

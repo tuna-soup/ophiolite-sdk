@@ -65,7 +65,10 @@ def details(node, names):
     who = lambda ident: (names.get(ident) or ident) if ident else NOT_RECORDED
     kind, made, method = node['kind'], node.get('made') or {}, node.get('method')
     out = []
-    if kind == 'reported':  # E106: made with a catalogue procedure on a person's computer (or by an agent, for its delegator)
+    if kind == 'reported' and node.get('witness_line'):  # E113 s2: a sandbox job made it; the server's line, never rebuilt here
+        if method: out.append('Made with %s %s, started by %s.' % (method['display'], method['version_label'], who(made.get('by'))))
+        out.append(node['witness_line'])
+    elif kind == 'reported':  # E106: made with a catalogue procedure on a person's computer (or by an agent, for its delegator)
         if made.get('by_kind') == 'agent':
             on = 'by %s' % (made.get('by_name') or 'an agent') + (' for %s' % who(made['on_behalf_of']) if made.get('on_behalf_of') else '')
         else: on = "on %s's computer" % who(made.get('reported_by'))

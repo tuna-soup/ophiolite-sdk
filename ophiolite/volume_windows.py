@@ -40,7 +40,10 @@ NOT_SENT = ' Nothing was sent.'
 NOT_AVAILABLE = ('Reading part of a volume is not available in this SDK yet.' + NOT_SENT +
                  ' Read one slice (Client.read_slice) or the whole original (Client.download_original).')
 REASONS = ('malformed', 'unknown-parameter', 'selection-required', 'reversed', 'outside', 'off-grid', 'line-by-label',
-           'not-a-volume', 'not-available-yet', 'window-changed')
+           'not-a-volume', 'not-available-yet', 'window-changed', 'masked', 'headers-changed')  # E175 s2: the last two the client's own
+MASKED = ('This window has positions without a trace, which a list of codes cannot state. Read it with to_masked(), which '
+          'masks those positions.')
+HEADERS_CHANGED = 'The trace headers of this window changed while it was written: ask for the window again. Nothing was written.'
 AXES = ('inline', 'crossline', 'trace', 'sample')
 RANGE = re.compile(r'^(-?[0-9]{1,10})(?::(-?[0-9]{1,10}))?$')
 STEPPED = re.compile(r'^-?[0-9]{1,10}:-?[0-9]{1,10}:-?[0-9]{1,10}$')
@@ -136,14 +139,51 @@ NATIVE_CODE, NATIVE_FORMAT, NATIVE_MAPPING = 8, 'int8-code', 'seismic-volume/2'
 ASK_NATIVE = ('windows', '2')
 
 
+# E175 s1 (D-5): a cube as published's window, `/3`, at the format's own width, each piece and headers answer led by its
+# positions' mask (one bit each, 1 for absent, most significant first, padded to whole bytes). Asked with windows=3,
+# and only for an item whose described context counts `cells`.
+WINDOW3 = 'ophiolite.volume-window/3'
+PUBLISHED_MAPPING = 'seismic-volume/3'
+PUBLISHED_FORMATS = {1: 'ibm-float32', 2: 'int32', 3: 'int16', 5: 'ieee-float32'}
+PUBLISHED_WIDTH = {1: 4, 2: 4, 3: 2, 5: 4}
+INTEGER_CODES = {2: 'int32', 3: 'int16'}
+CLIENT_CHECKS3 = CLIENT_CHECKS + ['mask']
+HEADERS_PER_ANSWER3 = 8 * BYTES_MAX // (8 * 240 + 1)  # D-H3: 139,737 positions, an answer's mask and headers <= 32 MiB
+FIELDS3 = FIELDS | {'absent', 'headers'}
+ASK_PUBLISHED = ('windows', '3')
+
+
 def native(description):
     """True for a volume whose described context is the 8-bit form (format_code 8)."""
     return description is not None and description.geometry == 'volume' and description.context.get('format_code') == NATIVE_CODE
 
 
+def published(description):
+    """E175 s1: True for a volume described as a cube as published (its context counts `cells`)."""
+    return description is not None and description.geometry == 'volume' and 'cells' in description.context
+
+
 def asked(query, description):
-    """The query a request sends: the window's own, plus windows=2 for a native cube only (R5)."""
-    return list(query) + [ASK_NATIVE] if native(description) else list(query)
+    """The query a request sends: the window's own, plus windows=2 for a native cube or windows=3 for a cube as
+    published only (R5: a float request stays byte-identical)."""
+    if native(description): return list(query) + [ASK_NATIVE]
+    return list(query) + [ASK_PUBLISHED] if published(description) else list(query)
+
+
+def mask_bytes(positions):
+    """D-M: the bytes of the mask of `positions` positions, padded to whole bytes."""
+    return -(-positions // 8)
+
+
+def published_per(samples, width):
+    """D-M: the positions a `/3` piece holds, its mask and every trace within BYTES_MAX."""
+    return 8 * BYTES_MAX // (8 * samples * width + 1)
+
+
+def published_bytes(positions, absent, per, samples, width):
+    """D-M: a `/3` window's bytes: each piece's mask, then the present traces' words."""
+    full, rest = divmod(positions, per)
+    return full * mask_bytes(per) + mask_bytes(rest) + (positions - absent) * samples * width
 
 
 def _failed(check, why):
@@ -249,6 +289,7 @@ def check_document(document, *, asset, revision, query, description):
     `/2` (E140 s3): one byte per sample, its code for no value the described one."""
     from .models.generated import VolumeWindow, VolumeWindow2
     from pydantic import ValidationError
+    if published(description): return _check_document3(document, asset=asset, revision=revision, query=query, description=description)
     two = native(description)
     schema, model, width = (WINDOW2, VolumeWindow2, 1) if two else (WINDOW, VolumeWindow, 4)
     if not isinstance(document, dict) or set(document) != FIELDS: _failed('identity', 'the document is not an %s document.' % schema)
@@ -285,6 +326,78 @@ def check_document(document, *, asset, revision, query, description):
     return d
 
 
+def _check_document3(document, *, asset, revision, query, description):
+    """E175 s1 (D-5): a cube as published's `/3` document, checked as `/1`'s and for its own fields: the samples at the
+    format's width, the absent positions, the `/3` piece and headers partitions."""
+    from .models.generated import VolumeWindow3
+    from pydantic import ValidationError
+    if not isinstance(document, dict) or set(document) != FIELDS3: _failed('identity', 'the document is not an %s document.' % WINDOW3)
+    try: VolumeWindow3.model_validate(document)
+    except ValidationError: _failed('identity', 'the document does not satisfy %s.' % WINDOW3)
+    d = document
+    if d['asset_id'] != asset or d['revision'] != revision or d['source_sha256'] != revision:
+        _failed('identity', 'the document names another asset or revision than the one asked for.')
+    if d['geometry'] != 'volume' or d['interpretation']['mapping'] != PUBLISHED_MAPPING:
+        _failed('axes', 'the document is not of the asset\'s geometry or not read by its mapping.')
+    if tuple(a['name'] for a in d['axes']) != GEOMETRY_AXES['volume']: _failed('axes', 'the axes are not the geometry\'s, in order.')
+    if any(a['count'] != a['last'] - a['first'] + 1 for a in d['axes']): _failed('shape', 'an axis count is not last - first + 1.')
+    if any('labels' in a and len(a['labels']) != a['count'] for a in d['axes']): _failed('shape', 'a trace axis does not have one label per trace.')
+    if d['shape'] != [a['count'] for a in d['axes']]: _failed('shape', 'the shape is not the axis counts.')
+    samples, code = d['samples'], d['samples']['format_code']
+    if PUBLISHED_FORMATS.get(code) != samples['format'] or samples['byte_order'] != 'big' or samples['width'] != PUBLISHED_WIDTH.get(code):
+        _failed('shape', 'the sample format does not match its code.')
+    width, positions, absent = samples['width'], math.prod(d['shape'][:-1]), d['absent']
+    if absent['encoding'] != 'bitmap-msb' or not 0 <= absent['count'] <= positions: _failed('mask', 'the absent positions are not a mask of this window.')
+    pieces, per = d['pieces'], published_per(d['shape'][-1], width)
+    if pieces['bytes_max'] != BYTES_MAX or pieces['traces_per_piece'] != per or pieces['count'] != -(-positions // per):
+        _failed('shape', 'the pieces do not follow the /3 partition.')
+    if d['headers'] != {'count': -(-positions // HEADERS_PER_ANSWER3), 'traces_per_answer': HEADERS_PER_ANSWER3}:
+        _failed('shape', 'the headers answers do not follow the /3 partition.')
+    if d['bytes'] != published_bytes(positions, absent['count'], per, d['shape'][-1], width):
+        _failed('shape', 'the byte count is not the masks and the present traces.')
+    if d['window_id'] != hashlib.sha256(canonical(asset, revision, 'volume', d['axes'], code, per, WINDOW3)).hexdigest():
+        _failed('identity', 'the window_id is not the digest of the window it describes.')
+    if d['verification'] != {'client': CLIENT_CHECKS3, 'trusted': TRUSTED}: _failed('identity', 'the verification lists are not the closed lists.')
+    selection, axes = resolve(description, query)
+    if d['selection'] != selection or d['axes'] != axes or code != description.context['format_code']:
+        _failed('axes', 'the axes are not the ones the request names on this asset.')
+    return d
+
+
+class MaskDigest:
+    """D-M: the window's absent bits, fed piece by piece (padding stripped) and digested as one bit string padded once
+    at the end; `close()` checks the digest and the count of ones against the document's `absent`."""
+    def __init__(self, document):
+        self.absent, self.digest, self.carry, self.held, self.ones = document['absent'], hashlib.sha256(), 0, 0, 0
+
+    def add(self, bits, n):
+        self.ones += bits.bit_count()
+        value, held = (self.carry << n) | bits, self.held + n
+        whole, self.held = divmod(held, 8)
+        if whole: self.digest.update((value >> self.held).to_bytes(whole, 'big'))
+        self.carry = value & ((1 << self.held) - 1)
+
+    def close(self, what='pieces'):
+        if self.held: self.digest.update((self.carry << (8 - self.held)).to_bytes(1, 'big')); self.held = 0
+        if self.digest.hexdigest() != self.absent['sha256'] or self.ones != self.absent['count']:
+            _failed('mask', 'the %s\' masks do not digest to the window\'s absent positions.' % what)
+
+
+def split_masked(index, body, positions, record):
+    """E175 s1 (D-5): a `/3` piece or headers answer of `positions` positions, after its identity and digest: its mask
+    (padding bits zero), then `record` bytes for each present position. Returns (bits as an integer, the records)."""
+    m = mask_bytes(positions)
+    if len(body) < m: _failed('completeness', 'answer %d is shorter than its mask.' % index)
+    bits = int.from_bytes(body[:m], 'big')
+    pad = 8 * m - positions
+    if bits & ((1 << pad) - 1): _failed('mask', 'answer %d has a padding bit set in its mask.' % index)
+    bits >>= pad
+    present = positions - bits.bit_count()
+    if len(body) != m + present * record:
+        _failed('completeness', 'answer %d has %d bytes, not its mask and %d present traces.' % (index, len(body), present))
+    return bits, body[m:]
+
+
 def codes(body):
     """E140 s3: a native window's one-byte codes, verbatim, as two's complement integers (-128..127)."""
     return list(struct.unpack('>%db' % len(body), body))
@@ -296,6 +409,9 @@ def decode(body, code, undefined_code=None):
     if code == NATIVE_CODE:
         from .native_form import values
         return values(body, undefined_code)
+    if code in INTEGER_CODES:  # E175 s1: a code of a cube as published is its value, as a float (float64 holds it exactly)
+        n = len(body) // PUBLISHED_WIDTH[code]
+        return [float(v) for v in struct.unpack('>%d%s' % (n, 'h' if code == 3 else 'i'), body)]
     n = len(body) // 4
     if code == 5: return list(struct.unpack('>%df' % n, body))
     return [_ibm(w) for w in struct.unpack('>%dI' % n, body)]
@@ -312,13 +428,15 @@ def _ibm(word):
 class WindowPiece:
     """One verified piece: window traces `traces = (first, last)` in C order of the trace axes, `values` one list of
     floats per trace. For a native window (`/2`), `codes()` returns the stored one-byte codes verbatim, one list of
-    integers per trace; `raw` is the verified body."""
-    def __init__(self, index, count, traces, values, raw=None, samples=None):
+    integers per trace; `raw` is the verified body. E175 s1: for an integer cube as published (`/3`, format 2 or 3)
+    `codes()` returns its stored integers, one list per position, None for an absent position (`values` too)."""
+    def __init__(self, index, count, traces, values, raw=None, samples=None, integer=False):
         self.index, self.count, self.traces, self.values = index, count, traces, values
-        self.raw, self._samples = raw, samples
+        self.raw, self._samples, self._integer = raw, samples, integer
 
     def codes(self):
-        if self.raw is None: raise ValueError('Only a window of an 8-bit cube holds codes; this one holds 4-byte words.')
+        if self._integer: return [None if t is None else [int(v) for v in t] for t in self.values]
+        if self.raw is None: raise ValueError('Only a window of an 8-bit cube or of an integer cube holds codes; this one holds float words.')
         flat, s = codes(self.raw), self._samples
         return [flat[k * s:(k + 1) * s] for k in range(len(flat) // s)]
 
@@ -333,29 +451,44 @@ class Window:
         self.samples, self.traces = document['shape'][-1], math.prod(document['shape'][:-1])
         self.code = document['samples']['format_code']
         self.width, self.undefined = document['samples']['width'], document['samples'].get('undefined_code')
-        self.request = asked(query, description)  # E140 s3: windows=2 for a native cube only
+        self.request = asked(query, description)  # E140 s3: windows=2 for a native cube only; E175 s1: 3 for a cube as published
         self.digest, self.next, self.total, self.complete = hashlib.sha256(), 0, 0, False
+        self.three = document['schema'] == WINDOW3
+        self.mask = MaskDigest(document) if self.three else None
 
     def span(self, index):
         return index * self.per, min((index + 1) * self.per, self.traces) - 1
 
     def piece(self, index):
-        """(path, exact body length) of piece `index`."""
+        """(path, body length) of piece `index`: exact, or for `/3` the most it can be (its mask and every trace; the
+        exact length is known from its mask, R1-4)."""
         first, last = self.span(index)
+        n = last - first + 1
         return (self.base + '/pieces/%d?' % index + urlencode(self.request + [('window', self.document['window_id'])]),
-                (last - first + 1) * self.samples * self.width)
+                (mask_bytes(n) if self.three else 0) + n * self.samples * self.width)
 
     def accept(self, index, body, answer):
-        verify_piece(self.document, index, body, answer, self.piece(index)[1])
+        first, last = self.span(index)
+        if self.three:
+            verify_piece(self.document, index, body, answer, len(body))  # identity and digest; the length follows the mask
+            bits, words = split_masked(index, body, last - first + 1, self.samples * self.width)
+            self.mask.add(bits, last - first + 1)
+        else: verify_piece(self.document, index, body, answer, self.piece(index)[1])
         self.digest.update(body); self.total += len(body); self.next = index + 1
         if self.next == self.count:
+            if self.three: self.mask.close()  # first: a coherently shortened piece is a mask defect (R1-9)
             if self.total != self.document['bytes']: _failed('completeness', 'the pieces do not add up to the window.')
             self.complete = True
-        first, last = self.span(index)
-        flat = decode(body, self.code, self.undefined)
-        raw = body if self.code == NATIVE_CODE else None
-        return WindowPiece(index, self.count, (first, last), [flat[k * self.samples:(k + 1) * self.samples] for k in range(last - first + 1)],
-                           raw, self.samples)
+        if not self.three:
+            flat = decode(body, self.code, self.undefined)
+            raw = body if self.code == NATIVE_CODE else None
+            return WindowPiece(index, self.count, (first, last), [flat[k * self.samples:(k + 1) * self.samples] for k in range(last - first + 1)],
+                               raw, self.samples)
+        flat, n, traces, at = decode(words, self.code), last - first + 1, [], 0
+        for k in range(n):  # MSB first: position k is bit n - 1 - k
+            if bits >> (n - 1 - k) & 1: traces.append(None)
+            else: traces.append(flat[at * self.samples:(at + 1) * self.samples]); at += 1
+        return WindowPiece(index, self.count, (first, last), traces, None, self.samples, self.code in INTEGER_CODES)
 
     @property
     def window_digest(self): return self.digest.hexdigest() if self.complete else None
@@ -386,7 +519,29 @@ class VolumeWindowResult:
 
     def to_numpy(self):
         import numpy  # optional: only this method needs it
+        if self.document['schema'] == WINDOW3:  # E175 s1: an absent position (none in s1) reads as NaN
+            nan = [math.nan] * self.shape[-1]
+            return numpy.asarray([[nan if t is None else t for t in row] for row in self.values], dtype=numpy.float64).reshape(self.shape)
         return numpy.asarray(self.values, dtype=numpy.float64).reshape(self.shape)
+
+    def codes(self):
+        """E175 s1: an integer cube as published's stored integers, [inline][crossline][sample]. E175 s2 (D-H3): a window
+        with positions without a trace refuses (`masked`); its integer form is `to_masked()`."""
+        if self.document['schema'] != WINDOW3 or self.document['samples']['format_code'] not in INTEGER_CODES:
+            raise ValueError('Only a window of an integer cube as published holds integer codes.')
+        if self.document['absent']['count']: raise WindowRefused('masked', MASKED)
+        return [[None if t is None else [int(v) for v in t] for t in row] for row in self.values]
+
+    def to_masked(self):
+        """E175 s1: a `/3` window as a numpy.ma.MaskedArray, int16 or int32 for an integer cube (float64 for float
+        formats), masked where a position is absent (none in s1: every mask is false)."""
+        import numpy  # optional: only this method needs it
+        if self.document['schema'] != WINDOW3: raise ValueError('Only a window of a cube as published has absent positions to mask.')
+        dtype = {2: numpy.int32, 3: numpy.int16}.get(self.document['samples']['format_code'], numpy.float64)
+        zero = [0] * self.shape[-1]
+        data = numpy.asarray([[zero if t is None else t for t in row] for row in self.values], dtype=numpy.float64).astype(dtype).reshape(self.shape)
+        absent = numpy.asarray([[[t is None] * self.shape[-1] for t in row] for row in self.values], dtype=bool).reshape(self.shape)
+        return numpy.ma.MaskedArray(data, mask=absent)
 
 
 class WindowReader:
@@ -461,7 +616,10 @@ DELAY, COUNT, BINARY_COUNT, REVISION, FORMAT = 108, 114, 3220, 3500, 3224  # 0-b
 REVISIONS = (0x0000, 0x0100)
 POSITIONS = ('inline', 'crossline', 'cdp_x', 'cdp_y')
 SPOKEN = {'inline': 'inline number', 'crossline': 'crossline number', 'cdp_x': 'x coordinate', 'cdp_y': 'y coordinate'}
-WINDOW_CODES = ('inexact-crop', 'revision-unsupported', 'header-positions-overlap', 'window-volume-only', 'volume-needs-window', 'window-needs-output')
+WINDOW_CODES = ('inexact-crop', 'revision-unsupported', 'header-positions-overlap', 'window-volume-only', 'volume-needs-window', 'window-needs-output',
+                'crop-not-segy')
+CROP_NOT_SEGY = ('This part of the cube has a line with no trace, which a SEG-Y file cannot state. Choose a part where every '
+                 'line holds a trace. Nothing was written.')
 LINE_WINDOW = 'A 2D line has no window file; get writes its original.'
 OTHER_WINDOW = 'Only a seismic volume is written as a window file; get this item without --window.'
 VOLUME_NEEDS_WINDOW = 'Give a window, for example --window inline=100:104,by=label, or call Client.download_original for the whole file.'
@@ -597,44 +755,97 @@ class SegyWindowWriter:
         self.samples, self.traces = document['shape'][-1], math.prod(document['shape'][:-1])
         self.width, self.code = document['samples']['width'], document['samples']['format_code']  # E140 s3: `/2` is 1 byte, format 8
         self.per_piece, self.pieces = document['pieces']['traces_per_piece'], document['pieces']['count']
-        self.per_headers = headers_per or HEADERS_PER_ANSWER
+        self.three = document['schema'] == WINDOW3  # E175 s1 (D-5): masks lead pieces and headers answers
+        self.per_headers = headers_per or (document['headers']['traces_per_answer'] if self.three else HEADERS_PER_ANSWER)  # R1-4: the document's partition
         self.headers = headers_count(document, self.per_headers)
         self.path = self.staging / 'window.sgy'
         self.window_digest, self.headers_digest = hashlib.sha256(), hashlib.sha256()
+        self.masks = (MaskDigest(document), MaskDigest(document)) if self.three else None  # pieces', headers answers'
         self.asked = []  # (kind, index) in the order asked
+
+    def headers_length(self, index):
+        """The most headers answer `index` can hold: 240 bytes a trace, and for `/3` its mask first (R1-4)."""
+        k = min((index + 1) * self.per_headers, self.traces) - index * self.per_headers
+        return (mask_bytes(k) if self.three else 0) + k * TRACE_HEADER
+
+    def _present(self, kind, index, body, answer, positions, record, fold=True):
+        """A `/3` answer checked (identity, digest, mask, length) and, when `fold`, fed to its mask digest. Returns
+        (bits as an integer, the mask bytes, the records after the mask). E175 s2: a set bit is a position without a
+        trace; whether the window can still be a SEG-Y file is the pre-pass's question (D-W2)."""
+        if kind == 'pieces': verify_piece(self.document, index, body, answer, len(body))
+        else: check_headers(self.document, index, self.headers, body, answer, len(body))
+        bits, records = split_masked(index, body, positions, record)
+        if fold: self.masks[kind != 'pieces'].add(bits, positions)
+        return bits, bytes(body[:mask_bytes(positions)]), records
+
+    def _occupancy(self, ask_headers):
+        """E175 s2 (D-W2): every headers answer asked once, its mask verified and folded into the window-wide digest, and
+        each window inline and crossline marked when it holds a present trace. A line without one refuses
+        `crop-not-segy` before `window.sgy` is opened. Memory: one answer, a flag per line, 32 bytes per answer (R1-4).
+        Returns the sha256 of each answer's mask, which the write's second asking must match."""
+        ni, nx = self.document['shape'][0], self.document['shape'][1]
+        rows, unseen, kept = [False] * ni, set(range(nx)), []  # inlines holding a trace; crosslines not yet seen holding one
+        for h in range(self.headers):
+            first, end = h * self.per_headers, min((h + 1) * self.per_headers, self.traces)
+            self.asked.append(('headers', h))
+            body, answer = ask_headers(h)
+            bits, mask, _ = self._present('headers', h, body, answer, end - first, TRACE_HEADER)
+            kept.append(hashlib.sha256(mask).digest())
+            gone = (lambda k: mask[(k - first) >> 3] >> (7 - ((k - first) & 7)) & 1) if bits else (lambda k: 0)
+            for i in range(first // nx, (end - 1) // nx + 1):
+                a, b = max(first, i * nx), min(end, (i + 1) * nx)
+                if not rows[i]: rows[i] = any(not gone(k) for k in range(a, b))
+                unseen -= {x for x in unseen if a <= i * nx + x < b and not gone(i * nx + x)}
+        self.masks[1].close('headers answers')
+        if not all(rows) or unseen: raise cannot('crop-not-segy', CROP_NOT_SEGY)
+        return kept
 
     def write(self, ask_headers, ask_piece):
         d, S, W = self.document, self.samples, self.width
         inlines, crosslines = d['axes'][0]['labels'], d['axes'][1]['labels']
         nx = len(crosslines)
+        absent = d['absent']['count'] if self.three else 0
+        if absent == self.traces: raise cannot('crop-not-segy', CROP_NOT_SEGY)  # D-W2 case 1: no answer asked
+        kept = self._occupancy(ask_headers) if absent else None  # case 3; case 2 (none absent) asks as s1 did
         struct.pack_into('>H', self.file_header, BINARY_COUNT, S)
         struct.pack_into('>h', self.file_header, FORMAT, self.code)  # the window's sample format (checked equal to the original's)
         self.staging.mkdir(mode=0o700, exist_ok=True)
         h, p, h_body, p_body, h_first, p_first, h_end, p_end, written = -1, -1, b'', b'', 0, 0, 0, 0, 0
-        with open(self.path, 'xb') as out:
+        h_bits = p_bits = h_at = p_at = 0
+        with open(self.path, 'xb') as out:  # a refusal below leaves it in Exchange.get's staging, which is removed (R1-13)
             out.write(self.file_header); written += FILE_HEADER
             for k in range(self.traces):
                 if k >= h_end:
-                    h += 1; h_first, h_end = h * self.per_headers, min((h + 1) * self.per_headers, self.traces)
+                    h += 1; h_first, h_end, h_at = h * self.per_headers, min((h + 1) * self.per_headers, self.traces), 0
                     self.asked.append(('headers', h))
                     h_body, answer = ask_headers(h)
-                    check_headers(d, h, self.headers, h_body, answer, (h_end - h_first) * TRACE_HEADER)
                     self.headers_digest.update(h_body)
+                    if self.three:
+                        h_bits, mask, h_body = self._present('headers', h, h_body, answer, h_end - h_first, TRACE_HEADER, fold=not absent)
+                        if absent and hashlib.sha256(mask).digest() != kept[h]: raise WindowRefused('headers-changed', HEADERS_CHANGED)
+                    else: check_headers(d, h, self.headers, h_body, answer, (h_end - h_first) * TRACE_HEADER)
                 if k >= p_end:
-                    p += 1; p_first, p_end = p * self.per_piece, min((p + 1) * self.per_piece, self.traces)
+                    p += 1; p_first, p_end, p_at = p * self.per_piece, min((p + 1) * self.per_piece, self.traces), 0
                     self.asked.append(('pieces', p))
                     p_body, answer = ask_piece(p)
-                    verify_piece(d, p, p_body, answer, (p_end - p_first) * S * W)
                     self.window_digest.update(p_body)
-                header = bytearray(h_body[(k - h_first) * TRACE_HEADER:(k - h_first + 1) * TRACE_HEADER])
+                    if self.three: p_bits, _, p_body = self._present('pieces', p, p_body, answer, p_end - p_first, S * W)
+                    else: verify_piece(d, p, p_body, answer, (p_end - p_first) * S * W)
+                gone = h_bits >> (h_end - 1 - k) & 1
+                if gone != p_bits >> (p_end - 1 - k) & 1:
+                    _failed('mask', 'position %d is %s in the headers answer and not in its piece.' % (k, 'absent' if gone else 'present'))
+                if gone: continue  # E175 s2 (D-W2): a position without a trace is not written
+                header = bytearray(h_body[h_at * TRACE_HEADER:(h_at + 1) * TRACE_HEADER]); h_at += 1
                 expected = (inlines[k // nx], crosslines[k % nx])
                 carried = (struct.unpack_from('>i', header, self.positions['inline'] - 1)[0], struct.unpack_from('>i', header, self.positions['crossline'] - 1)[0])
                 if carried != expected:
                     _failed('headers-identity', 'trace header %d carries inline %d, crossline %d, not inline %d, crossline %d.' % (k, *carried, *expected))
                 struct.pack_into('>H', header, COUNT, S)
                 if self.delay is not None: struct.pack_into('>h', header, DELAY, self.delay)
-                out.write(header); out.write(p_body[(k - p_first) * S * W:(k - p_first + 1) * S * W]); written += TRACE_HEADER + S * W
-            if (h, p) != (self.headers - 1, self.pieces - 1) or written != FILE_HEADER + self.traces * (TRACE_HEADER + S * W):
+                out.write(header); out.write(p_body[p_at * S * W:(p_at + 1) * S * W]); p_at += 1; written += TRACE_HEADER + S * W
+            if self.three: self.masks[0].close()
+            if self.three and not absent: self.masks[1].close('headers answers')  # a sparse window's closed in the pre-pass
+            if (h, p) != (self.headers - 1, self.pieces - 1) or written != FILE_HEADER + (self.traces - absent) * (TRACE_HEADER + S * W):
                 _failed('completeness', 'the window file does not hold every trace of the window.')
             out.flush(); os.fsync(out.fileno())
-        return {'bytes': written, 'traces': self.traces, 'window_digest': self.window_digest.hexdigest(), 'headers_digest': self.headers_digest.hexdigest()}
+        return {'bytes': written, 'traces': self.traces - absent, 'window_digest': self.window_digest.hexdigest(), 'headers_digest': self.headers_digest.hexdigest()}

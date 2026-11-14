@@ -94,6 +94,8 @@ def asset(value):
     kept = value['interpretation'].get('parsing_policy') == 'table-file/1'  # E58b: a kept table, the original with its table-interpretation.json
     native = value['scientific'].get('type') == 'seismic-volume' and value['scientific'].get('format_code') == 8  # E140 s0: an 8-bit cube
     require(native == (value['profile'] == 'segy/2'), 'An 8-bit seismic cube is described through profile segy/2, and only it')
+    published = value['scientific'].get('type') == 'seismic-volume' and 'cells' in value['scientific']  # E175 s0: a cube as published
+    require(published == (value['profile'] == 'segy/3'), 'A seismic cube as published is described through profile segy/3, and only it')
     require(kept == (value['scientific'].get('type') == 'table'), 'Scientific context and interpretation disagree')
     require((recipe or packaged or kept) == (value.get('package') is not None), 'A package is present exactly when the interpretation is recipe- or package-based')
     require(packaged == (value['interpretation'].get('parsing_policy') == 'package-strict/1'), 'Interpretation is not the one this profile declares')
@@ -110,7 +112,7 @@ def asset(value):
                    'well-location': 'well-location/1', 'time-depth': 'time-depth/1', 'feature-set': 'feature-set/1',
                    'well-path': 'well-path/1', 'well-set': 'well-set/1',
                    'well-residual': 'well-residual/1', 'seismic-line': 'seismic-line/1'}  # E53; E74b: a position file or a corrected position; E56; E125 s3a; E119a; E119b; E137 s1
-        if not native:  # E140 s0: an 8-bit cube's mapping is the one its normalized profile declares (checked below, as the gateway)
+        if not native and not published:  # E140 s0, E175 s0: the mapping is the one the normalized profile declares (checked below, as the gateway)
             require(value['interpretation'].get('mapping') == mapping.get(value['scientific']['type']), 'Scientific context and interpretation disagree')
     else:
         context(value['scientific'])
@@ -306,6 +308,13 @@ def typed_payload(value):
         require(len({s['index'] for s in sticks}) == len(sticks), 'A stick index repeats')
         require(len(sticks) == c['sticks'] and len(points) == c['points'], 'Sticks, points and their context disagree')
         value = {**value, 'attributes': []}; spatial(points)
+    elif kind == 'seismic-volume' and 'cells' in c:  # E175 s0: a cube as published, its present traces per inline
+        published_context(c)
+        require([k['inline'] for k in value['chunks']] == line_numbers(c['inline']), 'Chunks do not follow the inline numbers')
+        require(all(k['traces'] <= c['crossline']['count'] for k in value['chunks']), 'A chunk holds more traces than the inline has positions')
+        require(all(k['bytes'] == k['traces'] * sample_width(c) * c['samples'] for k in value['chunks']), 'A chunk has the wrong size')
+        require(sum(k['traces'] for k in value['chunks']) == c['traces'], 'The chunks do not hold every trace')
+        require(value['decisions'] == c['fidelity']['decisions'], 'Decisions disagree with the fidelity report')
     elif kind == 'seismic-volume':
         seismic_context(c)
         il = c['inline']
@@ -464,9 +473,26 @@ def seismic_context(c):
     require(bool(c['fidelity']['decisions']), 'A seismic volume records its header decisions')
 
 
+PUBLISHED_FORMATS = {1: 'IBM 4-byte floating point', 2: "4-byte two's complement integer", 3: "2-byte two's complement integer",
+                     5: 'IEEE 4-byte floating point'}
+
+
+def published_context(c):
+    """E175 s0: a cube as published states its cells, of which `absent` have no trace, as the server's model does."""
+    for axis in ('inline', 'crossline'):
+        line = c[axis]; require(line['first'] + (line['count'] - 1) * line['step'] == line['last'], 'Line range, step and count disagree')
+    require(PUBLISHED_FORMATS[c['format_code']] == c['format'], 'The sample format and its code disagree')
+    require(c['inline']['count'] * c['crossline']['count'] == c['cells'], 'The cell count is not inlines times crosslines')
+    require(c['traces'] <= c['cells'], 'A cube holds at most one trace per position')
+    require(c['absent'] == c['cells'] - c['traces'], 'The positions without a trace are the cells less the traces')
+    require(c['trace_bytes'] == 240 + sample_width(c) * c['samples'], 'Trace length and sample count disagree')
+    require(bool(c['fidelity']['decisions']), 'A seismic volume records its header decisions')
+
+
 def sample_width(c):
-    """E140 s0: bytes per sample, one for an 8-bit cube (format 8), four for IBM or IEEE floats."""
-    return 1 if c['format_code'] == 8 else 4
+    """E140 s0: bytes per sample, one for an 8-bit cube (format 8), two for format 3 (E175 s0), four for format 2 and for
+    IBM or IEEE floats."""
+    return {8: 1, 3: 2}.get(c['format_code'], 4)
 
 
 SLICE_AXES = {'inline': ('crossline', 'sample'), 'crossline': ('inline', 'sample'), 'sample': ('inline', 'crossline')}

@@ -156,9 +156,9 @@ class Client:
 @pytest.mark.parametrize('rows, said', [([row('current'), row('behind')], [SENT, 'Held by 2 connected applications, 1 of them on an older version.']),
                                         (RuntimeError('the read failed'), [SENT])], ids=['held', 'read-fails'])
 def test_the_cli_prints_the_held_line_after_the_sentence(tmp_path, capsys, rows, said):
-    """stdout stays the sentence alone (tools/package/qualify_exchange.py compares it); people see the held line on
-    stderr. Mutation: the CLI's print dropped -> stderr is empty; printed to stdout -> stdout has two lines; printed
-    with --json -> stderr is not empty there."""
+    """People see the held line on stdout, on its own line after the sentence (E171 design 6); stderr stays empty.
+    Mutation: the CLI's print dropped -> stdout is the sentence alone; printed to stderr -> stderr is not empty;
+    printed with --json -> stdout is not one JSON document."""
     def send(where, *extra):
         fake = Holders(rows); folder(where, fake)
         (where / 'v2.csv').write_bytes(V2)
@@ -168,7 +168,7 @@ def test_the_cli_prints_the_held_line_after_the_sentence(tmp_path, capsys, rows,
         done = cli._exchange(cli.parser().parse_args(argv), Client(fake))
         return (done, *capsys.readouterr())
     done, out, err = send(tmp_path / 'people')
-    assert (out, err.splitlines()) == (SENT + '\n', said[1:]) and done.sentence == SENT
+    assert (out.splitlines(), err) == (said, '') and done.sentence == SENT
     done, out, err = send(tmp_path / 'json', '--json')
     assert json.loads(out) == done.to_dict() and json.loads(out)['sentence'] == SENT and err == ''
     assert json.loads(out)['facts'].get('held_line') == (said[1] if len(said) > 1 else None)

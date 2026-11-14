@@ -247,6 +247,24 @@ class AgentClient:
         area, name = operation.split('/', 1)
         return self._post(area, name, body or {})
 
+    def procedure_fetch(self, digest, *, cache=None):
+        """E155 s2 (C4): the checked local folder of the tool version `digest`, fetched with this agent's key. Before
+        any bundle bytes it refuses, in the gateway's tool-run order, what a run of it would be refused for: a read or
+        source step (`import-as-run`), withdrawn, not verified (`agent_exchange.ToolRunRefused`), and a version not
+        enabled yet (`procedures.NotRun('not-enabled')`). A version the agent cannot see answers as the server does
+        (not found). Trust is the person's and is asked at the send (`send_run`'s `not-trusted`), never here."""
+        from .agent_exchange import ToolRunRefused
+        from .procedures import NotRun, _AgentCatalogue
+        found = self.read('procedures/get', {'digest': digest})
+        reason = ('import-as-run' if (found.get('manifest') or {}).get('step') in ('read', 'source') else
+                  'withdrawn' if found.get('state') == 'withdrawn' else None)
+        if reason is None and found.get('state') != 'enabled': raise NotRun('not-enabled', '', {'digest': digest})
+        if reason is None and (found.get('verification') or {}).get('state') != 'verified': reason = 'not-verified'
+        if reason is not None:
+            sentence = TOOL_RUN_SENTENCES[reason]
+            raise ToolRunRefused(sentence, {'sentence': sentence, 'reason': reason}, {'reason': reason, 'digest': digest})
+        return _AgentCatalogue(self)._cached(digest, cache)
+
     def capabilities(self):
         """What this agent may ask for: every operation with eligibility, whether it needs a plan,
         the agent's scopes, budgets (used by the admission rule) and expiry, and the MCP endpoint."""

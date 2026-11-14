@@ -16,8 +16,9 @@ TOPS = 'name,md\nTop Chalk,1000.5\nBase Chalk,1200\n'
 SHIFTED = b'name,md\nTop Chalk,1003\nBase Chalk,1202.5\n'
 # The 13 public methods of ProcedureClient when E131 s1 opened (f1d813538); a new one needs its twin and a row here.
 FROZEN = ('procedure_again', 'procedure_bundle', 'procedure_enable', 'procedure_get', 'procedure_list', 'procedure_prepare_again',
-          'procedure_publish', 'procedure_register', 'procedure_run', 'procedure_run_get', 'procedure_trust', 'procedure_verifications',
-          'procedure_verify', 'procedure_version', 'procedure_withdraw')  # E165 s1: verify and verifications
+          'procedure_publish', 'procedure_register', 'procedure_run', 'procedure_run_get',
+          'procedure_sandbox_enable', 'procedure_sandbox_job', 'procedure_sandbox_run',  # E113 s1: sandbox runs
+          'procedure_trust', 'procedure_verifications', 'procedure_verify', 'procedure_version', 'procedure_withdraw')  # E165 s1: verify and verifications
 HELPERS = ('compared', 'delivered', 'refused', 'not_delivered', 'unknown', 'Stopped', 'NotRun', 'validate', 'digest', 'pack',
            'new', 'run')
 
@@ -61,7 +62,7 @@ def test_each_twin_calls_its_procedure_method_unchanged():
         verb = name[len('procedure_'):]
         assert getattr(client, 'tool_' + verb)('a', 2, flag=True) == ('sentinel', name)
         assert calls[-1] == (name, ('a', 2), {'flag': True})
-    assert len(calls) == 15  # 13 at E131 s1 + E165 s1's verify and verifications
+    assert len(calls) == 18  # 13 at E131 s1 + E165 s1's verify and verifications + E113 s1's three sandbox methods
 
 
 def test_agent_catalogue_gets_no_twins():

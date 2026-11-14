@@ -681,10 +681,11 @@
             "schema": {
               "type": "string",
               "enum": [
-                "2"
+                "2",
+                "3"
               ]
             },
-            "description": "2 asks for an 8-bit cube's window at native size (ophiolite.volume-window/2, one byte per sample). Without it an 8-bit cube is refused with native-form and nothing is read; a float volume or 2D line answers ophiolite.volume-window/1 with or without it."
+            "description": "2 asks for an 8-bit cube's window at native size (ophiolite.volume-window/2, one byte per sample); 3 asks for a cube as published at its own sample size (ophiolite.volume-window/3: 2- or 4-byte words, each piece led by its positions' mask). Without the value its cube needs, an 8-bit cube or a cube as published is refused with native-form and nothing is read; a float volume or 2D line answers ophiolite.volume-window/1 with or without it."
           }
         ],
         "security": [
@@ -827,10 +828,11 @@
             "schema": {
               "type": "string",
               "enum": [
-                "2"
+                "2",
+                "3"
               ]
             },
-            "description": "2 asks for an 8-bit cube's window at native size (ophiolite.volume-window/2, one byte per sample). Without it an 8-bit cube is refused with native-form and nothing is read; a float volume or 2D line answers ophiolite.volume-window/1 with or without it."
+            "description": "2 asks for an 8-bit cube's window at native size (ophiolite.volume-window/2, one byte per sample); 3 asks for a cube as published at its own sample size (ophiolite.volume-window/3: 2- or 4-byte words, each piece led by its positions' mask). Without the value its cube needs, an 8-bit cube or a cube as published is refused with native-form and nothing is read; a float volume or 2D line answers ophiolite.volume-window/1 with or without it."
           },
           {
             "name": "window",
@@ -991,10 +993,11 @@
             "schema": {
               "type": "string",
               "enum": [
-                "2"
+                "2",
+                "3"
               ]
             },
-            "description": "2 asks for an 8-bit cube's window at native size (ophiolite.volume-window/2, one byte per sample). Without it an 8-bit cube is refused with native-form and nothing is read; a float volume or 2D line answers ophiolite.volume-window/1 with or without it."
+            "description": "2 asks for an 8-bit cube's window at native size (ophiolite.volume-window/2, one byte per sample); 3 asks for a cube as published at its own sample size (ophiolite.volume-window/3: 2- or 4-byte words, each piece led by its positions' mask). Without the value its cube needs, an 8-bit cube or a cube as published is refused with native-form and nothing is read; a float volume or 2D line answers ophiolite.volume-window/1 with or without it."
           },
           {
             "name": "window",
@@ -1165,10 +1168,11 @@
             "schema": {
               "type": "string",
               "enum": [
-                "2"
+                "2",
+                "3"
               ]
             },
-            "description": "2 asks for an 8-bit cube's window at native size (ophiolite.volume-window/2, one byte per sample). Without it an 8-bit cube is refused with native-form and nothing is read; a float volume or 2D line answers ophiolite.volume-window/1 with or without it."
+            "description": "2 asks for an 8-bit cube's window at native size (ophiolite.volume-window/2, one byte per sample); 3 asks for a cube as published at its own sample size (ophiolite.volume-window/3: 2- or 4-byte words, each piece led by its positions' mask). Without the value its cube needs, an 8-bit cube or a cube as published is refused with native-form and nothing is read; a float volume or 2D line answers ophiolite.volume-window/1 with or without it."
           },
           {
             "name": "window",
